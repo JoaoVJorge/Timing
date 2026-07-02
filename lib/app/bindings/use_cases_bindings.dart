@@ -1,0 +1,17 @@
+import "package:get/get.dart";
+import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
+import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
+import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
+
+class UseCasesBindings extends Bindings {
+  @override
+  void dependencies() {
+    Get.put<GetAppConfigUseCase>(GetAppConfigUseCase(appConfigRepository: Get.find()), permanent: true);
+    Get.put<SaveAppConfigUseCase>(SaveAppConfigUseCase(appConfigRepository: Get.find()), permanent: true);
+    Get.put<GetSubjectsUseCase>(GetSubjectsUseCase(subjectsRepository: Get.find()), permanent: true);
+    Get.put<AddSubjectUseCase>(AddSubjectUseCase(subjectsRepository: Get.find()), permanent: true);
+    Get.put<UpdateSubjectTimeUseCase>(UpdateSubjectTimeUseCase(subjectsRepository: Get.find()), permanent: true);
+  }
+}

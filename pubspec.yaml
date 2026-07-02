@@ -1,0 +1,32 @@
+name: help_out
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  dartz: ^0.10.1
+  dio: ^5.9.2
+  equatable: ^2.0.8
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^6.0.1
+  flutter_secure_storage: ^10.3.1
+  flutter_svg: ^2.3.0
+  gap: ^3.0.1
+  get: ^4.7.2
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - lib/env/debug.env
+    - lib/env/prod.env
