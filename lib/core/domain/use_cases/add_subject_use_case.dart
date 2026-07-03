@@ -3,14 +3,18 @@ import "package:help_out/core/data/repositories/subjects_repository.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/theme/subject_colors.dart";
 
 class AddSubjectUseCase {
   AddSubjectUseCase({required this._subjectsRepository});
 
   final SubjectsRepository _subjectsRepository;
 
-  Future<Either<AppError, SubjectEntity>> call({required String name, required TimeCategoryType category}) async {
+  Future<Either<AppError, SubjectEntity>> call({
+    required String name,
+    required TimeCategoryType category,
+    required int colorValue,
+    required int goalSeconds,
+  }) async {
     final Either<AppError, List<SubjectEntity>> getResult = await _subjectsRepository.getSubjects();
 
     return getResult.fold((error) async => Left(error), (subjects) async {
@@ -18,8 +22,9 @@ class AddSubjectUseCase {
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         name: name,
         category: category,
-        colorValue: SubjectColors.byIndex(subjects.length).toARGB32(),
+        colorValue: colorValue,
         totalSeconds: 0,
+        goalSeconds: goalSeconds,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository.saveSubjects([...subjects, newSubject]);

@@ -27,25 +27,21 @@ class MainNavigationController extends GetxController {
     selectedButton.value = type;
     switch (type) {
       case BottomNavButtonType.home:
-        _onTapHome();
+        _navigateToTab(AppRoutes.home);
+      case BottomNavButtonType.profile:
+        _navigateToTab(AppRoutes.profile);
+      case BottomNavButtonType.groups:
+        _navigateToTab(AppRoutes.groups);
       case BottomNavButtonType.config:
-        _onTapConfig();
+        _navigateToTab(AppRoutes.config);
     }
   }
 
-  void _onTapHome() {
-    if (currentRouteName == AppRoutes.home) {
+  void _navigateToTab(String routeName) {
+    if (currentRouteName == routeName) {
       return;
     }
-    currentRouteName = AppRoutes.home;
-    _appNavigator.offAllNamed(AppRoutes.home, id: nestedKey);
-  }
-
-  void _onTapConfig() {
-    if (currentRouteName == AppRoutes.config) {
-      return;
-    }
-    currentRouteName = AppRoutes.config;
-    _appNavigator.offAllNamed(AppRoutes.config, id: nestedKey);
+    currentRouteName = routeName;
+    _appNavigator.offAllNamed(routeName, id: nestedKey);
   }
 }

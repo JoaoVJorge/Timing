@@ -4,7 +4,11 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_button.dart";
 
 class CategoryCard extends StatelessWidget {
-  const CategoryCard({required this.category, required this.onTapPlay, super.key});
+  const CategoryCard({
+    required this.category,
+    required this.onTapPlay,
+    super.key,
+  });
 
   final TimeCategoryType category;
   final VoidCallback onTapPlay;
@@ -21,9 +25,21 @@ class CategoryCard extends StatelessWidget {
         Icon(category.icon, color: context.colorTokens.primary, size: 28),
         const SizedBox(width: 16),
         Expanded(
-          child: Text(category.label, style: context.textStyles.extraBold20),
+          child: Text(
+            category.label,
+            style: context.textStyles.extraBold20.copyWith(
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
         ),
-        AppButton(icon: Icons.play_arrow_rounded, onTap: onTapPlay, size: 48),
+        AppButton(svgName: "play", onTap: onTapPlay, size: 48),
       ],
     ),
   );

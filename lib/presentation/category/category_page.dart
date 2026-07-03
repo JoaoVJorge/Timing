@@ -61,7 +61,7 @@ class _AddSubjectTile extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(18),
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         border: Border.all(color: context.colorTokens.borderUnfocused, width: 1.5),
         borderRadius: BorderRadius.circular(18),

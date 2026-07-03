@@ -12,7 +12,7 @@ abstract class AppThemes {
       dialogTheme: DialogThemeData(backgroundColor: tokens.surface),
       colorScheme: ColorScheme.fromSeed(seedColor: seed, brightness: brightness),
       extensions: [tokens],
-      fontFamily: "Roboto",
+      fontFamily: "Nunito",
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: tokens.textHint),
       ),

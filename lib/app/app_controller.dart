@@ -24,6 +24,8 @@ class AppController extends GetxController {
   final RxBool isDarkMode = false.obs;
   final Rx<Color> accentColor = AppAccentPresets.defaultAccent.obs;
   final RxString userName = "".obs;
+  final RxString nickName = "".obs;
+  final RxInt avatarIconIndex = 0.obs;
 
   Future<void> initialize() async {
     await Future.wait([_loadAppConfig(), Future.delayed(AppConstants.splashScreenDuration)]);
@@ -47,10 +49,17 @@ class AppController extends GetxController {
     isDarkMode.value = config.isDarkMode;
     accentColor.value = Color(config.accentColorValue);
     userName.value = config.userName;
+    nickName.value = config.nickName;
+    avatarIconIndex.value = config.avatarIconIndex;
   }
 
-  AppConfigEntity get _currentConfig =>
-      AppConfigEntity(isDarkMode: isDarkMode.value, userName: userName.value, accentColorValue: accentColor.value.toARGB32());
+  AppConfigEntity get _currentConfig => AppConfigEntity(
+    isDarkMode: isDarkMode.value,
+    userName: userName.value,
+    nickName: nickName.value,
+    accentColorValue: accentColor.value.toARGB32(),
+    avatarIconIndex: avatarIconIndex.value,
+  );
 
   Future<void> setDarkMode(bool value) async {
     isDarkMode.value = value;
@@ -64,6 +73,16 @@ class AppController extends GetxController {
 
   Future<void> setUserName(String value) async {
     userName.value = value;
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
+  Future<void> setNickName(String value) async {
+    nickName.value = value;
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
+  Future<void> setAvatarIconIndex(int value) async {
+    avatarIconIndex.value = value;
     await _saveAppConfigUseCase(_currentConfig);
   }
 }

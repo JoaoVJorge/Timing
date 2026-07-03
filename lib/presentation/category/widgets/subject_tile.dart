@@ -11,27 +11,49 @@ class SubjectTile extends StatelessWidget {
   final VoidCallback onTapPlay;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(18)),
-    child: Row(
-      children: [
-        Container(width: 12, height: 12, decoration: BoxDecoration(color: Color(subject.colorValue), shape: BoxShape.circle)),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(subject.name, style: context.textStyles.bodyLarge),
-              Text(
-                formatDurationLong(Duration(seconds: subject.totalSeconds)),
-                style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final Color color = Color(subject.colorValue);
+    final bool hasGoal = subject.goalSeconds > 0;
+    final double progress = hasGoal ? (subject.totalSeconds / subject.goalSeconds).clamp(0, 1) : 0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(18)),
+      child: Row(
+        children: [
+          Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(subject.name, style: context.textStyles.bodyLarge),
+                Text(
+                  hasGoal
+                      ? "${formatDurationLong(Duration(seconds: subject.totalSeconds))} of "
+                            "${formatDurationLong(Duration(seconds: subject.goalSeconds))}"
+                      : formatDurationLong(Duration(seconds: subject.totalSeconds)),
+                  style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
+                ),
+                if (hasGoal) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 4,
+                      backgroundColor: color.withValues(alpha: 0.15),
+                      valueColor: AlwaysStoppedAnimation(color),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        AppButton(icon: Icons.play_arrow_rounded, onTap: onTapPlay, size: 44),
-      ],
-    ),
-  );
+          const SizedBox(width: 8),
+          AppButton(svgName: "play", onTap: onTapPlay, size: 44),
+        ],
+      ),
+    );
+  }
 }

@@ -43,13 +43,18 @@ class CategoryController extends GetxController {
   void onTapSubject(SubjectEntity subject) => _appNavigator.toNamed(AppRoutes.timer, arguments: subject);
 
   Future<void> onTapAddSubject() async {
-    final String? name = await _appNavigator.dialog<String>(child: const AddSubjectDialog());
+    final AddSubjectResult? dialogResult = await _appNavigator.dialog<AddSubjectResult>(child: const AddSubjectDialog());
 
-    if (name == null || name.trim().isEmpty) {
+    if (dialogResult == null) {
       return;
     }
 
-    final Either<AppError, SubjectEntity> result = await _addSubjectUseCase(name: name.trim(), category: category);
+    final Either<AppError, SubjectEntity> result = await _addSubjectUseCase(
+      name: dialogResult.name,
+      category: category,
+      colorValue: dialogResult.colorValue,
+      goalSeconds: dialogResult.goalSeconds,
+    );
     result.fold((error) => _appNavigator.showErrorSnackBar(), subjects.add);
   }
 }

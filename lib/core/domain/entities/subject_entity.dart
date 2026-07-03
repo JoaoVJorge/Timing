@@ -10,6 +10,7 @@ class SubjectEntity extends Equatable {
     required this.category,
     required this.colorValue,
     required this.totalSeconds,
+    required this.goalSeconds,
   });
 
   factory SubjectEntity.fromJson(String source) => SubjectEntity.fromMap(jsonDecode(source) as Map<String, dynamic>);
@@ -20,6 +21,7 @@ class SubjectEntity extends Equatable {
     category: TimeCategoryType.values.byName(map["category"] as String),
     colorValue: map["colorValue"] as int,
     totalSeconds: map["totalSeconds"] as int,
+    goalSeconds: map["goalSeconds"] as int? ?? 0,
   );
 
   final String id;
@@ -27,6 +29,7 @@ class SubjectEntity extends Equatable {
   final TimeCategoryType category;
   final int colorValue;
   final int totalSeconds;
+  final int goalSeconds;
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -34,18 +37,20 @@ class SubjectEntity extends Equatable {
     "category": category.name,
     "colorValue": colorValue,
     "totalSeconds": totalSeconds,
+    "goalSeconds": goalSeconds,
   };
 
   String toJson() => jsonEncode(toMap());
 
-  SubjectEntity copyWith({String? name, int? colorValue, int? totalSeconds}) => SubjectEntity(
+  SubjectEntity copyWith({String? name, int? colorValue, int? totalSeconds, int? goalSeconds}) => SubjectEntity(
     id: id,
     name: name ?? this.name,
     category: category,
     colorValue: colorValue ?? this.colorValue,
     totalSeconds: totalSeconds ?? this.totalSeconds,
+    goalSeconds: goalSeconds ?? this.goalSeconds,
   );
 
   @override
-  List<Object?> get props => [id, name, category, colorValue, totalSeconds];
+  List<Object?> get props => [id, name, category, colorValue, totalSeconds, goalSeconds];
 }

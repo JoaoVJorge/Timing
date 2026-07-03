@@ -4,8 +4,8 @@ class AppAccentPresets {
   const AppAccentPresets._();
 
   static const List<Color> values = [
-    Color(0xFFFF7A30),
     Color(0xFFFFC107),
+    Color(0xFFFF7A30),
     Color(0xFF8325FF),
     Color(0xFF2E6ADE),
     Color(0xFF3FA65D),
