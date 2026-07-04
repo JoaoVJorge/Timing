@@ -4,6 +4,8 @@ import "package:help_out/presentation/category/category_bindings.dart";
 import "package:help_out/presentation/category/category_page.dart";
 import "package:help_out/presentation/config/config_bindings.dart";
 import "package:help_out/presentation/config/config_page.dart";
+import "package:help_out/presentation/create_group/create_group_bindings.dart";
+import "package:help_out/presentation/create_group/create_group_page.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_bindings.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_page.dart";
 import "package:help_out/presentation/faq/faq_bindings.dart";
@@ -18,6 +20,8 @@ import "package:help_out/presentation/main_navigation/main_navigation_bindings.d
 import "package:help_out/presentation/main_navigation/main_navigation_page.dart";
 import "package:help_out/presentation/profile/profile_bindings.dart";
 import "package:help_out/presentation/profile/profile_page.dart";
+import "package:help_out/presentation/schedule/schedule_bindings.dart";
+import "package:help_out/presentation/schedule/schedule_page.dart";
 import "package:help_out/presentation/splash/splash_bindings.dart";
 import "package:help_out/presentation/splash/splash_page.dart";
 import "package:help_out/presentation/timer/timer_bindings.dart";
@@ -37,6 +41,8 @@ class AppRoutes {
   static const String timer = "/timer";
   static const String editProfile = "/editProfile";
   static const String faq = "/faq";
+  static const String createGroup = "/createGroup";
+  static const String schedule = "/schedule";
 
   static final List<GetPage<dynamic>> getPages = [
     GetPage(name: splash, page: () => const SplashPage(), binding: SplashBindings()),
@@ -53,11 +59,58 @@ class AppRoutes {
         GetPage(name: config, page: () => const ConfigPage(), binding: ConfigBindings()),
       ],
     ),
-    GetPage(name: category, page: () => const CategoryPage(), binding: CategoryBindings()),
-    GetPage(name: timer, page: () => const TimerPage(), binding: TimerBindings()),
-    GetPage(name: editProfile, page: () => const EditProfilePage(), binding: EditProfileBindings()),
-    GetPage(name: faq, page: () => const FaqPage(), binding: FaqBindings()),
+    GetPage(
+      name: category,
+      page: () => const CategoryPage(),
+      binding: CategoryBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: timer,
+      page: () => const TimerPage(),
+      binding: TimerBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: editProfile,
+      page: () => const EditProfilePage(),
+      binding: EditProfileBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: faq,
+      page: () => const FaqPage(),
+      binding: FaqBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: createGroup,
+      page: () => const CreateGroupPage(),
+      binding: CreateGroupBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: schedule,
+      page: () => const SchedulePage(),
+      binding: ScheduleBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
   ];
+
+  static const Duration pageTransitionDuration = Duration(milliseconds: 320);
+  static const Curve pageTransitionCurve = Curves.easeInOutCubic;
 
   static Route? onGenerateChildRoute({required RouteSettings settings, required String parentRouteName}) {
     if (settings.name == null) {
