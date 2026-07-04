@@ -14,6 +14,7 @@ class AddSubjectUseCase {
     required TimeCategoryType category,
     required int colorValue,
     required int goalSeconds,
+    int goalPages = 0,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult = await _subjectsRepository.getSubjects();
 
@@ -25,6 +26,8 @@ class AddSubjectUseCase {
         colorValue: colorValue,
         totalSeconds: 0,
         goalSeconds: goalSeconds,
+        currentPages: 0,
+        goalPages: goalPages,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository.saveSubjects([...subjects, newSubject]);
