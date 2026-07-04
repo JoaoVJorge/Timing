@@ -21,19 +21,30 @@ class HomePage extends StatelessWidget {
           Obx(
             () => Container(
               width: double.infinity,
-              color: context.colorTokens.primary,
+              decoration: BoxDecoration(
+                gradient: context.colorTokens.primaryGradient,
+              ),
               padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: MediaQuery.of(context).padding.top + 4,
-                bottom: 16,
+                left: 24,
+                right: 24,
+                top: MediaQuery.of(context).padding.top + 8,
+                bottom: 20,
               ),
               child: Text(
                 controller.userName.value.isEmpty
-                    ? "Let's Start"
-                    : "Let's Start, ${controller.userName.value}",
+                    ? context.l10n.homeGreetingDefault
+                    : context.l10n.homeGreetingWithName(
+                        controller.userName.value,
+                      ),
                 style: context.textStyles.titleFont.copyWith(
                   color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
               ),
             ),

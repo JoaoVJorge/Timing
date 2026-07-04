@@ -26,24 +26,38 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     final HSLColor seedHsl = HSLColor.fromColor(seed);
 
     return AppColorTokens(
-      primary: isDark ? seedHsl.withLightness(_clamp(seedHsl.lightness + 0.08)).toColor() : seed,
-      primaryPastel: seedHsl.withLightness(_clamp(seedHsl.lightness + (isDark ? 0.12 : 0.24))).toColor(),
+      primary: isDark
+          ? seedHsl.withLightness(_clamp(seedHsl.lightness + 0.08)).toColor()
+          : seed,
+      primaryPastel: seedHsl
+          .withLightness(_clamp(seedHsl.lightness + (isDark ? 0.12 : 0.24)))
+          .toColor(),
       primaryVeryLight: seedHsl.withLightness(isDark ? 0.24 : 0.92).toColor(),
       linkColor: const Color(0xFF2E6ADE),
       primaryForeground: const Color(0xFFFFFFFF),
       scaffold: isDark ? const Color(0xFF121212) : const Color(0xFFF4F4F4),
       surface: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF),
-      surfaceShadow: const Color(0xFF000000).withValues(alpha: isDark ? 0.3 : 0.05),
-      surfaceInnerLayer: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFF0F0F0),
-      borderUnfocused: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFDADADA),
+      surfaceShadow: const Color(
+        0xFF000000,
+      ).withValues(alpha: isDark ? 0.3 : 0.05),
+      surfaceInnerLayer: isDark
+          ? const Color(0xFF2C2C2C)
+          : const Color(0xFFF0F0F0),
+      borderUnfocused: isDark
+          ? const Color(0xFF3A3A3A)
+          : const Color(0xFFDADADA),
       borderFocused: isDark ? const Color(0xFFBBBBBB) : const Color(0xFF444444),
       textBody: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444),
-      textHint: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444)).withValues(alpha: 0.5),
+      textHint: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444))
+          .withValues(alpha: 0.5),
       error: const Color(0xFFF14336),
       success: isDark ? const Color(0xFF5AB663) : const Color(0xFF3FA65D),
       warning: isDark ? const Color(0xFFF2C230) : const Color(0xFFE0A400),
-      iconDisabled: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444)).withValues(alpha: 0.5),
-      overlayDark: const Color(0xFF000000).withValues(alpha: isDark ? 0.6 : 0.5),
+      iconDisabled: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444))
+          .withValues(alpha: 0.5),
+      overlayDark: const Color(
+        0xFF000000,
+      ).withValues(alpha: isDark ? 0.6 : 0.5),
     );
   }
 
@@ -123,13 +137,25 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     return AppColorTokens(
       primary: Color.lerp(primary, other.primary, t)!,
       primaryPastel: Color.lerp(primaryPastel, other.primaryPastel, t)!,
-      primaryVeryLight: Color.lerp(primaryVeryLight, other.primaryVeryLight, t)!,
+      primaryVeryLight: Color.lerp(
+        primaryVeryLight,
+        other.primaryVeryLight,
+        t,
+      )!,
       linkColor: Color.lerp(linkColor, other.linkColor, t)!,
-      primaryForeground: Color.lerp(primaryForeground, other.primaryForeground, t)!,
+      primaryForeground: Color.lerp(
+        primaryForeground,
+        other.primaryForeground,
+        t,
+      )!,
       scaffold: Color.lerp(scaffold, other.scaffold, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       surfaceShadow: Color.lerp(surfaceShadow, other.surfaceShadow, t)!,
-      surfaceInnerLayer: Color.lerp(surfaceInnerLayer, other.surfaceInnerLayer, t)!,
+      surfaceInnerLayer: Color.lerp(
+        surfaceInnerLayer,
+        other.surfaceInnerLayer,
+        t,
+      )!,
       borderUnfocused: Color.lerp(borderUnfocused, other.borderUnfocused, t)!,
       borderFocused: Color.lerp(borderFocused, other.borderFocused, t)!,
       textBody: Color.lerp(textBody, other.textBody, t)!,

@@ -13,10 +13,13 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.1
+  flutter_localizations:
+    sdk: flutter
   flutter_secure_storage: ^10.3.1
   flutter_svg: ^2.3.0
   gap: ^3.0.1
   get: ^4.7.2
+  intl: ^0.20.2
   shared_preferences: ^2.5.3
 
 dev_dependencies:
@@ -26,6 +29,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - lib/env/debug.env

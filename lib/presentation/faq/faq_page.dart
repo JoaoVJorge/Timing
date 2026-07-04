@@ -4,6 +4,7 @@ import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/faq/faq_controller.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 
 class FaqPage extends StatelessWidget {
@@ -12,6 +13,7 @@ class FaqPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final FaqController controller = Get.find();
+    final List<FaqEntry> entries = controller.entries(context);
 
     return AppScaffold(
       body: Column(
@@ -20,17 +22,17 @@ class FaqPage extends StatelessWidget {
           const Gap(16),
           Row(
             children: [
-              IconButton(onPressed: appNavigator.back, icon: Icon(Icons.arrow_back, color: context.colorTokens.textBody)),
-              Text("FAQ", style: context.textStyles.titleFont),
+              IconButton(onPressed: appNavigator.back, icon: AppIcon("left_back", size: 20, color: context.colorTokens.primary)),
+              Text(context.l10n.faqTitle, style: context.textStyles.titleFont),
             ],
           ),
           const Gap(16),
           Expanded(
             child: ListView.separated(
-              itemCount: controller.entries.length,
+              itemCount: entries.length,
               separatorBuilder: (context, index) => const Gap(12),
               itemBuilder: (context, index) {
-                final FaqEntry entry = controller.entries[index];
+                final FaqEntry entry = entries[index];
                 return Container(
                   decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(16)),
                   child: Theme(
