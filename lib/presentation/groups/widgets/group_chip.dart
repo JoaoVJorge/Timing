@@ -22,12 +22,23 @@ class GroupChip extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: isSelected ? context.colorTokens.primaryGradient : null,
-        color: isSelected ? null : context.colorTokens.surface,
+        gradient: isSelected
+            ? context.colorTokens.primaryGradient
+            : LinearGradient(
+                colors: [
+                  context.colorTokens.surface,
+                  context.colorTokens.surface,
+                ],
+              ),
         borderRadius: BorderRadius.circular(24),
-        border: isSelected
-            ? null
-            : Border.all(color: context.colorTokens.borderUnfocused),
+
+        boxShadow: [
+          BoxShadow(
+            color: context.colorTokens.surfaceShadow,
+            blurRadius: 8,
+            offset: const Offset(2, 3),
+          ),
+        ],
       ),
       child: Text(
         group.name,
