@@ -1,12 +1,19 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 
-typedef AddScheduleEntryResult = ({String title, int startMinutes, int? endMinutes, int colorValue});
+typedef AddScheduleEntryResult = ({
+  String title,
+  int startMinutes,
+  int? endMinutes,
+  int colorValue,
+});
 
 class AddScheduleEntryDialog extends StatefulWidget {
   const AddScheduleEntryDialog({super.key});
@@ -17,41 +24,61 @@ class AddScheduleEntryDialog extends StatefulWidget {
 
 class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
   final TextEditingController _titleController = TextEditingController();
-  TimeOfDay? _startTime;
-  TimeOfDay? _endTime;
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
+  final FocusNode _startTimeFocusNode = FocusNode();
+  final FocusNode _endTimeFocusNode = FocusNode();
   Color _selectedColor = SubjectColors.values.first;
 
   @override
   void dispose() {
     _titleController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+    _startTimeFocusNode.dispose();
+    _endTimeFocusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _pickStartTime() async {
-    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: _startTime ?? TimeOfDay.now());
-    if (picked != null) {
-      setState(() => _startTime = picked);
+  static ({int hour, int minute})? _parseTime(String raw) {
+    final RegExpMatch? match = RegExp(
+      r"^([0-9]{1,2}):([0-9]{1,2})$",
+    ).firstMatch(raw.trim());
+    if (match == null) {
+      return null;
     }
-  }
 
-  Future<void> _pickEndTime() async {
-    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: _endTime ?? TimeOfDay.now());
-    if (picked != null) {
-      setState(() => _endTime = picked);
+    final int hour = int.parse(match.group(1)!);
+    final int minute = int.parse(match.group(2)!);
+    if (hour > 23 || minute > 59) {
+      return null;
     }
+
+    return (hour: hour, minute: minute);
   }
 
   void _onSubmit() {
     final String title = _titleController.text.trim();
-    if (title.isEmpty || _startTime == null) {
+    final ({int hour, int minute})? startTime = _parseTime(
+      _startTimeController.text,
+    );
+    final bool hasEndInput = _endTimeController.text.trim().isNotEmpty;
+    final ({int hour, int minute})? endTime = hasEndInput
+        ? _parseTime(_endTimeController.text)
+        : null;
+
+    final bool isIncomplete =
+        title.isEmpty || startTime == null || (hasEndInput && endTime == null);
+    if (isIncomplete) {
+      appNavigator.showErrorSnackBar(context.l10n.incompleteScheduleEntryError);
       return;
     }
 
     appNavigator.back<AddScheduleEntryResult>(
       result: (
         title: title,
-        startMinutes: _startTime!.hour * 60 + _startTime!.minute,
-        endMinutes: _endTime == null ? null : _endTime!.hour * 60 + _endTime!.minute,
+        startMinutes: startTime.hour * 60 + startTime.minute,
+        endMinutes: endTime == null ? null : endTime.hour * 60 + endTime.minute,
         colorValue: _selectedColor.toARGB32(),
       ),
     );
@@ -68,37 +95,47 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
           TextField(
             controller: _titleController,
             autofocus: true,
-            decoration: AppInputDecoration.withBorder(tokens: context.colorTokens, hintText: context.l10n.scheduleTitleHint),
+            decoration: AppInputDecoration.withBorder(
+              tokens: context.colorTokens,
+              hintText: context.l10n.scheduleTitleHint,
+            ),
           ),
           const Gap(16),
           Row(
             children: [
               Expanded(
-                child: _TimeField(
+                child: _TimeTextField(
                   label: context.l10n.startTimeLabel,
-                  time: _startTime,
-                  onTap: _pickStartTime,
+                  controller: _startTimeController,
+                  focusNode: _startTimeFocusNode,
+                  onCompleted: () =>
+                      FocusScope.of(context).requestFocus(_endTimeFocusNode),
                 ),
               ),
               const Gap(12),
               Expanded(
-                child: _TimeField(
+                child: _TimeTextField(
                   label: context.l10n.endTimeOptionalLabel,
-                  time: _endTime,
-                  onTap: _pickEndTime,
-                  onClear: _endTime == null ? null : () => setState(() => _endTime = null),
+                  controller: _endTimeController,
+                  focusNode: _endTimeFocusNode,
                 ),
               ),
             ],
           ),
           const Gap(16),
-          Text(context.l10n.colorLabel, style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint)),
+          Text(
+            context.l10n.colorLabel,
+            style: context.textStyles.bodySmall.copyWith(
+              color: context.colorTokens.textHint,
+            ),
+          ),
           const Gap(8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: SubjectColors.values.map((color) {
-              final bool isSelected = color.toARGB32() == _selectedColor.toARGB32();
+              final bool isSelected =
+                  color.toARGB32() == _selectedColor.toARGB32();
               return GestureDetector(
                 onTap: () => setState(() => _selectedColor = color),
                 child: Container(
@@ -107,9 +144,22 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
-                    border: isSelected ? Border.all(color: context.colorTokens.textBody, width: 2) : null,
+                    border: isSelected
+                        ? Border.all(
+                            color: context.colorTokens.textBody,
+                            width: 2,
+                          )
+                        : null,
                   ),
-                  child: isSelected ? const Center(child: AppIcon("check", size: 14, color: Colors.white)) : null,
+                  child: isSelected
+                      ? const Center(
+                          child: AppIcon(
+                            "check",
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
                 ),
               );
             }).toList(),
@@ -118,55 +168,77 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
       ),
     ),
     actions: [
-      TextButton(onPressed: () => appNavigator.back<AddScheduleEntryResult>(), child: Text(context.l10n.cancelButton)),
-      const SizedBox(width: 4),
-      FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: context.colorTokens.primary),
-        onPressed: _onSubmit,
-        child: Text(context.l10n.addButton),
+      TextButton(
+        onPressed: () => appNavigator.back<AddScheduleEntryResult>(),
+        child: Text(context.l10n.cancelButton),
       ),
+      const SizedBox(width: 4),
+      FloatingPrimaryButton(label: context.l10n.addButton, onTap: _onSubmit),
     ],
   );
 }
 
-class _TimeField extends StatelessWidget {
-  const _TimeField({required this.label, required this.time, required this.onTap, this.onClear});
+/// Runs after [FilteringTextInputFormatter.digitsOnly], so [newValue] is always pure digits here.
+class _TimeInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String digits = newValue.text.length > 4
+        ? newValue.text.substring(0, 4)
+        : newValue.text;
+    final String formatted = digits.length <= 2
+        ? digits
+        : "${digits.substring(0, 2)}:${digits.substring(2)}";
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class _TimeTextField extends StatelessWidget {
+  const _TimeTextField({
+    required this.label,
+    required this.controller,
+    required this.focusNode,
+    this.onCompleted,
+  });
 
   final String label;
-  final TimeOfDay? time;
-  final VoidCallback onTap;
-  final VoidCallback? onClear;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final VoidCallback? onCompleted;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint)),
+      Text(
+        label,
+        style: context.textStyles.bodySmall.copyWith(
+          color: context.colorTokens.textHint,
+        ),
+      ),
       const Gap(6),
-      InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            border: Border.all(color: context.colorTokens.borderUnfocused),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  time?.format(context) ?? "--:--",
-                  style: context.textStyles.bodyLarge,
-                ),
-              ),
-              if (onClear != null)
-                GestureDetector(
-                  onTap: onClear,
-                  child: Icon(Icons.close, size: 16, color: context.colorTokens.textHint),
-                ),
-            ],
-          ),
+      TextField(
+        controller: controller,
+        focusNode: focusNode,
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          _TimeInputFormatter(),
+        ],
+        onChanged: (value) {
+          if (value.length == 5) {
+            onCompleted?.call();
+          }
+        },
+        decoration: AppInputDecoration.withBorder(
+          tokens: context.colorTokens,
+          hintText: "00:00",
         ),
       ),
     ],

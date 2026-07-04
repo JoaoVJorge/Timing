@@ -42,7 +42,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       ).withValues(alpha: isDark ? 0.3 : 0.05),
       surfaceInnerLayer: isDark
           ? const Color(0xFF2C2C2C)
-          : const Color(0xFFF0F0F0),
+          : const Color.fromARGB(255, 230, 230, 230),
       borderUnfocused: isDark
           ? const Color(0xFF3A3A3A)
           : const Color(0xFFDADADA),

@@ -339,6 +339,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get endTimeOptionalLabel => 'Hora de fim (opcional)';
 
   @override
+  String get incompleteScheduleEntryError =>
+      'Cadastro incompleto — preencha o título e um horário de início válido.';
+
+  @override
   String get continueWithGoogleButton => 'Continuar com Google';
 
   @override
@@ -349,4 +353,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get createAccountSectionTitle => 'Criar uma conta';
+
+  @override
+  String get createAccountButton => 'Criar Conta';
 }

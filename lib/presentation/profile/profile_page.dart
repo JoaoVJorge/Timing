@@ -9,6 +9,7 @@ import "package:help_out/presentation/profile/widgets/top_theme_tile.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class ProfilePage extends StatelessWidget {
@@ -19,13 +20,11 @@ class ProfilePage extends StatelessWidget {
     final ProfileController controller = Get.find();
 
     return AppScaffold(
+      topBar: AppTopBar(title: context.l10n.profileTitle),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Gap(16),
-            Text(context.l10n.profileTitle, style: context.textStyles.titleFont),
-            const Gap(4),
             Obx(
               () => Text(
                 controller.userName.value.isEmpty
@@ -83,10 +82,16 @@ class ProfilePage extends StatelessWidget {
               );
             }),
             const Gap(24),
-            Text(context.l10n.myScheduleCardTitle, style: context.textStyles.extraBold20),
+            Text(
+              context.l10n.myScheduleCardTitle,
+              style: context.textStyles.extraBold20,
+            ),
             const Gap(12),
             Obx(() {
-              final List<ScheduleEntryEntity> preview = controller.sortedScheduleEntries.take(3).toList();
+              final List<ScheduleEntryEntity> preview = controller
+                  .sortedScheduleEntries
+                  .take(3)
+                  .toList();
 
               return BounceTap(
                 pressedScale: 0.98,
@@ -95,43 +100,85 @@ class ProfilePage extends StatelessWidget {
                   width: double.infinity,
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    color: context.colorTokens.surface,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: context.colorTokens.borderUnfocused),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        context.colorTokens.primaryVeryLight,
+                        context.colorTokens.surface,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: context.colorTokens.borderUnfocused,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: context.colorTokens.borderUnfocused)),
-                        ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                         child: Row(
                           children: [
-                            Expanded(child: Text(context.l10n.periodToday, style: context.textStyles.extraBold20)),
-                            AppIcon("right_back", size: 12, color: context.colorTokens.primary),
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: context.colorTokens.primaryGradient,
+                              ),
+                              child: const Center(
+                                child: AppIcon(
+                                  "timer",
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const Gap(12),
+                            Expanded(
+                              child: Text(
+                                context.l10n.periodToday,
+                                style: context.textStyles.extraBold20,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.6),
+                              ),
+                              child: AppIcon(
+                                "right_back",
+                                size: 12,
+                                color: context.colorTokens.primary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       if (preview.isEmpty)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                           child: Text(
                             context.l10n.noScheduleYet,
-                            style: context.textStyles.bodyMedium.copyWith(color: context.colorTokens.textHint),
+                            style: context.textStyles.bodyMedium.copyWith(
+                              color: context.colorTokens.textHint,
+                            ),
                           ),
                         )
                       else
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              for (int index = 0; index < preview.length; index++) ...[
+                              for (
+                                int index = 0;
+                                index < preview.length;
+                                index++
+                              ) ...[
                                 if (index > 0) const Gap(8),
-                                _SchedulePreviewRow(entry: preview[index]),
+                                _SchedulePreviewTicket(entry: preview[index]),
                               ],
                             ],
                           ),
@@ -184,8 +231,8 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class _SchedulePreviewRow extends StatelessWidget {
-  const _SchedulePreviewRow({required this.entry});
+class _SchedulePreviewTicket extends StatelessWidget {
+  const _SchedulePreviewTicket({required this.entry});
 
   final ScheduleEntryEntity entry;
 
@@ -199,20 +246,38 @@ class _SchedulePreviewRow extends StatelessWidget {
         ? _formatMinutes(context, entry.startMinutes)
         : "${_formatMinutes(context, entry.startMinutes)} - ${_formatMinutes(context, entry.endMinutes!)}";
 
-    return Row(
-      children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const Gap(10),
-        Expanded(
-          child: Text.rich(
-            TextSpan(
-              text: "$timeRange: ",
-              style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
-              children: [TextSpan(text: entry.title, style: context.textStyles.bodyLarge)],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              timeRange,
+              style: context.textStyles.textButtonMedium.copyWith(
+                color: Colors.white,
+                fontSize: 12,
+              ),
             ),
           ),
-        ),
-      ],
+          const Gap(12),
+          Expanded(
+            child: Text(
+              entry.title,
+              style: context.textStyles.bodyLarge,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

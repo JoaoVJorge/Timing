@@ -5,10 +5,16 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 
-typedef AddSubjectResult = ({String name, int colorValue, int goalSeconds, int goalPages});
+typedef AddSubjectResult = ({
+  String name,
+  int colorValue,
+  int goalSeconds,
+  int goalPages,
+});
 
 class AddSubjectDialog extends StatefulWidget {
   const AddSubjectDialog({required this.category, super.key});
@@ -42,14 +48,24 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
     if (_isPageBased) {
       final int goalPages = int.tryParse(_goalController.text.trim()) ?? 0;
       appNavigator.back<AddSubjectResult>(
-        result: (name: name, colorValue: _selectedColor.toARGB32(), goalSeconds: 0, goalPages: goalPages),
+        result: (
+          name: name,
+          colorValue: _selectedColor.toARGB32(),
+          goalSeconds: 0,
+          goalPages: goalPages,
+        ),
       );
       return;
     }
 
     final double goalHours = double.tryParse(_goalController.text.trim()) ?? 0;
     appNavigator.back<AddSubjectResult>(
-      result: (name: name, colorValue: _selectedColor.toARGB32(), goalSeconds: (goalHours * 3600).round(), goalPages: 0),
+      result: (
+        name: name,
+        colorValue: _selectedColor.toARGB32(),
+        goalSeconds: (goalHours * 3600).round(),
+        goalPages: 0,
+      ),
     );
   }
 
@@ -66,20 +82,27 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
             autofocus: true,
             decoration: AppInputDecoration.withBorder(
               tokens: context.colorTokens,
-              hintText: context.l10n.itemNameHint(widget.category.itemNoun(context)),
+              hintText: context.l10n.itemNameHint(
+                widget.category.itemNoun(context),
+              ),
             ),
           ),
           const Gap(16),
           Text(
-            _isPageBased ? context.l10n.bookThemeLabel : context.l10n.colorLabel,
-            style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
+            _isPageBased
+                ? context.l10n.bookThemeLabel
+                : context.l10n.colorLabel,
+            style: context.textStyles.bodySmall.copyWith(
+              color: context.colorTokens.textHint,
+            ),
           ),
           const Gap(8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: SubjectColors.values.map((color) {
-              final bool isSelected = color.toARGB32() == _selectedColor.toARGB32();
+              final bool isSelected =
+                  color.toARGB32() == _selectedColor.toARGB32();
               return GestureDetector(
                 onTap: () => setState(() => _selectedColor = color),
                 child: Container(
@@ -88,9 +111,22 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
-                    border: isSelected ? Border.all(color: context.colorTokens.textBody, width: 2) : null,
+                    border: isSelected
+                        ? Border.all(
+                            color: context.colorTokens.textBody,
+                            width: 2,
+                          )
+                        : null,
                   ),
-                  child: isSelected ? const Center(child: AppIcon("check", size: 14, color: Colors.white)) : null,
+                  child: isSelected
+                      ? const Center(
+                          child: AppIcon(
+                            "check",
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
                 ),
               );
             }).toList(),
@@ -103,20 +139,21 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
                 : const TextInputType.numberWithOptions(decimal: true),
             decoration: AppInputDecoration.withBorder(
               tokens: context.colorTokens,
-              hintText: _isPageBased ? context.l10n.goalPagesHint : context.l10n.estimatedHoursGoalHint,
+              hintText: _isPageBased
+                  ? context.l10n.goalPagesHint
+                  : context.l10n.estimatedHoursGoalHint,
             ),
           ),
         ],
       ),
     ),
     actions: [
-      TextButton(onPressed: () => appNavigator.back<AddSubjectResult>(), child: Text(context.l10n.cancelButton)),
-      const SizedBox(width: 4),
-      FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: context.colorTokens.primary),
-        onPressed: _onSubmit,
-        child: Text(context.l10n.addButton),
+      TextButton(
+        onPressed: () => appNavigator.back<AddSubjectResult>(),
+        child: Text(context.l10n.cancelButton),
       ),
+      const SizedBox(width: 4),
+      FloatingPrimaryButton(label: context.l10n.addButton, onTap: _onSubmit),
     ],
   );
 }

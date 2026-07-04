@@ -3,6 +3,7 @@ import "package:gap/gap.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 
 class LogPagesDialog extends StatefulWidget {
@@ -40,26 +41,36 @@ class _LogPagesDialogState extends State<LogPagesDialog> {
       children: [
         Text(
           widget.subject.goalPages > 0
-              ? context.l10n.pagesProgress(widget.subject.currentPages, widget.subject.goalPages)
+              ? context.l10n.pagesProgress(
+                  widget.subject.currentPages,
+                  widget.subject.goalPages,
+                )
               : context.l10n.pagesReadOnly(widget.subject.currentPages),
-          style: context.textStyles.bodyMedium.copyWith(color: context.colorTokens.textHint),
+          style: context.textStyles.bodyMedium.copyWith(
+            color: context.colorTokens.textHint,
+          ),
         ),
         const Gap(16),
         TextField(
           controller: _pagesController,
           autofocus: true,
           keyboardType: TextInputType.number,
-          decoration: AppInputDecoration.withBorder(tokens: context.colorTokens, hintText: context.l10n.pagesReadNowHint),
+          decoration: AppInputDecoration.withBorder(
+            tokens: context.colorTokens,
+            hintText: context.l10n.pagesReadNowHint,
+          ),
         ),
       ],
     ),
     actions: [
-      TextButton(onPressed: () => appNavigator.back<int>(), child: Text(context.l10n.cancelButton)),
+      TextButton(
+        onPressed: () => appNavigator.back<int>(),
+        child: Text(context.l10n.cancelButton),
+      ),
       const SizedBox(width: 4),
-      FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: context.colorTokens.primary),
-        onPressed: _onSubmit,
-        child: Text(context.l10n.logPagesButton),
+      FloatingPrimaryButton(
+        label: context.l10n.logPagesButton,
+        onTap: _onSubmit,
       ),
     ],
   );

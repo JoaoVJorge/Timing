@@ -10,22 +10,26 @@ class AddScheduleEntryUseCase {
 
   Future<Either<AppError, ScheduleEntryEntity>> call({
     required String title,
+    required int weekday,
     required int startMinutes,
     required int? endMinutes,
     required int colorValue,
   }) async {
-    final Either<AppError, List<ScheduleEntryEntity>> getResult = await _scheduleRepository.getEntries();
+    final Either<AppError, List<ScheduleEntryEntity>> getResult =
+        await _scheduleRepository.getEntries();
 
     return getResult.fold((error) async => Left(error), (entries) async {
       final ScheduleEntryEntity newEntry = ScheduleEntryEntity(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         title: title,
+        weekday: weekday,
         startMinutes: startMinutes,
         endMinutes: endMinutes,
         colorValue: colorValue,
       );
 
-      final Either<AppError, void> saveResult = await _scheduleRepository.saveEntries([...entries, newEntry]);
+      final Either<AppError, void> saveResult = await _scheduleRepository
+          .saveEntries([...entries, newEntry]);
       return saveResult.fold(Left.new, (_) => Right(newEntry));
     });
   }

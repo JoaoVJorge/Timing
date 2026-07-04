@@ -706,6 +706,12 @@ abstract class AppLocalizations {
   /// **'End time (optional)'**
   String get endTimeOptionalLabel;
 
+  /// No description provided for @incompleteScheduleEntryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete entry — fill in the title and a valid start time.'**
+  String get incompleteScheduleEntryError;
+
   /// No description provided for @continueWithGoogleButton.
   ///
   /// In en, this message translates to:
@@ -729,6 +735,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create an account'**
   String get createAccountSectionTitle;
+
+  /// No description provided for @createAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccountButton;
 }
 
 class _AppLocalizationsDelegate

@@ -158,9 +158,11 @@
   "scheduleTitleHint": "Title",
   "startTimeLabel": "Start time",
   "endTimeOptionalLabel": "End time (optional)",
+  "incompleteScheduleEntryError": "Incomplete entry — fill in the title and a valid start time.",
 
   "continueWithGoogleButton": "Continue with Google",
   "continueWithAppleButton": "Continue with Apple",
   "orSeparator": "OR",
-  "createAccountSectionTitle": "Create an account"
+  "createAccountSectionTitle": "Create an account",
+  "createAccountButton": "Create Account"
 }

@@ -119,9 +119,11 @@
   "scheduleTitleHint": "Título",
   "startTimeLabel": "Hora de inicio",
   "endTimeOptionalLabel": "Hora de fin (opcional)",
+  "incompleteScheduleEntryError": "Registro incompleto — completa el título y una hora de inicio válida.",
 
   "continueWithGoogleButton": "Continuar con Google",
   "continueWithAppleButton": "Continuar con Apple",
   "orSeparator": "O",
-  "createAccountSectionTitle": "Crear una cuenta"
+  "createAccountSectionTitle": "Crear una cuenta",
+  "createAccountButton": "Crear Cuenta"
 }

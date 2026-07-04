@@ -23,6 +23,9 @@ class HomePage extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: context.colorTokens.primaryGradient,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(28),
+                ),
               ),
               padding: EdgeInsets.only(
                 left: 24,
@@ -50,20 +53,18 @@ class HomePage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ListView.separated(
-                itemCount: TimeCategoryType.values.length,
-                separatorBuilder: (context, index) => const Gap(16),
-                itemBuilder: (context, index) {
-                  final TimeCategoryType category =
-                      TimeCategoryType.values[index];
-                  return CategoryCard(
-                    category: category,
-                    onTapPlay: () => controller.onTapCategory(category),
-                  );
-                },
-              ),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              itemCount: TimeCategoryType.values.length,
+              separatorBuilder: (context, index) => const Gap(12),
+              itemBuilder: (context, index) {
+                final TimeCategoryType category =
+                    TimeCategoryType.values[index];
+                return CategoryCard(
+                  category: category,
+                  onTapPlay: () => controller.onTapCategory(category),
+                );
+              },
             ),
           ),
         ],
