@@ -4,6 +4,7 @@ import "package:gap/gap.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/dialog_top_bar.dart";
 import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
@@ -86,7 +87,7 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(context.l10n.addScheduleEntryTitle),
+    title: DialogTopBar(title: context.l10n.addScheduleEntryTitle),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,

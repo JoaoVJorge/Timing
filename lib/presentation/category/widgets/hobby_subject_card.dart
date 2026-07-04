@@ -7,7 +7,11 @@ import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class HobbySubjectCard extends StatelessWidget {
-  const HobbySubjectCard({required this.subject, required this.onTapPlay, super.key});
+  const HobbySubjectCard({
+    required this.subject,
+    required this.onTapPlay,
+    super.key,
+  });
 
   final SubjectEntity subject;
   final VoidCallback onTapPlay;
@@ -35,20 +39,29 @@ class HobbySubjectCard extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-              child: const Center(child: AppIcon("guitar", size: 20, color: Colors.white)),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: AppIcon("guitar", size: 20, color: Colors.white),
+              ),
             ),
             const Spacer(),
             Text(
               subject.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.extraBold20.copyWith(color: Colors.white),
+              style: context.textStyles.extraBold20.copyWith(
+                color: Colors.white,
+              ),
             ),
             const Gap(4),
             Text(
               formatDurationLong(Duration(seconds: subject.totalSeconds)),
-              style: context.textStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+              style: context.textStyles.bodySmall.copyWith(
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
             ),
           ],
         ),

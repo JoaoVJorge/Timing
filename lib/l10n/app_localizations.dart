@@ -268,6 +268,24 @@ abstract class AppLocalizations {
   /// **'Log pages'**
   String get logPagesButton;
 
+  /// No description provided for @notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notesLabel;
+
+  /// No description provided for @notesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your notes here...'**
+  String get notesHint;
+
+  /// No description provided for @saveNotesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveNotesButton;
+
   /// No description provided for @durationProgress.
   ///
   /// In en, this message translates to:

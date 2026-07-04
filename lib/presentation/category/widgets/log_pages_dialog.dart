@@ -3,6 +3,7 @@ import "package:gap/gap.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/dialog_top_bar.dart";
 import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 
@@ -34,7 +35,8 @@ class _LogPagesDialogState extends State<LogPagesDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.subject.name),
+    title: DialogTopBar(title: widget.subject.name),
+
     content: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,11 +65,6 @@ class _LogPagesDialogState extends State<LogPagesDialog> {
       ],
     ),
     actions: [
-      TextButton(
-        onPressed: () => appNavigator.back<int>(),
-        child: Text(context.l10n.cancelButton),
-      ),
-      const SizedBox(width: 4),
       FloatingPrimaryButton(
         label: context.l10n.logPagesButton,
         onTap: _onSubmit,

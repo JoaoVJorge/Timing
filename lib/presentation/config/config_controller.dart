@@ -21,7 +21,8 @@ class ConfigController extends GetxController {
 
   void onToggleDarkMode(bool value) => _appController.setDarkMode(value);
 
-  void onToggleNotifications(bool value) => _appController.setNotificationsEnabled(value);
+  void onToggleNotifications(bool value) =>
+      _appController.setNotificationsEnabled(value);
 
   void onTapMyProfile() => _appNavigator.toNamed(AppRoutes.editProfile);
 
@@ -39,7 +40,9 @@ class ConfigController extends GetxController {
   String get languageLabel => AppLanguages.byCode(languageCode.value).label;
 
   Future<void> onTapLogOut() async {
-    final bool? confirmed = await _appNavigator.dialog<bool>(child: const LogOutDialog());
+    final bool? confirmed = await _appNavigator.dialog<bool>(
+      child: const LogOutDialog(),
+    );
     if (confirmed ?? false) {
       await _appController.logOut();
     }

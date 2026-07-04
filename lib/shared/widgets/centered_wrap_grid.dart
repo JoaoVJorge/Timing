@@ -24,10 +24,11 @@ class CenteredWrapGrid extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (int i = start; i < start + itemsPerRow && i < children.length; i++) ...[
-                if (i > start) SizedBox(width: spacing),
-                children[i],
-              ],
+              for (
+                int i = start;
+                i < start + itemsPerRow && i < children.length;
+                i++
+              ) ...[if (i > start) SizedBox(width: spacing), children[i]],
             ],
           ),
         ),

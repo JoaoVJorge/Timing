@@ -34,12 +34,17 @@ class CreateGroupController extends GetxController {
 
   Future<void> loadFriends() async {
     isLoading.value = true;
-    final Either<AppError, List<FriendOption>> result = await _getInvitableFriendsUseCase();
-    result.fold((error) => availableFriends.clear(), (friends) => availableFriends.value = friends);
+    final Either<AppError, List<FriendOption>> result =
+        await _getInvitableFriendsUseCase();
+    result.fold(
+      (error) => availableFriends.clear(),
+      (friends) => availableFriends.value = friends,
+    );
     isLoading.value = false;
   }
 
-  void onGroupNameChanged(String value) => canCreate.value = value.trim().isNotEmpty;
+  void onGroupNameChanged(String value) =>
+      canCreate.value = value.trim().isNotEmpty;
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -59,10 +64,16 @@ class CreateGroupController extends GetxController {
     final List<FriendOption> invitedFriends = availableFriends
         .where((friend) => selectedFriendIds.contains(friend.id))
         .toList();
-    final Either<AppError, GroupEntity> result = await _createGroupUseCase(name: name, invitedFriends: invitedFriends);
+    final Either<AppError, GroupEntity> result = await _createGroupUseCase(
+      name: name,
+      invitedFriends: invitedFriends,
+    );
     isCreating.value = false;
 
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (group) => _appNavigator.back<GroupEntity>(result: group));
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(),
+      (group) => _appNavigator.back<GroupEntity>(result: group),
+    );
   }
 
   @override

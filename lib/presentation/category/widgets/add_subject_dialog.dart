@@ -5,6 +5,7 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/dialog_top_bar.dart";
 import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
@@ -71,7 +72,9 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(context.l10n.addItemButton(widget.category.itemNoun(context))),
+    title: DialogTopBar(
+      title: context.l10n.addItemButton(widget.category.itemNoun(context)),
+    ),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -122,7 +125,7 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
                       ? const Center(
                           child: AppIcon(
                             "check",
-                            size: 14,
+                            size: 12,
                             color: Colors.white,
                           ),
                         )
@@ -148,11 +151,6 @@ class _AddSubjectDialogState extends State<AddSubjectDialog> {
       ),
     ),
     actions: [
-      TextButton(
-        onPressed: () => appNavigator.back<AddSubjectResult>(),
-        child: Text(context.l10n.cancelButton),
-      ),
-      const SizedBox(width: 4),
       FloatingPrimaryButton(label: context.l10n.addButton, onTap: _onSubmit),
     ],
   );

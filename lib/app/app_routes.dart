@@ -20,6 +20,8 @@ import "package:help_out/presentation/login/login_bindings.dart";
 import "package:help_out/presentation/login/login_page.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_bindings.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_page.dart";
+import "package:help_out/presentation/notes/notes_bindings.dart";
+import "package:help_out/presentation/notes/notes_page.dart";
 import "package:help_out/presentation/profile/profile_bindings.dart";
 import "package:help_out/presentation/profile/profile_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
@@ -45,6 +47,7 @@ class AppRoutes {
   static const String faq = "/faq";
   static const String createGroup = "/createGroup";
   static const String schedule = "/schedule";
+  static const String notes = "/notes";
 
   static final List<GetPage<dynamic>> getPages = [
     GetPage(
@@ -136,6 +139,14 @@ class AppRoutes {
     GetPage(
       name: schedule,
       page: () => const SchedulePage(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: notes,
+      page: () => const NotesPage(),
+      binding: NotesBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

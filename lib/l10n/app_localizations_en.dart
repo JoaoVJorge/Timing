@@ -104,6 +104,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logPagesButton => 'Log pages';
 
   @override
+  String get notesLabel => 'Notes';
+
+  @override
+  String get notesHint => 'Write your notes here...';
+
+  @override
+  String get saveNotesButton => 'Save';
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration of $goalDuration';
   }

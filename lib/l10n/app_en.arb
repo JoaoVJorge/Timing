@@ -54,6 +54,10 @@
   "pagesReadNowHint": "Pages read now",
   "logPagesButton": "Log pages",
 
+  "notesLabel": "Notes",
+  "notesHint": "Write your notes here...",
+  "saveNotesButton": "Save",
+
   "durationProgress": "{duration} of {goalDuration}",
   "@durationProgress": {
     "placeholders": {

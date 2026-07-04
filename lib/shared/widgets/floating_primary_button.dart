@@ -17,23 +17,26 @@ class FloatingPrimaryButton extends StatelessWidget {
     pressedScale: 0.96,
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      width: double.infinity,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(
-            color: context.colorTokens.primary.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 12,
-            offset: const Offset(0, 4),
+            offset: const Offset(2, 2),
           ),
         ],
       ),
       child: Text(
         label,
-        style: context.textStyles.textButtonMedium.copyWith(
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.extraBold20.copyWith(
           color: context.colorTokens.primary,
-          fontWeight: FontWeight.w800,
         ),
       ),
     ),

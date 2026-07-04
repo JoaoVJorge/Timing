@@ -49,6 +49,8 @@ class AppBottomNavBar extends StatelessWidget {
                       AppIcon(button.iconName, size: 24, color: color),
                       Text(
                         button.localizedLabel(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodySmall.copyWith(
                           color: color,
                         ),

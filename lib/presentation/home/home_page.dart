@@ -39,6 +39,8 @@ class HomePage extends StatelessWidget {
                     : context.l10n.homeGreetingWithName(
                         controller.userName.value,
                       ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: context.textStyles.titleFont.copyWith(
                   color: Colors.white,
                   shadows: [

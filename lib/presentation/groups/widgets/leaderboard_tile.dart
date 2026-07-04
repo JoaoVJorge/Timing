@@ -4,13 +4,22 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 
 class LeaderboardTile extends StatelessWidget {
-  const LeaderboardTile({required this.rank, required this.member, required this.seconds, super.key});
+  const LeaderboardTile({
+    required this.rank,
+    required this.member,
+    required this.seconds,
+    super.key,
+  });
 
   final int rank;
   final GroupMemberEntity member;
   final int seconds;
 
-  static const List<Color> _medalColors = [Color(0xFFFFC107), Color(0xFFB0BEC5), Color(0xFFD08A55)];
+  static const List<Color> _medalColors = [
+    Color(0xFFFFC107),
+    Color(0xFFB0BEC5),
+    Color(0xFFD08A55),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +31,12 @@ class LeaderboardTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(18),
-        border: isTopThree ? Border.all(color: _medalColors[rank - 1].withValues(alpha: 0.6), width: 1.5) : null,
+        border: isTopThree
+            ? Border.all(
+                color: _medalColors[rank - 1].withValues(alpha: 0.6),
+                width: 1.5,
+              )
+            : null,
       ),
       child: Row(
         children: [
@@ -32,7 +46,9 @@ class LeaderboardTile extends StatelessWidget {
               "$rank",
               textAlign: TextAlign.center,
               style: context.textStyles.bodyLarge.copyWith(
-                color: isTopThree ? _medalColors[rank - 1] : context.colorTokens.textHint,
+                color: isTopThree
+                    ? _medalColors[rank - 1]
+                    : context.colorTokens.textHint,
               ),
             ),
           ),
@@ -43,10 +59,22 @@ class LeaderboardTile extends StatelessWidget {
             backgroundImage: NetworkImage(member.avatarUrl),
           ),
           const SizedBox(width: 12),
-          Expanded(child: Text(member.name, style: context.textStyles.bodyLarge)),
+          Expanded(
+            child: Text(
+              member.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyLarge,
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             formatDurationLong(Duration(seconds: seconds)),
-            style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodySmall.copyWith(
+              color: context.colorTokens.textHint,
+            ),
           ),
         ],
       ),

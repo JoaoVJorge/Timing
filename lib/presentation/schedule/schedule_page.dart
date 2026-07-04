@@ -42,10 +42,14 @@ class SchedulePage extends StatelessWidget {
                   controller.sortedEntries;
 
               if (entries.isEmpty) {
-                return Center(
+                return Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
                     context.l10n.noScheduleYet,
-                    style: context.textStyles.bodyMedium.copyWith(
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.clip,
+                    style: context.textStyles.bodyLarge.copyWith(
                       color: context.colorTokens.textHint,
                     ),
                   ),

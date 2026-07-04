@@ -8,27 +8,45 @@ class AppTopBar extends StatelessWidget {
   const AppTopBar({
     required this.title,
     this.showBackButton = false,
+    this.onBack,
     super.key,
   });
 
   final String title;
   final bool showBackButton;
+  final VoidCallback? onBack;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      if (showBackButton) ...[
-        GestureDetector(
-          onTap: appNavigator.back,
-          child: AppIcon(
-            "left_back",
-            size: 20,
-            color: context.colorTokens.primary,
+  Widget build(BuildContext context) {
+    const double size = 20;
+
+    return Row(
+      children: [
+        if (showBackButton) ...[
+          GestureDetector(
+            onTap: onBack ?? appNavigator.back,
+            child: Container(
+              width: size,
+              height: size,
+              alignment: Alignment.center,
+              color: Colors.transparent,
+              child: AppIcon(
+                "left_back",
+                size: size,
+                color: context.colorTokens.primary,
+              ),
+            ),
+          ),
+          const Gap(8),
+        ],
+        Expanded(
+          child: Text(
+            title,
+            style: context.textStyles.titleFont,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        const Gap(12),
       ],
-      Text(title, style: context.textStyles.titleFont),
-    ],
-  );
+    );
+  }
 }

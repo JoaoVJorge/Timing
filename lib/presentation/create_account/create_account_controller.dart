@@ -5,7 +5,10 @@ import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 
 class CreateAccountController extends GetxController {
-  CreateAccountController({required this._appController, required this._appNavigator});
+  CreateAccountController({
+    required this._appController,
+    required this._appNavigator,
+  });
 
   final AppController _appController;
   final AppNavigator _appNavigator;
@@ -28,7 +31,9 @@ class CreateAccountController extends GetxController {
     await _appController.updateProfile(
       userName: name,
       nickName: nicknameController.text.trim(),
-      phoneNumber: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+      phoneNumber: phoneController.text.trim().isEmpty
+          ? null
+          : phoneController.text.trim(),
     );
     isSubmitting.value = false;
 

@@ -5,7 +5,11 @@ class CreateGroupBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<CreateGroupController>(
-      CreateGroupController(getInvitableFriendsUseCase: Get.find(), createGroupUseCase: Get.find(), appNavigator: Get.find()),
+      CreateGroupController(
+        getInvitableFriendsUseCase: Get.find(),
+        createGroupUseCase: Get.find(),
+        appNavigator: Get.find(),
+      ),
     );
   }
 }

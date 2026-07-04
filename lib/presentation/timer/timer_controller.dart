@@ -5,7 +5,10 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 
 class TimerController extends GetxController {
-  TimerController({required this._updateSubjectTimeUseCase}) : subject = Get.arguments as SubjectEntity;
+  TimerController({
+    required this._updateSubjectTimeUseCase,
+    required this.subject,
+  });
 
   static const int _breakIntervalSeconds = 25 * 60;
 
@@ -54,7 +57,10 @@ class TimerController extends GetxController {
   void _persistAccumulatedTime() {
     _baselineSeconds += sessionSeconds.value;
     sessionSeconds.value = 0;
-    _updateSubjectTimeUseCase(subjectId: subject.id, totalSeconds: _baselineSeconds);
+    _updateSubjectTimeUseCase(
+      subjectId: subject.id,
+      totalSeconds: _baselineSeconds,
+    );
   }
 
   @override

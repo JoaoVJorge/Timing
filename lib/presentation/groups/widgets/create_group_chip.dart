@@ -21,7 +21,12 @@ class CreateGroupChip extends StatelessWidget {
         children: [
           Icon(Icons.add, size: 18, color: context.colorTokens.primary),
           const SizedBox(width: 4),
-          Text(context.l10n.newGroupChip, style: context.textStyles.bodyLarge.copyWith(color: context.colorTokens.primary)),
+          Text(
+            context.l10n.newGroupChip,
+            style: context.textStyles.bodyLarge.copyWith(
+              color: context.colorTokens.primary,
+            ),
+          ),
         ],
       ),
     ),

@@ -21,7 +21,10 @@ class MainNavigationController extends GetxController {
   String currentRouteName = AppRoutes.home;
 
   Route<dynamic>? onGenerateRoute(RouteSettings settings) =>
-      AppRoutes.onGenerateChildRoute(settings: settings, parentRouteName: AppRoutes.mainNavigation);
+      AppRoutes.onGenerateChildRoute(
+        settings: settings,
+        parentRouteName: AppRoutes.mainNavigation,
+      );
 
   void onTapBottomBarButton(BottomNavButtonType type) {
     selectedButton.value = type;

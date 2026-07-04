@@ -12,5 +12,6 @@ class HomeController extends GetxController {
 
   RxString get userName => _appController.userName;
 
-  void onTapCategory(TimeCategoryType category) => _appNavigator.toNamed(AppRoutes.category, arguments: category);
+  void onTapCategory(TimeCategoryType category) =>
+      _appNavigator.toNamed(AppRoutes.category, arguments: category);
 }

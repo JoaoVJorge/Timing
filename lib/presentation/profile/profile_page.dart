@@ -32,6 +32,8 @@ class ProfilePage extends StatelessWidget {
                     : context.l10n.profileSubtitleWithName(
                         controller.userName.value,
                       ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodyMedium.copyWith(
                   color: context.colorTokens.textHint,
                 ),
@@ -139,6 +141,8 @@ class ProfilePage extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 context.l10n.periodToday,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: context.textStyles.extraBold20,
                               ),
                             ),
@@ -146,7 +150,7 @@ class ProfilePage extends StatelessWidget {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: context.colorTokens.primaryVeryLight,
                               ),
                               child: AppIcon(
                                 "right_back",
@@ -272,6 +276,7 @@ class _SchedulePreviewTicket extends StatelessWidget {
           Expanded(
             child: Text(
               entry.title,
+              maxLines: 1,
               style: context.textStyles.bodyLarge,
               overflow: TextOverflow.ellipsis,
             ),

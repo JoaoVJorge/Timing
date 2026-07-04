@@ -17,7 +17,8 @@ class CategoryController extends GetxController {
     required this._addSubjectUseCase,
     required this._updateSubjectPagesUseCase,
     required this._appNavigator,
-  }) : category = Get.arguments as TimeCategoryType;
+    required this.category,
+  });
 
   final GetSubjectsUseCase _getSubjectsUseCase;
   final AddSubjectUseCase _addSubjectUseCase;
@@ -38,17 +39,22 @@ class CategoryController extends GetxController {
 
   Future<void> loadSubjects() async {
     isLoading.value = true;
-    final Either<AppError, List<SubjectEntity>> result = await _getSubjectsUseCase();
+    final Either<AppError, List<SubjectEntity>> result =
+        await _getSubjectsUseCase();
     result.fold(
       (error) => subjects.clear(),
-      (allSubjects) => subjects.value = allSubjects.where((subject) => subject.category == category).toList(),
+      (allSubjects) => subjects.value = allSubjects
+          .where((subject) => subject.category == category)
+          .toList(),
     );
     isLoading.value = false;
   }
 
   Future<void> onTapSubject(SubjectEntity subject) async {
     if (isPageBased) {
-      final int? updatedPages = await _appNavigator.dialog<int>(child: LogPagesDialog(subject: subject));
+      final int? updatedPages = await _appNavigator.dialog<int>(
+        child: LogPagesDialog(subject: subject),
+      );
       if (updatedPages == null) {
         return;
       }
@@ -57,17 +63,35 @@ class CategoryController extends GetxController {
       if (index != -1) {
         subjects[index] = subjects[index].copyWith(currentPages: updatedPages);
       }
-      await _updateSubjectPagesUseCase(subjectId: subject.id, currentPages: updatedPages);
+      await _updateSubjectPagesUseCase(
+        subjectId: subject.id,
+        currentPages: updatedPages,
+      );
       return;
     }
 
     _appNavigator.toNamed(AppRoutes.timer, arguments: subject);
   }
 
-  Future<void> onTapAddSubject() async {
-    final AddSubjectResult? result = await _appNavigator.dialog<AddSubjectResult>(
-      child: AddSubjectDialog(category: category),
+  Future<void> onTapNotes(SubjectEntity subject) async {
+    final dynamic result = await _appNavigator.toNamed(
+      AppRoutes.notes,
+      arguments: subject,
     );
+    final String? updatedNotes = result as String?;
+    if (updatedNotes == null) {
+      return;
+    }
+
+    final int index = subjects.indexWhere((item) => item.id == subject.id);
+    if (index != -1) {
+      subjects[index] = subjects[index].copyWith(notes: updatedNotes);
+    }
+  }
+
+  Future<void> onTapAddSubject() async {
+    final AddSubjectResult? result = await _appNavigator
+        .dialog<AddSubjectResult>(child: AddSubjectDialog(category: category));
 
     if (result == null) {
       return;

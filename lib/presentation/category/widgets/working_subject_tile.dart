@@ -7,7 +7,11 @@ import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
 class WorkingSubjectTile extends StatelessWidget {
-  const WorkingSubjectTile({required this.subject, required this.onTapPlay, super.key});
+  const WorkingSubjectTile({
+    required this.subject,
+    required this.onTapPlay,
+    super.key,
+  });
 
   final SubjectEntity subject;
   final VoidCallback onTapPlay;
@@ -16,17 +20,25 @@ class WorkingSubjectTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = Color(subject.colorValue);
     final bool hasGoal = subject.goalSeconds > 0;
-    final double progress = hasGoal ? (subject.totalSeconds / subject.goalSeconds).clamp(0, 1) : 0;
+    final double progress = hasGoal
+        ? (subject.totalSeconds / subject.goalSeconds).clamp(0, 1)
+        : 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
-      decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
             child: Center(child: AppIcon("building", size: 22, color: color)),
           ),
           const Gap(16),
@@ -34,16 +46,31 @@ class WorkingSubjectTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(subject.name, style: context.textStyles.extraBold20),
+                Text(
+                  subject.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.extraBold20,
+                ),
                 const Gap(4),
                 Text(
                   hasGoal
                       ? context.l10n.durationProgress(
-                          formatDurationLong(Duration(seconds: subject.totalSeconds)),
-                          formatDurationLong(Duration(seconds: subject.goalSeconds)),
+                          formatDurationLong(
+                            Duration(seconds: subject.totalSeconds),
+                          ),
+                          formatDurationLong(
+                            Duration(seconds: subject.goalSeconds),
+                          ),
                         )
-                      : formatDurationLong(Duration(seconds: subject.totalSeconds)),
-                  style: context.textStyles.bodyMedium.copyWith(color: context.colorTokens.textHint),
+                      : formatDurationLong(
+                          Duration(seconds: subject.totalSeconds),
+                        ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textHint,
+                  ),
                 ),
                 if (hasGoal) ...[
                   const Gap(8),

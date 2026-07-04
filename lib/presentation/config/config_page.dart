@@ -62,6 +62,8 @@ class ConfigPage extends StatelessWidget {
                               controller.userName.value.isEmpty
                                   ? context.l10n.myProfileFallback
                                   : controller.userName.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: context.textStyles.extraBold20,
                             ),
                             if (controller.nickName.value.isNotEmpty)
@@ -74,12 +76,16 @@ class ConfigPage extends StatelessWidget {
                                     color: context.colorTokens.textHint,
                                   ),
                                   const Gap(4),
-                                  Text(
-                                    controller.nickName.value,
-                                    style: context.textStyles.bodySmall
-                                        .copyWith(
-                                          color: context.colorTokens.textHint,
-                                        ),
+                                  Flexible(
+                                    child: Text(
+                                      controller.nickName.value,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: context.textStyles.bodySmall
+                                          .copyWith(
+                                            color: context.colorTokens.textHint,
+                                          ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -116,6 +122,8 @@ class ConfigPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         context.l10n.darkModeLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyLarge,
                       ),
                     ),
@@ -156,6 +164,8 @@ class ConfigPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         context.l10n.notificationsLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyLarge,
                       ),
                     ),
@@ -230,6 +240,8 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
     style: context.textStyles.bodySmall.copyWith(
       color: context.colorTokens.textHint,
     ),
@@ -315,16 +327,24 @@ class _SettingsTile extends StatelessWidget {
           Expanded(
             child: Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodyLarge.copyWith(
                 color: isDestructive ? context.colorTokens.error : null,
               ),
             ),
           ),
           if (trailingText != null) ...[
-            Text(
-              trailingText!,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Text(
+                trailingText!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: context.textStyles.bodySmall.copyWith(
+                  color: context.colorTokens.textHint,
+                ),
               ),
             ),
             if (onTap != null) const Gap(8),

@@ -31,34 +31,55 @@ class TimerPage extends StatelessWidget {
             const Gap(16),
             IconButton(
               onPressed: appNavigator.back,
-              icon: AppIcon("left_back", size: 20, color: context.colorTokens.primary),
+              icon: AppIcon(
+                "left_back",
+                size: 20,
+                color: context.colorTokens.primary,
+              ),
             ),
             const Gap(24),
             Center(
               child: Column(
                 children: [
-                  Text(controller.subject.name, style: context.textStyles.titleFont),
+                  Text(
+                    controller.subject.name,
+                    style: context.textStyles.titleFont,
+                  ),
                   const Gap(48),
                   Obx(
                     () => Text(
-                      formatDurationClock(Duration(seconds: controller.sessionSeconds.value)),
+                      formatDurationClock(
+                        Duration(seconds: controller.sessionSeconds.value),
+                      ),
                       style: context.textStyles.black32.copyWith(fontSize: 56),
-                    ),
-                  ),
-                  const Gap(8),
-                  Obx(
-                    () => Text(
-                      context.l10n.timerTotalLabel(formatDurationClock(Duration(seconds: controller.totalSeconds))),
-                      style: context.textStyles.bodyMedium.copyWith(color: Colors.white.withValues(alpha: 0.7)),
                     ),
                   ),
                   const Gap(12),
                   Obx(
                     () => Text(
-                      context.l10n.timerNextBreakLabel(
-                        formatDurationClock(Duration(seconds: controller.breakCountdownSeconds.value)),
+                      context.l10n.timerTotalLabel(
+                        formatDurationClock(
+                          Duration(seconds: controller.totalSeconds),
+                        ),
                       ),
-                      style: context.textStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.4)),
+                      style: context.textStyles.bodyMedium.copyWith(
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                  const Gap(4),
+                  Obx(
+                    () => Text(
+                      context.l10n.timerNextBreakLabel(
+                        formatDurationClock(
+                          Duration(
+                            seconds: controller.breakCountdownSeconds.value,
+                          ),
+                        ),
+                      ),
+                      style: context.textStyles.bodySmall.copyWith(
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
                     ),
                   ),
                 ],
@@ -68,7 +89,9 @@ class TimerPage extends StatelessWidget {
             Center(
               child: Obx(
                 () => AppButton(
-                  icon: controller.isRunning.value ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  icon: controller.isRunning.value
+                      ? Icons.pause_rounded
+                      : Icons.play_arrow_rounded,
                   onTap: controller.togglePause,
                   size: 84,
                 ),

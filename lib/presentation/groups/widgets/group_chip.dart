@@ -40,13 +40,18 @@ class GroupChip extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        group.name,
-        style: isSelected
-            ? context.textStyles.textPrimaryButton
-            : context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.textBody,
-              ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 160),
+        child: Text(
+          group.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: isSelected
+              ? context.textStyles.textPrimaryButton
+              : context.textStyles.bodyLarge.copyWith(
+                  color: context.colorTokens.textBody,
+                ),
+        ),
       ),
     ),
   );

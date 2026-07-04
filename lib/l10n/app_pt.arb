@@ -36,6 +36,10 @@
   "pagesReadNowHint": "Páginas lidas agora",
   "logPagesButton": "Registrar páginas",
 
+  "notesLabel": "Anotações",
+  "notesHint": "Escreva suas anotações aqui...",
+  "saveNotesButton": "Salvar",
+
   "durationProgress": "{duration} de {goalDuration}",
 
   "timerTotalLabel": "Total: {duration}",

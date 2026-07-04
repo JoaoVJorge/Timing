@@ -27,7 +27,7 @@ class WeekdaySelector extends StatelessWidget {
             weekday <= DateTime.sunday;
             weekday++
           ) ...[
-            if (weekday > DateTime.monday) const Gap(8),
+            if (weekday > DateTime.monday) const Gap(6),
             _WeekdayChip(
               label: DateFormat.E(locale).format(DateTime(2024, 1, weekday)),
               isSelected: weekday == selectedWeekday,

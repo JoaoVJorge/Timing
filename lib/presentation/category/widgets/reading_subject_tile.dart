@@ -6,7 +6,11 @@ import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
 class ReadingSubjectTile extends StatelessWidget {
-  const ReadingSubjectTile({required this.subject, required this.onTapPlay, super.key});
+  const ReadingSubjectTile({
+    required this.subject,
+    required this.onTapPlay,
+    super.key,
+  });
 
   final SubjectEntity subject;
   final VoidCallback onTapPlay;
@@ -15,30 +19,52 @@ class ReadingSubjectTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = Color(subject.colorValue);
     final bool hasGoal = subject.goalPages > 0;
-    final double progress = hasGoal ? (subject.currentPages / subject.goalPages).clamp(0, 1) : 0;
+    final double progress = hasGoal
+        ? (subject.currentPages / subject.goalPages).clamp(0, 1)
+        : 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Row(
         children: [
           Container(
             width: 40,
             height: 56,
-            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(6)),
-            child: const Center(child: AppIcon("open_book", size: 20, color: Colors.white)),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Center(
+              child: AppIcon("open_book", size: 20, color: Colors.white),
+            ),
           ),
           const Gap(16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(subject.name, style: context.textStyles.bodyLarge),
+                Text(
+                  subject.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyLarge,
+                ),
                 Text(
                   hasGoal
-                      ? context.l10n.pagesProgress(subject.currentPages, subject.goalPages)
+                      ? context.l10n.pagesProgress(
+                          subject.currentPages,
+                          subject.goalPages,
+                        )
                       : context.l10n.pagesReadOnly(subject.currentPages),
-                  style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textHint,
+                  ),
                 ),
                 if (hasGoal) ...[
                   const Gap(8),

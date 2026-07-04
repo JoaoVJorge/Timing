@@ -1,7 +1,12 @@
 import "package:flutter/material.dart";
 
 class BounceTap extends StatefulWidget {
-  const BounceTap({required this.onTap, required this.child, this.pressedScale = 0.9, super.key});
+  const BounceTap({
+    required this.onTap,
+    required this.child,
+    this.pressedScale = 0.9,
+    super.key,
+  });
 
   final VoidCallback onTap;
   final Widget child;
@@ -14,7 +19,8 @@ class BounceTap extends StatefulWidget {
 class _BounceTapState extends State<BounceTap> {
   bool _isPressed = false;
 
-  void _setPressed({required bool isPressed}) => setState(() => _isPressed = isPressed);
+  void _setPressed({required bool isPressed}) =>
+      setState(() => _isPressed = isPressed);
 
   @override
   Widget build(BuildContext context) => GestureDetector(

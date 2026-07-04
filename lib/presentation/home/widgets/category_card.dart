@@ -45,6 +45,8 @@ class CategoryCard extends StatelessWidget {
           Expanded(
             child: Text(
               category.localizedLabel(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: context.textStyles.extraBold20,
             ),
           ),

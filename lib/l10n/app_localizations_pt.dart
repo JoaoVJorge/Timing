@@ -104,6 +104,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get logPagesButton => 'Registrar páginas';
 
   @override
+  String get notesLabel => 'Anotações';
+
+  @override
+  String get notesHint => 'Escreva suas anotações aqui...';
+
+  @override
+  String get saveNotesButton => 'Salvar';
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration de $goalDuration';
   }

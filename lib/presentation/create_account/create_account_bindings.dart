@@ -5,7 +5,10 @@ class CreateAccountBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<CreateAccountController>(
-      CreateAccountController(appController: Get.find(), appNavigator: Get.find()),
+      CreateAccountController(
+        appController: Get.find(),
+        appNavigator: Get.find(),
+      ),
     );
   }
 }
