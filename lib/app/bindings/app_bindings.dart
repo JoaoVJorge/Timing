@@ -21,7 +21,12 @@ class AppBindings extends Bindings {
     UseCasesBindings().dependencies();
 
     Get.put<AppController>(
-      AppController(getAppConfigUseCase: Get.find(), saveAppConfigUseCase: Get.find(), appNavigator: Get.find()),
+      AppController(
+        getAppConfigUseCase: Get.find(),
+        saveAppConfigUseCase: Get.find(),
+        syncProfileToBackendUseCase: Get.find(),
+        appNavigator: Get.find(),
+      ),
       permanent: true,
     );
   }
