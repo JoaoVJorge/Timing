@@ -16,13 +16,6 @@ class LeaderboardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isTopThree = rank <= 3;
     final Color avatarColor = Color(member.avatarColorValue);
-    final String initials = member.name
-        .trim()
-        .split(RegExp(r"\s+"))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -47,7 +40,7 @@ class LeaderboardTile extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: avatarColor.withValues(alpha: 0.2),
-            child: Text(initials, style: context.textStyles.bodyMedium.copyWith(color: avatarColor)),
+            backgroundImage: NetworkImage(member.avatarUrl),
           ),
           const SizedBox(width: 12),
           Expanded(child: Text(member.name, style: context.textStyles.bodyLarge)),
