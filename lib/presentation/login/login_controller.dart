@@ -25,6 +25,15 @@ class LoginController extends GetxController {
     await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
   }
 
+  Future<void> onTapGoogleSignIn() => _mockSocialSignIn("Google User");
+
+  Future<void> onTapAppleSignIn() => _mockSocialSignIn("Apple User");
+
+  Future<void> _mockSocialSignIn(String mockName) async {
+    await _appController.setUserName(mockName);
+    await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
+  }
+
   @override
   void onClose() {
     nameController.dispose();
