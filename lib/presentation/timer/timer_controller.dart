@@ -49,6 +49,8 @@ class TimerController extends GetxController {
     }
   }
 
+  void saveProgress() => _persistAccumulatedTime();
+
   void _persistAccumulatedTime() {
     _baselineSeconds += sessionSeconds.value;
     sessionSeconds.value = 0;
