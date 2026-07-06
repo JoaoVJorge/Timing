@@ -1,10 +1,43 @@
 import "package:dartz/dartz.dart";
+import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 
 class GroupsDataSource {
   Future<Either<AppError, List<GroupEntity>>> getGroups() async => Right(_mockGroups);
+
+  Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async => const Right(_mockFriends);
+
+  Future<Either<AppError, GroupEntity>> createGroup({required String name, required List<FriendOption> invitedFriends}) async {
+    final List<GroupMemberEntity> members = [
+      const GroupMemberEntity(id: "me", name: "You", avatarColorValue: 0xFFFFC107, todaySeconds: 0, weekSeconds: 0, monthSeconds: 0),
+      for (int index = 0; index < invitedFriends.length; index++)
+        GroupMemberEntity(
+          id: invitedFriends[index].id,
+          name: invitedFriends[index].name,
+          avatarColorValue: _memberColors[index % _memberColors.length],
+          todaySeconds: 0,
+          weekSeconds: 0,
+          monthSeconds: 0,
+        ),
+    ];
+
+    final GroupEntity newGroup = GroupEntity(id: DateTime.now().microsecondsSinceEpoch.toString(), name: name, members: members);
+    _mockGroups.add(newGroup);
+    return Right(newGroup);
+  }
+
+  static const List<int> _memberColors = [0xFFE0507A, 0xFF2E6ADE, 0xFF3FA65D, 0xFF8325FF, 0xFF1FA2A6, 0xFFFF7A30];
+
+  static const List<FriendOption> _mockFriends = [
+    (id: "f1", name: "Gabriel Torres"),
+    (id: "f2", name: "Helena Costa"),
+    (id: "f3", name: "Igor Martins"),
+    (id: "f4", name: "Julia Ramos"),
+    (id: "f5", name: "Kevin Duarte"),
+    (id: "f6", name: "Laura Nunes"),
+  ];
 
   static final List<GroupEntity> _mockGroups = [
     const GroupEntity(

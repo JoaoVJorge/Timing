@@ -14,8 +14,10 @@ class AddSubjectUseCase {
     required TimeCategoryType category,
     required int colorValue,
     required int goalSeconds,
+    int goalPages = 0,
   }) async {
-    final Either<AppError, List<SubjectEntity>> getResult = await _subjectsRepository.getSubjects();
+    final Either<AppError, List<SubjectEntity>> getResult =
+        await _subjectsRepository.getSubjects();
 
     return getResult.fold((error) async => Left(error), (subjects) async {
       final SubjectEntity newSubject = SubjectEntity(
@@ -25,9 +27,13 @@ class AddSubjectUseCase {
         colorValue: colorValue,
         totalSeconds: 0,
         goalSeconds: goalSeconds,
+        currentPages: 0,
+        goalPages: goalPages,
+        notes: "",
       );
 
-      final Either<AppError, void> saveResult = await _subjectsRepository.saveSubjects([...subjects, newSubject]);
+      final Either<AppError, void> saveResult = await _subjectsRepository
+          .saveSubjects([...subjects, newSubject]);
 
       return saveResult.fold(Left.new, (_) => Right(newSubject));
     });

@@ -4,8 +4,16 @@ import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class AppButton extends StatelessWidget {
-  const AppButton({this.icon, this.svgName, required this.onTap, this.size = 64, super.key})
-    : assert(icon != null || svgName != null, "Provide either icon or svgName");
+  const AppButton({
+    this.icon,
+    this.svgName,
+    required this.onTap,
+    this.size = 64,
+    super.key,
+  }) : assert(
+         icon != null || svgName != null,
+         "Provide either icon or svgName",
+       );
 
   final IconData? icon;
   final String? svgName;
@@ -22,7 +30,11 @@ class AppButton extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: context.colorTokens.primaryGradient,
         boxShadow: [
-          BoxShadow(color: context.colorTokens.primary.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 8)),
+          BoxShadow(
+            color: context.colorTokens.primary.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Center(

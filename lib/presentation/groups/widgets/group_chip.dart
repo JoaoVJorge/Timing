@@ -22,20 +22,36 @@ class GroupChip extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: isSelected ? context.colorTokens.primaryGradient : null,
-        color: isSelected ? null : context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: isSelected
-            ? null
-            : Border.all(color: context.colorTokens.borderUnfocused),
-      ),
-      child: Text(
-        group.name,
-        style: isSelected
-            ? context.textStyles.textPrimaryButton
-            : context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.textBody,
+        gradient: isSelected
+            ? context.colorTokens.primaryGradient
+            : LinearGradient(
+                colors: [
+                  context.colorTokens.surface,
+                  context.colorTokens.surface,
+                ],
               ),
+        borderRadius: BorderRadius.circular(24),
+
+        boxShadow: [
+          BoxShadow(
+            color: context.colorTokens.surfaceShadow,
+            blurRadius: 8,
+            offset: const Offset(2, 3),
+          ),
+        ],
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 160),
+        child: Text(
+          group.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: isSelected
+              ? context.textStyles.textPrimaryButton
+              : context.textStyles.bodyLarge.copyWith(
+                  color: context.colorTokens.textBody,
+                ),
+        ),
       ),
     ),
   );

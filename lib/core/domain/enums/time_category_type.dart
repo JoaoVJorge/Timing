@@ -1,13 +1,10 @@
-import "package:flutter/material.dart";
-
 enum TimeCategoryType {
-  studying(label: "Studying", icon: Icons.school_outlined),
-  working(label: "Working", icon: Icons.work_outline),
-  reading(label: "Reading", icon: Icons.menu_book_outlined),
-  hobbies(label: "Hobbies", icon: Icons.palette_outlined);
+  studying(iconName: "studing"),
+  working(iconName: "building"),
+  reading(iconName: "open_book"),
+  hobbies(iconName: "guitar");
 
-  const TimeCategoryType({required this.label, required this.icon});
+  const TimeCategoryType({required this.iconName});
 
-  final String label;
-  final IconData icon;
+  final String iconName;
 }

@@ -3,6 +3,7 @@ import "package:get/get.dart";
 import "package:help_out/app/app_constants.dart";
 import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/theme/theme.dart";
 
 class AppWidget extends StatelessWidget {
@@ -20,6 +21,9 @@ class AppWidget extends StatelessWidget {
           seed: appController.accentColor.value,
           brightness: appController.isDarkMode.value ? Brightness.dark : Brightness.light,
         ),
+        locale: Locale(appController.languageCode.value),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         initialRoute: AppRoutes.splash,
         getPages: AppRoutes.getPages,
       ),

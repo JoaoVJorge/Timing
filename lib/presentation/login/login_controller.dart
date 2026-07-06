@@ -1,4 +1,3 @@
-import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
@@ -10,24 +9,14 @@ class LoginController extends GetxController {
   final AppController _appController;
   final AppNavigator _appNavigator;
 
-  final TextEditingController nameController = TextEditingController();
-  final RxBool canSubmit = false.obs;
+  Future<void> onTapGoogleSignIn() => _mockSocialSignIn("Google User");
 
-  void onNameChanged(String value) => canSubmit.value = value.trim().isNotEmpty;
+  Future<void> onTapAppleSignIn() => _mockSocialSignIn("Apple User");
 
-  Future<void> onSubmit() async {
-    final String name = nameController.text.trim();
-    if (name.isEmpty) {
-      return;
-    }
-
-    await _appController.setUserName(name);
+  Future<void> _mockSocialSignIn(String mockName) async {
+    await _appController.setUserName(mockName);
     await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
   }
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    super.onClose();
-  }
+  void onTapCreateAccount() => _appNavigator.toNamed(AppRoutes.createAccount);
 }

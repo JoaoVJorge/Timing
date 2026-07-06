@@ -1,11 +1,10 @@
 enum BottomNavButtonType {
-  home(iconName: "home", label: "Home"),
-  profile(iconName: "trophy", label: "Profile"),
-  groups(iconName: "group", label: "Groups"),
-  config(iconName: "address_book", label: "Settings");
+  home(iconName: "home"),
+  profile(iconName: "trophy"),
+  groups(iconName: "group"),
+  config(iconName: "settings");
 
-  const BottomNavButtonType({required this.iconName, required this.label});
+  const BottomNavButtonType({required this.iconName});
 
   final String iconName;
-  final String label;
 }

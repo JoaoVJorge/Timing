@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/main_navigation/enums/bottom_nav_button_type.dart";
+import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
@@ -47,7 +48,9 @@ class AppBottomNavBar extends StatelessWidget {
                     children: [
                       AppIcon(button.iconName, size: 24, color: color),
                       Text(
-                        button.label,
+                        button.localizedLabel(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodySmall.copyWith(
                           color: color,
                         ),
