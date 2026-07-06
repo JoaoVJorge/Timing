@@ -50,8 +50,8 @@ class AppNavigator {
       );
   }
 
-  void showErrorSnackBar([String text = "Something went wrong. Please try again later."]) =>
-      showSnackBar(text: text, isAnError: true);
+  void showErrorSnackBar([String? text]) =>
+      showSnackBar(text: text ?? Get.context!.l10n.genericErrorMessage, isAnError: true);
 
   void showSuccessSnackBar(String text) => showSnackBar(text: text, backgroundColor: Get.context!.colorTokens.success);
 }

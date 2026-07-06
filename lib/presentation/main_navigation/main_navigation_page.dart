@@ -17,7 +17,10 @@ class MainNavigationPage extends StatelessWidget {
         onGenerateRoute: controller.onGenerateRoute,
       ),
       bottomNavigationBar: Obx(
-        () => AppBottomNavBar(selectedButton: controller.selectedButton.value, onTabTap: controller.onTapBottomBarButton),
+        () => AppBottomNavBar(
+          selectedButton: controller.selectedButton.value,
+          onTabTap: controller.onTapBottomBarButton,
+        ),
       ),
     );
   }

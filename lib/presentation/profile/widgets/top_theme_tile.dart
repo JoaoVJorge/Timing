@@ -12,21 +12,44 @@ class TopThemeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    decoration: BoxDecoration(color: context.colorTokens.surface, borderRadius: BorderRadius.circular(18)),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+    ),
     child: Row(
       children: [
         Container(
           width: 28,
           height: 28,
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: Color(subject.colorValue).withValues(alpha: 0.18), shape: BoxShape.circle),
-          child: Text("#$rank", style: context.textStyles.bodyTiny.copyWith(color: Color(subject.colorValue))),
+          decoration: BoxDecoration(
+            color: Color(subject.colorValue).withValues(alpha: 0.18),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            "#$rank",
+            style: context.textStyles.bodyTiny.copyWith(
+              color: Color(subject.colorValue),
+            ),
+          ),
         ),
         const SizedBox(width: 16),
-        Expanded(child: Text(subject.name, style: context.textStyles.bodyLarge)),
+        Expanded(
+          child: Text(
+            subject.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyLarge,
+          ),
+        ),
+        const SizedBox(width: 8),
         Text(
           formatDurationLong(Duration(seconds: subject.totalSeconds)),
-          style: context.textStyles.bodySmall.copyWith(color: context.colorTokens.textHint),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.bodySmall.copyWith(
+            color: context.colorTokens.textHint,
+          ),
         ),
       ],
     ),

@@ -5,6 +5,7 @@ import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/groups_controller.dart";
+import "package:help_out/presentation/groups/widgets/create_group_chip.dart";
 import "package:help_out/presentation/groups/widgets/group_chip.dart";
 import "package:help_out/presentation/groups/widgets/leaderboard_tile.dart";
 import "package:help_out/presentation/groups/widgets/period_selector.dart";
@@ -22,7 +23,7 @@ class GroupsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Gap(16),
-          Text("Groups", style: context.textStyles.titleFont),
+          Text(context.l10n.groupsTitle, style: context.textStyles.titleFont),
           const Gap(16),
           Obx(() {
             final List<GroupEntity> groups = controller.groups;
@@ -40,6 +41,8 @@ class GroupsPage extends StatelessWidget {
                       onTap: () => controller.onSelectGroup(groups[index]),
                     ),
                   ],
+                  if (groups.isNotEmpty) const Gap(8),
+                  CreateGroupChip(onTap: controller.onTapCreateGroup),
                 ],
               ),
             );
@@ -59,7 +62,7 @@ class GroupsPage extends StatelessWidget {
               if (members.isEmpty) {
                 return Center(
                   child: Text(
-                    "No group selected yet.",
+                    context.l10n.noGroupSelected,
                     style: context.textStyles.bodyMedium.copyWith(
                       color: context.colorTokens.textHint,
                     ),

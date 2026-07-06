@@ -31,6 +31,8 @@ class GroupMemberEntity extends Equatable {
   final int weekSeconds;
   final int monthSeconds;
 
+  String get avatarUrl => "https://i.pravatar.cc/150?u=$id";
+
   int secondsFor(LeaderboardPeriodType period) => switch (period) {
     LeaderboardPeriodType.today => todaySeconds,
     LeaderboardPeriodType.thisWeek => weekSeconds,

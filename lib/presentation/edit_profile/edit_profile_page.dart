@@ -1,11 +1,13 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_controller.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/shared/widgets/centered_wrap_grid.dart";
 import "package:help_out/theme/accent_presets.dart";
 import "package:help_out/theme/avatar_presets.dart";
 import "package:help_out/theme/decoration.dart";
@@ -18,24 +20,23 @@ class EditProfilePage extends StatelessWidget {
     final EditProfileController controller = Get.find();
 
     return AppScaffold(
+      topBar: AppTopBar(
+        title: context.l10n.myProfileTitle,
+        showBackButton: true,
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Gap(16),
-            Row(
-              children: [
-                IconButton(onPressed: appNavigator.back, icon: Icon(Icons.arrow_back, color: context.colorTokens.textBody)),
-                Text("My Profile", style: context.textStyles.titleFont),
-              ],
-            ),
-            const Gap(16),
             Center(
               child: Obx(
                 () => Container(
                   width: 88,
                   height: 88,
-                  decoration: BoxDecoration(gradient: context.colorTokens.primaryGradient, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    gradient: context.colorTokens.primaryGradient,
+                    shape: BoxShape.circle,
+                  ),
                   child: Icon(
                     AppAvatarPresets.byIndex(controller.avatarIconIndex.value),
                     color: Colors.white,
@@ -44,59 +45,123 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            const Gap(24),
-            Text("Avatar", style: context.textStyles.bodyLarge),
+            const Gap(20),
+            Text(context.l10n.avatarLabel, style: context.textStyles.bodyLarge),
             const Gap(12),
             Obx(
-              () => Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: List.generate(AppAvatarPresets.values.length, (index) {
-                  final bool isSelected = index == controller.avatarIconIndex.value;
+              () => CenteredWrapGrid(
+                itemsPerRow: 4,
+                children: List.generate(AppAvatarPresets.values.length, (
+                  index,
+                ) {
+                  final bool isSelected =
+                      index == controller.avatarIconIndex.value;
                   return BounceTap(
                     onTap: () => controller.onSelectAvatarIcon(index),
                     child: Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: isSelected ? context.colorTokens.primaryVeryLight : context.colorTokens.surfaceInnerLayer,
+                        color: isSelected
+                            ? context.colorTokens.primaryVeryLight
+                            : context.colorTokens.surfaceInnerLayer,
                         shape: BoxShape.circle,
-                        border: isSelected ? Border.all(color: context.colorTokens.primary, width: 2) : null,
+                        border: isSelected
+                            ? Border.all(
+                                color: context.colorTokens.primary,
+                                width: 2,
+                              )
+                            : null,
                       ),
                       child: Icon(
                         AppAvatarPresets.values[index],
-                        color: isSelected ? context.colorTokens.primary : context.colorTokens.textHint,
+                        color: isSelected
+                            ? context.colorTokens.primary
+                            : context.colorTokens.textHint,
                       ),
                     ),
                   );
                 }),
               ),
             ),
-            const Gap(24),
-            Text("Name", style: context.textStyles.bodyLarge),
+            const Gap(16),
+            Text(context.l10n.nameLabel, style: context.textStyles.bodyLarge),
             const Gap(8),
             TextField(
               controller: controller.nameController,
-              onChanged: controller.onNameChanged,
-              decoration: AppInputDecoration.withBorder(tokens: context.colorTokens, hintText: "Your name"),
+              decoration: AppInputDecoration.withBorder(
+                tokens: context.colorTokens,
+                hintText: context.l10n.yourNameHint,
+                prefixIcon: AppIcon(
+                  "address_book",
+                  size: 20,
+                  color: context.colorTokens.textHint,
+                ),
+              ),
             ),
-            const Gap(20),
-            Text("Nickname", style: context.textStyles.bodyLarge),
+            const Gap(16),
+            Text(
+              context.l10n.nicknameLabel,
+              style: context.textStyles.bodyLarge,
+            ),
             const Gap(8),
             TextField(
               controller: controller.nickNameController,
-              onChanged: controller.onNickNameChanged,
-              decoration: AppInputDecoration.withBorder(tokens: context.colorTokens, hintText: "What friends call you"),
+              decoration: AppInputDecoration.withBorder(
+                tokens: context.colorTokens,
+                hintText: context.l10n.nicknameHint,
+                prefixIcon: AppIcon(
+                  "special_a",
+                  size: 20,
+                  color: context.colorTokens.textHint,
+                ),
+              ),
+            ),
+            const Gap(16),
+            Text(context.l10n.emailLabel, style: context.textStyles.bodyLarge),
+            const Gap(8),
+            TextField(
+              controller: controller.emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: AppInputDecoration.withBorder(
+                tokens: context.colorTokens,
+                hintText: context.l10n.optionalHint,
+                prefixIcon: Icon(
+                  Icons.mail_outline,
+                  color: context.colorTokens.textHint,
+                ),
+              ),
+            ),
+            const Gap(16),
+            Text(context.l10n.phoneLabel, style: context.textStyles.bodyLarge),
+            const Gap(8),
+            TextField(
+              controller: controller.phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: AppInputDecoration.withBorder(
+                tokens: context.colorTokens,
+                hintText: context.l10n.optionalHint,
+                prefixIcon: Icon(
+                  Icons.call_outlined,
+                  color: context.colorTokens.textHint,
+                ),
+              ),
             ),
             const Gap(24),
-            Text("Theme color", style: context.textStyles.bodyLarge),
+            Text(
+              context.l10n.themeColorLabel,
+              style: context.textStyles.bodyLarge,
+            ),
             const Gap(12),
             Obx(
-              () => Wrap(
+              () => CenteredWrapGrid(
+                itemsPerRow: 4,
                 spacing: 16,
                 runSpacing: 16,
                 children: AppAccentPresets.values.map((color) {
-                  final bool isSelected = controller.accentColor.value.toARGB32() == color.toARGB32();
+                  final bool isSelected =
+                      controller.accentColor.value.toARGB32() ==
+                      color.toARGB32();
                   return BounceTap(
                     onTap: () => controller.onSelectAccentColor(color),
                     child: Container(
@@ -105,12 +170,68 @@ class EditProfilePage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
-                        border: isSelected ? Border.all(color: context.colorTokens.textBody, width: 3) : null,
                       ),
-                      child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                      child: isSelected
+                          ? const Center(
+                              child: AppIcon(
+                                "check",
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            )
+                          : null,
                     ),
                   );
                 }).toList(),
+              ),
+            ),
+            const Gap(28),
+            Obx(
+              () => BounceTap(
+                pressedScale: 0.97,
+                onTap: controller.isSaving.value ? () {} : controller.onTapSave,
+                child: Container(
+                  width: double.infinity,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    gradient: context.colorTokens.primaryGradient,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.colorTokens.primary.withValues(
+                          alpha: 0.3,
+                        ),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: controller.isSaving.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const AppIcon(
+                              "check",
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                            const Gap(8),
+                            Text(
+                              context.l10n.saveChangesButton,
+                              style: context.textStyles.textPrimaryButton,
+                            ),
+                          ],
+                        ),
+                ),
               ),
             ),
             const Gap(24),

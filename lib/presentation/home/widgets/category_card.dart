@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
+import "package:gap/gap.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_button.dart";
+import "package:help_out/shared/extensions/enum_localization_extensions.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
@@ -14,33 +16,60 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onTapPlay;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    decoration: BoxDecoration(
-      color: context.colorTokens.primaryVeryLight,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Row(
-      children: [
-        Icon(category.icon, color: context.colorTokens.primary, size: 28),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            category.label,
-            style: context.textStyles.extraBold20.copyWith(
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTapPlay,
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: AppIcon(
+                category.iconName,
+                size: 24,
+                color: context.colorTokens.primary,
+              ),
+            ),
+          ),
+          Gap(16),
+          Expanded(
+            child: Text(
+              category.localizedLabel(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.extraBold20,
+            ),
+          ),
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: context.colorTokens.primaryGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: context.colorTokens.primary.withValues(alpha: 0.25),
                   blurRadius: 8,
-                  offset: const Offset(2, 2),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
+            child: Center(
+              child: AppIcon("play", size: 20, color: Colors.white),
+            ),
           ),
-        ),
-        AppButton(svgName: "play", onTap: onTapPlay, size: 48),
-      ],
+        ],
+      ),
     ),
   );
 }

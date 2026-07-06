@@ -21,38 +21,52 @@ class HomePage extends StatelessWidget {
           Obx(
             () => Container(
               width: double.infinity,
-              color: context.colorTokens.primary,
+              decoration: BoxDecoration(
+                gradient: context.colorTokens.primaryGradient,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(28),
+                ),
+              ),
               padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: MediaQuery.of(context).padding.top + 4,
-                bottom: 16,
+                left: 24,
+                right: 24,
+                top: MediaQuery.of(context).padding.top + 8,
+                bottom: 20,
               ),
               child: Text(
                 controller.userName.value.isEmpty
-                    ? "Let's Start"
-                    : "Let's Start, ${controller.userName.value}",
+                    ? context.l10n.homeGreetingDefault
+                    : context.l10n.homeGreetingWithName(
+                        controller.userName.value,
+                      ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: context.textStyles.titleFont.copyWith(
                   color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ListView.separated(
-                itemCount: TimeCategoryType.values.length,
-                separatorBuilder: (context, index) => const Gap(16),
-                itemBuilder: (context, index) {
-                  final TimeCategoryType category =
-                      TimeCategoryType.values[index];
-                  return CategoryCard(
-                    category: category,
-                    onTapPlay: () => controller.onTapCategory(category),
-                  );
-                },
-              ),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+              itemCount: TimeCategoryType.values.length,
+              separatorBuilder: (context, index) => const Gap(12),
+              itemBuilder: (context, index) {
+                final TimeCategoryType category =
+                    TimeCategoryType.values[index];
+                return CategoryCard(
+                  category: category,
+                  onTapPlay: () => controller.onTapCategory(category),
+                );
+              },
             ),
           ),
         ],

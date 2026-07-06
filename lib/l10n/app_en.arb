@@ -1,0 +1,172 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "HelpOut",
+  "genericErrorMessage": "Something went wrong. Please try again later.",
+
+  "loginHeadline": "Let's Start",
+  "loginSubtitle": "What should we call you?",
+  "loginNameHint": "Your name",
+  "loginButton": "Let's Start",
+
+  "homeGreetingDefault": "Let's Start",
+  "homeGreetingWithName": "Let's Start, {userName}",
+  "@homeGreetingWithName": {
+    "placeholders": { "userName": { "type": "String" } }
+  },
+
+  "categoryStudying": "Studying",
+  "categoryWorking": "Working",
+  "categoryReading": "Reading",
+  "categoryHobbies": "Hobbies",
+
+  "itemNounStudying": "Subject",
+  "itemNounWorking": "Task",
+  "itemNounReading": "Book",
+  "itemNounHobbies": "Hobby",
+
+  "addItemButton": "Add {itemNoun}",
+  "@addItemButton": {
+    "placeholders": { "itemNoun": { "type": "String" } }
+  },
+  "itemNameHint": "{itemNoun} name",
+  "@itemNameHint": {
+    "placeholders": { "itemNoun": { "type": "String" } }
+  },
+  "colorLabel": "Color",
+  "bookThemeLabel": "Book theme",
+  "estimatedHoursGoalHint": "Estimated hours (goal)",
+  "goalPagesHint": "Goal (pages)",
+  "cancelButton": "Cancel",
+  "addButton": "Add",
+
+  "pagesProgress": "{currentPages} of {goalPages} pages",
+  "@pagesProgress": {
+    "placeholders": {
+      "currentPages": { "type": "int" },
+      "goalPages": { "type": "int" }
+    }
+  },
+  "pagesReadOnly": "{currentPages} pages read",
+  "@pagesReadOnly": {
+    "placeholders": { "currentPages": { "type": "int" } }
+  },
+  "pagesReadNowHint": "Pages read now",
+  "logPagesButton": "Log pages",
+
+  "notesLabel": "Notes",
+  "notesHint": "Write your notes here...",
+  "saveNotesButton": "Save",
+
+  "durationProgress": "{duration} of {goalDuration}",
+  "@durationProgress": {
+    "placeholders": {
+      "duration": { "type": "String" },
+      "goalDuration": { "type": "String" }
+    }
+  },
+
+  "timerTotalLabel": "Total: {duration}",
+  "@timerTotalLabel": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "timerNextBreakLabel": "Next break in {duration}",
+  "@timerNextBreakLabel": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+
+  "profileTitle": "Your Profile",
+  "profileSubtitleDefault": "Accomplishments",
+  "profileSubtitleWithName": "Great work, {userName}",
+  "@profileSubtitleWithName": {
+    "placeholders": { "userName": { "type": "String" } }
+  },
+  "statHoursStudied": "Hours studied",
+  "statTopSubjectFallback": "—",
+  "statTopSubject": "Top subject",
+  "statHoursWorked": "Hours worked",
+  "statHoursRead": "Hours read",
+  "mostReadThemes": "Most read themes",
+  "noReadingYet": "Read something to see your top themes here.",
+
+  "groupsTitle": "Groups",
+  "noGroupSelected": "No group selected yet.",
+  "newGroupChip": "New group",
+  "periodToday": "Today",
+  "periodThisWeek": "This Week",
+  "periodThisMonth": "This Month",
+
+  "settingsTitle": "Settings",
+  "myProfileFallback": "My Profile",
+  "preferencesSection": "Preferences",
+  "darkModeLabel": "Dark mode",
+  "notificationsLabel": "Notifications",
+  "language": "Language",
+  "supportSection": "Support",
+  "faqLabel": "FAQ",
+  "aboutLabel": "About",
+  "appVersionLabel": "{appTitle} v{appVersion}",
+  "@appVersionLabel": {
+    "placeholders": {
+      "appTitle": { "type": "String" },
+      "appVersion": { "type": "String" }
+    }
+  },
+  "accountSection": "Account",
+  "logOutLabel": "Log out",
+
+  "logOutDialogTitle": "Log out",
+  "logOutDialogContent": "This clears your local profile from this device. You can always set it up again.",
+  "logOutConfirmButton": "Log out",
+
+  "myProfileTitle": "My Profile",
+  "avatarLabel": "Avatar",
+  "nameLabel": "Name",
+  "yourNameHint": "Your name",
+  "nicknameLabel": "Nickname",
+  "nicknameHint": "What friends call you",
+  "emailLabel": "Email",
+  "optionalHint": "Optional",
+  "phoneLabel": "Phone number",
+  "themeColorLabel": "Theme color",
+  "saveChangesButton": "Save Changes",
+  "profileSavedMessage": "Profile saved",
+
+  "faqTitle": "FAQ",
+  "faqQ1": "How does the study timer work?",
+  "faqA1": "Pick a subject, tap play, and the timer tracks your current session while adding it to that subject's total time. Tap pause any time to stop and save your progress.",
+  "faqQ2": "What is the break countdown?",
+  "faqA2": "Each session follows a classic Pomodoro cycle: a 25 minute countdown to your next break. When it reaches zero it simply resets, it's a reminder, not a hard stop.",
+  "faqQ3": "How do I add a new subject?",
+  "faqA3": "Open a category from Home, then tap \"Add Subject\" at the bottom of the list. You can pick a color and set an estimated hours goal for it.",
+  "faqQ4": "How are groups and the leaderboard calculated?",
+  "faqA4": "Groups show a scoreboard of everyone's studied hours. Switch between Today, This Week and This Month to see who studied the most in that period.",
+  "faqQ5": "Can I change the app's color theme?",
+  "faqA5": "Yes, go to Settings > My Profile and pick any theme color. Every gradient, button and highlight across the app updates to match it, including dark mode.",
+
+  "createGroupTitle": "Create Group",
+  "groupNameHint": "Group name",
+  "inviteFriendsLabel": "Invite friends",
+  "createGroupButton": "Create Group",
+
+  "navHome": "Home",
+  "navProfile": "Profile",
+  "navGroups": "Groups",
+  "navSettings": "Settings",
+
+  "myScheduleCardTitle": "My Schedule",
+  "myScheduleTitle": "My Schedule",
+  "noScheduleYet": "No schedule yet — tap to add",
+  "addScheduleEntryTitle": "Add Schedule Entry",
+  "addScheduleEntryButton": "Add Entry",
+  "scheduleTitleHint": "Title",
+  "startTimeLabel": "Start time",
+  "endTimeOptionalLabel": "End time (optional)",
+  "incompleteScheduleEntryError": "Incomplete entry — fill in the title and a valid start time.",
+
+  "continueWithGoogleButton": "Continue with Google",
+  "continueWithAppleButton": "Continue with Apple",
+  "orSeparator": "OR",
+  "createAccountSectionTitle": "Create an account",
+  "createAccountButton": "Create Account"
+}
