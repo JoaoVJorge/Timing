@@ -253,7 +253,7 @@ class _SchedulePreviewTicket extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: context.colorTokens.primaryVeryLight,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
