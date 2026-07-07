@@ -8,7 +8,12 @@ class TimerBindings extends Bindings {
     final SubjectEntity subject = Get.arguments as SubjectEntity;
 
     Get.put<TimerController>(
-      TimerController(updateSubjectTimeUseCase: Get.find(), subject: subject),
+      TimerController(
+        updateSubjectTimeUseCase: Get.find(),
+        lastActivityService: Get.find(),
+        timerNotificationService: Get.find(),
+        subject: subject,
+      ),
     );
   }
 }

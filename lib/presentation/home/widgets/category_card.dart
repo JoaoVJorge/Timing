@@ -1,18 +1,18 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
-    required this.category,
+    required this.iconName,
+    required this.label,
     required this.onTapPlay,
     super.key,
   });
 
-  final TimeCategoryType category;
+  final String iconName;
+  final String label;
   final VoidCallback onTapPlay;
 
   @override
@@ -35,7 +35,7 @@ class CategoryCard extends StatelessWidget {
             ),
             child: Center(
               child: AppIcon(
-                category.iconName,
+                iconName,
                 size: 24,
                 color: context.colorTokens.primary,
               ),
@@ -44,7 +44,7 @@ class CategoryCard extends StatelessWidget {
           Gap(16),
           Expanded(
             child: Text(
-              category.localizedLabel(context),
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.extraBold20,
