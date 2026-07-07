@@ -9,6 +9,7 @@ class AppConfigEntity extends Equatable {
     required this.nickName,
     required this.email,
     required this.phoneNumber,
+    required this.birthDate,
     required this.accentColorValue,
     required this.avatarIconIndex,
     required this.notificationsEnabled,
@@ -21,6 +22,7 @@ class AppConfigEntity extends Equatable {
     nickName: "",
     email: null,
     phoneNumber: null,
+    birthDate: null,
     accentColorValue: 0xFFFFC107,
     avatarIconIndex: 0,
     notificationsEnabled: true,
@@ -35,6 +37,7 @@ class AppConfigEntity extends Equatable {
     nickName: map["nickName"] as String? ?? "",
     email: map["email"] as String?,
     phoneNumber: map["phoneNumber"] as String?,
+    birthDate: map["birthDate"] as String?,
     accentColorValue: map["accentColorValue"] as int,
     avatarIconIndex: map["avatarIconIndex"] as int? ?? 0,
     notificationsEnabled: map["notificationsEnabled"] as bool? ?? true,
@@ -46,6 +49,9 @@ class AppConfigEntity extends Equatable {
   final String nickName;
   final String? email;
   final String? phoneNumber;
+
+  /// ISO-8601 date (yyyy-MM-dd), null until the user completes the credentials step.
+  final String? birthDate;
   final int accentColorValue;
   final int avatarIconIndex;
   final bool notificationsEnabled;
@@ -57,6 +63,7 @@ class AppConfigEntity extends Equatable {
     "nickName": nickName,
     "email": email,
     "phoneNumber": phoneNumber,
+    "birthDate": birthDate,
     "accentColorValue": accentColorValue,
     "avatarIconIndex": avatarIconIndex,
     "notificationsEnabled": notificationsEnabled,
@@ -79,6 +86,7 @@ class AppConfigEntity extends Equatable {
     nickName: nickName ?? this.nickName,
     email: email,
     phoneNumber: phoneNumber,
+    birthDate: birthDate,
     accentColorValue: accentColorValue ?? this.accentColorValue,
     avatarIconIndex: avatarIconIndex ?? this.avatarIconIndex,
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -92,6 +100,7 @@ class AppConfigEntity extends Equatable {
     nickName,
     email,
     phoneNumber,
+    birthDate,
     accentColorValue,
     avatarIconIndex,
     notificationsEnabled,

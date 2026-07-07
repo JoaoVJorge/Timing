@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
 
   final Rx<ProfileStatsEntity> stats = const ProfileStatsEntity(
     studyingTotalSeconds: 0,
-    workingTotalSeconds: 0,
+    exercisesTotalSeconds: 0,
     readingTotalSeconds: 0,
     topStudyingSubject: null,
     topReadingSubjects: [],
