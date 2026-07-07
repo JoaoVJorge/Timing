@@ -3,8 +3,10 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/presentation/create_group/create_group_controller.dart";
 import "package:help_out/presentation/create_group/widgets/friend_tile.dart";
+import "package:help_out/presentation/create_group/widgets/group_theme_tile.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
@@ -39,6 +41,37 @@ class CreateGroupPage extends StatelessWidget {
               ),
             ),
           ),
+          const Gap(24),
+          Text(
+            context.l10n.groupThemeLabel,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyLarge,
+          ),
+          const Gap(12),
+          Obx(() {
+            final GroupThemeType? selected = controller.selectedTheme.value;
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (
+                    int index = 0;
+                    index < GroupThemeType.values.length;
+                    index++
+                  ) ...[
+                    if (index > 0) const Gap(8),
+                    GroupThemeTile(
+                      theme: GroupThemeType.values[index],
+                      isSelected: GroupThemeType.values[index] == selected,
+                      onTap: () => controller.onSelectTheme(
+                        GroupThemeType.values[index],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
           const Gap(24),
           Text(
             context.l10n.inviteFriendsLabel,

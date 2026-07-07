@@ -58,8 +58,9 @@ class GroupsPage extends StatelessWidget {
           Expanded(
             child: Obx(() {
               final List<GroupMemberEntity> members = controller.rankedMembers;
+              final GroupEntity? group = controller.selectedGroup.value;
 
-              if (members.isEmpty) {
+              if (members.isEmpty || group == null) {
                 return Center(
                   child: Text(
                     context.l10n.noGroupSelected,
@@ -76,7 +77,8 @@ class GroupsPage extends StatelessWidget {
                 itemBuilder: (context, index) => LeaderboardTile(
                   rank: index + 1,
                   member: members[index],
-                  seconds: members[index].secondsFor(
+                  theme: group.theme,
+                  value: members[index].secondsFor(
                     controller.selectedPeriod.value,
                   ),
                 ),

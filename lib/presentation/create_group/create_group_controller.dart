@@ -4,6 +4,7 @@ import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
+import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
@@ -22,6 +23,7 @@ class CreateGroupController extends GetxController {
   final TextEditingController groupNameController = TextEditingController();
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
+  final Rx<GroupThemeType?> selectedTheme = Rx<GroupThemeType?>(null);
   final RxBool isLoading = true.obs;
   final RxBool isCreating = false.obs;
   final RxBool canCreate = false.obs;
@@ -43,8 +45,15 @@ class CreateGroupController extends GetxController {
     isLoading.value = false;
   }
 
-  void onGroupNameChanged(String value) =>
-      canCreate.value = value.trim().isNotEmpty;
+  void onGroupNameChanged(String value) => _refreshCanCreate();
+
+  void onSelectTheme(GroupThemeType theme) {
+    selectedTheme.value = theme;
+    _refreshCanCreate();
+  }
+
+  void _refreshCanCreate() => canCreate.value =
+      groupNameController.text.trim().isNotEmpty && selectedTheme.value != null;
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -56,7 +65,8 @@ class CreateGroupController extends GetxController {
 
   Future<void> onTapCreate() async {
     final String name = groupNameController.text.trim();
-    if (name.isEmpty) {
+    final GroupThemeType? theme = selectedTheme.value;
+    if (name.isEmpty || theme == null) {
       return;
     }
 
@@ -66,6 +76,7 @@ class CreateGroupController extends GetxController {
         .toList();
     final Either<AppError, GroupEntity> result = await _createGroupUseCase(
       name: name,
+      theme: theme,
       invitedFriends: invitedFriends,
     );
     isCreating.value = false;

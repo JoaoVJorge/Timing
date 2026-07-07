@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
+import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class GroupChip extends StatelessWidget {
@@ -40,18 +42,41 @@ class GroupChip extends StatelessWidget {
           ),
         ],
       ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 160),
-        child: Text(
-          group.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: isSelected
-              ? context.textStyles.textPrimaryButton
-              : context.textStyles.bodyLarge.copyWith(
-                  color: context.colorTokens.textBody,
-                ),
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.25)
+                  : context.colorTokens.primaryVeryLight,
+            ),
+            child: Center(
+              child: AppIcon(
+                group.theme.iconName,
+                size: 16,
+                color: isSelected ? Colors.white : context.colorTokens.primary,
+              ),
+            ),
+          ),
+          const Gap(8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 160),
+            child: Text(
+              group.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: isSelected
+                  ? context.textStyles.textPrimaryButton
+                  : context.textStyles.bodyLarge.copyWith(
+                      color: context.colorTokens.textBody,
+                    ),
+            ),
+          ),
+        ],
       ),
     ),
   );

@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'What should we call you?'**
+  /// **'Sign in to get started.'**
   String get loginSubtitle;
 
   /// No description provided for @loginNameHint.
@@ -148,17 +148,119 @@ abstract class AppLocalizations {
   /// **'Let\'s Start, {userName}'**
   String homeGreetingWithName(String userName);
 
+  /// No description provided for @homeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are we tackling today?'**
+  String get homeSubtitle;
+
+  /// No description provided for @homeTasksSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goals'**
+  String get homeTasksSection;
+
+  /// No description provided for @homeCategoriesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Your time'**
+  String get homeCategoriesSection;
+
+  /// No description provided for @addTaskButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add goal'**
+  String get addTaskButton;
+
+  /// No description provided for @createTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New goal'**
+  String get createTaskTitle;
+
+  /// No description provided for @taskNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal name'**
+  String get taskNameHint;
+
+  /// No description provided for @targetDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target (days)'**
+  String get targetDaysLabel;
+
+  /// No description provided for @targetDaysChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String targetDaysChip(int days);
+
+  /// No description provided for @targetDaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom target (days)'**
+  String get targetDaysHint;
+
+  /// No description provided for @taskDaysProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{target} days'**
+  String taskDaysProgress(int completed, int target);
+
+  /// No description provided for @taskCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Done!'**
+  String get taskCompletedLabel;
+
+  /// No description provided for @lastActivityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last activity'**
+  String get lastActivityLabel;
+
+  /// No description provided for @lastActivityNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet — start something!'**
+  String get lastActivityNone;
+
+  /// No description provided for @lastActivityJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get lastActivityJustNow;
+
+  /// No description provided for @lastActivityMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String lastActivityMinutesAgo(int minutes);
+
+  /// No description provided for @lastActivityHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h ago'**
+  String lastActivityHoursAgo(int hours);
+
+  /// No description provided for @lastActivityDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d ago'**
+  String lastActivityDaysAgo(int days);
+
   /// No description provided for @categoryStudying.
   ///
   /// In en, this message translates to:
   /// **'Studying'**
   String get categoryStudying;
 
-  /// No description provided for @categoryWorking.
+  /// No description provided for @categoryExercises.
   ///
   /// In en, this message translates to:
-  /// **'Working'**
-  String get categoryWorking;
+  /// **'Exercising'**
+  String get categoryExercises;
 
   /// No description provided for @categoryReading.
   ///
@@ -178,11 +280,11 @@ abstract class AppLocalizations {
   /// **'Subject'**
   String get itemNounStudying;
 
-  /// No description provided for @itemNounWorking.
+  /// No description provided for @itemNounExercises.
   ///
   /// In en, this message translates to:
-  /// **'Task'**
-  String get itemNounWorking;
+  /// **'Exercise'**
+  String get itemNounExercises;
 
   /// No description provided for @itemNounReading.
   ///
@@ -195,6 +297,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hobby'**
   String get itemNounHobbies;
+
+  /// No description provided for @iconLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get iconLabel;
+
+  /// No description provided for @restTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest time'**
+  String get restTimeLabel;
+
+  /// No description provided for @restMinutesChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String restMinutesChip(int minutes);
+
+  /// No description provided for @musicSuggestionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Music suggestion'**
+  String get musicSuggestionLabel;
+
+  /// No description provided for @musicSuggestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Lo-fi beats'**
+  String get musicSuggestionHint;
+
+  /// No description provided for @wallpaperLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer wallpaper'**
+  String get wallpaperLabel;
 
   /// No description provided for @addItemButton.
   ///
@@ -304,6 +442,36 @@ abstract class AppLocalizations {
   /// **'Next break in {duration}'**
   String timerNextBreakLabel(String duration);
 
+  /// No description provided for @timerRestingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting — back in {duration}'**
+  String timerRestingLabel(String duration);
+
+  /// No description provided for @timerMusicSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested: {name}'**
+  String timerMusicSuggestion(String name);
+
+  /// No description provided for @timerNotificationRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus session in progress'**
+  String get timerNotificationRunning;
+
+  /// No description provided for @timerNotificationResting.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting — back soon'**
+  String get timerNotificationResting;
+
+  /// No description provided for @timerNotificationPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get timerNotificationPaused;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
@@ -340,11 +508,11 @@ abstract class AppLocalizations {
   /// **'Top subject'**
   String get statTopSubject;
 
-  /// No description provided for @statHoursWorked.
+  /// No description provided for @statHoursExercised.
   ///
   /// In en, this message translates to:
-  /// **'Hours worked'**
-  String get statHoursWorked;
+  /// **'Hours exercising'**
+  String get statHoursExercised;
 
   /// No description provided for @statHoursRead.
   ///
@@ -640,6 +808,12 @@ abstract class AppLocalizations {
   /// **'Group name'**
   String get groupNameHint;
 
+  /// No description provided for @groupThemeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get groupThemeLabel;
+
   /// No description provided for @inviteFriendsLabel.
   ///
   /// In en, this message translates to:
@@ -651,6 +825,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Group'**
   String get createGroupButton;
+
+  /// No description provided for @metricDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} days'**
+  String metricDaysValue(int value);
+
+  /// No description provided for @metricPagesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} pages'**
+  String metricPagesValue(int value);
 
   /// No description provided for @navHome.
   ///
@@ -742,23 +928,89 @@ abstract class AppLocalizations {
   /// **'Continue with Apple'**
   String get continueWithAppleButton;
 
-  /// No description provided for @orSeparator.
+  /// No description provided for @continueWithPhoneButton.
   ///
   /// In en, this message translates to:
-  /// **'OR'**
-  String get orSeparator;
+  /// **'Continue with phone number'**
+  String get continueWithPhoneButton;
 
-  /// No description provided for @createAccountSectionTitle.
+  /// No description provided for @phoneLoginTitle.
   ///
   /// In en, this message translates to:
-  /// **'Create an account'**
-  String get createAccountSectionTitle;
+  /// **'Sign in'**
+  String get phoneLoginTitle;
 
-  /// No description provided for @createAccountButton.
+  /// No description provided for @phoneLoginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Create Account'**
-  String get createAccountButton;
+  /// **'Enter your phone number and we\'ll text you a verification code.'**
+  String get phoneLoginSubtitle;
+
+  /// No description provided for @sendCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCodeButton;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your number'**
+  String get otpTitle;
+
+  /// No description provided for @otpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code we sent to {phone}.'**
+  String otpSubtitle(String phone);
+
+  /// No description provided for @verifyCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyCodeButton;
+
+  /// No description provided for @resendCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resendCodeButton;
+
+  /// No description provided for @codeResentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent'**
+  String get codeResentMessage;
+
+  /// No description provided for @invalidCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid code. Please try again.'**
+  String get invalidCodeError;
+
+  /// No description provided for @credentialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there'**
+  String get credentialsTitle;
+
+  /// No description provided for @credentialsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us a bit about you.'**
+  String get credentialsSubtitle;
+
+  /// No description provided for @birthDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get birthDateHint;
+
+  /// No description provided for @finishButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finishButton;
 }
 
 class _AppLocalizationsDelegate

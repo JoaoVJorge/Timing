@@ -19,7 +19,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginHeadline => 'Empecemos';
 
   @override
-  String get loginSubtitle => '¿Cómo te llamamos?';
+  String get loginSubtitle => 'Inicia sesión para empezar.';
 
   @override
   String get loginNameHint => 'Tu nombre';
@@ -36,10 +36,71 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get homeSubtitle => '¿Qué haremos hoy?';
+
+  @override
+  String get homeTasksSection => 'Metas diarias';
+
+  @override
+  String get homeCategoriesSection => 'Tu tiempo';
+
+  @override
+  String get addTaskButton => 'Añadir meta';
+
+  @override
+  String get createTaskTitle => 'Nueva meta';
+
+  @override
+  String get taskNameHint => 'Nombre de la meta';
+
+  @override
+  String get targetDaysLabel => 'Objetivo (días)';
+
+  @override
+  String targetDaysChip(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get targetDaysHint => 'Objetivo personalizado (días)';
+
+  @override
+  String taskDaysProgress(int completed, int target) {
+    return '$completed/$target días';
+  }
+
+  @override
+  String get taskCompletedLabel => '¡Completada!';
+
+  @override
+  String get lastActivityLabel => 'Última actividad';
+
+  @override
+  String get lastActivityNone => 'Nada aún — ¡empieza algo!';
+
+  @override
+  String get lastActivityJustNow => 'justo ahora';
+
+  @override
+  String lastActivityMinutesAgo(int minutes) {
+    return 'hace $minutes min';
+  }
+
+  @override
+  String lastActivityHoursAgo(int hours) {
+    return 'hace $hours h';
+  }
+
+  @override
+  String lastActivityDaysAgo(int days) {
+    return 'hace $days d';
+  }
+
+  @override
   String get categoryStudying => 'Estudiando';
 
   @override
-  String get categoryWorking => 'Trabajando';
+  String get categoryExercises => 'Ejercicio';
 
   @override
   String get categoryReading => 'Leyendo';
@@ -51,13 +112,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get itemNounStudying => 'Materia';
 
   @override
-  String get itemNounWorking => 'Tarea';
+  String get itemNounExercises => 'Ejercicio';
 
   @override
   String get itemNounReading => 'Libro';
 
   @override
   String get itemNounHobbies => 'Hobby';
+
+  @override
+  String get iconLabel => 'Icono';
+
+  @override
+  String get restTimeLabel => 'Tiempo de descanso';
+
+  @override
+  String restMinutesChip(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get musicSuggestionLabel => 'Sugerencia de música';
+
+  @override
+  String get musicSuggestionHint => 'p. ej. Lo-fi beats';
+
+  @override
+  String get wallpaperLabel => 'Fondo del timer';
 
   @override
   String addItemButton(String itemNoun) {
@@ -128,6 +209,25 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String timerRestingLabel(String duration) {
+    return 'Descansando — vuelve en $duration';
+  }
+
+  @override
+  String timerMusicSuggestion(String name) {
+    return 'Sugerencia: $name';
+  }
+
+  @override
+  String get timerNotificationRunning => 'Sesión de concentración en curso';
+
+  @override
+  String get timerNotificationResting => 'Descansando — vuelve pronto';
+
+  @override
+  String get timerNotificationPaused => 'Pausado';
+
+  @override
   String get profileTitle => 'Tu Perfil';
 
   @override
@@ -148,7 +248,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get statTopSubject => 'Materia principal';
 
   @override
-  String get statHoursWorked => 'Horas trabajadas';
+  String get statHoursExercised => 'Horas de ejercicio';
 
   @override
   String get statHoursRead => 'Horas leídas';
@@ -306,10 +406,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupNameHint => 'Nombre del grupo';
 
   @override
+  String get groupThemeLabel => 'Tema';
+
+  @override
   String get inviteFriendsLabel => 'Invitar amigos';
 
   @override
   String get createGroupButton => 'Crear Grupo';
+
+  @override
+  String metricDaysValue(int value) {
+    return '$value días';
+  }
+
+  @override
+  String metricPagesValue(int value) {
+    return '$value páginas';
+  }
 
   @override
   String get navHome => 'Inicio';
@@ -358,11 +471,47 @@ class AppLocalizationsEs extends AppLocalizations {
   String get continueWithAppleButton => 'Continuar con Apple';
 
   @override
-  String get orSeparator => 'O';
+  String get continueWithPhoneButton => 'Continuar con el teléfono';
 
   @override
-  String get createAccountSectionTitle => 'Crear una cuenta';
+  String get phoneLoginTitle => 'Iniciar sesión';
 
   @override
-  String get createAccountButton => 'Crear Cuenta';
+  String get phoneLoginSubtitle =>
+      'Ingresa tu número de teléfono y te enviaremos un código de verificación por SMS.';
+
+  @override
+  String get sendCodeButton => 'Enviar código';
+
+  @override
+  String get otpTitle => 'Verifica tu número';
+
+  @override
+  String otpSubtitle(String phone) {
+    return 'Ingresa el código de 6 dígitos que enviamos a $phone.';
+  }
+
+  @override
+  String get verifyCodeButton => 'Verificar';
+
+  @override
+  String get resendCodeButton => 'Reenviar código';
+
+  @override
+  String get codeResentMessage => 'Código de verificación enviado';
+
+  @override
+  String get invalidCodeError => 'Código no válido. Inténtalo de nuevo.';
+
+  @override
+  String get credentialsTitle => 'Casi listo';
+
+  @override
+  String get credentialsSubtitle => 'Cuéntanos un poco sobre ti.';
+
+  @override
+  String get birthDateHint => 'Fecha de nacimiento';
+
+  @override
+  String get finishButton => 'Finalizar';
 }

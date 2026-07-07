@@ -1,19 +1,22 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
+import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
+import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 
 class LeaderboardTile extends StatelessWidget {
   const LeaderboardTile({
     required this.rank,
     required this.member,
-    required this.seconds,
+    required this.theme,
+    required this.value,
     super.key,
   });
 
   final int rank;
   final GroupMemberEntity member;
-  final int seconds;
+  final GroupThemeType theme;
+  final int value;
 
   static const List<Color> _medalColors = [
     Color(0xFFFFC107),
@@ -69,7 +72,7 @@ class LeaderboardTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            formatDurationLong(Duration(seconds: seconds)),
+            theme.formatMetric(context, value),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textStyles.bodySmall.copyWith(
