@@ -9,7 +9,6 @@ import "package:help_out/presentation/category/widgets/hobby_subject_card.dart";
 import "package:help_out/presentation/category/widgets/notebook_swipe_tile.dart";
 import "package:help_out/presentation/category/widgets/reading_subject_tile.dart";
 import "package:help_out/presentation/category/widgets/subject_tile.dart";
-import "package:help_out/presentation/category/widgets/working_subject_tile.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
@@ -71,10 +70,6 @@ class CategoryPage extends StatelessWidget {
             return NotebookSwipeTile(
               onTapNotes: () => controller.onTapNotes(subject),
               child: switch (controller.category) {
-                TimeCategoryType.working => WorkingSubjectTile(
-                  subject: subject,
-                  onTapPlay: () => controller.onTapSubject(subject),
-                ),
                 TimeCategoryType.reading => ReadingSubjectTile(
                   subject: subject,
                   onTapPlay: () => controller.onTapSubject(subject),
