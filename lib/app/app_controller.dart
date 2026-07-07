@@ -30,6 +30,7 @@ class AppController extends GetxController {
   final RxString nickName = "".obs;
   final Rx<String?> email = Rx<String?>(null);
   final Rx<String?> phoneNumber = Rx<String?>(null);
+  final Rx<String?> birthDate = Rx<String?>(null);
   final RxInt avatarIconIndex = 0.obs;
   final RxBool notificationsEnabled = true.obs;
   final RxString languageCode = "en".obs;
@@ -59,6 +60,7 @@ class AppController extends GetxController {
     nickName.value = config.nickName;
     email.value = config.email;
     phoneNumber.value = config.phoneNumber;
+    birthDate.value = config.birthDate;
     avatarIconIndex.value = config.avatarIconIndex;
     notificationsEnabled.value = config.notificationsEnabled;
     languageCode.value = config.languageCode;
@@ -74,6 +76,7 @@ class AppController extends GetxController {
     nickName: nickName.value,
     email: email.value,
     phoneNumber: phoneNumber.value,
+    birthDate: birthDate.value,
     accentColorValue: accentColor.value.toARGB32(),
     avatarIconIndex: avatarIconIndex.value,
     notificationsEnabled: notificationsEnabled.value,
@@ -121,11 +124,13 @@ class AppController extends GetxController {
     required String nickName,
     String? email,
     String? phoneNumber,
+    String? birthDate,
   }) async {
     this.userName.value = userName;
     this.nickName.value = nickName;
     this.email.value = email;
     this.phoneNumber.value = phoneNumber;
+    this.birthDate.value = birthDate;
 
     await _saveAppConfigUseCase(_currentConfig);
     return _syncProfileToBackendUseCase(_currentConfig);
@@ -136,6 +141,7 @@ class AppController extends GetxController {
     nickName.value = "";
     email.value = null;
     phoneNumber.value = null;
+    birthDate.value = null;
     avatarIconIndex.value = 0;
     await _saveAppConfigUseCase(_currentConfig);
     await _appNavigator.offAllNamed(AppRoutes.login);
