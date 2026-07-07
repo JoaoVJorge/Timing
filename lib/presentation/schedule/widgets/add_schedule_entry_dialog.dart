@@ -4,6 +4,7 @@ import "package:gap/gap.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/shared/widgets/dialog_top_bar.dart";
 import "package:help_out/shared/widgets/floating_primary_button.dart";
 import "package:help_out/theme/decoration.dart";
@@ -134,35 +135,42 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
           ),
           const Gap(8),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 12,
+            runSpacing: 12,
             children: SubjectColors.values.map((color) {
               final bool isSelected =
                   color.toARGB32() == _selectedColor.toARGB32();
-              return GestureDetector(
+              return BounceTap(
+                pressedScale: 0.9,
                 onTap: () => setState(() => _selectedColor = color),
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: 44,
+                  height: 44,
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: color,
                     shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(
-                            color: context.colorTokens.textBody,
-                            width: 2,
+                    border: Border.all(
+                      color: isSelected
+                          ? context.colorTokens.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                    child: isSelected
+                        ? const Center(
+                            child: AppIcon(
+                              "check",
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           )
                         : null,
                   ),
-                  child: isSelected
-                      ? const Center(
-                          child: AppIcon(
-                            "check",
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      : null,
                 ),
               );
             }).toList(),
@@ -225,7 +233,7 @@ class _TimeTextField extends StatelessWidget {
           color: context.colorTokens.textHint,
         ),
       ),
-      const Gap(6),
+      const Gap(8),
       TextField(
         controller: controller,
         focusNode: focusNode,
