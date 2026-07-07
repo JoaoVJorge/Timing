@@ -67,10 +67,10 @@ class ProfilePage extends StatelessWidget {
                         context.l10n.statTopSubjectFallback,
                   ),
                   StatCard(
-                    icon: Icons.work_outline,
-                    label: context.l10n.statHoursWorked,
+                    icon: Icons.fitness_center_outlined,
+                    label: context.l10n.statHoursExercised,
                     value: formatDurationLong(
-                      Duration(seconds: stats.workingTotalSeconds),
+                      Duration(seconds: stats.exercisesTotalSeconds),
                     ),
                   ),
                   StatCard(

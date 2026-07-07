@@ -5,7 +5,7 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 class ProfileStatsEntity extends Equatable {
   const ProfileStatsEntity({
     required this.studyingTotalSeconds,
-    required this.workingTotalSeconds,
+    required this.exercisesTotalSeconds,
     required this.readingTotalSeconds,
     required this.topStudyingSubject,
     required this.topReadingSubjects,
@@ -18,7 +18,7 @@ class ProfileStatsEntity extends Equatable {
 
     return ProfileStatsEntity(
       studyingTotalSeconds: _sumSeconds(studyingSubjects),
-      workingTotalSeconds: _sumSeconds(_byCategory(subjects, TimeCategoryType.working)),
+      exercisesTotalSeconds: _sumSeconds(_byCategory(subjects, TimeCategoryType.exercises)),
       readingTotalSeconds: _sumSeconds(readingSubjects),
       topStudyingSubject: _topSubject(studyingSubjects),
       topReadingSubjects: readingSubjects.take(3).toList(),
@@ -39,7 +39,7 @@ class ProfileStatsEntity extends Equatable {
   }
 
   final int studyingTotalSeconds;
-  final int workingTotalSeconds;
+  final int exercisesTotalSeconds;
   final int readingTotalSeconds;
   final SubjectEntity? topStudyingSubject;
   final List<SubjectEntity> topReadingSubjects;
@@ -47,7 +47,7 @@ class ProfileStatsEntity extends Equatable {
   @override
   List<Object?> get props => [
     studyingTotalSeconds,
-    workingTotalSeconds,
+    exercisesTotalSeconds,
     readingTotalSeconds,
     topStudyingSubject,
     topReadingSubjects,

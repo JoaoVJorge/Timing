@@ -49,6 +49,7 @@ class EditProfileController extends GetxController {
       phoneNumber: phoneController.text.trim().isEmpty
           ? null
           : phoneController.text.trim(),
+      birthDate: _appController.birthDate.value,
     );
 
     isSaving.value = false;
