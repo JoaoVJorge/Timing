@@ -4,10 +4,14 @@ import "package:help_out/presentation/category/category_bindings.dart";
 import "package:help_out/presentation/category/category_page.dart";
 import "package:help_out/presentation/config/config_bindings.dart";
 import "package:help_out/presentation/config/config_page.dart";
-import "package:help_out/presentation/create_account/create_account_bindings.dart";
-import "package:help_out/presentation/create_account/create_account_page.dart";
 import "package:help_out/presentation/create_group/create_group_bindings.dart";
 import "package:help_out/presentation/create_group/create_group_page.dart";
+import "package:help_out/presentation/create_subject/create_subject_bindings.dart";
+import "package:help_out/presentation/create_subject/create_subject_page.dart";
+import "package:help_out/presentation/create_task/create_task_bindings.dart";
+import "package:help_out/presentation/create_task/create_task_page.dart";
+import "package:help_out/presentation/daily_goals/daily_goals_bindings.dart";
+import "package:help_out/presentation/daily_goals/daily_goals_page.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_bindings.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_page.dart";
 import "package:help_out/presentation/faq/faq_bindings.dart";
@@ -20,8 +24,14 @@ import "package:help_out/presentation/login/login_bindings.dart";
 import "package:help_out/presentation/login/login_page.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_bindings.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_page.dart";
+import "package:help_out/presentation/credentials/credentials_bindings.dart";
+import "package:help_out/presentation/credentials/credentials_page.dart";
 import "package:help_out/presentation/notes/notes_bindings.dart";
 import "package:help_out/presentation/notes/notes_page.dart";
+import "package:help_out/presentation/otp/otp_bindings.dart";
+import "package:help_out/presentation/otp/otp_page.dart";
+import "package:help_out/presentation/phone_login/phone_login_bindings.dart";
+import "package:help_out/presentation/phone_login/phone_login_page.dart";
 import "package:help_out/presentation/profile/profile_bindings.dart";
 import "package:help_out/presentation/profile/profile_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
@@ -35,13 +45,18 @@ class AppRoutes {
 
   static const String splash = "/";
   static const String login = "/login";
-  static const String createAccount = "/createAccount";
+  static const String phoneLogin = "/phoneLogin";
+  static const String otp = "/otp";
+  static const String credentials = "/credentials";
   static const String mainNavigation = "/mainNavigation";
   static const String home = "/home";
   static const String profile = "/profile";
   static const String groups = "/groups";
   static const String config = "/config";
   static const String category = "/category";
+  static const String createSubject = "/createSubject";
+  static const String createTask = "/createTask";
+  static const String dailyGoals = "/dailyGoals";
   static const String timer = "/timer";
   static const String editProfile = "/editProfile";
   static const String faq = "/faq";
@@ -61,9 +76,25 @@ class AppRoutes {
       binding: LoginBindings(),
     ),
     GetPage(
-      name: createAccount,
-      page: () => const CreateAccountPage(),
-      binding: CreateAccountBindings(),
+      name: phoneLogin,
+      page: () => const PhoneLoginPage(),
+      binding: PhoneLoginBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: otp,
+      page: () => const OtpPage(),
+      binding: OtpBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: credentials,
+      page: () => const CredentialsPage(),
+      binding: CredentialsBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
@@ -100,6 +131,30 @@ class AppRoutes {
       name: category,
       page: () => const CategoryPage(),
       binding: CategoryBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: createSubject,
+      page: () => const CreateSubjectPage(),
+      binding: CreateSubjectBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: createTask,
+      page: () => const CreateTaskPage(),
+      binding: CreateTaskBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: dailyGoals,
+      page: () => const DailyGoalsPage(),
+      binding: DailyGoalsBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
