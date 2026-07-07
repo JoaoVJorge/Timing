@@ -48,7 +48,10 @@ class GroupsController extends GetxController {
     final Either<AppError, List<GroupEntity>> result =
         await _getGroupsUseCase();
     result.fold((error) => groups.clear(), (value) {
-      groups.value = value;
+      // Copy so the controller's list doesn't alias the data source's mutable
+      // store — otherwise a created group appears in both the store add and the
+      // controller add below, showing up twice.
+      groups.value = List.of(value);
       selectedGroup.value = value.isEmpty ? null : value.first;
     });
     isLoading.value = false;
