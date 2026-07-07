@@ -52,6 +52,12 @@ class CreateGroupPage extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              // Snapshot the selection during build so the Obx subscribes to
+              // it here — reading it inside the lazy itemBuilder would run
+              // after the reactive scope closes and never track toggles.
+              final Set<String> selectedIds = controller.selectedFriendIds
+                  .toSet();
+
               return ListView.separated(
                 itemCount: controller.availableFriends.length,
                 separatorBuilder: (context, index) => const Gap(8),
@@ -60,9 +66,7 @@ class CreateGroupPage extends StatelessWidget {
                       controller.availableFriends[index];
                   return FriendTile(
                     friend: friend,
-                    isSelected: controller.selectedFriendIds.contains(
-                      friend.id,
-                    ),
+                    isSelected: selectedIds.contains(friend.id),
                     onTap: () => controller.onToggleFriend(friend.id),
                   );
                 },
