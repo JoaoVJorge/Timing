@@ -75,7 +75,9 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
       return;
     }
 
-    appNavigator.back<AddScheduleEntryResult>(
+    // Pass the record as a plain Object result — a concrete generic here makes
+    // GetX drop the payload (see the schedule controller for the retrieval).
+    appNavigator.back<Object>(
       result: (
         title: title,
         startMinutes: startTime.hour * 60 + startTime.minute,
@@ -170,7 +172,7 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
     ),
     actions: [
       TextButton(
-        onPressed: () => appNavigator.back<AddScheduleEntryResult>(),
+        onPressed: () => appNavigator.back<Object>(),
         child: Text(context.l10n.cancelButton),
       ),
       const SizedBox(width: 4),

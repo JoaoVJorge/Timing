@@ -52,8 +52,14 @@ class ScheduleController extends GetxController {
   }
 
   Future<void> onTapAddEntry() async {
-    final AddScheduleEntryResult? result = await _appNavigator
-        .dialog<AddScheduleEntryResult>(child: const AddScheduleEntryDialog());
+    // Retrieve as dynamic and cast: passing the concrete record type as the
+    // dialog's generic makes GetX drop the result, so the entry only showed up
+    // after an app restart. See [[feedback_getx_tonamed_generic_crash]].
+    final dynamic rawResult = await _appNavigator.dialog<dynamic>(
+      child: const AddScheduleEntryDialog(),
+    );
+    final AddScheduleEntryResult? result =
+        rawResult as AddScheduleEntryResult?;
 
     if (result == null) {
       return;
