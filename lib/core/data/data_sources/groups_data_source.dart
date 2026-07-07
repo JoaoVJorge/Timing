@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
+import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 
 class GroupsDataSource {
@@ -9,7 +10,11 @@ class GroupsDataSource {
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async => const Right(_mockFriends);
 
-  Future<Either<AppError, GroupEntity>> createGroup({required String name, required List<FriendOption> invitedFriends}) async {
+  Future<Either<AppError, GroupEntity>> createGroup({
+    required String name,
+    required GroupThemeType theme,
+    required List<FriendOption> invitedFriends,
+  }) async {
     final List<GroupMemberEntity> members = [
       const GroupMemberEntity(id: "me", name: "You", avatarColorValue: 0xFFFFC107, todaySeconds: 0, weekSeconds: 0, monthSeconds: 0),
       for (int index = 0; index < invitedFriends.length; index++)
@@ -23,7 +28,12 @@ class GroupsDataSource {
         ),
     ];
 
-    final GroupEntity newGroup = GroupEntity(id: DateTime.now().microsecondsSinceEpoch.toString(), name: name, members: members);
+    final GroupEntity newGroup = GroupEntity(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      name: name,
+      theme: theme,
+      members: members,
+    );
     _mockGroups.add(newGroup);
     return Right(newGroup);
   }
@@ -43,6 +53,7 @@ class GroupsDataSource {
     const GroupEntity(
       id: "study-squad",
       name: "Study Squad",
+      theme: GroupThemeType.studying,
       members: [
         GroupMemberEntity(
           id: "m1",
@@ -89,6 +100,7 @@ class GroupsDataSource {
     const GroupEntity(
       id: "work-crew",
       name: "Work Crew",
+      theme: GroupThemeType.exercises,
       members: [
         GroupMemberEntity(
           id: "m6",

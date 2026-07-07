@@ -5,7 +5,7 @@
   "genericErrorMessage": "Something went wrong. Please try again later.",
 
   "loginHeadline": "Let's Start",
-  "loginSubtitle": "What should we call you?",
+  "loginSubtitle": "Sign in to get started.",
   "loginNameHint": "Your name",
   "loginButton": "Let's Start",
 
@@ -14,16 +14,63 @@
   "@homeGreetingWithName": {
     "placeholders": { "userName": { "type": "String" } }
   },
+  "homeSubtitle": "What are we tackling today?",
+  "homeTasksSection": "Daily goals",
+  "homeCategoriesSection": "Your time",
+
+  "addTaskButton": "Add goal",
+  "createTaskTitle": "New goal",
+  "taskNameHint": "Goal name",
+  "targetDaysLabel": "Target (days)",
+  "targetDaysChip": "{days} days",
+  "@targetDaysChip": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "targetDaysHint": "Custom target (days)",
+  "taskDaysProgress": "{completed}/{target} days",
+  "@taskDaysProgress": {
+    "placeholders": {
+      "completed": { "type": "int" },
+      "target": { "type": "int" }
+    }
+  },
+  "taskCompletedLabel": "Done!",
+
+  "lastActivityLabel": "Last activity",
+  "lastActivityNone": "Nothing yet — start something!",
+  "lastActivityJustNow": "just now",
+  "lastActivityMinutesAgo": "{minutes} min ago",
+  "@lastActivityMinutesAgo": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "lastActivityHoursAgo": "{hours} h ago",
+  "@lastActivityHoursAgo": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "lastActivityDaysAgo": "{days} d ago",
+  "@lastActivityDaysAgo": {
+    "placeholders": { "days": { "type": "int" } }
+  },
 
   "categoryStudying": "Studying",
-  "categoryWorking": "Working",
+  "categoryExercises": "Exercising",
   "categoryReading": "Reading",
   "categoryHobbies": "Hobbies",
 
   "itemNounStudying": "Subject",
-  "itemNounWorking": "Task",
+  "itemNounExercises": "Exercise",
   "itemNounReading": "Book",
   "itemNounHobbies": "Hobby",
+
+  "iconLabel": "Icon",
+  "restTimeLabel": "Rest time",
+  "restMinutesChip": "{minutes} min",
+  "@restMinutesChip": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "musicSuggestionLabel": "Music suggestion",
+  "musicSuggestionHint": "e.g. Lo-fi beats",
+  "wallpaperLabel": "Timer wallpaper",
 
   "addItemButton": "Add {itemNoun}",
   "@addItemButton": {
@@ -74,6 +121,17 @@
   "@timerNextBreakLabel": {
     "placeholders": { "duration": { "type": "String" } }
   },
+  "timerRestingLabel": "Resting — back in {duration}",
+  "@timerRestingLabel": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "timerMusicSuggestion": "Suggested: {name}",
+  "@timerMusicSuggestion": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "timerNotificationRunning": "Focus session in progress",
+  "timerNotificationResting": "Resting — back soon",
+  "timerNotificationPaused": "Paused",
 
   "profileTitle": "Your Profile",
   "profileSubtitleDefault": "Accomplishments",
@@ -84,7 +142,7 @@
   "statHoursStudied": "Hours studied",
   "statTopSubjectFallback": "—",
   "statTopSubject": "Top subject",
-  "statHoursWorked": "Hours worked",
+  "statHoursExercised": "Hours exercising",
   "statHoursRead": "Hours read",
   "mostReadThemes": "Most read themes",
   "noReadingYet": "Read something to see your top themes here.",
@@ -146,8 +204,18 @@
 
   "createGroupTitle": "Create Group",
   "groupNameHint": "Group name",
+  "groupThemeLabel": "Theme",
   "inviteFriendsLabel": "Invite friends",
   "createGroupButton": "Create Group",
+
+  "metricDaysValue": "{value} days",
+  "@metricDaysValue": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "metricPagesValue": "{value} pages",
+  "@metricPagesValue": {
+    "placeholders": { "value": { "type": "int" } }
+  },
 
   "navHome": "Home",
   "navProfile": "Profile",
@@ -166,7 +234,24 @@
 
   "continueWithGoogleButton": "Continue with Google",
   "continueWithAppleButton": "Continue with Apple",
-  "orSeparator": "OR",
-  "createAccountSectionTitle": "Create an account",
-  "createAccountButton": "Create Account"
+  "continueWithPhoneButton": "Continue with phone number",
+
+  "phoneLoginTitle": "Sign in",
+  "phoneLoginSubtitle": "Enter your phone number and we'll text you a verification code.",
+  "sendCodeButton": "Send code",
+
+  "otpTitle": "Verify your number",
+  "otpSubtitle": "Enter the 6-digit code we sent to {phone}.",
+  "@otpSubtitle": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+  "verifyCodeButton": "Verify",
+  "resendCodeButton": "Resend code",
+  "codeResentMessage": "Verification code sent",
+  "invalidCodeError": "Invalid code. Please try again.",
+
+  "credentialsTitle": "Almost there",
+  "credentialsSubtitle": "Tell us a bit about you.",
+  "birthDateHint": "Date of birth",
+  "finishButton": "Finish"
 }

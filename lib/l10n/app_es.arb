@@ -5,22 +5,48 @@
   "genericErrorMessage": "Algo salió mal. Inténtalo de nuevo más tarde.",
 
   "loginHeadline": "Empecemos",
-  "loginSubtitle": "¿Cómo te llamamos?",
+  "loginSubtitle": "Inicia sesión para empezar.",
   "loginNameHint": "Tu nombre",
   "loginButton": "Empecemos",
 
   "homeGreetingDefault": "Empecemos",
   "homeGreetingWithName": "Empecemos, {userName}",
+  "homeSubtitle": "¿Qué haremos hoy?",
+  "homeTasksSection": "Metas diarias",
+  "homeCategoriesSection": "Tu tiempo",
+
+  "addTaskButton": "Añadir meta",
+  "createTaskTitle": "Nueva meta",
+  "taskNameHint": "Nombre de la meta",
+  "targetDaysLabel": "Objetivo (días)",
+  "targetDaysChip": "{days} días",
+  "targetDaysHint": "Objetivo personalizado (días)",
+  "taskDaysProgress": "{completed}/{target} días",
+  "taskCompletedLabel": "¡Completada!",
+
+  "lastActivityLabel": "Última actividad",
+  "lastActivityNone": "Nada aún — ¡empieza algo!",
+  "lastActivityJustNow": "justo ahora",
+  "lastActivityMinutesAgo": "hace {minutes} min",
+  "lastActivityHoursAgo": "hace {hours} h",
+  "lastActivityDaysAgo": "hace {days} d",
 
   "categoryStudying": "Estudiando",
-  "categoryWorking": "Trabajando",
+  "categoryExercises": "Ejercicio",
   "categoryReading": "Leyendo",
   "categoryHobbies": "Hobbies",
 
   "itemNounStudying": "Materia",
-  "itemNounWorking": "Tarea",
+  "itemNounExercises": "Ejercicio",
   "itemNounReading": "Libro",
   "itemNounHobbies": "Hobby",
+
+  "iconLabel": "Icono",
+  "restTimeLabel": "Tiempo de descanso",
+  "restMinutesChip": "{minutes} min",
+  "musicSuggestionLabel": "Sugerencia de música",
+  "musicSuggestionHint": "p. ej. Lo-fi beats",
+  "wallpaperLabel": "Fondo del timer",
 
   "addItemButton": "Añadir {itemNoun}",
   "itemNameHint": "Nombre de {itemNoun}",
@@ -44,6 +70,11 @@
 
   "timerTotalLabel": "Total: {duration}",
   "timerNextBreakLabel": "Próximo descanso en {duration}",
+  "timerRestingLabel": "Descansando — vuelve en {duration}",
+  "timerMusicSuggestion": "Sugerencia: {name}",
+  "timerNotificationRunning": "Sesión de concentración en curso",
+  "timerNotificationResting": "Descansando — vuelve pronto",
+  "timerNotificationPaused": "Pausado",
 
   "profileTitle": "Tu Perfil",
   "profileSubtitleDefault": "Logros",
@@ -51,7 +82,7 @@
   "statHoursStudied": "Horas estudiadas",
   "statTopSubjectFallback": "—",
   "statTopSubject": "Materia principal",
-  "statHoursWorked": "Horas trabajadas",
+  "statHoursExercised": "Horas de ejercicio",
   "statHoursRead": "Horas leídas",
   "mostReadThemes": "Temas más leídos",
   "noReadingYet": "Lee algo para ver aquí tus temas favoritos.",
@@ -107,8 +138,18 @@
 
   "createGroupTitle": "Crear Grupo",
   "groupNameHint": "Nombre del grupo",
+  "groupThemeLabel": "Tema",
   "inviteFriendsLabel": "Invitar amigos",
   "createGroupButton": "Crear Grupo",
+
+  "metricDaysValue": "{value} días",
+  "@metricDaysValue": {
+    "placeholders": { "value": { "type": "int" } }
+  },
+  "metricPagesValue": "{value} páginas",
+  "@metricPagesValue": {
+    "placeholders": { "value": { "type": "int" } }
+  },
 
   "navHome": "Inicio",
   "navProfile": "Perfil",
@@ -127,7 +168,21 @@
 
   "continueWithGoogleButton": "Continuar con Google",
   "continueWithAppleButton": "Continuar con Apple",
-  "orSeparator": "O",
-  "createAccountSectionTitle": "Crear una cuenta",
-  "createAccountButton": "Crear Cuenta"
+  "continueWithPhoneButton": "Continuar con el teléfono",
+
+  "phoneLoginTitle": "Iniciar sesión",
+  "phoneLoginSubtitle": "Ingresa tu número de teléfono y te enviaremos un código de verificación por SMS.",
+  "sendCodeButton": "Enviar código",
+
+  "otpTitle": "Verifica tu número",
+  "otpSubtitle": "Ingresa el código de 6 dígitos que enviamos a {phone}.",
+  "verifyCodeButton": "Verificar",
+  "resendCodeButton": "Reenviar código",
+  "codeResentMessage": "Código de verificación enviado",
+  "invalidCodeError": "Código no válido. Inténtalo de nuevo.",
+
+  "credentialsTitle": "Casi listo",
+  "credentialsSubtitle": "Cuéntanos un poco sobre ti.",
+  "birthDateHint": "Fecha de nacimiento",
+  "finishButton": "Finalizar"
 }

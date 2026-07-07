@@ -19,7 +19,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginHeadline => 'Let\'s Start';
 
   @override
-  String get loginSubtitle => 'What should we call you?';
+  String get loginSubtitle => 'Sign in to get started.';
 
   @override
   String get loginNameHint => 'Your name';
@@ -36,10 +36,71 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeSubtitle => 'What are we tackling today?';
+
+  @override
+  String get homeTasksSection => 'Daily goals';
+
+  @override
+  String get homeCategoriesSection => 'Your time';
+
+  @override
+  String get addTaskButton => 'Add goal';
+
+  @override
+  String get createTaskTitle => 'New goal';
+
+  @override
+  String get taskNameHint => 'Goal name';
+
+  @override
+  String get targetDaysLabel => 'Target (days)';
+
+  @override
+  String targetDaysChip(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get targetDaysHint => 'Custom target (days)';
+
+  @override
+  String taskDaysProgress(int completed, int target) {
+    return '$completed/$target days';
+  }
+
+  @override
+  String get taskCompletedLabel => 'Done!';
+
+  @override
+  String get lastActivityLabel => 'Last activity';
+
+  @override
+  String get lastActivityNone => 'Nothing yet — start something!';
+
+  @override
+  String get lastActivityJustNow => 'just now';
+
+  @override
+  String lastActivityMinutesAgo(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String lastActivityHoursAgo(int hours) {
+    return '$hours h ago';
+  }
+
+  @override
+  String lastActivityDaysAgo(int days) {
+    return '$days d ago';
+  }
+
+  @override
   String get categoryStudying => 'Studying';
 
   @override
-  String get categoryWorking => 'Working';
+  String get categoryExercises => 'Exercising';
 
   @override
   String get categoryReading => 'Reading';
@@ -51,13 +112,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemNounStudying => 'Subject';
 
   @override
-  String get itemNounWorking => 'Task';
+  String get itemNounExercises => 'Exercise';
 
   @override
   String get itemNounReading => 'Book';
 
   @override
   String get itemNounHobbies => 'Hobby';
+
+  @override
+  String get iconLabel => 'Icon';
+
+  @override
+  String get restTimeLabel => 'Rest time';
+
+  @override
+  String restMinutesChip(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String get musicSuggestionLabel => 'Music suggestion';
+
+  @override
+  String get musicSuggestionHint => 'e.g. Lo-fi beats';
+
+  @override
+  String get wallpaperLabel => 'Timer wallpaper';
 
   @override
   String addItemButton(String itemNoun) {
@@ -128,6 +209,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String timerRestingLabel(String duration) {
+    return 'Resting — back in $duration';
+  }
+
+  @override
+  String timerMusicSuggestion(String name) {
+    return 'Suggested: $name';
+  }
+
+  @override
+  String get timerNotificationRunning => 'Focus session in progress';
+
+  @override
+  String get timerNotificationResting => 'Resting — back soon';
+
+  @override
+  String get timerNotificationPaused => 'Paused';
+
+  @override
   String get profileTitle => 'Your Profile';
 
   @override
@@ -148,7 +248,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statTopSubject => 'Top subject';
 
   @override
-  String get statHoursWorked => 'Hours worked';
+  String get statHoursExercised => 'Hours exercising';
 
   @override
   String get statHoursRead => 'Hours read';
@@ -306,10 +406,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupNameHint => 'Group name';
 
   @override
+  String get groupThemeLabel => 'Theme';
+
+  @override
   String get inviteFriendsLabel => 'Invite friends';
 
   @override
   String get createGroupButton => 'Create Group';
+
+  @override
+  String metricDaysValue(int value) {
+    return '$value days';
+  }
+
+  @override
+  String metricPagesValue(int value) {
+    return '$value pages';
+  }
 
   @override
   String get navHome => 'Home';
@@ -358,11 +471,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithAppleButton => 'Continue with Apple';
 
   @override
-  String get orSeparator => 'OR';
+  String get continueWithPhoneButton => 'Continue with phone number';
 
   @override
-  String get createAccountSectionTitle => 'Create an account';
+  String get phoneLoginTitle => 'Sign in';
 
   @override
-  String get createAccountButton => 'Create Account';
+  String get phoneLoginSubtitle =>
+      'Enter your phone number and we\'ll text you a verification code.';
+
+  @override
+  String get sendCodeButton => 'Send code';
+
+  @override
+  String get otpTitle => 'Verify your number';
+
+  @override
+  String otpSubtitle(String phone) {
+    return 'Enter the 6-digit code we sent to $phone.';
+  }
+
+  @override
+  String get verifyCodeButton => 'Verify';
+
+  @override
+  String get resendCodeButton => 'Resend code';
+
+  @override
+  String get codeResentMessage => 'Verification code sent';
+
+  @override
+  String get invalidCodeError => 'Invalid code. Please try again.';
+
+  @override
+  String get credentialsTitle => 'Almost there';
+
+  @override
+  String get credentialsSubtitle => 'Tell us a bit about you.';
+
+  @override
+  String get birthDateHint => 'Date of birth';
+
+  @override
+  String get finishButton => 'Finish';
 }
