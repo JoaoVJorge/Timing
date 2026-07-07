@@ -16,13 +16,26 @@ class LanguagePickerDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: AppLanguages.values.map((language) {
         final bool isSelected = language.code == currentCode;
-        return ListTile(
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => appNavigator.back<String>(result: language.code),
-          contentPadding: EdgeInsets.zero,
-          title: Text(language.label, style: context.textStyles.bodyLarge),
-          trailing: isSelected
-              ? Icon(Icons.check, color: context.colorTokens.primary)
-              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    language.label,
+                    style: context.textStyles.bodyLarge.copyWith(
+                      color: context.colorTokens.primary,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Icon(Icons.check, color: context.colorTokens.primary),
+              ],
+            ),
+          ),
         );
       }).toList(),
     ),
