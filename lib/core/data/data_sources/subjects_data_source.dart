@@ -2,6 +2,7 @@ import "dart:convert";
 
 import "package:dartz/dartz.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
@@ -20,7 +21,16 @@ class SubjectsDataSource {
       }
 
       final List<dynamic> decoded = jsonDecode(savedSubjects) as List<dynamic>;
-      return Right(decoded.map((item) => SubjectEntity.fromMap(item as Map<String, dynamic>)).toList());
+      final List<SubjectEntity> subjects = [];
+      for (final dynamic item in decoded) {
+        final Map<String, dynamic> map = item as Map<String, dynamic>;
+        // Skips entries from removed categories (e.g. the old "working" one).
+        if (TimeCategoryType.tryByName(map["category"] as String? ?? "") == null) {
+          continue;
+        }
+        subjects.add(SubjectEntity.fromMap(map));
+      }
+      return Right(subjects);
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
     }

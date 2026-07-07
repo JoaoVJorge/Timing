@@ -14,6 +14,10 @@ class SubjectEntity extends Equatable {
     required this.currentPages,
     required this.goalPages,
     required this.notes,
+    required this.iconName,
+    required this.restMinutes,
+    required this.musicSuggestion,
+    required this.wallpaperIndex,
   });
 
   factory SubjectEntity.fromJson(String source) =>
@@ -29,7 +33,13 @@ class SubjectEntity extends Equatable {
     currentPages: map["currentPages"] as int? ?? 0,
     goalPages: map["goalPages"] as int? ?? 0,
     notes: map["notes"] as String? ?? "",
+    iconName: map["iconName"] as String? ?? "",
+    restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
+    musicSuggestion: map["musicSuggestion"] as String? ?? "",
+    wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
   );
+
+  static const int defaultRestMinutes = 5;
 
   final String id;
   final String name;
@@ -40,6 +50,10 @@ class SubjectEntity extends Equatable {
   final int currentPages;
   final int goalPages;
   final String notes;
+  final String iconName;
+  final int restMinutes;
+  final String musicSuggestion;
+  final int wallpaperIndex;
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -51,6 +65,10 @@ class SubjectEntity extends Equatable {
     "currentPages": currentPages,
     "goalPages": goalPages,
     "notes": notes,
+    "iconName": iconName,
+    "restMinutes": restMinutes,
+    "musicSuggestion": musicSuggestion,
+    "wallpaperIndex": wallpaperIndex,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -63,6 +81,10 @@ class SubjectEntity extends Equatable {
     int? currentPages,
     int? goalPages,
     String? notes,
+    String? iconName,
+    int? restMinutes,
+    String? musicSuggestion,
+    int? wallpaperIndex,
   }) => SubjectEntity(
     id: id,
     name: name ?? this.name,
@@ -73,6 +95,10 @@ class SubjectEntity extends Equatable {
     currentPages: currentPages ?? this.currentPages,
     goalPages: goalPages ?? this.goalPages,
     notes: notes ?? this.notes,
+    iconName: iconName ?? this.iconName,
+    restMinutes: restMinutes ?? this.restMinutes,
+    musicSuggestion: musicSuggestion ?? this.musicSuggestion,
+    wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
   );
 
   @override
@@ -86,5 +112,9 @@ class SubjectEntity extends Equatable {
     currentPages,
     goalPages,
     notes,
+    iconName,
+    restMinutes,
+    musicSuggestion,
+    wallpaperIndex,
   ];
 }
