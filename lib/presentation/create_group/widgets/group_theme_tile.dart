@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
@@ -25,18 +26,20 @@ class GroupThemeTile extends StatelessWidget {
     pressedScale: 0.97,
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.colorTokens.surface,
+        color: isSelected
+            ? context.colorTokens.primaryVeryLight
+            : context.colorTokens.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected
-              ? context.colorTokens.primary
-              : Colors.transparent,
+          color: isSelected ? context.colorTokens.primary : Colors.transparent,
           width: 1.5,
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
@@ -54,7 +57,7 @@ class GroupThemeTile extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(8),
+          const Gap(10),
           Text(
             theme.localizedLabel(context),
             maxLines: 1,
@@ -63,6 +66,15 @@ class GroupThemeTile extends StatelessWidget {
               color: isSelected
                   ? context.colorTokens.primary
                   : context.colorTokens.textBody,
+            ),
+          ),
+          const Gap(4),
+          Text(
+            groupMetricDescription(context, theme),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodySmall.copyWith(
+              color: context.colorTokens.textHint,
             ),
           ),
         ],
