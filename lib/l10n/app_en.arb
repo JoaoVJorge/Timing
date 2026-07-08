@@ -122,6 +122,69 @@
   "cancelButton": "Cancel",
   "addButton": "Add",
 
+  "createSubjectTitleStudying": "New subject",
+  "createSubjectTitleReading": "New reading",
+  "createSubjectTitleExercises": "New workout",
+  "createSubjectTitleHobbies": "New hobby",
+  "createSubjectSubtitleStudying": "Set a goal and personalize your focus",
+  "createSubjectSubtitleReading": "Track pages and personalize your reading",
+  "createSubjectSubtitleExercises": "Choose how you want to track this activity",
+  "createSubjectSubtitleHobbies": "Choose how you want to track this hobby",
+  "createSubjectBasicSection": "Basic information",
+  "createSubjectGoalSection": "Goal",
+  "createSubjectRoutineSection": "Routine",
+  "createSubjectPersonalizationSection": "Personalization",
+  "createSubjectNameLabelStudying": "Subject name",
+  "createSubjectNameLabelReading": "Reading name",
+  "createSubjectNameLabelExercises": "Activity name",
+  "createSubjectNameLabelHobbies": "Hobby name",
+  "createSubjectNameHintStudying": "Ex.: Biology, Math, English",
+  "createSubjectNameHintReading": "Ex.: History book, Dom Casmurro",
+  "createSubjectNameHintExercises": "Ex.: Gym, Running, Stretching",
+  "createSubjectNameHintHobbies": "Ex.: Guitar, Drawing, Programming",
+  "createSubjectTimeGoalLabel": "Time goal",
+  "createSubjectPagesGoalLabel": "Page goal",
+  "createSubjectTimeGoalHelp": "How many hours do you want to accumulate in total?",
+  "createSubjectPagesGoalHelp": "How many pages do you want to log in total?",
+  "createSubjectRestLabel": "Break after each focus",
+  "createSubjectRestHelp": "The timer suggests a break after 25 min of focus.",
+  "createSubjectPreviewTitle": "Preview",
+  "createSubjectPreviewNoGoal": "No goal set",
+  "createSubjectPreviewGoal": "Goal: {goal}",
+  "@createSubjectPreviewGoal": {
+    "placeholders": { "goal": { "type": "String" } }
+  },
+  "createSubjectPreviewRest": "Break: {minutes} min",
+  "@createSubjectPreviewRest": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "createSubjectHoursValue": "{hours}h",
+  "@createSubjectHoursValue": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
+  "@createSubjectHoursMinutesValue": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+  "createSubjectColorSemantic": "Color {index}",
+  "@createSubjectColorSemantic": {
+    "placeholders": { "index": { "type": "int" } }
+  },
+  "createSubjectButtonStudying": "Create subject",
+  "createSubjectButtonReading": "Create reading",
+  "createSubjectButtonExercises": "Create activity",
+  "createSubjectButtonHobbies": "Create hobby",
+  "createSubjectMissingName": "Enter a name to continue",
+  "createSubjectMissingTimeGoal": "Set a valid time goal",
+  "createSubjectMissingPagesGoal": "Set a valid page goal",
+  "createSubjectSuccessStudying": "Subject created successfully",
+  "createSubjectSuccessReading": "Reading created successfully",
+  "createSubjectSuccessExercises": "Activity created successfully",
+  "createSubjectSuccessHobbies": "Hobby created successfully",
+
   "pagesProgress": "{currentPages} of {goalPages} pages",
   "@pagesProgress": {
     "placeholders": {
@@ -167,37 +230,186 @@
   "timerNotificationRunning": "Focus session in progress",
   "timerNotificationResting": "Resting — back soon",
   "timerNotificationPaused": "Paused",
-
-  "profileTitle": "Your Profile",
-  "profileSubtitleDefault": "Accomplishments",
-  "profileSubtitleWithName": "Great work, {userName}",
-  "@profileSubtitleWithName": {
-    "placeholders": { "userName": { "type": "String" } }
+  "timerStateFocusingTitle": "Focus in progress",
+  "timerStateFocusingDescription": "Keep your focus. A break will be suggested soon.",
+  "timerStatePausedTitle": "Timer paused",
+  "timerStatePausedDescription": "Continue when you're ready.",
+  "timerStateRestingTitle": "Well-earned break",
+  "timerStateRestingDescription": "Drink water or breathe a little before continuing.",
+  "timerSessionSavedTitle": "Session logged",
+  "timerSessionSavedDescription": "Your time was added to the subject.",
+  "timerCurrentFocusLabel": "Focused time now",
+  "timerRestTimeLabel": "Break time",
+  "timerSessionLabel": "Current session",
+  "timerTotalInSubject": "Total in {subjectName}",
+  "@timerTotalInSubject": {
+    "placeholders": { "subjectName": { "type": "String" } }
   },
-  "statHoursStudied": "Hours studied",
-  "statTopSubjectFallback": "—",
-  "statTopSubject": "Top subject",
-  "statHoursExercised": "Hours exercising",
-  "statHoursRead": "Hours read",
-  "mostReadThemes": "Most read themes",
-  "noReadingYet": "Read something to see your top themes here.",
+  "timerPauseButton": "Pause",
+  "timerContinueButton": "Continue",
+  "timerContinueFocusButton": "Continue focus",
+  "timerSkipRestButton": "Skip break",
+  "timerEndSessionButton": "End session",
+  "timerStartAnotherSessionButton": "Start another session",
+  "timerSaveReassurance": "Progress is also saved when you pause or leave.",
+  "timerMusicSuggestionTitle": "Focus suggestion",
+  "timerFocusedValue": "{duration} focused",
+  "@timerFocusedValue": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "timerAccumulatedTotalLabel": "Accumulated total",
+  "timerBackToSubjectsButton": "Back to subjects",
+  "timerExitDialogTitle": "End session?",
+  "timerExitDialogContent": "Your {duration} progress will be saved in {subjectName}.",
+  "@timerExitDialogContent": {
+    "placeholders": {
+      "duration": { "type": "String" },
+      "subjectName": { "type": "String" }
+    }
+  },
+  "timerExitDialogCancel": "Keep focusing",
+  "timerExitDialogConfirm": "End",
+
+  "profileTitle": "Profile",
+  "editButton": "Edit",
+  "nicknameFallback": "user",
+
+  "profileSummaryLabel": "Total summary",
+  "profileSummaryFocusLabel": "Total focus time",
+  "profileSummaryFocusDescription": "Studying, exercise and hobbies",
+
+  "statHoursStudied": "Studying",
+  "statHoursExercised": "Exercise",
+  "statPagesRead": "Pages read",
+  "statTopSubject": "Most studied",
+
+  "profileStatTimeEmptyTitle": "Start your first focus",
+  "profileStatTimeEmptyDescription": "Your time will show up here",
+  "profileStatReadingEmptyTitle": "No pages yet",
+  "profileStatReadingEmptyDescription": "Log your first reading",
+  "profileTopSubjectEmptyTitle": "None yet",
+  "profileTopSubjectEmptyDescription": "Study a subject to feature it here",
+
+  "profileEmptyTitle": "Your progress starts here",
+  "profileEmptyDescription": "Start a session, log some reading or set a goal to track your evolution in HelpOut.",
+  "profileEmptyStartButton": "Start now",
+  "profileShortcutsTitle": "Shortcuts",
+  "profileShortcutCreateSubject": "Create subject",
+  "profileShortcutCreateGoal": "Create goal",
+  "profileShortcutAddSchedule": "Add schedule",
+
+  "profileEvolutionTitle": "Your progress",
+  "profileEvolutionFocus": "You've accumulated {duration} of focus.",
+  "@profileEvolutionFocus": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "profileEvolutionTopSubject": "Your most studied subject is {name}.",
+  "@profileEvolutionTopSubject": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "profileEvolutionRemaining": "You're {duration} away from your goal.",
+  "@profileEvolutionRemaining": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "profileEvolutionGoalReached": "You've reached your focus goal!",
+
+  "profileAgendaTitle": "Today's schedule",
+  "profileAgendaEmptyTitle": "No schedule planned",
+  "profileAgendaEmptyDescription": "Add blocks to organize your routine.",
+  "profileAgendaAddButton": "Add schedule",
+
+  "profileTopReadingTitle": "Top reading",
+  "profileTopReadingEmptyTitle": "No reading logged",
+  "profileTopReadingEmptyDescription": "Log pages read to see your top themes here.",
 
   "groupsTitle": "Groups",
+  "groupsSubtitle": "Compare your progress with friends",
   "noGroupSelected": "No group selected yet.",
-  "newGroupChip": "New group",
+  "newGroupChip": "New",
+  "groupHeaderCreateButton": "Group",
+  "groupsEmptyTitle": "No groups yet",
+  "groupsEmptyDescription": "Create a group to compare progress with friends and keep the momentum going.",
+  "groupsEmptyButton": "Create first group",
+  "you": "You",
+  "mockStudyGroupName": "Study Squad",
+  "mockWorkoutGroupName": "Workout Crew",
   "periodToday": "Today",
-  "periodThisWeek": "This Week",
-  "periodThisMonth": "This Month",
+  "periodThisWeek": "Week",
+  "periodThisMonth": "Month",
+  "periodDescriptionToday": "today",
+  "periodDescriptionThisWeek": "this week",
+  "periodDescriptionThisMonth": "this month",
+  "groupMetricStudying": "study hours",
+  "groupMetricDailyGoals": "completed goal days",
+  "groupMetricExercises": "exercise hours",
+  "groupMetricReading": "pages read",
+  "groupMetricHobbies": "hobby hours",
+  "groupLeaderboardDescription": "Ranking for {period} · measured in {metric}",
+  "@groupLeaderboardDescription": {
+    "placeholders": {
+      "period": { "type": "String" },
+      "metric": { "type": "String" }
+    }
+  },
+  "leaderboardTitle": "Ranking",
+  "currentUserRankTitle": "Your performance",
+  "currentUserRankValue": "{rank} place · {score}",
+  "@currentUserRankValue": {
+    "placeholders": {
+      "rank": { "type": "String" },
+      "score": { "type": "String" }
+    }
+  },
+  "currentUserRankNextStep": "{score} to climb one position",
+  "@currentUserRankNextStep": {
+    "placeholders": { "score": { "type": "String" } }
+  },
+  "currentUserRankLeading": "You're leading this ranking.",
+  "currentUserRankSubtitle": "your current position",
+  "leaderboardTopPosition": "leading this ranking",
+  "leaderboardDifferenceAhead": "+{value} ahead",
+  "@leaderboardDifferenceAhead": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "groupCreatedSuccess": "Group created successfully",
 
   "settingsTitle": "Settings",
+  "settingsSubtitle": "Adjust your account and preferences",
   "myProfileFallback": "My Profile",
+  "personalProfileLabel": "Personal profile",
   "preferencesSection": "Preferences",
   "darkModeLabel": "Dark mode",
+  "darkModeEnabledSubtitle": "Dark theme is on",
+  "darkModeDisabledSubtitle": "Use darker colors in the app",
+  "accentColorSettingsTitle": "Accent color",
+  "accentColorSettingsSubtitle": "Personalize the app appearance",
   "notificationsLabel": "Notifications",
+  "timerNotificationsTitle": "Timer notifications",
+  "notificationsEnabledSubtitle": "Focus, break and progress alerts",
+  "notificationsDisabledSubtitle": "Alerts are off on this device",
   "language": "Language",
+  "appLanguageSubtitle": "App language",
+  "chooseLanguageTitle": "Choose language",
+  "languageChangedMessage": "Language changed to {language}",
+  "@languageChangedMessage": {
+    "placeholders": { "language": { "type": "String" } }
+  },
+  "preferenceSavedMessage": "Preference saved",
   "supportSection": "Support",
+  "helpSection": "Help",
   "faqLabel": "FAQ",
+  "faqSettingsSubtitle": "Questions about timer, goals and groups",
+  "sendFeedbackTitle": "Send feedback",
+  "sendFeedbackSubtitle": "Tell us what could be better",
+  "feedbackUnavailable": "Feedback is not available yet",
   "aboutLabel": "About",
+  "aboutSection": "About",
+  "appVersionValue": "Version {version}",
+  "@appVersionValue": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "debugEnvironmentTitle": "Environment",
+  "debugEnvironmentSubtitle": "Debug · sample data active",
   "appVersionLabel": "{appTitle} v{appVersion}",
   "@appVersionLabel": {
     "placeholders": {
@@ -206,10 +418,12 @@
     }
   },
   "accountSection": "Account",
+  "sessionSection": "Session",
   "logOutLabel": "Log out",
+  "logOutSettingsSubtitle": "End the session on this device",
 
-  "logOutDialogTitle": "Log out",
-  "logOutDialogContent": "This clears your local profile from this device. You can always set it up again.",
+  "logOutDialogTitle": "Log out?",
+  "logOutDialogContent": "You will need to sign in again to access this account on this device. Your local study data will be kept.",
   "logOutConfirmButton": "Log out",
 
   "myProfileTitle": "My Profile",
@@ -233,15 +447,47 @@
   "faqQ3": "How do I add a new subject?",
   "faqA3": "Open a category from Home, then tap \"Add Subject\" at the bottom of the list. You can pick a color and set an estimated hours goal for it.",
   "faqQ4": "How are groups and the leaderboard calculated?",
-  "faqA4": "Groups show a scoreboard of everyone's studied hours. Switch between Today, This Week and This Month to see who studied the most in that period.",
+  "faqA4": "Groups show a scoreboard based on the group's theme: focus hours, completed goal days or pages read. Switch between Today, Week and Month to compare progress.",
   "faqQ5": "Can I change the app's color theme?",
   "faqA5": "Yes, go to Settings > My Profile and pick any theme color. Every gradient, button and highlight across the app updates to match it, including dark mode.",
 
-  "createGroupTitle": "Create Group",
+  "createGroupTitle": "New group",
+  "createGroupSubtitle": "Choose a theme and invite friends",
+  "groupNameLabel": "Group name",
   "groupNameHint": "Group name",
+  "groupNameExampleHint": "Ex.: Exam study crew",
   "groupThemeLabel": "Theme",
+  "groupThemeSelectedDescription": "This group ranks by {metric}.",
+  "@groupThemeSelectedDescription": {
+    "placeholders": { "metric": { "type": "String" } }
+  },
   "inviteFriendsLabel": "Invite friends",
+  "selectedFriendsCount": "{count} selected",
+  "@selectedFriendsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "selectAtLeastOneFriend": "Select at least 1 friend",
+  "searchFriendHint": "Search friend",
+  "loadingFriends": "Loading friends...",
+  "friendsLoadErrorTitle": "Could not load friends",
+  "friendsLoadErrorDescription": "Try again in a moment.",
+  "noFriendsAvailableTitle": "No friends available",
+  "noFriendsAvailableDescription": "Add friends before creating a group.",
+  "noFriendsFoundTitle": "No friend found",
+  "noFriendsFoundDescription": "Try another name.",
   "createGroupButton": "Create Group",
+  "createGroupMissingName": "Enter the group name",
+  "createGroupMissingTheme": "Choose a theme",
+  "createGroupMissingFriends": "Select at least 1 friend",
+  "createGroupWithFriendsButton": "Create group with {count} friends",
+  "@createGroupWithFriendsButton": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "createGroupRequirementsTitle": "To create:",
+  "createGroupRequirementName": "Group name",
+  "createGroupRequirementTheme": "Theme chosen",
+  "createGroupRequirementFriends": "At least 1 friend",
+  "groupPrivacyNote": "Your friends will only see your name, avatar and progress in this theme.",
 
   "metricDaysValue": "{value} days",
   "@metricDaysValue": {
