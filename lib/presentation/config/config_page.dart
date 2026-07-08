@@ -4,10 +4,10 @@ import "package:get/get.dart";
 import "package:help_out/app/app_constants.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/config/config_controller.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/presentation/config/widgets/settings_section.dart";
+import "package:help_out/presentation/config/widgets/settings_tile.dart";
+import "package:help_out/presentation/config/widgets/settings_user_card.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/avatar_presets.dart";
 
 class ConfigPage extends StatelessWidget {
   const ConfigPage({super.key});
@@ -18,6 +18,7 @@ class ConfigPage extends StatelessWidget {
 
     return AppScaffold(
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 112),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -26,327 +27,120 @@ class ConfigPage extends StatelessWidget {
               context.l10n.settingsTitle,
               style: context.textStyles.titleFont,
             ),
+            const Gap(8),
+            Text(
+              context.l10n.settingsSubtitle,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: context.colorTokens.textHint,
+              ),
+            ),
             const Gap(24),
             Obx(
-              () => BounceTap(
-                pressedScale: 0.97,
+              () => SettingsUserCard(
+                name: controller.displayName,
+                nickname: controller.displayNickname,
+                avatarIconIndex: controller.avatarIconIndex.value,
                 onTap: controller.onTapMyProfile,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: context.colorTokens.surface,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          gradient: context.colorTokens.primaryGradient,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          AppAvatarPresets.byIndex(
-                            controller.avatarIconIndex.value,
-                          ),
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Gap(16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              controller.userName.value.isEmpty
-                                  ? context.l10n.myProfileFallback
-                                  : controller.userName.value,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textStyles.extraBold20,
-                            ),
-                            if (controller.nickName.value.isNotEmpty)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AppIcon(
-                                    "special_a",
-                                    size: 12,
-                                    color: context.colorTokens.textHint,
-                                  ),
-                                  const Gap(4),
-                                  Flexible(
-                                    child: Text(
-                                      controller.nickName.value,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: context.textStyles.bodySmall
-                                          .copyWith(
-                                            color: context.colorTokens.textHint,
-                                          ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                      AppIcon(
-                        "right_back",
-                        size: 12,
-                        color: context.colorTokens.primary,
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
             const Gap(28),
-            _SectionLabel(context.l10n.preferencesSection),
-            const Gap(8),
-            _PreferenceSwitchTile(
-              iconName: "moon",
-              label: context.l10n.darkModeLabel,
-              value: controller.isDarkMode,
-              onChanged: controller.onToggleDarkMode,
-            ),
-            const Gap(12),
-            _PreferenceSwitchTile(
-              icon: Icons.notifications_none_rounded,
-              label: context.l10n.notificationsLabel,
-              value: controller.notificationsEnabled,
-              onChanged: controller.onToggleNotifications,
-            ),
-            const Gap(12),
             Obx(
-              () => _SettingsTile(
-                icon: Icons.language_rounded,
-                label: context.l10n.language,
-                trailingText: controller.languageLabel,
-                onTap: controller.onTapLanguage,
+              () => SettingsSection(
+                title: context.l10n.preferencesSection,
+                children: [
+                  SettingsTile.toggle(
+                    icon: controller.isDarkMode.value
+                        ? Icons.dark_mode_rounded
+                        : Icons.light_mode_rounded,
+                    title: context.l10n.darkModeLabel,
+                    subtitle: controller.darkModeSubtitle,
+                    value: controller.isDarkMode.value,
+                    onChanged: controller.onToggleDarkMode,
+                    tint: context.colorTokens.primary,
+                  ),
+                  SettingsTile.navigation(
+                    icon: Icons.palette_rounded,
+                    title: context.l10n.accentColorSettingsTitle,
+                    subtitle: context.l10n.accentColorSettingsSubtitle,
+                    trailingText: context.l10n.editButton,
+                    tint: controller.accentColor.value,
+                    onTap: controller.onTapAccentColor,
+                  ),
+                  SettingsTile.toggle(
+                    icon: Icons.notifications_active_rounded,
+                    title: context.l10n.timerNotificationsTitle,
+                    subtitle: controller.notificationsSubtitle,
+                    value: controller.notificationsEnabled.value,
+                    onChanged: controller.onToggleNotifications,
+                    tint: const Color(0xFF1FA2A6),
+                  ),
+                  SettingsTile.navigation(
+                    icon: Icons.language_rounded,
+                    title: context.l10n.language,
+                    subtitle: context.l10n.appLanguageSubtitle,
+                    trailingText: controller.languageLabel,
+                    tint: const Color(0xFF2E6ADE),
+                    onTap: controller.onTapLanguage,
+                  ),
+                ],
               ),
             ),
             const Gap(28),
-            _SectionLabel(context.l10n.supportSection),
-            const Gap(8),
-            _SettingsTile(
-              iconName: "faq",
-              label: context.l10n.faqLabel,
-              onTap: controller.onTapFaq,
-            ),
-            const Gap(12),
-            _SettingsTile(
-              icon: Icons.info_outline_rounded,
-              label: context.l10n.aboutLabel,
-              trailingText: context.l10n.appVersionLabel(
-                AppConstants.appTitle,
-                AppConstants.appVersion,
-              ),
-              onTap: null,
-            ),
-            const Gap(28),
-            _SectionLabel(context.l10n.accountSection),
-            const Gap(8),
-            _SettingsTile(
-              icon: Icons.logout_rounded,
-              label: context.l10n.logOutLabel,
-              onTap: controller.onTapLogOut,
-              isDestructive: true,
-            ),
-            const Gap(24),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Text(
-    text,
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: context.textStyles.bodySmall.copyWith(
-      color: context.colorTokens.textHint,
-    ),
-  );
-}
-
-class _PreferenceSwitchTile extends StatelessWidget {
-  const _PreferenceSwitchTile({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    this.iconName,
-    this.icon,
-  });
-
-  final String label;
-  final RxBool value;
-  final ValueChanged<bool> onChanged;
-  final String? iconName;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(18),
-    ),
-    child: Row(
-      children: [
-        _IconBadge(iconName: iconName, icon: icon),
-        const Gap(12),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodyLarge,
-          ),
-        ),
-        // Only the switch value is reactive — keep the Obx off the rest of the
-        // static row so a toggle doesn't rebuild the whole tile.
-        Obx(
-          () => Switch(
-            value: value.value,
-            onChanged: onChanged,
-            activeThumbColor: context.colorTokens.primary,
-            activeTrackColor: context.colorTokens.primaryVeryLight,
-            inactiveThumbColor: context.colorTokens.primary,
-            inactiveTrackColor: context.colorTokens.primaryVeryLight,
-            trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
-              states,
-            ) {
-              if (states.contains(WidgetState.selected)) {
-                return context.colorTokens.primaryVeryLight;
-              }
-              return context.colorTokens.primary;
-            }),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _IconBadge extends StatelessWidget {
-  const _IconBadge({this.iconName, this.icon})
-    : assert(
-        iconName != null || icon != null,
-        "Provide either iconName or icon",
-      );
-
-  final String? iconName;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 36,
-    height: 36,
-    decoration: BoxDecoration(
-      color: context.colorTokens.primaryVeryLight,
-      shape: BoxShape.circle,
-    ),
-    child: Center(
-      child: iconName != null
-          ? AppIcon(iconName!, size: 18, color: context.colorTokens.primary)
-          : Icon(icon, size: 20, color: context.colorTokens.primary),
-    ),
-  );
-}
-
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    this.iconName,
-    this.icon,
-    required this.label,
-    required this.onTap,
-    this.trailingText,
-    this.isDestructive = false,
-  }) : assert(
-         iconName != null || icon != null,
-         "Provide either iconName or icon",
-       );
-
-  final String? iconName;
-  final IconData? icon;
-  final String label;
-  final VoidCallback? onTap;
-  final String? trailingText;
-  final bool isDestructive;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color tint = isDestructive
-        ? context.colorTokens.error
-        : context.colorTokens.primary;
-    final Widget content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: isDestructive
-                  ? context.colorTokens.error.withValues(alpha: 0.12)
-                  : context.colorTokens.primaryVeryLight,
-
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: iconName != null
-                  ? AppIcon(iconName!, size: 18, color: tint)
-                  : Icon(icon, size: 20, color: tint),
-            ),
-          ),
-          const Gap(12),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: isDestructive ? context.colorTokens.error : null,
-              ),
-            ),
-          ),
-          if (trailingText != null) ...[
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 120),
-              child: Text(
-                trailingText!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.textHint,
+            SettingsSection(
+              title: context.l10n.helpSection,
+              children: [
+                SettingsTile.navigationIconName(
+                  iconName: "faq",
+                  title: context.l10n.faqLabel,
+                  subtitle: context.l10n.faqSettingsSubtitle,
+                  tint: const Color(0xFF3FA65D),
+                  onTap: controller.onTapFaq,
                 ),
-              ),
+                SettingsTile.navigation(
+                  icon: Icons.feedback_outlined,
+                  title: context.l10n.sendFeedbackTitle,
+                  subtitle: context.l10n.sendFeedbackSubtitle,
+                  tint: const Color(0xFF1FA2A6),
+                  onTap: controller.onTapFeedback,
+                ),
+              ],
             ),
-            if (onTap != null) const Gap(8),
+            const Gap(28),
+            SettingsSection(
+              title: context.l10n.aboutSection,
+              children: [
+                SettingsTile.info(
+                  icon: Icons.info_outline_rounded,
+                  title: AppConstants.appTitle,
+                  subtitle: context.l10n.appVersionValue(
+                    AppConstants.appVersion,
+                  ),
+                  tint: context.colorTokens.textHint,
+                ),
+                if (AppConstants.useMockData)
+                  SettingsTile.info(
+                    icon: Icons.developer_mode_rounded,
+                    title: context.l10n.debugEnvironmentTitle,
+                    subtitle: context.l10n.debugEnvironmentSubtitle,
+                    tint: context.colorTokens.textHint,
+                  ),
+              ],
+            ),
+            const Gap(28),
+            SettingsSection(
+              title: context.l10n.sessionSection,
+              children: [
+                SettingsTile.danger(
+                  icon: Icons.logout_rounded,
+                  title: context.l10n.logOutLabel,
+                  subtitle: context.l10n.logOutSettingsSubtitle,
+                  onTap: controller.onTapLogOut,
+                ),
+              ],
+            ),
           ],
-          if (onTap != null)
-            AppIcon("right_back", size: 12, color: context.colorTokens.primary),
-        ],
+        ),
       ),
     );
-
-    if (onTap == null) {
-      return content;
-    }
-    return BounceTap(pressedScale: 0.97, onTap: onTap!, child: content);
   }
 }
