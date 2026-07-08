@@ -22,12 +22,31 @@ class CreateGroupController extends GetxController {
   final AppNavigator _appNavigator;
 
   final TextEditingController groupNameController = TextEditingController();
+  final TextEditingController friendSearchController = TextEditingController();
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
   final Rx<GroupThemeType?> selectedTheme = Rx<GroupThemeType?>(null);
+  final RxString friendSearchQuery = "".obs;
   final RxBool isLoading = true.obs;
+  final RxBool hasLoadError = false.obs;
   final RxBool isCreating = false.obs;
   final RxBool canCreate = false.obs;
+
+  bool get hasName => groupNameController.text.trim().isNotEmpty;
+
+  bool get hasTheme => selectedTheme.value != null;
+
+  bool get hasFriends => selectedFriendIds.isNotEmpty;
+
+  List<FriendOption> get filteredFriends {
+    final String query = friendSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) {
+      return availableFriends;
+    }
+    return availableFriends
+        .where((friend) => friend.name.toLowerCase().contains(query))
+        .toList();
+  }
 
   @override
   void onInit() {
@@ -37,26 +56,41 @@ class CreateGroupController extends GetxController {
 
   Future<void> loadFriends() async {
     isLoading.value = true;
+    hasLoadError.value = false;
     final Either<AppError, List<FriendOption>> result =
         await _getInvitableFriendsUseCase();
-    result.fold(
-      (error) => availableFriends.clear(),
-      (friends) => availableFriends.value = friends,
-    );
+    result.fold((error) {
+      availableFriends.clear();
+      hasLoadError.value = true;
+    }, (friends) => availableFriends.value = friends);
     isLoading.value = false;
   }
 
   void onGroupNameChanged(String value) => _refreshCanCreate();
+
+  void onFriendSearchChanged(String value) => friendSearchQuery.value = value;
 
   void onSelectTheme(GroupThemeType theme) {
     selectedTheme.value = theme;
     _refreshCanCreate();
   }
 
-  void _refreshCanCreate() => canCreate.value =
-      groupNameController.text.trim().isNotEmpty &&
-      selectedTheme.value != null &&
-      selectedFriendIds.isNotEmpty;
+  void _refreshCanCreate() =>
+      canCreate.value = hasName && hasTheme && hasFriends;
+
+  String createButtonText(BuildContext context) {
+    if (!hasName) {
+      return context.l10n.createGroupMissingName;
+    }
+    if (!hasTheme) {
+      return context.l10n.createGroupMissingTheme;
+    }
+    if (!hasFriends) {
+      return context.l10n.createGroupMissingFriends;
+    }
+    final int count = selectedFriendIds.length;
+    return context.l10n.createGroupWithFriendsButton(count);
+  }
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -85,9 +119,7 @@ class CreateGroupController extends GetxController {
       return;
     }
     if (selectedFriendIds.isEmpty) {
-      _appNavigator.showErrorSnackBar(
-        Get.context!.l10n.groupNeedsFriendError,
-      );
+      _appNavigator.showErrorSnackBar(Get.context!.l10n.groupNeedsFriendError);
       return;
     }
 
@@ -111,6 +143,7 @@ class CreateGroupController extends GetxController {
   @override
   void onClose() {
     groupNameController.dispose();
+    friendSearchController.dispose();
     super.onClose();
   }
 }
