@@ -5,6 +5,7 @@ import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/add_daily_task_use_case.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/theme/subject_colors.dart";
 
 class CreateTaskController extends GetxController {
@@ -38,8 +39,16 @@ class CreateTaskController extends GetxController {
   }
 
   Future<void> onSubmit() async {
+    if (isSaving.value) {
+      return;
+    }
+
     final String name = nameController.text.trim();
-    if (name.isEmpty || targetDays.value <= 0 || isSaving.value) {
+    if (name.isEmpty) {
+      _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
+      return;
+    }
+    if (targetDays.value <= 0) {
       return;
     }
 

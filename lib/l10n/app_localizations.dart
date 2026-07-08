@@ -139,13 +139,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeGreetingDefault.
   ///
   /// In en, this message translates to:
-  /// **'Let\'s Start'**
+  /// **'Hello'**
   String get homeGreetingDefault;
 
   /// No description provided for @homeGreetingWithName.
   ///
   /// In en, this message translates to:
-  /// **'Let\'s Start, {userName}'**
+  /// **'Hello, {userName}'**
   String homeGreetingWithName(String userName);
 
   /// No description provided for @homeSubtitle.
@@ -153,6 +153,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What are we tackling today?'**
   String get homeSubtitle;
+
+  /// No description provided for @homeSubtitleFocusedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve focused {duration} today'**
+  String homeSubtitleFocusedToday(String duration);
+
+  /// No description provided for @homeSubtitleNextSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Next up: {title} at {time}'**
+  String homeSubtitleNextSchedule(String title, String time);
+
+  /// No description provided for @homeSubtitleStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your first focus session'**
+  String get homeSubtitleStart;
 
   /// No description provided for @homeTasksSection.
   ///
@@ -163,8 +181,110 @@ abstract class AppLocalizations {
   /// No description provided for @homeCategoriesSection.
   ///
   /// In en, this message translates to:
-  /// **'Your time'**
+  /// **'Activities'**
   String get homeCategoriesSection;
+
+  /// No description provided for @homeActionContinueEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue now'**
+  String get homeActionContinueEyebrow;
+
+  /// No description provided for @homeActionContinueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get homeActionContinueButton;
+
+  /// No description provided for @homeActionStartEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start focus'**
+  String get homeActionStartEyebrow;
+
+  /// No description provided for @homeActionStartButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get homeActionStartButton;
+
+  /// No description provided for @homeActionSuggestedMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Your most-tracked subject'**
+  String get homeActionSuggestedMeta;
+
+  /// No description provided for @homeActionCreateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first subject to start a focus session.'**
+  String get homeActionCreateBody;
+
+  /// No description provided for @homeActionCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create subject'**
+  String get homeActionCreateButton;
+
+  /// No description provided for @homeSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s summary'**
+  String get homeSummaryTitle;
+
+  /// No description provided for @homeSummaryFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get homeSummaryFocus;
+
+  /// No description provided for @homeSummaryGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get homeSummaryGoals;
+
+  /// No description provided for @homeSummaryPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get homeSummaryPages;
+
+  /// No description provided for @homeSummarySessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get homeSummarySessions;
+
+  /// No description provided for @homeGoalsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String homeGoalsProgress(int done, int total);
+
+  /// No description provided for @homeCategoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet'**
+  String get homeCategoryEmpty;
+
+  /// No description provided for @homeNextScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next up'**
+  String get homeNextScheduleTitle;
+
+  /// No description provided for @homeNextScheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule today'**
+  String get homeNextScheduleEmpty;
+
+  /// No description provided for @homeNextScheduleAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add schedule'**
+  String get homeNextScheduleAdd;
 
   /// No description provided for @addTaskButton.
   ///
@@ -915,6 +1035,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Incomplete entry — fill in the title and a valid start time.'**
   String get incompleteScheduleEntryError;
+
+  /// No description provided for @endTimeBeforeStartError.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be later than the start time.'**
+  String get endTimeBeforeStartError;
+
+  /// No description provided for @nameRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name first.'**
+  String get nameRequiredError;
+
+  /// No description provided for @groupThemeRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a theme for your group.'**
+  String get groupThemeRequiredError;
+
+  /// No description provided for @groupNeedsFriendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite at least one friend — a group can\'t be created alone.'**
+  String get groupNeedsFriendError;
 
   /// No description provided for @continueWithGoogleButton.
   ///

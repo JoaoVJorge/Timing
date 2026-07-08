@@ -6,7 +6,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/timer/timer_controller.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_button.dart";
+import "package:help_out/shared/widgets/app_icon_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/theme/subject_icons.dart";
@@ -175,7 +175,7 @@ class TimerPage extends StatelessWidget {
               const Spacer(),
               Center(
                 child: Obx(
-                  () => AppButton(
+                  () => AppIconButton(
                     icon: controller.isRunning.value
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,

@@ -4,7 +4,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/notes/notes_controller.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/floating_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 
 class NotesPage extends StatelessWidget {
   const NotesPage({super.key});
@@ -27,7 +27,7 @@ class NotesPage extends StatelessWidget {
         showBackButton: true,
         onBack: controller.onTapSave,
       ),
-      bottomBar: FloatingPrimaryButton(
+      bottomBar: AppButton(
         label: context.l10n.saveNotesButton,
         onTap: controller.onTapSave,
       ),

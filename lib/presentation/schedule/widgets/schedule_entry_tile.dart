@@ -4,14 +4,9 @@ import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 class ScheduleEntryTile extends StatelessWidget {
-  const ScheduleEntryTile({
-    required this.entry,
-    required this.onDelete,
-    super.key,
-  });
+  const ScheduleEntryTile({required this.entry, super.key});
 
   final ScheduleEntryEntity entry;
-  final VoidCallback onDelete;
 
   String _formatMinutes(BuildContext context, int minutes) =>
       TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60).format(context);
@@ -59,14 +54,6 @@ class ScheduleEntryTile extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          GestureDetector(
-            onTap: onDelete,
-            child: Icon(
-              Icons.delete_outline,
-              size: 20,
-              color: context.colorTokens.textHint,
             ),
           ),
         ],

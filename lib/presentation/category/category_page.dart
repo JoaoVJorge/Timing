@@ -69,6 +69,7 @@ class CategoryPage extends StatelessWidget {
             final SubjectEntity subject = subjects[index];
             return NotebookSwipeTile(
               onTapNotes: () => controller.onTapNotes(subject),
+              onDelete: () => controller.onDeleteSubject(subject),
               child: switch (controller.category) {
                 TimeCategoryType.reading => ReadingSubjectTile(
                   subject: subject,

@@ -9,6 +9,10 @@ class HomeBindings extends Bindings {
         appController: Get.find(),
         appNavigator: Get.find(),
         lastActivityService: Get.find(),
+        dailyProgressService: Get.find(),
+        getSubjectsUseCase: Get.find(),
+        getDailyTasksUseCase: Get.find(),
+        getScheduleEntriesUseCase: Get.find(),
       ),
     );
   }

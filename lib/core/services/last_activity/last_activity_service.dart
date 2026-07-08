@@ -23,10 +23,11 @@ class LastActivityService {
     }
   }
 
-  Future<void> record(String label) async {
+  Future<void> record(String label, {String? subjectId}) async {
     final LastActivityEntity activity = LastActivityEntity(
       label: label,
       timestamp: DateTime.now(),
+      subjectId: subjectId,
     );
     lastActivity.value = activity;
     await _localStorageService.write(

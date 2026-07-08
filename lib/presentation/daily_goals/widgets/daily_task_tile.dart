@@ -36,7 +36,7 @@ class DailyTaskTile extends StatelessWidget {
           color: context.colorTokens.error,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+        child: const AppIcon("trash", color: Colors.white, size: 26),
       ),
       child: Container(
         padding: const EdgeInsets.all(16),

@@ -9,14 +9,49 @@
   "loginNameHint": "Your name",
   "loginButton": "Let's Start",
 
-  "homeGreetingDefault": "Let's Start",
-  "homeGreetingWithName": "Let's Start, {userName}",
+  "homeGreetingDefault": "Hello",
+  "homeGreetingWithName": "Hello, {userName}",
   "@homeGreetingWithName": {
     "placeholders": { "userName": { "type": "String" } }
   },
   "homeSubtitle": "What are we tackling today?",
+  "homeSubtitleFocusedToday": "You've focused {duration} today",
+  "@homeSubtitleFocusedToday": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "homeSubtitleNextSchedule": "Next up: {title} at {time}",
+  "@homeSubtitleNextSchedule": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "time": { "type": "String" }
+    }
+  },
+  "homeSubtitleStart": "Start your first focus session",
   "homeTasksSection": "Daily goals",
-  "homeCategoriesSection": "Your time",
+  "homeCategoriesSection": "Activities",
+  "homeActionContinueEyebrow": "Continue now",
+  "homeActionContinueButton": "Continue",
+  "homeActionStartEyebrow": "Start focus",
+  "homeActionStartButton": "Start",
+  "homeActionSuggestedMeta": "Your most-tracked subject",
+  "homeActionCreateBody": "Create your first subject to start a focus session.",
+  "homeActionCreateButton": "Create subject",
+  "homeSummaryTitle": "Today's summary",
+  "homeSummaryFocus": "Focus",
+  "homeSummaryGoals": "Goals",
+  "homeSummaryPages": "Pages",
+  "homeSummarySessions": "Sessions",
+  "homeGoalsProgress": "{done} of {total} done",
+  "@homeGoalsProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "homeCategoryEmpty": "Nothing yet",
+  "homeNextScheduleTitle": "Next up",
+  "homeNextScheduleEmpty": "No schedule today",
+  "homeNextScheduleAdd": "Add schedule",
 
   "addTaskButton": "Add goal",
   "createTaskTitle": "New goal",
@@ -231,6 +266,10 @@
   "startTimeLabel": "Start time",
   "endTimeOptionalLabel": "End time (optional)",
   "incompleteScheduleEntryError": "Incomplete entry — fill in the title and a valid start time.",
+  "endTimeBeforeStartError": "End time must be later than the start time.",
+  "nameRequiredError": "Please enter a name first.",
+  "groupThemeRequiredError": "Pick a theme for your group.",
+  "groupNeedsFriendError": "Invite at least one friend — a group can't be created alone.",
 
   "continueWithGoogleButton": "Continue with Google",
   "continueWithAppleButton": "Continue with Apple",

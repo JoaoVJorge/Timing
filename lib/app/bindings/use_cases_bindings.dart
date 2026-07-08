@@ -3,6 +3,7 @@ import "package:help_out/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/delete_daily_task_use_case.dart";
+import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
@@ -36,6 +37,10 @@ class UseCasesBindings extends Bindings {
       GetSubjectsUseCase(subjectsRepository: Get.find()),
       permanent: true,
     );
+    Get.put<DeleteSubjectUseCase>(
+      DeleteSubjectUseCase(subjectsRepository: Get.find()),
+    );
+
     Get.put<AddSubjectUseCase>(
       AddSubjectUseCase(subjectsRepository: Get.find()),
       permanent: true,

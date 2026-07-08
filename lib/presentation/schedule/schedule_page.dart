@@ -8,7 +8,7 @@ import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart"
 import "package:help_out/presentation/schedule/widgets/weekday_selector.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/floating_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -22,7 +22,7 @@ class SchedulePage extends StatelessWidget {
         title: context.l10n.myScheduleTitle,
         showBackButton: true,
       ),
-      bottomBar: FloatingPrimaryButton(
+      bottomBar: AppButton(
         label: context.l10n.addScheduleEntryButton,
         onTap: controller.onTapAddEntry,
       ),
@@ -61,9 +61,23 @@ class SchedulePage extends StatelessWidget {
                 separatorBuilder: (context, index) => const Gap(12),
                 itemBuilder: (context, index) {
                   final ScheduleEntryEntity entry = entries[index];
-                  return ScheduleEntryTile(
-                    entry: entry,
-                    onDelete: () => controller.onDeleteEntry(entry.id),
+                  return Dismissible(
+                    key: ValueKey(entry.id),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) => controller.onDeleteEntry(entry.id),
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      decoration: BoxDecoration(
+                        color: context.colorTokens.error,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                    child: ScheduleEntryTile(entry: entry),
                   );
                 },
               );

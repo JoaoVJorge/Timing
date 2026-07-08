@@ -4,6 +4,7 @@ import "package:flutter/widgets.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
+import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/notifications/timer_notification_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
@@ -12,6 +13,7 @@ class TimerController extends GetxController {
   TimerController({
     required this._updateSubjectTimeUseCase,
     required this._lastActivityService,
+    required this._dailyProgressService,
     required this._timerNotificationService,
     required this.subject,
   });
@@ -20,6 +22,7 @@ class TimerController extends GetxController {
 
   final UpdateSubjectTimeUseCase _updateSubjectTimeUseCase;
   final LastActivityService _lastActivityService;
+  final DailyProgressService _dailyProgressService;
   final TimerNotificationService _timerNotificationService;
 
   final SubjectEntity subject;
@@ -87,15 +90,17 @@ class TimerController extends GetxController {
   void saveProgress() => _persistAccumulatedTime();
 
   void _persistAccumulatedTime() {
-    if (sessionSeconds.value > 0) {
+    final int elapsedSinceLastPersist = sessionSeconds.value;
+    if (elapsedSinceLastPersist > 0) {
       _hasLoggedTime = true;
     }
-    _baselineSeconds += sessionSeconds.value;
+    _baselineSeconds += elapsedSinceLastPersist;
     sessionSeconds.value = 0;
     _updateSubjectTimeUseCase(
       subjectId: subject.id,
       totalSeconds: _baselineSeconds,
     );
+    _dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
   }
 
   void _updateNotification() {
@@ -134,7 +139,8 @@ class TimerController extends GetxController {
     _ticker?.cancel();
     _persistAccumulatedTime();
     if (_hasLoggedTime) {
-      _lastActivityService.record(subject.name);
+      _lastActivityService.record(subject.name, subjectId: subject.id);
+      _dailyProgressService.registerSession();
     }
     _timerNotificationService.cancel();
     super.onClose();

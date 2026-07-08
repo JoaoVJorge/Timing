@@ -6,6 +6,7 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:help_out/theme/subject_icons.dart";
 
@@ -40,8 +41,13 @@ class CreateSubjectController extends GetxController {
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
   Future<void> onSubmit() async {
+    if (isSaving.value) {
+      return;
+    }
+
     final String name = nameController.text.trim();
-    if (name.isEmpty || isSaving.value) {
+    if (name.isEmpty) {
+      _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
       return;
     }
 

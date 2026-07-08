@@ -4,7 +4,7 @@ import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/phone_login/phone_login_controller.dart";
 import "package:help_out/shared/widgets/auth_gradient_scaffold.dart";
-import "package:help_out/shared/widgets/auth_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/shared/widgets/auth_text_field.dart";
 
 class PhoneLoginPage extends StatelessWidget {
@@ -20,7 +20,8 @@ class PhoneLoginPage extends StatelessWidget {
         title: context.l10n.phoneLoginTitle,
         subtitle: context.l10n.phoneLoginSubtitle,
         bottom: Obx(
-          () => AuthPrimaryButton(
+          () => AppButton(
+            variant: AppButtonVariant.onGradient,
             label: context.l10n.sendCodeButton,
             enabled: controller.canSubmit.value,
             isLoading: controller.isSubmitting.value,

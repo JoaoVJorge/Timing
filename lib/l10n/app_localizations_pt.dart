@@ -28,21 +28,88 @@ class AppLocalizationsPt extends AppLocalizations {
   String get loginButton => 'Vamos Começar';
 
   @override
-  String get homeGreetingDefault => 'Vamos Começar';
+  String get homeGreetingDefault => 'Olá';
 
   @override
   String homeGreetingWithName(String userName) {
-    return 'Vamos Começar, $userName';
+    return 'Olá, $userName';
   }
 
   @override
   String get homeSubtitle => 'O que vamos fazer hoje?';
 
   @override
+  String homeSubtitleFocusedToday(String duration) {
+    return 'Você já focou $duration hoje';
+  }
+
+  @override
+  String homeSubtitleNextSchedule(String title, String time) {
+    return 'Próximo horário: $title às $time';
+  }
+
+  @override
+  String get homeSubtitleStart => 'Comece sua primeira sessão de foco';
+
+  @override
   String get homeTasksSection => 'Metas diárias';
 
   @override
-  String get homeCategoriesSection => 'Seu tempo';
+  String get homeCategoriesSection => 'Atividades';
+
+  @override
+  String get homeActionContinueEyebrow => 'Continuar agora';
+
+  @override
+  String get homeActionContinueButton => 'Continuar';
+
+  @override
+  String get homeActionStartEyebrow => 'Começar foco';
+
+  @override
+  String get homeActionStartButton => 'Começar';
+
+  @override
+  String get homeActionSuggestedMeta => 'Sua matéria com mais tempo';
+
+  @override
+  String get homeActionCreateBody =>
+      'Crie sua primeira matéria para iniciar uma sessão de foco.';
+
+  @override
+  String get homeActionCreateButton => 'Criar matéria';
+
+  @override
+  String get homeSummaryTitle => 'Resumo de hoje';
+
+  @override
+  String get homeSummaryFocus => 'Foco';
+
+  @override
+  String get homeSummaryGoals => 'Metas';
+
+  @override
+  String get homeSummaryPages => 'Páginas';
+
+  @override
+  String get homeSummarySessions => 'Sessões';
+
+  @override
+  String homeGoalsProgress(int done, int total) {
+    return '$done de $total feitas';
+  }
+
+  @override
+  String get homeCategoryEmpty => 'Nada ainda';
+
+  @override
+  String get homeNextScheduleTitle => 'Próximo horário';
+
+  @override
+  String get homeNextScheduleEmpty => 'Nenhum horário hoje';
+
+  @override
+  String get homeNextScheduleAdd => 'Adicionar horário';
 
   @override
   String get addTaskButton => 'Adicionar meta';
@@ -463,6 +530,20 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get incompleteScheduleEntryError =>
       'Cadastro incompleto — preencha o título e um horário de início válido.';
+
+  @override
+  String get endTimeBeforeStartError =>
+      'O horário de término deve ser depois do horário de início.';
+
+  @override
+  String get nameRequiredError => 'Digite um nome primeiro.';
+
+  @override
+  String get groupThemeRequiredError => 'Escolha um tema para o grupo.';
+
+  @override
+  String get groupNeedsFriendError =>
+      'Convide pelo menos um amigo — um grupo não pode ser criado sozinho.';
 
   @override
   String get continueWithGoogleButton => 'Continuar com Google';

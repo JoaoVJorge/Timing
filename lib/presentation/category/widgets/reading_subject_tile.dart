@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_button.dart";
+import "package:help_out/shared/widgets/app_icon_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
 class ReadingSubjectTile extends StatelessWidget {
@@ -82,7 +82,7 @@ class ReadingSubjectTile extends StatelessWidget {
             ),
           ),
           const Gap(8),
-          AppButton(svgName: "play", onTap: onTapPlay, size: 44),
+          AppIconButton(svgName: "play", onTap: onTapPlay, size: 44),
         ],
       ),
     );

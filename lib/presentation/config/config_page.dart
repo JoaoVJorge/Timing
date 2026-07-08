@@ -105,88 +105,18 @@ class ConfigPage extends StatelessWidget {
             const Gap(28),
             _SectionLabel(context.l10n.preferencesSection),
             const Gap(8),
-            Obx(
-              () => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colorTokens.surface,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  children: [
-                    const _IconBadge(iconName: "moon"),
-                    const Gap(12),
-                    Expanded(
-                      child: Text(
-                        context.l10n.darkModeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodyLarge,
-                      ),
-                    ),
-                    Switch(
-                      value: controller.isDarkMode.value,
-                      onChanged: controller.onToggleDarkMode,
-                      activeThumbColor: context.colorTokens.primary,
-                      activeTrackColor: context.colorTokens.primaryVeryLight,
-                      inactiveThumbColor: context.colorTokens.primary,
-                      inactiveTrackColor: context.colorTokens.primaryVeryLight,
-                      trackOutlineColor:
-                          WidgetStateProperty.resolveWith<Color?>((states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return context.colorTokens.primaryVeryLight;
-                            }
-                            return context.colorTokens.primary;
-                          }),
-                    ),
-                  ],
-                ),
-              ),
+            _PreferenceSwitchTile(
+              iconName: "moon",
+              label: context.l10n.darkModeLabel,
+              value: controller.isDarkMode,
+              onChanged: controller.onToggleDarkMode,
             ),
             const Gap(12),
-            Obx(
-              () => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colorTokens.surface,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Row(
-                  children: [
-                    const _IconBadge(icon: Icons.notifications_none_rounded),
-                    const Gap(12),
-                    Expanded(
-                      child: Text(
-                        context.l10n.notificationsLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodyLarge,
-                      ),
-                    ),
-                    Switch(
-                      value: controller.notificationsEnabled.value,
-                      onChanged: controller.onToggleNotifications,
-                      activeThumbColor: context.colorTokens.primary,
-                      activeTrackColor: context.colorTokens.primaryVeryLight,
-                      inactiveThumbColor: context.colorTokens.primary,
-                      inactiveTrackColor: context.colorTokens.primaryVeryLight,
-                      trackOutlineColor:
-                          WidgetStateProperty.resolveWith<Color?>((states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return context.colorTokens.primaryVeryLight;
-                            }
-                            return context.colorTokens.primary;
-                          }),
-                    ),
-                  ],
-                ),
-              ),
+            _PreferenceSwitchTile(
+              icon: Icons.notifications_none_rounded,
+              label: context.l10n.notificationsLabel,
+              value: controller.notificationsEnabled,
+              onChanged: controller.onToggleNotifications,
             ),
             const Gap(12),
             Obx(
@@ -244,6 +174,65 @@ class _SectionLabel extends StatelessWidget {
     overflow: TextOverflow.ellipsis,
     style: context.textStyles.bodySmall.copyWith(
       color: context.colorTokens.textHint,
+    ),
+  );
+}
+
+class _PreferenceSwitchTile extends StatelessWidget {
+  const _PreferenceSwitchTile({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.iconName,
+    this.icon,
+  });
+
+  final String label;
+  final RxBool value;
+  final ValueChanged<bool> onChanged;
+  final String? iconName;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Row(
+      children: [
+        _IconBadge(iconName: iconName, icon: icon),
+        const Gap(12),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyLarge,
+          ),
+        ),
+        // Only the switch value is reactive — keep the Obx off the rest of the
+        // static row so a toggle doesn't rebuild the whole tile.
+        Obx(
+          () => Switch(
+            value: value.value,
+            onChanged: onChanged,
+            activeThumbColor: context.colorTokens.primary,
+            activeTrackColor: context.colorTokens.primaryVeryLight,
+            inactiveThumbColor: context.colorTokens.primary,
+            inactiveTrackColor: context.colorTokens.primaryVeryLight,
+            trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
+              states,
+            ) {
+              if (states.contains(WidgetState.selected)) {
+                return context.colorTokens.primaryVeryLight;
+              }
+              return context.colorTokens.primary;
+            }),
+          ),
+        ),
+      ],
     ),
   );
 }

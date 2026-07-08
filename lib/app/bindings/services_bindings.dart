@@ -1,6 +1,7 @@
 import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
+import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/http/http_client_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
@@ -26,6 +27,10 @@ class ServicesBindings extends Bindings {
     final LastActivityService lastActivityService = LastActivityService(localStorageService: Get.find());
     await lastActivityService.load();
     Get.put<LastActivityService>(lastActivityService, permanent: true);
+
+    final DailyProgressService dailyProgressService = DailyProgressService(localStorageService: Get.find());
+    await dailyProgressService.load();
+    Get.put<DailyProgressService>(dailyProgressService, permanent: true);
 
     final Dio dio = Dio(BaseOptions(baseUrl: EnvironmentKeys.baseUrl));
     Get.put<Dio>(dio, permanent: true);

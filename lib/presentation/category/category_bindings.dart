@@ -11,6 +11,8 @@ class CategoryBindings extends Bindings {
       CategoryController(
         getSubjectsUseCase: Get.find(),
         updateSubjectPagesUseCase: Get.find(),
+        deleteSubjectUseCase: Get.find(),
+        dailyProgressService: Get.find(),
         appNavigator: Get.find(),
         category: category,
       ),

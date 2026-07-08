@@ -4,7 +4,7 @@ import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/dialog_top_bar.dart";
-import "package:help_out/shared/widgets/floating_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/theme/decoration.dart";
 
 class LogPagesDialog extends StatefulWidget {
@@ -65,7 +65,7 @@ class _LogPagesDialogState extends State<LogPagesDialog> {
       ],
     ),
     actions: [
-      FloatingPrimaryButton(
+      AppButton(
         label: context.l10n.logPagesButton,
         onTap: _onSubmit,
       ),

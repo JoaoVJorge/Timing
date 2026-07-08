@@ -6,6 +6,7 @@ import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
 
@@ -53,7 +54,9 @@ class CreateGroupController extends GetxController {
   }
 
   void _refreshCanCreate() => canCreate.value =
-      groupNameController.text.trim().isNotEmpty && selectedTheme.value != null;
+      groupNameController.text.trim().isNotEmpty &&
+      selectedTheme.value != null &&
+      selectedFriendIds.isNotEmpty;
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -61,12 +64,30 @@ class CreateGroupController extends GetxController {
     } else {
       selectedFriendIds.add(friendId);
     }
+    _refreshCanCreate();
   }
 
   Future<void> onTapCreate() async {
+    if (isCreating.value) {
+      return;
+    }
+
     final String name = groupNameController.text.trim();
     final GroupThemeType? theme = selectedTheme.value;
-    if (name.isEmpty || theme == null) {
+    if (name.isEmpty) {
+      _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
+      return;
+    }
+    if (theme == null) {
+      _appNavigator.showErrorSnackBar(
+        Get.context!.l10n.groupThemeRequiredError,
+      );
+      return;
+    }
+    if (selectedFriendIds.isEmpty) {
+      _appNavigator.showErrorSnackBar(
+        Get.context!.l10n.groupNeedsFriendError,
+      );
       return;
     }
 
