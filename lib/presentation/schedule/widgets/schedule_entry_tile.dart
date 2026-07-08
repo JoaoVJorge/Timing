@@ -19,7 +19,7 @@ class ScheduleEntryTile extends StatelessWidget {
         : "${_formatMinutes(context, entry.startMinutes)} - ${_formatMinutes(context, entry.endMinutes!)}";
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(16),
@@ -34,7 +34,7 @@ class ScheduleEntryTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Gap(14),
+          const Gap(16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
