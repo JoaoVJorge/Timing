@@ -3,6 +3,7 @@ import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/functions/format_schedule_time.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 /// Shows the next schedule slot still to come today, or a prompt to add one.
@@ -30,17 +31,18 @@ class NextScheduleCard extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: context.colorTokens.primaryVeryLight,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.schedule_rounded,
+              child: AppIcon(
+                "clock",
                 size: 22,
                 color: context.colorTokens.primary,
               ),
             ),
-            const Gap(14),
+            const Gap(16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

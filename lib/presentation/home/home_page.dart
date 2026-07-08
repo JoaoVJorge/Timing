@@ -120,7 +120,7 @@ class HomePage extends StatelessWidget {
         meta: activity == null
             ? null
             : formatRelativeTime(context, activity.timestamp),
-        actionIcon: Icons.play_arrow_rounded,
+        actionIconName: "play",
         onTap: controller.onContinue,
       );
     }
@@ -131,7 +131,7 @@ class HomePage extends StatelessWidget {
         eyebrow: context.l10n.homeActionStartEyebrow,
         title: suggested.name,
         meta: context.l10n.homeActionSuggestedMeta,
-        actionIcon: Icons.play_arrow_rounded,
+        actionIconName: "play",
         onTap: controller.onStartSuggested,
       );
     }
@@ -139,7 +139,7 @@ class HomePage extends StatelessWidget {
     return HomeActionCard(
       eyebrow: context.l10n.homeActionStartEyebrow,
       title: context.l10n.homeActionCreateBody,
-      actionIcon: Icons.add_rounded,
+      actionIconName: "plus",
       onTap: controller.onCreateFirstSubject,
     );
   }

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 /// Hero card at the top of Home carrying the single next best action:
@@ -9,7 +10,7 @@ class HomeActionCard extends StatelessWidget {
   const HomeActionCard({
     required this.eyebrow,
     required this.title,
-    required this.actionIcon,
+    required this.actionIconName,
     required this.onTap,
     this.meta,
     super.key,
@@ -18,7 +19,7 @@ class HomeActionCard extends StatelessWidget {
   final String eyebrow;
   final String title;
   final String? meta;
-  final IconData actionIcon;
+  final String actionIconName;
   final VoidCallback onTap;
 
   @override
@@ -50,7 +51,7 @@ class HomeActionCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.85),
                   ),
                 ),
-                const Gap(6),
+                const Gap(8),
                 Text(
                   title,
                   maxLines: 2,
@@ -81,10 +82,17 @@ class HomeActionCard extends StatelessWidget {
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              actionIcon,
-              size: 28,
-              color: context.colorTokens.primary,
+            child: Center(
+              child: SizedBox.square(
+                dimension: 20,
+                child: ClipRect(
+                  child: AppIcon(
+                    actionIconName,
+                    size: 20,
+                    color: context.colorTokens.primary,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

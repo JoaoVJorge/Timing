@@ -35,19 +35,23 @@ class CategoryCard extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.colorTokens.primaryVeryLight,
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: AppIcon(
-                iconName,
-                size: 22,
-                color: context.colorTokens.primary,
+            child: SizedBox.square(
+              dimension: 22,
+              child: ClipRect(
+                child: AppIcon(
+                  iconName,
+                  size: 22,
+                  color: context.colorTokens.primary,
+                ),
               ),
             ),
           ),
-          const Gap(14),
+          const Gap(16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
