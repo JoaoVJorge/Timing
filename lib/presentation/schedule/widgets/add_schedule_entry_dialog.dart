@@ -6,7 +6,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/shared/widgets/dialog_top_bar.dart";
-import "package:help_out/shared/widgets/floating_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 
@@ -76,13 +76,22 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
       return;
     }
 
+    final int startMinutes = startTime.hour * 60 + startTime.minute;
+    final int? endMinutes = endTime == null
+        ? null
+        : endTime.hour * 60 + endTime.minute;
+    if (endMinutes != null && endMinutes <= startMinutes) {
+      appNavigator.showErrorSnackBar(context.l10n.endTimeBeforeStartError);
+      return;
+    }
+
     // Pass the record as a plain Object result — a concrete generic here makes
     // GetX drop the payload (see the schedule controller for the retrieval).
     appNavigator.back<Object>(
       result: (
         title: title,
-        startMinutes: startTime.hour * 60 + startTime.minute,
-        endMinutes: endTime == null ? null : endTime.hour * 60 + endTime.minute,
+        startMinutes: startMinutes,
+        endMinutes: endMinutes,
         colorValue: _selectedColor.toARGB32(),
       ),
     );
@@ -184,7 +193,7 @@ class _AddScheduleEntryDialogState extends State<AddScheduleEntryDialog> {
         child: Text(context.l10n.cancelButton),
       ),
       const SizedBox(width: 4),
-      FloatingPrimaryButton(label: context.l10n.addButton, onTap: _onSubmit),
+      AppButton(label: context.l10n.addButton, onTap: _onSubmit),
     ],
   );
 }

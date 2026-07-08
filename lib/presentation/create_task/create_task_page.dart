@@ -6,7 +6,7 @@ import "package:help_out/presentation/create_task/create_task_controller.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/floating_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 
@@ -22,7 +22,7 @@ class CreateTaskPage extends StatelessWidget {
         title: context.l10n.createTaskTitle,
         showBackButton: true,
       ),
-      bottomBar: FloatingPrimaryButton(
+      bottomBar: AppButton(
         label: context.l10n.addButton,
         onTap: controller.onSubmit,
       ),

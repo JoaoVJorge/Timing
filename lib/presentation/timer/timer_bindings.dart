@@ -11,6 +11,7 @@ class TimerBindings extends Bindings {
       TimerController(
         updateSubjectTimeUseCase: Get.find(),
         lastActivityService: Get.find(),
+        dailyProgressService: Get.find(),
         timerNotificationService: Get.find(),
         subject: subject,
       ),

@@ -5,20 +5,26 @@ import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
+import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/presentation/category/widgets/log_pages_dialog.dart";
 
 class CategoryController extends GetxController {
   CategoryController({
     required this._getSubjectsUseCase,
     required this._updateSubjectPagesUseCase,
+    required this._deleteSubjectUseCase,
+    required this._dailyProgressService,
     required this._appNavigator,
     required this.category,
   });
 
   final GetSubjectsUseCase _getSubjectsUseCase;
   final UpdateSubjectPagesUseCase _updateSubjectPagesUseCase;
+  final DeleteSubjectUseCase _deleteSubjectUseCase;
+  final DailyProgressService _dailyProgressService;
   final AppNavigator _appNavigator;
 
   final TimeCategoryType category;
@@ -63,6 +69,7 @@ class CategoryController extends GetxController {
         subjectId: subject.id,
         currentPages: updatedPages,
       );
+      await _dailyProgressService.addPages(updatedPages - subject.currentPages);
       return;
     }
 
@@ -83,6 +90,11 @@ class CategoryController extends GetxController {
     if (index != -1) {
       subjects[index] = subjects[index].copyWith(notes: updatedNotes);
     }
+  }
+
+  Future<void> onDeleteSubject(SubjectEntity subject) async {
+    subjects.removeWhere((item) => item.id == subject.id);
+    await _deleteSubjectUseCase(subjectId: subject.id);
   }
 
   Future<void> onTapAddSubject() async {

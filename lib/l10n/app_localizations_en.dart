@@ -28,21 +28,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Let\'s Start';
 
   @override
-  String get homeGreetingDefault => 'Let\'s Start';
+  String get homeGreetingDefault => 'Hello';
 
   @override
   String homeGreetingWithName(String userName) {
-    return 'Let\'s Start, $userName';
+    return 'Hello, $userName';
   }
 
   @override
   String get homeSubtitle => 'What are we tackling today?';
 
   @override
+  String homeSubtitleFocusedToday(String duration) {
+    return 'You\'ve focused $duration today';
+  }
+
+  @override
+  String homeSubtitleNextSchedule(String title, String time) {
+    return 'Next up: $title at $time';
+  }
+
+  @override
+  String get homeSubtitleStart => 'Start your first focus session';
+
+  @override
   String get homeTasksSection => 'Daily goals';
 
   @override
-  String get homeCategoriesSection => 'Your time';
+  String get homeCategoriesSection => 'Activities';
+
+  @override
+  String get homeActionContinueEyebrow => 'Continue now';
+
+  @override
+  String get homeActionContinueButton => 'Continue';
+
+  @override
+  String get homeActionStartEyebrow => 'Start focus';
+
+  @override
+  String get homeActionStartButton => 'Start';
+
+  @override
+  String get homeActionSuggestedMeta => 'Your most-tracked subject';
+
+  @override
+  String get homeActionCreateBody =>
+      'Create your first subject to start a focus session.';
+
+  @override
+  String get homeActionCreateButton => 'Create subject';
+
+  @override
+  String get homeSummaryTitle => 'Today\'s summary';
+
+  @override
+  String get homeSummaryFocus => 'Focus';
+
+  @override
+  String get homeSummaryGoals => 'Goals';
+
+  @override
+  String get homeSummaryPages => 'Pages';
+
+  @override
+  String get homeSummarySessions => 'Sessions';
+
+  @override
+  String homeGoalsProgress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get homeCategoryEmpty => 'Nothing yet';
+
+  @override
+  String get homeNextScheduleTitle => 'Next up';
+
+  @override
+  String get homeNextScheduleEmpty => 'No schedule today';
+
+  @override
+  String get homeNextScheduleAdd => 'Add schedule';
 
   @override
   String get addTaskButton => 'Add goal';
@@ -463,6 +530,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get incompleteScheduleEntryError =>
       'Incomplete entry — fill in the title and a valid start time.';
+
+  @override
+  String get endTimeBeforeStartError =>
+      'End time must be later than the start time.';
+
+  @override
+  String get nameRequiredError => 'Please enter a name first.';
+
+  @override
+  String get groupThemeRequiredError => 'Pick a theme for your group.';
+
+  @override
+  String get groupNeedsFriendError =>
+      'Invite at least one friend — a group can\'t be created alone.';
 
   @override
   String get continueWithGoogleButton => 'Continue with Google';

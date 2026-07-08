@@ -5,7 +5,7 @@ import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/otp/otp_controller.dart";
 import "package:help_out/shared/widgets/auth_gradient_scaffold.dart";
-import "package:help_out/shared/widgets/auth_primary_button.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 
 class OtpPage extends StatelessWidget {
   const OtpPage({super.key});
@@ -20,7 +20,8 @@ class OtpPage extends StatelessWidget {
         title: context.l10n.otpTitle,
         subtitle: context.l10n.otpSubtitle(controller.phoneNumber),
         bottom: Obx(
-          () => AuthPrimaryButton(
+          () => AppButton(
+            variant: AppButtonVariant.onGradient,
             label: context.l10n.verifyCodeButton,
             enabled: controller.canSubmit.value,
             isLoading: controller.isSubmitting.value,

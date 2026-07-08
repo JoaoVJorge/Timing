@@ -141,9 +141,8 @@ class CreateGroupPage extends StatelessWidget {
                     ),
             );
 
-            if (!canCreate) {
-              return button;
-            }
+            // Always tappable — when something's missing, onTapCreate surfaces
+            // the specific reason instead of the button silently doing nothing.
             return BounceTap(
               pressedScale: 0.97,
               onTap: controller.onTapCreate,
