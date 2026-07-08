@@ -94,11 +94,7 @@ class LoginPage extends StatelessWidget {
                     ),
                     Spacer(),
                     _SocialSignInButton(
-                      icon: const AppIcon(
-                        "google",
-                        size: 19,
-                        color: Colors.black87,
-                      ),
+                      icon: const AppIcon("google", size: 19),
                       label: context.l10n.continueWithGoogleButton,
                       onTap: controller.onTapGoogleSignIn,
                     ),

@@ -3,8 +3,8 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/credentials/credentials_controller.dart";
-import "package:help_out/shared/widgets/auth_gradient_scaffold.dart";
 import "package:help_out/shared/widgets/app_button.dart";
+import "package:help_out/shared/widgets/auth_gradient_scaffold.dart";
 import "package:help_out/shared/widgets/auth_text_field.dart";
 import "package:intl/intl.dart";
 
@@ -37,7 +37,7 @@ class CredentialsPage extends StatelessWidget {
             controller: controller.nameController,
             onChanged: controller.onNameChanged,
             hintText: context.l10n.loginNameHint,
-            icon: "address_book",
+            icon: "user",
           ),
           const Gap(16),
           AuthTextField(
