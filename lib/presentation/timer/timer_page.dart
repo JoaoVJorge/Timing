@@ -4,9 +4,11 @@ import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/timer/timer_controller.dart";
+import "package:help_out/presentation/timer/timer_visual_state.dart";
+import "package:help_out/presentation/timer/widgets/timer_action_buttons.dart";
+import "package:help_out/presentation/timer/widgets/timer_session_summary.dart";
+import "package:help_out/presentation/timer/widgets/timer_status_card.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_icon_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/theme/subject_icons.dart";
@@ -18,176 +20,214 @@ class TimerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TimerController controller = Get.find();
+
+    return Obx(
+      () => PopScope(
+        canPop: !controller.hasActiveSession,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) {
+            controller.saveProgress();
+            return;
+          }
+          if (await controller.confirmExitIfNeeded()) {
+            appNavigator.back();
+          }
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: TimerWallpapers.byIndex(
+              controller.subject.wallpaperIndex,
+            ),
+          ),
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.36),
+            child: AppScaffold(
+              backgroundColor: Colors.transparent,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _TimerHeader(controller: controller),
+                      const Gap(24),
+                      if (controller.isSessionFinished.value)
+                        TimerSessionSummary(
+                          subjectName: controller.subject.name,
+                          sessionSeconds: controller.sessionSeconds.value,
+                          totalSeconds: controller.totalSeconds,
+                          onBackTap: appNavigator.back,
+                        )
+                      else ...[
+                        TimerStatusCard(
+                          subjectName: controller.subject.name,
+                          state: _stateFor(controller),
+                          sessionSeconds: controller.sessionSeconds.value,
+                          totalSeconds: controller.totalSeconds,
+                          breakCountdownSeconds:
+                              controller.breakCountdownSeconds.value,
+                          restCountdownSeconds:
+                              controller.restCountdownSeconds.value,
+                          restIntervalSeconds: controller.restIntervalSeconds,
+                          focusProgress: controller.focusProgress,
+                        ),
+                        const Gap(16),
+                        _MusicSuggestion(controller: controller),
+                        const Gap(18),
+                        TimerActionButtons(
+                          state: _stateFor(controller),
+                          onPrimaryTap: () {
+                            if (controller.isResting.value) {
+                              controller.continueFocus();
+                              return;
+                            }
+                            controller.togglePause();
+                          },
+                          onSkipRestTap: controller.skipRest,
+                          onEndTap: controller.finishSession,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  TimerVisualState _stateFor(TimerController controller) {
+    if (controller.isSessionFinished.value) {
+      return TimerVisualState.finished;
+    }
+    if (controller.isResting.value) {
+      return TimerVisualState.resting;
+    }
+    if (!controller.isRunning.value) {
+      return TimerVisualState.paused;
+    }
+    return TimerVisualState.focusing;
+  }
+}
+
+class _TimerHeader extends StatelessWidget {
+  const _TimerHeader({required this.controller});
+
+  final TimerController controller;
+
+  @override
+  Widget build(BuildContext context) {
     final Color subjectColor = Color(controller.subject.colorValue);
     final IconData? subjectIcon = SubjectIcons.byName(
       controller.subject.iconName,
     );
 
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          controller.saveProgress();
-        }
-      },
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: TimerWallpapers.byIndex(controller.subject.wallpaperIndex),
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () async {
+            if (await controller.confirmExitIfNeeded()) {
+              appNavigator.back();
+            }
+          },
+          icon: const AppIcon("left_back", size: 20, color: Colors.white),
         ),
-        child: AppScaffold(
-          backgroundColor: Colors.transparent,
-          body: Column(
+        const Gap(8),
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: subjectColor.withValues(alpha: 0.25),
+            shape: BoxShape.circle,
+            border: Border.all(color: subjectColor.withValues(alpha: 0.8)),
+          ),
+          child: Icon(subjectIcon, size: 24, color: Colors.white),
+        ),
+        const Gap(12),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Gap(16),
-              IconButton(
-                onPressed: appNavigator.back,
-                icon: AppIcon(
-                  "left_back",
-                  size: 20,
-                  color: context.colorTokens.primary,
+              Text(
+                controller.subject.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              const Gap(24),
-              Center(
-                child: Column(
-                  children: [
-                    if (subjectIcon != null) ...[
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: subjectColor.withValues(alpha: 0.25),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: subjectColor, width: 2),
-                        ),
-                        child: Icon(subjectIcon, size: 28, color: subjectColor),
-                      ),
-                      const Gap(12),
-                    ],
-                    Text(
-                      controller.subject.category
-                          .localizedLabel(context)
-                          .toUpperCase(),
-                      style: context.textStyles.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    const Gap(4),
-                    Text(
-                      controller.subject.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: context.textStyles.titleFont,
-                    ),
-                    if (controller.subject.musicSuggestion.isNotEmpty) ...[
-                      const Gap(12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.music_note_rounded,
-                              size: 16,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                            const Gap(4),
-                            Flexible(
-                              child: Text(
-                                context.l10n.timerMusicSuggestion(
-                                  controller.subject.musicSuggestion,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textStyles.bodySmall.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const Gap(36),
-                    Obx(
-                      () => Text(
-                        formatDurationClock(
-                          Duration(seconds: controller.sessionSeconds.value),
-                        ),
-                        style: context.textStyles.black32.copyWith(
-                          fontSize: 56,
-                        ),
-                      ),
-                    ),
-                    const Gap(12),
-                    Obx(
-                      () => Text(
-                        context.l10n.timerTotalLabel(
-                          formatDurationClock(
-                            Duration(seconds: controller.totalSeconds),
-                          ),
-                        ),
-                        style: context.textStyles.bodyMedium.copyWith(
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
-                    const Gap(4),
-                    Obx(
-                      () => Text(
-                        controller.isResting.value
-                            ? context.l10n.timerRestingLabel(
-                                formatDurationClock(
-                                  Duration(
-                                    seconds:
-                                        controller.restCountdownSeconds.value,
-                                  ),
-                                ),
-                              )
-                            : context.l10n.timerNextBreakLabel(
-                                formatDurationClock(
-                                  Duration(
-                                    seconds:
-                                        controller.breakCountdownSeconds.value,
-                                  ),
-                                ),
-                              ),
-                        style: context.textStyles.bodySmall.copyWith(
-                          color: controller.isResting.value
-                              ? context.colorTokens.success
-                              : Colors.white.withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ),
-                  ],
+              const Gap(4),
+              Text(
+                controller.subject.category.localizedLabel(context),
+                style: context.textStyles.bodySmall.copyWith(
+                  color: Colors.white.withValues(alpha: 0.68),
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const Spacer(),
-              Center(
-                child: Obx(
-                  () => AppIconButton(
-                    icon: controller.isRunning.value
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                    onTap: controller.togglePause,
-                    size: 84,
-                  ),
-                ),
-              ),
-              const Gap(48),
             ],
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _MusicSuggestion extends StatelessWidget {
+  const _MusicSuggestion({required this.controller});
+
+  final TimerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final String suggestion = controller.subject.musicSuggestion.trim();
+    if (suggestion.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.music_note_rounded,
+            size: 20,
+            color: Colors.white.withValues(alpha: 0.76),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.timerMusicSuggestionTitle,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: Colors.white.withValues(alpha: 0.58),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Gap(4),
+                Text(
+                  suggestion,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

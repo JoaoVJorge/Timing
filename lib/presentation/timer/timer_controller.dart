@@ -1,7 +1,8 @@
 import "dart:async";
 
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 import "package:get/get.dart";
+import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
@@ -18,7 +19,7 @@ class TimerController extends GetxController {
     required this.subject,
   });
 
-  static const int _focusIntervalSeconds = 25 * 60;
+  static const int focusIntervalSeconds = 25 * 60;
 
   final UpdateSubjectTimeUseCase _updateSubjectTimeUseCase;
   final LastActivityService _lastActivityService;
@@ -27,17 +28,28 @@ class TimerController extends GetxController {
 
   final SubjectEntity subject;
 
-  late int _baselineSeconds = subject.totalSeconds;
   final RxInt sessionSeconds = 0.obs;
-  final RxInt breakCountdownSeconds = _focusIntervalSeconds.obs;
+  final RxInt breakCountdownSeconds = focusIntervalSeconds.obs;
   late final RxInt restCountdownSeconds = restIntervalSeconds.obs;
   final RxBool isRunning = true.obs;
   final RxBool isResting = false.obs;
+  final RxBool isSessionFinished = false.obs;
 
   Timer? _ticker;
+  int _persistedSessionSeconds = 0;
   bool _hasLoggedTime = false;
+  bool _hasRegisteredSession = false;
 
-  int get totalSeconds => _baselineSeconds + sessionSeconds.value;
+  int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
+
+  int get cycleElapsedSeconds =>
+      focusIntervalSeconds - breakCountdownSeconds.value;
+
+  double get focusProgress =>
+      (cycleElapsedSeconds / focusIntervalSeconds).clamp(0, 1).toDouble();
+
+  bool get hasActiveSession =>
+      !isSessionFinished.value && sessionSeconds.value > 0;
 
   int get restIntervalSeconds =>
       (subject.restMinutes > 0
@@ -61,7 +73,8 @@ class TimerController extends GetxController {
       restCountdownSeconds.value--;
       if (restCountdownSeconds.value <= 0) {
         isResting.value = false;
-        breakCountdownSeconds.value = _focusIntervalSeconds;
+        isRunning.value = false;
+        breakCountdownSeconds.value = focusIntervalSeconds;
         _updateNotification();
       }
       return;
@@ -89,18 +102,99 @@ class TimerController extends GetxController {
 
   void saveProgress() => _persistAccumulatedTime();
 
+  void skipRest() {
+    if (!isResting.value) {
+      return;
+    }
+    isResting.value = false;
+    isRunning.value = true;
+    restCountdownSeconds.value = restIntervalSeconds;
+    breakCountdownSeconds.value = focusIntervalSeconds;
+    _updateNotification();
+  }
+
+  void continueFocus() {
+    isResting.value = false;
+    isRunning.value = true;
+    restCountdownSeconds.value = restIntervalSeconds;
+    breakCountdownSeconds.value = focusIntervalSeconds;
+    _updateNotification();
+  }
+
+  void finishSession() {
+    _persistAccumulatedTime();
+    _registerSessionIfNeeded();
+    isRunning.value = false;
+    isSessionFinished.value = true;
+    _ticker?.cancel();
+    _timerNotificationService.cancel();
+  }
+
+  Future<bool> confirmExitIfNeeded() async {
+    if (!hasActiveSession) {
+      saveProgress();
+      return true;
+    }
+
+    final BuildContext context = Get.context!;
+    final bool? shouldExit = await appNavigator.dialog<bool>(
+      child: AlertDialog(
+        title: Text(context.l10n.timerExitDialogTitle),
+        content: Text(
+          context.l10n.timerExitDialogContent(
+            _formatMinutesForDialog(sessionSeconds.value),
+            subject.name,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => appNavigator.back<bool>(result: false),
+            child: Text(context.l10n.timerExitDialogCancel),
+          ),
+          TextButton(
+            onPressed: () => appNavigator.back<bool>(result: true),
+            child: Text(context.l10n.timerExitDialogConfirm),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExit == true) {
+      finishSession();
+    }
+    return shouldExit == true;
+  }
+
   void _persistAccumulatedTime() {
-    final int elapsedSinceLastPersist = sessionSeconds.value;
+    final int elapsedSinceLastPersist =
+        sessionSeconds.value - _persistedSessionSeconds;
+    if (elapsedSinceLastPersist <= 0) {
+      return;
+    }
+
     if (elapsedSinceLastPersist > 0) {
       _hasLoggedTime = true;
     }
-    _baselineSeconds += elapsedSinceLastPersist;
-    sessionSeconds.value = 0;
+    _persistedSessionSeconds = sessionSeconds.value;
     _updateSubjectTimeUseCase(
       subjectId: subject.id,
-      totalSeconds: _baselineSeconds,
+      totalSeconds: totalSeconds,
     );
     _dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+  }
+
+  void _registerSessionIfNeeded() {
+    if (!_hasLoggedTime || _hasRegisteredSession) {
+      return;
+    }
+    _hasRegisteredSession = true;
+    _lastActivityService.record(subject.name, subjectId: subject.id);
+    _dailyProgressService.registerSession();
+  }
+
+  String _formatMinutesForDialog(int seconds) {
+    final int minutes = (seconds / 60).ceil();
+    return "${minutes}min";
   }
 
   void _updateNotification() {
@@ -138,10 +232,7 @@ class TimerController extends GetxController {
   void onClose() {
     _ticker?.cancel();
     _persistAccumulatedTime();
-    if (_hasLoggedTime) {
-      _lastActivityService.record(subject.name, subjectId: subject.id);
-      _dailyProgressService.registerSession();
-    }
+    _registerSessionIfNeeded();
     _timerNotificationService.cancel();
     super.onClose();
   }
