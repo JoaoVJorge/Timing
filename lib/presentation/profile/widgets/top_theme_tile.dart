@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
+import "package:help_out/shared/functions/format_name.dart";
 
 class TopThemeTile extends StatelessWidget {
   const TopThemeTile({required this.rank, required this.subject, super.key});
@@ -15,6 +15,7 @@ class TopThemeTile extends StatelessWidget {
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
     ),
     child: Row(
       children: [
@@ -36,7 +37,7 @@ class TopThemeTile extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: Text(
-            subject.name,
+            capitalizeName(subject.name),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textStyles.bodyLarge,
@@ -44,7 +45,7 @@ class TopThemeTile extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          formatDurationLong(Duration(seconds: subject.totalSeconds)),
+          context.l10n.metricPagesValue(subject.currentPages),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodySmall.copyWith(
