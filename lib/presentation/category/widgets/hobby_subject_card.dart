@@ -43,8 +43,8 @@ class HobbySubjectCard extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Center(
-                child: AppIcon("guitar", size: 20, color: Colors.white),
+              child: Center(
+                child: AppIcon(subject.iconName, size: 20, color: Colors.white),
               ),
             ),
             const Spacer(),

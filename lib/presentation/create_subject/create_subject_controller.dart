@@ -35,10 +35,120 @@ class CreateSubjectController extends GetxController {
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
   final RxInt wallpaperIndex = 0.obs;
   final RxBool isSaving = false.obs;
+  final RxString name = "".obs;
+  final RxString goal = "".obs;
 
   bool get isPageBased => category == TimeCategoryType.reading;
 
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
+
+  bool get hasValidGoal {
+    final String rawGoal = goal.value.trim().replaceAll(",", ".");
+    if (rawGoal.isEmpty) {
+      return false;
+    }
+
+    if (isPageBased) {
+      return (int.tryParse(rawGoal) ?? 0) > 0;
+    }
+
+    return (double.tryParse(rawGoal) ?? 0) > 0;
+  }
+
+  bool get canSubmit => name.value.trim().isNotEmpty && hasValidGoal;
+
+  String title(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectTitleStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectTitleReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectTitleExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectTitleHobbies,
+  };
+
+  String subtitle(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectSubtitleStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectSubtitleReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectSubtitleExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectSubtitleHobbies,
+  };
+
+  String nameLabel(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectNameLabelStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectNameLabelReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectNameLabelExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectNameLabelHobbies,
+  };
+
+  String nameHint(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectNameHintStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectNameHintReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectNameHintExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectNameHintHobbies,
+  };
+
+  String submitLabel(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectButtonStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectButtonReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectButtonExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectButtonHobbies,
+  };
+
+  String successMessage(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectSuccessStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectSuccessReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectSuccessExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectSuccessHobbies,
+  };
+
+  String? missingRequirement(BuildContext context) {
+    if (name.value.trim().isEmpty) {
+      return context.l10n.createSubjectMissingName;
+    }
+    if (!hasValidGoal) {
+      return isPageBased
+          ? context.l10n.createSubjectMissingPagesGoal
+          : context.l10n.createSubjectMissingTimeGoal;
+    }
+    return null;
+  }
+
+  String previewName(BuildContext context) {
+    final String value = name.value.trim();
+    if (value.isNotEmpty) {
+      return value;
+    }
+    return nameHint(context).replaceFirst("Ex.: ", "");
+  }
+
+  String previewGoal(BuildContext context) {
+    if (!hasValidGoal) {
+      return context.l10n.createSubjectPreviewNoGoal;
+    }
+
+    if (isPageBased) {
+      return context.l10n.metricPagesValue(int.parse(goal.value.trim()));
+    }
+
+    final double hours = double.parse(goal.value.trim().replaceAll(",", "."));
+    final int seconds = (hours * 3600).round();
+    final int wholeHours = seconds ~/ 3600;
+    final int minutes = (seconds % 3600) ~/ 60;
+    if (minutes == 0) {
+      return context.l10n.createSubjectHoursValue(wholeHours);
+    }
+    return context.l10n.createSubjectHoursMinutesValue(wholeHours, minutes);
+  }
+
+  void setGoalPreset(num value) {
+    goalController.text = isPageBased ? value.toInt().toString() : "$value";
+    goal.value = goalController.text;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    nameController.addListener(() => name.value = nameController.text);
+    goalController.addListener(() => goal.value = goalController.text);
+  }
 
   Future<void> onSubmit() async {
     if (isSaving.value) {
@@ -50,6 +160,10 @@ class CreateSubjectController extends GetxController {
       _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
       return;
     }
+    if (!hasValidGoal) {
+      _appNavigator.showErrorSnackBar(missingRequirement(Get.context!)!);
+      return;
+    }
 
     isSaving.value = true;
 
@@ -59,7 +173,7 @@ class CreateSubjectController extends GetxController {
       goalPages = int.tryParse(goalController.text.trim()) ?? 0;
     } else {
       final double goalHours =
-          double.tryParse(goalController.text.trim()) ?? 0;
+          double.tryParse(goalController.text.trim().replaceAll(",", ".")) ?? 0;
       goalSeconds = (goalHours * 3600).round();
     }
 
@@ -76,10 +190,10 @@ class CreateSubjectController extends GetxController {
     );
 
     isSaving.value = false;
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (subject) => _appNavigator.back<SubjectEntity>(result: subject),
-    );
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (subject) {
+      _appNavigator.showSuccessSnackBar(successMessage(Get.context!));
+      _appNavigator.back<SubjectEntity>(result: subject);
+    });
   }
 
   @override
