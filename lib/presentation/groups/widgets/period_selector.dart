@@ -4,8 +4,8 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
-class PeriodSelector extends StatelessWidget {
-  const PeriodSelector({
+class GroupPeriodSelector extends StatelessWidget {
+  const GroupPeriodSelector({
     required this.selectedPeriod,
     required this.onSelectPeriod,
     super.key,

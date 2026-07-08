@@ -8,12 +8,14 @@ import "package:help_out/shared/widgets/bounce_tap.dart";
 class GroupChip extends StatelessWidget {
   const GroupChip({
     required this.group,
+    required this.label,
     required this.isSelected,
     required this.onTap,
     super.key,
   });
 
   final GroupEntity group;
+  final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -66,7 +68,7 @@ class GroupChip extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 160),
             child: Text(
-              group.name,
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: isSelected

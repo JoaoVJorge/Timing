@@ -7,6 +7,7 @@ import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 class GroupsController extends GetxController {
   GroupsController({
@@ -22,6 +23,7 @@ class GroupsController extends GetxController {
   final Rx<LeaderboardPeriodType> selectedPeriod =
       LeaderboardPeriodType.today.obs;
   final RxBool isLoading = true.obs;
+  static const String currentUserId = "me";
 
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
@@ -36,6 +38,32 @@ class GroupsController extends GetxController {
       );
     return members;
   }
+
+  GroupMemberEntity? get currentUserMember {
+    for (final GroupMemberEntity member in rankedMembers) {
+      if (isCurrentUser(member)) {
+        return member;
+      }
+    }
+    return null;
+  }
+
+  int get currentUserRank {
+    final int index = rankedMembers.indexWhere(isCurrentUser);
+    return index < 0 ? 0 : index + 1;
+  }
+
+  int? differenceToPrevious(GroupMemberEntity member) {
+    final List<GroupMemberEntity> members = rankedMembers;
+    final int index = members.indexWhere((item) => item.id == member.id);
+    if (index <= 0) {
+      return null;
+    }
+    return members[index - 1].secondsFor(selectedPeriod.value) -
+        member.secondsFor(selectedPeriod.value);
+  }
+
+  bool isCurrentUser(GroupMemberEntity member) => member.id == currentUserId;
 
   @override
   void onInit() {
@@ -70,5 +98,6 @@ class GroupsController extends GetxController {
     }
     groups.add(newGroup);
     selectedGroup.value = newGroup;
+    _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
 }
