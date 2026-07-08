@@ -38,7 +38,10 @@ class AppButton extends StatelessWidget {
 
     final Widget button = switch (variant) {
       AppButtonVariant.floating => _buildFloating(context),
-      AppButtonVariant.onGradient => _buildOnGradient(context, isActive: isActive),
+      AppButtonVariant.onGradient => _buildOnGradient(
+        context,
+        isActive: isActive,
+      ),
     };
 
     if (!isActive) {
@@ -56,11 +59,7 @@ class AppButton extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(999),
       boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.3),
-          blurRadius: 12,
-          offset: const Offset(2, 2),
-        ),
+        BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4),
       ],
     ),
     child: isLoading
