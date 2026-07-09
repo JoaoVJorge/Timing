@@ -34,6 +34,7 @@ import "package:help_out/presentation/phone_login/phone_login_bindings.dart";
 import "package:help_out/presentation/phone_login/phone_login_page.dart";
 import "package:help_out/presentation/profile/profile_bindings.dart";
 import "package:help_out/presentation/profile/profile_page.dart";
+import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
 import "package:help_out/presentation/splash/splash_bindings.dart";
 import "package:help_out/presentation/splash/splash_page.dart";
@@ -62,6 +63,7 @@ class AppRoutes {
   static const String faq = "/faq";
   static const String createGroup = "/createGroup";
   static const String schedule = "/schedule";
+  static const String addScheduleEntry = "/addScheduleEntry";
   static const String notes = "/notes";
 
   static final List<GetPage<dynamic>> getPages = [
@@ -194,6 +196,13 @@ class AppRoutes {
     GetPage(
       name: schedule,
       page: () => const SchedulePage(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: addScheduleEntry,
+      page: () => const AddScheduleEntryPage(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

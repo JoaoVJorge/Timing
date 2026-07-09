@@ -6,9 +6,9 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/schedule/schedule_controller.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:help_out/presentation/schedule/widgets/weekday_selector.dart";
+import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/app_button.dart";
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -57,8 +57,9 @@ class SchedulePage extends StatelessWidget {
               }
 
               return ListView.separated(
+                padding: const EdgeInsets.only(bottom: 16),
                 itemCount: entries.length,
-                separatorBuilder: (context, index) => const Gap(12),
+                separatorBuilder: (context, index) => const Gap(8),
                 itemBuilder: (context, index) {
                   final ScheduleEntryEntity entry = entries[index];
                   return Dismissible(

@@ -1,12 +1,13 @@
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
-import "package:help_out/presentation/schedule/widgets/add_schedule_entry_dialog.dart";
+import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
 
 class ScheduleController extends GetxController {
   ScheduleController({
@@ -47,19 +48,19 @@ class ScheduleController extends GetxController {
     isLoading.value = true;
     final Either<AppError, List<ScheduleEntryEntity>> result =
         await _getScheduleEntriesUseCase();
-    result.fold((error) => entries.clear(), (value) => entries.value = value);
+    result.fold((error) {
+      entries.clear();
+      _appNavigator.showErrorSnackBar(error.message);
+    }, (value) => entries.value = value);
     isLoading.value = false;
   }
 
   Future<void> onTapAddEntry() async {
-    // Retrieve as dynamic and cast: passing the concrete record type as the
-    // dialog's generic makes GetX drop the result, so the entry only showed up
-    // after an app restart. See [[feedback_getx_tonamed_generic_crash]].
-    final dynamic rawResult = await _appNavigator.dialog<dynamic>(
-      child: const AddScheduleEntryDialog(),
+    final dynamic rawResult = await _appNavigator.toNamed<dynamic>(
+      AppRoutes.addScheduleEntry,
+      arguments: selectedWeekday.value,
     );
-    final AddScheduleEntryResult? result =
-        rawResult as AddScheduleEntryResult?;
+    final AddScheduleEntryResult? result = rawResult as AddScheduleEntryResult?;
 
     if (result == null) {
       return;
@@ -68,16 +69,29 @@ class ScheduleController extends GetxController {
     final Either<AppError, ScheduleEntryEntity> addResult =
         await _addScheduleEntryUseCase(
           title: result.title,
-          weekday: selectedWeekday.value,
+          weekday: result.weekday,
           startMinutes: result.startMinutes,
           endMinutes: result.endMinutes,
           colorValue: result.colorValue,
         );
-    addResult.fold((error) => _appNavigator.showErrorSnackBar(), entries.add);
+    addResult.fold((error) => _appNavigator.showErrorSnackBar(error.message), (
+      entry,
+    ) {
+      entries.add(entry);
+      selectedWeekday.value = entry.weekday;
+      entries.refresh();
+    });
   }
 
   Future<void> onDeleteEntry(String entryId) async {
+    final List<ScheduleEntryEntity> previousEntries = entries.toList();
     entries.removeWhere((entry) => entry.id == entryId);
-    await _deleteScheduleEntryUseCase(entryId);
+    final Either<AppError, void> result = await _deleteScheduleEntryUseCase(
+      entryId,
+    );
+    result.fold((error) {
+      entries.value = previousEntries;
+      _appNavigator.showErrorSnackBar(error.message);
+    }, (_) {});
   }
 }
