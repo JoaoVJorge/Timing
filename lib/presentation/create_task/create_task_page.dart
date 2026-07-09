@@ -3,12 +3,11 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_task/create_task_controller.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/app_button.dart";
+import "package:help_out/shared/widgets/subject_color_selector.dart";
 import "package:help_out/theme/decoration.dart";
-import "package:help_out/theme/subject_colors.dart";
 
 class CreateTaskPage extends StatelessWidget {
   const CreateTaskPage({super.key});
@@ -48,40 +47,12 @@ class CreateTaskPage extends StatelessWidget {
             ),
             const Gap(8),
             Obx(
-              () => Wrap(
+              () => SubjectColorSelector(
+                selectedColor: controller.selectedColor.value,
+                onSelected: (color) => controller.selectedColor.value = color,
+                swatchSize: 36,
                 spacing: 8,
                 runSpacing: 8,
-                children: SubjectColors.values.map((color) {
-                  final bool isSelected =
-                      color.toARGB32() ==
-                      controller.selectedColor.value.toARGB32();
-                  return GestureDetector(
-                    onTap: () => controller.selectedColor.value = color,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(
-                                color: context.colorTokens.textBody,
-                                width: 2,
-                              )
-                            : null,
-                      ),
-                      child: isSelected
-                          ? const Center(
-                              child: AppIcon(
-                                "check",
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                            )
-                          : null,
-                    ),
-                  );
-                }).toList(),
               ),
             ),
             const Gap(20),

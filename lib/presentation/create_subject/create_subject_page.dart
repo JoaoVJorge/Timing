@@ -7,21 +7,13 @@ import "package:help_out/shared/widgets/app_button.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
+import "package:help_out/shared/widgets/subject_color_selector.dart";
 import "package:help_out/theme/decoration.dart";
-import "package:help_out/theme/subject_colors.dart";
 import "package:help_out/theme/subject_icons.dart";
 import "package:help_out/theme/timer_wallpapers.dart";
 
 class CreateSubjectPage extends StatelessWidget {
   const CreateSubjectPage({super.key});
-
-  static const List<String> _musicSuggestions = [
-    "Lo-fi",
-    "Piano",
-    "Classical",
-    "Jazz",
-    "Rain",
-  ];
 
   static const List<num> _timeGoalPresets = [1, 3, 5, 10];
   static const List<num> _pageGoalPresets = [10, 25, 50, 100];
@@ -35,21 +27,10 @@ class CreateSubjectPage extends StatelessWidget {
       bottomBar: Obx(
         () => Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (controller.missingRequirement(context) != null) ...[
-              Text(
-                controller.missingRequirement(context)!,
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Gap(12),
-            ],
             AppButton(
               label: controller.submitLabel(context),
-              enabled: controller.canSubmit,
+              enabled: !controller.isSaving.value,
               isLoading: controller.isSaving.value,
               onTap: controller.onSubmit,
             ),
@@ -57,7 +38,7 @@ class CreateSubjectPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -180,37 +161,6 @@ class CreateSubjectPage extends StatelessWidget {
                       }).toList(),
                     ),
                   ),
-                  const Gap(20),
-                  Row(
-                    children: [
-                      _FieldLabel(text: context.l10n.musicSuggestionLabel),
-                      const Gap(8),
-                      _OptionalTag(),
-                    ],
-                  ),
-                  const Gap(8),
-                  TextField(
-                    controller: controller.musicController,
-                    decoration: AppInputDecoration.withBorder(
-                      tokens: context.colorTokens,
-                      hintText: context.l10n.musicSuggestionHint,
-                    ),
-                  ),
-                  const Gap(8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _musicSuggestions
-                        .map(
-                          (suggestion) => _SelectableChip(
-                            label: suggestion,
-                            isSelected: false,
-                            onTap: () =>
-                                controller.musicController.text = suggestion,
-                          ),
-                        )
-                        .toList(),
-                  ),
                 ],
               ),
             ),
@@ -232,7 +182,15 @@ class CreateSubjectPage extends StatelessWidget {
                     ],
                   ),
                   const Gap(12),
-                  _ColorSelector(controller: controller),
+                  Obx(
+                    () => SubjectColorSelector(
+                      selectedColor: controller.selectedColor.value,
+                      onSelected: (color) =>
+                          controller.selectedColor.value = color,
+                      semanticLabelBuilder: (context, index) =>
+                          context.l10n.createSubjectColorSemantic(index + 1),
+                    ),
+                  ),
                   const Gap(20),
                   Row(
                     children: [
@@ -390,62 +348,6 @@ class _OptionalTag extends StatelessWidget {
         color: context.colorTokens.primary,
         fontWeight: FontWeight.w800,
       ),
-    ),
-  );
-}
-
-class _ColorSelector extends StatelessWidget {
-  const _ColorSelector({required this.controller});
-
-  final CreateSubjectController controller;
-
-  @override
-  Widget build(BuildContext context) => Obx(
-    () => Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: SubjectColors.values.map((color) {
-        final bool isSelected =
-            color.toARGB32() == controller.selectedColor.value.toARGB32();
-        return Semantics(
-          label: context.l10n.createSubjectColorSemantic(
-            SubjectColors.values.indexOf(color) + 1,
-          ),
-          selected: isSelected,
-          button: true,
-          child: GestureDetector(
-            onTap: () => controller.selectedColor.value = color,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: isSelected ? 40 : 34,
-              height: isSelected ? 40 : 34,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? context.colorTokens.textBody
-                      : Colors.white.withValues(alpha: 0.8),
-                  width: isSelected ? 3 : 1,
-                ),
-                boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                ],
-              ),
-              child: isSelected
-                  ? const Center(
-                      child: AppIcon("check", size: 14, color: Colors.white),
-                    )
-                  : null,
-            ),
-          ),
-        );
-      }).toList(),
     ),
   );
 }

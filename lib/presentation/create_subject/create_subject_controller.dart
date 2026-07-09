@@ -26,7 +26,6 @@ class CreateSubjectController extends GetxController {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController goalController = TextEditingController();
-  final TextEditingController musicController = TextEditingController();
 
   late final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   late final RxString selectedIconName = SubjectIcons.suggestionsFor(
@@ -116,7 +115,7 @@ class CreateSubjectController extends GetxController {
     if (value.isNotEmpty) {
       return value;
     }
-    return nameHint(context).replaceFirst("Ex.: ", "");
+    return nameLabel(context);
   }
 
   String previewGoal(BuildContext context) {
@@ -185,7 +184,6 @@ class CreateSubjectController extends GetxController {
       goalPages: goalPages,
       iconName: selectedIconName.value,
       restMinutes: restMinutes.value,
-      musicSuggestion: musicController.text.trim(),
       wallpaperIndex: wallpaperIndex.value,
     );
 
@@ -200,7 +198,6 @@ class CreateSubjectController extends GetxController {
   void onClose() {
     nameController.dispose();
     goalController.dispose();
-    musicController.dispose();
     super.onClose();
   }
 }
