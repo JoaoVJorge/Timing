@@ -19,7 +19,7 @@
   "@homeSubtitleFocusedToday": {
     "placeholders": { "duration": { "type": "String" } }
   },
-  "homeSubtitleNextSchedule": "Next up: {title} at {time}",
+  "homeSubtitleNextSchedule": "Agenda: {title} at {time}",
   "@homeSubtitleNextSchedule": {
     "placeholders": {
       "title": { "type": "String" },
@@ -49,7 +49,7 @@
     }
   },
   "homeCategoryEmpty": "Nothing yet",
-  "homeNextScheduleTitle": "Next up",
+  "homeNextScheduleTitle": "Agenda",
   "homeNextScheduleEmpty": "No schedule today",
   "homeNextScheduleAdd": "Add schedule",
 
@@ -87,7 +87,7 @@
     "placeholders": { "days": { "type": "int" } }
   },
 
-  "categoryStudying": "Studying",
+  "categoryStudying": "Studies",
   "categoryExercises": "Exercising",
   "categoryReading": "Reading",
   "categoryHobbies": "Hobbies",
@@ -103,8 +103,6 @@
   "@restMinutesChip": {
     "placeholders": { "minutes": { "type": "int" } }
   },
-  "musicSuggestionLabel": "Music suggestion",
-  "musicSuggestionHint": "e.g. Lo-fi beats",
   "wallpaperLabel": "Timer wallpaper",
 
   "addItemButton": "Add {itemNoun}",
@@ -223,10 +221,6 @@
   "@timerRestingLabel": {
     "placeholders": { "duration": { "type": "String" } }
   },
-  "timerMusicSuggestion": "Suggested: {name}",
-  "@timerMusicSuggestion": {
-    "placeholders": { "name": { "type": "String" } }
-  },
   "timerNotificationRunning": "Focus session in progress",
   "timerNotificationResting": "Resting — back soon",
   "timerNotificationPaused": "Paused",
@@ -252,7 +246,6 @@
   "timerEndSessionButton": "End session",
   "timerStartAnotherSessionButton": "Start another session",
   "timerSaveReassurance": "Progress is also saved when you pause or leave.",
-  "timerMusicSuggestionTitle": "Focus suggestion",
   "timerFocusedValue": "{duration} focused",
   "@timerFocusedValue": {
     "placeholders": { "duration": { "type": "String" } }
@@ -275,6 +268,8 @@
   "nicknameFallback": "user",
 
   "profileSummaryLabel": "Total summary",
+  "profileSummarySinceStartLabel": "Since the beginning",
+  "profileSummaryAccumulatedFocus": "{duration} of accumulated focus",
   "profileSummaryFocusLabel": "Total focus time",
   "profileSummaryFocusDescription": "Studying, exercise and hobbies",
 
@@ -285,13 +280,16 @@
 
   "profileStatTimeEmptyTitle": "Start your first focus",
   "profileStatTimeEmptyDescription": "Your time will show up here",
+  "profileStatExerciseEmptyTitle": "No exercise yet",
+  "profileStatExerciseEmptyDescription": "Log your first activity",
   "profileStatReadingEmptyTitle": "No pages yet",
   "profileStatReadingEmptyDescription": "Log your first reading",
   "profileTopSubjectEmptyTitle": "None yet",
   "profileTopSubjectEmptyDescription": "Study a subject to feature it here",
 
   "profileEmptyTitle": "Your progress starts here",
-  "profileEmptyDescription": "Start a session, log some reading or set a goal to track your evolution in HelpOut.",
+  "profileEmptyDescription": "Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.",
+  "profileEmptyGuidance": "After that, your total time, top activities and reading highlights will appear here.",
   "profileEmptyStartButton": "Start now",
   "profileShortcutsTitle": "Shortcuts",
   "profileShortcutCreateSubject": "Create subject",
@@ -377,10 +375,11 @@
   "settingsSubtitle": "Adjust your account and preferences",
   "myProfileFallback": "My Profile",
   "personalProfileLabel": "Personal profile",
+  "accountDataSubtitle": "{nickname} · personal data and security",
   "preferencesSection": "Preferences",
   "darkModeLabel": "Dark mode",
   "darkModeEnabledSubtitle": "Dark theme is on",
-  "darkModeDisabledSubtitle": "Use darker colors in the app",
+  "darkModeDisabledSubtitle": "Use the dark theme in the app",
   "accentColorSettingsTitle": "Accent color",
   "accentColorSettingsSubtitle": "Personalize the app appearance",
   "notificationsLabel": "Notifications",
@@ -510,8 +509,8 @@
   "addScheduleEntryButton": "Add Entry",
   "scheduleTitleHint": "Title",
   "startTimeLabel": "Start time",
-  "endTimeOptionalLabel": "End time (optional)",
-  "incompleteScheduleEntryError": "Incomplete entry — fill in the title and a valid start time.",
+  "endTimeOptionalLabel": "End time",
+  "incompleteScheduleEntryError": "Incomplete entry — fill in the title, start time and end time.",
   "endTimeBeforeStartError": "End time must be later than the start time.",
   "nameRequiredError": "Please enter a name first.",
   "groupThemeRequiredError": "Pick a theme for your group.",

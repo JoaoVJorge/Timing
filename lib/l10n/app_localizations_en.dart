@@ -45,7 +45,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeSubtitleNextSchedule(String title, String time) {
-    return 'Next up: $title at $time';
+    return 'Agenda: $title at $time';
   }
 
   @override
@@ -103,7 +103,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeCategoryEmpty => 'Nothing yet';
 
   @override
-  String get homeNextScheduleTitle => 'Next up';
+  String get homeNextScheduleTitle => 'Agenda';
 
   @override
   String get homeNextScheduleEmpty => 'No schedule today';
@@ -164,7 +164,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get categoryStudying => 'Studying';
+  String get categoryStudying => 'Studies';
 
   @override
   String get categoryExercises => 'Exercising';
@@ -197,12 +197,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String restMinutesChip(int minutes) {
     return '$minutes min';
   }
-
-  @override
-  String get musicSuggestionLabel => 'Music suggestion';
-
-  @override
-  String get musicSuggestionHint => 'e.g. Lo-fi beats';
 
   @override
   String get wallpaperLabel => 'Timer wallpaper';
@@ -431,11 +425,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String timerMusicSuggestion(String name) {
-    return 'Suggested: $name';
-  }
-
-  @override
   String get timerNotificationRunning => 'Focus session in progress';
 
   @override
@@ -508,9 +497,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Progress is also saved when you pause or leave.';
 
   @override
-  String get timerMusicSuggestionTitle => 'Focus suggestion';
-
-  @override
   String timerFocusedValue(String duration) {
     return '$duration focused';
   }
@@ -548,6 +534,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSummaryLabel => 'Total summary';
 
   @override
+  String get profileSummarySinceStartLabel => 'Since the beginning';
+
+  @override
+  String profileSummaryAccumulatedFocus(Object duration) {
+    return '$duration of accumulated focus';
+  }
+
+  @override
   String get profileSummaryFocusLabel => 'Total focus time';
 
   @override
@@ -572,6 +566,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileStatTimeEmptyDescription => 'Your time will show up here';
 
   @override
+  String get profileStatExerciseEmptyTitle => 'No exercise yet';
+
+  @override
+  String get profileStatExerciseEmptyDescription => 'Log your first activity';
+
+  @override
   String get profileStatReadingEmptyTitle => 'No pages yet';
 
   @override
@@ -589,7 +589,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEmptyDescription =>
-      'Start a session, log some reading or set a goal to track your evolution in HelpOut.';
+      'Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.';
+
+  @override
+  String get profileEmptyGuidance =>
+      'After that, your total time, top activities and reading highlights will appear here.';
 
   @override
   String get profileEmptyStartButton => 'Start now';
@@ -768,6 +772,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalProfileLabel => 'Personal profile';
 
   @override
+  String accountDataSubtitle(Object nickname) {
+    return '$nickname · personal data and security';
+  }
+
+  @override
   String get preferencesSection => 'Preferences';
 
   @override
@@ -777,7 +786,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get darkModeEnabledSubtitle => 'Dark theme is on';
 
   @override
-  String get darkModeDisabledSubtitle => 'Use darker colors in the app';
+  String get darkModeDisabledSubtitle => 'Use the dark theme in the app';
 
   @override
   String get accentColorSettingsTitle => 'Accent color';
@@ -1089,11 +1098,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startTimeLabel => 'Start time';
 
   @override
-  String get endTimeOptionalLabel => 'End time (optional)';
+  String get endTimeOptionalLabel => 'End time';
 
   @override
   String get incompleteScheduleEntryError =>
-      'Incomplete entry — fill in the title and a valid start time.';
+      'Incomplete entry — fill in the title, start time and end time.';
 
   @override
   String get endTimeBeforeStartError =>
