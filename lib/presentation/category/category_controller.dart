@@ -7,24 +7,17 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
-import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
-import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
-import "package:help_out/presentation/category/widgets/log_pages_dialog.dart";
 
 class CategoryController extends GetxController {
   CategoryController({
     required this._getSubjectsUseCase,
-    required this._updateSubjectPagesUseCase,
     required this._deleteSubjectUseCase,
-    required this._dailyProgressService,
     required this._appNavigator,
     required this.category,
   });
 
   final GetSubjectsUseCase _getSubjectsUseCase;
-  final UpdateSubjectPagesUseCase _updateSubjectPagesUseCase;
   final DeleteSubjectUseCase _deleteSubjectUseCase;
-  final DailyProgressService _dailyProgressService;
   final AppNavigator _appNavigator;
 
   final TimeCategoryType category;
@@ -44,7 +37,10 @@ class CategoryController extends GetxController {
     final Either<AppError, List<SubjectEntity>> result =
         await _getSubjectsUseCase();
     result.fold(
-      (error) => subjects.clear(),
+      (error) {
+        subjects.clear();
+        _appNavigator.showErrorSnackBar(error.message);
+      },
       (allSubjects) => subjects.value = allSubjects
           .where((subject) => subject.category == category)
           .toList(),
@@ -54,26 +50,25 @@ class CategoryController extends GetxController {
 
   Future<void> onTapSubject(SubjectEntity subject) async {
     if (isPageBased) {
-      final int? updatedPages = await _appNavigator.dialog<int>(
-        child: LogPagesDialog(subject: subject),
+      final dynamic result = await _appNavigator.toNamed(
+        AppRoutes.timer,
+        arguments: subject,
       );
-      if (updatedPages == null) {
+      final SubjectEntity? updatedSubject = result as SubjectEntity?;
+      if (updatedSubject == null) {
         return;
       }
 
       final int index = subjects.indexWhere((item) => item.id == subject.id);
       if (index != -1) {
-        subjects[index] = subjects[index].copyWith(currentPages: updatedPages);
+        subjects[index] = updatedSubject;
       }
-      await _updateSubjectPagesUseCase(
-        subjectId: subject.id,
-        currentPages: updatedPages,
-      );
-      await _dailyProgressService.addPages(updatedPages - subject.currentPages);
+      await loadSubjects();
       return;
     }
 
-    _appNavigator.toNamed(AppRoutes.timer, arguments: subject);
+    await _appNavigator.toNamed(AppRoutes.timer, arguments: subject);
+    await loadSubjects();
   }
 
   Future<void> onTapNotes(SubjectEntity subject) async {
@@ -93,8 +88,13 @@ class CategoryController extends GetxController {
   }
 
   Future<void> onDeleteSubject(SubjectEntity subject) async {
+    final List<SubjectEntity> previousSubjects = subjects.toList();
     subjects.removeWhere((item) => item.id == subject.id);
-    await _deleteSubjectUseCase(subjectId: subject.id);
+    final result = await _deleteSubjectUseCase(subjectId: subject.id);
+    result.fold((error) {
+      subjects.value = previousSubjects;
+      _handleError(error);
+    }, (_) {});
   }
 
   Future<void> onTapAddSubject() async {
@@ -105,6 +105,10 @@ class CategoryController extends GetxController {
     final SubjectEntity? createdSubject = result as SubjectEntity?;
     if (createdSubject != null) {
       subjects.add(createdSubject);
+      await loadSubjects();
     }
   }
+
+  void _handleError(AppError error) =>
+      _appNavigator.showErrorSnackBar(error.message);
 }

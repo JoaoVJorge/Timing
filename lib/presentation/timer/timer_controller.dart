@@ -12,19 +12,19 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 class TimerController extends GetxController {
   TimerController({
-    required this._updateSubjectTimeUseCase,
-    required this._lastActivityService,
-    required this._dailyProgressService,
-    required this._timerNotificationService,
+    required this.updateSubjectTimeUseCase,
+    required this.lastActivityService,
+    required this.dailyProgressService,
+    required this.timerNotificationService,
     required this.subject,
   });
 
   static const int focusIntervalSeconds = 25 * 60;
 
-  final UpdateSubjectTimeUseCase _updateSubjectTimeUseCase;
-  final LastActivityService _lastActivityService;
-  final DailyProgressService _dailyProgressService;
-  final TimerNotificationService _timerNotificationService;
+  final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
+  final LastActivityService lastActivityService;
+  final DailyProgressService dailyProgressService;
+  final TimerNotificationService timerNotificationService;
 
   final SubjectEntity subject;
 
@@ -127,7 +127,7 @@ class TimerController extends GetxController {
     isRunning.value = false;
     isSessionFinished.value = true;
     _ticker?.cancel();
-    _timerNotificationService.cancel();
+    timerNotificationService.cancel();
   }
 
   Future<bool> confirmExitIfNeeded() async {
@@ -176,11 +176,8 @@ class TimerController extends GetxController {
       _hasLoggedTime = true;
     }
     _persistedSessionSeconds = sessionSeconds.value;
-    _updateSubjectTimeUseCase(
-      subjectId: subject.id,
-      totalSeconds: totalSeconds,
-    );
-    _dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+    updateSubjectTimeUseCase(subjectId: subject.id, totalSeconds: totalSeconds);
+    dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
   }
 
   void _registerSessionIfNeeded() {
@@ -188,8 +185,8 @@ class TimerController extends GetxController {
       return;
     }
     _hasRegisteredSession = true;
-    _lastActivityService.record(subject.name, subjectId: subject.id);
-    _dailyProgressService.registerSession();
+    lastActivityService.record(subject.name, subjectId: subject.id);
+    dailyProgressService.registerSession();
   }
 
   String _formatMinutesForDialog(int seconds) {
@@ -204,7 +201,7 @@ class TimerController extends GetxController {
     }
 
     if (!isRunning.value) {
-      _timerNotificationService.showStatic(
+      timerNotificationService.showStatic(
         title: subject.name,
         body: context.l10n.timerNotificationPaused,
       );
@@ -212,14 +209,14 @@ class TimerController extends GetxController {
     }
 
     if (isResting.value) {
-      _timerNotificationService.showStatic(
+      timerNotificationService.showStatic(
         title: subject.name,
         body: context.l10n.timerNotificationResting,
       );
       return;
     }
 
-    _timerNotificationService.showRunning(
+    timerNotificationService.showRunning(
       title: subject.name,
       body: context.l10n.timerNotificationRunning,
       startedAt: DateTime.now().subtract(
@@ -233,7 +230,7 @@ class TimerController extends GetxController {
     _ticker?.cancel();
     _persistAccumulatedTime();
     _registerSessionIfNeeded();
-    _timerNotificationService.cancel();
+    timerNotificationService.cancel();
     super.onClose();
   }
 }

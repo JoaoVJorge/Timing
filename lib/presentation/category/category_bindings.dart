@@ -10,9 +10,7 @@ class CategoryBindings extends Bindings {
     Get.put<CategoryController>(
       CategoryController(
         getSubjectsUseCase: Get.find(),
-        updateSubjectPagesUseCase: Get.find(),
         deleteSubjectUseCase: Get.find(),
-        dailyProgressService: Get.find(),
         appNavigator: Get.find(),
         category: category,
       ),

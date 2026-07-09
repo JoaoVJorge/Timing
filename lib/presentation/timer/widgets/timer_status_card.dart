@@ -130,7 +130,9 @@ class TimerStatusCard extends StatelessWidget {
               Expanded(
                 child: _MetricTile(
                   label: context.l10n.timerSessionLabel,
-                  value: formatDurationLong(Duration(seconds: sessionSeconds)),
+                  value: formatDurationCompact(
+                    Duration(seconds: sessionSeconds),
+                  ),
                 ),
               ),
               const Gap(12),
