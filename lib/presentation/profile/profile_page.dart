@@ -6,7 +6,6 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/profile/profile_category_style.dart";
 import "package:help_out/presentation/profile/profile_controller.dart";
-import "package:help_out/presentation/profile/widgets/profile_agenda_preview.dart";
 import "package:help_out/presentation/profile/widgets/profile_empty_state.dart";
 import "package:help_out/presentation/profile/widgets/profile_evolution.dart";
 import "package:help_out/presentation/profile/widgets/profile_header.dart";
@@ -44,27 +43,14 @@ class ProfilePage extends StatelessWidget {
               ),
               const Gap(24),
               if (stats.isEmpty)
-                ProfileEmptyState(
-                  onStart: () =>
-                      controller.onTapCategory(TimeCategoryType.studying),
-                  onCreateSubject: () =>
-                      controller.onTapCategory(TimeCategoryType.studying),
-                  onCreateGoal: controller.onTapCreateGoal,
-                  onAddSchedule: controller.onAddScheduleEntry,
-                )
+                const ProfileEmptyState()
               else ...[
                 _SummaryCard(stats: stats),
                 const Gap(16),
-                _StatsGrid(stats: stats, controller: controller),
+                _StatsGrid(stats: stats),
                 const Gap(24),
                 ProfileEvolution(stats: stats),
               ],
-              const Gap(24),
-              ProfileAgendaPreview(
-                entries: controller.sortedScheduleEntries,
-                onTapSchedule: controller.onTapSchedule,
-                onAddEntry: controller.onAddScheduleEntry,
-              ),
               if (!stats.isEmpty) ...[
                 const Gap(24),
                 Text(
@@ -110,22 +96,19 @@ class _SummaryCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.profileSummaryLabel,
+          context.l10n.profileSummarySinceStartLabel,
           style: context.textStyles.bodySmall.copyWith(
             color: Colors.white.withValues(alpha: 0.8),
           ),
         ),
         const Gap(8),
         Text(
-          formatDurationLong(Duration(seconds: stats.totalFocusSeconds)),
-          style: context.textStyles.black32.copyWith(color: Colors.white),
+          context.l10n.profileSummaryAccumulatedFocus(
+            formatDurationLong(Duration(seconds: stats.totalFocusSeconds)),
+          ),
+          style: context.textStyles.extraBold24.copyWith(color: Colors.white),
         ),
-        const Gap(4),
-        Text(
-          context.l10n.profileSummaryFocusLabel,
-          style: context.textStyles.bodyLarge.copyWith(color: Colors.white),
-        ),
-        const Gap(2),
+        const Gap(6),
         Text(
           context.l10n.profileSummaryFocusDescription,
           style: context.textStyles.bodySmall.copyWith(
@@ -138,13 +121,11 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.stats, required this.controller});
+  const _StatsGrid({required this.stats});
 
   final ProfileStatsEntity stats;
-  final ProfileController controller;
 
-  double? _progress(int current, int goal) =>
-      goal > 0 ? current / goal : null;
+  double? _progress(int current, int goal) => goal > 0 ? current / goal : null;
 
   @override
   Widget build(BuildContext context) => GridView(
@@ -171,7 +152,6 @@ class _StatsGrid extends StatelessWidget {
         isEmpty: stats.studyingTotalSeconds == 0,
         emptyTitle: context.l10n.profileStatTimeEmptyTitle,
         emptyDescription: context.l10n.profileStatTimeEmptyDescription,
-        onTap: () => controller.onTapCategory(TimeCategoryType.studying),
       ),
       ProfileStatCard(
         iconName: TimeCategoryType.studying.iconName,
@@ -188,7 +168,6 @@ class _StatsGrid extends StatelessWidget {
         isEmpty: !stats.hasTopStudyingSubject,
         emptyTitle: context.l10n.profileTopSubjectEmptyTitle,
         emptyDescription: context.l10n.profileTopSubjectEmptyDescription,
-        onTap: () => controller.onTapCategory(TimeCategoryType.studying),
       ),
       ProfileStatCard(
         iconName: TimeCategoryType.exercises.iconName,
@@ -202,9 +181,8 @@ class _StatsGrid extends StatelessWidget {
           stats.exercisesGoalSeconds,
         ),
         isEmpty: stats.exercisesTotalSeconds == 0,
-        emptyTitle: context.l10n.profileStatTimeEmptyTitle,
-        emptyDescription: context.l10n.profileStatTimeEmptyDescription,
-        onTap: () => controller.onTapCategory(TimeCategoryType.exercises),
+        emptyTitle: context.l10n.profileStatExerciseEmptyTitle,
+        emptyDescription: context.l10n.profileStatExerciseEmptyDescription,
       ),
       ProfileStatCard(
         iconName: TimeCategoryType.reading.iconName,
@@ -215,7 +193,6 @@ class _StatsGrid extends StatelessWidget {
         isEmpty: stats.readingTotalPages == 0,
         emptyTitle: context.l10n.profileStatReadingEmptyTitle,
         emptyDescription: context.l10n.profileStatReadingEmptyDescription,
-        onTap: () => controller.onTapCategory(TimeCategoryType.reading),
       ),
     ],
   );

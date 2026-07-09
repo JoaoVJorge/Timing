@@ -2,12 +2,10 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
 
 /// Reusable statistic card for the Profile screen. Renders either a real value
 /// (with an optional goal subtitle and progress bar) or a guidance empty state
-/// when there is nothing tracked yet. Tapping it navigates to the related
-/// category when [onTap] is provided.
+/// when there is nothing tracked yet.
 class ProfileStatCard extends StatelessWidget {
   const ProfileStatCard({
     required this.iconName,
@@ -19,7 +17,6 @@ class ProfileStatCard extends StatelessWidget {
     this.isEmpty = false,
     this.emptyTitle,
     this.emptyDescription,
-    this.onTap,
     super.key,
   });
 
@@ -34,66 +31,48 @@ class ProfileStatCard extends StatelessWidget {
   final bool isEmpty;
   final String? emptyTitle;
   final String? emptyDescription;
-  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final Widget card = Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.colorTokens.borderUnfocused),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.16),
-                  shape: BoxShape.circle,
-                ),
-                child:  SizedBox.square(
-                dimension: 20,
-                  child: AppIcon(iconName, size: 20, color: accentColor),
-                ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow,
+          blurRadius: 12,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.16),
+                shape: BoxShape.circle,
               ),
-              const Spacer(),
-              if (onTap != null)
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: context.colorTokens.textHint,
-                ),
-            ],
-          ),
-          const Gap(12),
-          if (isEmpty)
-            ..._buildEmpty(context)
-          else
-            ..._buildValue(context),
-        ],
-      ),
-    );
-
-    if (onTap == null) {
-      return card;
-    }
-    return BounceTap(pressedScale: 0.98, onTap: onTap!, child: card);
-  }
+              child: SizedBox.square(
+                dimension: 20,
+                child: AppIcon(iconName, size: 20, color: accentColor),
+              ),
+            ),
+          ],
+        ),
+        const Gap(12),
+        if (isEmpty) ..._buildEmpty(context) else ..._buildValue(context),
+      ],
+    ),
+  );
 
   List<Widget> _buildValue(BuildContext context) => [
     Text(

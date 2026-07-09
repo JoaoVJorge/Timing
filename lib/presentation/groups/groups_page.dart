@@ -25,64 +25,25 @@ class GroupsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Gap(16),
-          Row(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.groupsTitle,
-                      style: context.textStyles.titleFont,
-                    ),
-                    const Gap(4),
-                    Text(
-                      context.l10n.groupsSubtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyMedium.copyWith(
-                        color: context.colorTokens.textHint,
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                context.l10n.groupsTitle,
+                style: context.textStyles.titleFont,
               ),
-              const Gap(12),
-              BounceTap(
-                onTap: controller.onTapCreateGroup,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.colorTokens.primary,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 18,
-                        color: context.colorTokens.primaryForeground,
-                      ),
-                      const Gap(4),
-                      Text(
-                        context.l10n.groupHeaderCreateButton,
-                        style: context.textStyles.bodySmall.copyWith(
-                          color: context.colorTokens.primaryForeground,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+              const Gap(4),
+              Text(
+                context.l10n.groupsSubtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: context.colorTokens.textHint,
                 ),
               ),
             ],
           ),
-          const Gap(20),
+          const Gap(16),
           Obx(
             () => GroupSelector(
               groups: controller.groups,
@@ -130,16 +91,20 @@ class GroupsPage extends StatelessWidget {
               }
 
               return ListView(
+                padding: EdgeInsets.only(bottom: 16),
                 children: [
-                  Text(
-                    leaderboardDescription(
-                      context,
-                      group.theme,
-                      controller.selectedPeriod.value,
-                    ),
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: context.colorTokens.textHint,
-                      fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Text(
+                      leaderboardDescription(
+                        context,
+                        group.theme,
+                        controller.selectedPeriod.value,
+                      ),
+                      style: context.textStyles.bodySmall.copyWith(
+                        color: context.colorTokens.textHint,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const Gap(12),

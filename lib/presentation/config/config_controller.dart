@@ -33,7 +33,7 @@ class ConfigController extends GetxController {
       RegExp(r"^@+\s*"),
       "",
     );
-    return value.isEmpty ? Get.context!.l10n.personalProfileLabel : "@$value";
+    return value.isEmpty ? "@${Get.context!.l10n.nicknameFallback}" : "@$value";
   }
 
   String get darkModeSubtitle => isDarkMode.value
