@@ -1,509 +1,817 @@
-# HelpOut — Documento de Referência Completo do Aplicativo
+# HelpOut - Documento de Referencia do Projeto
 
-> Documento descritivo do app **HelpOut** (pacote Flutter `help_out`, versão `0.1.0+1`).
-> Objetivo: fornecer a qualquer sistema de IA (ou humano) uma compreensão completa e sem ambiguidades
-> do propósito, arquitetura, modelo de dados e de **todos os fluxos** do aplicativo.
-> Última síntese baseada no código-fonte em `lib/`.
-
----
-
-## 1. Visão Geral (o que o app é)
-
-**HelpOut** é um aplicativo mobile Flutter de **produtividade e gestão de tempo/estudos com componente social**.
-O usuário cronometra e acumula tempo dedicado a diferentes atividades (estudar, exercícios, hobbies),
-registra progresso de leitura por páginas, mantém metas/hábitos diários, organiza uma grade de horários
-semanal e compete com amigos em grupos com rankings (leaderboards).
-
-Conceito central: **transformar tempo e constância em métricas visíveis e comparáveis**, misturando um
-cronômetro de foco (estilo Pomodoro) com gamificação social.
-
-- **Nome de exibição:** `HelpOut` (`AppConstants.appTitle`).
-- **Público:** estudantes e pessoas que querem acompanhar hábitos e tempo de foco.
-- **Idiomas suportados:** Inglês (`en`), Português (`pt`), Espanhol (`es`) — ver seção 11.
-- **Plataforma-alvo principal:** Android (notificações persistentes de timer só funcionam em Android; ver seção 10).
-
-### Estado de maturidade / dados simulados
-Partes do backend são **mockadas** (não há servidor real ainda):
-- **Login social** (Google/Apple): apenas define um nome fake e entra. Nenhuma autenticação real.
-- **Login por telefone/OTP:** o "envio de SMS" é simulado (delay); a verificação aceita **qualquer código de 6 dígitos**.
-- **Sincronização de perfil com backend:** simulada (delay de ~600ms, sempre sucesso).
-- **Grupos e amigos:** dados fixos em memória (mock). Grupos criados persistem apenas na sessão (lista em memória).
-- Todo o resto (subjects, tarefas diárias, grade de horários, config/perfil) é **persistido localmente** no dispositivo.
+> Documento atualizado do app Flutter `help_out` (`0.1.0+1`).
+> Objetivo: dar uma visao clara do produto, arquitetura, dados, servicos e fluxos principais para humanos ou sistemas de IA que precisem continuar o projeto.
+> Baseado no codigo atual em `lib/`.
 
 ---
 
-## 2. Stack Técnica e Arquitetura
+## 1. Visao Geral
 
-### 2.1 Dependências principais (`pubspec.yaml`)
-- **State management + navegação + DI:** `get` (GetX) `^4.7.2`.
-- **Programação funcional / erros:** `dartz` `^0.10.1` (uso de `Either<AppError, T>` em toda a camada de domínio/dados).
-- **Igualdade de valor:** `equatable` `^2.0.8` (todas as entidades estendem `Equatable`).
-- **HTTP:** `dio` `^5.9.2` (infra HTTP existe, mas o app hoje roda em mocks locais).
-- **Persistência local:** `shared_preferences` `^2.5.3` (dados normais) + `flutter_secure_storage` `^10.3.1` (dados sensíveis).
-- **Notificações locais:** `flutter_local_notifications` `^22.0.1` (API de parâmetros nomeados da v22).
-- **Config de ambiente:** `flutter_dotenv` `^6.0.1` (arquivos `lib/env/debug.env` e `lib/env/prod.env`).
-- **UI utilitária:** `flutter_svg` (ícones SVG), `gap` (espaçamentos), `intl` (formatação/i18n).
-- **Fonte:** `Nunito` (todos os pesos, 200–900, incluindo itálicos).
+**HelpOut** e um app mobile Flutter de produtividade, estudos e acompanhamento de habitos com camada social.
+O usuario cria atividades, registra tempo de foco, acompanha leituras por paginas, marca metas diarias, organiza uma agenda semanal e compara desempenho em grupos.
 
-### 2.2 Arquitetura em camadas (Clean Architecture simplificada)
-```
+Ideia central: transformar **tempo, paginas e constancia** em metricas visiveis, com um fluxo leve de gamificacao.
+
+- **Nome de exibicao:** `HelpOut` (`AppConstants.appTitle`).
+- **Pacote Flutter:** `help_out`.
+- **Estado de login:** atualmente `userName` vazio significa usuario deslogado; `userName` preenchido significa usuario logado.
+- **Idiomas:** ingles (`en`), portugues (`pt`) e espanhol (`es`).
+- **Plataforma principal:** Android, especialmente por causa das notificacoes persistentes do timer.
+
+### Estado atual de backend e mocks
+
+O app ainda nao depende de um backend real para os fluxos principais.
+
+- Login Google/Apple e mockado.
+- Login por telefone/OTP e mockado; qualquer codigo numerico de 6 digitos e aceito.
+- Sync de perfil com backend e mockado.
+- Grupos, amigos e rankings usam dados fixos em memoria.
+- Subjects, tarefas, agenda, configuracoes, ultima atividade e progresso diario sao persistidos localmente.
+
+---
+
+## 2. Stack Tecnica
+
+Principais dependencias em `pubspec.yaml`:
+
+| Area | Dependencia | Uso |
+|---|---|---|
+| Estado, rotas e DI | `get` | GetX para controllers, bindings, navegacao e injecao |
+| Erros funcionais | `dartz` | `Either<AppError, T>` nos use cases e repositorios |
+| Valor/igualdade | `equatable` | entidades imutaveis comparaveis |
+| HTTP | `dio` | infraestrutura pronta para backend real |
+| Persistencia | `shared_preferences` | dados locais nao sensiveis |
+| Persistencia sensivel | `flutter_secure_storage` | tokens/reservado para auth real |
+| Notificacoes | `flutter_local_notifications` | timer persistente no Android |
+| Ambiente | `flutter_dotenv` | `lib/env/debug.env` e `lib/env/prod.env` |
+| UI | `flutter_svg`, `gap`, `intl` | icones, espacamentos, formatacao |
+| Fonte | `Nunito` | familia tipografica completa |
+
+---
+
+## 3. Arquitetura
+
+O projeto segue uma Clean Architecture simplificada:
+
+```text
 lib/
-├── main.dart                → bootstrap: inicializa bindings e roda AppWidget
-├── app/                     → shell do app (rotas, controller global, navegação, DI raiz)
-├── core/
-│   ├── domain/              → entities, enums, use_cases, errors (regras de negócio puras)
-│   ├── data/                → data_sources (I/O bruto) + repositories (contrato/orquestração)
-│   ├── services/            → http, local_storage, notifications, last_activity, log
-│   └── utils/               → extensions
-├── presentation/           → uma pasta por tela: <feature>_page + _controller + _bindings [+ widgets/]
-├── theme/                  → tokens de cor, tipografia, presets (cores, ícones, wallpapers, idiomas)
-├── l10n/                   → arquivos ARB + AppLocalizations gerados (en/pt/es)
-└── shared/                 → widgets/extensions/functions reutilizáveis
+  main.dart                 -> bootstrap do Flutter e bindings
+  app/                      -> app shell, rotas, navegacao, DI raiz, AppController
+  core/
+    domain/                 -> entities, enums, use_cases, errors
+    data/                   -> data_sources e repositories
+    services/               -> storage, HTTP, notificacoes, progresso, logs
+    utils/                  -> extensoes
+  presentation/             -> telas por feature: page, controller, bindings, widgets
+  theme/                    -> cores, tipografia, presets, icones, wallpapers
+  l10n/                     -> ARB e classes geradas de localizacao
+  shared/                   -> widgets e funcoes reutilizaveis
 ```
 
-**Fluxo de dependência (regra):** `presentation → domain (use_cases) → data (repositories → data_sources) → services`.
-A camada de domínio não conhece detalhes de UI nem de armazenamento; a comunicação de erro é feita sempre por `Either<AppError, T>`.
+Fluxo de dependencia:
 
-### 2.3 Padrão de cada tela (feature)
-Cada rota segue o trio GetX:
-- **`*_page.dart`** — Widget (`StatelessWidget`) que observa o controller via `Obx`.
-- **`*_controller.dart`** — `GetxController` com estado reativo (`.obs`) e handlers de interação.
-- **`*_bindings.dart`** — registra o controller e suas dependências no container GetX (lazy).
+```text
+presentation -> domain/use_cases -> data/repositories -> data_sources -> services
+```
 
-### 2.4 Injeção de Dependência (DI)
-Feita no boot via `AppBindings().dependencies()` (chamado em `main.dart` antes de `runApp`). Estrutura em `lib/app/bindings/`:
-- `services_bindings.dart` — instancia serviços (storage, http, notificações, last activity, logger).
-- `data_sources_bindings.dart` — data sources.
-- `repositories_bindings.dart` — repositories.
-- `use_cases_bindings.dart` — use cases.
-- `app_bindings.dart` — agrega tudo + registra o `AppController` global.
-Bindings por tela injetam apenas o controller daquela rota (lazy) quando a rota é aberta.
+Padrao de tela:
 
-### 2.5 Controller global — `AppController`
-Vive durante toda a sessão (registrado no boot). Guarda o **estado global do usuário e preferências**, todos reativos:
-`isDarkMode`, `accentColor`, `userName`, `nickName`, `email`, `phoneNumber`, `birthDate`, `avatarIconIndex`,
-`notificationsEnabled`, `languageCode`.
-Responsabilidades:
-- `initialize()` — carrega `AppConfig` do storage e aguarda a duração do splash; depois decide a rota inicial.
-- `_navigateAfterSplash()` — se `userName` está vazio → `/login`; senão → `/mainNavigation`. **`userName` não vazio é o proxy de "usuário logado".**
-- Setters (`setDarkMode`, `setAccentColor`, `setUserName`, `setAvatarIconIndex`, `setNotificationsEnabled`, `setLanguageCode`) — atualizam o estado e **persistem** via `SaveAppConfigUseCase`.
-- `updateProfile(...)` — atualiza dados de perfil, persiste localmente **e** chama `SyncProfileToBackendUseCase` (mock).
-- `logOut()` — limpa dados de identidade e vai para `/login`.
-- Detalhe de i18n: `setLanguageCode` usa `Get.updateLocale(...)` porque `GetMaterialApp` só lê o parâmetro `locale:` no primeiro build.
+- `*_page.dart`: widget de UI, normalmente observando estado com `Obx`.
+- `*_controller.dart`: estado reativo e regras de interacao.
+- `*_bindings.dart`: injeta o controller da rota.
+
+### Bootstrap e DI
+
+`main.dart` chama `WidgetsFlutterBinding.ensureInitialized()`, executa `AppBindings().dependencies()` e entao roda `AppWidget`.
+
+`AppBindings`:
+
+- carrega o `.env` de debug ou prod;
+- registra `AppNavigator`;
+- inicializa servicos;
+- registra data sources, repositories e use cases;
+- registra `AppController` como permanente;
+- registra `ScheduleController` como singleton permanente, para Perfil e Agenda observarem a mesma lista de horarios.
 
 ---
 
-## 3. Modelo de Dados (Entities)
+## 4. Estado Global
 
-Todas em `lib/core/domain/entities/`. Todas imutáveis, com `fromMap`/`toMap` (+ `fromJson`/`toJson`) e `Equatable`.
+`AppController` e o controller global do app. Ele guarda preferencias e dados de identidade:
 
-### 3.1 `AppConfigEntity` — configuração global + identidade do usuário
-Persistida como JSON único sob a chave `appConfig`.
-| Campo | Tipo | Descrição |
+- `isDarkMode`
+- `accentColor`
+- `userName`
+- `nickName`
+- `email`
+- `phoneNumber`
+- `birthDate`
+- `avatarIconIndex`
+- `notificationsEnabled`
+- `languageCode`
+
+Responsabilidades principais:
+
+- carregar `AppConfigEntity` do storage;
+- decidir a rota apos splash;
+- persistir tema, idioma, avatar, notificacoes e perfil;
+- aplicar idioma em runtime com `Get.updateLocale`;
+- executar sync de perfil mockado;
+- fazer logout limpando identidade local.
+
+Rota inicial real:
+
+```text
+Splash -> AppController.initialize()
+  -> userName vazio: /login
+  -> userName preenchido: /mainNavigation
+```
+
+---
+
+## 5. Modelo de Dados
+
+Todas as entidades principais ficam em `lib/core/domain/entities/`, sao imutaveis, usam `Equatable` e possuem serializacao `toMap`/`fromMap`.
+
+### AppConfigEntity
+
+Persistida em `LocalStorageKeys.appConfig`.
+
+Campos:
+
+- `isDarkMode`
+- `userName`
+- `nickName`
+- `email`
+- `phoneNumber`
+- `birthDate`
+- `accentColorValue`
+- `avatarIconIndex`
+- `notificationsEnabled`
+- `languageCode`
+
+`AppConfigEntity.fallback()` representa um usuario novo.
+
+### SubjectEntity
+
+Representa uma atividade/materia acompanhavel.
+
+Campos principais:
+
+- `id`
+- `name`
+- `category` (`studying`, `exercises`, `reading`, `hobbies`)
+- `colorValue`
+- `totalSeconds`
+- `goalSeconds`
+- `currentPages`
+- `goalPages`
+- `notes`
+- `iconName`
+- `restMinutes`
+- `musicSuggestion`
+- `wallpaperIndex`
+
+Categorias de tempo usam `totalSeconds` e `goalSeconds`.
+Leitura usa `currentPages` e `goalPages`.
+
+### DailyTaskEntity
+
+Representa uma meta/habito diario.
+
+- `id`
+- `name`
+- `colorValue`
+- `targetDays`
+- `completedDates`
+
+Getters:
+
+- `isCheckedToday`
+- `completedDays`
+- `isCompleted`
+
+Marcar/desmarcar alterna a presenca da data atual em `completedDates`.
+
+### ScheduleEntryEntity
+
+Representa um bloco da agenda semanal.
+
+- `id`
+- `title`
+- `weekday` (`1` segunda a `7` domingo)
+- `startMinutes`
+- `endMinutes`
+- `colorValue`
+
+### DailyProgressEntity
+
+Agregado diario usado pela Home para mostrar metricas honestas do dia, sem precisar de historico completo de sessoes.
+
+- `focusSeconds`
+- `sessions`
+- `pages`
+
+Fica em um mapa persistido por data (`yyyy-MM-dd`) via `DailyProgressService`.
+
+### LastActivityEntity
+
+Ultima atividade registrada.
+
+- `label`
+- `timestamp`
+- `subjectId`
+
+Quando `subjectId` existe, `isResumable` e verdadeiro e a Home pode reabrir o timer daquele subject.
+Quando a atividade veio de uma tarefa diaria, `subjectId` fica `null`.
+
+### GroupEntity e GroupMemberEntity
+
+`GroupEntity`:
+
+- `id`
+- `name`
+- `theme`
+- `members`
+- `ownerId`
+- `createdAt`
+- `inviteCode`
+- `privacy`
+
+`GroupMemberEntity`:
+
+- `id`
+- `name`
+- `avatarColorValue`
+- `todaySeconds`
+- `weekSeconds`
+- `monthSeconds`
+- `avatar`
+- `role`
+- `joinedAt`
+
+`secondsFor(period)` retorna a metrica usada no leaderboard.
+O usuario atual e identificado pelo id `"me"`.
+
+### ProfileStatsEntity
+
+Derivada dos subjects.
+
+- soma tempo de estudo, exercicios e hobbies;
+- soma metas de estudo e exercicios;
+- soma paginas atuais e meta de paginas de leitura;
+- identifica a principal materia de estudo por tempo;
+- lista top 3 leituras por paginas.
+
+Leitura e tratada como fluxo baseado em paginas, nao como tempo.
+
+---
+
+## 6. Persistencia Local
+
+Servico: `AppLocalStorageService`.
+
+Ele roteia leitura/escrita por chave:
+
+- chaves normais usam `SharedPreferences`;
+- chaves sensiveis usam `FlutterSecureStorage`.
+
+| Chave | Sensivel | Conteudo |
 |---|---|---|
-| `isDarkMode` | bool | tema claro/escuro |
-| `userName` | String | nome do usuário (vazio = deslogado) |
-| `nickName` | String | apelido |
-| `email` | String? | opcional |
-| `phoneNumber` | String? | opcional (preenchido no login por telefone) |
-| `birthDate` | String? | ISO-8601 `yyyy-MM-dd`; null até completar credenciais |
-| `accentColorValue` | int (ARGB) | cor de destaque; default `0xFFFFC107` (âmbar) |
-| `avatarIconIndex` | int | índice do ícone de avatar |
-| `notificationsEnabled` | bool | default true |
-| `languageCode` | String | `en`/`pt`/`es`, default `en` |
+| `appConfig` | nao | configuracao e identidade local |
+| `subjects` | nao | lista de subjects |
+| `dailyTasks` | nao | lista de metas diarias |
+| `lastActivity` | nao | ultima atividade |
+| `dailyProgress` | nao | progresso diario por data |
+| `scheduleEntries` | nao | agenda semanal |
+| `accessToken` | sim | reservado para auth real |
+| `refreshToken` | sim | reservado para auth real |
 
-`AppConfigEntity.fallback()` fornece o estado inicial de um usuário novo (tudo vazio/default).
+`clearStorage()` limpa storage normal e seguro.
 
-### 3.2 `SubjectEntity` — uma "matéria"/atividade cronometrável
-Persistida numa lista JSON sob a chave `subjects`. É o objeto central do app.
-| Campo | Tipo | Descrição |
+---
+
+## 7. Navegacao
+
+Rotas em `lib/app/app_routes.dart`.
+
+| Rota | Tela | Observacoes |
 |---|---|---|
-| `id` | String | `DateTime.now().microsecondsSinceEpoch` |
-| `name` | String | nome |
-| `category` | `TimeCategoryType` | studying / exercises / reading / hobbies |
-| `colorValue` | int | cor do card |
-| `totalSeconds` | int | tempo acumulado total (segundos) |
-| `goalSeconds` | int | meta de tempo (para categorias por tempo) |
-| `currentPages` | int | páginas lidas (categoria reading) |
-| `goalPages` | int | meta de páginas |
-| `notes` | String | anotações de texto livre |
-| `iconName` | String | chave de ícone (ver `SubjectIcons`) |
-| `restMinutes` | int | duração da pausa no timer (default 5) |
-| `musicSuggestion` | String | sugestão de música/playlist |
-| `wallpaperIndex` | int | índice do gradiente de fundo do timer |
+| `/` | Splash | dispara inicializacao global |
+| `/login` | Login | social mock + telefone |
+| `/phoneLogin` | Login por telefone | coleta numero |
+| `/otp` | OTP | recebe telefone |
+| `/credentials` | Credenciais | recebe telefone, coleta nome/nascimento |
+| `/mainNavigation` | Shell principal | bottom navigation com navigator aninhado |
+| `/home` | Home | aba do shell |
+| `/profile` | Perfil | aba do shell |
+| `/groups` | Grupos | aba do shell |
+| `/config` | Configuracoes | aba do shell |
+| `/category` | Categoria | recebe `TimeCategoryType` |
+| `/createSubject` | Criar subject | recebe categoria e retorna `SubjectEntity` |
+| `/dailyGoals` | Metas diarias | lista habitos |
+| `/createTask` | Criar tarefa | retorna `DailyTaskEntity` |
+| `/timer` | Timer | recebe `SubjectEntity` |
+| `/notes` | Notas | recebe subject e retorna texto |
+| `/schedule` | Agenda | usa `ScheduleController` singleton |
+| `/editProfile` | Editar perfil | altera dados globais |
+| `/faq` | FAQ | conteudo estatico |
+| `/createGroup` | Criar grupo | retorna `GroupEntity` |
 
-### 3.3 `DailyTaskEntity` — hábito/meta diária
-Lista JSON sob a chave `dailyTasks`.
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `id` | String | id |
-| `name` | String | nome do hábito |
-| `colorValue` | int | cor |
-| `targetDays` | int | meta de dias a cumprir |
-| `completedDates` | List\<String\> | datas (`yyyy-MM-dd`) em que foi marcado |
+`MainNavigationPage` usa um `Navigator` interno com id `1`.
+Trocar abas chama `offAllNamed` no navigator aninhado, entao Home/Perfil/Grupos/Config nao ficam empilhadas.
 
-Getters derivados: `isCheckedToday`, `completedDays` (= tamanho da lista), `isCompleted` (= `completedDays >= targetDays`).
-Marcar/desmarcar é **por dia**: adiciona/remove a data de hoje da lista.
-
-### 3.4 `ScheduleEntryEntity` — bloco na grade de horários semanal
-Lista JSON sob a chave `scheduleEntries`.
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `id` | String | id |
-| `title` | String | título do compromisso |
-| `weekday` | int | 1=segunda … 7=domingo (`DateTime.monday`…) |
-| `startMinutes` | int | minutos desde 00:00 (início) |
-| `endMinutes` | int? | fim opcional |
-| `colorValue` | int | cor do bloco |
-
-### 3.5 `GroupEntity` + `GroupMemberEntity` — grupos sociais e ranking
-| `GroupEntity` | Descrição |
-|---|---|
-| `id`, `name` | identificação |
-| `theme` | `GroupThemeType` (studying/dailyGoals/exercises/reading/hobbies) |
-| `members` | `List<GroupMemberEntity>` |
-
-| `GroupMemberEntity` | Descrição |
-|---|---|
-| `id`, `name` | identificação |
-| `avatarColorValue` | cor do avatar |
-| `todaySeconds` / `weekSeconds` / `monthSeconds` | tempo acumulado por período |
-| `avatarUrl` (getter) | `https://i.pravatar.cc/150?u=<id>` |
-| `secondsFor(period)` | retorna o valor conforme `LeaderboardPeriodType` |
-
-### 3.6 `ProfileStatsEntity` — estatísticas agregadas do perfil (derivadas de subjects)
-Construída por `ProfileStatsEntity.fromSubjects(...)`. Agrega:
-- `studyingTotalSeconds`, `exercisesTotalSeconds`, `readingTotalSeconds` (somas por categoria),
-- `topStudyingSubject` (matéria de estudo com maior tempo),
-- `topReadingSubjects` (top 3 leituras por tempo).
-
-### 3.7 `LastActivityEntity` — última atividade registrada
-`label` + `timestamp`. Persistida sob a chave `lastActivity`. Alimenta o card "última atividade" na Home.
-
-### 3.8 `FriendOption`
-Typedef de record: `({String id, String name})`. Usado na criação de grupos.
-
-### 3.9 Enums
-- **`TimeCategoryType`**: `studying`, `exercises`, `reading`, `hobbies` — cada um com `iconName`. `reading` é tratada como **baseada em páginas** (não em timer).
-- **`GroupThemeType`**: `studying`, `dailyGoals`, `exercises`, `reading`, `hobbies` — cada um com `iconName` e `unit` (`GroupMetricUnit`: hours/days/pages) que define como o ranking é medido. `byName` faz fallback para `studying` (compat. legada).
-- **`LeaderboardPeriodType`**: `today`, `thisWeek`, `thisMonth`.
-- **`GroupMetricUnit`**: `hours`, `days`, `pages`.
-- **`HttpMethod`**: GET/POST/DELETE/PUT/PATCH (infra HTTP).
+Rotas fora do shell sao abertas sobre o app inteiro.
+`AppNavigator` centraliza `toNamed`, `offAllNamed`, `back`, dialogos e snackbars.
 
 ---
 
-## 4. Persistência Local
+## 8. Fluxo de Autenticacao
 
-Serviço: `AppLocalStorageService` (`lib/core/services/local_storage/`). Roteia por chave:
-- Chaves **não sensíveis** → `SharedPreferences`.
-- Chaves **sensíveis** (`hasSensitiveData: true`) → `FlutterSecureStorage`.
+### Splash
 
-Chaves (`LocalStorageKeys`):
-| Chave | Sensível | Conteúdo |
-|---|---|---|
-| `appConfig` | não | `AppConfigEntity` (JSON) |
-| `subjects` | não | lista de `SubjectEntity` (JSON) |
-| `dailyTasks` | não | lista de `DailyTaskEntity` (JSON) |
-| `lastActivity` | não | `LastActivityEntity` (JSON) |
-| `scheduleEntries` | não | lista de `ScheduleEntryEntity` (JSON) |
-| `accessToken` | **sim** | reservado para auth real (ainda não usado) |
-| `refreshToken` | **sim** | reservado para auth real (ainda não usado) |
+1. `SplashPage` inicia.
+2. `AppController.initialize()` carrega config local e aguarda a duracao minima do splash.
+3. Se `userName` esta vazio, vai para `/login`.
+4. Se `userName` esta preenchido, vai para `/mainNavigation`.
 
-`clearStorage()` limpa ambos os storages. Ao **carregar subjects**, o data source **ignora entradas de categorias removidas** (ex.: uma antiga "working"), garantindo compatibilidade com dados salvos por versões anteriores.
+### Login social mockado
 
----
+Na tela de login:
 
-## 5. Mapa de Navegação (Rotas)
+- Google grava `"Google User"`;
+- Apple grava `"Apple User"`;
+- ambos entram direto em `/mainNavigation`.
 
-Definidas em `lib/app/app_routes.dart` (GetX `GetPage`). Rota inicial: `/` (splash).
-Transição padrão entre páginas empilhadas: `rightToLeft`, 320ms, `easeInOutCubic`.
+Nao ha OAuth real ainda.
 
-| Rota | Constante | Tela | Observações |
-|---|---|---|---|
-| `/` | `splash` | Splash | dispara `AppController.initialize()` |
-| `/login` | `login` | Login | Google/Apple (mock) + telefone |
-| `/phoneLogin` | `phoneLogin` | Login por telefone | pede número |
-| `/otp` | `otp` | Verificação OTP | recebe telefone como argumento |
-| `/credentials` | `credentials` | Cadastro (nome/apelido/nascimento) | recebe telefone |
-| `/mainNavigation` | `mainNavigation` | **Shell com bottom nav** | contém navegação aninhada (id=1) |
-| `/home` | `home` | Home | filho de mainNavigation |
-| `/profile` | `profile` | Perfil | filho de mainNavigation |
-| `/groups` | `groups` | Grupos | filho de mainNavigation |
-| `/config` | `config` | Configurações | filho de mainNavigation |
-| `/category` | `category` | Lista de subjects da categoria | recebe `TimeCategoryType` |
-| `/createSubject` | `createSubject` | Criar subject | recebe categoria; retorna `SubjectEntity` |
-| `/createTask` | `createTask` | Criar tarefa diária | retorna `DailyTaskEntity` |
-| `/dailyGoals` | `dailyGoals` | Metas diárias | lista de hábitos |
-| `/timer` | `timer` | Cronômetro de foco | recebe `SubjectEntity` |
-| `/editProfile` | `editProfile` | Editar perfil | |
-| `/faq` | `faq` | FAQ / ajuda | |
-| `/createGroup` | `createGroup` | Criar grupo | retorna `GroupEntity` |
-| `/schedule` | `schedule` | Grade de horários semanal | |
-| `/notes` | `notes` | Editor de anotações do subject | recebe `SubjectEntity`; retorna String (notas) |
+### Login por telefone
 
-**Navegação aninhada (bottom nav):** `MainNavigationPage` mantém um `Navigator` interno (id=1). `MainNavigationController.onTapBottomBarButton` troca entre `home`/`profile`/`groups`/`config` via `offAllNamed(rota, id: nestedKey)`, sem empilhar. As telas fora do shell (timer, createSubject, etc.) são empilhadas sobre o shell inteiro.
+Fluxo:
 
-**Abstração de navegação:** todas as telas navegam por `AppNavigator` (`lib/app/app_navigator.dart`), que encapsula `Get.toNamed/offAllNamed/back`, diálogos e snackbars de erro/sucesso (padronizados e i18n).
+```text
+/phoneLogin -> /otp -> /credentials -> /mainNavigation
+```
+
+Detalhes:
+
+- telefone precisa ter pelo menos 8 digitos;
+- `RequestPhoneCodeUseCase` simula envio;
+- OTP exige 6 digitos e auto-submete ao completar;
+- `VerifyPhoneCodeUseCase` aceita qualquer codigo numerico de 6 digitos;
+- se ja houver `userName`, o OTP vai direto para Main;
+- se nao houver, coleta nome, apelido opcional e nascimento.
+
+### Logout
+
+Config -> dialogo de confirmacao -> `AppController.logOut()` limpa identidade e navega para `/login`.
 
 ---
 
-## 6. Fluxo de Autenticação e Onboarding
+## 9. Home
 
-### 6.1 Splash → decisão de rota
-1. `SplashPage` monta e no `onReady` chama `AppController.initialize()`.
-2. `initialize()` carrega a config salva e aguarda `splashScreenDuration` (2s) em paralelo.
-3. Decisão: `userName` vazio → **`/login`**; caso contrário → **`/mainNavigation`** (auto-login por dado local).
+Controller: `HomeController`.
 
-### 6.2 Login social (mock)
-- `LoginPage` oferece Google, Apple e "entrar por telefone".
-- Tocar Google/Apple → `_mockSocialSignIn("Google User"/"Apple User")` → grava `userName` e vai para `/mainNavigation`. **Não há OAuth real.**
+A Home carrega:
 
-### 6.3 Login por telefone → OTP → credenciais
-1. `/phoneLogin`: campo de telefone; botão habilita quando há ≥ 8 dígitos. Ao enviar → `RequestPhoneCodeUseCase` (mock, delay 700ms) → navega para `/otp` passando o telefone.
-2. `/otp`: campo de 6 dígitos. Ao completar 6 dígitos, **auto-submete** → `VerifyPhoneCodeUseCase` (mock aceita qualquer 6 dígitos numéricos). Também há "reenviar código".
-   - Após verificação: se já existe conta (`userName` não vazio) → `/mainNavigation`; senão → `/credentials`.
-3. `/credentials`: coleta **nome** (obrigatório), **apelido** (opcional) e **data de nascimento** (obrigatória, via date picker; default sugere idade 18). Botão habilita com nome + data preenchidos. Ao enviar → `AppController.updateProfile(...)` (grava local + sync mock) → `/mainNavigation`.
+- todos os subjects;
+- metas diarias;
+- agenda semanal;
+- ultima atividade;
+- progresso de hoje.
 
-### 6.4 Logout
-Em Configurações → confirma em diálogo → `AppController.logOut()` limpa identidade e volta a `/login`.
+Ela exibe/resume:
 
----
+- saudacao pelo nome do usuario;
+- resumo do dia vindo de `DailyProgressService`;
+- categorias (`studying`, `exercises`, `reading`, `hobbies`);
+- card de metas diarias;
+- proxima entrada de agenda ainda futura no dia;
+- ultima atividade;
+- acao de continuar o ultimo timer quando a ultima atividade tem `subjectId`;
+- sugestao de iniciar o subject com maior `totalSeconds` quando nao ha retomada.
 
-## 7. Núcleo Funcional — Categorias, Subjects, Timer, Leitura
-
-### 7.1 Home (`/home`)
-- Saúda o usuário pelo `userName`.
-- Mostra um **grid de categorias** (`CategoryCard`), uma para cada `TimeCategoryType` (studying, exercises, reading, hobbies).
-- **Logo após "studying"**, insere um card extra **"Metas Diárias"** (`onTapDailyGoals` → `/dailyGoals`).
-- Tocar numa categoria → `/category` com aquele `TimeCategoryType`.
-- Exibe o card de **última atividade** (`LastActivityCard`), alimentado pelo `LastActivityService`.
-
-### 7.2 Lista da Categoria (`/category`)
-Controller: `CategoryController` (recebe a `category`).
-- Carrega todos os subjects e filtra pelos da categoria.
-- `isPageBased = (category == reading)` — muda o comportamento de "tocar no subject":
-  - **Reading (baseada em páginas):** tocar abre `LogPagesDialog` para **registrar páginas lidas**; ao confirmar, atualiza `currentPages` via `UpdateSubjectPagesUseCase`.
-  - **Demais categorias (baseadas em tempo):** tocar abre o **Timer** (`/timer`) com o subject.
-- Ações por subject:
-  - **Notas:** abre `/notes` (retorna texto atualizado, refletido na lista).
-  - **Deletar:** remove otimisticamente da lista + `DeleteSubjectUseCase`.
-  - **Adicionar:** abre `/createSubject`; ao voltar com o subject criado, adiciona à lista.
-
-### 7.3 Criar Subject (`/createSubject`)
-Controller: `CreateSubjectController` (recebe a categoria).
-Campos coletados:
-- **Nome** (obrigatório; erro i18n se vazio).
-- **Cor** (paleta `SubjectColors`, 8 cores).
-- **Ícone** (sugestões específicas por categoria via `SubjectIcons.suggestionsFor`).
-- **Meta:** se `reading` → meta em **páginas**; senão → meta em **horas** (convertida para segundos: `horas*3600`).
-- **Minutos de descanso** (`restMinutesOptions`: 5/10/15/20).
-- **Wallpaper** do timer (índice em `TimerWallpapers`).
-- **Sugestão de música** (texto livre).
-Ao salvar → `AddSubjectUseCase` cria com `totalSeconds=0`, `currentPages=0` e persiste; retorna a entidade para a tela anterior.
-
-### 7.4 Timer de Foco (`/timer`) — coração do app
-Controller: `TimerController` (recebe o `SubjectEntity`). Estilo Pomodoro.
-Constantes/estado:
-- **Intervalo de foco:** 25 min (`_focusIntervalSeconds = 25*60`).
-- **Intervalo de descanso:** `subject.restMinutes` (fallback 5) em minutos.
-- Reativos: `sessionSeconds` (tempo da sessão atual), `breakCountdownSeconds` (contagem regressiva até a pausa), `restCountdownSeconds` (contagem da pausa), `isRunning`, `isResting`.
-- `totalSeconds = baselineSeconds (persistido) + sessionSeconds`.
-
-Lógica do tick (1×/s):
-1. Se pausado → não faz nada.
-2. Se em descanso → decrementa `restCountdownSeconds`; ao chegar a 0, sai do descanso e reinicia o ciclo de foco (25 min).
-3. Se em foco → incrementa `sessionSeconds`, decrementa `breakCountdownSeconds`; ao chegar a 0, entra em **descanso**, **persiste o tempo acumulado** e atualiza a notificação.
-
-Interações e persistência:
-- `togglePause()` — pausa/retoma; ao pausar, persiste o acumulado.
-- `saveProgress()` — persiste manualmente.
-- `_persistAccumulatedTime()` — move `sessionSeconds` para `baselineSeconds`, zera a sessão e grava via `UpdateSubjectTimeUseCase`. Marca que houve tempo logado.
-- Ao **sair da tela** (`onClose`): persiste o restante; se houve tempo logado, registra em `LastActivityService.record(subject.name)`; cancela a notificação.
-- **Notificação persistente** (Android): mostra estado "rodando" (com cronômetro ao vivo via `usesChronometer`), "descansando" ou "pausado" — ver seção 10.
-
-### 7.5 Notas do Subject (`/notes`)
-`NotesController` recebe o subject, edita `notes` em um `TextField`. Ao salvar → `UpdateSubjectNotesUseCase` persiste e retorna a string para a tela de categoria atualizar o subject.
+Depois de navegar para telas que podem alterar dados, a Home chama `load()` novamente ao retornar.
 
 ---
 
-## 8. Metas Diárias (Hábitos)
+## 10. Categorias, Subjects, Leitura e Notas
 
-### 8.1 Lista (`/dailyGoals`)
+### Categoria
+
+Controller: `CategoryController`.
+
+Recebe uma `TimeCategoryType`, carrega todos os subjects e filtra pela categoria.
+
+Comportamento ao tocar:
+
+- `reading`: abre `LogPagesDialog`, atualiza `currentPages` e soma paginas no `DailyProgressService`;
+- outras categorias: abre `/timer` com o subject.
+
+Acoes:
+
+- adicionar subject em `/createSubject`;
+- editar notas em `/notes`;
+- deletar subject com remocao otimista.
+
+### Criar subject
+
+Controller: `CreateSubjectController`.
+
+Campos:
+
+- nome obrigatorio;
+- meta obrigatoria;
+- cor;
+- icone sugerido por categoria;
+- minutos de descanso (`5`, `10`, `15`, `20`);
+- wallpaper do timer;
+- sugestao de musica.
+
+Meta:
+
+- leitura usa paginas;
+- demais categorias usam horas e convertem para segundos.
+
+Ao salvar, cria via `AddSubjectUseCase`, mostra snackbar de sucesso e retorna o subject para a tela anterior.
+
+### Notas
+
+`NotesController` recebe o subject, edita `notes`, persiste com `UpdateSubjectNotesUseCase` e retorna a string atualizada.
+
+---
+
+## 11. Timer
+
+Controller: `TimerController`.
+
+O timer e baseado em ciclos de foco de 25 minutos:
+
+- `focusIntervalSeconds = 25 * 60`;
+- descanso vem de `subject.restMinutes`, com fallback de 5 minutos;
+- `sessionSeconds` guarda o tempo da sessao atual;
+- `breakCountdownSeconds` conta ate o proximo descanso;
+- `restCountdownSeconds` conta o descanso;
+- `isRunning`, `isResting` e `isSessionFinished` controlam o estado visual.
+
+Fluxo de tick:
+
+1. Se pausado, nao incrementa.
+2. Se esta descansando, decrementa o descanso.
+3. Quando o descanso chega a zero, sai do descanso, pausa o timer e reinicia o contador de foco.
+4. Se esta em foco, incrementa `sessionSeconds` e decrementa `breakCountdownSeconds`.
+5. Quando o foco chega a zero, entra em descanso, persiste o tempo acumulado e atualiza notificacao.
+
+Persistencia:
+
+- pausar chama `_persistAccumulatedTime()`;
+- salvar manualmente chama `_persistAccumulatedTime()`;
+- finalizar chama `_persistAccumulatedTime()` e registra a sessao;
+- sair da tela chama persistencia, registra a sessao se houve tempo e cancela notificacao.
+
+Efeitos colaterais:
+
+- `UpdateSubjectTimeUseCase` grava o novo total do subject;
+- `DailyProgressService.addFocusSeconds` soma segundos do dia;
+- `DailyProgressService.registerSession` conta a sessao finalizada/registrada;
+- `LastActivityService.record(subject.name, subjectId: subject.id)` permite retomar esse timer pela Home.
+
+Saida com sessao ativa:
+
+- `confirmExitIfNeeded()` exibe dialogo se existe tempo ativo nao finalizado;
+- se confirmado, finaliza a sessao antes de sair.
+
+Notificacao:
+
+- `TimerNotificationService.showRunning` usa cronometro ao vivo no Android;
+- `showStatic` mostra estados pausado/descansando;
+- `cancel` remove ao fechar/finalizar.
+
+---
+
+## 12. Metas Diarias
+
+### Lista
+
 Controller: `DailyGoalsController`.
-- Carrega tarefas (`GetDailyTasksUseCase`).
-- **Marcar/desmarcar (`onToggleTask`)** → `ToggleDailyTaskCheckUseCase`: se hoje já está em `completedDates`, remove; senão adiciona hoje. Persiste e devolve a tarefa atualizada. Se ficou marcada hoje, registra em `LastActivityService`.
-- **Deletar** → remoção otimista + `DeleteDailyTaskUseCase`.
-- **Adicionar** → `/createTask` (retorna a tarefa criada).
 
-### 8.2 Criar Tarefa (`/createTask`)
+Carrega tarefas com `GetDailyTasksUseCase`.
+
+Acoes:
+
+- adicionar em `/createTask`;
+- marcar/desmarcar com `ToggleDailyTaskCheckUseCase`;
+- deletar com remocao otimista.
+
+Quando uma tarefa fica marcada hoje, a ultima atividade e registrada com `LastActivityService.record(task.name)`.
+Como nao ha `subjectId`, essa atividade nao e retomavel.
+
+### Criar tarefa
+
 Controller: `CreateTaskController`.
-- **Nome** (obrigatório).
-- **Cor** (paleta `SubjectColors`).
-- **Meta de dias:** opções pré-definidas `[3,5,7,14,21,30]` **ou** valor customizado (campo numérico). Selecionar um preset limpa o custom, e vice-versa.
-- Ao salvar → `AddDailyTaskUseCase` cria com `completedDates` vazio; retorna a entidade.
 
-Semântica de "streak/progresso": a tarefa acumula dias marcados (`completedDays`) rumo a `targetDays`; `isCompleted` quando alcança a meta.
+Campos:
 
----
+- nome obrigatorio;
+- cor;
+- meta de dias por preset ou valor customizado.
 
-## 9. Grupos e Rankings (Social)
-
-### 9.1 Lista de Grupos (`/groups`)
-Controller: `GroupsController`. **Dados mockados** (`GroupsDataSource`).
-- Carrega grupos (2 mock: "Study Squad" tema studying, "Work Crew" tema exercises) e seleciona o primeiro.
-- **Seleção de grupo** e **seleção de período** (`today`/`thisWeek`/`thisMonth`).
-- **`rankedMembers`** — ordena os membros do grupo selecionado por `secondsFor(período)` (desc). É o leaderboard.
-- **Criar grupo** → `/createGroup`; ao voltar, adiciona e seleciona o novo grupo.
-- Observação de implementação: a lista carregada é **copiada** (`List.of`) para não aliasar o store mockado (senão um grupo criado apareceria duplicado).
-
-### 9.2 Criar Grupo (`/createGroup`)
-Controller: `CreateGroupController`.
-- Carrega **amigos convidáveis** (`GetInvitableFriendsUseCase`, 6 amigos mock).
-- Coleta: **nome do grupo** (obrigatório), **tema** (`GroupThemeType`, obrigatório) e **≥1 amigo** selecionado (obrigatório).
-- `canCreate` só habilita com os três satisfeitos; erros específicos i18n para cada campo faltante.
-- Ao criar → `CreateGroupUseCase`/`GroupsDataSource.createGroup`: monta os membros incluindo **"You"** + os amigos convidados (todos com tempos zerados), gera id por timestamp, adiciona ao store mock e retorna.
-
-O **tema** define a unidade do ranking (`GroupMetricUnit`): studying/exercises/hobbies → horas; dailyGoals → dias; reading → páginas.
+Ao salvar, cria com `completedDates` vazio e retorna a tarefa.
 
 ---
 
-## 10. Perfil e Grade de Horários
+## 13. Agenda
 
-### 10.1 Perfil (`/profile`)
-Controller: `ProfileController`.
-- Exibe `userName`.
-- **Estatísticas agregadas** (`GetProfileStatsUseCase` → `ProfileStatsEntity.fromSubjects`): totais por categoria (studying/exercises/reading), matéria de estudo top e top 3 leituras. Renderizadas em `StatCard` / `TopThemeTile`.
-- **Prévia da agenda de hoje:** `sortedScheduleEntries` vem de `ScheduleController.todayEntries` (entradas do dia atual, ordenadas por horário de início).
-- Botão para abrir a **grade completa** (`/schedule`).
-
-Nota de DI: `ProfileController` depende de um `ScheduleController` compartilhado, para reaproveitar as entradas já carregadas.
-
-### 10.2 Grade de Horários (`/schedule`)
 Controller: `ScheduleController`.
-- `selectedWeekday` inicia no dia atual (`DateTime.now().weekday`).
-- `sortedEntries` = entradas do dia selecionado ordenadas por `startMinutes`. Seleção de dia via `onSelectWeekday`.
-- **Adicionar entrada** → abre `AddScheduleEntryDialog` (título, horário início/fim opcional, cor). Cria via `AddScheduleEntryUseCase` no dia selecionado.
-  - **Detalhe importante (bug conhecido evitado):** o resultado do diálogo é obtido como `dynamic` e depois convertido (`as AddScheduleEntryResult?`). Passar o tipo record concreto como genérico do `toNamed`/dialog faz o GetX **descartar o resultado** (a entrada só aparecia após reiniciar o app). Ver memória `feedback_getx_tonamed_generic_crash`.
-- **Deletar entrada** → remoção otimista + `DeleteScheduleEntryUseCase`.
+
+Ele e registrado no binding raiz como singleton permanente.
+Isso permite que Perfil, Agenda e outras telas vejam a mesma lista.
+
+Estado:
+
+- `entries`;
+- `selectedWeekday`, iniciado no dia atual;
+- `sortedEntries`, entradas do dia selecionado;
+- `todayEntries`, entradas do dia atual.
+
+Acoes:
+
+- selecionar dia da semana;
+- adicionar entrada via `AddScheduleEntryDialog`;
+- deletar entrada com remocao otimista.
+
+Detalhe tecnico importante:
+
+- o resultado do dialogo e lido como `dynamic` e depois convertido para `AddScheduleEntryResult?`;
+- passar o record concreto como generico em GetX faz o resultado se perder em algumas situacoes.
 
 ---
 
-## 11. Configurações, Perfil Editável e FAQ
+## 14. Perfil
 
-### 11.1 Configurações (`/config`)
-Controller: `ConfigController` (proxeia estado do `AppController`).
-- **Modo escuro** (toggle) → `setDarkMode`.
-- **Notificações** (toggle) → `setNotificationsEnabled`.
-- **Meu perfil** → `/editProfile`.
-- **Idioma** → `LanguagePickerDialog` (en/pt/es) → `setLanguageCode` (aplica `Get.updateLocale`).
-- **FAQ** → `/faq`.
-- **Logout** → `LogOutDialog` (confirmação) → `logOut()`.
-Mostra também `userName`, `nickName`, `avatarIconIndex`.
+Controller: `ProfileController`.
 
-### 11.2 Editar Perfil (`/editProfile`)
+Mostra:
+
+- nome, apelido e avatar globais;
+- estatisticas agregadas de subjects;
+- agenda de hoje vinda do `ScheduleController`;
+- atalhos para editar perfil, categorias, agenda e metas.
+
+`ProfileStatsEntity.fromSubjects` calcula:
+
+- tempo total de estudo;
+- meta total de estudo;
+- tempo total de exercicios;
+- meta total de exercicios;
+- tempo total de hobbies;
+- paginas lidas;
+- meta de paginas;
+- top subject de estudo por tempo;
+- top 3 leituras por paginas.
+
+---
+
+## 15. Grupos e Rankings
+
+### Lista de grupos
+
+Controller: `GroupsController`.
+
+Dados vem de `GroupsDataSource`, atualmente mockado em memoria.
+
+Estado:
+
+- lista de grupos;
+- grupo selecionado;
+- periodo selecionado (`today`, `thisWeek`, `thisMonth`);
+- loading.
+
+Ranking:
+
+- `rankedMembers` ordena por `secondsFor(selectedPeriod)`;
+- `currentUserMember` localiza o membro com id `"me"`;
+- `currentUserRank` calcula a posicao atual;
+- `differenceToPrevious(member)` calcula a distancia para o membro imediatamente acima.
+
+Criar grupo:
+
+- abre `/createGroup`;
+- ao voltar com `GroupEntity`, adiciona na lista, seleciona o novo grupo e mostra snackbar de sucesso.
+
+### Criar grupo
+
+Controller: `CreateGroupController`.
+
+Exige:
+
+- nome;
+- tema (`GroupThemeType`);
+- pelo menos 1 amigo convidado.
+
+Ao criar:
+
+- inclui o usuario atual como `"me"` e role `"owner"`;
+- adiciona amigos convidados como membros;
+- gera `id` por timestamp;
+- gera `inviteCode`;
+- define `privacy = "inviteOnly"`;
+- persiste apenas no store mockado em memoria.
+
+Temas:
+
+- `studying`: horas;
+- `dailyGoals`: dias;
+- `exercises`: horas;
+- `reading`: paginas;
+- `hobbies`: horas.
+
+---
+
+## 16. Configuracoes, Perfil Editavel e FAQ
+
+### Configuracoes
+
+Controller: `ConfigController`.
+
+Expoe o estado do `AppController` e permite:
+
+- alternar modo escuro;
+- alternar notificacoes;
+- abrir editar perfil;
+- trocar idioma;
+- abrir FAQ;
+- fazer logout.
+
+### Editar perfil
+
 Controller: `EditProfileController`.
-- Edita **nome, apelido, email, telefone**.
-- **Cor de destaque** (`AppAccentPresets`, 7 cores) — aplicada imediatamente ao tema (`setAccentColor`).
-- **Ícone de avatar** (`AppAvatarPresets`, 8 ícones) — aplicado imediatamente.
-- **Salvar** → `AppController.updateProfile(...)` (persiste local + sync mock) → snackbar de sucesso i18n.
 
-### 11.3 FAQ (`/faq`)
-Lista de perguntas/respostas (dados de conteúdo estático, renderizados em lista expansível).
+Edita:
 
----
+- nome;
+- apelido;
+- email;
+- telefone;
+- cor de destaque;
+- icone de avatar.
 
-## 12. Tema, Design System e Internacionalização
+Cor e avatar sao aplicados imediatamente no estado global.
+Salvar chama `AppController.updateProfile(...)`, persiste localmente e executa sync mockado.
 
-### 12.1 Sistema de cores dinâmico
-`AppColorTokens` (`ThemeExtension`) é **gerado a partir de uma cor semente (accent)** e do brilho (claro/escuro) via `AppColorTokens.fromSeed`. Deriva ~18 tokens (primary, pastel, superfícies, bordas, texto, erro/sucesso/aviso, overlays) manipulando HSL da semente. Isso permite **re-tematização em tempo real** quando o usuário troca a cor de destaque ou o modo escuro (o `AppWidget` reconstrói o `GetMaterialApp` dentro de um `Obx`).
+### FAQ
 
-### 12.2 Presets de tema
-- `AppAccentPresets` — 7 cores de destaque (default âmbar `0xFFFFC107`).
-- `SubjectColors` — 8 cores para subjects/tarefas.
-- `AppAvatarPresets` — 8 ícones de avatar (Material rounded).
-- `SubjectIcons` — mapa nome→`IconData`, com sugestões por categoria.
-- `TimerWallpapers` — 6 gradientes lineares escuros para o fundo do timer.
-- `AppTextStyles` — escala tipográfica (Nunito) derivada dos tokens.
-
-### 12.3 Internacionalização (i18n)
-- Gerada via `flutter gen-l10n` (`generate: true`), com `AppLocalizations` e delegates.
-- **Três locales:** `en`, `pt`, `es` (arquivos `lib/l10n/app_en.arb`, `app_pt.arb`, `app_es.arb`; ~207 chaves).
-- Acesso via extensão `context.l10n`.
-- Troca em runtime por `Get.updateLocale` (persistida em `AppConfig.languageCode`).
-
-### 12.4 Convenções de código (memórias/regras do projeto)
-- **Espaçamentos** (gap/padding/margin) devem ser **múltiplos de 4**.
-- **Nunca** aninhar `Obx()` dentro de callbacks `itemBuilder`.
-- **Não** alternar entre `color` e `gradient` em `BoxDecoration` de um `AnimatedContainer`.
-- **Não** chamar `toNamed<T>()` com tipo concreto; obter `dynamic` e converter (ver §10.2).
+Tela simples com perguntas e respostas estaticas em lista expansivel.
 
 ---
 
-## 13. Serviços de Suporte
+## 17. Tema e Internacionalizacao
 
-- **`LastActivityService`** — mantém a última atividade reativa (`Rx<LastActivityEntity?>`), carrega do storage e grava com `record(label)`. Alimenta a Home. É registrada tanto em sessões de timer quanto ao marcar tarefas diárias.
-- **`TimerNotificationService`** (Android only, `GetPlatform.isAndroid`) — canal `focus_timer`, notificação **ongoing** (não removível), importância baixa, silenciosa, visível na lockscreen, categoria "stopwatch". Três estados: `showRunning` (cronômetro ao vivo baseado em `startedAt`), `showStatic` (descansando/pausado) e `cancel`. É resiliente: qualquer falha é engolida para não interromper o timer.
-- **`AppLocalStorageService`** — abstração sobre SharedPreferences + SecureStorage (ver §4).
-- **Camada HTTP** (`lib/core/services/http/`: `HttpClientService`, `AppHttpRequest`, `HttpStatusCode`) — infraestrutura pronta para um backend real (Dio), atualmente não exercida pelos fluxos (que usam mocks/local).
-- **`AppLoggerService`** — logging.
-- **Tratamento de erro** — `AppError` (`lib/core/domain/errors/`) com variantes como `GenericAppError` e `SerializationAppError`; propagado por `Either` e exibido via snackbars padronizados do `AppNavigator`.
+Tema:
+
+- `AppThemes.build(...)` monta o tema a partir da cor de destaque e brilho;
+- `AppColorTokens` e um `ThemeExtension` derivado da cor semente;
+- trocar modo escuro ou accent reconstrói `GetMaterialApp` via `Obx`;
+- presets ficam em `theme/accent_presets.dart`, `avatar_presets.dart`, `subject_colors.dart`, `subject_icons.dart` e `timer_wallpapers.dart`.
+
+Tipografia:
+
+- fonte `Nunito`;
+- estilos centralizados em `AppTextStyles`.
+
+i18n:
+
+- arquivos ARB em `lib/l10n/app_en.arb`, `app_pt.arb`, `app_es.arb`;
+- `flutter gen-l10n` gera `AppLocalizations`;
+- acesso comum via `context.l10n`;
+- troca em runtime via `Get.updateLocale`.
 
 ---
 
-## 14. Resumo dos Casos de Uso (Use Cases)
+## 18. Servicos
 
-Todos em `lib/core/domain/use_cases/`, retornando `Either<AppError, T>`:
-
-| Use Case | Função |
+| Servico | Funcao |
 |---|---|
-| `GetAppConfigUseCase` / `SaveAppConfigUseCase` | ler/gravar configuração global |
-| `SyncProfileToBackendUseCase` | sincronizar perfil (mock) |
-| `RequestPhoneCodeUseCase` / `VerifyPhoneCodeUseCase` | login por telefone (mock) |
-| `GetSubjectsUseCase` / `AddSubjectUseCase` / `DeleteSubjectUseCase` | CRUD de subjects |
-| `UpdateSubjectTimeUseCase` | acumular tempo do timer |
-| `UpdateSubjectPagesUseCase` | registrar páginas (leitura) |
-| `UpdateSubjectNotesUseCase` | salvar notas |
-| `GetDailyTasksUseCase` / `AddDailyTaskUseCase` / `DeleteDailyTaskUseCase` | CRUD de tarefas diárias |
-| `ToggleDailyTaskCheckUseCase` | marcar/desmarcar hábito no dia |
-| `GetScheduleEntriesUseCase` / `AddScheduleEntryUseCase` / `DeleteScheduleEntryUseCase` | CRUD da grade |
-| `GetGroupsUseCase` / `CreateGroupUseCase` / `GetInvitableFriendsUseCase` | grupos e amigos (mock) |
-| `GetProfileStatsUseCase` | estatísticas agregadas do perfil |
+| `AppLocalStorageService` | abstracao sobre SharedPreferences e SecureStorage |
+| `LastActivityService` | carrega/grava ultima atividade e expoe `Rx<LastActivityEntity?>` |
+| `DailyProgressService` | agrega foco, sessoes e paginas por dia |
+| `TimerNotificationService` | notificacao persistente do timer no Android |
+| `HttpClientService` | wrapper Dio para backend futuro |
+| `AppLoggerService` | logging |
+
+`TimerNotificationService` e resiliente: falhas de notificacao nao devem derrubar o timer.
 
 ---
 
-## 15. Mapa Mental dos Fluxos (rápido)
+## 19. Use Cases
 
+Todos ficam em `lib/core/domain/use_cases/` e retornam `Either<AppError, T>`.
+
+| Use case | Responsabilidade |
+|---|---|
+| `GetAppConfigUseCase` | ler configuracao |
+| `SaveAppConfigUseCase` | salvar configuracao |
+| `SyncProfileToBackendUseCase` | sync mockado de perfil |
+| `RequestPhoneCodeUseCase` | solicitar codigo mockado |
+| `VerifyPhoneCodeUseCase` | validar OTP mockado |
+| `GetSubjectsUseCase` | listar subjects |
+| `AddSubjectUseCase` | criar subject |
+| `DeleteSubjectUseCase` | deletar subject |
+| `UpdateSubjectTimeUseCase` | atualizar tempo acumulado |
+| `UpdateSubjectPagesUseCase` | atualizar paginas de leitura |
+| `UpdateSubjectNotesUseCase` | atualizar notas |
+| `GetDailyTasksUseCase` | listar tarefas |
+| `AddDailyTaskUseCase` | criar tarefa |
+| `DeleteDailyTaskUseCase` | deletar tarefa |
+| `ToggleDailyTaskCheckUseCase` | marcar/desmarcar tarefa hoje |
+| `GetScheduleEntriesUseCase` | listar agenda |
+| `AddScheduleEntryUseCase` | criar entrada de agenda |
+| `DeleteScheduleEntryUseCase` | deletar entrada de agenda |
+| `GetGroupsUseCase` | listar grupos mockados |
+| `CreateGroupUseCase` | criar grupo mockado |
+| `GetInvitableFriendsUseCase` | listar amigos mockados |
+| `GetProfileStatsUseCase` | gerar estatisticas agregadas |
+
+---
+
+## 20. Fluxo Geral Resumido
+
+```text
+Splash
+  -> sem userName
+      -> Login
+          -> Google/Apple mock -> MainNavigation
+          -> Telefone -> OTP -> Credentials -> MainNavigation
+  -> com userName
+      -> MainNavigation
+
+MainNavigation
+  -> Home
+      -> Categoria
+          -> Reading: registrar paginas
+          -> Outras: Timer
+          -> Criar Subject
+          -> Notas
+      -> Metas Diarias
+      -> Agenda
+      -> Continuar ultimo timer retomavel
+  -> Perfil
+      -> Estatisticas
+      -> Agenda de hoje
+      -> Editar Perfil / Categorias / Metas / Agenda
+  -> Grupos
+      -> Ranking por periodo
+      -> Criar Grupo
+  -> Config
+      -> Tema / idioma / notificacoes
+      -> Editar Perfil
+      -> FAQ
+      -> Logout
 ```
-Splash ─▶ (tem userName?) ─── não ─▶ Login ─▶ [Google/Apple mock] ─▶ MainNavigation
-                       │                    └▶ Telefone ─▶ OTP ─▶ (tem conta? sim ─▶ Main / não ─▶ Credentials ─▶ Main)
-                       └── sim ─────────────────────────────────────────▶ MainNavigation
-
-MainNavigation (bottom nav):
- ├─ Home ─▶ Categoria ─▶ (reading? LogPagesDialog / senão Timer) ; +Subject ; Notas
- │         └▶ Metas Diárias ─▶ toggle/+Tarefa
- ├─ Perfil ─▶ Estatísticas + Agenda de hoje ─▶ Grade de Horários
- ├─ Grupos ─▶ Leaderboard (período) ─▶ +Criar Grupo
- └─ Config ─▶ tema/idioma/notificações ; Editar Perfil ; FAQ ; Logout
-```
 
 ---
 
-## 16. Glossário de "Onde está o quê" (para navegação de código por IA)
+## 21. Onde Encontrar Cada Coisa
 
-- **Estado global do usuário/preferências:** `lib/app/app_controller.dart`.
-- **Rotas e transições:** `lib/app/app_routes.dart`.
-- **Navegação/diálogos/snackbars:** `lib/app/app_navigator.dart`.
-- **Bootstrap/DI:** `lib/main.dart` + `lib/app/bindings/`.
-- **Modelos de dados:** `lib/core/domain/entities/`.
-- **Regras de negócio:** `lib/core/domain/use_cases/`.
-- **Persistência:** `lib/core/services/local_storage/` + `lib/core/data/data_sources/`.
-- **Mock social (grupos/amigos):** `lib/core/data/data_sources/groups_data_source.dart`.
-- **Mock auth telefone:** `lib/core/data/data_sources/phone_auth_data_source.dart`.
-- **Timer/Pomodoro:** `lib/presentation/timer/timer_controller.dart`.
-- **Notificações:** `lib/core/services/notifications/timer_notification_service.dart`.
-- **Tema dinâmico:** `lib/theme/colors.dart` (`AppColorTokens.fromSeed`) + `lib/theme/theme.dart`.
-- **Traduções:** `lib/l10n/*.arb`.
+| Assunto | Caminho |
+|---|---|
+| Bootstrap | `lib/main.dart` |
+| DI raiz | `lib/app/bindings/app_bindings.dart` |
+| Rotas | `lib/app/app_routes.dart` |
+| Navegacao | `lib/app/app_navigator.dart` |
+| Estado global | `lib/app/app_controller.dart` |
+| Entidades | `lib/core/domain/entities/` |
+| Enums | `lib/core/domain/enums/` |
+| Use cases | `lib/core/domain/use_cases/` |
+| Repositorios | `lib/core/data/repositories/` |
+| Data sources | `lib/core/data/data_sources/` |
+| Storage | `lib/core/services/local_storage/` |
+| Progresso diario | `lib/core/services/daily_progress/daily_progress_service.dart` |
+| Ultima atividade | `lib/core/services/last_activity/last_activity_service.dart` |
+| Notificacao do timer | `lib/core/services/notifications/timer_notification_service.dart` |
+| Timer | `lib/presentation/timer/timer_controller.dart` |
+| Home | `lib/presentation/home/home_controller.dart` |
+| Categorias | `lib/presentation/category/category_controller.dart` |
+| Agenda | `lib/presentation/schedule/schedule_controller.dart` |
+| Perfil | `lib/presentation/profile/profile_controller.dart` |
+| Grupos | `lib/presentation/groups/groups_controller.dart` |
+| Tema | `lib/theme/` |
+| Traducoes | `lib/l10n/` |
 
 ---
 
-*Fim do documento. Este arquivo descreve o estado do app HelpOut conforme o código-fonte atual em `lib/`.*
+## 22. Regras e Cuidados do Projeto
+
+- Responsabilidade das abas deve seguir `docs/SCREEN_OWNERSHIP.md`.
+- Espacamentos devem preferir multiplos de 4.
+- Evitar `Obx()` dentro de callbacks `itemBuilder`.
+- Evitar alternar `color` e `gradient` no mesmo `AnimatedContainer`.
+- Em dialogs/rotas GetX com retorno complexo, buscar como `dynamic` e converter depois.
+- Nao assumir backend real para login, grupos ou sync de perfil.
+- Leitura e medida por paginas, nao por tempo.
+- `ScheduleController` e singleton permanente; cuidado ao criar outro controller da agenda.
+
+---
+
+*Fim do documento. Atualizado para refletir os fluxos e servicos atuais do projeto HelpOut.*
