@@ -12,7 +12,7 @@ class HomeBindings extends Bindings {
         dailyProgressService: Get.find(),
         getSubjectsUseCase: Get.find(),
         getDailyTasksUseCase: Get.find(),
-        getScheduleEntriesUseCase: Get.find(),
+        scheduleController: Get.find(),
       ),
     );
   }

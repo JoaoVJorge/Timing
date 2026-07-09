@@ -11,10 +11,10 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
+import "package:help_out/presentation/schedule/schedule_controller.dart";
 
 class HomeController extends GetxController {
   HomeController({
@@ -24,7 +24,7 @@ class HomeController extends GetxController {
     required this._dailyProgressService,
     required this._getSubjectsUseCase,
     required this._getDailyTasksUseCase,
-    required this._getScheduleEntriesUseCase,
+    required this._scheduleController,
   });
 
   final AppController _appController;
@@ -33,12 +33,10 @@ class HomeController extends GetxController {
   final DailyProgressService _dailyProgressService;
   final GetSubjectsUseCase _getSubjectsUseCase;
   final GetDailyTasksUseCase _getDailyTasksUseCase;
-  final GetScheduleEntriesUseCase _getScheduleEntriesUseCase;
+  final ScheduleController _scheduleController;
 
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxList<DailyTaskEntity> dailyTasks = <DailyTaskEntity>[].obs;
-  final RxList<ScheduleEntryEntity> scheduleEntries =
-      <ScheduleEntryEntity>[].obs;
 
   RxString get userName => _appController.userName;
 
@@ -55,24 +53,19 @@ class HomeController extends GetxController {
   Future<void> load() async {
     final Either<AppError, List<SubjectEntity>> subjectsResult =
         await _getSubjectsUseCase();
-    subjectsResult.fold(
-      (_) => subjects.clear(),
-      (value) => subjects.value = value,
-    );
+    subjectsResult.fold((error) {
+      subjects.clear();
+      _appNavigator.showErrorSnackBar(error.message);
+    }, (value) => subjects.value = value);
 
     final Either<AppError, List<DailyTaskEntity>> tasksResult =
         await _getDailyTasksUseCase();
-    tasksResult.fold(
-      (_) => dailyTasks.clear(),
-      (value) => dailyTasks.value = value,
-    );
+    tasksResult.fold((error) {
+      dailyTasks.clear();
+      _appNavigator.showErrorSnackBar(error.message);
+    }, (value) => dailyTasks.value = value);
 
-    final Either<AppError, List<ScheduleEntryEntity>> scheduleResult =
-        await _getScheduleEntriesUseCase();
-    scheduleResult.fold(
-      (_) => scheduleEntries.clear(),
-      (value) => scheduleEntries.value = value,
-    );
+    await _scheduleController.loadEntries();
   }
 
   bool get hasSubjects => subjects.isNotEmpty;
@@ -98,7 +91,8 @@ class HomeController extends GetxController {
     );
   }
 
-  int get goalsDoneToday => dailyTasks.where((task) => task.isCheckedToday).length;
+  int get goalsDoneToday =>
+      dailyTasks.where((task) => task.isCheckedToday).length;
 
   int get goalsTotal => dailyTasks.length;
 
@@ -113,16 +107,15 @@ class HomeController extends GetxController {
   bool hasSubjectsIn(TimeCategoryType category) =>
       subjects.any((s) => s.category == category);
 
+  List<ScheduleEntryEntity> get todayScheduleEntries =>
+      _scheduleController.todayEntries;
+
   /// Next schedule slot still to come today, if any.
   ScheduleEntryEntity? get nextTodayEntry {
     final DateTime now = DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
     final List<ScheduleEntryEntity> upcoming =
-        scheduleEntries
-            .where(
-              (e) => e.weekday == now.weekday && e.startMinutes >= nowMinutes,
-            )
-            .toList()
+        todayScheduleEntries.where((e) => e.startMinutes >= nowMinutes).toList()
           ..sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
     return upcoming.isEmpty ? null : upcoming.first;
   }
@@ -154,6 +147,11 @@ class HomeController extends GetxController {
   );
 
   Future<void> onTapSchedule() => _navigateAndRefresh(AppRoutes.schedule);
+
+  Future<void> onAddScheduleEntry() async {
+    await _scheduleController.onTapAddEntry();
+    await load();
+  }
 
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??

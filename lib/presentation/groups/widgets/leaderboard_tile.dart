@@ -41,15 +41,14 @@ class LeaderboardTile extends StatelessWidget {
     final Color backgroundColor = isCurrentUser
         ? context.colorTokens.primaryVeryLight
         : context.colorTokens.surface;
-    final String memberName = isCurrentUser ? context.l10n.you : member.name;
     final String score = formatGroupScore(context, value, theme.unit);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: accentColor.withValues(alpha: isCurrentUser ? 0.7 : 0.45),
           width: isCurrentUser || isTopThree ? 1.5 : 1,
@@ -62,48 +61,22 @@ class LeaderboardTile extends StatelessWidget {
             width: 28,
             child: _RankMarker(rank: rank, isTopThree: isTopThree),
           ),
-          const SizedBox(width: 12),
+          const Gap(8),
           GroupMemberAvatar(
-            name: memberName,
+            name: member.name,
             colorValue: member.avatarColorValue,
           ),
-          const SizedBox(width: 12),
+          const Gap(8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        memberName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodyLarge,
-                      ),
-                    ),
-                    if (isCurrentUser) ...[
-                      const Gap(8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.colorTokens.primary,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          context.l10n.you,
-                          style: context.textStyles.bodyTiny.copyWith(
-                            color: context.colorTokens.primaryForeground,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  member.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyLarge,
                 ),
-                const Gap(4),
                 Text(
                   isCurrentUser
                       ? context.l10n.currentUserRankSubtitle
@@ -117,7 +90,7 @@ class LeaderboardTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const Gap(8),
           Text(
             score,
             maxLines: 1,
@@ -153,10 +126,12 @@ class _RankMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isTopThree) {
-      return Icon(
-        Icons.workspace_premium_rounded,
-        size: 24,
-        color: LeaderboardTile._medalColors[rank - 1],
+      return Center(
+        child: Icon(
+          Icons.workspace_premium_rounded,
+          size: 24,
+          color: LeaderboardTile._medalColors[rank - 1],
+        ),
       );
     }
 

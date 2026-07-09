@@ -50,6 +50,16 @@ class SettingsUserCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  context.l10n.accountSection,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(4),
+                Text(
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -57,7 +67,7 @@ class SettingsUserCard extends StatelessWidget {
                 ),
                 const Gap(4),
                 Text(
-                  nickname,
+                  context.l10n.accountDataSubtitle(nickname),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
@@ -69,21 +79,9 @@ class SettingsUserCard extends StatelessWidget {
             ),
           ),
           const Gap(12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                context.l10n.editButton,
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.colorTokens.primary,
-              ),
-            ],
+          Icon(
+            Icons.chevron_right_rounded,
+            color: context.colorTokens.textHint,
           ),
         ],
       ),
