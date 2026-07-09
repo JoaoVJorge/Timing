@@ -8,6 +8,13 @@ String formatDurationLong(Duration duration) {
   return "${minutes}m";
 }
 
+String formatDurationCompact(Duration duration) {
+  if (duration.inSeconds < 60) {
+    return "${duration.inSeconds}s";
+  }
+  return formatDurationLong(duration);
+}
+
 String formatDurationClock(Duration duration) {
   final int minutes = duration.inMinutes.remainder(60);
   final int seconds = duration.inSeconds.remainder(60);
