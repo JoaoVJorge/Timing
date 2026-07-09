@@ -45,7 +45,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String homeSubtitleNextSchedule(String title, String time) {
-    return 'Próximo horário: $title às $time';
+    return 'Agenda: $title às $time';
   }
 
   @override
@@ -103,7 +103,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeCategoryEmpty => 'Nada ainda';
 
   @override
-  String get homeNextScheduleTitle => 'Próximo horário';
+  String get homeNextScheduleTitle => 'Agenda';
 
   @override
   String get homeNextScheduleEmpty => 'Nenhum horário hoje';
@@ -164,13 +164,13 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get categoryStudying => 'Estudando';
+  String get categoryStudying => 'Estudos';
 
   @override
   String get categoryExercises => 'Exercícios';
 
   @override
-  String get categoryReading => 'Lendo';
+  String get categoryReading => 'Leitura';
 
   @override
   String get categoryHobbies => 'Hobbies';
@@ -197,12 +197,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String restMinutesChip(int minutes) {
     return '$minutes min';
   }
-
-  @override
-  String get musicSuggestionLabel => 'Sugestão de música';
-
-  @override
-  String get musicSuggestionHint => 'ex.: Lo-fi beats';
 
   @override
   String get wallpaperLabel => 'Wallpaper do timer';
@@ -435,11 +429,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String timerMusicSuggestion(String name) {
-    return 'Sugestão: $name';
-  }
-
-  @override
   String get timerNotificationRunning => 'Sessão de foco em andamento';
 
   @override
@@ -512,9 +501,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'O progresso também é salvo ao pausar ou sair.';
 
   @override
-  String get timerMusicSuggestionTitle => 'Sugestão para foco';
-
-  @override
   String timerFocusedValue(String duration) {
     return '$duration focados';
   }
@@ -552,6 +538,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileSummaryLabel => 'Resumo total';
 
   @override
+  String get profileSummarySinceStartLabel => 'Desde o início';
+
+  @override
+  String profileSummaryAccumulatedFocus(Object duration) {
+    return '$duration de foco acumulado';
+  }
+
+  @override
   String get profileSummaryFocusLabel => 'Tempo total de foco';
 
   @override
@@ -576,6 +570,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileStatTimeEmptyDescription => 'Seu tempo aparecerá aqui';
 
   @override
+  String get profileStatExerciseEmptyTitle => 'Nenhum exercício ainda';
+
+  @override
+  String get profileStatExerciseEmptyDescription =>
+      'Registre sua primeira atividade';
+
+  @override
   String get profileStatReadingEmptyTitle => 'Nenhuma página ainda';
 
   @override
@@ -594,7 +595,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileEmptyDescription =>
-      'Inicie uma sessão, registre uma leitura ou crie uma meta para acompanhar sua evolução no HelpOut.';
+      'Inicie uma sessão, registre uma leitura ou crie uma meta pela Home para acompanhar sua evolução no HelpOut.';
+
+  @override
+  String get profileEmptyGuidance =>
+      'Depois disso, seu tempo total, principais atividades e leituras aparecem aqui.';
 
   @override
   String get profileEmptyStartButton => 'Começar agora';
@@ -773,6 +778,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get personalProfileLabel => 'Perfil pessoal';
 
   @override
+  String accountDataSubtitle(Object nickname) {
+    return '$nickname · dados pessoais e segurança';
+  }
+
+  @override
   String get preferencesSection => 'Preferências';
 
   @override
@@ -782,7 +792,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get darkModeEnabledSubtitle => 'Tema escuro ativado';
 
   @override
-  String get darkModeDisabledSubtitle => 'Usar cores mais escuras no app';
+  String get darkModeDisabledSubtitle => 'Usar tema escuro no app';
 
   @override
   String get accentColorSettingsTitle => 'Cor de destaque';
@@ -1096,11 +1106,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get startTimeLabel => 'Hora de início';
 
   @override
-  String get endTimeOptionalLabel => 'Hora de fim (opcional)';
+  String get endTimeOptionalLabel => 'Hora de fim';
 
   @override
   String get incompleteScheduleEntryError =>
-      'Cadastro incompleto — preencha o título e um horário de início válido.';
+      'Cadastro incompleto — preencha o título, a hora de início e a hora de fim.';
 
   @override
   String get endTimeBeforeStartError =>

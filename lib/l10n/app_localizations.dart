@@ -163,7 +163,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeSubtitleNextSchedule.
   ///
   /// In en, this message translates to:
-  /// **'Next up: {title} at {time}'**
+  /// **'Agenda: {title} at {time}'**
   String homeSubtitleNextSchedule(String title, String time);
 
   /// No description provided for @homeSubtitleStart.
@@ -271,7 +271,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeNextScheduleTitle.
   ///
   /// In en, this message translates to:
-  /// **'Next up'**
+  /// **'Agenda'**
   String get homeNextScheduleTitle;
 
   /// No description provided for @homeNextScheduleEmpty.
@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryStudying.
   ///
   /// In en, this message translates to:
-  /// **'Studying'**
+  /// **'Studies'**
   String get categoryStudying;
 
   /// No description provided for @categoryExercises.
@@ -435,18 +435,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} min'**
   String restMinutesChip(int minutes);
-
-  /// No description provided for @musicSuggestionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Music suggestion'**
-  String get musicSuggestionLabel;
-
-  /// No description provided for @musicSuggestionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Lo-fi beats'**
-  String get musicSuggestionHint;
 
   /// No description provided for @wallpaperLabel.
   ///
@@ -832,12 +820,6 @@ abstract class AppLocalizations {
   /// **'Resting — back in {duration}'**
   String timerRestingLabel(String duration);
 
-  /// No description provided for @timerMusicSuggestion.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggested: {name}'**
-  String timerMusicSuggestion(String name);
-
   /// No description provided for @timerNotificationRunning.
   ///
   /// In en, this message translates to:
@@ -970,12 +952,6 @@ abstract class AppLocalizations {
   /// **'Progress is also saved when you pause or leave.'**
   String get timerSaveReassurance;
 
-  /// No description provided for @timerMusicSuggestionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Focus suggestion'**
-  String get timerMusicSuggestionTitle;
-
   /// No description provided for @timerFocusedValue.
   ///
   /// In en, this message translates to:
@@ -1042,6 +1018,18 @@ abstract class AppLocalizations {
   /// **'Total summary'**
   String get profileSummaryLabel;
 
+  /// No description provided for @profileSummarySinceStartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Since the beginning'**
+  String get profileSummarySinceStartLabel;
+
+  /// No description provided for @profileSummaryAccumulatedFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} of accumulated focus'**
+  String profileSummaryAccumulatedFocus(Object duration);
+
   /// No description provided for @profileSummaryFocusLabel.
   ///
   /// In en, this message translates to:
@@ -1090,6 +1078,18 @@ abstract class AppLocalizations {
   /// **'Your time will show up here'**
   String get profileStatTimeEmptyDescription;
 
+  /// No description provided for @profileStatExerciseEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No exercise yet'**
+  String get profileStatExerciseEmptyTitle;
+
+  /// No description provided for @profileStatExerciseEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your first activity'**
+  String get profileStatExerciseEmptyDescription;
+
   /// No description provided for @profileStatReadingEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -1123,8 +1123,14 @@ abstract class AppLocalizations {
   /// No description provided for @profileEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Start a session, log some reading or set a goal to track your evolution in HelpOut.'**
+  /// **'Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.'**
   String get profileEmptyDescription;
+
+  /// No description provided for @profileEmptyGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'After that, your total time, top activities and reading highlights will appear here.'**
+  String get profileEmptyGuidance;
 
   /// No description provided for @profileEmptyStartButton.
   ///
@@ -1444,6 +1450,12 @@ abstract class AppLocalizations {
   /// **'Personal profile'**
   String get personalProfileLabel;
 
+  /// No description provided for @accountDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{nickname} · personal data and security'**
+  String accountDataSubtitle(Object nickname);
+
   /// No description provided for @preferencesSection.
   ///
   /// In en, this message translates to:
@@ -1465,7 +1477,7 @@ abstract class AppLocalizations {
   /// No description provided for @darkModeDisabledSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use darker colors in the app'**
+  /// **'Use the dark theme in the app'**
   String get darkModeDisabledSubtitle;
 
   /// No description provided for @accentColorSettingsTitle.
@@ -2041,13 +2053,13 @@ abstract class AppLocalizations {
   /// No description provided for @endTimeOptionalLabel.
   ///
   /// In en, this message translates to:
-  /// **'End time (optional)'**
+  /// **'End time'**
   String get endTimeOptionalLabel;
 
   /// No description provided for @incompleteScheduleEntryError.
   ///
   /// In en, this message translates to:
-  /// **'Incomplete entry — fill in the title and a valid start time.'**
+  /// **'Incomplete entry — fill in the title, start time and end time.'**
   String get incompleteScheduleEntryError;
 
   /// No description provided for @endTimeBeforeStartError.
