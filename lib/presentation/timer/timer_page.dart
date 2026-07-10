@@ -163,7 +163,7 @@ class _TimerScaffold extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 _TimerActionButton(
-                                  icon: Icons.crop_square_rounded,
+                                  iconPath: "stop",
                                   label: "Encerrar",
                                   onTap: onEndTap,
                                 ),
@@ -174,7 +174,7 @@ class _TimerScaffold extends StatelessWidget {
                                   onTap: onMainTap,
                                 ),
                                 _TimerActionButton(
-                                  icon: data.trailingActionIcon,
+                                  iconPath: "note",
                                   label: data.trailingLabel,
                                   onTap: onTrailingTap,
                                 ),
@@ -388,12 +388,12 @@ class _TimerInfoRow extends StatelessWidget {
 
 class _TimerActionButton extends StatelessWidget {
   const _TimerActionButton({
-    required this.icon,
+    required this.iconPath,
     required this.label,
     required this.onTap,
   });
 
-  final IconData icon;
+  final String iconPath;
   final String label;
   final VoidCallback onTap;
 
@@ -407,13 +407,14 @@ class _TimerActionButton extends StatelessWidget {
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Icon(
-              icon,
+            child: AppIcon(
+              iconPath,
               color: context.colorTokens.white.withValues(alpha: 0.9),
-              size: 32,
+              size: 42,
             ),
           ),
         ),
+        const Gap(8),
         Text(
           label,
           textAlign: TextAlign.center,
