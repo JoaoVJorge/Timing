@@ -94,11 +94,7 @@ class LoginPage extends StatelessWidget {
                     ),
                     Spacer(),
                     _SocialSignInButton(
-                      icon: const AppIcon(
-                        "google",
-                        size: 19,
-                        color: Colors.black87,
-                      ),
+                      icon: const AppIcon("google", size: 19),
                       label: context.l10n.continueWithGoogleButton,
                       onTap: controller.onTapGoogleSignIn,
                     ),
@@ -112,60 +108,17 @@ class LoginPage extends StatelessWidget {
                       label: context.l10n.continueWithAppleButton,
                       onTap: controller.onTapAppleSignIn,
                     ),
-                    const Gap(24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            context.l10n.orSeparator,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 1,
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Gap(24),
-                    Center(
-                      child: BounceTap(
-                        pressedScale: 0.97,
-                        onTap: controller.onTapCreateAccount,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            context.l10n.createAccountSectionTitle,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                     const Gap(12),
+                    _SocialSignInButton(
+                      icon: const Icon(
+                        Icons.smartphone_rounded,
+                        size: 22,
+                        color: Colors.black87,
+                      ),
+                      label: context.l10n.continueWithPhoneButton,
+                      onTap: controller.onTapPhoneSignIn,
+                    ),
+                    const Gap(24),
                   ],
                 ),
               ),

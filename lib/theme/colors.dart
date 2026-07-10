@@ -20,6 +20,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     required this.warning,
     required this.iconDisabled,
     required this.overlayDark,
+    required this.white,
+    required this.black,
+    required this.transparent,
+    required this.dialogSurface,
+    required this.dialogText,
+    required this.dialogTextMuted,
+    required this.divider,
   });
 
   factory AppColorTokens.fromSeed({required Color seed, required bool isDark}) {
@@ -58,6 +65,15 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       overlayDark: const Color(
         0xFF000000,
       ).withValues(alpha: isDark ? 0.6 : 0.5),
+      white: const Color(0xFFFFFFFF),
+      black: const Color(0xFF000000),
+      transparent: Colors.transparent,
+      dialogSurface: isDark ? const Color(0xFF232323) : const Color(0xFFFFFFFF),
+      dialogText: isDark ? const Color(0xFFF4F4F4) : const Color(0xFF17181F),
+      dialogTextMuted: isDark
+          ? const Color(0xFFB8BBC2)
+          : const Color(0xFF5C5E66),
+      divider: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E0E0),
     );
   }
 
@@ -81,6 +97,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color warning;
   final Color iconDisabled;
   final Color overlayDark;
+  final Color white;
+  final Color black;
+  final Color transparent;
+  final Color dialogSurface;
+  final Color dialogText;
+  final Color dialogTextMuted;
+  final Color divider;
 
   LinearGradient get primaryGradient => LinearGradient(
     colors: [primary, primaryPastel],
@@ -108,6 +131,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     Color? warning,
     Color? iconDisabled,
     Color? overlayDark,
+    Color? white,
+    Color? black,
+    Color? transparent,
+    Color? dialogSurface,
+    Color? dialogText,
+    Color? dialogTextMuted,
+    Color? divider,
   }) => AppColorTokens(
     primary: primary ?? this.primary,
     primaryPastel: primaryPastel ?? this.primaryPastel,
@@ -127,6 +157,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     warning: warning ?? this.warning,
     iconDisabled: iconDisabled ?? this.iconDisabled,
     overlayDark: overlayDark ?? this.overlayDark,
+    white: white ?? this.white,
+    black: black ?? this.black,
+    transparent: transparent ?? this.transparent,
+    dialogSurface: dialogSurface ?? this.dialogSurface,
+    dialogText: dialogText ?? this.dialogText,
+    dialogTextMuted: dialogTextMuted ?? this.dialogTextMuted,
+    divider: divider ?? this.divider,
   );
 
   @override
@@ -165,6 +202,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       warning: Color.lerp(warning, other.warning, t)!,
       iconDisabled: Color.lerp(iconDisabled, other.iconDisabled, t)!,
       overlayDark: Color.lerp(overlayDark, other.overlayDark, t)!,
+      white: Color.lerp(white, other.white, t)!,
+      black: Color.lerp(black, other.black, t)!,
+      transparent: Color.lerp(transparent, other.transparent, t)!,
+      dialogSurface: Color.lerp(dialogSurface, other.dialogSurface, t)!,
+      dialogText: Color.lerp(dialogText, other.dialogText, t)!,
+      dialogTextMuted: Color.lerp(dialogTextMuted, other.dialogTextMuted, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
     );
   }
 }

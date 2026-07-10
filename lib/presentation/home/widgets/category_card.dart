@@ -1,25 +1,31 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/bounce_tap.dart";
 
+/// Compact navigation row for a Home activity area. Tapping anywhere opens the
+/// area, so it uses a chevron affordance rather than a play button.
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
-    required this.category,
-    required this.onTapPlay,
+    required this.iconName,
+    required this.label,
+    required this.onTap,
+    this.subtitle,
     super.key,
   });
 
-  final TimeCategoryType category;
-  final VoidCallback onTapPlay;
+  final String iconName;
+  final String label;
+  final String? subtitle;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTapPlay,
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.98,
+    onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(20),
@@ -27,46 +33,56 @@ class CategoryCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.colorTokens.primaryVeryLight,
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: AppIcon(
-                category.iconName,
-                size: 24,
-                color: context.colorTokens.primary,
+            child: SizedBox.square(
+              dimension: 22,
+              child: ClipRect(
+                child: AppIcon(
+                  iconName,
+                  size: 22,
+                  color: context.colorTokens.primary,
+                ),
               ),
             ),
           ),
-          Gap(16),
+          const Gap(16),
           Expanded(
-            child: Text(
-              category.localizedLabel(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.extraBold20,
-            ),
-          ),
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: context.colorTokens.primaryGradient,
-              boxShadow: [
-                BoxShadow(
-                  color: context.colorTokens.primary.withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
+                if (subtitle != null) ...[
+                  const Gap(2),
+                  Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textHint,
+                    ),
+                  ),
+                ],
               ],
             ),
-            child: Center(
-              child: AppIcon("play", size: 20, color: Colors.white),
-            ),
+          ),
+          const Gap(8),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 24,
+            color: context.colorTokens.textHint,
           ),
         ],
       ),

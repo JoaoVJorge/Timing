@@ -4,37 +4,36 @@ import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
-import "package:help_out/presentation/schedule/schedule_controller.dart";
 
 class ProfileController extends GetxController {
   ProfileController({
     required this._getProfileStatsUseCase,
-    required this._scheduleController,
     required this._appController,
     required this._appNavigator,
   });
 
   final GetProfileStatsUseCase _getProfileStatsUseCase;
-  final ScheduleController _scheduleController;
   final AppController _appController;
   final AppNavigator _appNavigator;
 
   RxString get userName => _appController.userName;
+  RxString get nickName => _appController.nickName;
+  RxInt get avatarIconIndex => _appController.avatarIconIndex;
 
   final Rx<ProfileStatsEntity> stats = const ProfileStatsEntity(
     studyingTotalSeconds: 0,
-    workingTotalSeconds: 0,
-    readingTotalSeconds: 0,
+    studyingGoalSeconds: 0,
+    exercisesTotalSeconds: 0,
+    exercisesGoalSeconds: 0,
+    hobbiesTotalSeconds: 0,
+    readingTotalPages: 0,
+    readingGoalPages: 0,
     topStudyingSubject: null,
     topReadingSubjects: [],
   ).obs;
   final RxBool isLoading = true.obs;
-
-  List<ScheduleEntryEntity> get sortedScheduleEntries =>
-      _scheduleController.todayEntries;
 
   @override
   void onInit() {
@@ -50,6 +49,11 @@ class ProfileController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> onTapSchedule() =>
-      _appNavigator.toNamed(AppRoutes.schedule) ?? Future.value();
+  Future<void> onTapEditProfile() => _navigateAndRefresh(AppRoutes.editProfile);
+
+  Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
+    await (_appNavigator.toNamed(route, arguments: arguments) ??
+        Future<void>.value());
+    await loadStats();
+  }
 }

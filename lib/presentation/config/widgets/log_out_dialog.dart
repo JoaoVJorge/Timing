@@ -9,19 +9,25 @@ class LogOutDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: DialogTopBar(title: context.l10n.logOutDialogTitle),
-    content: Text(context.l10n.logOutDialogContent),
+    content: Text(
+      context.l10n.logOutDialogContent,
+      style: context.textStyles.bodyMedium.copyWith(
+        color: context.colorTokens.textBody,
+      ),
+    ),
     actions: [
       TextButton(
         onPressed: () => appNavigator.back<bool>(result: false),
         child: Text(context.l10n.cancelButton),
       ),
       const SizedBox(width: 4),
-      TextButton(
+      FilledButton(
         onPressed: () => appNavigator.back<bool>(result: true),
-        child: Text(
-          context.l10n.logOutConfirmButton,
-          style: TextStyle(color: context.colorTokens.error),
+        style: FilledButton.styleFrom(
+          backgroundColor: context.colorTokens.error,
+          foregroundColor: Colors.white,
         ),
+        child: Text(context.l10n.logOutConfirmButton),
       ),
     ],
   );

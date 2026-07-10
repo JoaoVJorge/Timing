@@ -1,17 +1,21 @@
 import "package:flutter/material.dart";
+import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class GroupChip extends StatelessWidget {
   const GroupChip({
     required this.group,
+    required this.label,
     required this.isSelected,
     required this.onTap,
     super.key,
   });
 
   final GroupEntity group;
+  final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -20,7 +24,8 @@ class GroupChip extends StatelessWidget {
     onTap: onTap,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 62,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         gradient: isSelected
             ? context.colorTokens.primaryGradient
@@ -30,28 +35,54 @@ class GroupChip extends StatelessWidget {
                   context.colorTokens.surface,
                 ],
               ),
-        borderRadius: BorderRadius.circular(24),
-
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 8,
-            offset: const Offset(2, 3),
+            color: context.colorTokens.surfaceShadow.withValues(
+              alpha: isSelected ? 0.12 : 0.08,
+            ),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 160),
-        child: Text(
-          group.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: isSelected
-              ? context.textStyles.textPrimaryButton
-              : context.textStyles.bodyLarge.copyWith(
-                  color: context.colorTokens.textBody,
-                ),
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.25)
+                  : context.colorTokens.primaryVeryLight,
+            ),
+            child: Center(
+              child: AppIcon(
+                group.theme.iconName,
+                size: 20,
+                color: isSelected ? Colors.white : context.colorTokens.primary,
+              ),
+            ),
+          ),
+          const Gap(10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 158),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: isSelected
+                  ? context.textStyles.textPrimaryButton.copyWith(fontSize: 16)
+                  : context.textStyles.bodyLarge.copyWith(
+                      color: context.colorTokens.textBody,
+                      fontSize: 16,
+                    ),
+            ),
+          ),
+        ],
       ),
     ),
   );

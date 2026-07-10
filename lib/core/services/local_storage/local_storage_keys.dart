@@ -1,6 +1,9 @@
 enum LocalStorageKeys {
   appConfig(hasSensitiveData: false),
   subjects(hasSensitiveData: false),
+  dailyTasks(hasSensitiveData: false),
+  lastActivity(hasSensitiveData: false),
+  dailyProgress(hasSensitiveData: false),
   scheduleEntries(hasSensitiveData: false),
   accessToken(hasSensitiveData: true),
   refreshToken(hasSensitiveData: true);
