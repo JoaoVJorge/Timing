@@ -56,10 +56,13 @@ class AppButton extends StatelessWidget {
     alignment: Alignment.center,
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: context.colorTokens.white,
       borderRadius: BorderRadius.circular(999),
       boxShadow: [
-        BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4),
+        BoxShadow(
+          color: context.colorTokens.black.withValues(alpha: 0.2),
+          blurRadius: 4,
+        ),
       ],
     ),
     child: isLoading
@@ -88,14 +91,14 @@ class AppButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: isActive ? onTap : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
+            backgroundColor: context.colorTokens.white,
             foregroundColor: context.colorTokens.primary,
             // While loading we keep the solid white surface (it is an
             // in-progress action); when truly disabled we fade to a translucent
             // white so it reads as inactive against the gradient background.
             disabledBackgroundColor: isLoading
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.22),
+                ? context.colorTokens.white
+                : context.colorTokens.white.withValues(alpha: 0.22),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -115,7 +118,7 @@ class AppButton extends StatelessWidget {
                   style: context.textStyles.bodyLarge.copyWith(
                     color: isActive
                         ? context.colorTokens.textBody
-                        : Colors.white.withValues(alpha: 0.7),
+                        : context.colorTokens.white.withValues(alpha: 0.7),
                   ),
                 ),
         ),
