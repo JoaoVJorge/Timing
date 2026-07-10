@@ -95,9 +95,8 @@ class _AddSubjectTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(18),
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
@@ -132,9 +131,8 @@ class _AddSubjectCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(20),
     child: Container(
       decoration: BoxDecoration(
         border: Border.all(

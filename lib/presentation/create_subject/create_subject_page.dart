@@ -229,9 +229,8 @@ class _SubjectPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color color = controller.selectedColor.value;
-    final IconData? icon = SubjectIcons.byName(
-      controller.selectedIconName.value,
-    );
+    final String iconName = controller.selectedIconName.value;
+    final IconData? icon = SubjectIcons.byName(iconName);
 
     return Container(
       width: double.infinity,
@@ -247,7 +246,11 @@ class _SubjectPreview extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Center(
+              child: icon == null
+                  ? AppIcon(iconName, color: Colors.white, size: 24)
+                  : Icon(icon, color: Colors.white, size: 24),
+            ),
           ),
           const Gap(12),
           Expanded(
@@ -367,6 +370,7 @@ class _IconSelector extends StatelessWidget {
         return _SelectableChip(
           label: iconName,
           icon: SubjectIcons.byName(iconName),
+          svgIconName: SubjectIcons.isSvgName(iconName) ? iconName : null,
           isSelected: isSelected,
           onTap: () => controller.selectedIconName.value = iconName,
         );
@@ -426,10 +430,12 @@ class _SelectableChip extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.icon,
+    this.svgIconName,
   });
 
   final String label;
   final IconData? icon;
+  final String? svgIconName;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -454,14 +460,23 @@ class _SelectableChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected
-                  ? context.colorTokens.primary
-                  : context.colorTokens.textHint,
-            ),
+          if (icon != null || svgIconName != null) ...[
+            if (svgIconName != null)
+              AppIcon(
+                svgIconName!,
+                size: 16,
+                color: isSelected
+                    ? context.colorTokens.primary
+                    : context.colorTokens.textHint,
+              )
+            else
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected
+                    ? context.colorTokens.primary
+                    : context.colorTokens.textHint,
+              ),
             const Gap(8),
           ],
           Text(
