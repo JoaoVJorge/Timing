@@ -18,7 +18,7 @@ class ConfigPage extends StatelessWidget {
 
     return AppScaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 112),
+        padding: const EdgeInsets.only(bottom: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -62,7 +62,6 @@ class ConfigPage extends StatelessWidget {
                     icon: Icons.palette_rounded,
                     title: context.l10n.accentColorSettingsTitle,
                     subtitle: context.l10n.accentColorSettingsSubtitle,
-                    trailingText: context.l10n.editButton,
                     tint: controller.accentColor.value,
                     onTap: controller.onTapAccentColor,
                   ),
