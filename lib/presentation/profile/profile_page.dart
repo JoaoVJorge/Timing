@@ -27,6 +27,7 @@ class ProfilePage extends StatelessWidget {
     return AppScaffold(
       topBar: AppTopBar(title: context.l10n.profileTitle),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 16),
         child: Obx(() {
           final ProfileStatsEntity stats = controller.stats.value;
 
@@ -60,7 +61,6 @@ class ProfilePage extends StatelessWidget {
                 const Gap(12),
                 ProfileTopSubjectsList(subjects: stats.topReadingSubjects),
               ],
-              const Gap(24),
             ],
           );
         }),
