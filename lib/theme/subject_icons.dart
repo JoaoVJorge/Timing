@@ -23,11 +23,8 @@ class SubjectIcons {
     "stories": Icons.auto_stories_rounded,
     "article": Icons.article_rounded,
     "bookmark": Icons.bookmark_rounded,
-    "music": Icons.music_note_rounded,
     "piano": Icons.piano_rounded,
-    "brush": Icons.brush_rounded,
     "game": Icons.videogame_asset_rounded,
-    "camera": Icons.camera_alt_rounded,
     "cooking": Icons.restaurant_rounded,
     "plant": Icons.park_rounded,
   };
@@ -63,14 +60,18 @@ class SubjectIcons {
         ],
         TimeCategoryType.hobbies => const [
           "music",
-          "piano",
           "brush",
-          "game",
+          "gaming-pad",
           "camera",
-          "cooking",
-          "plant",
+          "cutlery",
+          "scissor",
+          "yin-yang",
+          "cinema",
+          "magnifying-glass",
         ],
       };
 
   static IconData? byName(String name) => _all[name];
+
+  static bool isSvgName(String name) => !_all.containsKey(name);
 }

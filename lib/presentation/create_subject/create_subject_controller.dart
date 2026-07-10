@@ -189,8 +189,13 @@ class CreateSubjectController extends GetxController {
 
     isSaving.value = false;
     result.fold((error) => _appNavigator.showErrorSnackBar(), (subject) {
-      _appNavigator.showSuccessSnackBar(successMessage(Get.context!));
+      final String message = successMessage(Get.context!);
       _appNavigator.back<SubjectEntity>(result: subject);
+      Future<void>.delayed(const Duration(milliseconds: 220), () {
+        if (Get.context != null) {
+          _appNavigator.showSuccessSnackBar(message);
+        }
+      });
     });
   }
 

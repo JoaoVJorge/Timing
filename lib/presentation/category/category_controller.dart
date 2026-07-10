@@ -97,14 +97,28 @@ class CategoryController extends GetxController {
     }, (_) {});
   }
 
-  Future<void> onTapAddSubject() async {
-    final dynamic result = await _appNavigator.toNamed(
+  Future<void> onTapAddSubject() {
+    final Future<dynamic>? route = _appNavigator.toNamed(
       AppRoutes.createSubject,
       arguments: category,
     );
-    final SubjectEntity? createdSubject = result as SubjectEntity?;
+
+    return route?.then((result) async {
+          final SubjectEntity? createdSubject = result as SubjectEntity?;
+          await _addCreatedSubjectIfNeeded(createdSubject);
+        }) ??
+        Future<void>.value();
+  }
+
+  Future<void> _addCreatedSubjectIfNeeded(SubjectEntity? createdSubject) async {
     if (createdSubject != null) {
-      subjects.add(createdSubject);
+      final bool belongsToCurrentCategory = createdSubject.category == category;
+      final bool isAlreadyListed = subjects.any(
+        (subject) => subject.id == createdSubject.id,
+      );
+      if (belongsToCurrentCategory && !isAlreadyListed) {
+        subjects.add(createdSubject);
+      }
       await loadSubjects();
     }
   }
