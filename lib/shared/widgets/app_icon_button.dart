@@ -41,8 +41,12 @@ class AppIconButton extends StatelessWidget {
       ),
       child: Center(
         child: svgName != null
-            ? AppIcon(svgName!, size: size * 0.45, color: Colors.white)
-            : Icon(icon, color: Colors.white, size: size * 0.45),
+            ? AppIcon(
+                svgName!,
+                size: size * 0.45,
+                color: context.colorTokens.white,
+              )
+            : Icon(icon, color: context.colorTokens.white, size: size * 0.45),
       ),
     ),
   );
