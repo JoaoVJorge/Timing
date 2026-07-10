@@ -4,8 +4,7 @@ import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/config/widgets/language_picker_dialog.dart";
-import "package:help_out/presentation/config/widgets/log_out_dialog.dart";
+import "package:help_out/presentation/config/widgets/config_dialogs.dart";
 import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/theme/app_languages.dart";
 
@@ -58,8 +57,8 @@ class ConfigController extends GetxController {
   void onTapFaq() => _appNavigator.toNamed(AppRoutes.faq);
 
   Future<void> onTapLanguage() async {
-    final String? selectedCode = await _appNavigator.dialog<String>(
-      child: LanguagePickerDialog(currentCode: languageCode.value),
+    final String? selectedCode = await showLanguagePickerDialog(
+      currentCode: languageCode.value,
     );
     if (selectedCode != null) {
       await _appController.setLanguageCode(selectedCode);
@@ -79,9 +78,7 @@ class ConfigController extends GetxController {
       _appNavigator.showSnackBar(text: Get.context!.l10n.feedbackUnavailable);
 
   Future<void> onTapLogOut() async {
-    final bool? confirmed = await _appNavigator.dialog<bool>(
-      child: const LogOutDialog(),
-    );
+    final bool? confirmed = await showLogOutDialog();
     if (confirmed ?? false) {
       await _appController.logOut();
     }
