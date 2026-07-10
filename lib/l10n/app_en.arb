@@ -241,7 +241,7 @@
   },
   "timerPauseButton": "Pause",
   "timerContinueButton": "Continue",
-  "timerContinueFocusButton": "Continue focus",
+  "timerContinueFocusButton": "Continue",
   "timerSkipRestButton": "Skip break",
   "timerEndSessionButton": "End session",
   "timerStartAnotherSessionButton": "Start another session",
@@ -251,7 +251,7 @@
     "placeholders": { "duration": { "type": "String" } }
   },
   "timerAccumulatedTotalLabel": "Accumulated total",
-  "timerBackToSubjectsButton": "Back to subjects",
+  "timerBackToSubjectsButton": "Back",
   "timerExitDialogTitle": "End session?",
   "timerExitDialogContent": "Your {duration} progress will be saved in {subjectName}.",
   "@timerExitDialogContent": {
@@ -260,7 +260,8 @@
       "subjectName": { "type": "String" }
     }
   },
-  "timerExitDialogCancel": "Keep focusing",
+  "timerExitDialogCancel": "Continue",
+  "timerExitDialogContinueLater": "You can continue later.",
   "timerExitDialogConfirm": "End",
 
   "profileTitle": "Profile",

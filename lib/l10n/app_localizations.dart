@@ -925,7 +925,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerContinueFocusButton.
   ///
   /// In en, this message translates to:
-  /// **'Continue focus'**
+  /// **'Continue'**
   String get timerContinueFocusButton;
 
   /// No description provided for @timerSkipRestButton.
@@ -967,7 +967,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerBackToSubjectsButton.
   ///
   /// In en, this message translates to:
-  /// **'Back to subjects'**
+  /// **'Back'**
   String get timerBackToSubjectsButton;
 
   /// No description provided for @timerExitDialogTitle.
@@ -985,8 +985,14 @@ abstract class AppLocalizations {
   /// No description provided for @timerExitDialogCancel.
   ///
   /// In en, this message translates to:
-  /// **'Keep focusing'**
+  /// **'Continue'**
   String get timerExitDialogCancel;
+
+  /// No description provided for @timerExitDialogContinueLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can continue later.'**
+  String get timerExitDialogContinueLater;
 
   /// No description provided for @timerExitDialogConfirm.
   ///

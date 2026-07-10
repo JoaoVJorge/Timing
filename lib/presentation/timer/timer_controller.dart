@@ -2,13 +2,13 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/notifications/timer_notification_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/timer/widgets/timer_exit_dialog.dart";
 
 class TimerController extends GetxController {
   TimerController({
@@ -137,26 +137,16 @@ class TimerController extends GetxController {
     }
 
     final BuildContext context = Get.context!;
-    final bool? shouldExit = await appNavigator.dialog<bool>(
-      child: AlertDialog(
-        title: Text(context.l10n.timerExitDialogTitle),
-        content: Text(
-          context.l10n.timerExitDialogContent(
-            _formatMinutesForDialog(sessionSeconds.value),
-            subject.name,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => appNavigator.back<bool>(result: false),
-            child: Text(context.l10n.timerExitDialogCancel),
-          ),
-          TextButton(
-            onPressed: () => appNavigator.back<bool>(result: true),
-            child: Text(context.l10n.timerExitDialogConfirm),
-          ),
-        ],
+    final bool? shouldExit = await showTimerExitDialog(
+      context: context,
+      accentColor: Color(subject.colorValue),
+      title: context.l10n.timerExitDialogTitle,
+      content: context.l10n.timerExitDialogContent(
+        _formatMinutesForDialog(sessionSeconds.value),
+        subject.name,
       ),
+      cancelLabel: context.l10n.timerExitDialogCancel,
+      confirmLabel: context.l10n.timerExitDialogConfirm,
     );
 
     if (shouldExit == true) {
@@ -191,7 +181,7 @@ class TimerController extends GetxController {
 
   String _formatMinutesForDialog(int seconds) {
     final int minutes = (seconds / 60).ceil();
-    return "${minutes}min";
+    return "$minutes min";
   }
 
   void _updateNotification() {

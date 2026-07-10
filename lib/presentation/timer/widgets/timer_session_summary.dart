@@ -22,9 +22,11 @@ class TimerSessionSummary extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      color: Colors.black.withValues(alpha: 0.24),
+      color: context.colorTokens.black.withValues(alpha: 0.24),
       borderRadius: BorderRadius.circular(28),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      border: Border.all(
+        color: context.colorTokens.white.withValues(alpha: 0.16),
+      ),
     ),
     child: Column(
       children: [
@@ -37,14 +39,16 @@ class TimerSessionSummary extends StatelessWidget {
         Text(
           context.l10n.timerSessionSavedTitle,
           textAlign: TextAlign.center,
-          style: context.textStyles.titleFont.copyWith(color: Colors.white),
+          style: context.textStyles.titleFont.copyWith(
+            color: context.colorTokens.white,
+          ),
         ),
         const Gap(8),
         Text(
           context.l10n.timerSessionSavedDescription,
           textAlign: TextAlign.center,
           style: context.textStyles.bodyMedium.copyWith(
-            color: Colors.white.withValues(alpha: 0.72),
+            color: context.colorTokens.white.withValues(alpha: 0.72),
           ),
         ),
         const Gap(20),
@@ -66,7 +70,7 @@ class TimerSessionSummary extends StatelessWidget {
           child: ElevatedButton(
             onPressed: onBackTap,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: context.colorTokens.white,
               foregroundColor: context.colorTokens.primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -92,9 +96,11 @@ class _SummaryRow extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.1),
+      color: context.colorTokens.white.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      border: Border.all(
+        color: context.colorTokens.white.withValues(alpha: 0.1),
+      ),
     ),
     child: Row(
       children: [
@@ -104,7 +110,7 @@ class _SummaryRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: context.colorTokens.white.withValues(alpha: 0.72),
             ),
           ),
         ),
@@ -112,7 +118,7 @@ class _SummaryRow extends StatelessWidget {
         Text(
           value,
           style: context.textStyles.bodyMedium.copyWith(
-            color: Colors.white,
+            color: context.colorTokens.white,
             fontWeight: FontWeight.w800,
           ),
         ),
