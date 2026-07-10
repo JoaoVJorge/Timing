@@ -17,8 +17,6 @@ class CreateSubjectController extends GetxController {
     required this.category,
   });
 
-  static const List<int> restMinutesOptions = [5, 10, 15, 20];
-
   final AddSubjectUseCase _addSubjectUseCase;
   final AppNavigator _appNavigator;
 
@@ -31,11 +29,16 @@ class CreateSubjectController extends GetxController {
   late final RxString selectedIconName = SubjectIcons.suggestionsFor(
     category,
   ).first.obs;
+
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
   final RxInt wallpaperIndex = 0.obs;
   final RxBool isSaving = false.obs;
   final RxString name = "".obs;
   final RxString goal = "".obs;
+
+  final List<int> restMinutesOptions = [5, 10, 15, 20];
+  final List<num> timeGoalPresets = [1, 3, 5, 10];
+  final List<num> pageGoalPresets = [5, 10, 25, 50];
 
   bool get isPageBased => category == TimeCategoryType.reading;
 
