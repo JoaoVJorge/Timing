@@ -31,7 +31,7 @@ class TimerActionButtons extends StatelessWidget {
             icon: Icon(_primaryIcon),
             label: Text(_primaryLabel(context)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: context.colorTokens.white,
               foregroundColor: context.colorTokens.primary,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -67,7 +67,7 @@ class TimerActionButtons extends StatelessWidget {
           context.l10n.timerSaveReassurance,
           textAlign: TextAlign.center,
           style: context.textStyles.bodySmall.copyWith(
-            color: Colors.white.withValues(alpha: 0.62),
+            color: context.colorTokens.white.withValues(alpha: 0.62),
           ),
         ),
       ],
@@ -108,8 +108,10 @@ class _SecondaryButton extends StatelessWidget {
       icon: Icon(icon, size: 18),
       label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.32)),
+        foregroundColor: context.colorTokens.white,
+        side: BorderSide(
+          color: context.colorTokens.white.withValues(alpha: 0.32),
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     ),

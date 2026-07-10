@@ -485,7 +485,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timerContinueButton => 'Continuar';
 
   @override
-  String get timerContinueFocusButton => 'Continuar foco';
+  String get timerContinueFocusButton => 'Continuar';
 
   @override
   String get timerSkipRestButton => 'Pular pausa';
@@ -509,7 +509,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timerAccumulatedTotalLabel => 'Total acumulado';
 
   @override
-  String get timerBackToSubjectsButton => 'Voltar para matérias';
+  String get timerBackToSubjectsButton => 'Voltar';
 
   @override
   String get timerExitDialogTitle => 'Encerrar sessão?';
@@ -520,7 +520,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get timerExitDialogCancel => 'Continuar focando';
+  String get timerExitDialogCancel => 'Continuar';
+
+  @override
+  String get timerExitDialogContinueLater => 'Você poderá continuar depois.';
 
   @override
   String get timerExitDialogConfirm => 'Encerrar';

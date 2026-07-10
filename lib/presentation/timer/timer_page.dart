@@ -105,12 +105,11 @@ class _TimerScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.black,
+    backgroundColor: context.colorTokens.black,
     body: DecoratedBox(
       decoration: BoxDecoration(gradient: data.backgroundGradient),
       child: Stack(
         children: [
-          Positioned.fill(child: _TimerGlow(color: data.accentColor)),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -118,71 +117,74 @@ class _TimerScaffold extends StatelessWidget {
                   constraints.maxWidth * 0.76,
                   292,
                 );
-                final bool compact = constraints.maxHeight < 700;
 
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    22,
-                    12,
-                    22,
-                    math.max(MediaQuery.paddingOf(context).bottom, 12),
-                  ),
-                  child: Column(
-                    children: [
-                      _TimerHeader(data: data, onBackTap: onBackTap),
-                      Gap(compact ? 20 : 32),
-                      _TimerProgressRing(data: data, size: progressSize),
-                      Gap(compact ? 22 : 28),
-                      if (data.state == TimerVisualState.resting)
-                        const _RestMessage()
-                      else
-                        Column(
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          22,
+                          14,
+                          22,
+                          math.max(MediaQuery.paddingOf(context).bottom, 10),
+                        ),
+                        child: Column(
                           children: [
-                            _TimerInfoChip(
-                              children: [
-                                TextSpan(text: data.nextBreakLabel),
-                                TextSpan(
-                                  text: data.nextBreak,
-                                  style: TextStyle(
-                                    color: data.accentColor,
-                                    fontWeight: FontWeight.w900,
+                            _TimerHeader(data: data, onBackTap: onBackTap),
+                            const Gap(20),
+                            _TimerProgressRing(data: data, size: progressSize),
+                            const Gap(32),
+                            if (data.state == TimerVisualState.resting)
+                              const _RestMessage()
+                            else
+                              Column(
+                                children: [
+                                  _TimerInfoRow(
+                                    icon: Icons.schedule_rounded,
+                                    label: data.nextBreakLabel,
+                                    value: data.nextBreak,
+                                    accentColor: data.accentColor,
                                   ),
+                                  const Gap(10),
+                                  _TimerInfoRow(
+                                    icon: Icons.bar_chart_rounded,
+                                    label: "Total hoje",
+                                    value: data.totalSubjectTimeLabel,
+                                    accentColor: data.accentColor,
+                                  ),
+                                ],
+                              ),
+                            const Spacer(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _TimerActionButton(
+                                  icon: Icons.crop_square_rounded,
+                                  label: "Encerrar",
+                                  onTap: onEndTap,
+                                ),
+                                _TimerMainActionButton(
+                                  icon: data.mainActionIcon,
+                                  label: data.mainActionLabel,
+                                  accentColor: data.accentColor,
+                                  onTap: onMainTap,
+                                ),
+                                _TimerActionButton(
+                                  icon: data.trailingActionIcon,
+                                  label: data.trailingLabel,
+                                  onTap: onTrailingTap,
                                 ),
                               ],
                             ),
-                            const Gap(16),
-                            _TimerInfoChip(
-                              children: [
-                                TextSpan(text: data.totalSubjectTimeLabel),
-                              ],
-                            ),
+                            const Gap(10),
                           ],
                         ),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _TimerActionButton(
-                            icon: Icons.stop_rounded,
-                            label: "Encerrar",
-                            onTap: onEndTap,
-                          ),
-                          _TimerMainActionButton(
-                            icon: data.mainActionIcon,
-                            label: data.mainActionLabel,
-                            accentColor: data.accentColor,
-                            onTap: onMainTap,
-                          ),
-                          _TimerActionButton(
-                            icon: data.trailingActionIcon,
-                            label: data.trailingLabel,
-                            onTap: onTrailingTap,
-                          ),
-                        ],
                       ),
-                      const Gap(34),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -202,7 +204,7 @@ class _TimerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 48,
+    height: 52,
     child: Stack(
       alignment: Alignment.center,
       children: [
@@ -211,28 +213,38 @@ class _TimerHeader extends StatelessWidget {
           child: IconButton(
             onPressed: onBackTap,
             tooltip: "Voltar",
-            icon: const AppIcon("left_back", size: 22, color: Colors.white),
+            icon: AppIcon(
+              "left_back",
+              size: 22,
+              color: context.colorTokens.white,
+            ),
           ),
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: data.headerIconColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: data.headerIconColor.withValues(alpha: 0.35),
-                    blurRadius: 18,
-                  ),
-                ],
               ),
-              child: Icon(data.subjectIcon, color: Colors.white, size: 19),
+              child: Center(
+                child: data.subjectSvgIconName == null
+                    ? Icon(
+                        data.subjectIcon,
+                        color: context.colorTokens.white,
+                        size: 22,
+                      )
+                    : AppIcon(
+                        data.subjectSvgIconName!,
+                        color: context.colorTokens.white,
+                        size: 22,
+                      ),
+              ),
             ),
-            const Gap(10),
+            const Gap(12),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,18 +253,18 @@ class _TimerHeader extends StatelessWidget {
                   data.subjectName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colorTokens.white,
                     fontSize: 22,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w800,
                     height: 1,
                   ),
                 ),
-                const Gap(5),
+                const Gap(6),
                 Text(
                   data.status,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.58),
+                    color: context.colorTokens.white.withValues(alpha: 0.58),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     height: 1,
@@ -289,34 +301,27 @@ class _TimerProgressRing extends StatelessWidget {
             Text(
               data.mainLabel,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 16,
+                color: data.accentColor,
+                fontSize: math.max(15, size * 0.055),
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const Gap(12),
+            Gap(math.max(10, size * 0.055)),
             Text(
               data.currentTime,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 64,
+              style: TextStyle(
+                color: context.colorTokens.white,
+                fontSize: math.max(44, size * 0.22),
                 fontWeight: FontWeight.w300,
                 height: 1,
-                shadows: [
-                  Shadow(
-                    color: Colors.black54,
-                    offset: Offset(0, 2),
-                    blurRadius: 12,
-                  ),
-                ],
               ),
             ),
-            const Gap(14),
+            Gap(math.max(8, size * 0.045)),
             Text(
               data.totalTimeLabel,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.52),
-                fontSize: 16,
+                color: context.colorTokens.white.withValues(alpha: 0.52),
+                fontSize: math.max(14, size * 0.05),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -327,36 +332,56 @@ class _TimerProgressRing extends StatelessWidget {
   );
 }
 
-class _TimerInfoChip extends StatelessWidget {
-  const _TimerInfoChip({required this.children});
+class _TimerInfoRow extends StatelessWidget {
+  const _TimerInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.accentColor,
+  });
 
-  final List<InlineSpan> children;
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+    constraints: const BoxConstraints(maxWidth: 480),
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.055),
-      borderRadius: BorderRadius.circular(100),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.16),
-          blurRadius: 18,
-          offset: const Offset(0, 8),
+      color: context.colorTokens.black.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(
+        color: context.colorTokens.white.withValues(alpha: 0.12),
+      ),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: accentColor, size: 21),
+        const Gap(14),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.colorTokens.white.withValues(alpha: 0.64),
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const Gap(10),
+        Text(
+          value,
+          style: TextStyle(
+            color: accentColor,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ],
-    ),
-    child: RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.74),
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        children: children,
-      ),
     ),
   );
 }
@@ -374,44 +399,30 @@ class _TimerActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: 84,
+    width: 72,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
+        GestureDetector(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Container(
-            width: 78,
-            height: 70,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.16),
-                  blurRadius: 18,
-                ),
-              ],
-            ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
             child: Icon(
               icon,
-              color: Colors.white.withValues(alpha: 0.82),
-              size: 29,
+              color: context.colorTokens.white.withValues(alpha: 0.9),
+              size: 32,
             ),
           ),
         ),
-        const Gap(10),
         Text(
           label,
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.58),
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+            color: context.colorTokens.white.withValues(alpha: 0.58),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -438,38 +449,27 @@ class _TimerMainActionButton extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
+        GestureDetector(
           onTap: onTap,
-          customBorder: const CircleBorder(),
           child: Container(
-            width: 82,
-            height: 82,
+            width: 78,
+            height: 78,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [Colors.white.withValues(alpha: 0.22), accentColor],
-                center: const Alignment(-0.24, -0.3),
-                radius: 0.92,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withValues(alpha: 0.38),
-                  blurRadius: 34,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              color: context.colorTokens.transparent,
+              border: Border.all(color: accentColor, width: 3),
             ),
-            child: Icon(icon, color: Colors.white, size: 36),
+            child: Icon(icon, color: accentColor, size: 36),
           ),
         ),
-        const Gap(12),
+        const Gap(13),
         Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.72),
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
+            color: context.colorTokens.white.withValues(alpha: 0.88),
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -483,11 +483,11 @@ class _RestMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      const Text(
+      Text(
         "Descanse um pouco",
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.white,
+          color: context.colorTokens.white,
           fontSize: 16,
           fontWeight: FontWeight.w900,
         ),
@@ -497,29 +497,12 @@ class _RestMessage extends StatelessWidget {
         context.l10n.timerStateRestingDescription,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.54),
+          color: context.colorTokens.white.withValues(alpha: 0.54),
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
       ),
     ],
-  );
-}
-
-class _TimerGlow extends StatelessWidget {
-  const _TimerGlow({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      gradient: RadialGradient(
-        colors: [color.withValues(alpha: 0.22), Colors.transparent],
-        center: const Alignment(0, -0.2),
-        radius: 0.72,
-      ),
-    ),
   );
 }
 
@@ -531,7 +514,7 @@ class _TimerRingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
-    const double strokeWidth = 10;
+    const double strokeWidth = 8;
     final double radius = (size.width - strokeWidth) / 2;
     final Rect rect = Rect.fromCircle(center: center, radius: radius);
     const double startAngle = -math.pi / 2;
@@ -542,12 +525,6 @@ class _TimerRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth
       ..color = data.trackColor;
-    final Paint glowPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth + 9
-      ..color = data.accentColor.withValues(alpha: 0.12)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
     final Paint progressPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -560,17 +537,8 @@ class _TimerRingPainter extends CustomPainter {
 
     canvas
       ..drawCircle(center, radius, trackPaint)
-      ..drawArc(rect, startAngle, sweepAngle, false, glowPaint)
       ..drawArc(rect, startAngle, sweepAngle, false, progressPaint);
 
-    _drawDot(
-      canvas,
-      center,
-      radius,
-      startAngle + sweepAngle,
-      data.accentColor,
-      strokeWidth * 0.84,
-    );
     if (data.showStartDot) {
       _drawDot(
         canvas,
@@ -578,7 +546,24 @@ class _TimerRingPainter extends CustomPainter {
         radius,
         startAngle,
         data.accentColor,
-        strokeWidth * 0.52,
+        strokeWidth * 0.9,
+      );
+      _drawDot(
+        canvas,
+        center,
+        radius,
+        startAngle + sweepAngle,
+        data.accentColor,
+        strokeWidth * 0.56,
+      );
+    } else {
+      _drawDot(
+        canvas,
+        center,
+        radius,
+        startAngle + sweepAngle,
+        data.accentColor,
+        strokeWidth * 0.84,
       );
     }
   }
@@ -595,13 +580,7 @@ class _TimerRingPainter extends CustomPainter {
       center.dx + math.cos(angle) * radius,
       center.dy + math.sin(angle) * radius,
     );
-    canvas
-      ..drawCircle(
-        dotCenter,
-        dotRadius * 1.75,
-        Paint()..color = color.withValues(alpha: 0.2),
-      )
-      ..drawCircle(dotCenter, dotRadius, Paint()..color = color);
+    canvas.drawCircle(dotCenter, dotRadius, Paint()..color = color);
   }
 
   @override
@@ -623,6 +602,7 @@ class _TimerViewData {
     required this.accentColor,
     required this.headerIconColor,
     required this.subjectIcon,
+    required this.subjectSvgIconName,
     required this.progress,
     required this.backgroundGradient,
     required this.trackColor,
@@ -658,9 +638,12 @@ class _TimerViewData {
               (controller.restCountdownSeconds.value /
                   controller.restIntervalSeconds)
         : controller.focusProgress;
-    final IconData? subjectIcon = SubjectIcons.byName(
-      controller.subject.iconName,
-    );
+    final String iconName = controller.subject.iconName.isEmpty
+        ? _fallbackIconName(controller.subject.category)
+        : controller.subject.iconName;
+    final IconData? subjectIcon = SubjectIcons.byName(iconName);
+    final String? subjectSvgIconName =
+        subjectIcon == null && iconName.isNotEmpty ? iconName : null;
 
     return _TimerViewData(
       state: state,
@@ -669,7 +652,7 @@ class _TimerViewData {
         TimerVisualState.resting => context.l10n.timerStateRestingTitle,
         TimerVisualState.paused => context.l10n.timerStatePausedTitle,
         TimerVisualState.finished => context.l10n.timerSessionSavedTitle,
-        TimerVisualState.focusing => isReading ? "Lendo" : "Estudando",
+        TimerVisualState.focusing => isReading ? "Leitura" : "Foco",
       },
       mainLabel: isResting
           ? "Pausa"
@@ -679,17 +662,19 @@ class _TimerViewData {
       currentTime: formatDurationClock(Duration(seconds: currentSeconds)),
       totalTimeLabel:
           "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
-      nextBreakLabel: "Próxima pausa em ",
+      nextBreakLabel: "Próxima pausa em",
       nextBreak: formatDurationClock(
         Duration(seconds: controller.breakCountdownSeconds.value),
       ),
-      totalSubjectTimeLabel:
-          "${context.l10n.timerTotalInSubject(controller.subject.name)}: ${formatDurationLong(Duration(seconds: controller.totalSeconds))}",
+      totalSubjectTimeLabel: formatDurationLong(
+        Duration(seconds: controller.totalSeconds),
+      ),
       accentColor: accent,
       headerIconColor: accent.withValues(alpha: 0.82),
       subjectIcon:
           subjectIcon ??
           (isReading ? Icons.menu_book_rounded : Icons.school_rounded),
+      subjectSvgIconName: subjectSvgIconName,
       progress: progress.clamp(0, 1).toDouble(),
       backgroundGradient: isResting
           ? const LinearGradient(
@@ -704,7 +689,7 @@ class _TimerViewData {
           : [
               accent.withValues(alpha: 0.72),
               accent,
-              Color.lerp(accent, Colors.white, 0.2) ?? accent,
+              Color.lerp(accent, context.colorTokens.white, 0.2) ?? accent,
             ],
       mainActionIcon: switch (state) {
         TimerVisualState.resting => Icons.play_arrow_rounded,
@@ -726,6 +711,14 @@ class _TimerViewData {
     );
   }
 
+  static String _fallbackIconName(TimeCategoryType category) =>
+      switch (category) {
+        TimeCategoryType.studying => "school",
+        TimeCategoryType.reading => "book",
+        TimeCategoryType.exercises => "fitness",
+        TimeCategoryType.hobbies => "music",
+      };
+
   final TimerVisualState state;
   final String subjectName;
   final String status;
@@ -738,6 +731,7 @@ class _TimerViewData {
   final Color accentColor;
   final Color headerIconColor;
   final IconData subjectIcon;
+  final String? subjectSvgIconName;
   final double progress;
   final LinearGradient backgroundGradient;
   final Color trackColor;

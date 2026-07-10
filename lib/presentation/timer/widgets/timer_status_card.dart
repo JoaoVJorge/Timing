@@ -33,7 +33,7 @@ class TimerStatusCard extends StatelessWidget {
     final Color accent = isResting
         ? context.colorTokens.success
         : isPaused
-        ? Colors.amber
+        ? context.colorTokens.warning
         : context.colorTokens.primary;
     final int mainSeconds = isResting ? restCountdownSeconds : sessionSeconds;
 
@@ -41,9 +41,11 @@ class TimerStatusCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.22),
+        color: context.colorTokens.black.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        border: Border.all(
+          color: context.colorTokens.white.withValues(alpha: 0.16),
+        ),
       ),
       child: Column(
         children: [
@@ -60,7 +62,7 @@ class TimerStatusCard extends StatelessWidget {
             _description(context),
             textAlign: TextAlign.center,
             style: context.textStyles.bodySmall.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: context.colorTokens.white.withValues(alpha: 0.72),
             ),
           ),
           const Gap(24),
@@ -76,7 +78,9 @@ class TimerStatusCard extends StatelessWidget {
                         ? 1 - (restCountdownSeconds / restIntervalSeconds)
                         : focusProgress,
                     strokeWidth: 12,
-                    backgroundColor: Colors.white.withValues(alpha: 0.14),
+                    backgroundColor: context.colorTokens.white.withValues(
+                      alpha: 0.14,
+                    ),
                     valueColor: AlwaysStoppedAnimation<Color>(accent),
                     strokeCap: StrokeCap.round,
                   ),
@@ -88,7 +92,7 @@ class TimerStatusCard extends StatelessWidget {
                       formatDurationClock(Duration(seconds: mainSeconds)),
                       style: context.textStyles.black32.copyWith(
                         fontSize: 52,
-                        color: Colors.white,
+                        color: context.colorTokens.white,
                       ),
                     ),
                     const Gap(4),
@@ -97,7 +101,9 @@ class TimerStatusCard extends StatelessWidget {
                           ? context.l10n.timerRestTimeLabel
                           : context.l10n.timerCurrentFocusLabel,
                       style: context.textStyles.bodySmall.copyWith(
-                        color: Colors.white.withValues(alpha: 0.62),
+                        color: context.colorTokens.white.withValues(
+                          alpha: 0.62,
+                        ),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -120,7 +126,7 @@ class TimerStatusCard extends StatelessWidget {
                     ),
                   ),
             style: context.textStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.86),
+              color: context.colorTokens.white.withValues(alpha: 0.86),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -174,9 +180,11 @@ class _MetricTile extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.1),
+      color: context.colorTokens.white.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      border: Border.all(
+        color: context.colorTokens.white.withValues(alpha: 0.1),
+      ),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +194,7 @@ class _MetricTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodySmall.copyWith(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: context.colorTokens.white.withValues(alpha: 0.6),
           ),
         ),
         const Gap(4),
@@ -195,7 +203,7 @@ class _MetricTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodyMedium.copyWith(
-            color: Colors.white,
+            color: context.colorTokens.white,
             fontWeight: FontWeight.w800,
           ),
         ),
