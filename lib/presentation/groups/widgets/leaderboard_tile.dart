@@ -33,40 +33,27 @@ class LeaderboardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isTopThree = rank <= 3;
-    final Color accentColor = isCurrentUser
-        ? context.colorTokens.primary
-        : isTopThree
-        ? _medalColors[rank - 1]
-        : context.colorTokens.borderUnfocused;
-    final Color backgroundColor = isCurrentUser
-        ? context.colorTokens.primaryVeryLight
-        : context.colorTokens.surface;
     final String score = formatGroupScore(context, value, theme.unit);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: accentColor.withValues(alpha: isCurrentUser ? 0.7 : 0.45),
-          width: isCurrentUser || isTopThree ? 1.5 : 1,
-        ),
-      ),
+    return Container(
+      color: isCurrentUser
+          ? context.colorTokens.primaryVeryLight.withValues(alpha: 0.45)
+          : context.colorTokens.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 28,
+            width: 34,
             child: _RankMarker(rank: rank, isTopThree: isTopThree),
           ),
-          const Gap(8),
+          const Gap(6),
           GroupMemberAvatar(
             name: member.name,
             colorValue: member.avatarColorValue,
+            size: 50,
           ),
-          const Gap(8),
+          const Gap(14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,8 +62,9 @@ class LeaderboardTile extends StatelessWidget {
                   member.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge,
+                  style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
                 ),
+                const Gap(2),
                 Text(
                   isCurrentUser
                       ? context.l10n.currentUserRankSubtitle
@@ -85,12 +73,14 @@ class LeaderboardTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          const Gap(8),
+          const Gap(10),
           Text(
             score,
             maxLines: 1,
@@ -99,6 +89,8 @@ class LeaderboardTile extends StatelessWidget {
               color: isCurrentUser
                   ? context.colorTokens.primary
                   : context.colorTokens.textBody,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -127,19 +119,38 @@ class _RankMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isTopThree) {
       return Center(
-        child: Icon(
-          Icons.workspace_premium_rounded,
-          size: 24,
-          color: LeaderboardTile._medalColors[rank - 1],
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              Icons.workspace_premium_rounded,
+              size: 32,
+              color: LeaderboardTile._medalColors[rank - 1],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                "$rank",
+                style: context.textStyles.bodyTiny.copyWith(
+                  color: context.colorTokens.white,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
 
-    return Text(
-      "$rank",
-      textAlign: TextAlign.center,
-      style: context.textStyles.bodyLarge.copyWith(
-        color: context.colorTokens.textHint,
+    return Center(
+      child: Text(
+        "$rank",
+        textAlign: TextAlign.center,
+        style: context.textStyles.bodyLarge.copyWith(
+          color: context.colorTokens.textHint,
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }

@@ -30,20 +30,24 @@ class GroupSelector extends StatelessWidget {
       label: context.l10n.groupsTitle,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (int index = 0; index < groups.length; index++) ...[
-              if (index > 0) const Gap(8),
-              GroupChip(
-                group: groups[index],
-                label: localizedGroupName(context, groups[index]),
-                isSelected: groups[index].id == selectedGroupId,
-                onTap: () => onSelectGroup(groups[index]),
-              ),
+        clipBehavior: Clip.none,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            children: [
+              for (int index = 0; index < groups.length; index++) ...[
+                if (index > 0) const Gap(6),
+                GroupChip(
+                  group: groups[index],
+                  label: localizedGroupName(context, groups[index]),
+                  isSelected: groups[index].id == selectedGroupId,
+                  onTap: () => onSelectGroup(groups[index]),
+                ),
+              ],
+              const Gap(6),
+              CreateGroupChip(onTap: onCreateGroup),
             ],
-            const Gap(8),
-            CreateGroupChip(onTap: onCreateGroup),
-          ],
+          ),
         ),
       ),
     );
