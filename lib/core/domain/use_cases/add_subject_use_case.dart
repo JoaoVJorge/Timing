@@ -15,6 +15,9 @@ class AddSubjectUseCase {
     required int colorValue,
     required int goalSeconds,
     int goalPages = 0,
+    String iconName = "",
+    int restMinutes = SubjectEntity.defaultRestMinutes,
+    int wallpaperIndex = 0,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
@@ -30,6 +33,9 @@ class AddSubjectUseCase {
         currentPages: 0,
         goalPages: goalPages,
         notes: "",
+        iconName: iconName,
+        restMinutes: restMinutes,
+        wallpaperIndex: wallpaperIndex,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

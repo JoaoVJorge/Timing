@@ -9,7 +9,6 @@ import "package:help_out/presentation/category/widgets/hobby_subject_card.dart";
 import "package:help_out/presentation/category/widgets/notebook_swipe_tile.dart";
 import "package:help_out/presentation/category/widgets/reading_subject_tile.dart";
 import "package:help_out/presentation/category/widgets/subject_tile.dart";
-import "package:help_out/presentation/category/widgets/working_subject_tile.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
@@ -70,11 +69,8 @@ class CategoryPage extends StatelessWidget {
             final SubjectEntity subject = subjects[index];
             return NotebookSwipeTile(
               onTapNotes: () => controller.onTapNotes(subject),
+              onDelete: () => controller.onDeleteSubject(subject),
               child: switch (controller.category) {
-                TimeCategoryType.working => WorkingSubjectTile(
-                  subject: subject,
-                  onTapPlay: () => controller.onTapSubject(subject),
-                ),
                 TimeCategoryType.reading => ReadingSubjectTile(
                   subject: subject,
                   onTapPlay: () => controller.onTapSubject(subject),
@@ -99,9 +95,8 @@ class _AddSubjectTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(18),
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
@@ -136,9 +131,8 @@ class _AddSubjectCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(20),
     child: Container(
       decoration: BoxDecoration(
         border: Border.all(

@@ -93,7 +93,7 @@ class EditProfilePage extends StatelessWidget {
                 tokens: context.colorTokens,
                 hintText: context.l10n.yourNameHint,
                 prefixIcon: AppIcon(
-                  "address_book",
+                  "user",
                   size: 20,
                   color: context.colorTokens.textHint,
                 ),
@@ -126,8 +126,9 @@ class EditProfilePage extends StatelessWidget {
               decoration: AppInputDecoration.withBorder(
                 tokens: context.colorTokens,
                 hintText: context.l10n.optionalHint,
-                prefixIcon: Icon(
-                  Icons.mail_outline,
+                prefixIcon: AppIcon(
+                  "mail",
+                  size: 18,
                   color: context.colorTokens.textHint,
                 ),
               ),
@@ -141,8 +142,9 @@ class EditProfilePage extends StatelessWidget {
               decoration: AppInputDecoration.withBorder(
                 tokens: context.colorTokens,
                 hintText: context.l10n.optionalHint,
-                prefixIcon: Icon(
-                  Icons.call_outlined,
+                prefixIcon: AppIcon(
+                  "phone",
+                  size: 20,
                   color: context.colorTokens.textHint,
                 ),
               ),

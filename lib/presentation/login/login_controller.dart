@@ -18,5 +18,5 @@ class LoginController extends GetxController {
     await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
   }
 
-  void onTapCreateAccount() => _appNavigator.toNamed(AppRoutes.createAccount);
+  void onTapPhoneSignIn() => _appNavigator.toNamed(AppRoutes.phoneLogin);
 }

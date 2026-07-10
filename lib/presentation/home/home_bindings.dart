@@ -5,7 +5,15 @@ class HomeBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<HomeController>(
-      HomeController(appController: Get.find(), appNavigator: Get.find()),
+      HomeController(
+        appController: Get.find(),
+        appNavigator: Get.find(),
+        lastActivityService: Get.find(),
+        dailyProgressService: Get.find(),
+        getSubjectsUseCase: Get.find(),
+        getDailyTasksUseCase: Get.find(),
+        scheduleController: Get.find(),
+      ),
     );
   }
 }

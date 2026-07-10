@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
@@ -16,6 +17,15 @@ class FriendTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  static const List<int> _avatarColors = [
+    0xFFE0507A,
+    0xFF2E6ADE,
+    0xFF3FA65D,
+    0xFF8325FF,
+    0xFF1FA2A6,
+    0xFFFF7A30,
+  ];
+
   @override
   Widget build(BuildContext context) => BounceTap(
     pressedScale: 0.98,
@@ -23,19 +33,23 @@ class FriendTile extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: context.colorTokens.surface,
+        color: isSelected
+            ? context.colorTokens.primaryVeryLight
+            : context.colorTokens.surface,
         borderRadius: BorderRadius.circular(16),
-        border: isSelected
-            ? Border.all(color: context.colorTokens.primary, width: 1.5)
-            : null,
+        border: Border.all(
+          color: isSelected
+              ? context.colorTokens.primary
+              : context.colorTokens.borderUnfocused,
+          width: isSelected ? 1.5 : 1,
+        ),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage(
-              "https://i.pravatar.cc/150?u=${friend.id}",
-            ),
+          GroupMemberAvatar(
+            name: friend.name,
+            colorValue:
+                _avatarColors[friend.id.hashCode.abs() % _avatarColors.length],
           ),
           const SizedBox(width: 12),
           Expanded(

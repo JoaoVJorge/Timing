@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
+import "package:gap/gap.dart";
 import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
-class PeriodSelector extends StatelessWidget {
-  const PeriodSelector({
+class GroupPeriodSelector extends StatelessWidget {
+  const GroupPeriodSelector({
     required this.selectedPeriod,
     required this.onSelectPeriod,
     super.key,
@@ -16,10 +17,21 @@ class PeriodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(4),
+    padding: const EdgeInsets.all(6),
     decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
-      borderRadius: BorderRadius.circular(16),
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
+          blurRadius: 10,
+          spreadRadius: 1,
+          offset: const Offset(0, 2),
+        ),
+      ],
     ),
     child: Row(
       children: [
@@ -28,7 +40,7 @@ class PeriodSelector extends StatelessWidget {
           index < LeaderboardPeriodType.values.length;
           index++
         ) ...[
-          if (index > 0) const SizedBox(width: 8),
+          if (index > 0) const Gap(6),
           Expanded(
             child: _PeriodSegment(
               period: LeaderboardPeriodType.values[index],
@@ -59,21 +71,12 @@ class _PeriodSegment extends StatelessWidget {
     onTap: onTap,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      height: 42,
       decoration: BoxDecoration(
         color: isSelected
-            ? context.colorTokens.surface
+            ? context.colorTokens.primaryVeryLight
             : context.colorTokens.surface.withValues(alpha: 0),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isSelected
-            ? [
-                BoxShadow(
-                  color: context.colorTokens.surfaceShadow,
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ]
-            : null,
+        borderRadius: BorderRadius.circular(20),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -84,7 +87,8 @@ class _PeriodSegment extends StatelessWidget {
           color: isSelected
               ? context.colorTokens.primary
               : context.colorTokens.textHint,
-          fontWeight: FontWeight.bold,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
         ),
       ),
     ),
