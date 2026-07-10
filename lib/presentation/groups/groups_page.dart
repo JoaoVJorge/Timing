@@ -21,29 +21,32 @@ class GroupsPage extends StatelessWidget {
     final GroupsController controller = Get.find();
 
     return AppScaffold(
+      backgroundColor: context.colorTokens.white,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Gap(16),
+          const Gap(18),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 context.l10n.groupsTitle,
-                style: context.textStyles.titleFont,
+                style: context.textStyles.black32.copyWith(fontSize: 34),
               ),
               const Gap(4),
               Text(
                 context.l10n.groupsSubtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyMedium.copyWith(
+                style: context.textStyles.bodyLarge.copyWith(
                   color: context.colorTokens.textHint,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const Gap(16),
+          const Gap(6),
           Obx(
             () => GroupSelector(
               groups: controller.groups,
@@ -52,17 +55,17 @@ class GroupsPage extends StatelessWidget {
               onCreateGroup: controller.onTapCreateGroup,
             ),
           ),
+          const Gap(6),
           Obx(
             () => controller.groups.isEmpty
                 ? const SizedBox.shrink()
                 : Column(
                     children: [
-                      const Gap(20),
                       GroupPeriodSelector(
                         selectedPeriod: controller.selectedPeriod.value,
                         onSelectPeriod: controller.onSelectPeriod,
                       ),
-                      const Gap(12),
+                      const Gap(18),
                     ],
                   ),
           ),
@@ -91,23 +94,8 @@ class GroupsPage extends StatelessWidget {
               }
 
               return ListView(
-                padding: EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(bottom: 18),
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12),
-                    child: Text(
-                      leaderboardDescription(
-                        context,
-                        group.theme,
-                        controller.selectedPeriod.value,
-                      ),
-                      style: context.textStyles.bodySmall.copyWith(
-                        color: context.colorTokens.textHint,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const Gap(12),
                   if (currentUser != null) ...[
                     CurrentUserRankCard(
                       rank: controller.currentUserRank,
@@ -119,28 +107,98 @@ class GroupsPage extends StatelessWidget {
                         currentUser,
                       ),
                     ),
-                    const Gap(20),
+                    const Gap(14),
                   ],
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 14,
+                        color: context.colorTokens.primary.withValues(
+                          alpha: 0.35,
+                        ),
+                      ),
+                      const Gap(6),
+                      Expanded(
+                        child: Text(
+                          leaderboardDescription(
+                            context,
+                            group.theme,
+                            controller.selectedPeriod.value,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.bodySmall.copyWith(
+                            color: context.colorTokens.textHint,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Gap(16),
                   Text(
                     context.l10n.leaderboardTitle,
-                    style: context.textStyles.extraBold20,
-                  ),
-                  const Gap(12),
-                  for (int index = 0; index < members.length; index++) ...[
-                    if (index > 0) const Gap(12),
-                    LeaderboardTile(
-                      rank: index + 1,
-                      member: members[index],
-                      theme: group.theme,
-                      value: members[index].secondsFor(
-                        controller.selectedPeriod.value,
+                    style: context.textStyles.extraBold24.copyWith(
+                      color: context.colorTokens.textBody.withValues(
+                        alpha: 0.94,
                       ),
-                      isCurrentUser: controller.isCurrentUser(members[index]),
-                      differenceToPrevious: controller.differenceToPrevious(
-                        members[index],
+                      fontSize: 22,
+                    ),
+                  ),
+                  const Gap(14),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: context.colorTokens.surface,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.colorTokens.surfaceShadow.withValues(
+                            alpha: 0.08,
+                          ),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: context.colorTokens.borderUnfocused.withValues(
+                          alpha: 0.45,
+                        ),
                       ),
                     ),
-                  ],
+                    child: Column(
+                      children: [
+                        for (
+                          int index = 0;
+                          index < members.length;
+                          index++
+                        ) ...[
+                          LeaderboardTile(
+                            rank: index + 1,
+                            member: members[index],
+                            theme: group.theme,
+                            value: members[index].secondsFor(
+                              controller.selectedPeriod.value,
+                            ),
+                            isCurrentUser: controller.isCurrentUser(
+                              members[index],
+                            ),
+                            differenceToPrevious: controller
+                                .differenceToPrevious(members[index]),
+                          ),
+                          if (index < members.length - 1)
+                            Divider(
+                              height: 1,
+                              indent: 22,
+                              endIndent: 22,
+                              color: context.colorTokens.divider,
+                            ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               );
             }),
@@ -163,34 +221,37 @@ class _GroupsEmptyState extends StatelessWidget {
       children: [
         Icon(
           Icons.groups_rounded,
-          size: 48,
+          size: 46,
           color: context.colorTokens.primary,
         ),
-        const Gap(16),
+        const Gap(14),
         Text(
           context.l10n.groupsEmptyTitle,
-          style: context.textStyles.extraBold20,
+          style: context.textStyles.extraBold20.copyWith(fontSize: 18),
         ),
-        const Gap(8),
+        const Gap(6),
         Text(
           context.l10n.groupsEmptyDescription,
           textAlign: TextAlign.center,
           style: context.textStyles.bodyMedium.copyWith(
             color: context.colorTokens.textHint,
+            fontSize: 12,
           ),
         ),
-        const Gap(20),
+        const Gap(18),
         BounceTap(
           onTap: onCreateGroup,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               color: context.colorTokens.primary,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
               context.l10n.groupsEmptyButton,
-              style: context.textStyles.textPrimaryButton,
+              style: context.textStyles.textPrimaryButton.copyWith(
+                fontSize: 14,
+              ),
             ),
           ),
         ),

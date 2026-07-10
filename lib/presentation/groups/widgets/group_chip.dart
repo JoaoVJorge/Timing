@@ -24,7 +24,8 @@ class GroupChip extends StatelessWidget {
     onTap: onTap,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 62,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         gradient: isSelected
             ? context.colorTokens.primaryGradient
@@ -34,13 +35,15 @@ class GroupChip extends StatelessWidget {
                   context.colorTokens.surface,
                 ],
               ),
-        borderRadius: BorderRadius.circular(24),
-
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 8,
-            offset: const Offset(2, 3),
+            color: context.colorTokens.surfaceShadow.withValues(
+              alpha: isSelected ? 0.12 : 0.08,
+            ),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -48,8 +51,8 @@ class GroupChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isSelected
@@ -59,22 +62,23 @@ class GroupChip extends StatelessWidget {
             child: Center(
               child: AppIcon(
                 group.theme.iconName,
-                size: 16,
+                size: 20,
                 color: isSelected ? Colors.white : context.colorTokens.primary,
               ),
             ),
           ),
-          const Gap(8),
+          const Gap(10),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 160),
+            constraints: const BoxConstraints(maxWidth: 158),
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: isSelected
-                  ? context.textStyles.textPrimaryButton
+                  ? context.textStyles.textPrimaryButton.copyWith(fontSize: 16)
                   : context.textStyles.bodyLarge.copyWith(
                       color: context.colorTokens.textBody,
+                      fontSize: 16,
                     ),
             ),
           ),
