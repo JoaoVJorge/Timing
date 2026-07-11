@@ -61,7 +61,7 @@
   "@targetDaysChip": {
     "placeholders": { "days": { "type": "int" } }
   },
-  "targetDaysHint": "Custom target (days)",
+  "targetDaysHint": "Custom target",
   "taskDaysProgress": "{completed}/{target} days",
   "@taskDaysProgress": {
     "placeholders": {
@@ -505,7 +505,8 @@
 
   "myScheduleCardTitle": "My Schedule",
   "myScheduleTitle": "My Schedule",
-  "noScheduleYet": "No schedule yet — tap to add",
+  "noScheduleYet": "No schedule yet",
+  "noScheduleYetDescription": "Tap the button below to add\nyour first schedule",
   "addScheduleEntryTitle": "Add Schedule Entry",
   "addScheduleEntryButton": "Add Entry",
   "scheduleTitleHint": "Title",

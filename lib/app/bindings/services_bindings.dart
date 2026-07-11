@@ -4,6 +4,7 @@ import "package:get/get.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/http/http_client_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
+import "package:help_out/core/services/live_activity/timer_live_activity_service.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/notifications/timer_notification_service.dart";
@@ -13,27 +14,48 @@ import "package:shared_preferences/shared_preferences.dart";
 class ServicesBindings extends Bindings {
   @override
   Future<void> dependencies() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
     Get.put<SharedPreferences>(sharedPreferences, permanent: true);
-    Get.put<FlutterSecureStorage>(const FlutterSecureStorage(), permanent: true);
+    Get.put<FlutterSecureStorage>(
+      const FlutterSecureStorage(),
+      permanent: true,
+    );
     Get.put<AppLoggerService>(AppLoggerService(), permanent: true);
-    Get.put<TimerNotificationService>(TimerNotificationService(), permanent: true);
-
-    Get.put<AppLocalStorageService>(
-      AppLocalStorageService(localStorage: Get.find(), secureStorage: Get.find()),
+    Get.put<TimerNotificationService>(
+      TimerNotificationService(),
+      permanent: true,
+    );
+    Get.put<TimerLiveActivityService>(
+      TimerLiveActivityService(),
       permanent: true,
     );
 
-    final LastActivityService lastActivityService = LastActivityService(localStorageService: Get.find());
+    Get.put<AppLocalStorageService>(
+      AppLocalStorageService(
+        localStorage: Get.find(),
+        secureStorage: Get.find(),
+      ),
+      permanent: true,
+    );
+
+    final LastActivityService lastActivityService = LastActivityService(
+      localStorageService: Get.find(),
+    );
     await lastActivityService.load();
     Get.put<LastActivityService>(lastActivityService, permanent: true);
 
-    final DailyProgressService dailyProgressService = DailyProgressService(localStorageService: Get.find());
+    final DailyProgressService dailyProgressService = DailyProgressService(
+      localStorageService: Get.find(),
+    );
     await dailyProgressService.load();
     Get.put<DailyProgressService>(dailyProgressService, permanent: true);
 
     final Dio dio = Dio(BaseOptions(baseUrl: EnvironmentKeys.baseUrl));
     Get.put<Dio>(dio, permanent: true);
-    Get.put<HttpClientService>(HttpClientService(dio: Get.find()), permanent: true);
+    Get.put<HttpClientService>(
+      HttpClientService(dio: Get.find()),
+      permanent: true,
+    );
   }
 }

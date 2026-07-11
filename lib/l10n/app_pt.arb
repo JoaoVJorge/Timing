@@ -40,7 +40,7 @@
   "taskNameHint": "Nome da meta",
   "targetDaysLabel": "Alvo (dias)",
   "targetDaysChip": "{days} dias",
-  "targetDaysHint": "Alvo personalizado (dias)",
+  "targetDaysHint": "Alvo personalizado",
   "taskDaysProgress": "{completed}/{target} dias",
   "taskCompletedLabel": "Concluída!",
 
@@ -358,7 +358,8 @@
 
   "myScheduleCardTitle": "Sua Agenda",
   "myScheduleTitle": "Sua Agenda",
-  "noScheduleYet": "Nenhum horário ainda — toque para adicionar",
+  "noScheduleYet": "Nenhum horário ainda",
+  "noScheduleYetDescription": "Toque no botão abaixo para adicionar\nseu primeiro horário",
   "addScheduleEntryTitle": "Adicionar Horário",
   "addScheduleEntryButton": "Adicionar Horário",
   "scheduleTitleHint": "Título",

@@ -13,6 +13,7 @@ class TimerBindings extends Bindings {
         lastActivityService: Get.find(),
         dailyProgressService: Get.find(),
         timerNotificationService: Get.find(),
+        timerLiveActivityService: Get.find(),
         subject: subject,
       ),
     );

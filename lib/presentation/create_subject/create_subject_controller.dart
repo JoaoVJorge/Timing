@@ -24,6 +24,9 @@ class CreateSubjectController extends GetxController {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController goalController = TextEditingController();
+  final TextEditingController restMinutesController = TextEditingController(
+    text: SubjectEntity.defaultRestMinutes.toString(),
+  );
 
   late final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   late final RxString selectedIconName = SubjectIcons.suggestionsFor(
@@ -145,11 +148,22 @@ class CreateSubjectController extends GetxController {
     goal.value = goalController.text;
   }
 
+  void setRestMinutes(int minutes) {
+    restMinutes.value = minutes;
+    restMinutesController.text = minutes.toString();
+  }
+
   @override
   void onInit() {
     super.onInit();
     nameController.addListener(() => name.value = nameController.text);
     goalController.addListener(() => goal.value = goalController.text);
+    restMinutesController.addListener(() {
+      final int? minutes = int.tryParse(restMinutesController.text.trim());
+      if (minutes != null && minutes > 0) {
+        restMinutes.value = minutes;
+      }
+    });
   }
 
   Future<void> onSubmit() async {
@@ -206,6 +220,7 @@ class CreateSubjectController extends GetxController {
   void onClose() {
     nameController.dispose();
     goalController.dispose();
+    restMinutesController.dispose();
     super.onClose();
   }
 }

@@ -6,16 +6,18 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
+import "package:help_out/core/services/live_activity/timer_live_activity_service.dart";
 import "package:help_out/core/services/notifications/timer_notification_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/timer/widgets/timer_exit_dialog.dart";
 
-class TimerController extends GetxController {
+class TimerController extends GetxController with WidgetsBindingObserver {
   TimerController({
     required this.updateSubjectTimeUseCase,
     required this.lastActivityService,
     required this.dailyProgressService,
     required this.timerNotificationService,
+    required this.timerLiveActivityService,
     required this.subject,
   });
 
@@ -25,6 +27,7 @@ class TimerController extends GetxController {
   final LastActivityService lastActivityService;
   final DailyProgressService dailyProgressService;
   final TimerNotificationService timerNotificationService;
+  final TimerLiveActivityService timerLiveActivityService;
 
   final SubjectEntity subject;
 
@@ -39,6 +42,8 @@ class TimerController extends GetxController {
   int _persistedSessionSeconds = 0;
   bool _hasLoggedTime = false;
   bool _hasRegisteredSession = false;
+  bool _isConsumingLiveActivityAction = false;
+  late DateTime _lastTickAt;
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
@@ -60,39 +65,81 @@ class TimerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (timer) => _tick());
+    WidgetsBinding.instance.addObserver(this);
+    _lastTickAt = DateTime.now();
+    _ticker = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) => unawaited(_tick()),
+    );
     _updateNotification();
   }
 
-  void _tick() {
+  Future<void> _tick() async {
+    final bool consumedAction = await _consumeLiveActivityAction();
+    if (consumedAction || isSessionFinished.value) {
+      return;
+    }
+
+    final DateTime now = DateTime.now();
+    final int elapsedSeconds = now.difference(_lastTickAt).inSeconds;
+    if (elapsedSeconds <= 0) {
+      return;
+    }
+    _lastTickAt = _lastTickAt.add(Duration(seconds: elapsedSeconds));
+
     if (!isRunning.value) {
       return;
     }
 
-    if (isResting.value) {
-      restCountdownSeconds.value--;
-      if (restCountdownSeconds.value <= 0) {
-        isResting.value = false;
-        isRunning.value = false;
-        breakCountdownSeconds.value = focusIntervalSeconds;
+    _advanceBy(elapsedSeconds);
+  }
+
+  void _advanceBy(int seconds) {
+    int remaining = seconds;
+    while (remaining > 0 && isRunning.value) {
+      if (isResting.value) {
+        if (restCountdownSeconds.value <= 0) {
+          isResting.value = false;
+          isRunning.value = false;
+          breakCountdownSeconds.value = focusIntervalSeconds;
+          _updateNotification();
+          continue;
+        }
+        final int step = remaining.clamp(0, restCountdownSeconds.value);
+        restCountdownSeconds.value -= step;
+        remaining -= step;
+        if (restCountdownSeconds.value <= 0) {
+          isResting.value = false;
+          isRunning.value = false;
+          breakCountdownSeconds.value = focusIntervalSeconds;
+          _updateNotification();
+        }
+        continue;
+      }
+
+      if (breakCountdownSeconds.value <= 0) {
+        isResting.value = true;
+        restCountdownSeconds.value = restIntervalSeconds;
+        _persistAccumulatedTime();
+        _updateNotification();
+        continue;
+      }
+      final int step = remaining.clamp(0, breakCountdownSeconds.value);
+      sessionSeconds.value += step;
+      breakCountdownSeconds.value -= step;
+      remaining -= step;
+      if (breakCountdownSeconds.value <= 0) {
+        isResting.value = true;
+        restCountdownSeconds.value = restIntervalSeconds;
+        _persistAccumulatedTime();
         _updateNotification();
       }
-      return;
-    }
-
-    sessionSeconds.value++;
-    breakCountdownSeconds.value--;
-
-    if (breakCountdownSeconds.value <= 0) {
-      isResting.value = true;
-      restCountdownSeconds.value = restIntervalSeconds;
-      _persistAccumulatedTime();
-      _updateNotification();
     }
   }
 
   void togglePause() {
     isRunning.value = !isRunning.value;
+    _lastTickAt = DateTime.now();
 
     if (!isRunning.value) {
       _persistAccumulatedTime();
@@ -128,6 +175,7 @@ class TimerController extends GetxController {
     isSessionFinished.value = true;
     _ticker?.cancel();
     timerNotificationService.cancel();
+    unawaited(timerLiveActivityService.end());
   }
 
   Future<bool> confirmExitIfNeeded() async {
@@ -185,6 +233,18 @@ class TimerController extends GetxController {
   }
 
   void _updateNotification() {
+    unawaited(
+      timerLiveActivityService.startOrUpdate(
+        subjectName: subject.name,
+        colorValue: subject.colorValue,
+        remainingSeconds: isResting.value
+            ? restCountdownSeconds.value
+            : breakCountdownSeconds.value,
+        isRunning: isRunning.value,
+        isResting: isResting.value,
+      ),
+    );
+
     final BuildContext? context = Get.context;
     if (context == null) {
       return;
@@ -215,12 +275,78 @@ class TimerController extends GetxController {
     );
   }
 
+  Future<bool> _consumeLiveActivityAction() async {
+    if (_isConsumingLiveActivityAction || isSessionFinished.value) {
+      return _isConsumingLiveActivityAction;
+    }
+    _isConsumingLiveActivityAction = true;
+    try {
+      final TimerLiveActivityAction? value = await timerLiveActivityService
+          .consumePendingAction();
+      if (value == null) {
+        return false;
+      }
+
+      _applyLiveActivityState(value);
+      if (value.action == "finish") {
+        finishSession();
+        return true;
+      }
+      _lastTickAt = DateTime.now();
+      if (!value.isRunning) {
+        _persistAccumulatedTime();
+      }
+      _updateNotification();
+      return true;
+    } finally {
+      _isConsumingLiveActivityAction = false;
+    }
+  }
+
+  void _applyLiveActivityState(TimerLiveActivityAction value) {
+    if (!value.isResting) {
+      final int completedCycles = sessionSeconds.value - cycleElapsedSeconds;
+      sessionSeconds.value =
+          completedCycles.clamp(0, sessionSeconds.value) +
+          (focusIntervalSeconds - value.remainingSeconds).clamp(
+            0,
+            focusIntervalSeconds,
+          );
+      breakCountdownSeconds.value = value.remainingSeconds;
+      if (value.remainingSeconds <= 0) {
+        isResting.value = true;
+        isRunning.value = true;
+        restCountdownSeconds.value = restIntervalSeconds;
+        return;
+      }
+    } else {
+      restCountdownSeconds.value = value.remainingSeconds;
+      if (value.remainingSeconds <= 0) {
+        isResting.value = false;
+        isRunning.value = false;
+        breakCountdownSeconds.value = focusIntervalSeconds;
+        return;
+      }
+    }
+    isResting.value = value.isResting;
+    isRunning.value = value.isRunning;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_tick());
+    }
+  }
+
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _persistAccumulatedTime();
     _registerSessionIfNeeded();
     timerNotificationService.cancel();
+    unawaited(timerLiveActivityService.end());
     super.onClose();
   }
 }
