@@ -17,25 +17,39 @@ class WeekdaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String locale = Localizations.localeOf(context).toString();
+    final DateTime now = DateTime.now();
+    final DateTime weekStart = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - DateTime.monday));
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (
-            int weekday = DateTime.monday;
-            weekday <= DateTime.sunday;
-            weekday++
-          ) ...[
-            if (weekday > DateTime.monday) const Gap(8),
-            _WeekdayChip(
-              label: DateFormat.E(locale).format(DateTime(2024, 1, weekday)),
+    return Row(
+      children: [
+        for (
+          int weekday = DateTime.monday;
+          weekday <= DateTime.sunday;
+          weekday++
+        ) ...[
+          if (weekday > DateTime.monday) const Gap(6),
+          Expanded(
+            child: _WeekdayChip(
+              label: DateFormat.E(locale)
+                  .format(weekStart.add(Duration(days: weekday - 1)))
+                  .characters
+                  .take(3)
+                  .toString()
+                  .toUpperCase(),
+              day: DateFormat(
+                "dd",
+                locale,
+              ).format(weekStart.add(Duration(days: weekday - 1))),
               isSelected: weekday == selectedWeekday,
               onTap: () => onSelectWeekday(weekday),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 }
@@ -43,46 +57,100 @@ class WeekdaySelector extends StatelessWidget {
 class _WeekdayChip extends StatelessWidget {
   const _WeekdayChip({
     required this.label,
+    required this.day,
     required this.isSelected,
     required this.onTap,
   });
 
   final String label;
+  final String day;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: isSelected
-            ? context.colorTokens.primaryGradient
-            : LinearGradient(
-                colors: [
-                  context.colorTokens.surface,
-                  context.colorTokens.surface,
-                ],
+  Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return BounceTap(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 76,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              gradient: isSelected
+                  ? context.colorTokens.primaryGradient
+                  : LinearGradient(
+                      colors: [
+                        context.colorTokens.surface,
+                        context.colorTokens.surface,
+                      ],
+                    ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? context.colorTokens.transparent
+                    : context.colorTokens.borderUnfocused.withValues(
+                        alpha: 0.45,
+                      ),
               ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colorTokens.surfaceShadow.withValues(
+                    alpha: isDarkMode ? 0.2 : 0.1,
+                  ),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: isSelected
+                        ? context.colorTokens.white
+                        : context.colorTokens.textBody,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(4),
+                Text(
+                  day,
+                  maxLines: 1,
+                  style: context.textStyles.black28.copyWith(
+                    color: isSelected
+                        ? context.colorTokens.white
+                        : context.colorTokens.textBody,
+                    fontSize: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Gap(7),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? context.colorTokens.primary
+                  : context.colorTokens.borderUnfocused.withValues(alpha: 0.65),
+            ),
           ),
         ],
       ),
-      child: Text(
-        label,
-        style: isSelected
-            ? context.textStyles.textPrimaryButton
-            : context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textBody,
-              ),
-      ),
-    ),
-  );
+    );
+  }
 }

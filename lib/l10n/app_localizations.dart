@@ -319,7 +319,7 @@ abstract class AppLocalizations {
   /// No description provided for @targetDaysHint.
   ///
   /// In en, this message translates to:
-  /// **'Custom target (days)'**
+  /// **'Custom target'**
   String get targetDaysHint;
 
   /// No description provided for @taskDaysProgress.
@@ -2029,8 +2029,14 @@ abstract class AppLocalizations {
   /// No description provided for @noScheduleYet.
   ///
   /// In en, this message translates to:
-  /// **'No schedule yet — tap to add'**
+  /// **'No schedule yet'**
   String get noScheduleYet;
+
+  /// No description provided for @noScheduleYetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button below to add\nyour first schedule'**
+  String get noScheduleYetDescription;
 
   /// No description provided for @addScheduleEntryTitle.
   ///

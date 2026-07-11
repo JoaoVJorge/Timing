@@ -14,7 +14,7 @@ class CreateTaskController extends GetxController {
     required this._appNavigator,
   });
 
-  static const List<int> targetDaysOptions = [3, 5, 7, 14, 21, 30];
+  static const List<int> targetDaysOptions = [3, 7, 14, 30];
 
   final AddDailyTaskUseCase _addDailyTaskUseCase;
   final AppNavigator _appNavigator;

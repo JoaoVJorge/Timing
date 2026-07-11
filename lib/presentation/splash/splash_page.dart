@@ -17,12 +17,25 @@ class SplashPage extends StatelessWidget {
     builder: (context, color, child) => AppScaffold(
       backgroundColor: color,
       body: Center(
-        child: Text(
-          AppConstants.appTitle,
-          style: context.textStyles.textPrimaryButton.copyWith(
-            fontSize: 32,
-            fontWeight: FontWeight.w900,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Transform.scale(
+              scale: 1.6,
+              child: Image.asset(
+                "assets/images/logo_without_background.png",
+                height: 75,
+              ),
+            ),
+            Text(
+              AppConstants.appTitle,
+              style: context.textStyles.textPrimaryButton.copyWith(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
         ),
       ),
     ),

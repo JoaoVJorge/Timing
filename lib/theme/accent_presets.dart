@@ -4,13 +4,13 @@ class AppAccentPresets {
   const AppAccentPresets._();
 
   static const List<Color> values = [
-    Color(0xFFFFC107),
-    Color(0xFFFF7A30),
-    Color(0xFF8325FF),
-    Color(0xFF2E6ADE),
-    Color(0xFF3FA65D),
-    Color(0xFFE0507A),
-    Color(0xFF1FA2A6),
+    Color(0xFF1976D2), // Azul
+    Color(0xFF8E44AD), // Roxo
+    Color(0xFF6B8E23), // Verde oliva
+    Color(0xFFFF1493), // Rosa
+    Color(0xFF26C6DA), // Ciano
+    Color(0xFFFFCA28), // Amarelo
+    Color(0xFFFF8C00), // Laranja
   ];
 
   static Color get defaultAccent => values.first;

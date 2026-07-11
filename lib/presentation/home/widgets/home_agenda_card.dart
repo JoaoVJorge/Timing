@@ -204,13 +204,13 @@ class _SchedulePreviewTicket extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: color,
+              color: context.colorTokens.surface,
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
               timeRange,
               style: context.textStyles.textButtonMedium.copyWith(
-                color: Colors.white,
+                color: color,
                 fontSize: 12,
               ),
             ),

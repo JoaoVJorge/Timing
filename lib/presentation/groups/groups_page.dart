@@ -21,7 +21,6 @@ class GroupsPage extends StatelessWidget {
     final GroupsController controller = Get.find();
 
     return AppScaffold(
-      backgroundColor: context.colorTokens.white,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

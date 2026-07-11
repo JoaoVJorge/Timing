@@ -3,15 +3,15 @@ import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_schedule_time.dart";
+import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/subject_color_selector.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
-import "package:intl/intl.dart";
 
 typedef AddScheduleEntryResult = ({
   String title,
@@ -212,13 +212,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
           _FormSection(
             title: "Prévia",
             icon: Icons.visibility_rounded,
-            child: _SchedulePreview(
-              title: _previewTitle,
-              weekdayLabel: _selectedWeekdayLabel(context),
-              startMinutes: _startMinutes,
-              endMinutes: _endMinutes,
-              color: _selectedColor,
-            ),
+            child: ScheduleEntryTile(entry: _previewEntry),
           ),
         ],
       ),
@@ -229,6 +223,15 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     final String title = _titleController.text.trim();
     return title.isEmpty ? context.l10n.scheduleTitleHint : title;
   }
+
+  ScheduleEntryEntity get _previewEntry => ScheduleEntryEntity(
+    id: "schedule-preview",
+    title: _previewTitle,
+    weekday: _selectedWeekday,
+    startMinutes: _startMinutes ?? 0,
+    endMinutes: _endMinutes,
+    colorValue: _selectedColor.toARGB32(),
+  );
 
   int? get _startMinutes {
     final ({int hour, int minute})? time = _parseTime(
@@ -259,16 +262,6 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       return "${hours}h";
     }
     return "${hours}h ${minutes}min";
-  }
-
-  String _selectedWeekdayLabel(BuildContext context) {
-    final String locale = Localizations.localeOf(context).toString();
-    final String label = DateFormat.E(
-      locale,
-    ).format(DateTime(2024, 1, _selectedWeekday));
-    return label.isEmpty
-        ? label
-        : "${label[0].toUpperCase()}${label.substring(1)}";
   }
 }
 
@@ -338,80 +331,6 @@ class _FormSection extends StatelessWidget {
       ],
     ),
   );
-}
-
-class _SchedulePreview extends StatelessWidget {
-  const _SchedulePreview({
-    required this.title,
-    required this.weekdayLabel,
-    required this.startMinutes,
-    required this.endMinutes,
-    required this.color,
-  });
-
-  final String title;
-  final String weekdayLabel;
-  final int? startMinutes;
-  final int? endMinutes;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final String timeLabel = startMinutes == null || endMinutes == null
-        ? "--:-- - --:--"
-        : formatScheduleRange(context, startMinutes!, endMinutes!);
-
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          Container(width: 6, height: 74, color: color),
-          const Gap(14),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.13),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.calendar_month_rounded, color: color, size: 26),
-          ),
-          const Gap(14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  "$weekdayLabel • $timeLabel",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Gap(14),
-        ],
-      ),
-    );
-  }
 }
 
 class _SubmitButton extends StatelessWidget {

@@ -19,22 +19,22 @@ class ScheduleEntryTile extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
           Container(
-            width: 4,
-            height: 36,
+            width: 3,
+            height: 30,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Gap(16),
+          const Gap(12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class ScheduleEntryTile extends StatelessWidget {
                   entry.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge,
+                  style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
                 ),
                 Text(
                   timeRange,
@@ -51,6 +51,7 @@ class ScheduleEntryTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
+                    fontSize: 11,
                   ),
                 ),
               ],

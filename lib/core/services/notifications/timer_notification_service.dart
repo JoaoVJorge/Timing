@@ -100,9 +100,7 @@ class TimerNotificationService {
         id: _notificationId,
         title: title,
         body: body,
-        notificationDetails: const NotificationDetails(
-          android: androidDetails,
-        ),
+        notificationDetails: const NotificationDetails(android: androidDetails),
       );
     } catch (_) {
       // The timer must keep working even if notifications are unavailable.

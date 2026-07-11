@@ -129,7 +129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get targetDaysHint => 'Custom target (days)';
+  String get targetDaysHint => 'Custom target';
 
   @override
   String taskDaysProgress(int completed, int target) {
@@ -1086,7 +1086,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myScheduleTitle => 'My Schedule';
 
   @override
-  String get noScheduleYet => 'No schedule yet — tap to add';
+  String get noScheduleYet => 'No schedule yet';
+
+  @override
+  String get noScheduleYetDescription =>
+      'Tap the button below to add\nyour first schedule';
 
   @override
   String get addScheduleEntryTitle => 'Add Schedule Entry';
