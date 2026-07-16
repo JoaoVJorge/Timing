@@ -43,7 +43,7 @@ class ScheduleEntryTile extends StatelessWidget {
                   entry.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
+                  style: context.textStyles.bodyLarge,
                 ),
                 Text(
                   timeRange,
@@ -51,7 +51,6 @@ class ScheduleEntryTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
-                    fontSize: 11,
                   ),
                 ),
               ],
