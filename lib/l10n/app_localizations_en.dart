@@ -16,10 +16,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong. Please try again later.';
 
   @override
-  String get loginHeadline => 'Let\'s Start';
+  String get loginHeadline => 'Let\'s begin';
 
   @override
-  String get loginSubtitle => 'Sign in to get started.';
+  String get loginSubtitle =>
+      'Sign in to keep studying and organize your routine.';
 
   @override
   String get loginNameHint => 'Your name';
@@ -199,6 +200,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get timeUnitHoursSuffix => 'h';
+
+  @override
+  String get timeUnitMinutesSuffix => 'min';
+
+  @override
   String get wallpaperLabel => 'Timer wallpaper';
 
   @override
@@ -314,6 +321,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get createSubjectRestHelp =>
       'The timer suggests a break after 25 min of focus.';
+
+  @override
+  String get customRestMinutesHint => 'Custom break (min)';
 
   @override
   String get createSubjectPreviewTitle => 'Preview';
@@ -1099,6 +1109,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addScheduleEntryButton => 'Add Entry';
 
   @override
+  String get scheduleInfoSection => 'Information';
+
+  @override
+  String get scheduleWhenSection => 'When?';
+
+  @override
+  String get scheduleColorSection => 'Schedule color';
+
+  @override
+  String get schedulePreviewSection => 'Preview';
+
+  @override
+  String scheduleDurationLabel(String duration) {
+    return 'Duration: $duration';
+  }
+
+  @override
+  String scheduleDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String scheduleDurationHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String scheduleDurationHoursMinutes(int hours, int minutes) {
+    return '${hours}h $minutes min';
+  }
+
+  @override
   String get scheduleTitleHint => 'Title';
 
   @override
@@ -1135,14 +1177,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithPhoneButton => 'Continue with phone number';
 
   @override
-  String get phoneLoginTitle => 'Sign in';
+  String get phoneLoginTitle => 'Your number';
 
   @override
   String get phoneLoginSubtitle =>
-      'Enter your phone number and we\'ll text you a verification code.';
+      'Enter your phone number to receive an access code.';
 
   @override
   String get sendCodeButton => 'Send code';
+
+  @override
+  String get phoneSecurityNote =>
+      'You can use your number to sign in securely.';
+
+  @override
+  String get phoneCountryCodeBrazil => '+55';
+
+  @override
+  String get phoneNumberInputHint => '(11) 99999-9999';
+
+  @override
+  String get useSocialLoginButton => 'Use Google or Apple';
 
   @override
   String get otpTitle => 'Verify your number';
@@ -1159,19 +1214,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendCodeButton => 'Resend code';
 
   @override
+  String otpCodeValidFor(String time) {
+    return 'Code valid for $time';
+  }
+
+  @override
+  String get editPhoneNumberButton => 'Edit number';
+
+  @override
   String get codeResentMessage => 'Verification code sent';
 
   @override
   String get invalidCodeError => 'Invalid code. Please try again.';
 
   @override
-  String get credentialsTitle => 'Almost there';
+  String get credentialsTitle => 'Create your profile';
 
   @override
-  String get credentialsSubtitle => 'Tell us a bit about you.';
+  String get credentialsSubtitle =>
+      'Tell us a bit about yourself to personalize your experience.';
 
   @override
   String get birthDateHint => 'Date of birth';
+
+  @override
+  String get profileEditableLaterNote => 'You can edit this later.';
 
   @override
   String get finishButton => 'Finish';
