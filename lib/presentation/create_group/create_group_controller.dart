@@ -26,13 +26,14 @@ class CreateGroupController extends GetxController {
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
   final Rx<GroupThemeType?> selectedTheme = Rx<GroupThemeType?>(null);
+  final RxString groupName = "".obs;
   final RxString friendSearchQuery = "".obs;
   final RxBool isLoading = true.obs;
   final RxBool hasLoadError = false.obs;
   final RxBool isCreating = false.obs;
   final RxBool canCreate = false.obs;
 
-  bool get hasName => groupNameController.text.trim().isNotEmpty;
+  bool get hasName => groupName.value.trim().isNotEmpty;
 
   bool get hasTheme => selectedTheme.value != null;
 
@@ -51,6 +52,7 @@ class CreateGroupController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    groupNameController.addListener(_syncGroupName);
     loadFriends();
   }
 
@@ -66,7 +68,21 @@ class CreateGroupController extends GetxController {
     isLoading.value = false;
   }
 
-  void onGroupNameChanged(String value) => _refreshCanCreate();
+  void onGroupNameChanged(String value) {
+    if (groupName.value != value) {
+      groupName.value = value;
+    }
+    _refreshCanCreate();
+  }
+
+  void _syncGroupName() {
+    final String value = groupNameController.text;
+    if (groupName.value == value) {
+      return;
+    }
+    groupName.value = value;
+    _refreshCanCreate();
+  }
 
   void onFriendSearchChanged(String value) => friendSearchQuery.value = value;
 
@@ -142,6 +158,7 @@ class CreateGroupController extends GetxController {
 
   @override
   void onClose() {
+    groupNameController.removeListener(_syncGroupName);
     groupNameController.dispose();
     friendSearchController.dispose();
     super.onClose();

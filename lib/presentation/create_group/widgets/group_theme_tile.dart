@@ -68,13 +68,16 @@ class GroupThemeTile extends StatelessWidget {
                   : context.colorTokens.textBody,
             ),
           ),
-          const Gap(4),
-          Text(
-            groupMetricDescription(context, theme),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodySmall.copyWith(
-              color: context.colorTokens.textHint,
+          const Gap(3),
+          Flexible(
+            child: Text(
+              groupMetricDescription(context, theme),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodySmall.copyWith(
+                color: context.colorTokens.textHint,
+                height: 1.15,
+              ),
             ),
           ),
         ],
