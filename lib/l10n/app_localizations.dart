@@ -496,6 +496,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancelButton;
 
+  /// No description provided for @confirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmButton;
+
   /// No description provided for @addButton.
   ///
   /// In en, this message translates to:
@@ -2206,23 +2212,23 @@ abstract class AppLocalizations {
   /// **'You can use your number to sign in securely.'**
   String get phoneSecurityNote;
 
-  /// No description provided for @phoneCountryCodeBrazil.
+  /// No description provided for @selectCountryTitle.
   ///
   /// In en, this message translates to:
-  /// **'+55'**
-  String get phoneCountryCodeBrazil;
+  /// **'Select your country'**
+  String get selectCountryTitle;
 
-  /// No description provided for @phoneNumberInputHint.
+  /// No description provided for @searchCountryHint.
   ///
   /// In en, this message translates to:
-  /// **'(11) 99999-9999'**
-  String get phoneNumberInputHint;
+  /// **'Search country'**
+  String get searchCountryHint;
 
-  /// No description provided for @useSocialLoginButton.
+  /// No description provided for @otpCodeExpired.
   ///
   /// In en, this message translates to:
-  /// **'Use Google or Apple'**
-  String get useSocialLoginButton;
+  /// **'Code expired. Resend to get a new one.'**
+  String get otpCodeExpired;
 
   /// No description provided for @otpTitle.
   ///
@@ -2253,12 +2259,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Code valid for {time}'**
   String otpCodeValidFor(String time);
-
-  /// No description provided for @editPhoneNumberButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit number'**
-  String get editPhoneNumberButton;
 
   /// No description provided for @codeResentMessage.
   ///

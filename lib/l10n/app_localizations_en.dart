@@ -234,6 +234,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelButton => 'Cancel';
 
   @override
+  String get confirmButton => 'Confirm';
+
+  @override
   String get addButton => 'Add';
 
   @override
@@ -1191,13 +1194,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can use your number to sign in securely.';
 
   @override
-  String get phoneCountryCodeBrazil => '+55';
+  String get selectCountryTitle => 'Select your country';
 
   @override
-  String get phoneNumberInputHint => '(11) 99999-9999';
+  String get searchCountryHint => 'Search country';
 
   @override
-  String get useSocialLoginButton => 'Use Google or Apple';
+  String get otpCodeExpired => 'Code expired. Resend to get a new one.';
 
   @override
   String get otpTitle => 'Verify your number';
@@ -1217,9 +1220,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String otpCodeValidFor(String time) {
     return 'Code valid for $time';
   }
-
-  @override
-  String get editPhoneNumberButton => 'Edit number';
 
   @override
   String get codeResentMessage => 'Verification code sent';

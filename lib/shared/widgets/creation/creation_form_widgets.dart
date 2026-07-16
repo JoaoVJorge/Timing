@@ -303,7 +303,7 @@ class CreationSubmitButton extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 accent,
-                Color.lerp(accent, context.colorTokens.white, 0.22) ?? accent,
+                Color.lerp(accent, context.colorTokens.white, 0.1) ?? accent,
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

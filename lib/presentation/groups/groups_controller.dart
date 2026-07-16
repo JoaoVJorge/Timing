@@ -91,9 +91,10 @@ class GroupsController extends GetxController {
       selectedPeriod.value = period;
 
   Future<void> onTapCreateGroup() async {
-    final GroupEntity? newGroup = await _appNavigator.toNamed<GroupEntity>(
-      AppRoutes.createGroup,
-    );
+    // Get.toNamed<T> with a concrete type crashes at runtime (GetX types the
+    // route result future as dynamic internally), so await dynamic and cast.
+    final dynamic result = await _appNavigator.toNamed(AppRoutes.createGroup);
+    final GroupEntity? newGroup = result as GroupEntity?;
     if (newGroup == null) {
       return;
     }

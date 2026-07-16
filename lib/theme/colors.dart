@@ -109,7 +109,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color divider;
 
   LinearGradient get primaryGradient => LinearGradient(
-    colors: [primary, primaryPastel],
+    colors: [primary, Color.lerp(primary, primaryPastel, 0.45) ?? primary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

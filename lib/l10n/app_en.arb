@@ -120,6 +120,7 @@
   "estimatedHoursGoalHint": "Estimated hours (goal)",
   "goalPagesHint": "Goal (pages)",
   "cancelButton": "Cancel",
+  "confirmButton": "Confirm",
   "addButton": "Add",
 
   "createSubjectTitleStudying": "New subject",
@@ -552,9 +553,9 @@
   "phoneLoginSubtitle": "Enter your phone number to receive an access code.",
   "sendCodeButton": "Send code",
   "phoneSecurityNote": "You can use your number to sign in securely.",
-  "phoneCountryCodeBrazil": "+55",
-  "phoneNumberInputHint": "(11) 99999-9999",
-  "useSocialLoginButton": "Use Google or Apple",
+  "selectCountryTitle": "Select your country",
+  "searchCountryHint": "Search country",
+  "otpCodeExpired": "Code expired. Resend to get a new one.",
 
   "otpTitle": "Verify your number",
   "otpSubtitle": "Enter the 6-digit code we sent to {phone}.",
@@ -567,7 +568,6 @@
   "@otpCodeValidFor": {
     "placeholders": { "time": { "type": "String" } }
   },
-  "editPhoneNumberButton": "Edit number",
   "codeResentMessage": "Verification code sent",
   "invalidCodeError": "Invalid code. Please try again.",
 
