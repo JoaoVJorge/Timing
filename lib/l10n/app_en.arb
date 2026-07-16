@@ -4,8 +4,8 @@
   "appTitle": "HelpOut",
   "genericErrorMessage": "Something went wrong. Please try again later.",
 
-  "loginHeadline": "Let's Start",
-  "loginSubtitle": "Sign in to get started.",
+  "loginHeadline": "Let's begin",
+  "loginSubtitle": "Sign in to keep studying and organize your routine.",
   "loginNameHint": "Your name",
   "loginButton": "Let's Start",
 
@@ -103,6 +103,8 @@
   "@restMinutesChip": {
     "placeholders": { "minutes": { "type": "int" } }
   },
+  "timeUnitHoursSuffix": "h",
+  "timeUnitMinutesSuffix": "min",
   "wallpaperLabel": "Timer wallpaper",
 
   "addItemButton": "Add {itemNoun}",
@@ -146,6 +148,7 @@
   "createSubjectPagesGoalHelp": "How many pages do you want to log in total?",
   "createSubjectRestLabel": "Break after each focus",
   "createSubjectRestHelp": "The timer suggests a break after 25 min of focus.",
+  "customRestMinutesHint": "Custom break (min)",
   "createSubjectPreviewTitle": "Preview",
   "createSubjectPreviewNoGoal": "No goal set",
   "createSubjectPreviewGoal": "Goal: {goal}",
@@ -509,6 +512,29 @@
   "noScheduleYetDescription": "Tap the button below to add\nyour first schedule",
   "addScheduleEntryTitle": "Add Schedule Entry",
   "addScheduleEntryButton": "Add Entry",
+  "scheduleInfoSection": "Information",
+  "scheduleWhenSection": "When?",
+  "scheduleColorSection": "Schedule color",
+  "schedulePreviewSection": "Preview",
+  "scheduleDurationLabel": "Duration: {duration}",
+  "@scheduleDurationLabel": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "scheduleDurationMinutes": "{minutes} min",
+  "@scheduleDurationMinutes": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "scheduleDurationHours": "{hours}h",
+  "@scheduleDurationHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
+  "@scheduleDurationHoursMinutes": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
   "scheduleTitleHint": "Title",
   "startTimeLabel": "Start time",
   "endTimeOptionalLabel": "End time",
@@ -522,9 +548,13 @@
   "continueWithAppleButton": "Continue with Apple",
   "continueWithPhoneButton": "Continue with phone number",
 
-  "phoneLoginTitle": "Sign in",
-  "phoneLoginSubtitle": "Enter your phone number and we'll text you a verification code.",
+  "phoneLoginTitle": "Your number",
+  "phoneLoginSubtitle": "Enter your phone number to receive an access code.",
   "sendCodeButton": "Send code",
+  "phoneSecurityNote": "You can use your number to sign in securely.",
+  "phoneCountryCodeBrazil": "+55",
+  "phoneNumberInputHint": "(11) 99999-9999",
+  "useSocialLoginButton": "Use Google or Apple",
 
   "otpTitle": "Verify your number",
   "otpSubtitle": "Enter the 6-digit code we sent to {phone}.",
@@ -533,11 +563,17 @@
   },
   "verifyCodeButton": "Verify",
   "resendCodeButton": "Resend code",
+  "otpCodeValidFor": "Code valid for {time}",
+  "@otpCodeValidFor": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "editPhoneNumberButton": "Edit number",
   "codeResentMessage": "Verification code sent",
   "invalidCodeError": "Invalid code. Please try again.",
 
-  "credentialsTitle": "Almost there",
-  "credentialsSubtitle": "Tell us a bit about you.",
+  "credentialsTitle": "Create your profile",
+  "credentialsSubtitle": "Tell us a bit about yourself to personalize your experience.",
   "birthDateHint": "Date of birth",
+  "profileEditableLaterNote": "You can edit this later.",
   "finishButton": "Finish"
 }

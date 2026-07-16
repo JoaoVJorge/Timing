@@ -115,13 +115,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Let\'s Start'**
+  /// **'Let\'s begin'**
   String get loginHeadline;
 
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to get started.'**
+  /// **'Sign in to keep studying and organize your routine.'**
   String get loginSubtitle;
 
   /// No description provided for @loginNameHint.
@@ -436,6 +436,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String restMinutesChip(int minutes);
 
+  /// No description provided for @timeUnitHoursSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get timeUnitHoursSuffix;
+
+  /// No description provided for @timeUnitMinutesSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get timeUnitMinutesSuffix;
+
   /// No description provided for @wallpaperLabel.
   ///
   /// In en, this message translates to:
@@ -645,6 +657,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The timer suggests a break after 25 min of focus.'**
   String get createSubjectRestHelp;
+
+  /// No description provided for @customRestMinutesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom break (min)'**
+  String get customRestMinutesHint;
 
   /// No description provided for @createSubjectPreviewTitle.
   ///
@@ -2050,6 +2068,54 @@ abstract class AppLocalizations {
   /// **'Add Entry'**
   String get addScheduleEntryButton;
 
+  /// No description provided for @scheduleInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get scheduleInfoSection;
+
+  /// No description provided for @scheduleWhenSection.
+  ///
+  /// In en, this message translates to:
+  /// **'When?'**
+  String get scheduleWhenSection;
+
+  /// No description provided for @scheduleColorSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule color'**
+  String get scheduleColorSection;
+
+  /// No description provided for @schedulePreviewSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get schedulePreviewSection;
+
+  /// No description provided for @scheduleDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duration}'**
+  String scheduleDurationLabel(String duration);
+
+  /// No description provided for @scheduleDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String scheduleDurationMinutes(int minutes);
+
+  /// No description provided for @scheduleDurationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String scheduleDurationHours(int hours);
+
+  /// No description provided for @scheduleDurationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes} min'**
+  String scheduleDurationHoursMinutes(int hours, int minutes);
+
   /// No description provided for @scheduleTitleHint.
   ///
   /// In en, this message translates to:
@@ -2119,13 +2185,13 @@ abstract class AppLocalizations {
   /// No description provided for @phoneLoginTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in'**
+  /// **'Your number'**
   String get phoneLoginTitle;
 
   /// No description provided for @phoneLoginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your phone number and we\'ll text you a verification code.'**
+  /// **'Enter your phone number to receive an access code.'**
   String get phoneLoginSubtitle;
 
   /// No description provided for @sendCodeButton.
@@ -2133,6 +2199,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send code'**
   String get sendCodeButton;
+
+  /// No description provided for @phoneSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can use your number to sign in securely.'**
+  String get phoneSecurityNote;
+
+  /// No description provided for @phoneCountryCodeBrazil.
+  ///
+  /// In en, this message translates to:
+  /// **'+55'**
+  String get phoneCountryCodeBrazil;
+
+  /// No description provided for @phoneNumberInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'(11) 99999-9999'**
+  String get phoneNumberInputHint;
+
+  /// No description provided for @useSocialLoginButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Google or Apple'**
+  String get useSocialLoginButton;
 
   /// No description provided for @otpTitle.
   ///
@@ -2158,6 +2248,18 @@ abstract class AppLocalizations {
   /// **'Resend code'**
   String get resendCodeButton;
 
+  /// No description provided for @otpCodeValidFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Code valid for {time}'**
+  String otpCodeValidFor(String time);
+
+  /// No description provided for @editPhoneNumberButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit number'**
+  String get editPhoneNumberButton;
+
   /// No description provided for @codeResentMessage.
   ///
   /// In en, this message translates to:
@@ -2173,13 +2275,13 @@ abstract class AppLocalizations {
   /// No description provided for @credentialsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Almost there'**
+  /// **'Create your profile'**
   String get credentialsTitle;
 
   /// No description provided for @credentialsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tell us a bit about you.'**
+  /// **'Tell us a bit about yourself to personalize your experience.'**
   String get credentialsSubtitle;
 
   /// No description provided for @birthDateHint.
@@ -2187,6 +2289,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Date of birth'**
   String get birthDateHint;
+
+  /// No description provided for @profileEditableLaterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit this later.'**
+  String get profileEditableLaterNote;
 
   /// No description provided for @finishButton.
   ///
