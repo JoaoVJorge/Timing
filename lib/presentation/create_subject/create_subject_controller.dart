@@ -156,6 +156,10 @@ class CreateSubjectController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (!isPageBased && goalController.text.trim().isEmpty) {
+      goalController.text = "1";
+      goal.value = goalController.text;
+    }
     nameController.addListener(() => name.value = nameController.text);
     goalController.addListener(() => goal.value = goalController.text);
     restMinutesController.addListener(() {
