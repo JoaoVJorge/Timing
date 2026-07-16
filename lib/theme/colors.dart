@@ -18,6 +18,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     required this.error,
     required this.success,
     required this.warning,
+    required this.info,
     required this.iconDisabled,
     required this.overlayDark,
     required this.white,
@@ -60,6 +61,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       error: const Color(0xFFF14336),
       success: isDark ? const Color(0xFF5AB663) : const Color(0xFF3FA65D),
       warning: isDark ? const Color(0xFFF2C230) : const Color(0xFFE0A400),
+      info: isDark ? const Color(0xFF2BB8BC) : const Color(0xFF1FA2A6),
       iconDisabled: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444))
           .withValues(alpha: 0.5),
       overlayDark: const Color(
@@ -95,6 +97,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color error;
   final Color success;
   final Color warning;
+  final Color info;
   final Color iconDisabled;
   final Color overlayDark;
   final Color white;
@@ -129,6 +132,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     Color? error,
     Color? success,
     Color? warning,
+    Color? info,
     Color? iconDisabled,
     Color? overlayDark,
     Color? white,
@@ -155,6 +159,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
     error: error ?? this.error,
     success: success ?? this.success,
     warning: warning ?? this.warning,
+    info: info ?? this.info,
     iconDisabled: iconDisabled ?? this.iconDisabled,
     overlayDark: overlayDark ?? this.overlayDark,
     white: white ?? this.white,
@@ -200,6 +205,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       error: Color.lerp(error, other.error, t)!,
       success: Color.lerp(success, other.success, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
+      info: Color.lerp(info, other.info, t)!,
       iconDisabled: Color.lerp(iconDisabled, other.iconDisabled, t)!,
       overlayDark: Color.lerp(overlayDark, other.overlayDark, t)!,
       white: Color.lerp(white, other.white, t)!,

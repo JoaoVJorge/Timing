@@ -8,8 +8,8 @@ class AppAccentPresets {
     Color(0xFF8E44AD), // Roxo
     Color(0xFF6B8E23), // Verde oliva
     Color(0xFFFF1493), // Rosa
-    Color(0xFF26C6DA), // Ciano
-    Color(0xFFFFCA28), // Amarelo
+    Color(0xFF0AACC2), // Ciano
+    Color(0xFFEBAD03), // Amarelo
     Color(0xFFFF8C00), // Laranja
   ];
 
