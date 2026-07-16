@@ -102,7 +102,7 @@ class _ScheduleEmptyState extends StatelessWidget {
             Text(
               context.l10n.noScheduleYet,
               textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(fontSize: 21),
+              style: context.textStyles.extraBold24.copyWith(fontSize: 22),
             ),
             const Gap(8),
             Text(
@@ -155,7 +155,7 @@ class _ScheduleAddButton extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.textPrimaryButton.copyWith(
-                fontSize: 19,
+                fontSize: 20,
                 fontWeight: FontWeight.w900,
               ),
             ),
