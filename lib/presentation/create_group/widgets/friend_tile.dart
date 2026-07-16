@@ -4,6 +4,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/theme/group_colors.dart";
 
 class FriendTile extends StatelessWidget {
   const FriendTile({
@@ -16,15 +17,6 @@ class FriendTile extends StatelessWidget {
   final FriendOption friend;
   final bool isSelected;
   final VoidCallback onTap;
-
-  static const List<int> _avatarColors = [
-    0xFFE0507A,
-    0xFF2E6ADE,
-    0xFF3FA65D,
-    0xFF8325FF,
-    0xFF1FA2A6,
-    0xFFFF7A30,
-  ];
 
   @override
   Widget build(BuildContext context) => BounceTap(
@@ -48,8 +40,7 @@ class FriendTile extends StatelessWidget {
         children: [
           GroupMemberAvatar(
             name: friend.name,
-            colorValue:
-                _avatarColors[friend.id.hashCode.abs() % _avatarColors.length],
+            colorValue: GroupAvatarColors.byIndex(friend.id.hashCode),
           ),
           const SizedBox(width: 12),
           Expanded(

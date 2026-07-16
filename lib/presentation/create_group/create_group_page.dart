@@ -76,7 +76,7 @@ class CreateGroupPage extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
-                          mainAxisExtent: 112,
+                          mainAxisExtent: 132,
                         ),
                     itemBuilder: (context, index) {
                       final GroupThemeType theme = GroupThemeType.values[index];
@@ -93,6 +93,8 @@ class CreateGroupPage extends StatelessWidget {
                       context.l10n.groupThemeSelectedDescription(
                         groupMetricDescription(context, selected),
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodySmall.copyWith(
                         color: context.colorTokens.textHint,
                       ),
@@ -111,18 +113,23 @@ class CreateGroupPage extends StatelessWidget {
                     style: context.textStyles.bodyLarge,
                   ),
                 ),
-                Obx(
-                  () => Text(
-                    controller.selectedFriendIds.isEmpty
-                        ? context.l10n.selectAtLeastOneFriend
-                        : context.l10n.selectedFriendsCount(
-                            controller.selectedFriendIds.length,
-                          ),
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: controller.selectedFriendIds.isEmpty
-                          ? context.colorTokens.textHint
-                          : context.colorTokens.primary,
-                      fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Obx(
+                    () => Text(
+                      controller.selectedFriendIds.isEmpty
+                          ? context.l10n.selectAtLeastOneFriend
+                          : context.l10n.selectedFriendsCount(
+                              controller.selectedFriendIds.length,
+                            ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: context.textStyles.bodySmall.copyWith(
+                        color: controller.selectedFriendIds.isEmpty
+                            ? context.colorTokens.textHint
+                            : context.colorTokens.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -207,7 +214,7 @@ class CreateGroupPage extends StatelessWidget {
             const Gap(16),
             Obx(
               () => _CreateGroupRequirements(
-                hasName: controller.hasName,
+                hasName: controller.groupName.value.trim().isNotEmpty,
                 hasTheme: controller.hasTheme,
                 hasFriends: controller.hasFriends,
               ),
@@ -215,6 +222,8 @@ class CreateGroupPage extends StatelessWidget {
             const Gap(12),
             Text(
               context.l10n.groupPrivacyNote,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
                 color: context.colorTokens.textHint,
               ),
@@ -295,6 +304,8 @@ class _FriendListState extends StatelessWidget {
         Text(
           description,
           textAlign: TextAlign.center,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodySmall.copyWith(
             color: context.colorTokens.textHint,
           ),
@@ -329,6 +340,8 @@ class _CreateGroupRequirements extends StatelessWidget {
       children: [
         Text(
           context.l10n.createGroupRequirementsTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodyLarge,
         ),
         const Gap(8),
@@ -371,6 +384,8 @@ class _RequirementRow extends StatelessWidget {
       Expanded(
         child: Text(
           label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodySmall.copyWith(
             color: isComplete
                 ? context.colorTokens.textBody
