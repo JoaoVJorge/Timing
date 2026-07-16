@@ -87,7 +87,7 @@ class _PeriodSegment extends StatelessWidget {
           color: isSelected
               ? context.colorTokens.primary
               : context.colorTokens.textHint,
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w800,
         ),
       ),
