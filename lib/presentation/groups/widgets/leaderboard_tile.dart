@@ -5,6 +5,7 @@ import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
+import "package:help_out/theme/group_colors.dart";
 
 class LeaderboardTile extends StatelessWidget {
   const LeaderboardTile({
@@ -23,12 +24,6 @@ class LeaderboardTile extends StatelessWidget {
   final int value;
   final bool isCurrentUser;
   final int? differenceToPrevious;
-
-  static const List<Color> _medalColors = [
-    Color(0xFFFFC107),
-    Color(0xFFB0BEC5),
-    Color(0xFFD08A55),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +57,7 @@ class LeaderboardTile extends StatelessWidget {
                   member.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
+                  style: context.textStyles.bodyLarge,
                 ),
                 const Gap(2),
                 Text(
@@ -73,7 +68,6 @@ class LeaderboardTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
-                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -89,7 +83,6 @@ class LeaderboardTile extends StatelessWidget {
               color: isCurrentUser
                   ? context.colorTokens.primary
                   : context.colorTokens.textBody,
-              fontSize: 15,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -125,7 +118,7 @@ class _RankMarker extends StatelessWidget {
             Icon(
               Icons.workspace_premium_rounded,
               size: 32,
-              color: LeaderboardTile._medalColors[rank - 1],
+              color: LeaderboardMedalColors.byRank(rank),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 4),

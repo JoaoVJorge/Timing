@@ -32,7 +32,7 @@ class GroupSelector extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             children: [
               for (int index = 0; index < groups.length; index++) ...[

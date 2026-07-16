@@ -129,7 +129,6 @@ class GroupsPage extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: context.textStyles.bodySmall.copyWith(
                             color: context.colorTokens.textHint,
-                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

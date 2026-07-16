@@ -91,13 +91,22 @@ class GroupsController extends GetxController {
       selectedPeriod.value = period;
 
   Future<void> onTapCreateGroup() async {
-    final dynamic result = await _appNavigator.toNamed(AppRoutes.createGroup);
-    final GroupEntity? newGroup = result as GroupEntity?;
+    final GroupEntity? newGroup = await _appNavigator.toNamed<GroupEntity>(
+      AppRoutes.createGroup,
+    );
     if (newGroup == null) {
       return;
     }
-    groups.add(newGroup);
+    final int existingIndex = groups.indexWhere(
+      (group) => group.id == newGroup.id,
+    );
+    if (existingIndex >= 0) {
+      groups[existingIndex] = newGroup;
+    } else {
+      groups.add(newGroup);
+    }
     selectedGroup.value = newGroup;
+    groups.refresh();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
 }
