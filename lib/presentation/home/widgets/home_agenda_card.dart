@@ -57,10 +57,19 @@ class HomeAgendaCard extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: context.colorTokens.primaryGradient,
+                      color: context.colorTokens.primaryVeryLight,
+                      border: Border.all(
+                        color: context.colorTokens.primary.withValues(
+                          alpha: 0.18,
+                        ),
+                      ),
                     ),
-                    child: const Center(
-                      child: AppIcon("schedule", size: 20, color: Colors.white),
+                    child: Center(
+                      child: AppIcon(
+                        "schedule",
+                        size: 20,
+                        color: context.colorTokens.primary,
+                      ),
                     ),
                   ),
                   const Gap(12),
@@ -156,17 +165,21 @@ class _EmptyAgenda extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              gradient: context.colorTokens.primaryGradient,
+              color: context.colorTokens.primaryVeryLight,
               borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: context.colorTokens.primary.withValues(alpha: 0.18),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const AppIcon("plus", size: 14, color: Colors.white),
+                AppIcon("plus", size: 14, color: context.colorTokens.primary),
                 const Gap(8),
                 Text(
                   context.l10n.homeNextScheduleAdd,
                   style: context.textStyles.textPrimaryButton.copyWith(
+                    color: context.colorTokens.primary,
                     fontSize: 14,
                   ),
                 ),

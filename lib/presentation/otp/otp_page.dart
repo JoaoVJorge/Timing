@@ -4,6 +4,7 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/otp/otp_controller.dart";
+import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/widgets/auth_onboarding_widgets.dart";
 
 class OtpPage extends StatelessWidget {
@@ -26,11 +27,6 @@ class OtpPage extends StatelessWidget {
             color: AuthOnboardingColors.yellowDark,
             onTap: controller.onTapResend,
           ),
-          AuthTextLink(
-            label: context.l10n.editPhoneNumberButton,
-            color: AuthOnboardingColors.textMuted,
-            onTap: Get.back<void>,
-          ),
           const Gap(8),
           Obx(
             () => AuthPrimaryButton(
@@ -49,26 +45,39 @@ class OtpPage extends StatelessWidget {
           length: OtpController.codeLength,
         ),
         const Gap(16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.schedule_rounded,
-              color: AuthOnboardingColors.yellowDark,
-              size: 24,
-            ),
-            const Gap(8),
-            Text(
-              context.l10n.otpCodeValidFor("01:26"),
-              style: const TextStyle(
-                color: AuthOnboardingColors.textMuted,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
+        Obx(() {
+          final int seconds = controller.secondsRemaining.value;
+          final bool isExpired = seconds <= 0;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isExpired ? Icons.timer_off_outlined : Icons.schedule_rounded,
+                color: isExpired
+                    ? AuthOnboardingColors.textMuted
+                    : AuthOnboardingColors.yellowDark,
+                size: 24,
               ),
-            ),
-          ],
-        ),
+              const Gap(8),
+              Flexible(
+                child: Text(
+                  isExpired
+                      ? context.l10n.otpCodeExpired
+                      : context.l10n.otpCodeValidFor(
+                          formatDurationClock(Duration(seconds: seconds)),
+                        ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AuthOnboardingColors.textMuted,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
       ],
     );
   }

@@ -3,6 +3,7 @@ import "package:get/get.dart";
 import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/presentation/credentials/widgets/birth_date_picker_sheet.dart";
 
 class CredentialsController extends GetxController {
   CredentialsController({
@@ -28,11 +29,9 @@ class CredentialsController extends GetxController {
     final DateTime initial =
         birthDate.value ?? DateTime(now.year - 18, now.month, now.day);
 
-    final DateTime? picked = await showDatePicker(
-      context: context,
+    final DateTime? picked = await BirthDatePickerSheet.show(
+      context,
       initialDate: initial,
-      firstDate: DateTime(1900),
-      lastDate: now,
     );
 
     if (picked != null) {
