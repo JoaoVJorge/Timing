@@ -107,6 +107,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeNextScheduleTitle => 'Agenda';
 
   @override
+  String get homeTodayAgendaTitle => 'Agenda de hoy';
+
+  @override
   String get homeNextScheduleEmpty => 'Sin horario hoy';
 
   @override

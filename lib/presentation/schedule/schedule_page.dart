@@ -134,11 +134,8 @@ class _ScheduleAddButton extends StatelessWidget {
       width: double.infinity,
       height: 58,
       decoration: BoxDecoration(
-        color: context.colorTokens.primaryVeryLight,
+        gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: context.colorTokens.primary.withValues(alpha: 0.22),
-        ),
         boxShadow: [
           BoxShadow(
             color: context.colorTokens.surfaceShadow.withValues(alpha: 0.12),
@@ -150,17 +147,19 @@ class _ScheduleAddButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AppIcon("plus", color: context.colorTokens.primary, size: 24),
+          AppIcon(
+            "plus",
+            color: context.colorTokens.primaryForeground,
+            size: 24,
+          ),
           const Gap(12),
           Flexible(
             child: Text(
               context.l10n.addScheduleEntryButton,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.textPrimaryButton.copyWith(
-                color: context.colorTokens.primary,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
+              style: context.textStyles.black20.copyWith(
+                color: context.colorTokens.primaryForeground,
               ),
             ),
           ),

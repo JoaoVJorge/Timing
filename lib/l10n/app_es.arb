@@ -32,6 +32,7 @@
   "homeGoalsProgress": "{done} de {total} hechas",
   "homeCategoryEmpty": "Nada aún",
   "homeNextScheduleTitle": "Agenda",
+  "homeTodayAgendaTitle": "Agenda de hoy",
   "homeNextScheduleEmpty": "Sin horario hoy",
   "homeNextScheduleAdd": "Agregar horario",
 
