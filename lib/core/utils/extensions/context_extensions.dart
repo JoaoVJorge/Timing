@@ -19,13 +19,6 @@ extension AppColorTokensX on BuildContext {
     color: colorTokens.surface,
     borderRadius: BorderRadius.circular(20),
     border: Border.all(color: accent.withValues(alpha: 0.16)),
-    boxShadow: [softShadow],
-  );
-
-  BoxShadow get softShadow => BoxShadow(
-    color: colorTokens.black.withValues(alpha: isDarkMode ? 0.18 : 0.055),
-    blurRadius: 18,
-    offset: const Offset(0, 9),
   );
 }
 

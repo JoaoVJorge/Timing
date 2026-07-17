@@ -43,13 +43,6 @@ class NotesPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: context.colorTokens.surface,
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.colorTokens.surfaceShadow,
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                 ),
                 child: Stack(
                   children: [

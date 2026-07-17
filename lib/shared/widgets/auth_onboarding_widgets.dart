@@ -124,13 +124,6 @@ class AuthBrand extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: AuthOnboardingColors.yellowGradient,
           borderRadius: BorderRadius.circular(9),
-          boxShadow: [
-            BoxShadow(
-              color: AuthOnboardingColors.yellow.withValues(alpha: 0.24),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
-            ),
-          ],
         ),
         child: const AppIcon("open_book", size: 20, color: Colors.white),
       ),
@@ -188,13 +181,6 @@ class AuthPrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: AuthOnboardingColors.yellowGradient,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AuthOnboardingColors.yellow.withValues(alpha: 0.24),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: isLoading
             ? const SizedBox(
@@ -315,13 +301,6 @@ class AuthHeroPlaceholder extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.86),
-            boxShadow: [
-              BoxShadow(
-                color: AuthOnboardingColors.navy.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: Icon(
             icon,
@@ -445,13 +424,6 @@ class _FloatingIcon extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white.withValues(alpha: 0.82),
       borderRadius: BorderRadius.circular(15),
-      boxShadow: [
-        BoxShadow(
-          color: AuthOnboardingColors.navy.withValues(alpha: 0.08),
-          blurRadius: 12,
-          offset: const Offset(0, 6),
-        ),
-      ],
     ),
     child: Icon(
       icon,
@@ -471,17 +443,6 @@ class _DecorativeDot extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: size,
     height: size,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: color,
-      boxShadow: [
-        BoxShadow(
-          color: color.withValues(alpha: 0.26),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
-        ),
-      ],
-    ),
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
   );
 }
-

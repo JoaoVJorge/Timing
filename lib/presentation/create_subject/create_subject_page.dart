@@ -18,6 +18,7 @@ class CreateSubjectPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CreateSubjectController controller = Get.find();
+    controller.initializeThemeColor(context.colorTokens.primary);
 
     return CreationPageScaffold(
       submitButton: Obx(
@@ -475,13 +476,6 @@ class _IconChoice extends StatelessWidget {
           color: isSelected ? accent : context.colorTokens.borderUnfocused,
           width: isSelected ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.black.withValues(alpha: 0.035),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Center(
         child: icon == null

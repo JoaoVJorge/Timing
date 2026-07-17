@@ -69,8 +69,6 @@ class _WeekdayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return BounceTap(
       onTap: onTap,
       child: Column(
@@ -94,15 +92,6 @@ class _WeekdayChip extends StatelessWidget {
                       ),
                 width: isSelected ? 1.4 : 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colorTokens.surfaceShadow.withValues(
-                    alpha: isDarkMode ? 0.2 : 0.1,
-                  ),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

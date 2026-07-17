@@ -41,14 +41,6 @@ class CurrentUserRankCard extends StatelessWidget {
         border: Border.all(
           color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
-            blurRadius: 12,
-            spreadRadius: 1,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

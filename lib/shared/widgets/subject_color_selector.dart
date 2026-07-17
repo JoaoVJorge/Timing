@@ -78,14 +78,6 @@ class _ColorSwatch extends StatelessWidget {
                 : Colors.white.withValues(alpha: 0.8),
             width: isSelected ? 3 : 1,
           ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: color.withValues(alpha: 0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-          ],
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),

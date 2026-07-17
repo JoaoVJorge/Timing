@@ -20,7 +20,7 @@ class HomeAgendaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = context.colorTokens.info;
+    final Color accent = context.colorTokens.primary;
     final List<ScheduleEntryEntity> preview = entries.take(3).toList();
 
     return BounceTap(

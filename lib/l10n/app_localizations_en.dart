@@ -651,6 +651,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileEvolutionGoalReached => 'You\'ve reached your focus goal!';
 
   @override
+  String get profileProgressSectionTitle => 'Your progress';
+
+  @override
+  String get profileAchievementsTitle => 'Achievements';
+
+  @override
+  String get profileSeeHistory => 'See history';
+
+  @override
+  String get profileSeeAll => 'See all';
+
+  @override
+  String get profileAchievementFirstFocus => 'First focus';
+
+  @override
+  String get profileAchievementStudyStarted => 'Study started';
+
+  @override
+  String get profileAchievementReadingStarted => 'Reading started';
+
+  @override
+  String get profileAchievementLocked => 'Locked';
+
+  @override
+  String get periodWeek => 'Week';
+
+  @override
+  String get periodMonth => 'Month';
+
+  @override
+  String get periodTotal => 'Total';
+
+  @override
   String get profileAgendaTitle => 'Today\'s schedule';
 
   @override

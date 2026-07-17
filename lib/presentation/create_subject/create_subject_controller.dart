@@ -33,6 +33,8 @@ class CreateSubjectController extends GetxController {
     category,
   ).first.obs;
 
+  bool _hasInitializedThemeColor = false;
+
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
   final RxInt wallpaperIndex = 0.obs;
   final RxBool isSaving = false.obs;
@@ -61,6 +63,14 @@ class CreateSubjectController extends GetxController {
   }
 
   bool get canSubmit => name.value.trim().isNotEmpty && hasValidGoal;
+
+  void initializeThemeColor(Color color) {
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    selectedColor.value = SubjectColors.fromThemeAccent(color);
+    _hasInitializedThemeColor = true;
+  }
 
   String title(BuildContext context) => switch (category) {
     TimeCategoryType.studying => context.l10n.createSubjectTitleStudying,

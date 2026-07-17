@@ -89,13 +89,6 @@ class _SignInOption extends StatelessWidget {
               border: Border.all(
                 color: AuthOnboardingColors.navy.withValues(alpha: 0.06),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AuthOnboardingColors.navy.withValues(alpha: 0.08),
-                  blurRadius: 9,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: icon,
           ),
