@@ -118,12 +118,10 @@ class _TimerScaffold extends StatelessWidget {
                   292,
                 );
 
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: IntrinsicHeight(
+                return CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           22,
@@ -185,7 +183,7 @@ class _TimerScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
