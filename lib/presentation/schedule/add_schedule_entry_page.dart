@@ -10,7 +10,7 @@ import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/shared/widgets/subject_color_selector.dart";
+import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:intl/intl.dart";
@@ -41,6 +41,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     Get.arguments is int ? Get.arguments as int : DateTime.now().weekday,
   };
   Color _selectedColor = SubjectColors.values.first;
+  bool _hasInitializedThemeColor = false;
 
   @override
   void initState() {
@@ -48,6 +49,16 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     _titleController.addListener(_rebuildPreview);
     _startTimeController.addListener(_rebuildPreview);
     _endTimeController.addListener(_rebuildPreview);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    _selectedColor = SubjectColors.fromThemeAccent(context.colorTokens.primary);
+    _hasInitializedThemeColor = true;
   }
 
   @override
@@ -212,7 +223,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
           _FormSection(
             title: context.l10n.scheduleColorSection,
             icon: Icons.palette_rounded,
-            child: SubjectColorSelector(
+            child: _ScheduleColorSelector(
               selectedColor: _selectedColor,
               onSelected: (color) => setState(() => _selectedColor = color),
             ),
@@ -286,6 +297,30 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   }
 }
 
+class _ScheduleColorSelector extends StatelessWidget {
+  const _ScheduleColorSelector({
+    required this.selectedColor,
+    required this.onSelected,
+  });
+
+  final Color selectedColor;
+  final ValueChanged<Color> onSelected;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: SubjectColors.values
+        .map(
+          (color) => CreationColorChoice(
+            color: color,
+            isSelected: color.toARGB32() == selectedColor.toARGB32(),
+            onTap: () => onSelected(color),
+          ),
+        )
+        .toList(),
+  );
+}
+
 class _FormSection extends StatelessWidget {
   const _FormSection({
     required this.title,
@@ -305,13 +340,6 @@ class _FormSection extends StatelessWidget {
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(22),
       border: Border.all(color: context.colorTokens.borderUnfocused),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow,
-          blurRadius: 14,
-          offset: const Offset(0, 6),
-        ),
-      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

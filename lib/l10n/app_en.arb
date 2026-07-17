@@ -316,6 +316,17 @@
     "placeholders": { "duration": { "type": "String" } }
   },
   "profileEvolutionGoalReached": "You've reached your focus goal!",
+  "profileProgressSectionTitle": "Your progress",
+  "profileAchievementsTitle": "Achievements",
+  "profileSeeHistory": "See history",
+  "profileSeeAll": "See all",
+  "profileAchievementFirstFocus": "First focus",
+  "profileAchievementStudyStarted": "Study started",
+  "profileAchievementReadingStarted": "Reading started",
+  "profileAchievementLocked": "Locked",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodTotal": "Total",
 
   "profileAgendaTitle": "Today's schedule",
   "profileAgendaEmptyTitle": "No schedule planned",

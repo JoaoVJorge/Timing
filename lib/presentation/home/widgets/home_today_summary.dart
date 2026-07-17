@@ -53,11 +53,11 @@ class _SummaryTile extends StatelessWidget {
           height: 30,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: context.colorTokens.info.withValues(
+            color: context.colorTokens.primary.withValues(
               alpha: context.isDarkMode ? 0.16 : 0.12,
             ),
           ),
-          child: Icon(icon, size: 17, color: context.colorTokens.info),
+          child: Icon(icon, size: 17, color: context.colorTokens.primary),
         ),
         const Gap(10),
         Text(
@@ -65,7 +65,7 @@ class _SummaryTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.black20.copyWith(
-            color: context.colorTokens.info,
+            color: context.colorTokens.primary,
             fontSize: 22,
           ),
         ),

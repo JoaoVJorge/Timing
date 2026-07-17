@@ -198,15 +198,6 @@ class EditProfilePage extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: context.colorTokens.primaryGradient,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colorTokens.primary.withValues(
-                          alpha: 0.3,
-                        ),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
                   ),
                   alignment: Alignment.center,
                   child: controller.isSaving.value

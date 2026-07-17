@@ -13,7 +13,7 @@ class CreationNameField extends StatelessWidget {
     required this.hintText,
     required this.accent,
     required this.icon,
-    this.autofocus = true,
+    this.autofocus = false,
     super.key,
   });
 
@@ -157,14 +157,6 @@ class CreationSelectableChip extends StatelessWidget {
         border: Border.all(
           color: isSelected ? accent : context.colorTokens.borderUnfocused,
         ),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: accent.withValues(alpha: 0.24),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-        ],
       ),
       child: FittedBox(
         fit: BoxFit.scaleDown,
@@ -208,15 +200,6 @@ class CreationColorChoice extends StatelessWidget {
         shape: BoxShape.circle,
         color: isSelected ? color.withValues(alpha: 0.2) : color,
         border: Border.all(color: color, width: isSelected ? 2 : 0),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: color.withValues(alpha: 0.32),
-              blurRadius: 10,
-              spreadRadius: 1,
-              offset: Offset.zero,
-            ),
-        ],
       ),
       child: isSelected
           ? DecoratedBox(
@@ -309,13 +292,6 @@ class CreationSubmitButton extends StatelessWidget {
               end: Alignment.centerRight,
             ),
             borderRadius: BorderRadius.circular(999),
-            boxShadow: [
-              BoxShadow(
-                color: accent.withValues(alpha: 0.28),
-                blurRadius: 14,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: isLoading
               ? Center(

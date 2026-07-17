@@ -138,7 +138,6 @@ class CreationBackButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         shape: BoxShape.circle,
-        boxShadow: [context.softShadow],
       ),
       child: Center(child: AppIcon("left_back", size: 20, color: accent)),
     ),

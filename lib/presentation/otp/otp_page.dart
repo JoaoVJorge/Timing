@@ -149,15 +149,6 @@ class _OtpInput extends StatelessWidget {
                                 ),
                           width: isCurrent ? 1.8 : 1,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AuthOnboardingColors.navy.withValues(
-                              alpha: 0.08,
-                            ),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
                       child: Text(
                         hasDigit ? text[index] : "",

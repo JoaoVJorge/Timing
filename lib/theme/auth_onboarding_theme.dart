@@ -94,12 +94,5 @@ class AuthOnboardingDecorations {
   static BoxDecoration get card => BoxDecoration(
     color: Colors.white.withValues(alpha: 0.94),
     borderRadius: BorderRadius.circular(16),
-    boxShadow: [
-      BoxShadow(
-        color: AuthOnboardingColors.navy.withValues(alpha: 0.09),
-        blurRadius: 14,
-        offset: const Offset(0, 6),
-      ),
-    ],
   );
 }

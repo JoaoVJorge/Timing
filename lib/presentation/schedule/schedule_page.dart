@@ -136,13 +136,6 @@ class _ScheduleAddButton extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow.withValues(alpha: 0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

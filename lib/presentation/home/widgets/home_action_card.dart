@@ -31,13 +31,6 @@ class HomeActionCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.primary.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Row(
         children: [

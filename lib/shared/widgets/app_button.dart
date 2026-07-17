@@ -58,12 +58,6 @@ class AppButton extends StatelessWidget {
     decoration: BoxDecoration(
       color: context.colorTokens.white,
       borderRadius: BorderRadius.circular(999),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.black.withValues(alpha: 0.2),
-          blurRadius: 4,
-        ),
-      ],
     ),
     child: isLoading
         ? SizedBox(

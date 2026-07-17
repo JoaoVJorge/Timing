@@ -39,13 +39,6 @@ class ProfileStatCard extends StatelessWidget {
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: context.colorTokens.borderUnfocused),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow,
-          blurRadius: 12,
-          offset: const Offset(0, 6),
-        ),
-      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

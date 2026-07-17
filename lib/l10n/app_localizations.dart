@@ -1228,6 +1228,72 @@ abstract class AppLocalizations {
   /// **'You\'ve reached your focus goal!'**
   String get profileEvolutionGoalReached;
 
+  /// No description provided for @profileProgressSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress'**
+  String get profileProgressSectionTitle;
+
+  /// No description provided for @profileAchievementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get profileAchievementsTitle;
+
+  /// No description provided for @profileSeeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'See history'**
+  String get profileSeeHistory;
+
+  /// No description provided for @profileSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get profileSeeAll;
+
+  /// No description provided for @profileAchievementFirstFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'First focus'**
+  String get profileAchievementFirstFocus;
+
+  /// No description provided for @profileAchievementStudyStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Study started'**
+  String get profileAchievementStudyStarted;
+
+  /// No description provided for @profileAchievementReadingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading started'**
+  String get profileAchievementReadingStarted;
+
+  /// No description provided for @profileAchievementLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get profileAchievementLocked;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get periodMonth;
+
+  /// No description provided for @periodTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get periodTotal;
+
   /// No description provided for @profileAgendaTitle.
   ///
   /// In en, this message translates to:
