@@ -50,6 +50,7 @@
   },
   "homeCategoryEmpty": "Nothing yet",
   "homeNextScheduleTitle": "Agenda",
+  "homeTodayAgendaTitle": "Today's agenda",
   "homeNextScheduleEmpty": "No schedule today",
   "homeNextScheduleAdd": "Add schedule",
 

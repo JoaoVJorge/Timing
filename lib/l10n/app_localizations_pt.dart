@@ -107,6 +107,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeNextScheduleTitle => 'Agenda';
 
   @override
+  String get homeTodayAgendaTitle => 'Agenda de hoje';
+
+  @override
   String get homeNextScheduleEmpty => 'Nenhum horário hoje';
 
   @override

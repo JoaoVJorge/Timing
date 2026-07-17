@@ -274,6 +274,12 @@ abstract class AppLocalizations {
   /// **'Agenda'**
   String get homeNextScheduleTitle;
 
+  /// No description provided for @homeTodayAgendaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s agenda'**
+  String get homeTodayAgendaTitle;
+
   /// No description provided for @homeNextScheduleEmpty.
   ///
   /// In en, this message translates to:
