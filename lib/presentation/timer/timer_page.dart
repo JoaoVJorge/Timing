@@ -118,12 +118,10 @@ class _TimerScaffold extends StatelessWidget {
                   292,
                 );
 
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: IntrinsicHeight(
+                return CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           22,
@@ -185,7 +183,7 @@ class _TimerScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
@@ -265,7 +263,7 @@ class _TimerHeader extends StatelessWidget {
                   data.status,
                   style: TextStyle(
                     color: context.colorTokens.white.withValues(alpha: 0.58),
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     height: 1,
                   ),
@@ -367,7 +365,7 @@ class _TimerInfoRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: context.colorTokens.white.withValues(alpha: 0.64),
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -377,7 +375,7 @@ class _TimerInfoRow extends StatelessWidget {
           value,
           style: TextStyle(
             color: accentColor,
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -410,7 +408,7 @@ class _TimerActionButton extends StatelessWidget {
             child: AppIcon(
               iconPath,
               color: context.colorTokens.white.withValues(alpha: 0.9),
-              size: 42,
+              size: 40,
             ),
           ),
         ),
@@ -422,7 +420,7 @@ class _TimerActionButton extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: context.colorTokens.white.withValues(alpha: 0.58),
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -624,7 +622,7 @@ class _TimerViewData {
     final bool isReading =
         controller.subject.category == TimeCategoryType.reading;
     final Color accent = isResting
-        ? const Color(0xFFA879FF)
+        ? TimerRestPalette.accent
         : Color(controller.subject.colorValue);
     final int totalIntervalSeconds = isResting
         ? controller.restIntervalSeconds
@@ -678,15 +676,11 @@ class _TimerViewData {
       subjectSvgIconName: subjectSvgIconName,
       progress: progress.clamp(0, 1).toDouble(),
       backgroundGradient: isResting
-          ? const LinearGradient(
-              colors: [Color(0xFF07163E), Color(0xFF050C27), Color(0xFF020613)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
+          ? TimerRestPalette.backgroundGradient
           : TimerWallpapers.byIndex(controller.subject.wallpaperIndex),
       trackColor: accent.withValues(alpha: isResting ? 0.3 : 0.24),
       ringGradientColors: isResting
-          ? const [Color(0xFF653CC9), Color(0xFFB986FF), Color(0xFF8F5CFF)]
+          ? TimerRestPalette.ringGradientColors
           : [
               accent.withValues(alpha: 0.72),
               accent,

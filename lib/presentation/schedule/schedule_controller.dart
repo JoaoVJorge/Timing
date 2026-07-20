@@ -66,21 +66,38 @@ class ScheduleController extends GetxController {
       return;
     }
 
-    final Either<AppError, ScheduleEntryEntity> addResult =
-        await _addScheduleEntryUseCase(
-          title: result.title,
-          weekday: result.weekday,
-          startMinutes: result.startMinutes,
-          endMinutes: result.endMinutes,
-          colorValue: result.colorValue,
-        );
-    addResult.fold((error) => _appNavigator.showErrorSnackBar(error.message), (
-      entry,
-    ) {
-      entries.add(entry);
-      selectedWeekday.value = entry.weekday;
-      entries.refresh();
-    });
+    final List<ScheduleEntryEntity> addedEntries = [];
+    for (final int weekday in result.weekdays) {
+      final Either<AppError, ScheduleEntryEntity> addResult =
+          await _addScheduleEntryUseCase(
+            title: result.title,
+            weekday: weekday,
+            startMinutes: result.startMinutes,
+            endMinutes: result.endMinutes,
+            colorValue: result.colorValue,
+          );
+      final bool hasError = addResult.fold(
+        (error) {
+          _appNavigator.showErrorSnackBar(error.message);
+          return true;
+        },
+        (entry) {
+          addedEntries.add(entry);
+          return false;
+        },
+      );
+      if (hasError) {
+        break;
+      }
+    }
+
+    if (addedEntries.isEmpty) {
+      return;
+    }
+
+    entries.addAll(addedEntries);
+    selectedWeekday.value = addedEntries.first.weekday;
+    entries.refresh();
   }
 
   Future<void> onDeleteEntry(String entryId) async {

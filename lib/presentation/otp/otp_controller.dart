@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
@@ -19,6 +21,7 @@ class OtpController extends GetxController {
   });
 
   static const int codeLength = 6;
+  static const int codeValiditySeconds = 120;
 
   final VerifyPhoneCodeUseCase _verifyPhoneCodeUseCase;
   final RequestPhoneCodeUseCase _requestPhoneCodeUseCase;
@@ -29,6 +32,28 @@ class OtpController extends GetxController {
   final TextEditingController codeController = TextEditingController();
   final RxBool canSubmit = false.obs;
   final RxBool isSubmitting = false.obs;
+  final RxInt secondsRemaining = codeValiditySeconds.obs;
+
+  Timer? _countdownTimer;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _restartCountdown();
+  }
+
+  void _restartCountdown() {
+    _countdownTimer?.cancel();
+    secondsRemaining.value = codeValiditySeconds;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (secondsRemaining.value <= 1) {
+        secondsRemaining.value = 0;
+        _countdownTimer?.cancel();
+        return;
+      }
+      secondsRemaining.value--;
+    });
+  }
 
   void onCodeChanged(String value) {
     canSubmit.value = value.length == codeLength;
@@ -72,14 +97,15 @@ class OtpController extends GetxController {
     final Either<AppError, void> result = await _requestPhoneCodeUseCase(
       phoneNumber,
     );
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (_) => _appNavigator.showSuccessSnackBar(Get.context!.l10n.codeResentMessage),
-    );
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+      _restartCountdown();
+      _appNavigator.showSuccessSnackBar(Get.context!.l10n.codeResentMessage);
+    });
   }
 
   @override
   void onClose() {
+    _countdownTimer?.cancel();
     codeController.dispose();
     super.onClose();
   }

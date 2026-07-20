@@ -9,13 +9,15 @@ import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart"
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/subject_color_selector.dart";
+import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
+import "package:intl/intl.dart";
 
 typedef AddScheduleEntryResult = ({
   String title,
-  int weekday,
+  List<int> weekdays,
   int startMinutes,
   int endMinutes,
   int colorValue,
@@ -35,10 +37,11 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   final FocusNode _startTimeFocusNode = FocusNode();
   final FocusNode _endTimeFocusNode = FocusNode();
 
-  late final int _selectedWeekday = Get.arguments is int
-      ? Get.arguments as int
-      : DateTime.now().weekday;
+  late final Set<int> _selectedWeekdays = {
+    Get.arguments is int ? Get.arguments as int : DateTime.now().weekday,
+  };
   Color _selectedColor = SubjectColors.values.first;
+  bool _hasInitializedThemeColor = false;
 
   @override
   void initState() {
@@ -46,6 +49,16 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     _titleController.addListener(_rebuildPreview);
     _startTimeController.addListener(_rebuildPreview);
     _endTimeController.addListener(_rebuildPreview);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    _selectedColor = SubjectColors.fromThemeAccent(context.colorTokens.primary);
+    _hasInitializedThemeColor = true;
   }
 
   @override
@@ -108,7 +121,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     appNavigator.back<Object>(
       result: (
         title: title,
-        weekday: _selectedWeekday,
+        weekdays: _selectedWeekdays.toList()..sort(),
         startMinutes: startMinutes,
         endMinutes: endMinutes,
         colorValue: _selectedColor.toARGB32(),
@@ -129,7 +142,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _FormSection(
-            title: "Informações",
+            title: context.l10n.scheduleInfoSection,
             icon: "list",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,11 +162,16 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
           ),
           const Gap(16),
           _FormSection(
-            title: "Quando?",
+            title: context.l10n.scheduleWhenSection,
             icon: "schedule",
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _WeekdayMultiSelector(
+                  selectedWeekdays: _selectedWeekdays,
+                  onToggle: _toggleWeekday,
+                ),
+                const Gap(14),
                 Row(
                   children: [
                     Expanded(
@@ -176,7 +194,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                     ),
                   ],
                 ),
-                if (_durationLabel != null) ...[
+                if (_durationLabel(context) != null) ...[
                   const Gap(12),
                   Row(
                     children: [
@@ -187,7 +205,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                       ),
                       const Gap(6),
                       Text(
-                        "Duração: $_durationLabel",
+                        context.l10n.scheduleDurationLabel(
+                          _durationLabel(context)!,
+                        ),
                         style: context.textStyles.bodySmall.copyWith(
                           color: context.colorTokens.primary,
                           fontWeight: FontWeight.w800,
@@ -201,18 +221,20 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
           ),
           const Gap(16),
           _FormSection(
-            title: "Cor do horário",
+            title: context.l10n.scheduleColorSection,
             icon: Icons.palette_rounded,
-            child: SubjectColorSelector(
+            child: _ScheduleColorSelector(
               selectedColor: _selectedColor,
               onSelected: (color) => setState(() => _selectedColor = color),
             ),
           ),
           const Gap(16),
           _FormSection(
-            title: "Prévia",
+            title: context.l10n.schedulePreviewSection,
             icon: Icons.visibility_rounded,
-            child: ScheduleEntryTile(entry: _previewEntry),
+            child: _PreviewFrame(
+              child: ScheduleEntryTile(entry: _previewEntry),
+            ),
           ),
         ],
       ),
@@ -227,11 +249,21 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   ScheduleEntryEntity get _previewEntry => ScheduleEntryEntity(
     id: "schedule-preview",
     title: _previewTitle,
-    weekday: _selectedWeekday,
+    weekday: _selectedWeekdays.first,
     startMinutes: _startMinutes ?? 0,
     endMinutes: _endMinutes,
     colorValue: _selectedColor.toARGB32(),
   );
+
+  void _toggleWeekday(int weekday) {
+    setState(() {
+      if (_selectedWeekdays.contains(weekday) && _selectedWeekdays.length > 1) {
+        _selectedWeekdays.remove(weekday);
+        return;
+      }
+      _selectedWeekdays.add(weekday);
+    });
+  }
 
   int? get _startMinutes {
     final ({int hour, int minute})? time = _parseTime(
@@ -245,7 +277,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     return time == null ? null : time.hour * 60 + time.minute;
   }
 
-  String? get _durationLabel {
+  String? _durationLabel(BuildContext context) {
     final int? start = _startMinutes;
     final int? end = _endMinutes;
     if (start == null || end == null || end <= start) {
@@ -256,13 +288,37 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     final int hours = totalMinutes ~/ 60;
     final int minutes = totalMinutes % 60;
     if (hours == 0) {
-      return "${minutes}min";
+      return context.l10n.scheduleDurationMinutes(minutes);
     }
     if (minutes == 0) {
-      return "${hours}h";
+      return context.l10n.scheduleDurationHours(hours);
     }
-    return "${hours}h ${minutes}min";
+    return context.l10n.scheduleDurationHoursMinutes(hours, minutes);
   }
+}
+
+class _ScheduleColorSelector extends StatelessWidget {
+  const _ScheduleColorSelector({
+    required this.selectedColor,
+    required this.onSelected,
+  });
+
+  final Color selectedColor;
+  final ValueChanged<Color> onSelected;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: SubjectColors.values
+        .map(
+          (color) => CreationColorChoice(
+            color: color,
+            isSelected: color.toARGB32() == selectedColor.toARGB32(),
+            onTap: () => onSelected(color),
+          ),
+        )
+        .toList(),
+  );
 }
 
 class _FormSection extends StatelessWidget {
@@ -284,13 +340,6 @@ class _FormSection extends StatelessWidget {
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(22),
       border: Border.all(color: context.colorTokens.borderUnfocused),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow,
-          blurRadius: 14,
-          offset: const Offset(0, 6),
-        ),
-      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,6 +379,111 @@ class _FormSection extends StatelessWidget {
         child,
       ],
     ),
+  );
+}
+
+class _WeekdayMultiSelector extends StatelessWidget {
+  const _WeekdayMultiSelector({
+    required this.selectedWeekdays,
+    required this.onToggle,
+  });
+
+  final Set<int> selectedWeekdays;
+  final ValueChanged<int> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final String locale = Localizations.localeOf(context).toString();
+    final DateTime monday = DateTime(2024, 1, 1);
+
+    return Row(
+      children: [
+        for (
+          int weekday = DateTime.monday;
+          weekday <= DateTime.sunday;
+          weekday++
+        ) ...[
+          if (weekday > DateTime.monday) const Gap(6),
+          Expanded(
+            child: _WeekdayToggleChip(
+              label: DateFormat.E(locale)
+                  .format(monday.add(Duration(days: weekday - 1)))
+                  .characters
+                  .take(3)
+                  .toString()
+                  .toUpperCase(),
+              isSelected: selectedWeekdays.contains(weekday),
+              onTap: () => onToggle(weekday),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _WeekdayToggleChip extends StatelessWidget {
+  const _WeekdayToggleChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? context.colorTokens.primary
+            : context.colorTokens.scaffold.withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isSelected
+              ? context.colorTokens.primary
+              : context.colorTokens.borderUnfocused,
+        ),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodySmall.copyWith(
+          color: isSelected
+              ? context.colorTokens.white
+              : context.colorTokens.textBody,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
+  );
+}
+
+class _PreviewFrame extends StatelessWidget {
+  const _PreviewFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: context.colorTokens.scaffold.withValues(alpha: 0.48),
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: context.colorTokens.primary.withValues(alpha: 0.28),
+        width: 1.4,
+      ),
+    ),
+    child: child,
   );
 }
 

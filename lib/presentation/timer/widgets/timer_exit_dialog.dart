@@ -78,7 +78,7 @@ class _TimerExitDialog extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.colorTokens.dialogTextMuted,
-              fontSize: 17,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
               height: 1.35,
             ),
@@ -89,7 +89,7 @@ class _TimerExitDialog extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.colorTokens.textHint,
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               height: 1.3,
             ),

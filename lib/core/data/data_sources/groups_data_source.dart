@@ -4,6 +4,7 @@ import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/theme/group_colors.dart";
 
 class GroupsDataSource {
   Future<Either<AppError, List<GroupEntity>>> getGroups() async =>
@@ -31,7 +32,7 @@ class GroupsDataSource {
         GroupMemberEntity(
           id: invitedFriends[index].id,
           name: invitedFriends[index].name,
-          avatarColorValue: _memberColors[index % _memberColors.length],
+          avatarColorValue: GroupAvatarColors.byIndex(index),
           todaySeconds: 0,
           weekSeconds: 0,
           monthSeconds: 0,
@@ -52,15 +53,6 @@ class GroupsDataSource {
     _mockGroups.add(newGroup);
     return Right(newGroup);
   }
-
-  static const List<int> _memberColors = [
-    0xFFE0507A,
-    0xFF2E6ADE,
-    0xFF3FA65D,
-    0xFF8325FF,
-    0xFF1FA2A6,
-    0xFFFF7A30,
-  ];
 
   static const List<FriendOption> _mockFriends = [
     (id: "f1", name: "Gabriel Torres"),

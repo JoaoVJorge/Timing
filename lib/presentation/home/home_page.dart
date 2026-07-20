@@ -63,7 +63,7 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 16),
                 children: [
                   const _HomeActionCardSection(),
-                  const Gap(24),
+                  const Gap(12),
                   _SectionHeader(context.l10n.homeSummaryTitle),
                   const Gap(12),
                   Obx(
@@ -71,11 +71,7 @@ class HomePage extends StatelessWidget {
                       items: _summaryItems(context, controller),
                     ),
                   ),
-                  const Gap(24),
-                  _SectionHeader(context.l10n.homeCategoriesSection),
                   const Gap(12),
-                  const _HomeActivitiesSection(),
-                  const Gap(16),
                   Obx(
                     () => HomeAgendaCard(
                       entries: controller.todayScheduleEntries,
@@ -83,6 +79,10 @@ class HomePage extends StatelessWidget {
                       onAddEntry: controller.onAddScheduleEntry,
                     ),
                   ),
+                  const Gap(24),
+                  _SectionHeader(context.l10n.homeCategoriesSection),
+                  const Gap(12),
+                  const _HomeActivitiesSection(),
                 ],
               ),
             ),
@@ -109,22 +109,32 @@ class HomePage extends StatelessWidget {
     return context.l10n.homeSubtitleStart;
   }
 
-  List<({String value, String label})> _summaryItems(
+  List<({IconData icon, String value, String label})> _summaryItems(
     BuildContext context,
     HomeController controller,
   ) {
     final progress = controller.todayProgress.value;
     return [
       (
+        icon: Icons.schedule_rounded,
         value: formatDurationLong(Duration(seconds: progress.focusSeconds)),
         label: context.l10n.homeSummaryFocus,
       ),
       (
+        icon: Icons.track_changes_rounded,
         value: "${controller.goalsDoneToday}/${controller.goalsTotal}",
         label: context.l10n.homeSummaryGoals,
       ),
-      (value: "${progress.pages}", label: context.l10n.homeSummaryPages),
-      (value: "${progress.sessions}", label: context.l10n.homeSummarySessions),
+      (
+        icon: Icons.description_rounded,
+        value: "${progress.pages}",
+        label: context.l10n.homeSummaryPages,
+      ),
+      (
+        icon: Icons.trending_up_rounded,
+        value: "${progress.sessions}",
+        label: context.l10n.homeSummarySessions,
+      ),
     ];
   }
 }

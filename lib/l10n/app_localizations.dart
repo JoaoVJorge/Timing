@@ -115,13 +115,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Let\'s Start'**
+  /// **'Let\'s begin'**
   String get loginHeadline;
 
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to get started.'**
+  /// **'Sign in to keep studying and organize your routine.'**
   String get loginSubtitle;
 
   /// No description provided for @loginNameHint.
@@ -273,6 +273,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Agenda'**
   String get homeNextScheduleTitle;
+
+  /// No description provided for @homeTodayAgendaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s agenda'**
+  String get homeTodayAgendaTitle;
 
   /// No description provided for @homeNextScheduleEmpty.
   ///
@@ -436,6 +442,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String restMinutesChip(int minutes);
 
+  /// No description provided for @timeUnitHoursSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get timeUnitHoursSuffix;
+
+  /// No description provided for @timeUnitMinutesSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'min'**
+  String get timeUnitMinutesSuffix;
+
   /// No description provided for @wallpaperLabel.
   ///
   /// In en, this message translates to:
@@ -483,6 +501,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancelButton;
+
+  /// No description provided for @confirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmButton;
 
   /// No description provided for @addButton.
   ///
@@ -645,6 +669,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The timer suggests a break after 25 min of focus.'**
   String get createSubjectRestHelp;
+
+  /// No description provided for @customRestMinutesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom break (min)'**
+  String get customRestMinutesHint;
 
   /// No description provided for @createSubjectPreviewTitle.
   ///
@@ -1197,6 +1227,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve reached your focus goal!'**
   String get profileEvolutionGoalReached;
+
+  /// No description provided for @profileProgressSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your progress'**
+  String get profileProgressSectionTitle;
+
+  /// No description provided for @profileAchievementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get profileAchievementsTitle;
+
+  /// No description provided for @profileSeeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'See history'**
+  String get profileSeeHistory;
+
+  /// No description provided for @profileSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get profileSeeAll;
+
+  /// No description provided for @profileAchievementFirstFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'First focus'**
+  String get profileAchievementFirstFocus;
+
+  /// No description provided for @profileAchievementStudyStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Study started'**
+  String get profileAchievementStudyStarted;
+
+  /// No description provided for @profileAchievementReadingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading started'**
+  String get profileAchievementReadingStarted;
+
+  /// No description provided for @profileAchievementLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get profileAchievementLocked;
+
+  /// No description provided for @periodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get periodWeek;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get periodMonth;
+
+  /// No description provided for @periodTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get periodTotal;
 
   /// No description provided for @profileAgendaTitle.
   ///
@@ -2050,6 +2146,54 @@ abstract class AppLocalizations {
   /// **'Add Entry'**
   String get addScheduleEntryButton;
 
+  /// No description provided for @scheduleInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get scheduleInfoSection;
+
+  /// No description provided for @scheduleWhenSection.
+  ///
+  /// In en, this message translates to:
+  /// **'When?'**
+  String get scheduleWhenSection;
+
+  /// No description provided for @scheduleColorSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule color'**
+  String get scheduleColorSection;
+
+  /// No description provided for @schedulePreviewSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get schedulePreviewSection;
+
+  /// No description provided for @scheduleDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duration}'**
+  String scheduleDurationLabel(String duration);
+
+  /// No description provided for @scheduleDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String scheduleDurationMinutes(int minutes);
+
+  /// No description provided for @scheduleDurationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h'**
+  String scheduleDurationHours(int hours);
+
+  /// No description provided for @scheduleDurationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes} min'**
+  String scheduleDurationHoursMinutes(int hours, int minutes);
+
   /// No description provided for @scheduleTitleHint.
   ///
   /// In en, this message translates to:
@@ -2119,13 +2263,13 @@ abstract class AppLocalizations {
   /// No description provided for @phoneLoginTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in'**
+  /// **'Your number'**
   String get phoneLoginTitle;
 
   /// No description provided for @phoneLoginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enter your phone number and we\'ll text you a verification code.'**
+  /// **'Enter your phone number to receive an access code.'**
   String get phoneLoginSubtitle;
 
   /// No description provided for @sendCodeButton.
@@ -2133,6 +2277,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send code'**
   String get sendCodeButton;
+
+  /// No description provided for @phoneSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can use your number to sign in securely.'**
+  String get phoneSecurityNote;
+
+  /// No description provided for @selectCountryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your country'**
+  String get selectCountryTitle;
+
+  /// No description provided for @searchCountryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search country'**
+  String get searchCountryHint;
+
+  /// No description provided for @otpCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired. Resend to get a new one.'**
+  String get otpCodeExpired;
 
   /// No description provided for @otpTitle.
   ///
@@ -2158,6 +2326,12 @@ abstract class AppLocalizations {
   /// **'Resend code'**
   String get resendCodeButton;
 
+  /// No description provided for @otpCodeValidFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Code valid for {time}'**
+  String otpCodeValidFor(String time);
+
   /// No description provided for @codeResentMessage.
   ///
   /// In en, this message translates to:
@@ -2173,13 +2347,13 @@ abstract class AppLocalizations {
   /// No description provided for @credentialsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Almost there'**
+  /// **'Create your profile'**
   String get credentialsTitle;
 
   /// No description provided for @credentialsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tell us a bit about you.'**
+  /// **'Tell us a bit about yourself to personalize your experience.'**
   String get credentialsSubtitle;
 
   /// No description provided for @birthDateHint.
@@ -2187,6 +2361,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Date of birth'**
   String get birthDateHint;
+
+  /// No description provided for @profileEditableLaterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit this later.'**
+  String get profileEditableLaterNote;
 
   /// No description provided for @finishButton.
   ///
