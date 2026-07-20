@@ -24,14 +24,6 @@ class GroupPeriodSelector extends StatelessWidget {
       border: Border.all(
         color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
       ),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
-          blurRadius: 10,
-          spreadRadius: 1,
-          offset: const Offset(0, 2),
-        ),
-      ],
     ),
     child: Row(
       children: [
@@ -87,7 +79,7 @@ class _PeriodSegment extends StatelessWidget {
           color: isSelected
               ? context.colorTokens.primary
               : context.colorTokens.textHint,
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w800,
         ),
       ),

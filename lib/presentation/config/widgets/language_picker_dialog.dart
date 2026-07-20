@@ -163,7 +163,7 @@ class _DialogButton extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: context.colorTokens.dialogTextMuted,
-          fontSize: 15,
+          fontSize: 16,
           fontWeight: FontWeight.w800,
         ),
       ),

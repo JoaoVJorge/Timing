@@ -5,7 +5,7 @@
   "genericErrorMessage": "Algo salió mal. Inténtalo de nuevo más tarde.",
 
   "loginHeadline": "Empecemos",
-  "loginSubtitle": "Inicia sesión para empezar.",
+  "loginSubtitle": "Inicia sesión para continuar tus estudios y organizar tu rutina.",
   "loginNameHint": "Tu nombre",
   "loginButton": "Empecemos",
 
@@ -32,6 +32,7 @@
   "homeGoalsProgress": "{done} de {total} hechas",
   "homeCategoryEmpty": "Nada aún",
   "homeNextScheduleTitle": "Agenda",
+  "homeTodayAgendaTitle": "Agenda de hoy",
   "homeNextScheduleEmpty": "Sin horario hoy",
   "homeNextScheduleAdd": "Agregar horario",
 
@@ -64,6 +65,8 @@
   "iconLabel": "Icono",
   "restTimeLabel": "Tiempo de descanso",
   "restMinutesChip": "{minutes} min",
+  "timeUnitHoursSuffix": "h",
+  "timeUnitMinutesSuffix": "min",
   "wallpaperLabel": "Fondo del timer",
 
   "addItemButton": "Añadir {itemNoun}",
@@ -73,6 +76,7 @@
   "estimatedHoursGoalHint": "Meta estimada (horas)",
   "goalPagesHint": "Meta (páginas)",
   "cancelButton": "Cancelar",
+  "confirmButton": "Confirmar",
   "addButton": "Añadir",
 
   "createSubjectTitleStudying": "Nueva materia",
@@ -101,6 +105,7 @@
   "createSubjectPagesGoalHelp": "¿Cuántas páginas quieres registrar en total?",
   "createSubjectRestLabel": "Pausa después de cada enfoque",
   "createSubjectRestHelp": "El timer sugiere una pausa después de 25 min de enfoque.",
+  "customRestMinutesHint": "Pausa personalizada (min)",
   "createSubjectPreviewTitle": "Vista previa",
   "createSubjectPreviewNoGoal": "Sin meta definida",
   "createSubjectPreviewGoal": "Meta: {goal}",
@@ -203,6 +208,17 @@
   "profileEvolutionTopSubject": "Tu materia más estudiada es {name}.",
   "profileEvolutionRemaining": "Te faltan {duration} para tu meta.",
   "profileEvolutionGoalReached": "¡Alcanzaste tu meta de enfoque!",
+  "profileProgressSectionTitle": "Tu progreso",
+  "profileAchievementsTitle": "Logros",
+  "profileSeeHistory": "Ver historial",
+  "profileSeeAll": "Ver todos",
+  "profileAchievementFirstFocus": "Primer enfoque",
+  "profileAchievementStudyStarted": "Estudios iniciados",
+  "profileAchievementReadingStarted": "Lectura iniciada",
+  "profileAchievementLocked": "Bloqueado",
+  "periodWeek": "Semana",
+  "periodMonth": "Mes",
+  "periodTotal": "Total",
 
   "profileAgendaTitle": "Agenda de hoy",
   "profileAgendaEmptyTitle": "Sin horarios planeados",
@@ -362,6 +378,29 @@
   "noScheduleYetDescription": "Toca el botón de abajo para agregar\ntu primer horario",
   "addScheduleEntryTitle": "Agregar Horario",
   "addScheduleEntryButton": "Agregar Horario",
+  "scheduleInfoSection": "Información",
+  "scheduleWhenSection": "¿Cuándo?",
+  "scheduleColorSection": "Color del horario",
+  "schedulePreviewSection": "Vista previa",
+  "scheduleDurationLabel": "Duración: {duration}",
+  "@scheduleDurationLabel": {
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "scheduleDurationMinutes": "{minutes} min",
+  "@scheduleDurationMinutes": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "scheduleDurationHours": "{hours}h",
+  "@scheduleDurationHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
+  "@scheduleDurationHoursMinutes": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
   "scheduleTitleHint": "Título",
   "startTimeLabel": "Hora de inicio",
   "endTimeOptionalLabel": "Hora de fin",
@@ -375,19 +414,28 @@
   "continueWithAppleButton": "Continuar con Apple",
   "continueWithPhoneButton": "Continuar con el teléfono",
 
-  "phoneLoginTitle": "Iniciar sesión",
-  "phoneLoginSubtitle": "Ingresa tu número de teléfono y te enviaremos un código de verificación por SMS.",
+  "phoneLoginTitle": "Tu número",
+  "phoneLoginSubtitle": "Ingresa tu teléfono para recibir un código de acceso.",
   "sendCodeButton": "Enviar código",
+  "phoneSecurityNote": "Puedes usar tu número para entrar de forma segura.",
+  "selectCountryTitle": "Selecciona el país",
+  "searchCountryHint": "Buscar país",
+  "otpCodeExpired": "Código expirado. Reenvíalo para recibir uno nuevo.",
 
   "otpTitle": "Verifica tu número",
   "otpSubtitle": "Ingresa el código de 6 dígitos que enviamos a {phone}.",
   "verifyCodeButton": "Verificar",
   "resendCodeButton": "Reenviar código",
+  "otpCodeValidFor": "Código válido por {time}",
+  "@otpCodeValidFor": {
+    "placeholders": { "time": { "type": "String" } }
+  },
   "codeResentMessage": "Código de verificación enviado",
   "invalidCodeError": "Código no válido. Inténtalo de nuevo.",
 
-  "credentialsTitle": "Casi listo",
-  "credentialsSubtitle": "Cuéntanos un poco sobre ti.",
+  "credentialsTitle": "Crea tu perfil",
+  "credentialsSubtitle": "Cuéntanos un poco sobre ti para personalizar tu experiencia.",
   "birthDateHint": "Fecha de nacimiento",
+  "profileEditableLaterNote": "Podrás editar esto después.",
   "finishButton": "Finalizar"
 }

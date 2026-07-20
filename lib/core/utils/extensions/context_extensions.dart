@@ -8,24 +8,17 @@ extension AppColorTokensX on BuildContext {
 
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  Color get createTaskPageBackground {
+  Color get creationPageBackground {
     if (isDarkMode) return colorTokens.scaffold;
 
     return Color.lerp(colorTokens.primaryVeryLight, colorTokens.white, 0.74) ??
         colorTokens.scaffold;
   }
 
-  BoxDecoration createTaskCardDecoration(Color accent) => BoxDecoration(
+  BoxDecoration creationCardDecoration(Color accent) => BoxDecoration(
     color: colorTokens.surface,
     borderRadius: BorderRadius.circular(20),
     border: Border.all(color: accent.withValues(alpha: 0.16)),
-    boxShadow: [softShadow],
-  );
-
-  BoxShadow get softShadow => BoxShadow(
-    color: colorTokens.black.withValues(alpha: isDarkMode ? 0.18 : 0.055),
-    blurRadius: 18,
-    offset: const Offset(0, 9),
   );
 }
 

@@ -19,7 +19,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loginHeadline => 'Empecemos';
 
   @override
-  String get loginSubtitle => 'Inicia sesión para empezar.';
+  String get loginSubtitle =>
+      'Inicia sesión para continuar tus estudios y organizar tu rutina.';
 
   @override
   String get loginNameHint => 'Tu nombre';
@@ -104,6 +105,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeNextScheduleTitle => 'Agenda';
+
+  @override
+  String get homeTodayAgendaTitle => 'Agenda de hoy';
 
   @override
   String get homeNextScheduleEmpty => 'Sin horario hoy';
@@ -199,6 +203,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get timeUnitHoursSuffix => 'h';
+
+  @override
+  String get timeUnitMinutesSuffix => 'min';
+
+  @override
   String get wallpaperLabel => 'Fondo del timer';
 
   @override
@@ -225,6 +235,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cancelButton => 'Cancelar';
+
+  @override
+  String get confirmButton => 'Confirmar';
 
   @override
   String get addButton => 'Añadir';
@@ -317,6 +330,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get createSubjectRestHelp =>
       'El timer sugiere una pausa después de 25 min de enfoque.';
+
+  @override
+  String get customRestMinutesHint => 'Pausa personalizada (min)';
 
   @override
   String get createSubjectPreviewTitle => 'Vista previa';
@@ -639,6 +655,39 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profileEvolutionGoalReached => '¡Alcanzaste tu meta de enfoque!';
+
+  @override
+  String get profileProgressSectionTitle => 'Tu progreso';
+
+  @override
+  String get profileAchievementsTitle => 'Logros';
+
+  @override
+  String get profileSeeHistory => 'Ver historial';
+
+  @override
+  String get profileSeeAll => 'Ver todos';
+
+  @override
+  String get profileAchievementFirstFocus => 'Primer enfoque';
+
+  @override
+  String get profileAchievementStudyStarted => 'Estudios iniciados';
+
+  @override
+  String get profileAchievementReadingStarted => 'Lectura iniciada';
+
+  @override
+  String get profileAchievementLocked => 'Bloqueado';
+
+  @override
+  String get periodWeek => 'Semana';
+
+  @override
+  String get periodMonth => 'Mes';
+
+  @override
+  String get periodTotal => 'Total';
 
   @override
   String get profileAgendaTitle => 'Agenda de hoy';
@@ -1108,6 +1157,38 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addScheduleEntryButton => 'Agregar Horario';
 
   @override
+  String get scheduleInfoSection => 'Información';
+
+  @override
+  String get scheduleWhenSection => '¿Cuándo?';
+
+  @override
+  String get scheduleColorSection => 'Color del horario';
+
+  @override
+  String get schedulePreviewSection => 'Vista previa';
+
+  @override
+  String scheduleDurationLabel(String duration) {
+    return 'Duración: $duration';
+  }
+
+  @override
+  String scheduleDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String scheduleDurationHours(int hours) {
+    return '${hours}h';
+  }
+
+  @override
+  String scheduleDurationHoursMinutes(int hours, int minutes) {
+    return '${hours}h $minutes min';
+  }
+
+  @override
   String get scheduleTitleHint => 'Título';
 
   @override
@@ -1144,14 +1225,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get continueWithPhoneButton => 'Continuar con el teléfono';
 
   @override
-  String get phoneLoginTitle => 'Iniciar sesión';
+  String get phoneLoginTitle => 'Tu número';
 
   @override
   String get phoneLoginSubtitle =>
-      'Ingresa tu número de teléfono y te enviaremos un código de verificación por SMS.';
+      'Ingresa tu teléfono para recibir un código de acceso.';
 
   @override
   String get sendCodeButton => 'Enviar código';
+
+  @override
+  String get phoneSecurityNote =>
+      'Puedes usar tu número para entrar de forma segura.';
+
+  @override
+  String get selectCountryTitle => 'Selecciona el país';
+
+  @override
+  String get searchCountryHint => 'Buscar país';
+
+  @override
+  String get otpCodeExpired =>
+      'Código expirado. Reenvíalo para recibir uno nuevo.';
 
   @override
   String get otpTitle => 'Verifica tu número';
@@ -1168,19 +1263,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resendCodeButton => 'Reenviar código';
 
   @override
+  String otpCodeValidFor(String time) {
+    return 'Código válido por $time';
+  }
+
+  @override
   String get codeResentMessage => 'Código de verificación enviado';
 
   @override
   String get invalidCodeError => 'Código no válido. Inténtalo de nuevo.';
 
   @override
-  String get credentialsTitle => 'Casi listo';
+  String get credentialsTitle => 'Crea tu perfil';
 
   @override
-  String get credentialsSubtitle => 'Cuéntanos un poco sobre ti.';
+  String get credentialsSubtitle =>
+      'Cuéntanos un poco sobre ti para personalizar tu experiencia.';
 
   @override
   String get birthDateHint => 'Fecha de nacimiento';
+
+  @override
+  String get profileEditableLaterNote => 'Podrás editar esto después.';
 
   @override
   String get finishButton => 'Finalizar';

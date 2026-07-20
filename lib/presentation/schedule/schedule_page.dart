@@ -102,7 +102,7 @@ class _ScheduleEmptyState extends StatelessWidget {
             Text(
               context.l10n.noScheduleYet,
               textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(fontSize: 21),
+              style: context.textStyles.extraBold24.copyWith(fontSize: 22),
             ),
             const Gap(8),
             Text(
@@ -136,27 +136,23 @@ class _ScheduleAddButton extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.primary.withValues(alpha: 0.24),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AppIcon("plus", color: context.colorTokens.white, size: 24),
+          AppIcon(
+            "plus",
+            color: context.colorTokens.primaryForeground,
+            size: 24,
+          ),
           const Gap(12),
           Flexible(
             child: Text(
               context.l10n.addScheduleEntryButton,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.textPrimaryButton.copyWith(
-                fontSize: 19,
-                fontWeight: FontWeight.w900,
+              style: context.textStyles.black20.copyWith(
+                color: context.colorTokens.primaryForeground,
               ),
             ),
           ),

@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_constants.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/login/login_controller.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
+import "package:help_out/shared/widgets/auth_onboarding_widgets.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class LoginPage extends StatelessWidget {
@@ -14,160 +14,97 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final LoginController controller = Get.find();
 
-    return Scaffold(
-      body: SizedBox.expand(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      context.colorTokens.primary,
-                      context.colorTokens.primaryPastel,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            Positioned.fill(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  top: 24 + MediaQuery.paddingOf(context).top,
-                  bottom: 24 + MediaQuery.paddingOf(context).bottom,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppConstants.appTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white70,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(8),
-                    Text(
-                      context.l10n.loginHeadline,
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        height: 1.1,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black38,
-                            blurRadius: 10,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(12),
-                    Text(
-                      context.l10n.loginSubtitle,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Spacer(),
-                    _SocialSignInButton(
-                      icon: const AppIcon("google", size: 19),
-                      label: context.l10n.continueWithGoogleButton,
-                      onTap: controller.onTapGoogleSignIn,
-                    ),
-                    const Gap(12),
-                    _SocialSignInButton(
-                      icon: const Icon(
-                        Icons.apple,
-                        size: 24,
-                        color: Colors.black87,
-                      ),
-                      label: context.l10n.continueWithAppleButton,
-                      onTap: controller.onTapAppleSignIn,
-                    ),
-                    const Gap(12),
-                    _SocialSignInButton(
-                      icon: const Icon(
-                        Icons.smartphone_rounded,
-                        size: 22,
-                        color: Colors.black87,
-                      ),
-                      label: context.l10n.continueWithPhoneButton,
-                      onTap: controller.onTapPhoneSignIn,
-                    ),
-                    const Gap(24),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+    return AuthOnboardingScaffold(
+      title: context.l10n.loginHeadline,
+      subtitle: context.l10n.loginSubtitle,
+      topVisual: const AuthHeroPlaceholder(
+        icon: Icons.menu_book_rounded,
+        large: true,
       ),
+      bottom: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _SignInOption(
+            icon: const AppIcon("google", size: 26),
+            label: context.l10n.continueWithGoogleButton,
+            onTap: controller.onTapGoogleSignIn,
+          ),
+          const Gap(9),
+          _SignInOption(
+            icon: const Icon(Icons.apple, size: 30, color: Colors.black),
+            label: context.l10n.continueWithAppleButton,
+            onTap: controller.onTapAppleSignIn,
+          ),
+          const Gap(9),
+          _SignInOption(
+            icon: const Icon(
+              Icons.phone_iphone_rounded,
+              size: 25,
+              color: AuthOnboardingColors.yellowDark,
+            ),
+            label: context.l10n.continueWithPhoneButton,
+            onTap: controller.onTapPhoneSignIn,
+            highlighted: true,
+          ),
+        ],
+      ),
+      children: const [],
     );
   }
 }
 
-class _SocialSignInButton extends StatelessWidget {
-  const _SocialSignInButton({
+class _SignInOption extends StatelessWidget {
+  const _SignInOption({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.highlighted = false,
   });
 
   final Widget icon;
   final String label;
   final VoidCallback onTap;
+  final bool highlighted;
 
   @override
   Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.97,
+    pressedScale: 0.98,
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: AuthOnboardingDecorations.card,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          icon,
-          const Gap(8),
-          Flexible(
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: highlighted
+                  ? AuthOnboardingColors.yellow.withValues(alpha: 0.14)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AuthOnboardingColors.navy.withValues(alpha: 0.06),
+              ),
+            ),
+            child: icon,
+          ),
+          const Gap(14),
+          Expanded(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
+              style: AuthOnboardingTextStyles.fieldValue,
             ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: AuthOnboardingColors.navy,
+            size: 28,
           ),
         ],
       ),

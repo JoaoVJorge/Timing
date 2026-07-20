@@ -69,8 +69,6 @@ class _WeekdayChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return BounceTap(
       onTap: onTap,
       child: Column(
@@ -82,31 +80,18 @@ class _WeekdayChip extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              gradient: isSelected
-                  ? context.colorTokens.primaryGradient
-                  : LinearGradient(
-                      colors: [
-                        context.colorTokens.surface,
-                        context.colorTokens.surface,
-                      ],
-                    ),
+              color: isSelected
+                  ? context.colorTokens.primaryVeryLight
+                  : context.colorTokens.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
-                    ? context.colorTokens.transparent
+                    ? context.colorTokens.primary.withValues(alpha: 0.36)
                     : context.colorTokens.borderUnfocused.withValues(
                         alpha: 0.45,
                       ),
+                width: isSelected ? 1.4 : 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colorTokens.surfaceShadow.withValues(
-                    alpha: isDarkMode ? 0.2 : 0.1,
-                  ),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -117,7 +102,7 @@ class _WeekdayChip extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: isSelected
-                        ? context.colorTokens.white
+                        ? context.colorTokens.primary
                         : context.colorTokens.textBody,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -129,7 +114,7 @@ class _WeekdayChip extends StatelessWidget {
                   maxLines: 1,
                   style: context.textStyles.black28.copyWith(
                     color: isSelected
-                        ? context.colorTokens.white
+                        ? context.colorTokens.primary
                         : context.colorTokens.textBody,
                     fontSize: 22,
                   ),

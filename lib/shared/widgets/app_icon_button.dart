@@ -31,13 +31,6 @@ class AppIconButton extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: context.colorTokens.primaryGradient,
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.primary.withValues(alpha: 0.25),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Center(
         child: svgName != null

@@ -7,6 +7,8 @@ import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
 
+enum ProfilePeriod { week, month, total }
+
 class ProfileController extends GetxController {
   ProfileController({
     required this._getProfileStatsUseCase,
@@ -34,6 +36,7 @@ class ProfileController extends GetxController {
     topReadingSubjects: [],
   ).obs;
   final RxBool isLoading = true.obs;
+  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.week.obs;
 
   @override
   void onInit() {
@@ -50,6 +53,8 @@ class ProfileController extends GetxController {
   }
 
   Future<void> onTapEditProfile() => _navigateAndRefresh(AppRoutes.editProfile);
+
+  void onSelectPeriod(ProfilePeriod period) => selectedPeriod.value = period;
 
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??

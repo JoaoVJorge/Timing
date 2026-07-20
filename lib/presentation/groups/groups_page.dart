@@ -129,7 +129,6 @@ class GroupsPage extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: context.textStyles.bodySmall.copyWith(
                             color: context.colorTokens.textHint,
-                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -151,16 +150,6 @@ class GroupsPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: context.colorTokens.surface,
                       borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.colorTokens.surfaceShadow.withValues(
-                            alpha: 0.08,
-                          ),
-                          blurRadius: 12,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                       border: Border.all(
                         color: context.colorTokens.borderUnfocused.withValues(
                           alpha: 0.45,
