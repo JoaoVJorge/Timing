@@ -1,5 +1,3 @@
-import "dart:math" as math;
-
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -56,9 +54,12 @@ class ProfilePage extends StatelessWidget {
               const Gap(20),
               _ProgressSection(stats: stats),
               const Gap(20),
-              _EvolutionSection(stats: stats),
+              _EvolutionSection(values: controller.evolutionFocusSeconds),
               const Gap(20),
-              _AchievementsSection(stats: stats),
+              _AchievementsSection(
+                stats: stats,
+                onTapSeeAll: controller.onTapAchievements,
+              ),
               const Gap(20),
               _ReadingSection(stats: stats),
             ],
@@ -136,10 +137,7 @@ class _IdentityHeader extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: context.colorTokens.primaryGradient,
-          border: Border.all(
-            color: context.colorTokens.white.withValues(alpha: 0.82),
-            width: 3,
-          ),
+          border: Border.all(color: context.colorTokens.surface, width: 3),
         ),
         child: Icon(
           avatarIcon,
@@ -178,7 +176,7 @@ class _IdentityHeader extends StatelessWidget {
                   color: context.colorTokens.primaryVeryLight,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: context.colorTokens.primary.withValues(alpha: 0.2),
+                    color: context.colorTokens.primaryVeryLight,
                   ),
                 ),
                 child: Text(
@@ -572,17 +570,17 @@ class _ProgressRow extends StatelessWidget {
 }
 
 class _EvolutionSection extends StatelessWidget {
-  const _EvolutionSection({required this.stats});
+  const _EvolutionSection({required this.values});
 
-  final ProfileStatsEntity stats;
+  final List<int> values;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _SectionHeader(
-        title: context.l10n.profileEvolutionTitle,
-        action: context.l10n.profileSeeHistory,
+      Text(
+        context.l10n.profileEvolutionTitle,
+        style: context.textStyles.extraBold20,
       ),
       const Gap(12),
       Container(
@@ -591,7 +589,7 @@ class _EvolutionSection extends StatelessWidget {
         decoration: _cardDecoration(context),
         child: CustomPaint(
           painter: _EvolutionChartPainter(
-            values: _chartValues,
+            values: values,
             color: context.colorTokens.primary,
             textColor: context.colorTokens.textHint,
           ),
@@ -600,18 +598,6 @@ class _EvolutionSection extends StatelessWidget {
       ),
     ],
   );
-
-  List<double> get _chartValues {
-    final List<int> raw = [
-      stats.studyingTotalSeconds,
-      stats.exercisesTotalSeconds,
-      stats.hobbiesTotalSeconds,
-      stats.readingTotalPages * 60,
-      stats.totalFocusSeconds,
-    ];
-    final int maxValue = raw.fold<int>(1, math.max);
-    return raw.map((value) => value / maxValue).toList();
-  }
 }
 
 class _EvolutionChartPainter extends CustomPainter {
@@ -621,7 +607,7 @@ class _EvolutionChartPainter extends CustomPainter {
     required this.textColor,
   });
 
-  final List<double> values;
+  final List<int> values;
   final Color color;
   final Color textColor;
 
@@ -641,11 +627,17 @@ class _EvolutionChartPainter extends CustomPainter {
     final Paint dotPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
+    final int maxValue = values.fold<int>(
+      1,
+      (currentMax, value) => value > currentMax ? value : currentMax,
+    );
 
     final double chartTop = 6;
     final double chartBottom = size.height - 24;
     final double chartHeight = chartBottom - chartTop;
-    final double step = size.width / (values.length - 1);
+    final double step = values.length <= 1
+        ? 0
+        : size.width / (values.length - 1);
 
     for (int i = 0; i < 3; i++) {
       final double y = chartTop + chartHeight * (i / 2);
@@ -656,7 +648,8 @@ class _EvolutionChartPainter extends CustomPainter {
     final Path fill = Path();
     for (int i = 0; i < values.length; i++) {
       final double x = i * step;
-      final double y = chartBottom - chartHeight * values[i].clamp(0, 1);
+      final double normalizedValue = (values[i] / maxValue).clamp(0, 1);
+      final double y = chartBottom - chartHeight * normalizedValue;
       if (i == 0) {
         line.moveTo(x, y);
         fill.moveTo(x, chartBottom);
@@ -682,9 +675,10 @@ class _EvolutionChartPainter extends CustomPainter {
 }
 
 class _AchievementsSection extends StatelessWidget {
-  const _AchievementsSection({required this.stats});
+  const _AchievementsSection({required this.stats, required this.onTapSeeAll});
 
   final ProfileStatsEntity stats;
+  final VoidCallback onTapSeeAll;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -693,6 +687,7 @@ class _AchievementsSection extends StatelessWidget {
       _SectionHeader(
         title: context.l10n.profileAchievementsTitle,
         action: context.l10n.profileSeeAll,
+        onTapAction: onTapSeeAll,
       ),
       const Gap(12),
       Row(
@@ -805,20 +800,29 @@ class _ReadingSection extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.action});
+  const _SectionHeader({
+    required this.title,
+    required this.action,
+    this.onTapAction,
+  });
 
   final String title;
   final String action;
+  final VoidCallback? onTapAction;
 
   @override
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(child: Text(title, style: context.textStyles.extraBold20)),
-      Text(
-        action,
-        style: context.textStyles.bodyTiny.copyWith(
-          color: context.colorTokens.primary,
-          fontWeight: FontWeight.w900,
+      BounceTap(
+        onTap: onTapAction ?? () {},
+        pressedScale: onTapAction == null ? 1 : 0.94,
+        child: Text(
+          action,
+          style: context.textStyles.bodyMedium.copyWith(
+            color: context.colorTokens.primary,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     ],
@@ -873,8 +877,8 @@ extension on TimeCategoryType {
 
 extension on ProfilePeriod {
   String localizedLabel(BuildContext context) => switch (this) {
+    ProfilePeriod.fiveDays => context.l10n.periodFiveDays,
     ProfilePeriod.week => context.l10n.periodWeek,
     ProfilePeriod.month => context.l10n.periodMonth,
-    ProfilePeriod.total => context.l10n.periodTotal,
   };
 }
