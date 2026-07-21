@@ -53,7 +53,7 @@ class ConfigPage extends StatelessWidget {
                         ? Icons.dark_mode_rounded
                         : Icons.light_mode_rounded,
                     title: context.l10n.darkModeLabel,
-                    subtitle: controller.darkModeSubtitle,
+                    subtitle: context.l10n.darkModeDisabledSubtitle,
                     value: controller.isDarkMode.value,
                     onChanged: controller.onToggleDarkMode,
                     tint: context.colorTokens.primary,
@@ -68,7 +68,7 @@ class ConfigPage extends StatelessWidget {
                   SettingsTile.toggle(
                     icon: Icons.notifications_active_rounded,
                     title: context.l10n.timerNotificationsTitle,
-                    subtitle: controller.notificationsSubtitle,
+                    subtitle: context.l10n.notificationsEnabledSubtitle,
                     value: controller.notificationsEnabled.value,
                     onChanged: controller.onToggleNotifications,
                     tint: context.colorTokens.info,
