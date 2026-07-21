@@ -35,14 +35,6 @@ class ConfigController extends GetxController {
     return value.isEmpty ? "@${Get.context!.l10n.nicknameFallback}" : "@$value";
   }
 
-  String get darkModeSubtitle => isDarkMode.value
-      ? Get.context!.l10n.darkModeEnabledSubtitle
-      : Get.context!.l10n.darkModeDisabledSubtitle;
-
-  String get notificationsSubtitle => notificationsEnabled.value
-      ? Get.context!.l10n.notificationsEnabledSubtitle
-      : Get.context!.l10n.notificationsDisabledSubtitle;
-
   Future<void> onToggleDarkMode(bool value) async {
     await _appController.setDarkMode(value);
   }
