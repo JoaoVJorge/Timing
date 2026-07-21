@@ -85,6 +85,7 @@ class CategoryController extends GetxController {
     if (index != -1) {
       subjects[index] = subjects[index].copyWith(notes: updatedNotes);
     }
+    await loadSubjects();
   }
 
   Future<void> onDeleteSubject(SubjectEntity subject) async {

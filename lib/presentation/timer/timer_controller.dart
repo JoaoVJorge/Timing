@@ -29,7 +29,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final TimerNotificationService timerNotificationService;
   final TimerLiveActivityService timerLiveActivityService;
 
-  final SubjectEntity subject;
+  SubjectEntity subject;
 
   final RxInt sessionSeconds = 0.obs;
   final RxInt breakCountdownSeconds = focusIntervalSeconds.obs;
@@ -166,6 +166,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     restCountdownSeconds.value = restIntervalSeconds;
     breakCountdownSeconds.value = focusIntervalSeconds;
     _updateNotification();
+  }
+
+  void updateSubjectNotes(String notes) {
+    subject = subject.copyWith(notes: notes);
   }
 
   void finishSession() {
