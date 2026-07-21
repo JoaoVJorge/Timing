@@ -53,9 +53,7 @@ class _SummaryTile extends StatelessWidget {
           height: 30,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: context.colorTokens.primary.withValues(
-              alpha: context.isDarkMode ? 0.16 : 0.12,
-            ),
+            color: context.colorTokens.primaryVeryLight,
           ),
           child: Icon(icon, size: 17, color: context.colorTokens.primary),
         ),

@@ -9,7 +9,7 @@ class SubjectColors {
     Color(0xFFFF8A50),
     Color(0xFF8325FF),
     Color(0xFF2E6ADE),
-    Color(0xFF22C55E),
+    Color(0xFF02B142),
     Color(0xFFE0507A),
     Color(0xFF1FA2A6),
   ];
@@ -17,7 +17,7 @@ class SubjectColors {
   static const List<Color> _themeMatches = [
     Color(0xFF2E6ADE), // Azul
     Color(0xFF8325FF), // Roxo
-    Color(0xFF22C55E), // Verde
+    Color(0xFF02B142), // Verde
     Color(0xFFE0507A), // Rosa
     Color(0xFF1FA2A6), // Ciano
     Color(0xFFFFC107), // Amarelo

@@ -31,9 +31,7 @@ class LanguagePickerDialog extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: context.colorTokens.primaryVeryLight,
-              border: Border.all(
-                color: context.colorTokens.primary.withValues(alpha: 0.14),
-              ),
+              border: Border.all(color: context.colorTokens.primaryVeryLight),
             ),
             child: Icon(
               Icons.language_rounded,
@@ -102,7 +100,7 @@ class _LanguageOption extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSelected
-              ? context.colorTokens.primary.withValues(alpha: 0.55)
+              ? context.colorTokens.primary
               : context.colorTokens.borderUnfocused.withValues(alpha: 0.65),
           width: isSelected ? 1.5 : 1,
         ),

@@ -11,7 +11,7 @@ extension AppColorTokensX on BuildContext {
   Color get creationPageBackground {
     if (isDarkMode) return colorTokens.scaffold;
 
-    return Color.lerp(colorTokens.primaryVeryLight, colorTokens.white, 0.74) ??
+    return Color.lerp(colorTokens.primaryVeryLight, colorTokens.white, 0.96) ??
         colorTokens.scaffold;
   }
 

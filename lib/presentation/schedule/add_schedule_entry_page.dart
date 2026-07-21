@@ -479,7 +479,7 @@ class _PreviewFrame extends StatelessWidget {
       color: context.colorTokens.scaffold.withValues(alpha: 0.48),
       borderRadius: BorderRadius.circular(18),
       border: Border.all(
-        color: context.colorTokens.primary.withValues(alpha: 0.28),
+        color: context.colorTokens.primaryVeryLight,
         width: 1.4,
       ),
     ),
@@ -500,7 +500,7 @@ class _SubmitButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white,
+        color: context.colorTokens.white,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

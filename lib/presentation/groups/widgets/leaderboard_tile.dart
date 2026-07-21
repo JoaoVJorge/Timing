@@ -32,7 +32,7 @@ class LeaderboardTile extends StatelessWidget {
 
     return Container(
       color: isCurrentUser
-          ? context.colorTokens.primaryVeryLight.withValues(alpha: 0.45)
+          ? context.colorTokens.primaryVeryLight
           : context.colorTokens.transparent,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(

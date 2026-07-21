@@ -132,7 +132,7 @@ class _ScheduleAddButton extends StatelessWidget {
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      height: 58,
+      height: 52,
       decoration: BoxDecoration(
         gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(999),
@@ -143,7 +143,7 @@ class _ScheduleAddButton extends StatelessWidget {
           AppIcon(
             "plus",
             color: context.colorTokens.primaryForeground,
-            size: 24,
+            size: 20,
           ),
           const Gap(12),
           Flexible(
