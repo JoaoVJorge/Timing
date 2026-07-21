@@ -133,6 +133,14 @@
   "notesLabel": "Notas",
   "notesHint": "Escribe tus notas aquí...",
   "saveNotesButton": "Guardar",
+  "addNotesPageTooltip": "Añadir página",
+  "notesPageCounter": "Página {currentPage} de {pageCount}",
+  "@notesPageCounter": {
+    "placeholders": {
+      "currentPage": {"type": "int"},
+      "pageCount": {"type": "int"}
+    }
+  },
 
   "durationProgress": "{duration} de {goalDuration}",
 
@@ -216,8 +224,9 @@
   "profileAchievementStudyStarted": "Estudios iniciados",
   "profileAchievementReadingStarted": "Lectura iniciada",
   "profileAchievementLocked": "Bloqueado",
-  "periodWeek": "Semana",
-  "periodMonth": "Mes",
+  "periodFiveDays": "5 días",
+  "periodWeek": "1 semana",
+  "periodMonth": "1 mes",
   "periodTotal": "Total",
 
   "profileAgendaTitle": "Agenda de hoy",

@@ -425,6 +425,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveNotesButton => 'Salvar';
 
   @override
+  String get addNotesPageTooltip => 'Adicionar página';
+
+  @override
+  String notesPageCounter(int currentPage, int pageCount) {
+    return 'Página $currentPage de $pageCount';
+  }
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration de $goalDuration';
   }
@@ -681,10 +689,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileAchievementLocked => 'Bloqueada';
 
   @override
-  String get periodWeek => 'Semana';
+  String get periodFiveDays => '5 dias';
 
   @override
-  String get periodMonth => 'Mês';
+  String get periodWeek => '1 semana';
+
+  @override
+  String get periodMonth => '1 mês';
 
   @override
   String get periodTotal => 'Total';

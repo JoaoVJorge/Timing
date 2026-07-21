@@ -826,6 +826,18 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get saveNotesButton;
 
+  /// No description provided for @addNotesPageTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add page'**
+  String get addNotesPageTooltip;
+
+  /// No description provided for @notesPageCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {currentPage} of {pageCount}'**
+  String notesPageCounter(int currentPage, int pageCount);
+
   /// No description provided for @durationProgress.
   ///
   /// In en, this message translates to:
@@ -1276,16 +1288,22 @@ abstract class AppLocalizations {
   /// **'Locked'**
   String get profileAchievementLocked;
 
+  /// No description provided for @periodFiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'5 days'**
+  String get periodFiveDays;
+
   /// No description provided for @periodWeek.
   ///
   /// In en, this message translates to:
-  /// **'Week'**
+  /// **'1 week'**
   String get periodWeek;
 
   /// No description provided for @periodMonth.
   ///
   /// In en, this message translates to:
-  /// **'Month'**
+  /// **'1 month'**
   String get periodMonth;
 
   /// No description provided for @periodTotal.

@@ -9,12 +9,14 @@ class AppTopBar extends StatelessWidget {
     required this.title,
     this.showBackButton = false,
     this.onBack,
+    this.trailing,
     super.key,
   });
 
   final String title;
   final bool showBackButton;
   final VoidCallback? onBack;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class AppTopBar extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (trailing != null) ...[const Gap(8), trailing!],
       ],
     );
   }

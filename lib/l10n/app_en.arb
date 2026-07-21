@@ -205,6 +205,14 @@
   "notesLabel": "Notes",
   "notesHint": "Write your notes here...",
   "saveNotesButton": "Save",
+  "addNotesPageTooltip": "Add page",
+  "notesPageCounter": "Page {currentPage} of {pageCount}",
+  "@notesPageCounter": {
+    "placeholders": {
+      "currentPage": {"type": "int"},
+      "pageCount": {"type": "int"}
+    }
+  },
 
   "durationProgress": "{duration} of {goalDuration}",
   "@durationProgress": {
@@ -324,8 +332,9 @@
   "profileAchievementStudyStarted": "Study started",
   "profileAchievementReadingStarted": "Reading started",
   "profileAchievementLocked": "Locked",
-  "periodWeek": "Week",
-  "periodMonth": "Month",
+  "periodFiveDays": "5 days",
+  "periodWeek": "1 week",
+  "periodMonth": "1 month",
   "periodTotal": "Total",
 
   "profileAgendaTitle": "Today's schedule",
