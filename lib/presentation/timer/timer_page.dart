@@ -59,15 +59,19 @@ class TimerPage extends StatelessWidget {
             }
             controller.togglePause();
           },
-          onTrailingTap: () {
+          onTrailingTap: () async {
             if (state == TimerVisualState.resting) {
               controller.skipRest();
               return;
             }
-            appNavigator.toNamed(
+            final dynamic result = await appNavigator.toNamed(
               AppRoutes.notes,
               arguments: controller.subject,
             );
+            final String? updatedNotes = result as String?;
+            if (updatedNotes != null) {
+              controller.updateSubjectNotes(updatedNotes);
+            }
           },
         ),
       );

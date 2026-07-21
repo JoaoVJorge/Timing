@@ -30,30 +30,43 @@ class AppNavigator {
     Object? arguments,
     int? id,
     bool preventDuplicates = true,
-  }) => Get.toNamed<T>(
-    page,
-    arguments: arguments,
-    id: id,
-    preventDuplicates: preventDuplicates,
-  );
+  }) {
+    final Future<dynamic>? result = Get.toNamed<dynamic>(
+      page,
+      arguments: arguments,
+      id: id,
+      preventDuplicates: preventDuplicates,
+    );
+    return result?.then((value) => value as T?);
+  }
 
   Future<T?>? offNamed<T>(
     String page, {
     Object? arguments,
     int? id,
     bool preventDuplicates = true,
-  }) => Get.offNamed<T>(
-    page,
-    arguments: arguments,
-    id: id,
-    preventDuplicates: preventDuplicates,
-  );
+  }) {
+    final Future<dynamic>? result = Get.offNamed<dynamic>(
+      page,
+      arguments: arguments,
+      id: id,
+      preventDuplicates: preventDuplicates,
+    );
+    return result?.then((value) => value as T?);
+  }
 
   Future<T?>? offAllNamed<T>(
     String newRouteName, {
     Object? arguments,
     int? id,
-  }) => Get.offAllNamed<T>(newRouteName, arguments: arguments, id: id);
+  }) {
+    final Future<dynamic>? result = Get.offAllNamed<dynamic>(
+      newRouteName,
+      arguments: arguments,
+      id: id,
+    );
+    return result?.then((value) => value as T?);
+  }
 
   Future<T?> dialog<T>({
     required Widget child,
