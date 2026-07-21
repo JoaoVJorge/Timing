@@ -1,5 +1,7 @@
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
+import "package:help_out/presentation/achievements/achievements_bindings.dart";
+import "package:help_out/presentation/achievements/achievements_page.dart";
 import "package:help_out/presentation/category/category_bindings.dart";
 import "package:help_out/presentation/category/category_page.dart";
 import "package:help_out/presentation/config/config_bindings.dart";
@@ -65,6 +67,7 @@ class AppRoutes {
   static const String schedule = "/schedule";
   static const String addScheduleEntry = "/addScheduleEntry";
   static const String notes = "/notes";
+  static const String achievements = "/achievements";
 
   static final List<GetPage<dynamic>> getPages = [
     GetPage(
@@ -211,6 +214,14 @@ class AppRoutes {
       name: notes,
       page: () => const NotesPage(),
       binding: NotesBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: achievements,
+      page: () => const AchievementsPage(),
+      binding: AchievementsBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

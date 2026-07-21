@@ -6,17 +6,20 @@ import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
+import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 
-enum ProfilePeriod { week, month, total }
+enum ProfilePeriod { fiveDays, week, month }
 
 class ProfileController extends GetxController {
   ProfileController({
     required this._getProfileStatsUseCase,
+    required this._dailyProgressService,
     required this._appController,
     required this._appNavigator,
   });
 
   final GetProfileStatsUseCase _getProfileStatsUseCase;
+  final DailyProgressService _dailyProgressService;
   final AppController _appController;
   final AppNavigator _appNavigator;
 
@@ -36,7 +39,15 @@ class ProfileController extends GetxController {
     topReadingSubjects: [],
   ).obs;
   final RxBool isLoading = true.obs;
-  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.week.obs;
+  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.fiveDays.obs;
+
+  List<int> get evolutionFocusSeconds {
+    _dailyProgressService.today.value;
+    return _dailyProgressService
+        .progressForLastDays(selectedPeriod.value.dayCount)
+        .map((progress) => progress.focusSeconds)
+        .toList();
+  }
 
   @override
   void onInit() {
@@ -54,6 +65,9 @@ class ProfileController extends GetxController {
 
   Future<void> onTapEditProfile() => _navigateAndRefresh(AppRoutes.editProfile);
 
+  Future<void> onTapAchievements() =>
+      _navigateAndRefresh(AppRoutes.achievements);
+
   void onSelectPeriod(ProfilePeriod period) => selectedPeriod.value = period;
 
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
@@ -61,4 +75,12 @@ class ProfileController extends GetxController {
         Future<void>.value());
     await loadStats();
   }
+}
+
+extension ProfilePeriodX on ProfilePeriod {
+  int get dayCount => switch (this) {
+    ProfilePeriod.fiveDays => 5,
+    ProfilePeriod.week => 7,
+    ProfilePeriod.month => 30,
+  };
 }

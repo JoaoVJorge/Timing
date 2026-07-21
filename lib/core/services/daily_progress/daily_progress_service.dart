@@ -17,6 +17,8 @@ class DailyProgressService {
 
   final Rx<DailyProgressEntity> today = const DailyProgressEntity().obs;
 
+  List<DailyProgressEntity> get allProgress => _byDate.values.toList();
+
   static String dateKey(DateTime date) =>
       "${date.year.toString().padLeft(4, "0")}-"
       "${date.month.toString().padLeft(2, "0")}-"
@@ -68,6 +70,16 @@ class DailyProgressService {
     }
     final DailyProgressEntity current = _current();
     await _update(current.copyWith(pages: current.pages + pages));
+  }
+
+  List<DailyProgressEntity> progressForLastDays(int days) {
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+
+    return List.generate(days, (index) {
+      final DateTime date = today.subtract(Duration(days: days - index - 1));
+      return _byDate[dateKey(date)] ?? const DailyProgressEntity();
+    });
   }
 
   DailyProgressEntity _current() =>
