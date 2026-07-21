@@ -86,7 +86,7 @@ class _WeekdayChip extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected
-                    ? context.colorTokens.primary.withValues(alpha: 0.36)
+                    ? context.colorTokens.primary
                     : context.colorTokens.borderUnfocused.withValues(
                         alpha: 0.45,
                       ),

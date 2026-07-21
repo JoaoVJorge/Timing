@@ -25,33 +25,33 @@ class CategoryCard extends StatelessWidget {
     pressedScale: 0.98,
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(15.4),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48.4,
+            height: 48.4,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.colorTokens.primaryVeryLight,
               shape: BoxShape.circle,
             ),
             child: SizedBox.square(
-              dimension: 22,
+              dimension: 24.2,
               child: ClipRect(
                 child: AppIcon(
                   iconName,
-                  size: 22,
+                  size: 24.2,
                   color: context.colorTokens.primary,
                 ),
               ),
             ),
           ),
-          const Gap(16),
+          const Gap(17.6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,10 +78,10 @@ class CategoryCard extends StatelessWidget {
               ],
             ),
           ),
-          const Gap(8),
+          const Gap(8.8),
           Icon(
             Icons.chevron_right_rounded,
-            size: 24,
+            size: 26.4,
             color: context.colorTokens.textHint,
           ),
         ],

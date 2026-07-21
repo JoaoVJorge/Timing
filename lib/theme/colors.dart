@@ -40,7 +40,9 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       primaryPastel: seedHsl
           .withLightness(_clamp(seedHsl.lightness + (isDark ? 0.12 : 0.24)))
           .toColor(),
-      primaryVeryLight: seedHsl.withLightness(isDark ? 0.24 : 0.92).toColor(),
+      primaryVeryLight: seedHsl.toColor().withValues(
+        alpha: isDark ? 0.16 : 0.12,
+      ),
       linkColor: const Color(0xFF2E6ADE),
       primaryForeground: const Color(0xFFFFFFFF),
       scaffold: isDark ? const Color(0xFF121212) : const Color(0xFFF4F4F4),
@@ -109,7 +111,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
   final Color divider;
 
   LinearGradient get primaryGradient => LinearGradient(
-    colors: [primary, Color.lerp(primary, primaryPastel, 0.28) ?? primary],
+    colors: [primary, Color.lerp(primary, primaryPastel, 0.50) ?? primary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

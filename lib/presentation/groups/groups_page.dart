@@ -113,9 +113,7 @@ class GroupsPage extends StatelessWidget {
                       Icon(
                         Icons.info_outline_rounded,
                         size: 14,
-                        color: context.colorTokens.primary.withValues(
-                          alpha: 0.35,
-                        ),
+                        color: context.colorTokens.textHint,
                       ),
                       const Gap(6),
                       Expanded(
