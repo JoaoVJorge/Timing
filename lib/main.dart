@@ -14,17 +14,24 @@ Future<void> main() async {
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
-      _showUnhandledError(details.exception);
+      final Object exception = details.exception;
+      if (exception is AppError) {
+        _showError(exception);
+      }
     };
     await AppBindings().dependencies();
     runApp(const AppWidget());
-  }, (error, stack) => _showUnhandledError(error));
+  }, (error, stack) => _showError(error));
 }
 
-void _showUnhandledError(Object error) {
+void _showError(Object error) {
   if (!Get.isRegistered<AppNavigator>()) {
     return;
   }
-  final String message = error is AppError ? error.message : error.toString();
-  Get.find<AppNavigator>().showErrorSnackBar(message);
+  final AppNavigator navigator = Get.find<AppNavigator>();
+  if (error is AppError) {
+    navigator.showErrorSnackBar(error.message);
+    return;
+  }
+  navigator.showErrorSnackBar();
 }

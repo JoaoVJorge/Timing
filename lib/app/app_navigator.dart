@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import "package:get/get.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 
@@ -94,10 +95,14 @@ class AppNavigator {
     bool isAnError = false,
     Color? backgroundColor,
   }) {
-    final BuildContext context = Get.context!;
-    Get
-      ..closeCurrentSnackbar()
-      ..rawSnackbar(
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return;
+    }
+
+    void show() {
+      _closeCurrentSnackBar();
+      Get.rawSnackbar(
         messageText: Text(text, style: context.textStyles.textPrimaryButton),
         margin: const EdgeInsets.only(top: 12, right: 20, left: 20),
         padding: const EdgeInsets.all(16),
@@ -109,15 +114,43 @@ class AppNavigator {
                 ? context.colorTokens.error
                 : context.colorTokens.primary),
       );
+    }
+
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => show());
+      return;
+    }
+    show();
   }
 
-  void showErrorSnackBar([String? text]) => showSnackBar(
-    text: text ?? Get.context!.l10n.genericErrorMessage,
-    isAnError: true,
-  );
+  void _closeCurrentSnackBar() {
+    if (!Get.isSnackbarOpen) {
+      return;
+    }
+    try {
+      Get.closeCurrentSnackbar();
+    } on Object catch (_) {
+      return;
+    }
+  }
 
-  void showSuccessSnackBar(String text) => showSnackBar(
-    text: text,
-    backgroundColor: Get.context!.colorTokens.success,
-  );
+  void showErrorSnackBar([String? text]) {
+    final BuildContext? context = Get.context;
+    if (text == null && context == null) {
+      return;
+    }
+    showSnackBar(
+      text: text ?? context!.l10n.genericErrorMessage,
+      isAnError: true,
+    );
+  }
+
+  void showSuccessSnackBar(String text) {
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return;
+    }
+    showSnackBar(text: text, backgroundColor: context.colorTokens.success);
+  }
 }

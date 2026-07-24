@@ -21,3 +21,18 @@ class SerializationAppError extends AppError {
   SerializationAppError({required Object error, required StackTrace stackTrace})
     : super("Serialization error: $error \n StackTrace: $stackTrace");
 }
+
+class RouteArgumentError extends AppError {
+  RouteArgumentError({
+    required this.routeName,
+    required this.expected,
+    required this.actual,
+  }) : super(
+         "Route \"$routeName\" expected arguments of type $expected but "
+         "received ${actual == null ? "null" : actual.runtimeType}.",
+       );
+
+  final String routeName;
+  final Type expected;
+  final Object? actual;
+}

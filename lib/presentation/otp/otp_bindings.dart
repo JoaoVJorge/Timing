@@ -1,10 +1,12 @@
 import "package:get/get.dart";
+import "package:help_out/app/app_routes.dart";
+import "package:help_out/app/route_arguments.dart";
 import "package:help_out/presentation/otp/otp_controller.dart";
 
 class OtpBindings extends Bindings {
   @override
   void dependencies() {
-    final String phoneNumber = Get.arguments as String;
+    final String phoneNumber = RouteArguments.of<String>(AppRoutes.otp);
     Get.put<OtpController>(
       OtpController(
         verifyPhoneCodeUseCase: Get.find(),
