@@ -62,7 +62,7 @@ class GroupThemeTile extends StatelessWidget {
             theme.localizedLabel(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodyMedium.copyWith(
+            style: context.textStyles.bodyLarge.copyWith(
               color: isSelected
                   ? context.colorTokens.primary
                   : context.colorTokens.textBody,
