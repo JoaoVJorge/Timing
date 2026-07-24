@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_group/create_group_controller.dart";
 import "package:help_out/presentation/create_group/widgets/friend_tile.dart";
 import "package:help_out/presentation/create_group/widgets/group_theme_tile.dart";
@@ -36,7 +36,7 @@ class CreateGroupPage extends StatelessWidget {
                 color: context.colorTokens.textHint,
               ),
             ),
-            const Gap(20),
+            const Gap(16),
             Text(
               context.l10n.groupNameLabel,
               style: context.textStyles.bodyLarge,
@@ -55,7 +55,7 @@ class CreateGroupPage extends StatelessWidget {
                 ),
               ),
             ),
-            const Gap(24),
+            const Gap(20),
             Text(
               context.l10n.groupThemeLabel,
               overflow: TextOverflow.ellipsis,
@@ -104,38 +104,35 @@ class CreateGroupPage extends StatelessWidget {
               );
             }),
             const Gap(24),
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    context.l10n.inviteFriendsLabel,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodyLarge,
-                  ),
+                Text(
+                  context.l10n.inviteFriendsLabel,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyLarge,
                 ),
-                Flexible(
-                  child: Obx(
-                    () => Text(
-                      controller.selectedFriendIds.isEmpty
-                          ? context.l10n.selectAtLeastOneFriend
-                          : context.l10n.selectedFriendsCount(
-                              controller.selectedFriendIds.length,
-                            ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                      style: context.textStyles.bodySmall.copyWith(
-                        color: controller.selectedFriendIds.isEmpty
-                            ? context.colorTokens.textHint
-                            : context.colorTokens.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                const Gap(4),
+                Obx(
+                  () => Text(
+                    controller.selectedFriendIds.isEmpty
+                        ? context.l10n.selectAtLeastOneFriend
+                        : context.l10n.selectedFriendsCount(
+                            controller.selectedFriendIds.length,
+                          ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: controller.selectedFriendIds.isEmpty
+                          ? context.colorTokens.textHint
+                          : context.colorTokens.primary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ],
             ),
-            const Gap(12),
+            const Gap(8),
             TextField(
               controller: controller.friendSearchController,
               onChanged: controller.onFriendSearchChanged,

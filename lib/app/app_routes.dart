@@ -18,6 +18,7 @@ import "package:help_out/presentation/edit_profile/edit_profile_bindings.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_page.dart";
 import "package:help_out/presentation/faq/faq_bindings.dart";
 import "package:help_out/presentation/faq/faq_page.dart";
+import "package:help_out/presentation/friends/friends_page.dart";
 import "package:help_out/presentation/groups/groups_bindings.dart";
 import "package:help_out/presentation/groups/groups_page.dart";
 import "package:help_out/presentation/home/home_bindings.dart";
@@ -54,6 +55,7 @@ class AppRoutes {
   static const String mainNavigation = "/mainNavigation";
   static const String home = "/home";
   static const String profile = "/profile";
+  static const String friends = "/friends";
   static const String groups = "/groups";
   static const String config = "/config";
   static const String category = "/category";
@@ -120,6 +122,7 @@ class AppRoutes {
           page: () => const ProfilePage(),
           binding: ProfileBindings(),
         ),
+        GetPage(name: friends, page: () => const FriendsPage()),
         GetPage(
           name: groups,
           page: () => const GroupsPage(),
