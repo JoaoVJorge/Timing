@@ -228,7 +228,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get bookThemeLabel => 'Tema do livro';
 
   @override
-  String get estimatedHoursGoalHint => 'Meta estimada (horas)';
+  String get estimatedHoursGoalHint => 'Meta em minutos';
 
   @override
   String get goalPagesHint => 'Meta (páginas)';
@@ -311,14 +311,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ex.: Violão, Desenho, Programação';
 
   @override
-  String get createSubjectTimeGoalLabel => 'Meta de tempo';
+  String get createSubjectTimeGoalLabel => 'Meta de foco';
 
   @override
   String get createSubjectPagesGoalLabel => 'Meta de páginas';
 
   @override
-  String get createSubjectTimeGoalHelp =>
-      'Quantas horas você quer acumular no total?';
+  String get createSubjectTimeGoalHelp => 'Quantos minutos você quer focar?';
 
   @override
   String get createSubjectPagesGoalHelp =>
@@ -361,6 +360,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String createSubjectPagesValue(int value) {
+    return '$value páginas';
+  }
+
+  @override
   String createSubjectColorSemantic(int index) {
     return 'Cor $index';
   }
@@ -381,7 +385,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createSubjectMissingName => 'Digite o nome para continuar';
 
   @override
-  String get createSubjectMissingTimeGoal => 'Defina uma meta de tempo válida';
+  String get createSubjectMissingTimeGoal => 'Defina uma meta de foco válida';
 
   @override
   String get createSubjectMissingPagesGoal =>
@@ -553,7 +557,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timerExitDialogConfirm => 'Encerrar';
 
   @override
-  String get profileTitle => 'Perfil';
+  String get profileTitle => 'Jornada';
+
+  @override
+  String get profileSubtitle =>
+      'Acompanhe sua evolução e seus principais marcos';
 
   @override
   String get editButton => 'Editar';
@@ -675,6 +683,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileSeeAll => 'Ver todas';
+
+  @override
+  String get profileAchievementFirstUnlocked => '1ª conquista';
+
+  @override
+  String get profileAchievementGoalStarted => 'Meta iniciada';
+
+  @override
+  String get profileAchievementsStartHint => 'Comece para adquirir conquistas';
 
   @override
   String get profileAchievementFirstFocus => 'Primeiro foco';
@@ -884,6 +901,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appLanguageSubtitle => 'Idioma do app';
 
   @override
+  String get automaticLanguageLabel => 'Automático';
+
+  @override
   String get chooseLanguageTitle => 'Escolher idioma';
 
   @override
@@ -994,6 +1014,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileSavedMessage => 'Perfil salvo';
+
+  @override
+  String get profilePhotoSelectLabel => 'Adicionar foto';
+
+  @override
+  String get profilePhotoRemoveLabel => 'Remover foto';
 
   @override
   String get faqTitle => 'Perguntas frequentes';
@@ -1139,7 +1165,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navHome => 'Início';
 
   @override
-  String get navProfile => 'Perfil';
+  String get navProfile => 'Jornada';
 
   @override
   String get navGroups => 'Grupos';

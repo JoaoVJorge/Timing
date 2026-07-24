@@ -118,7 +118,7 @@
   },
   "colorLabel": "Color",
   "bookThemeLabel": "Book theme",
-  "estimatedHoursGoalHint": "Estimated hours (goal)",
+  "estimatedHoursGoalHint": "Goal in minutes",
   "goalPagesHint": "Goal (pages)",
   "cancelButton": "Cancel",
   "confirmButton": "Confirm",
@@ -144,9 +144,9 @@
   "createSubjectNameHintReading": "Ex.: History book, Dom Casmurro",
   "createSubjectNameHintExercises": "Ex.: Gym, Running, Stretching",
   "createSubjectNameHintHobbies": "Ex.: Guitar, Drawing, Programming",
-  "createSubjectTimeGoalLabel": "Time goal",
+  "createSubjectTimeGoalLabel": "Focus goal",
   "createSubjectPagesGoalLabel": "Page goal",
-  "createSubjectTimeGoalHelp": "How many hours do you want to accumulate in total?",
+  "createSubjectTimeGoalHelp": "How many minutes do you want to focus?",
   "createSubjectPagesGoalHelp": "How many pages do you want to log in total?",
   "createSubjectRestLabel": "Break after each focus",
   "createSubjectRestHelp": "The timer suggests a break after 25 min of focus.",
@@ -166,6 +166,10 @@
     "placeholders": { "hours": { "type": "int" } }
   },
   "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
+  "createSubjectPagesValue": "{value} pages",
+  "@createSubjectPagesValue": {
+    "placeholders": { "value": { "type": "int" } }
+  },
   "@createSubjectHoursMinutesValue": {
     "placeholders": {
       "hours": { "type": "int" },
@@ -181,7 +185,7 @@
   "createSubjectButtonExercises": "Create activity",
   "createSubjectButtonHobbies": "Create hobby",
   "createSubjectMissingName": "Enter a name to continue",
-  "createSubjectMissingTimeGoal": "Set a valid time goal",
+  "createSubjectMissingTimeGoal": "Set a valid focus goal",
   "createSubjectMissingPagesGoal": "Set a valid page goal",
   "createSubjectSuccessStudying": "Subject created successfully",
   "createSubjectSuccessReading": "Reading created successfully",
@@ -277,7 +281,8 @@
   "timerExitDialogContinueLater": "You can continue later.",
   "timerExitDialogConfirm": "End",
 
-  "profileTitle": "Profile",
+  "profileTitle": "Journey",
+  "profileSubtitle": "Track your progress and key milestones",
   "editButton": "Edit",
   "nicknameFallback": "user",
 
@@ -328,6 +333,9 @@
   "profileAchievementsTitle": "Achievements",
   "profileSeeHistory": "See history",
   "profileSeeAll": "See all",
+  "profileAchievementFirstUnlocked": "1st achievement",
+  "profileAchievementGoalStarted": "Goal started",
+  "profileAchievementsStartHint": "Start to earn achievements",
   "profileAchievementFirstFocus": "First focus",
   "profileAchievementStudyStarted": "Study started",
   "profileAchievementReadingStarted": "Reading started",
@@ -414,6 +422,7 @@
   "notificationsDisabledSubtitle": "Alerts are off on this device",
   "language": "Language",
   "appLanguageSubtitle": "App language",
+  "automaticLanguageLabel": "Automatic",
   "chooseLanguageTitle": "Choose language",
   "languageChangedMessage": "Language changed to {language}",
   "@languageChangedMessage": {
@@ -463,6 +472,8 @@
   "themeColorLabel": "Theme color",
   "saveChangesButton": "Save Changes",
   "profileSavedMessage": "Profile saved",
+  "profilePhotoSelectLabel": "Add photo",
+  "profilePhotoRemoveLabel": "Remove photo",
 
   "faqTitle": "FAQ",
   "faqQ1": "How does the study timer work?",
@@ -524,7 +535,7 @@
   },
 
   "navHome": "Home",
-  "navProfile": "Profile",
+  "navProfile": "Journey",
   "navGroups": "Groups",
   "navSettings": "Settings",
 

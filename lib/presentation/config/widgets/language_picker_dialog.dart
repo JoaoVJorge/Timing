@@ -7,7 +7,7 @@ import "package:help_out/theme/app_languages.dart";
 class LanguagePickerDialog extends StatelessWidget {
   const LanguagePickerDialog({required this.currentCode, super.key});
 
-  final String currentCode;
+  final String? currentCode;
 
   @override
   Widget build(BuildContext context) => Dialog(
@@ -54,7 +54,8 @@ class LanguagePickerDialog extends StatelessWidget {
           for (int index = 0; index < AppLanguages.values.length; index++) ...[
             if (index > 0) const Gap(10),
             _LanguageOption(
-              language: AppLanguages.values[index],
+              flag: AppLanguages.values[index].flag,
+              label: AppLanguages.values[index].label,
               isSelected: AppLanguages.values[index].code == currentCode,
               onTap: () => appNavigator.back<String>(
                 result: AppLanguages.values[index].code,
@@ -76,12 +77,14 @@ class LanguagePickerDialog extends StatelessWidget {
 
 class _LanguageOption extends StatelessWidget {
   const _LanguageOption({
-    required this.language,
+    required this.flag,
+    required this.label,
     required this.isSelected,
     required this.onTap,
   });
 
-  final AppLanguage language;
+  final String flag;
+  final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -107,11 +110,11 @@ class _LanguageOption extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(language.flag, style: const TextStyle(fontSize: 24)),
+          Text(flag, style: const TextStyle(fontSize: 24)),
           const Gap(12),
           Expanded(
             child: Text(
-              language.label,
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodyLarge.copyWith(

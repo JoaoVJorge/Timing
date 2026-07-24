@@ -40,6 +40,7 @@ class ConfigPage extends StatelessWidget {
                 name: controller.displayName,
                 nickname: controller.displayNickname,
                 avatarIconIndex: controller.avatarIconIndex.value,
+                profilePhotoBase64: controller.profilePhotoBase64.value,
                 onTap: controller.onTapMyProfile,
               ),
             ),

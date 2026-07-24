@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -28,24 +30,8 @@ class EditProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Obx(
-                () => Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    gradient: context.colorTokens.primaryGradient,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    AppAvatarPresets.byIndex(controller.avatarIconIndex.value),
-                    color: Colors.white,
-                    size: 44,
-                  ),
-                ),
-              ),
-            ),
-            const Gap(20),
+            Center(child: _ProfilePhotoPreview(controller: controller)),
+            const Gap(18),
             Text(context.l10n.avatarLabel, style: context.textStyles.bodyLarge),
             const Gap(12),
             Obx(
@@ -233,4 +219,73 @@ class EditProfilePage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ProfilePhotoPreview extends StatelessWidget {
+  const _ProfilePhotoPreview({required this.controller});
+
+  final EditProfileController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final String? photoBase64 = controller.profilePhotoBase64.value;
+
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: photoBase64 == null
+                    ? context.colorTokens.primaryGradient
+                    : null,
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: photoBase64 == null
+                  ? Icon(
+                      AppAvatarPresets.byIndex(
+                        controller.avatarIconIndex.value,
+                      ),
+                      color: Colors.white,
+                      size: 44,
+                    )
+                  : Image.memory(base64Decode(photoBase64), fit: BoxFit.cover),
+            ),
+          ),
+          Positioned(
+            right: 2,
+            bottom: 2,
+            child: BounceTap(
+              onTap: controller.onTapProfilePhoto,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: context.colorTokens.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.colorTokens.surfaceShadow,
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.photo_camera_rounded,
+                  color: Colors.white,
+                  size: 17,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  });
 }
