@@ -198,7 +198,7 @@ class CreationColorChoice extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? color.withValues(alpha: 0.2) : color,
+        color: isSelected ? color.withValues(alpha: 0.38) : color,
         border: Border.all(color: color, width: isSelected ? 2 : 0),
       ),
       child: isSelected
@@ -219,34 +219,52 @@ class CreationColorSection extends StatelessWidget {
     required this.accent,
     required this.label,
     required this.onSelect,
+    this.extraColors = const [],
     super.key,
   });
 
   final Color accent;
   final String label;
   final ValueChanged<Color> onSelect;
+  final List<Color> extraColors;
 
   @override
-  Widget build(BuildContext context) => CreationConfigCard(
-    accent: accent,
-    header: CreationSectionHeader(
-      icon: Icons.palette_outlined,
-      label: label,
+  Widget build(BuildContext context) {
+    final List<Color> colors = _dedupedColors([
+      ...extraColors,
+      ...SubjectColors.values,
+    ]);
+
+    return CreationConfigCard(
       accent: accent,
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: SubjectColors.values
-          .map(
-            (color) => CreationColorChoice(
-              color: color,
-              isSelected: color.toARGB32() == accent.toARGB32(),
-              onTap: () => onSelect(color),
-            ),
-          )
-          .toList(),
-    ),
-  );
+      header: CreationSectionHeader(
+        icon: Icons.palette_outlined,
+        label: label,
+        accent: accent,
+      ),
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: colors
+            .map(
+              (color) => CreationColorChoice(
+                color: color,
+                isSelected: color.toARGB32() == accent.toARGB32(),
+                onTap: () => onSelect(color),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  List<Color> _dedupedColors(List<Color> colors) {
+    final Set<int> seen = <int>{};
+    return [
+      for (final Color color in colors)
+        if (seen.add(color.toARGB32())) color,
+    ];
+  }
 }
 
 /// Gradient pill submit button pinned to the bottom of a creation form.

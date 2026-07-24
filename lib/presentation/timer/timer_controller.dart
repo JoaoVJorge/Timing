@@ -3,6 +3,8 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
@@ -14,6 +16,7 @@ import "package:help_out/presentation/timer/widgets/timer_exit_dialog.dart";
 class TimerController extends GetxController with WidgetsBindingObserver {
   TimerController({
     required this.updateSubjectTimeUseCase,
+    required this.updateSubjectPagesUseCase,
     required this.lastActivityService,
     required this.dailyProgressService,
     required this.timerNotificationService,
@@ -21,9 +24,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.subject,
   });
 
-  static const int focusIntervalSeconds = 25 * 60;
+  static const int defaultFocusIntervalSeconds = 25 * 60;
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
+  final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
   final LastActivityService lastActivityService;
   final DailyProgressService dailyProgressService;
   final TimerNotificationService timerNotificationService;
@@ -32,7 +36,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   SubjectEntity subject;
 
   final RxInt sessionSeconds = 0.obs;
-  final RxInt breakCountdownSeconds = focusIntervalSeconds.obs;
+  late final RxInt breakCountdownSeconds = focusIntervalSeconds.obs;
   late final RxInt restCountdownSeconds = restIntervalSeconds.obs;
   final RxBool isRunning = true.obs;
   final RxBool isResting = false.obs;
@@ -46,6 +50,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   late DateTime _lastTickAt;
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
+
+  bool get isReading => subject.category == TimeCategoryType.reading;
+
+  int get focusIntervalSeconds => subject.goalSeconds > 0
+      ? subject.goalSeconds
+      : defaultFocusIntervalSeconds;
 
   int get cycleElapsedSeconds =>
       focusIntervalSeconds - breakCountdownSeconds.value;
@@ -97,6 +107,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void _advanceBy(int seconds) {
     int remaining = seconds;
     while (remaining > 0 && isRunning.value) {
+      if (isReading) {
+        sessionSeconds.value += remaining;
+        remaining = 0;
+        continue;
+      }
+
       if (isResting.value) {
         if (restCountdownSeconds.value <= 0) {
           isResting.value = false;
@@ -150,7 +166,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void saveProgress() => _persistAccumulatedTime();
 
   void skipRest() {
-    if (!isResting.value) {
+    if (!isResting.value || isReading) {
       return;
     }
     isResting.value = false;
@@ -189,6 +205,23 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     final BuildContext context = Get.context!;
+    if (isReading) {
+      final int? pagesRead = await showReadingExitDialog(
+        context: context,
+        accentColor: Color(subject.colorValue),
+        title: context.l10n.timerExitDialogTitle,
+        content: _readingExitContent(context),
+        cancelLabel: context.l10n.timerExitDialogCancel,
+        confirmLabel: context.l10n.timerExitDialogConfirm,
+      );
+
+      if (pagesRead != null) {
+        finishReadingSession(pagesRead);
+        return true;
+      }
+      return false;
+    }
+
     final bool? shouldExit = await showTimerExitDialog(
       context: context,
       accentColor: Color(subject.colorValue),
@@ -207,6 +240,46 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     return shouldExit == true;
   }
 
+  Future<bool> confirmFinishSession() async {
+    if (!isReading) {
+      finishSession();
+      return true;
+    }
+
+    final BuildContext context = Get.context!;
+    final int? pagesRead = await showReadingExitDialog(
+      context: context,
+      accentColor: Color(subject.colorValue),
+      title: context.l10n.timerExitDialogTitle,
+      content: _readingExitContent(context),
+      cancelLabel: context.l10n.timerExitDialogCancel,
+      confirmLabel: context.l10n.timerExitDialogConfirm,
+    );
+
+    if (pagesRead == null) {
+      return false;
+    }
+    finishReadingSession(pagesRead);
+    return true;
+  }
+
+  void finishReadingSession(int pagesRead) {
+    final int sanitizedPages = pagesRead < 0 ? 0 : pagesRead;
+    _persistAccumulatedTime();
+    if (sanitizedPages > 0) {
+      final int nextPages = subject.currentPages + sanitizedPages;
+      subject = subject.copyWith(currentPages: nextPages);
+      updateSubjectPagesUseCase(subjectId: subject.id, currentPages: nextPages);
+      dailyProgressService.addPages(sanitizedPages);
+    }
+    _registerSessionIfNeeded();
+    isRunning.value = false;
+    isSessionFinished.value = true;
+    _ticker?.cancel();
+    timerNotificationService.cancel();
+    unawaited(timerLiveActivityService.end());
+  }
+
   void _persistAccumulatedTime() {
     final int elapsedSinceLastPersist =
         sessionSeconds.value - _persistedSessionSeconds;
@@ -219,7 +292,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
     _persistedSessionSeconds = sessionSeconds.value;
     updateSubjectTimeUseCase(subjectId: subject.id, totalSeconds: totalSeconds);
-    dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+    if (!isReading) {
+      dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+    }
   }
 
   void _registerSessionIfNeeded() {
@@ -234,6 +309,18 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   String _formatMinutesForDialog(int seconds) {
     final int minutes = (seconds / 60).ceil();
     return "$minutes min";
+  }
+
+  String _readingExitContent(BuildContext context) {
+    final String duration = _formatMinutesForDialog(sessionSeconds.value);
+    return switch (context.languageCode) {
+      "es" =>
+        "Leiste durante $duration. Informa cuantas paginas leiste en ${subject.name}.",
+      "pt" =>
+        "Voce leu por $duration. Informe quantas paginas foram lidas em ${subject.name}.",
+      _ =>
+        "You read for $duration. Enter how many pages you read in ${subject.name}.",
+    };
   }
 
   void _updateNotification() {
@@ -308,6 +395,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _applyLiveActivityState(TimerLiveActivityAction value) {
+    if (isReading) {
+      return;
+    }
     if (!value.isResting) {
       final int completedCycles = sessionSeconds.value - cycleElapsedSeconds;
       sessionSeconds.value =

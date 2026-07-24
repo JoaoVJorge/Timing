@@ -56,6 +56,7 @@ class CategoryController extends GetxController {
       );
       final SubjectEntity? updatedSubject = result as SubjectEntity?;
       if (updatedSubject == null) {
+        await loadSubjects();
         return;
       }
 
