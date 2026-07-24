@@ -59,7 +59,12 @@ class _UnlockedSummary extends StatelessWidget {
           ),
         ),
         TextSpan(
-          text: " /50 unlocked",
+          text: _localizedText(
+            context,
+            en: " /50 unlocked",
+            pt: " /50 desbloqueadas",
+            es: " /50 desbloqueados",
+          ),
           style: TextStyle(color: context.colorTokens.textHint),
         ),
       ],
@@ -103,7 +108,12 @@ class _LevelCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Current level",
+                      _localizedText(
+                        context,
+                        en: "Current level",
+                        pt: "Nivel atual",
+                        es: "Nivel actual",
+                      ),
                       style: context.textStyles.bodySmall.copyWith(
                         color: context.colorTokens.textHint,
                       ),
@@ -113,7 +123,12 @@ class _LevelCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            "Gold Learner",
+                            _localizedText(
+                              context,
+                              en: "Gold Learner",
+                              pt: "Aprendiz ouro",
+                              es: "Aprendiz oro",
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.textStyles.extraBold20.copyWith(
@@ -183,14 +198,32 @@ class _LevelCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      nextUnlock == null ? "All unlocked" : "Next unlock",
+                      nextUnlock == null
+                          ? _localizedText(
+                              context,
+                              en: "All unlocked",
+                              pt: "Tudo desbloqueado",
+                              es: "Todo desbloqueado",
+                            )
+                          : _localizedText(
+                              context,
+                              en: "Next unlock",
+                              pt: "Proxima conquista",
+                              es: "Proximo logro",
+                            ),
                       style: context.textStyles.bodyTiny.copyWith(
                         color: context.colorTokens.textHint,
                       ),
                     ),
                     const Gap(2),
                     Text(
-                      nextUnlock?.title ?? "Achievement Hunter",
+                      nextUnlock?.title ??
+                          _localizedText(
+                            context,
+                            en: "Achievement Hunter",
+                            pt: "Cacador de conquistas",
+                            es: "Cazador de logros",
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodyMedium.copyWith(
@@ -198,7 +231,13 @@ class _LevelCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      nextUnlock?.description ?? "You unlocked everything.",
+                      nextUnlock?.description ??
+                          _localizedText(
+                            context,
+                            en: "You unlocked everything.",
+                            pt: "Voce desbloqueou tudo.",
+                            es: "Desbloqueaste todo.",
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodyTiny.copyWith(
@@ -221,7 +260,12 @@ class _LevelCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  "${800 - controller.levelXp} XP to go",
+                  _localizedText(
+                    context,
+                    en: "${800 - controller.levelXp} XP to go",
+                    pt: "Faltam ${800 - controller.levelXp} XP",
+                    es: "Faltan ${800 - controller.levelXp} XP",
+                  ),
                   style: context.textStyles.bodyTiny.copyWith(
                     color: context.colorTokens.primary,
                     fontWeight: FontWeight.w900,
@@ -249,7 +293,12 @@ class _LevelPill extends StatelessWidget {
       borderRadius: BorderRadius.circular(999),
     ),
     child: Text(
-      "Level $level",
+      _localizedText(
+        context,
+        en: "Level $level",
+        pt: "Nivel $level",
+        es: "Nivel $level",
+      ),
       style: context.textStyles.bodyTiny.copyWith(
         color: context.colorTokens.primary,
         fontWeight: FontWeight.w900,
@@ -269,20 +318,30 @@ class _Filters extends StatelessWidget {
     child: Row(
       children: [
         _FilterChip(
-          label: "All",
+          label: _localizedText(context, en: "All", pt: "Todas", es: "Todos"),
           isSelected: controller.selectedFilter.value == AchievementFilter.all,
           onTap: () => controller.onSelectFilter(AchievementFilter.all),
         ),
         const Gap(8),
         _FilterChip(
-          label: "Unlocked",
+          label: _localizedText(
+            context,
+            en: "Unlocked",
+            pt: "Desbloqueadas",
+            es: "Desbloqueados",
+          ),
           isSelected:
               controller.selectedFilter.value == AchievementFilter.unlocked,
           onTap: () => controller.onSelectFilter(AchievementFilter.unlocked),
         ),
         const Gap(8),
         _FilterChip(
-          label: "Locked",
+          label: _localizedText(
+            context,
+            en: "Locked",
+            pt: "Bloqueadas",
+            es: "Bloqueados",
+          ),
           isSelected:
               controller.selectedFilter.value == AchievementFilter.locked,
           onTap: () => controller.onSelectFilter(AchievementFilter.locked),
@@ -304,7 +363,12 @@ class _CategoryMenu extends StatelessWidget {
     final AchievementCategory? selected = controller.selectedCategory.value;
 
     return PopupMenuButton<AchievementCategory?>(
-      tooltip: "Select category",
+      tooltip: _localizedText(
+        context,
+        en: "Select category",
+        pt: "Selecionar categoria",
+        es: "Seleccionar categoria",
+      ),
       initialValue: selected,
       onSelected: controller.onSelectCategory,
       color: context.colorTokens.surface,
@@ -315,7 +379,12 @@ class _CategoryMenu extends StatelessWidget {
         PopupMenuItem<AchievementCategory?>(
           value: null,
           child: _CategoryOption(
-            label: "All categories",
+            label: _localizedText(
+              context,
+              en: "All categories",
+              pt: "Todas as categorias",
+              es: "Todas las categorias",
+            ),
             color: context.colorTokens.primary,
             icon: Icons.apps_rounded,
             isSelected: selected == null,
@@ -334,7 +403,14 @@ class _CategoryMenu extends StatelessWidget {
         ),
       ],
       child: _FilterChip(
-        label: selected?.label(context) ?? "By category",
+        label:
+            selected?.label(context) ??
+            _localizedText(
+              context,
+              en: "By category",
+              pt: "Por categoria",
+              es: "Por categoria",
+            ),
         isSelected: selected != null,
         trailing: Icons.keyboard_arrow_down_rounded,
       ),
@@ -648,3 +724,14 @@ BoxDecoration _cardDecoration(BuildContext context, {required double radius}) =>
         ),
       ],
     );
+
+String _localizedText(
+  BuildContext context, {
+  required String en,
+  required String pt,
+  required String es,
+}) => switch (context.languageCode) {
+  "pt" => pt,
+  "es" => es,
+  _ => en,
+};
