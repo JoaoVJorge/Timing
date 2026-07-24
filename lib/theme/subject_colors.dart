@@ -5,51 +5,17 @@ class SubjectColors {
   const SubjectColors._();
 
   static const List<Color> values = [
-    Color(0xFFFFC107),
-    Color(0xFFFF8A50),
-    Color(0xFF8325FF),
-    Color(0xFF2E6ADE),
-    Color(0xFF02B142),
-    Color(0xFFE0507A),
-    Color(0xFF1FA2A6),
-  ];
-
-  static const List<Color> _themeMatches = [
-    Color(0xFF2E6ADE), // Azul
-    Color(0xFF8325FF), // Roxo
-    Color(0xFF02B142), // Verde
-    Color(0xFFE0507A), // Rosa
-    Color(0xFF1FA2A6), // Ciano
-    Color(0xFFFFC107), // Amarelo
-    Color(0xFFFF8A50), // Laranja
+    ...AppAccentPresets.values,
+    Color(0xFFCDE4F9),
+    Color(0xFFEADCF5),
+    Color(0xFFDEF0B4),
+    Color(0xFFF6D6E7),
+    Color(0xFFB9F0F5),
+    Color(0xFFFBEBAA),
+    Color(0xFFFFE2B3),
   ];
 
   static Color byIndex(int index) => values[index % values.length];
 
-  static Color fromThemeAccent(Color accent) {
-    final HSLColor source = HSLColor.fromColor(accent);
-    int bestIndex = 0;
-    double bestScore = double.infinity;
-
-    for (int index = 0; index < AppAccentPresets.values.length; index++) {
-      final HSLColor candidate = HSLColor.fromColor(
-        AppAccentPresets.values[index],
-      );
-      final double hueDifference = (source.hue - candidate.hue).abs();
-      final double hueDistance = hueDifference > 180
-          ? 360 - hueDifference
-          : hueDifference;
-      final double score =
-          hueDistance +
-          (source.saturation - candidate.saturation).abs() * 16 +
-          (source.lightness - candidate.lightness).abs() * 8;
-
-      if (score < bestScore) {
-        bestScore = score;
-        bestIndex = index;
-      }
-    }
-
-    return _themeMatches[bestIndex];
-  }
+  static Color fromThemeAccent(Color accent) => accent;
 }

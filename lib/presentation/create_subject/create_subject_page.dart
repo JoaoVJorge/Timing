@@ -36,8 +36,10 @@ class CreateSubjectPage extends StatelessWidget {
         _NameField(controller: controller),
         const Gap(12),
         _GoalSection(controller: controller),
-        const Gap(12),
-        _RestSection(controller: controller),
+        if (!controller.isPageBased) ...[
+          const Gap(12),
+          _RestSection(controller: controller),
+        ],
         const Gap(12),
         _ColorSection(controller: controller),
         const Gap(12),
@@ -126,10 +128,8 @@ class _GoalSection extends StatelessWidget {
                     .map(
                       (value) => CreationSelectableChip(
                         label: controller.isPageBased
-                            ? context.l10n.metricPagesValue(value.toInt())
-                            : context.l10n.createSubjectHoursValue(
-                                value.toInt(),
-                              ),
+                            ? value.toString()
+                            : context.l10n.restMinutesChip(value),
                         isSelected:
                             controller.goal.value.trim() == value.toString(),
                         accent: accent,
@@ -168,9 +168,8 @@ class _GoalInput extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: controller.goalController,
-            keyboardType: controller.isPageBased
-                ? TextInputType.number
-                : const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             style: TextStyle(
               color: context.colorTokens.textBody,
               fontSize: 16,
@@ -182,7 +181,7 @@ class _GoalInput extends StatelessWidget {
                   : context.l10n.estimatedHoursGoalHint,
               suffixText: controller.isPageBased
                   ? null
-                  : context.l10n.timeUnitHoursSuffix,
+                  : context.l10n.timeUnitMinutesSuffix,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
@@ -300,6 +299,7 @@ class _ColorSection extends StatelessWidget {
     () => CreationColorSection(
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
+      extraColors: [context.colorTokens.primary],
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );

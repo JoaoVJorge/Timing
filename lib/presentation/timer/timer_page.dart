@@ -37,24 +37,24 @@ class TimerPage extends StatelessWidget {
             return;
           }
           if (await controller.confirmExitIfNeeded()) {
-            appNavigator.back();
+            appNavigator.back(result: controller.subject);
           }
         },
         child: _TimerScaffold(
           data: data,
           onBackTap: () async {
             if (await controller.confirmExitIfNeeded()) {
-              appNavigator.back();
+              appNavigator.back(result: controller.subject);
             }
           },
-          onEndTap: controller.finishSession,
+          onEndTap: controller.confirmFinishSession,
           onMainTap: () {
             if (state == TimerVisualState.resting) {
               controller.continueFocus();
               return;
             }
             if (state == TimerVisualState.finished) {
-              appNavigator.back();
+              appNavigator.back(result: controller.subject);
               return;
             }
             controller.togglePause();
@@ -630,11 +630,15 @@ class _TimerViewData {
         : Color(controller.subject.colorValue);
     final int totalIntervalSeconds = isResting
         ? controller.restIntervalSeconds
-        : TimerController.focusIntervalSeconds;
-    final int currentSeconds = isResting
+        : controller.focusIntervalSeconds;
+    final int currentSeconds = isReading
+        ? controller.sessionSeconds.value
+        : isResting
         ? controller.restCountdownSeconds.value
         : controller.breakCountdownSeconds.value;
     final double progress = state == TimerVisualState.finished
+        ? 1
+        : isReading
         ? 1
         : isResting
         ? 1 -
@@ -663,12 +667,15 @@ class _TimerViewData {
           ? "Leitura"
           : "Foco",
       currentTime: formatDurationClock(Duration(seconds: currentSeconds)),
-      totalTimeLabel:
-          "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
-      nextBreakLabel: "Próxima pausa em",
-      nextBreak: formatDurationClock(
-        Duration(seconds: controller.breakCountdownSeconds.value),
-      ),
+      totalTimeLabel: isReading
+          ? "tempo de leitura"
+          : "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
+      nextBreakLabel: isReading ? "Paginas atuais" : "Proxima pausa em",
+      nextBreak: isReading
+          ? "${controller.subject.currentPages}"
+          : formatDurationClock(
+              Duration(seconds: controller.breakCountdownSeconds.value),
+            ),
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.totalSeconds),
       ),

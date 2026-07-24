@@ -13,6 +13,7 @@ class CreateTaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CreateTaskController controller = Get.find();
+    controller.initializeThemeColor(context.colorTokens.primary);
 
     return CreationPageScaffold(
       submitButton: Obx(
@@ -171,6 +172,7 @@ class _ColorSection extends StatelessWidget {
     () => CreationColorSection(
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
+      extraColors: [context.colorTokens.primary],
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );

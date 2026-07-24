@@ -42,8 +42,8 @@ class CreateSubjectController extends GetxController {
   final RxString goal = "".obs;
 
   final List<int> restMinutesOptions = [5, 10, 15, 20];
-  final List<num> timeGoalPresets = [1, 3, 5, 10];
-  final List<num> pageGoalPresets = [5, 10, 25, 50];
+  final List<int> timeGoalPresets = [15, 25, 30, 45];
+  final List<int> pageGoalPresets = [5, 10, 25, 50];
 
   bool get isPageBased => category == TimeCategoryType.reading;
 
@@ -140,21 +140,27 @@ class CreateSubjectController extends GetxController {
     }
 
     if (isPageBased) {
-      return context.l10n.metricPagesValue(int.parse(goal.value.trim()));
+      return context.l10n.createSubjectPagesValue(int.parse(goal.value.trim()));
     }
 
-    final double hours = double.parse(goal.value.trim().replaceAll(",", "."));
-    final int seconds = (hours * 3600).round();
+    final int minutes = int.parse(goal.value.trim());
+    final int seconds = minutes * 60;
     final int wholeHours = seconds ~/ 3600;
-    final int minutes = (seconds % 3600) ~/ 60;
-    if (minutes == 0) {
+    final int remainingMinutes = (seconds % 3600) ~/ 60;
+    if (remainingMinutes == 0 && wholeHours > 0) {
       return context.l10n.createSubjectHoursValue(wholeHours);
     }
-    return context.l10n.createSubjectHoursMinutesValue(wholeHours, minutes);
+    if (wholeHours == 0) {
+      return context.l10n.restMinutesChip(minutes);
+    }
+    return context.l10n.createSubjectHoursMinutesValue(
+      wholeHours,
+      remainingMinutes,
+    );
   }
 
-  void setGoalPreset(num value) {
-    goalController.text = isPageBased ? value.toInt().toString() : "$value";
+  void setGoalPreset(int value) {
+    goalController.text = value.toString();
     goal.value = goalController.text;
   }
 
@@ -167,7 +173,7 @@ class CreateSubjectController extends GetxController {
   void onInit() {
     super.onInit();
     if (!isPageBased && goalController.text.trim().isEmpty) {
-      goalController.text = "1";
+      goalController.text = "25";
       goal.value = goalController.text;
     }
     nameController.addListener(() => name.value = nameController.text);
@@ -202,9 +208,8 @@ class CreateSubjectController extends GetxController {
     if (isPageBased) {
       goalPages = int.tryParse(goalController.text.trim()) ?? 0;
     } else {
-      final double goalHours =
-          double.tryParse(goalController.text.trim().replaceAll(",", ".")) ?? 0;
-      goalSeconds = (goalHours * 3600).round();
+      final int goalMinutes = int.tryParse(goalController.text.trim()) ?? 0;
+      goalSeconds = goalMinutes * 60;
     }
 
     final Either<AppError, SubjectEntity> result = await _addSubjectUseCase(

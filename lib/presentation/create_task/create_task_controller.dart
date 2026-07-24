@@ -25,6 +25,15 @@ class CreateTaskController extends GetxController {
   final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   final RxInt targetDays = targetDaysOptions.first.obs;
   final RxBool isSaving = false.obs;
+  bool _hasInitializedThemeColor = false;
+
+  void initializeThemeColor(Color color) {
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    selectedColor.value = SubjectColors.fromThemeAccent(color);
+    _hasInitializedThemeColor = true;
+  }
 
   void onSelectTargetDays(int days) {
     targetDays.value = days;
