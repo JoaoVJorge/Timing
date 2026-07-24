@@ -57,7 +57,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
-            const Gap(20),
+            const Gap(12),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 16),

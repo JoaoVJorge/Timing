@@ -17,6 +17,7 @@ class AuthOnboardingScaffold extends StatelessWidget {
     this.showBackButton = false,
     this.topVisual,
     this.bottom,
+    this.brandGradient = AuthOnboardingColors.yellowGradient,
     super.key,
   });
 
@@ -26,6 +27,7 @@ class AuthOnboardingScaffold extends StatelessWidget {
   final Widget? topVisual;
   final List<Widget> children;
   final Widget? bottom;
+  final Gradient brandGradient;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,7 @@ class AuthOnboardingScaffold extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      const AuthBrand(),
+                      AuthBrand(gradient: brandGradient),
                       if (showBackButton)
                         Align(
                           alignment: Alignment.centerLeft,
@@ -111,7 +113,12 @@ class AuthOnboardingScaffold extends StatelessWidget {
 }
 
 class AuthBrand extends StatelessWidget {
-  const AuthBrand({super.key});
+  const AuthBrand({
+    this.gradient = AuthOnboardingColors.yellowGradient,
+    super.key,
+  });
+
+  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -122,7 +129,7 @@ class AuthBrand extends StatelessWidget {
         height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          gradient: AuthOnboardingColors.yellowGradient,
+          gradient: gradient,
           borderRadius: BorderRadius.circular(9),
         ),
         child: const AppIcon("open_book", size: 20, color: Colors.white),
@@ -233,11 +240,17 @@ class AuthHeroPlaceholder extends StatelessWidget {
   const AuthHeroPlaceholder({
     required this.icon,
     this.large = false,
+    this.accent = AuthOnboardingColors.yellow,
+    this.accentDark = AuthOnboardingColors.yellowDark,
+    this.accentLight = AuthOnboardingColors.yellowLight,
     super.key,
   });
 
   final IconData icon;
   final bool large;
+  final Color accent;
+  final Color accentDark;
+  final Color accentLight;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -253,7 +266,7 @@ class AuthHeroPlaceholder extends StatelessWidget {
           child: Container(
             height: large ? 72 : 62,
             decoration: BoxDecoration(
-              color: AuthOnboardingColors.yellowLight.withValues(alpha: 0.54),
+              color: accentLight.withValues(alpha: 0.54),
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -264,6 +277,7 @@ class AuthHeroPlaceholder extends StatelessWidget {
           child: _FloatingIcon(
             icon: Icons.edit_note_rounded,
             size: large ? 52 : 46,
+            color: accentDark,
           ),
         ),
         Positioned(
@@ -272,12 +286,13 @@ class AuthHeroPlaceholder extends StatelessWidget {
           child: _FloatingIcon(
             icon: Icons.calendar_month_rounded,
             size: large ? 50 : 44,
+            color: accentDark,
           ),
         ),
         Positioned(
           top: 12,
           left: 46,
-          child: _DecorativeDot(size: 12, color: AuthOnboardingColors.yellow),
+          child: _DecorativeDot(size: 12, color: accent),
         ),
         Positioned(
           top: 24,
@@ -287,12 +302,18 @@ class AuthHeroPlaceholder extends StatelessWidget {
         Positioned(
           top: 34,
           left: 104,
-          child: Text("+", style: AuthOnboardingTextStyles.sparkle),
+          child: Text(
+            "+",
+            style: AuthOnboardingTextStyles.sparkle.copyWith(color: accentDark),
+          ),
         ),
         Positioned(
           top: 36,
           right: 38,
-          child: Text("+", style: AuthOnboardingTextStyles.sparkle),
+          child: Text(
+            "+",
+            style: AuthOnboardingTextStyles.sparkle.copyWith(color: accentDark),
+          ),
         ),
         Container(
           width: large ? 96 : 86,
@@ -302,11 +323,7 @@ class AuthHeroPlaceholder extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.white.withValues(alpha: 0.86),
           ),
-          child: Icon(
-            icon,
-            size: large ? 50 : 44,
-            color: AuthOnboardingColors.yellow,
-          ),
+          child: Icon(icon, size: large ? 50 : 44, color: accent),
         ),
       ],
     ),
@@ -411,10 +428,15 @@ class AuthFieldCard extends StatelessWidget {
 }
 
 class _FloatingIcon extends StatelessWidget {
-  const _FloatingIcon({required this.icon, required this.size});
+  const _FloatingIcon({
+    required this.icon,
+    required this.size,
+    required this.color,
+  });
 
   final IconData icon;
   final double size;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -425,11 +447,7 @@ class _FloatingIcon extends StatelessWidget {
       color: Colors.white.withValues(alpha: 0.82),
       borderRadius: BorderRadius.circular(15),
     ),
-    child: Icon(
-      icon,
-      color: AuthOnboardingColors.yellowDark,
-      size: size * 0.48,
-    ),
+    child: Icon(icon, color: color, size: size * 0.48),
   );
 }
 

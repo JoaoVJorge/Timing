@@ -41,7 +41,7 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
           .withLightness(_clamp(seedHsl.lightness + (isDark ? 0.12 : 0.24)))
           .toColor(),
       primaryVeryLight: seedHsl.toColor().withValues(
-        alpha: isDark ? 0.16 : 0.12,
+        alpha: isDark ? 0.18 : 0.12,
       ),
       linkColor: const Color(0xFF2E6ADE),
       primaryForeground: const Color(0xFFFFFFFF),

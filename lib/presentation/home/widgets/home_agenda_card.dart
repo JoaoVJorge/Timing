@@ -216,7 +216,7 @@ class _AgendaEntryTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: context.colorTokens.surfaceInnerLayer.withValues(
-          alpha: context.isDarkMode ? 0.55 : 0.42,
+          alpha: context.isDarkMode ? 0.55 : 0.25,
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: context.colorTokens.borderUnfocused),

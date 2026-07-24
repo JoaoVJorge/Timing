@@ -11,11 +11,20 @@ class AuthOnboardingColors {
   static const Color yellow = Color(0xFFFFBE24);
   static const Color yellowDark = Color(0xFFF2A900);
   static const Color yellowLight = Color(0xFFFFE7A4);
+  static const Color blue = Color(0xFF3B82F6);
+  static const Color blueDark = Color(0xFF1D4ED8);
+  static const Color blueLight = Color(0xFFBFDBFE);
 
   static const LinearGradient yellowGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFFFFC329), Color(0xFFFFB919)],
+  );
+
+  static const LinearGradient blueGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF60A5FA), Color(0xFF2563EB)],
   );
 }
 
