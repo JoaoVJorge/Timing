@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
-import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/app/route_arguments.dart";
 import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
@@ -38,7 +38,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   final FocusNode _endTimeFocusNode = FocusNode();
 
   late final Set<int> _selectedWeekdays = {
-    Get.arguments is int ? Get.arguments as int : DateTime.now().weekday,
+    RouteArguments.maybeOf<int>() ?? DateTime.now().weekday,
   };
   Color _selectedColor = SubjectColors.values.first;
   bool _hasInitializedThemeColor = false;
@@ -307,8 +307,9 @@ class _ScheduleColorSelector extends StatelessWidget {
   final ValueChanged<Color> onSelected;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget build(BuildContext context) => Wrap(
+    spacing: 10,
+    runSpacing: 10,
     children: SubjectColors.values
         .map(
           (color) => CreationColorChoice(

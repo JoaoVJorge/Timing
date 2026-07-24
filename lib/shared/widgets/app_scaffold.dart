@@ -42,7 +42,7 @@ class AppScaffold extends StatelessWidget {
                       children: [
                         const Gap(16),
                         topBar!,
-                        const Gap(16),
+                        const Gap(12),
                         Expanded(child: body),
                       ],
                     ),

@@ -17,9 +17,13 @@ class LoginPage extends StatelessWidget {
     return AuthOnboardingScaffold(
       title: context.l10n.loginHeadline,
       subtitle: context.l10n.loginSubtitle,
+      brandGradient: AuthOnboardingColors.blueGradient,
       topVisual: const AuthHeroPlaceholder(
         icon: Icons.menu_book_rounded,
         large: true,
+        accent: AuthOnboardingColors.blue,
+        accentDark: AuthOnboardingColors.blueDark,
+        accentLight: AuthOnboardingColors.blueLight,
       ),
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
@@ -40,7 +44,7 @@ class LoginPage extends StatelessWidget {
             icon: const Icon(
               Icons.phone_iphone_rounded,
               size: 25,
-              color: AuthOnboardingColors.yellowDark,
+              color: AuthOnboardingColors.blueDark,
             ),
             label: context.l10n.continueWithPhoneButton,
             onTap: controller.onTapPhoneSignIn,
@@ -83,7 +87,7 @@ class _SignInOption extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: highlighted
-                  ? AuthOnboardingColors.yellow.withValues(alpha: 0.14)
+                  ? AuthOnboardingColors.blue.withValues(alpha: 0.14)
                   : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(

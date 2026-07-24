@@ -20,22 +20,24 @@ class AppTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double size = 20;
+    const double iconSize = 20;
+    const double tapTargetSize = 38.4;
 
     return Row(
       children: [
         if (showBackButton) ...[
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: onBack ?? appNavigator.back,
-            child: Container(
-              width: size,
-              height: size,
-              alignment: Alignment.center,
-              color: Colors.transparent,
-              child: AppIcon(
-                "left_back",
-                size: size,
-                color: context.colorTokens.primary,
+            child: SizedBox(
+              width: tapTargetSize,
+              height: tapTargetSize,
+              child: Center(
+                child: AppIcon(
+                  "left_back",
+                  size: iconSize,
+                  color: context.colorTokens.primary,
+                ),
               ),
             ),
           ),
