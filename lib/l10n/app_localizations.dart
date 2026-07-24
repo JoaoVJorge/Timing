@@ -5,8 +5,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
 import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
@@ -95,8 +98,11 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
     Locale('en'),
     Locale('es'),
+    Locale('fr'),
     Locale('pt'),
   ];
 
@@ -487,7 +493,7 @@ abstract class AppLocalizations {
   /// No description provided for @estimatedHoursGoalHint.
   ///
   /// In en, this message translates to:
-  /// **'Estimated hours (goal)'**
+  /// **'Goal in minutes'**
   String get estimatedHoursGoalHint;
 
   /// No description provided for @goalPagesHint.
@@ -637,7 +643,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectTimeGoalLabel.
   ///
   /// In en, this message translates to:
-  /// **'Time goal'**
+  /// **'Focus goal'**
   String get createSubjectTimeGoalLabel;
 
   /// No description provided for @createSubjectPagesGoalLabel.
@@ -649,7 +655,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectTimeGoalHelp.
   ///
   /// In en, this message translates to:
-  /// **'How many hours do you want to accumulate in total?'**
+  /// **'How many minutes do you want to focus?'**
   String get createSubjectTimeGoalHelp;
 
   /// No description provided for @createSubjectPagesGoalHelp.
@@ -712,6 +718,12 @@ abstract class AppLocalizations {
   /// **'{hours}h {minutes}m'**
   String createSubjectHoursMinutesValue(int hours, int minutes);
 
+  /// No description provided for @createSubjectPagesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} pages'**
+  String createSubjectPagesValue(int value);
+
   /// No description provided for @createSubjectColorSemantic.
   ///
   /// In en, this message translates to:
@@ -751,7 +763,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectMissingTimeGoal.
   ///
   /// In en, this message translates to:
-  /// **'Set a valid time goal'**
+  /// **'Set a valid focus goal'**
   String get createSubjectMissingTimeGoal;
 
   /// No description provided for @createSubjectMissingPagesGoal.
@@ -1045,8 +1057,14 @@ abstract class AppLocalizations {
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Journey'**
   String get profileTitle;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your progress and key milestones'**
+  String get profileSubtitle;
 
   /// No description provided for @editButton.
   ///
@@ -1263,6 +1281,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See all'**
   String get profileSeeAll;
+
+  /// No description provided for @profileAchievementFirstUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'1st achievement'**
+  String get profileAchievementFirstUnlocked;
+
+  /// No description provided for @profileAchievementGoalStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal started'**
+  String get profileAchievementGoalStarted;
+
+  /// No description provided for @profileAchievementsStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start to earn achievements'**
+  String get profileAchievementsStartHint;
 
   /// No description provided for @profileAchievementFirstFocus.
   ///
@@ -1648,6 +1684,12 @@ abstract class AppLocalizations {
   /// **'App language'**
   String get appLanguageSubtitle;
 
+  /// No description provided for @automaticLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get automaticLanguageLabel;
+
   /// No description provided for @chooseLanguageTitle.
   ///
   /// In en, this message translates to:
@@ -1857,6 +1899,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile saved'**
   String get profileSavedMessage;
+
+  /// No description provided for @profilePhotoSelectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get profilePhotoSelectLabel;
+
+  /// No description provided for @profilePhotoRemoveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get profilePhotoRemoveLabel;
 
   /// No description provided for @faqTitle.
   ///
@@ -2113,7 +2167,7 @@ abstract class AppLocalizations {
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Journey'**
   String get navProfile;
 
   /// No description provided for @navGroups.
@@ -2403,8 +2457,14 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'es', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'pt',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2413,10 +2473,16 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
     case 'pt':
       return AppLocalizationsPt();
   }

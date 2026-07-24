@@ -9,6 +9,7 @@ import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
+import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/theme/accent_presets.dart";
 
 class AppController extends GetxController {
@@ -31,12 +32,20 @@ class AppController extends GetxController {
   final Rx<String?> email = Rx<String?>(null);
   final Rx<String?> phoneNumber = Rx<String?>(null);
   final Rx<String?> birthDate = Rx<String?>(null);
+  final Rx<String?> profilePhotoBase64 = Rx<String?>(null);
   final RxInt avatarIconIndex = 0.obs;
   final RxBool notificationsEnabled = true.obs;
-  final RxString languageCode = "en".obs;
+  final Rx<String?> languageCode = Rx<String?>(null);
+
+  Locale get selectedLocale => _resolvedLocale(languageCode.value);
+
+  String get effectiveLanguageCode => selectedLocale.languageCode;
 
   Future<void> initialize() async {
-    await Future.wait([_loadAppConfig(), Future.delayed(AppConstants.splashScreenDuration)]);
+    await Future.wait([
+      _loadAppConfig(),
+      Future.delayed(AppConstants.splashScreenDuration),
+    ]);
     await _navigateAfterSplash();
   }
 
@@ -49,7 +58,8 @@ class AppController extends GetxController {
   }
 
   Future<void> _loadAppConfig() async {
-    final Either<AppError, AppConfigEntity> result = await _getAppConfigUseCase();
+    final Either<AppError, AppConfigEntity> result =
+        await _getAppConfigUseCase();
     result.fold((error) => null, _applyConfig);
   }
 
@@ -61,13 +71,14 @@ class AppController extends GetxController {
     email.value = config.email;
     phoneNumber.value = config.phoneNumber;
     birthDate.value = config.birthDate;
+    profilePhotoBase64.value = config.profilePhotoBase64;
     avatarIconIndex.value = config.avatarIconIndex;
     notificationsEnabled.value = config.notificationsEnabled;
     languageCode.value = config.languageCode;
     // The saved language only reaches here after GetMaterialApp's first
     // build (see the comment in setLanguageCode), so it must be applied
     // explicitly too, not just left to the `locale:` constructor param.
-    Get.updateLocale(Locale(config.languageCode));
+    Get.updateLocale(_resolvedLocale(config.languageCode));
   }
 
   AppConfigEntity get _currentConfig => AppConfigEntity(
@@ -77,6 +88,7 @@ class AppController extends GetxController {
     email: email.value,
     phoneNumber: phoneNumber.value,
     birthDate: birthDate.value,
+    profilePhotoBase64: profilePhotoBase64.value,
     accentColorValue: accentColor.value.toARGB32(),
     avatarIconIndex: avatarIconIndex.value,
     notificationsEnabled: notificationsEnabled.value,
@@ -103,20 +115,46 @@ class AppController extends GetxController {
     await _saveAppConfigUseCase(_currentConfig);
   }
 
+  Future<void> setProfilePhotoBase64(String? value) async {
+    profilePhotoBase64.value = value;
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
   Future<void> setNotificationsEnabled(bool value) async {
     notificationsEnabled.value = value;
     await _saveAppConfigUseCase(_currentConfig);
   }
 
-  Future<void> setLanguageCode(String value) async {
+  Future<void> setLanguageCode(String? value) async {
     languageCode.value = value;
     // GetMaterialApp only reads its `locale:` constructor param once, on the
     // very first build (see GetBuilder<GetMaterialController>'s initState in
     // the get package) — later rebuilds with a new `locale:` value are
     // ignored. Get.updateLocale is GetX's own API for propagating a runtime
     // locale change and forcing the app to rebuild with it.
-    await Get.updateLocale(Locale(value));
+    await Get.updateLocale(_resolvedLocale(value));
     await _saveAppConfigUseCase(_currentConfig);
+  }
+
+  Locale _resolvedLocale(String? code) {
+    if (code != null) {
+      return Locale(code);
+    }
+
+    final Locale? deviceLocale = Get.deviceLocale;
+    if (deviceLocale != null) {
+      final String deviceLanguageCode = deviceLocale.languageCode;
+      if (deviceLanguageCode == "pt" || deviceLocale.countryCode == "BR") {
+        return const Locale("pt");
+      }
+      if (AppLocalizations.supportedLocales.any(
+        (locale) => locale.languageCode == deviceLanguageCode,
+      )) {
+        return Locale(deviceLanguageCode);
+      }
+    }
+
+    return const Locale("en");
   }
 
   Future<Either<AppError, void>> updateProfile({
@@ -125,12 +163,15 @@ class AppController extends GetxController {
     String? email,
     String? phoneNumber,
     String? birthDate,
+    String? profilePhotoBase64,
   }) async {
     this.userName.value = userName;
     this.nickName.value = nickName;
     this.email.value = email;
     this.phoneNumber.value = phoneNumber;
     this.birthDate.value = birthDate;
+    this.profilePhotoBase64.value =
+        profilePhotoBase64 ?? this.profilePhotoBase64.value;
 
     await _saveAppConfigUseCase(_currentConfig);
     return _syncProfileToBackendUseCase(_currentConfig);
@@ -142,6 +183,7 @@ class AppController extends GetxController {
     email.value = null;
     phoneNumber.value = null;
     birthDate.value = null;
+    profilePhotoBase64.value = null;
     avatarIconIndex.value = 0;
     await _saveAppConfigUseCase(_currentConfig);
     await _appNavigator.offAllNamed(AppRoutes.login);

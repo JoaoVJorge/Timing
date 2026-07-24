@@ -18,9 +18,10 @@ class ConfigController extends GetxController {
   RxString get userName => _appController.userName;
   RxString get nickName => _appController.nickName;
   RxInt get avatarIconIndex => _appController.avatarIconIndex;
+  Rx<String?> get profilePhotoBase64 => _appController.profilePhotoBase64;
   Rx<Color> get accentColor => _appController.accentColor;
   RxBool get notificationsEnabled => _appController.notificationsEnabled;
-  RxString get languageCode => _appController.languageCode;
+  Rx<String?> get languageCode => _appController.languageCode;
 
   String get displayName {
     final String value = capitalizeName(userName.value);
@@ -50,7 +51,7 @@ class ConfigController extends GetxController {
 
   Future<void> onTapLanguage() async {
     final String? selectedCode = await showLanguagePickerDialog(
-      currentCode: languageCode.value,
+      currentCode: languageCode.value ?? _appController.effectiveLanguageCode,
     );
     if (selectedCode != null) {
       await _appController.setLanguageCode(selectedCode);
@@ -62,7 +63,9 @@ class ConfigController extends GetxController {
     }
   }
 
-  String get languageLabel => AppLanguages.byCode(languageCode.value).label;
+  String get languageLabel => AppLanguages.byCode(
+    languageCode.value ?? _appController.effectiveLanguageCode,
+  ).label;
 
   void onTapAccentColor() => _appNavigator.toNamed(AppRoutes.editProfile);
 

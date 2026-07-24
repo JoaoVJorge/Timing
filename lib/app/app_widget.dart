@@ -19,11 +19,17 @@ class AppWidget extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppThemes.build(
           seed: appController.accentColor.value,
-          brightness: appController.isDarkMode.value ? Brightness.dark : Brightness.light,
+          brightness: appController.isDarkMode.value
+              ? Brightness.dark
+              : Brightness.light,
         ),
-        locale: Locale(appController.languageCode.value),
+        locale: appController.selectedLocale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
+        builder: (context, child) => Directionality(
+          textDirection: TextDirection.ltr,
+          child: child ?? const SizedBox.shrink(),
+        ),
         initialRoute: AppRoutes.splash,
         getPages: AppRoutes.getPages,
       ),

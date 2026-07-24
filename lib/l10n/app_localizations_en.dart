@@ -228,7 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookThemeLabel => 'Book theme';
 
   @override
-  String get estimatedHoursGoalHint => 'Estimated hours (goal)';
+  String get estimatedHoursGoalHint => 'Goal in minutes';
 
   @override
   String get goalPagesHint => 'Goal (pages)';
@@ -308,14 +308,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ex.: Guitar, Drawing, Programming';
 
   @override
-  String get createSubjectTimeGoalLabel => 'Time goal';
+  String get createSubjectTimeGoalLabel => 'Focus goal';
 
   @override
   String get createSubjectPagesGoalLabel => 'Page goal';
 
   @override
   String get createSubjectTimeGoalHelp =>
-      'How many hours do you want to accumulate in total?';
+      'How many minutes do you want to focus?';
 
   @override
   String get createSubjectPagesGoalHelp =>
@@ -358,6 +358,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String createSubjectPagesValue(int value) {
+    return '$value pages';
+  }
+
+  @override
   String createSubjectColorSemantic(int index) {
     return 'Color $index';
   }
@@ -378,7 +383,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createSubjectMissingName => 'Enter a name to continue';
 
   @override
-  String get createSubjectMissingTimeGoal => 'Set a valid time goal';
+  String get createSubjectMissingTimeGoal => 'Set a valid focus goal';
 
   @override
   String get createSubjectMissingPagesGoal => 'Set a valid page goal';
@@ -549,7 +554,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerExitDialogConfirm => 'End';
 
   @override
-  String get profileTitle => 'Profile';
+  String get profileTitle => 'Journey';
+
+  @override
+  String get profileSubtitle => 'Track your progress and key milestones';
 
   @override
   String get editButton => 'Edit';
@@ -669,6 +677,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSeeAll => 'See all';
+
+  @override
+  String get profileAchievementFirstUnlocked => '1st achievement';
+
+  @override
+  String get profileAchievementGoalStarted => 'Goal started';
+
+  @override
+  String get profileAchievementsStartHint => 'Start to earn achievements';
 
   @override
   String get profileAchievementFirstFocus => 'First focus';
@@ -876,6 +893,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLanguageSubtitle => 'App language';
 
   @override
+  String get automaticLanguageLabel => 'Automatic';
+
+  @override
   String get chooseLanguageTitle => 'Choose language';
 
   @override
@@ -986,6 +1006,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSavedMessage => 'Profile saved';
+
+  @override
+  String get profilePhotoSelectLabel => 'Add photo';
+
+  @override
+  String get profilePhotoRemoveLabel => 'Remove photo';
 
   @override
   String get faqTitle => 'FAQ';
@@ -1131,7 +1157,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navProfile => 'Profile';
+  String get navProfile => 'Journey';
 
   @override
   String get navGroups => 'Groups';

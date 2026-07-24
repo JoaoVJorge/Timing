@@ -1,0 +1,772 @@
+{
+  "@@locale": "fr",
+  "appTitle": "HelpOut",
+  "@homeGreetingWithName": {
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeSubtitleFocusedToday": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeSubtitleNextSchedule": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeGoalsProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@targetDaysChip": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@taskDaysProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "@lastActivityMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@lastActivityHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@lastActivityDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@restMinutesChip": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@addItemButton": {
+    "placeholders": {
+      "itemNoun": {
+        "type": "String"
+      }
+    }
+  },
+  "@itemNameHint": {
+    "placeholders": {
+      "itemNoun": {
+        "type": "String"
+      }
+    }
+  },
+  "@createSubjectPreviewGoal": {
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@createSubjectPreviewRest": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@createSubjectHoursValue": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@createSubjectPagesValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@createSubjectHoursMinutesValue": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@createSubjectColorSemantic": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@pagesProgress": {
+    "placeholders": {
+      "currentPages": {
+        "type": "int"
+      },
+      "goalPages": {
+        "type": "int"
+      }
+    }
+  },
+  "@pagesReadOnly": {
+    "placeholders": {
+      "currentPages": {
+        "type": "int"
+      }
+    }
+  },
+  "@notesPageCounter": {
+    "placeholders": {
+      "currentPage": {
+        "type": "int"
+      },
+      "pageCount": {
+        "type": "int"
+      }
+    }
+  },
+  "@durationProgress": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "goalDuration": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerTotalLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerNextBreakLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerRestingLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerTotalInSubject": {
+    "placeholders": {
+      "subjectName": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerFocusedValue": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@timerExitDialogContent": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "subjectName": {
+        "type": "String"
+      }
+    }
+  },
+  "@profileEvolutionFocus": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@profileEvolutionTopSubject": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@profileEvolutionRemaining": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@groupLeaderboardDescription": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "@currentUserRankValue": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "@currentUserRankNextStep": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "@leaderboardDifferenceAhead": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@languageChangedMessage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "@appVersionValue": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@appVersionLabel": {
+    "placeholders": {
+      "appTitle": {
+        "type": "String"
+      },
+      "appVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "@groupThemeSelectedDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "@selectedFriendsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@createGroupWithFriendsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@metricDaysValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@metricPagesValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "@scheduleDurationLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "@scheduleDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@scheduleDurationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "@scheduleDurationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@otpSubtitle": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "@otpCodeValidFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "genericErrorMessage": "Quelque chose s'est mal passé. Veuillez réessayer plus tard.",
+  "loginHeadline": "Commençons",
+  "loginSubtitle": "Connectez-vous pour continuer à étudier et organiser votre routine.",
+  "loginNameHint": "Votre nom",
+  "loginButton": "Commençons",
+  "homeGreetingDefault": "Bonjour",
+  "homeGreetingWithName": "Bonjour, {userName}",
+  "homeSubtitle": "A quoi s’attaque-t-on aujourd’hui ?",
+  "homeSubtitleFocusedToday": "Vous avez concentré votre attention sur {duration} aujourd'hui",
+  "homeSubtitleNextSchedule": "Ordre du jour : {title} à {time}",
+  "homeSubtitleStart": "Commencez votre première séance de concentration",
+  "homeTasksSection": "Objectifs quotidiens",
+  "homeCategoriesSection": "Activités",
+  "homeActionContinueEyebrow": "Continuer maintenant",
+  "homeActionContinueButton": "Continuer",
+  "homeActionStartEyebrow": "Commencer à se concentrer",
+  "homeActionStartButton": "Commencer",
+  "homeActionSuggestedMeta": "Votre sujet le plus suivi",
+  "homeActionCreateBody": "Créez votre premier sujet pour démarrer une session de mise au point.",
+  "homeActionCreateButton": "Créer un sujet",
+  "homeSummaryTitle": "Le résumé du jour",
+  "homeSummaryFocus": "Concentrez-vous",
+  "homeSummaryGoals": "Objectifs",
+  "homeSummaryPages": "Pages",
+  "homeSummarySessions": "Séances",
+  "homeGoalsProgress": "{done} sur {total} terminé",
+  "homeCategoryEmpty": "Rien pour l'instant",
+  "homeNextScheduleTitle": "Ordre du jour",
+  "homeTodayAgendaTitle": "L'ordre du jour d'aujourd'hui",
+  "homeNextScheduleEmpty": "Pas d'horaire aujourd'hui",
+  "homeNextScheduleAdd": "Ajouter un horaire",
+  "addTaskButton": "Ajouter un objectif",
+  "createTaskTitle": "Nouvel objectif",
+  "taskNameHint": "Nom de l'objectif",
+  "targetDaysLabel": "Cible (jours)",
+  "targetDaysChip": "{days} jours",
+  "targetDaysHint": "Cible personnalisée",
+  "taskDaysProgress": "{completed}/{target} jours",
+  "taskCompletedLabel": "C'est fait !",
+  "lastActivityLabel": "Dernière activité",
+  "lastActivityNone": "Rien pour l'instant : commencez quelque chose !",
+  "lastActivityJustNow": "juste maintenant",
+  "lastActivityMinutesAgo": "Il y a {minutes} min",
+  "lastActivityHoursAgo": "{hours} h il y a",
+  "lastActivityDaysAgo": "il y a {days} j",
+  "categoryStudying": "Études",
+  "categoryExercises": "Faire de l'exercice",
+  "categoryReading": "Lecture",
+  "categoryHobbies": "Loisirs",
+  "itemNounStudying": "Sujet",
+  "itemNounExercises": "Exercice",
+  "itemNounReading": "Livre",
+  "itemNounHobbies": "Passe-temps",
+  "iconLabel": "Icône",
+  "restTimeLabel": "Temps de repos",
+  "restMinutesChip": "{minutes} min",
+  "timeUnitHoursSuffix": "h",
+  "timeUnitMinutesSuffix": "min",
+  "wallpaperLabel": "Fond d'écran de la minuterie",
+  "addItemButton": "Ajouter {itemNoun}",
+  "itemNameHint": "Nom {itemNoun}",
+  "colorLabel": "Couleur",
+  "bookThemeLabel": "Thème du livre",
+  "estimatedHoursGoalHint": "Objectif en minutes",
+  "goalPagesHint": "Objectif (pages)",
+  "cancelButton": "Annuler",
+  "confirmButton": "Confirmer",
+  "addButton": "Ajouter",
+  "createSubjectTitleStudying": "Nouveau sujet",
+  "createSubjectTitleReading": "Nouvelle lecture",
+  "createSubjectTitleExercises": "Nouvel entraînement",
+  "createSubjectTitleHobbies": "Nouveau passe-temps",
+  "createSubjectSubtitleStudying": "Fixez-vous un objectif et personnalisez votre concentration",
+  "createSubjectSubtitleReading": "Suivez les pages et personnalisez votre lecture",
+  "createSubjectSubtitleExercises": "Choisissez comment vous souhaitez suivre cette activité",
+  "createSubjectSubtitleHobbies": "Choisissez comment vous souhaitez suivre ce passe-temps",
+  "createSubjectBasicSection": "Informations de base",
+  "createSubjectGoalSection": "Objectif",
+  "createSubjectRoutineSection": "Routine",
+  "createSubjectPersonalizationSection": "Personnalisation",
+  "createSubjectNameLabelStudying": "Nom du sujet",
+  "createSubjectNameLabelReading": "Lecture du nom",
+  "createSubjectNameLabelExercises": "Nom de l'activité",
+  "createSubjectNameLabelHobbies": "Nom du passe-temps",
+  "createSubjectNameHintStudying": "Ex. : Biologie, Mathématiques, Anglais",
+  "createSubjectNameHintReading": "Ex. : Livre d'histoire, Dom Casmurro",
+  "createSubjectNameHintExercises": "Ex. : Gym, course à pied, étirements",
+  "createSubjectNameHintHobbies": "Ex. : Guitare, Dessin, Programmation",
+  "createSubjectTimeGoalLabel": "Objectif de concentration",
+  "createSubjectPagesGoalLabel": "Objectif de la page",
+  "createSubjectTimeGoalHelp": "Combien de minutes souhaitez-vous vous concentrer ?",
+  "createSubjectPagesGoalHelp": "Combien de pages souhaitez-vous connecter au total ?",
+  "createSubjectRestLabel": "Pause après chaque focus",
+  "createSubjectRestHelp": "Le timer propose une pause après 25 min de concentration.",
+  "customRestMinutesHint": "Pause personnalisée (min)",
+  "createSubjectPreviewTitle": "Aperçu",
+  "createSubjectPreviewNoGoal": "Aucun objectif fixé",
+  "createSubjectPreviewGoal": "Objectif : {goal}",
+  "createSubjectPreviewRest": "Pause : {minutes} min",
+  "createSubjectHoursValue": "{hours}h",
+  "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
+  "createSubjectPagesValue": "{value} pages",
+  "createSubjectColorSemantic": "Couleur {index}",
+  "createSubjectButtonStudying": "Créer un sujet",
+  "createSubjectButtonReading": "Créer une lecture",
+  "createSubjectButtonExercises": "Créer une activité",
+  "createSubjectButtonHobbies": "Créer un passe-temps",
+  "createSubjectMissingName": "Entrez un nom pour continuer",
+  "createSubjectMissingTimeGoal": "Fixez-vous un objectif de concentration valide",
+  "createSubjectMissingPagesGoal": "Définir un objectif de page valide",
+  "createSubjectSuccessStudying": "Sujet créé avec succès",
+  "createSubjectSuccessReading": "Lecture créée avec succès",
+  "createSubjectSuccessExercises": "Activité créée avec succès",
+  "createSubjectSuccessHobbies": "Hobby créé avec succès",
+  "pagesProgress": "Pages {currentPages} sur {goalPages}",
+  "pagesReadOnly": "{currentPages} pages lues",
+  "pagesReadNowHint": "Pages lues maintenant",
+  "logPagesButton": "Pages de journal",
+  "notesLabel": "Remarques",
+  "notesHint": "Écrivez vos notes ici...",
+  "saveNotesButton": "Enregistrer",
+  "addNotesPageTooltip": "Ajouter une page",
+  "notesPageCounter": "Page {currentPage} sur {pageCount}",
+  "durationProgress": "{duration} sur {goalDuration}",
+  "timerTotalLabel": "Total : {duration}",
+  "timerNextBreakLabel": "Prochaine pause dans {duration}",
+  "timerRestingLabel": "Repos - de retour dans {duration}",
+  "timerNotificationRunning": "Séance de focus en cours",
+  "timerNotificationResting": "Repos - de retour bientôt",
+  "timerNotificationPaused": "En pause",
+  "timerStateFocusingTitle": "Mise au point en cours",
+  "timerStateFocusingDescription": "Restez concentré. Une pause sera proposée prochainement.",
+  "timerStatePausedTitle": "Minuterie en pause",
+  "timerStatePausedDescription": "Continuez lorsque vous êtes prêt.",
+  "timerStateRestingTitle": "Pause bien méritée",
+  "timerStateRestingDescription": "Buvez de l'eau ou respirez un peu avant de continuer.",
+  "timerSessionSavedTitle": "Session enregistrée",
+  "timerSessionSavedDescription": "Votre temps a été ajouté au sujet.",
+  "timerCurrentFocusLabel": "Temps concentré maintenant",
+  "timerRestTimeLabel": "Temps de pause",
+  "timerSessionLabel": "Session en cours",
+  "timerTotalInSubject": "Total dans {subjectName}",
+  "timerPauseButton": "Pause",
+  "timerContinueButton": "Continuer",
+  "timerContinueFocusButton": "Continuer",
+  "timerSkipRestButton": "Sauter la pause",
+  "timerEndSessionButton": "Fin de séance",
+  "timerStartAnotherSessionButton": "Démarrer une autre session",
+  "timerSaveReassurance": "La progression est également enregistrée lorsque vous faites une pause ou quittez.",
+  "timerFocusedValue": "{duration} concentré",
+  "timerAccumulatedTotalLabel": "Total cumulé",
+  "timerBackToSubjectsButton": "Retour",
+  "timerExitDialogTitle": "Fin de séance ?",
+  "timerExitDialogContent": "Votre progression {duration} sera enregistrée dans {subjectName}.",
+  "timerExitDialogCancel": "Continuer",
+  "timerExitDialogContinueLater": "Vous pourrez continuer plus tard.",
+  "timerExitDialogConfirm": "Fin",
+  "profileTitle": "Voyage",
+  "profileSubtitle": "Suivez vos progrès et les étapes clés",
+  "editButton": "Modifier",
+  "nicknameFallback": "utilisateur",
+  "profileSummaryLabel": "Résumé total",
+  "profileSummarySinceStartLabel": "Depuis le début",
+  "profileSummaryAccumulatedFocus": "{duration} de concentration accumulée",
+  "profileSummaryFocusLabel": "Temps de mise au point total",
+  "profileSummaryFocusDescription": "Études, exercice et loisirs",
+  "statHoursStudied": "Étudier",
+  "statHoursExercised": "Exercice",
+  "statPagesRead": "Pages lues",
+  "statTopSubject": "Les plus étudiés",
+  "profileStatTimeEmptyTitle": "Commencez votre première concentration",
+  "profileStatTimeEmptyDescription": "Votre temps s'affichera ici",
+  "profileStatExerciseEmptyTitle": "Pas encore d'exercice",
+  "profileStatExerciseEmptyDescription": "Enregistrez votre première activité",
+  "profileStatReadingEmptyTitle": "Aucune page pour l'instant",
+  "profileStatReadingEmptyDescription": "Enregistrez votre première lecture",
+  "profileTopSubjectEmptyTitle": "Aucun pour l'instant",
+  "profileTopSubjectEmptyDescription": "Étudier un sujet pour le présenter ici",
+  "profileEmptyTitle": "Votre progression commence ici",
+  "profileEmptyDescription": "Démarrez une session, enregistrez des lectures ou définissez un objectif depuis l'accueil pour suivre votre évolution dans HelpOut.",
+  "profileEmptyGuidance": "Après cela, votre temps total, vos principales activités et les points forts de vos lectures apparaîtront ici.",
+  "profileEmptyStartButton": "Commencez maintenant",
+  "profileShortcutsTitle": "Raccourcis",
+  "profileShortcutCreateSubject": "Créer un sujet",
+  "profileShortcutCreateGoal": "Créer un objectif",
+  "profileShortcutAddSchedule": "Ajouter un horaire",
+  "profileEvolutionTitle": "Votre progression",
+  "profileEvolutionFocus": "Vous avez accumulé {duration} de concentration.",
+  "profileEvolutionTopSubject": "Votre sujet le plus étudié est {name}.",
+  "profileEvolutionRemaining": "Vous êtes à {duration} de votre objectif.",
+  "profileEvolutionGoalReached": "Vous avez atteint votre objectif de concentration !",
+  "profileProgressSectionTitle": "Votre progression",
+  "profileAchievementsTitle": "Réalisations",
+  "profileSeeHistory": "Voir l'historique",
+  "profileSeeAll": "Voir tout",
+  "profileAchievementFirstUnlocked": "1ère réalisation",
+  "profileAchievementGoalStarted": "Objectif commencé",
+  "profileAchievementsStartHint": "Commencez à gagner des succès",
+  "profileAchievementFirstFocus": "Premier focus",
+  "profileAchievementStudyStarted": "Étude commencée",
+  "profileAchievementReadingStarted": "La lecture a commencé",
+  "profileAchievementLocked": "Verrouillé",
+  "periodFiveDays": "5 jours",
+  "periodWeek": "1 semaine",
+  "periodMonth": "1 mois",
+  "periodTotal": "Total",
+  "profileAgendaTitle": "Le programme d'aujourd'hui",
+  "profileAgendaEmptyTitle": "Aucun planning prévu",
+  "profileAgendaEmptyDescription": "Ajoutez des blocs pour organiser votre routine.",
+  "profileAgendaAddButton": "Ajouter un horaire",
+  "profileTopReadingTitle": "Meilleures lectures",
+  "profileTopReadingEmptyTitle": "Aucune lecture enregistrée",
+  "profileTopReadingEmptyDescription": "Pages de journal lues pour voir vos principaux thèmes ici.",
+  "groupsTitle": "Groupes",
+  "groupsSubtitle": "Comparez vos progrès avec vos amis",
+  "noGroupSelected": "Aucun groupe sélectionné pour l'instant.",
+  "newGroupChip": "Nouveau",
+  "groupHeaderCreateButton": "Groupe",
+  "groupsEmptyTitle": "Aucun groupe pour l'instant",
+  "groupsEmptyDescription": "Créez un groupe pour comparer les progrès avec vos amis et maintenir l’élan.",
+  "groupsEmptyButton": "Créer le premier groupe",
+  "you": "Vous",
+  "mockStudyGroupName": "Equipe d'étude",
+  "mockWorkoutGroupName": "Équipe d'entraînement",
+  "periodToday": "Aujourd'hui",
+  "periodThisWeek": "Semaine",
+  "periodThisMonth": "Mois",
+  "periodDescriptionToday": "aujourd'hui",
+  "periodDescriptionThisWeek": "cette semaine",
+  "periodDescriptionThisMonth": "ce mois-ci",
+  "groupMetricStudying": "heures d'étude",
+  "groupMetricDailyGoals": "jours d'objectif terminés",
+  "groupMetricExercises": "heures d'exercice",
+  "groupMetricReading": "pages lues",
+  "groupMetricHobbies": "heures de passe-temps",
+  "groupLeaderboardDescription": "Classement pour {period} · mesuré en {metric}",
+  "leaderboardTitle": "Classement",
+  "currentUserRankTitle": "Votre prestation",
+  "currentUserRankValue": "{rank} lieu · {score}",
+  "currentUserRankNextStep": "{score} pour gravir une position",
+  "currentUserRankLeading": "Vous êtes en tête de ce classement.",
+  "currentUserRankSubtitle": "votre position actuelle",
+  "leaderboardTopPosition": "en tête de ce classement",
+  "leaderboardDifferenceAhead": "+{value} en avance",
+  "groupCreatedSuccess": "Groupe créé avec succès",
+  "settingsTitle": "Paramètres",
+  "settingsSubtitle": "Ajustez votre compte et vos préférences",
+  "myProfileFallback": "Mon profil",
+  "personalProfileLabel": "Profil personnel",
+  "accountDataSubtitle": "{nickname} · données personnelles et sécurité",
+  "preferencesSection": "Préférences",
+  "darkModeLabel": "Mode sombre",
+  "darkModeEnabledSubtitle": "Le thème sombre est activé",
+  "darkModeDisabledSubtitle": "Utilisez le thème sombre dans l'application",
+  "accentColorSettingsTitle": "Couleur d'accentuation",
+  "accentColorSettingsSubtitle": "Personnalisez l'apparence de l'application",
+  "notificationsLabel": "Notifications",
+  "timerNotificationsTitle": "Notifications de minuterie",
+  "notificationsEnabledSubtitle": "Alertes de concentration, de pause et de progression",
+  "notificationsDisabledSubtitle": "Les alertes sont désactivées sur cet appareil",
+  "language": "Langue",
+  "appLanguageSubtitle": "Langue de l'application",
+  "automaticLanguageLabel": "Automatique",
+  "chooseLanguageTitle": "Choisir la langue",
+  "languageChangedMessage": "Langue modifiée en {language}",
+  "preferenceSavedMessage": "Préférence enregistrée",
+  "supportSection": "Assistance",
+  "helpSection": "Aide",
+  "faqLabel": "FAQ",
+  "faqSettingsSubtitle": "Questions sur le chronomètre, les objectifs et les groupes",
+  "sendFeedbackTitle": "Envoyer des commentaires",
+  "sendFeedbackSubtitle": "Dites-nous ce qui pourrait être mieux",
+  "feedbackUnavailable": "Les commentaires ne sont pas encore disponibles",
+  "aboutLabel": "À propos",
+  "aboutSection": "À propos",
+  "appVersionValue": "Version{version}",
+  "debugEnvironmentTitle": "Environnement",
+  "debugEnvironmentSubtitle": "Débogage · exemples de données actifs",
+  "appVersionLabel": "{appTitle} v{appVersion}",
+  "accountSection": "Compte",
+  "sessionSection": "Séance",
+  "logOutLabel": "Se déconnecter",
+  "logOutSettingsSubtitle": "Terminer la session sur cet appareil",
+  "logOutDialogTitle": "Se déconnecter ?",
+  "logOutDialogContent": "Vous devrez vous reconnecter pour accéder à ce compte sur cet appareil. Les données de votre étude locale seront conservées.",
+  "logOutConfirmButton": "Se déconnecter",
+  "myProfileTitle": "Mon profil",
+  "avatarLabel": "avatar",
+  "nameLabel": "Nom",
+  "yourNameHint": "Votre nom",
+  "nicknameLabel": "Surnom",
+  "nicknameHint": "Quels amis t'appellent",
+  "emailLabel": "Courriel",
+  "optionalHint": "Facultatif",
+  "phoneLabel": "Numéro de téléphone",
+  "themeColorLabel": "Couleur du thème",
+  "saveChangesButton": "Enregistrer les modifications",
+  "profileSavedMessage": "Profil enregistré",
+  "profilePhotoSelectLabel": "Ajouter une photo",
+  "profilePhotoRemoveLabel": "Supprimer la photo",
+  "faqTitle": "FAQ",
+  "faqQ1": "Comment fonctionne le minuteur d'étude ?",
+  "faqA1": "Choisissez un sujet, appuyez sur Lecture et le minuteur suit votre session en cours tout en l'ajoutant à la durée totale de ce sujet. Appuyez sur pause à tout moment pour arrêter et enregistrer votre progression.",
+  "faqQ2": "Qu'est-ce que le compte à rebours des pauses ?",
+  "faqA2": "Chaque séance suit un cycle Pomodoro classique : un compte à rebours de 25 minutes jusqu'à votre prochaine pause. Lorsqu'il atteint zéro, il se réinitialise simplement, c'est un rappel, pas un arrêt brutal.",
+  "faqQ3": "Comment ajouter un nouveau sujet ?",
+  "faqA3": "Ouvrez une catégorie depuis Accueil, puis appuyez sur « Ajouter un sujet » au bas de la liste. Vous pouvez choisir une couleur et définir un objectif d’heures estimé pour celle-ci.",
+  "faqQ4": "Comment les groupes et le classement sont-ils calculés ?",
+  "faqA4": "Les groupes affichent un tableau de bord basé sur le thème du groupe : heures de concentration, jours d'objectifs atteints ou pages lues. Basculez entre Aujourd’hui, Semaine et Mois pour comparer les progrès.",
+  "faqQ5": "Puis-je modifier le thème de couleur de l'application ?",
+  "faqA5": "Oui, accédez à Paramètres > Mon profil et choisissez n'importe quelle couleur de thème. Chaque dégradé, bouton et surbrillance de l'application est mis à jour pour y correspondre, y compris le mode sombre.",
+  "createGroupTitle": "Nouveau groupe",
+  "createGroupSubtitle": "Choisissez un thème et invitez des amis",
+  "groupNameLabel": "Nom du groupe",
+  "groupNameHint": "Nom du groupe",
+  "groupNameExampleHint": "Ex. : équipe d'étude de l'examen",
+  "groupThemeLabel": "Thème",
+  "groupThemeSelectedDescription": "Ce groupe est classé par {metric}.",
+  "inviteFriendsLabel": "Inviter des amis",
+  "selectedFriendsCount": "{count} sélectionné",
+  "selectAtLeastOneFriend": "Sélectionnez au moins 1 ami",
+  "searchFriendHint": "Rechercher un ami",
+  "loadingFriends": "Chargement des amis...",
+  "friendsLoadErrorTitle": "Impossible de charger les amis",
+  "friendsLoadErrorDescription": "Réessayez dans un instant.",
+  "noFriendsAvailableTitle": "Aucun ami disponible",
+  "noFriendsAvailableDescription": "Ajoutez des amis avant de créer un groupe.",
+  "noFriendsFoundTitle": "Aucun ami trouvé",
+  "noFriendsFoundDescription": "Essayez un autre nom.",
+  "createGroupButton": "Créer un groupe",
+  "createGroupMissingName": "Entrez le nom du groupe",
+  "createGroupMissingTheme": "Choisissez un thème",
+  "createGroupMissingFriends": "Sélectionnez au moins 1 ami",
+  "createGroupWithFriendsButton": "Créer un groupe avec des amis {count}",
+  "createGroupRequirementsTitle": "Pour créer :",
+  "createGroupRequirementName": "Nom du groupe",
+  "createGroupRequirementTheme": "Thème choisi",
+  "createGroupRequirementFriends": "Au moins 1 ami",
+  "groupPrivacyNote": "Vos amis ne verront que votre nom, votre avatar et votre progression dans ce thème.",
+  "metricDaysValue": "{value} jours",
+  "metricPagesValue": "{value} pages",
+  "navHome": "Accueil",
+  "navProfile": "Voyage",
+  "navGroups": "Groupes",
+  "navSettings": "Paramètres",
+  "myScheduleCardTitle": "Mon emploi du temps",
+  "myScheduleTitle": "Mon emploi du temps",
+  "noScheduleYet": "Pas encore d'horaire",
+  "noScheduleYetDescription": "Appuyez sur le bouton ci-dessous pour ajouter\nvotre premier emploi du temps",
+  "addScheduleEntryTitle": "Ajouter une entrée de planification",
+  "addScheduleEntryButton": "Ajouter une entrée",
+  "scheduleInfoSection": "Informations",
+  "scheduleWhenSection": "Quand ?",
+  "scheduleColorSection": "Couleur du calendrier",
+  "schedulePreviewSection": "Aperçu",
+  "scheduleDurationLabel": "Durée : {duration}",
+  "scheduleDurationMinutes": "{minutes} min",
+  "scheduleDurationHours": "{hours}h",
+  "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
+  "scheduleTitleHint": "Titre",
+  "startTimeLabel": "Heure de début",
+  "endTimeOptionalLabel": "Heure de fin",
+  "incompleteScheduleEntryError": "Entrée incomplète : indiquez le titre, l'heure de début et l'heure de fin.",
+  "endTimeBeforeStartError": "L'heure de fin doit être postérieure à l'heure de début.",
+  "nameRequiredError": "Veuillez d'abord saisir un nom.",
+  "groupThemeRequiredError": "Choisissez un thème pour votre groupe.",
+  "groupNeedsFriendError": "Invitez au moins un ami : un groupe ne peut pas être créé seul.",
+  "continueWithGoogleButton": "Continuer avec Google",
+  "continueWithAppleButton": "Continuer avec Apple",
+  "continueWithPhoneButton": "Continuer avec le numéro de téléphone",
+  "phoneLoginTitle": "Votre numéro",
+  "phoneLoginSubtitle": "Entrez votre numéro de téléphone pour recevoir un code d'accès.",
+  "sendCodeButton": "Envoyer le code",
+  "phoneSecurityNote": "Vous pouvez utiliser votre numéro pour vous connecter en toute sécurité.",
+  "selectCountryTitle": "Sélectionnez votre pays",
+  "searchCountryHint": "Rechercher un pays",
+  "otpCodeExpired": "Code expiré. Renvoyez pour en obtenir un nouveau.",
+  "otpTitle": "Vérifiez votre numéro",
+  "otpSubtitle": "Entrez le code à 6 chiffres que nous avons envoyé à {phone}.",
+  "verifyCodeButton": "Vérifier",
+  "resendCodeButton": "Renvoyer le code",
+  "otpCodeValidFor": "Code valable pour {time}",
+  "codeResentMessage": "Code de vérification envoyé",
+  "invalidCodeError": "Code invalide. Veuillez réessayer.",
+  "credentialsTitle": "Créez votre profil",
+  "credentialsSubtitle": "Parlez-nous un peu de vous pour personnaliser votre expérience.",
+  "birthDateHint": "Date de naissance",
+  "profileEditableLaterNote": "Vous pourrez le modifier plus tard.",
+  "finishButton": "Terminer"
+}
