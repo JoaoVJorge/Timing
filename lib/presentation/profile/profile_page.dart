@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
@@ -11,7 +13,6 @@ import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/avatar_presets.dart";
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -22,27 +23,23 @@ class ProfilePage extends StatelessWidget {
 
     return AppScaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 16, bottom: 16),
+        padding: const EdgeInsets.only(top: 18, bottom: 16),
         child: Obx(() {
           final ProfileStatsEntity stats = controller.stats.value;
           final ProfilePeriod selectedPeriod = controller.selectedPeriod.value;
-          final String name = _displayName(context, controller.userName.value);
-          final String handle = _handle(context, controller.nickName.value);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ProfileTopBar(onTapSettings: controller.onTapEditProfile),
-              const Gap(18),
-              _IdentityHeader(
-                name: name,
-                handle: handle,
-                avatarIcon: AppAvatarPresets.byIndex(
-                  controller.avatarIconIndex.value,
-                ),
-                onTapEdit: controller.onTapEditProfile,
+              const _JourneyHeader(),
+              const Gap(6),
+              _TopAchievementsStrip(
+                hasAnyUnlockedAchievement: controller.hasAnyUnlockedAchievement,
+                hasGoalStarted: controller.hasGoalStarted,
+                hasValidFirstFocus: controller.hasValidFirstFocus,
+                onTap: controller.onTapAchievements,
               ),
-              const Gap(18),
+              const Gap(16),
               _FocusHeroCard(stats: stats),
               const Gap(14),
               _PeriodTabs(
@@ -56,10 +53,7 @@ class ProfilePage extends StatelessWidget {
               const Gap(20),
               _EvolutionSection(values: controller.evolutionFocusSeconds),
               const Gap(20),
-              _AchievementsSection(
-                stats: stats,
-                onTapSeeAll: controller.onTapAchievements,
-              ),
+              _SocialSection(onTapFriends: controller.onTapFriends),
               const Gap(20),
               _ReadingSection(stats: stats),
             ],
@@ -68,131 +62,271 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  String _displayName(BuildContext context, String rawName) {
-    final String formatted = capitalizeName(rawName);
-    return formatted.isEmpty ? context.l10n.loginNameHint : formatted;
-  }
-
-  String _handle(BuildContext context, String rawNick) {
-    final String nick = rawNick.trim().replaceAll(RegExp(r"^@+\s*"), "");
-    return nick.isEmpty ? "@${context.l10n.nicknameFallback}" : "@$nick";
-  }
 }
 
-class _ProfileTopBar extends StatelessWidget {
-  const _ProfileTopBar({required this.onTapSettings});
-
-  final VoidCallback onTapSettings;
+class _JourneyHeader extends StatelessWidget {
+  const _JourneyHeader();
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Expanded(
-        child: Text(
-          context.l10n.profileTitle,
-          style: context.textStyles.extraBold24,
-        ),
+      Text(
+        context.l10n.profileTitle,
+        style: context.textStyles.black32.copyWith(fontSize: 34),
       ),
-      BounceTap(
-        onTap: onTapSettings,
-        child: Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: context.colorTokens.surface,
-            border: Border.all(color: context.colorTokens.borderUnfocused),
-          ),
-          child: Icon(
-            Icons.settings_rounded,
-            size: 18,
-            color: context.colorTokens.textBody,
-          ),
+      const Gap(4),
+      Text(
+        context.l10n.profileSubtitle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyLarge.copyWith(
+          color: context.colorTokens.textHint,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
         ),
       ),
     ],
   );
 }
 
-class _IdentityHeader extends StatelessWidget {
-  const _IdentityHeader({
-    required this.name,
-    required this.handle,
-    required this.avatarIcon,
-    required this.onTapEdit,
+class _TopAchievementsStrip extends StatelessWidget {
+  const _TopAchievementsStrip({
+    required this.hasAnyUnlockedAchievement,
+    required this.hasGoalStarted,
+    required this.hasValidFirstFocus,
+    required this.onTap,
   });
 
-  final String name;
-  final String handle;
-  final IconData avatarIcon;
-  final VoidCallback onTapEdit;
+  final bool hasAnyUnlockedAchievement;
+  final bool hasGoalStarted;
+  final bool hasValidFirstFocus;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Container(
-        width: 58,
-        height: 58,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: context.colorTokens.primaryGradient,
-          border: Border.all(color: context.colorTokens.surface, width: 3),
-        ),
-        child: Icon(
-          avatarIcon,
-          color: context.colorTokens.primaryForeground,
-          size: 30,
-        ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Gap(6),
+          Expanded(
+            flex: 12,
+            child: _TopAchievementChip(
+              icon: Icons.emoji_events_rounded,
+              title: context.l10n.profileAchievementFirstUnlocked,
+              color: context.colorTokens.primary,
+              isUnlocked: hasAnyUnlockedAchievement,
+              isFeatured: true,
+              onTap: onTap,
+            ),
+          ),
+          const Gap(10),
+          Expanded(
+            flex: 10,
+            child: Column(
+              children: [
+                _TopAchievementChip(
+                  icon: Icons.track_changes_rounded,
+                  title: context.l10n.profileAchievementGoalStarted,
+                  color: context.colorTokens.primary,
+                  isUnlocked: hasGoalStarted,
+                  onTap: onTap,
+                ),
+                const Gap(8),
+                _TopAchievementChip(
+                  icon: Icons.eco_rounded,
+                  title: context.l10n.profileAchievementFirstFocus,
+                  color: context.colorTokens.primary,
+                  isUnlocked: hasValidFirstFocus,
+                  onTap: onTap,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      const Gap(14),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.extraBold20,
-            ),
-            Text(
-              handle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
-              ),
-            ),
-            const Gap(6),
-            BounceTap(
-              onTap: onTapEdit,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colorTokens.primaryVeryLight,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: context.colorTokens.primaryVeryLight,
-                  ),
-                ),
-                child: Text(
-                  context.l10n.editButton,
-                  style: context.textStyles.bodyTiny.copyWith(
-                    color: context.colorTokens.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
-          ],
+      if (!hasAnyUnlockedAchievement) ...[
+        const Gap(6),
+        Text(
+          context.l10n.profileAchievementsStartHint,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.bodySmall.copyWith(
+            color: context.colorTokens.textHint,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-      ),
+      ],
     ],
   );
+}
+
+class _TopAchievementChip extends StatelessWidget {
+  const _TopAchievementChip({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.isUnlocked,
+    required this.onTap,
+    this.isFeatured = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color color;
+  final bool isUnlocked;
+  final VoidCallback onTap;
+  final bool isFeatured;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color effectiveColor = isUnlocked
+        ? color
+        : context.colorTokens.textHint;
+    final double height = isFeatured ? 100 : 46;
+    final double iconSize = isFeatured ? 56 : 32;
+    final double innerIconSize = isFeatured ? 32 : 18;
+    final double textSize = isFeatured ? 20 : 12.5;
+    final double radius = isFeatured ? 16 : 14;
+
+    return BounceTap(
+      onTap: onTap,
+      pressedScale: 0.97,
+      child: Stack(
+        children: [
+          Container(
+            height: height,
+            padding: EdgeInsets.symmetric(
+              horizontal: isFeatured ? 12 : 12,
+              vertical: isFeatured ? 12 : 6,
+            ),
+            decoration: BoxDecoration(
+              color: context.colorTokens.surface,
+              borderRadius: BorderRadius.circular(radius),
+              border: Border.all(
+                color: isUnlocked && isFeatured
+                    ? color.withValues(alpha: 0.30)
+                    : context.colorTokens.borderUnfocused.withValues(
+                        alpha: 0.60,
+                      ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: context.colorTokens.surfaceShadow,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: iconSize,
+                  height: iconSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: effectiveColor.withValues(
+                      alpha: isUnlocked ? 0.14 : 0.10,
+                    ),
+                  ),
+                  child: Icon(
+                    isUnlocked ? icon : Icons.lock_rounded,
+                    color: effectiveColor,
+                    size: innerIconSize,
+                  ),
+                ),
+                Gap(isFeatured ? 12 : 8),
+                Expanded(
+                  child: isFeatured
+                      ? _FeaturedAchievementTitle(
+                          title: title,
+                          color: isUnlocked
+                              ? color
+                              : context.colorTokens.textBody.withValues(
+                                  alpha: 0.72,
+                                ),
+                        )
+                      : Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.bodyMedium.copyWith(
+                            color: isUnlocked
+                                ? color
+                                : context.colorTokens.textBody.withValues(
+                                    alpha: 0.72,
+                                  ),
+                            fontSize: textSize,
+                            fontWeight: FontWeight.w900,
+                            height: 1.12,
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
+          if (isUnlocked)
+            Positioned(
+              right: 10,
+              bottom: 8,
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: isFeatured ? 16 : 12,
+                color: color.withValues(alpha: 0.35),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeaturedAchievementTitle extends StatelessWidget {
+  const _FeaturedAchievementTitle({required this.title, required this.color});
+
+  final String title;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> parts = title.split(" ");
+    final String firstLine = parts.isEmpty ? title : parts.first;
+    final String secondLine = parts.length <= 1
+        ? ""
+        : parts.sublist(1).join(" ");
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          firstLine,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.black20.copyWith(
+            color: color,
+            fontSize: 24,
+            height: 0.96,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        if (secondLine.isNotEmpty)
+          Text(
+            secondLine,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyMedium.copyWith(
+              color: color,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              height: 1.05,
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class _FocusHeroCard extends StatelessWidget {
@@ -217,9 +351,7 @@ class _FocusHeroCard extends StatelessWidget {
               Text(
                 context.l10n.profileSummarySinceStartLabel,
                 style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primaryForeground.withValues(
-                    alpha: 0.76,
-                  ),
+                  color: context.colorTokens.white,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -236,9 +368,7 @@ class _FocusHeroCard extends StatelessWidget {
               Text(
                 context.l10n.profileSummaryFocusLabel,
                 style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primaryForeground.withValues(
-                    alpha: 0.82,
-                  ),
+                  color: context.colorTokens.white,
                 ),
               ),
             ],
@@ -329,11 +459,10 @@ class _PeriodTab extends StatelessWidget {
         period.localizedLabel(context),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodySmall.copyWith(
+        style: context.textStyles.bodyMedium.copyWith(
           color: isSelected
               ? context.colorTokens.primary
               : context.colorTokens.textHint,
-          fontSize: 14,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -627,27 +756,44 @@ class _EvolutionChartPainter extends CustomPainter {
     final Paint dotPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-    final int maxValue = values.fold<int>(
-      1,
+    final int rawMaxValue = values.fold<int>(
+      60,
       (currentMax, value) => value > currentMax ? value : currentMax,
     );
+    final int interval = rawMaxValue <= 3600 ? 1800 : 3600;
+    final int maxValue = ((rawMaxValue + interval - 1) ~/ interval) * interval;
 
     final double chartTop = 6;
     final double chartBottom = size.height - 24;
     final double chartHeight = chartBottom - chartTop;
+    const double labelWidth = 42;
+    final double chartLeft = labelWidth;
+    final double chartWidth = size.width - chartLeft;
     final double step = values.length <= 1
         ? 0
-        : size.width / (values.length - 1);
+        : chartWidth / (values.length - 1);
 
     for (int i = 0; i < 3; i++) {
       final double y = chartTop + chartHeight * (i / 2);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+      canvas.drawLine(Offset(chartLeft, y), Offset(size.width, y), gridPaint);
+      final TextPainter labelPainter = TextPainter(
+        text: TextSpan(
+          text: _formatChartLabel((maxValue * (2 - i) / 2).round()),
+          style: TextStyle(
+            color: textColor,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: labelWidth - 6);
+      labelPainter.paint(canvas, Offset(0, y - labelPainter.height / 2));
     }
 
     final Path line = Path();
     final Path fill = Path();
     for (int i = 0; i < values.length; i++) {
-      final double x = i * step;
+      final double x = chartLeft + (i * step);
       final double normalizedValue = (values[i] / maxValue).clamp(0, 1);
       final double y = chartBottom - chartHeight * normalizedValue;
       if (i == 0) {
@@ -672,112 +818,191 @@ class _EvolutionChartPainter extends CustomPainter {
       oldDelegate.values != values ||
       oldDelegate.color != color ||
       oldDelegate.textColor != textColor;
+
+  String _formatChartLabel(int seconds) {
+    if (seconds >= 3600) {
+      final int hours = seconds ~/ 3600;
+      final int minutes = (seconds % 3600) ~/ 60;
+      return minutes == 0 ? "${hours}h" : "${hours}h${minutes}m";
+    }
+
+    final int minutes = (seconds / 60).round();
+    return minutes <= 0 ? "0min" : "${minutes}min";
+  }
 }
 
-class _AchievementsSection extends StatelessWidget {
-  const _AchievementsSection({required this.stats, required this.onTapSeeAll});
+class _SocialSection extends StatelessWidget {
+  const _SocialSection({required this.onTapFriends});
 
-  final ProfileStatsEntity stats;
-  final VoidCallback onTapSeeAll;
+  final VoidCallback onTapFriends;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _SectionHeader(
-        title: context.l10n.profileAchievementsTitle,
-        action: context.l10n.profileSeeAll,
-        onTapAction: onTapSeeAll,
-      ),
+      Text(_socialTitle(context), style: context.textStyles.extraBold20),
       const Gap(12),
-      Row(
-        children: [
-          Expanded(
-            child: _AchievementBadge(
-              icon: Icons.bolt_rounded,
-              title: context.l10n.profileAchievementFirstFocus,
-              color: context.colorTokens.primary,
-              isUnlocked: stats.totalFocusSeconds > 0,
+      Container(
+        decoration: _cardDecoration(
+          context,
+        ).copyWith(borderRadius: BorderRadius.circular(18)),
+        child: Column(
+          children: [
+            _SocialTile(
+              icon: Icons.group_rounded,
+              title: _friendsTitle(context),
+              subtitle: _friendsSubtitle(context),
+              detail: _friendsDetail(context),
+              onTap: onTapFriends,
             ),
-          ),
-          const Gap(10),
-          Expanded(
-            child: _AchievementBadge(
-              icon: Icons.school_rounded,
-              title: context.l10n.profileAchievementStudyStarted,
-              color: TimeCategoryType.studying.accentColor,
-              isUnlocked: stats.studyingTotalSeconds > 0,
+            Divider(
+              height: 1,
+              indent: 76,
+              endIndent: 18,
+              color: context.colorTokens.divider,
             ),
-          ),
-          const Gap(10),
-          Expanded(
-            child: _AchievementBadge(
-              icon: Icons.auto_stories_rounded,
-              title: context.l10n.profileAchievementReadingStarted,
-              color: TimeCategoryType.reading.accentColor,
-              isUnlocked: stats.readingTotalPages > 0,
+            _SocialTile(
+              icon: Icons.qr_code_rounded,
+              title: _inviteCodeTitle(context),
+              subtitle: _inviteCodeSubtitle(context),
+              onTap: () async {
+                final String message = _inviteCodeCopied(context);
+                await Clipboard.setData(const ClipboardData(text: "JOAO-2841"));
+                appNavigator.showSuccessSnackBar(message);
+              },
             ),
-          ),
-          const Gap(10),
-          Expanded(
-            child: _AchievementBadge(
-              icon: Icons.lock_rounded,
-              title: context.l10n.profileAchievementLocked,
-              color: context.colorTokens.textHint,
-              isUnlocked: false,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     ],
   );
+
+  String _socialTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Social",
+    "pt" => "Social",
+    _ => "Social",
+  };
+
+  String _friendsTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Amigos",
+    "pt" => "Amigos",
+    _ => "Friends",
+  };
+
+  String _friendsSubtitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Gestiona amigos y solicitudes",
+        "pt" => "Gerencie amigos e solicitações",
+        _ => "Manage friends and requests",
+      };
+
+  String _friendsDetail(BuildContext context) => switch (context.languageCode) {
+    "es" => "12 amigos • 2 pendientes",
+    "pt" => "12 amigos • 2 pendentes",
+    _ => "12 friends • 2 pending",
+  };
+
+  String _inviteCodeTitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Código de invitación",
+        "pt" => "Código de convite",
+        _ => "Invite code",
+      };
+
+  String _inviteCodeSubtitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Comparte para agregar amigos",
+        "pt" => "Compartilhe para adicionar amigos",
+        _ => "Share to add friends",
+      };
+
+  String _inviteCodeCopied(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Código copiado",
+        "pt" => "Código copiado",
+        _ => "Code copied",
+      };
 }
 
-class _AchievementBadge extends StatelessWidget {
-  const _AchievementBadge({
+class _SocialTile extends StatelessWidget {
+  const _SocialTile({
     required this.icon,
     required this.title,
-    required this.color,
-    required this.isUnlocked,
+    required this.subtitle,
+    required this.onTap,
+    this.detail,
   });
 
   final IconData icon;
   final String title;
-  final Color color;
-  final bool isUnlocked;
+  final String subtitle;
+  final String? detail;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final Color effectiveColor = isUnlocked
-        ? color
-        : context.colorTokens.textHint;
-    return Column(
-      children: [
-        Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: effectiveColor.withValues(alpha: isUnlocked ? 0.16 : 0.08),
-            border: Border.all(
-              color: effectiveColor.withValues(alpha: isUnlocked ? 0.32 : 0.18),
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.98,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Row(
+        children: [
+          _IconBadge(
+            icon: icon,
+            color: context.colorTokens.primary,
+            size: 46,
+            iconSize: 23,
+          ),
+          const Gap(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(3),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (detail != null) ...[
+                  const Gap(2),
+                  Text(
+                    detail!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          child: Icon(icon, color: effectiveColor, size: 26),
-        ),
-        const Gap(8),
-        Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: context.textStyles.bodyTiny.copyWith(
-            color: context.colorTokens.textBody,
+          const Gap(8),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 28,
+            color: context.colorTokens.textHint,
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      ),
+    ),
+  );
 }
 
 class _ReadingSection extends StatelessWidget {
@@ -795,36 +1020,6 @@ class _ReadingSection extends StatelessWidget {
       ),
       const Gap(12),
       ProfileTopSubjectsList(subjects: stats.topReadingSubjects),
-    ],
-  );
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.action,
-    this.onTapAction,
-  });
-
-  final String title;
-  final String action;
-  final VoidCallback? onTapAction;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(child: Text(title, style: context.textStyles.extraBold20)),
-      BounceTap(
-        onTap: onTapAction ?? () {},
-        pressedScale: onTapAction == null ? 1 : 0.94,
-        child: Text(
-          action,
-          style: context.textStyles.bodyMedium.copyWith(
-            color: context.colorTokens.primary,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
     ],
   );
 }

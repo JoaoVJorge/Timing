@@ -7,8 +7,8 @@ class ProfileBindings extends Bindings {
     Get.put<ProfileController>(
       ProfileController(
         getProfileStatsUseCase: Get.find(),
+        getDailyTasksUseCase: Get.find(),
         dailyProgressService: Get.find(),
-        appController: Get.find(),
         appNavigator: Get.find(),
       ),
     );
