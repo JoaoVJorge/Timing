@@ -50,6 +50,10 @@ class CategoryPage extends StatelessWidget {
               return HobbySubjectCard(
                 subject: subject,
                 onTapPlay: () => controller.onTapSubject(subject),
+                onTapEdit: () => controller.onTapEditSubject(subject),
+                onTapPin: () => controller.onPinSubjectToStart(subject),
+                onDelete: () => controller.onDeleteSubject(subject),
+                isPinned: index == 0,
               );
             },
           );
@@ -69,6 +73,7 @@ class CategoryPage extends StatelessWidget {
             final SubjectEntity subject = subjects[index];
             return NotebookSwipeTile(
               onTapNotes: () => controller.onTapNotes(subject),
+              onTapEdit: () => controller.onTapEditSubject(subject),
               onDelete: () => controller.onDeleteSubject(subject),
               child: switch (controller.category) {
                 TimeCategoryType.reading => ReadingSubjectTile(

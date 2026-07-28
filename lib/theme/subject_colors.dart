@@ -6,13 +6,13 @@ class SubjectColors {
 
   static const List<Color> values = [
     ...AppAccentPresets.values,
-    Color(0xFFCDE4F9),
-    Color(0xFFEADCF5),
-    Color(0xFFDEF0B4),
-    Color(0xFFF6D6E7),
-    Color(0xFFB9F0F5),
-    Color(0xFFFBEBAA),
-    Color(0xFFFFE2B3),
+    Color(0xFF8FCBFF),
+    Color(0xFFD6A8F2),
+    Color(0xFFC5EA67),
+    Color(0xFFFF9DCA),
+    Color(0xFF66E3EC),
+    Color(0xFFFFD84D),
+    Color(0xFFFFBE64),
   ];
 
   static Color byIndex(int index) => values[index % values.length];

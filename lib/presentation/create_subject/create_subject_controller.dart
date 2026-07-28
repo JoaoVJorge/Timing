@@ -6,6 +6,7 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
+import "package:help_out/core/domain/use_cases/update_subject_use_case.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:help_out/theme/subject_icons.dart";
@@ -13,14 +14,18 @@ import "package:help_out/theme/subject_icons.dart";
 class CreateSubjectController extends GetxController {
   CreateSubjectController({
     required this._addSubjectUseCase,
+    required this._updateSubjectUseCase,
     required this._appNavigator,
     required this.category,
+    this.editingSubject,
   });
 
   final AddSubjectUseCase _addSubjectUseCase;
+  final UpdateSubjectUseCase _updateSubjectUseCase;
   final AppNavigator _appNavigator;
 
   final TimeCategoryType category;
+  final SubjectEntity? editingSubject;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController goalController = TextEditingController();
@@ -46,6 +51,7 @@ class CreateSubjectController extends GetxController {
   final List<int> pageGoalPresets = [5, 10, 25, 50];
 
   bool get isPageBased => category == TimeCategoryType.reading;
+  bool get isEditing => editingSubject != null;
 
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
@@ -66,6 +72,11 @@ class CreateSubjectController extends GetxController {
 
   void initializeThemeColor(Color color) {
     if (_hasInitializedThemeColor) {
+      return;
+    }
+    if (editingSubject != null) {
+      selectedColor.value = Color(editingSubject!.colorValue);
+      _hasInitializedThemeColor = true;
       return;
     }
     selectedColor.value = SubjectColors.fromThemeAccent(color);
@@ -100,19 +111,45 @@ class CreateSubjectController extends GetxController {
     TimeCategoryType.hobbies => context.l10n.createSubjectNameHintHobbies,
   };
 
-  String submitLabel(BuildContext context) => switch (category) {
-    TimeCategoryType.studying => context.l10n.createSubjectButtonStudying,
-    TimeCategoryType.reading => context.l10n.createSubjectButtonReading,
-    TimeCategoryType.exercises => context.l10n.createSubjectButtonExercises,
-    TimeCategoryType.hobbies => context.l10n.createSubjectButtonHobbies,
-  };
+  String submitLabel(BuildContext context) {
+    if (isEditing) {
+      return switch (context.languageCode) {
+        "en" => "Save changes",
+        "es" => "Guardar cambios",
+        "fr" => "Enregistrer",
+        "de" => "Änderungen speichern",
+        "ar" => "حفظ التغييرات",
+        _ => "Salvar alterações",
+      };
+    }
 
-  String successMessage(BuildContext context) => switch (category) {
-    TimeCategoryType.studying => context.l10n.createSubjectSuccessStudying,
-    TimeCategoryType.reading => context.l10n.createSubjectSuccessReading,
-    TimeCategoryType.exercises => context.l10n.createSubjectSuccessExercises,
-    TimeCategoryType.hobbies => context.l10n.createSubjectSuccessHobbies,
-  };
+    return switch (category) {
+      TimeCategoryType.studying => context.l10n.createSubjectButtonStudying,
+      TimeCategoryType.reading => context.l10n.createSubjectButtonReading,
+      TimeCategoryType.exercises => context.l10n.createSubjectButtonExercises,
+      TimeCategoryType.hobbies => context.l10n.createSubjectButtonHobbies,
+    };
+  }
+
+  String successMessage(BuildContext context) {
+    if (isEditing) {
+      return switch (context.languageCode) {
+        "en" => "Updated successfully",
+        "es" => "Actualizado correctamente",
+        "fr" => "Mis à jour",
+        "de" => "Erfolgreich aktualisiert",
+        "ar" => "تم التحديث بنجاح",
+        _ => "Atualizado com sucesso",
+      };
+    }
+
+    return switch (category) {
+      TimeCategoryType.studying => context.l10n.createSubjectSuccessStudying,
+      TimeCategoryType.reading => context.l10n.createSubjectSuccessReading,
+      TimeCategoryType.exercises => context.l10n.createSubjectSuccessExercises,
+      TimeCategoryType.hobbies => context.l10n.createSubjectSuccessHobbies,
+    };
+  }
 
   String? missingRequirement(BuildContext context) {
     if (name.value.trim().isEmpty) {
@@ -172,7 +209,22 @@ class CreateSubjectController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (!isPageBased && goalController.text.trim().isEmpty) {
+    final SubjectEntity? subject = editingSubject;
+    if (subject != null) {
+      nameController.text = subject.name;
+      selectedColor.value = Color(subject.colorValue);
+      selectedIconName.value = subject.iconName.isEmpty
+          ? SubjectIcons.suggestionsFor(category).first
+          : subject.iconName;
+      restMinutes.value = subject.restMinutes;
+      restMinutesController.text = subject.restMinutes.toString();
+      wallpaperIndex.value = subject.wallpaperIndex;
+      goalController.text = isPageBased
+          ? subject.goalPages.toString()
+          : (subject.goalSeconds ~/ 60).toString();
+      goal.value = goalController.text;
+      name.value = nameController.text;
+    } else if (!isPageBased && goalController.text.trim().isEmpty) {
       goalController.text = "25";
       goal.value = goalController.text;
     }
@@ -212,16 +264,28 @@ class CreateSubjectController extends GetxController {
       goalSeconds = goalMinutes * 60;
     }
 
-    final Either<AppError, SubjectEntity> result = await _addSubjectUseCase(
-      name: name,
-      category: category,
-      colorValue: selectedColor.value.toARGB32(),
-      goalSeconds: goalSeconds,
-      goalPages: goalPages,
-      iconName: selectedIconName.value,
-      restMinutes: restMinutes.value,
-      wallpaperIndex: wallpaperIndex.value,
-    );
+    final SubjectEntity? subject = editingSubject;
+    final Either<AppError, SubjectEntity> result = subject == null
+        ? await _addSubjectUseCase(
+            name: name,
+            category: category,
+            colorValue: selectedColor.value.toARGB32(),
+            goalSeconds: goalSeconds,
+            goalPages: goalPages,
+            iconName: selectedIconName.value,
+            restMinutes: restMinutes.value,
+            wallpaperIndex: wallpaperIndex.value,
+          )
+        : await _updateSubjectUseCase(
+            subjectId: subject.id,
+            name: name,
+            colorValue: selectedColor.value.toARGB32(),
+            goalSeconds: goalSeconds,
+            goalPages: goalPages,
+            iconName: selectedIconName.value,
+            restMinutes: restMinutes.value,
+            wallpaperIndex: wallpaperIndex.value,
+          );
 
     isSaving.value = false;
     result.fold((error) => _appNavigator.showErrorSnackBar(), (subject) {
