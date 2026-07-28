@@ -8,5 +8,6 @@ class GetSubjectsUseCase {
 
   final SubjectsRepository _subjectsRepository;
 
-  Future<Either<AppError, List<SubjectEntity>>> call() => _subjectsRepository.getSubjects();
+  Future<Either<AppError, List<SubjectEntity>>> call() =>
+      _subjectsRepository.getSubjects();
 }

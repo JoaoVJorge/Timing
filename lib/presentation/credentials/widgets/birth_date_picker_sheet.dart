@@ -43,10 +43,10 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
   int get _leadingEmptyDays =>
       DateTime(_visibleMonth.year, _visibleMonth.month).weekday % 7;
 
-  bool get _canGoToNextMonth =>
-      DateTime(_visibleMonth.year, _visibleMonth.month + 1).isBefore(
-        DateTime(_today.year, _today.month + 1),
-      );
+  bool get _canGoToNextMonth => DateTime(
+    _visibleMonth.year,
+    _visibleMonth.month + 1,
+  ).isBefore(DateTime(_today.year, _today.month + 1));
 
   bool get _canGoToPreviousMonth =>
       _visibleMonth.year > _minYear || _visibleMonth.month > 1;
@@ -63,10 +63,8 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
       return;
     }
     setState(
-      () => _visibleMonth = DateTime(
-        _visibleMonth.year,
-        _visibleMonth.month - 1,
-      ),
+      () =>
+          _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month - 1),
     );
   }
 
@@ -75,10 +73,8 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
       return;
     }
     setState(
-      () => _visibleMonth = DateTime(
-        _visibleMonth.year,
-        _visibleMonth.month + 1,
-      ),
+      () =>
+          _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + 1),
     );
   }
 
@@ -171,9 +167,8 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
         ),
         Expanded(
           child: BounceTap(
-            onTap: () => setState(
-              () => _isYearPickerVisible = !_isYearPickerVisible,
-            ),
+            onTap: () =>
+                setState(() => _isYearPickerVisible = !_isYearPickerVisible),
             child: Column(
               children: [
                 Text(
@@ -223,8 +218,9 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
     children: [
       Row(
         children: [
-          for (final String weekday
-              in MaterialLocalizations.of(context).narrowWeekdays)
+          for (final String weekday in MaterialLocalizations.of(
+            context,
+          ).narrowWeekdays)
             Expanded(
               child: Center(
                 child: Text(
@@ -338,9 +334,7 @@ class _BirthDatePickerSheetState extends State<BirthDatePickerSheet> {
           child: Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: isSelected
-                  ? AuthOnboardingColors.yellowGradient
-                  : null,
+              gradient: isSelected ? AuthOnboardingColors.yellowGradient : null,
               color: isSelected
                   ? null
                   : AuthOnboardingColors.background.withValues(alpha: 0.6),

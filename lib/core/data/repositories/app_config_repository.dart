@@ -8,7 +8,8 @@ class AppConfigRepository {
 
   final AppConfigDataSource _appConfigDataSource;
 
-  Future<Either<AppError, AppConfigEntity>> getAppConfig() => _appConfigDataSource.getAppConfig();
+  Future<Either<AppError, AppConfigEntity>> getAppConfig() =>
+      _appConfigDataSource.getAppConfig();
 
   Future<Either<AppError, void>> saveAppConfig(AppConfigEntity config) =>
       _appConfigDataSource.saveAppConfig(config);

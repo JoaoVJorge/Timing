@@ -7,23 +7,27 @@ import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 class GroupsController extends GetxController {
   GroupsController({
     required this._getGroupsUseCase,
     required this._appNavigator,
+    required this._supabaseService,
   });
 
   final GetGroupsUseCase _getGroupsUseCase;
   final AppNavigator _appNavigator;
+  final SupabaseService _supabaseService;
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
   final Rx<LeaderboardPeriodType> selectedPeriod =
       LeaderboardPeriodType.today.obs;
   final RxBool isLoading = true.obs;
-  static const String currentUserId = "me";
+
+  String get currentUserId => _supabaseService.currentUserId ?? "";
 
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;

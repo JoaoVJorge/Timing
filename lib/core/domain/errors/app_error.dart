@@ -7,7 +7,8 @@ abstract class AppError {
 }
 
 class HttpError extends AppError {
-  HttpError({required this.statusCode, required String message}) : super(message);
+  HttpError({required this.statusCode, required String message})
+    : super(message);
 
   final HttpStatusCode statusCode;
 }

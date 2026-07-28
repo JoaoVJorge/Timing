@@ -13,14 +13,22 @@ class DailyTasksDataSource {
 
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
     try {
-      final String? savedTasks = await _localStorageService.read<String?>(LocalStorageKeys.dailyTasks);
+      final String? savedTasks = await _localStorageService.read<String?>(
+        LocalStorageKeys.dailyTasks,
+      );
 
       if (savedTasks == null) {
         return const Right([]);
       }
 
       final List<dynamic> decoded = jsonDecode(savedTasks) as List<dynamic>;
-      return Right(decoded.map((item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>)).toList());
+      return Right(
+        decoded
+            .map(
+              (item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>),
+            )
+            .toList(),
+      );
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
     }
@@ -28,7 +36,9 @@ class DailyTasksDataSource {
 
   Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) async {
     try {
-      final String encoded = jsonEncode(tasks.map((task) => task.toMap()).toList());
+      final String encoded = jsonEncode(
+        tasks.map((task) => task.toMap()).toList(),
+      );
       await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
       return const Right(null);
     } catch (error, stackTrace) {

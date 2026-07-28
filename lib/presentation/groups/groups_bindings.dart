@@ -5,7 +5,11 @@ class GroupsBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<GroupsController>(
-      GroupsController(getGroupsUseCase: Get.find(), appNavigator: Get.find()),
+      GroupsController(
+        getGroupsUseCase: Get.find(),
+        appNavigator: Get.find(),
+        supabaseService: Get.find(),
+      ),
     );
   }
 }

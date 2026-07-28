@@ -9,11 +9,14 @@ class DeleteScheduleEntryUseCase {
   final ScheduleRepository _scheduleRepository;
 
   Future<Either<AppError, void>> call(String entryId) async {
-    final Either<AppError, List<ScheduleEntryEntity>> getResult = await _scheduleRepository.getEntries();
+    final Either<AppError, List<ScheduleEntryEntity>> getResult =
+        await _scheduleRepository.getEntries();
 
     return getResult.fold(
       (error) async => Left(error),
-      (entries) => _scheduleRepository.saveEntries(entries.where((entry) => entry.id != entryId).toList()),
+      (entries) => _scheduleRepository.saveEntries(
+        entries.where((entry) => entry.id != entryId).toList(),
+      ),
     );
   }
 }

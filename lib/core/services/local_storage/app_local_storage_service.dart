@@ -3,7 +3,10 @@ import "package:help_out/core/services/local_storage/local_storage_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class AppLocalStorageService {
-  AppLocalStorageService({required this._localStorage, required this._secureStorage});
+  AppLocalStorageService({
+    required this._localStorage,
+    required this._secureStorage,
+  });
 
   final SharedPreferences _localStorage;
   final FlutterSecureStorage _secureStorage;

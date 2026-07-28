@@ -8,5 +8,6 @@ class GetAppConfigUseCase {
 
   final AppConfigRepository _appConfigRepository;
 
-  Future<Either<AppError, AppConfigEntity>> call() => _appConfigRepository.getAppConfig();
+  Future<Either<AppError, AppConfigEntity>> call() =>
+      _appConfigRepository.getAppConfig();
 }
