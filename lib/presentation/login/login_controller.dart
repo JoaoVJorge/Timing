@@ -33,6 +33,7 @@ class LoginController extends GetxController {
 
   StreamSubscription<AuthState>? _authSubscription;
   bool _isHandlingSignedInUser = false;
+  bool _hasCompletedSignIn = false;
 
   @override
   void onInit() {
@@ -76,7 +77,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> _handleSignedInUser() async {
-    if (_isHandlingSignedInUser) {
+    if (_isHandlingSignedInUser || _hasCompletedSignIn) {
       return;
     }
 
@@ -87,7 +88,10 @@ class LoginController extends GetxController {
       if (!hasRemoteProfile) {
         await _syncProfileFromAuthUser();
       }
-      await appNavigator.offAllNamed(AppRoutes.mainNavigation);
+      _hasCompletedSignIn = true;
+      if (Get.currentRoute != AppRoutes.mainNavigation) {
+        await appNavigator.offAllNamed(AppRoutes.mainNavigation);
+      }
     } catch (error, stackTrace) {
       logger.logError(
         "Failed to finish Google sign in",
