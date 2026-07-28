@@ -16,4 +16,7 @@ class PhoneAuthRepository {
   }) => _phoneAuthDataSource.verifyCode(emailAddress: emailAddress, code: code);
 
   Future<Either<AppError, void>> signOut() => _phoneAuthDataSource.signOut();
+
+  Future<Either<AppError, void>> signInWithGoogle() =>
+      _phoneAuthDataSource.signInWithGoogle();
 }

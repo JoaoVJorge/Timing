@@ -52,4 +52,17 @@ class PhoneAuthDataSource {
 
   String _normalizedEmailAddress(String emailAddress) =>
       emailAddress.trim().toLowerCase();
+
+  Future<Either<AppError, void>> signInWithGoogle() async {
+    try {
+      await _supabaseService.requireClient.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: SupabaseService.oauthRedirectUrl,
+        authScreenLaunchMode: LaunchMode.externalApplication,
+      );
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
 }
