@@ -4,8 +4,6 @@ import "package:help_out/presentation/login/login_controller.dart";
 class LoginBindings extends Bindings {
   @override
   void dependencies() {
-    Get.put<LoginController>(
-      LoginController(appController: Get.find(), appNavigator: Get.find()),
-    );
+    Get.put<LoginController>(LoginController(appNavigator: Get.find()));
   }
 }

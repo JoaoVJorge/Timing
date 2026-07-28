@@ -8,5 +8,6 @@ class GetGroupsUseCase {
 
   final GroupsRepository _groupsRepository;
 
-  Future<Either<AppError, List<GroupEntity>>> call() => _groupsRepository.getGroups();
+  Future<Either<AppError, List<GroupEntity>>> call() =>
+      _groupsRepository.getGroups();
 }

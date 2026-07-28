@@ -1,21 +1,55 @@
 import "package:dartz/dartz.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
+import "package:supabase_flutter/supabase_flutter.dart";
 
-/// Mock phone authentication backend. There is no real SMS provider yet, so
-/// requesting a code just simulates a network round-trip and verifying accepts
-/// any well-formed 6-digit code.
 class PhoneAuthDataSource {
+  PhoneAuthDataSource({required this._supabaseService});
+
+  final SupabaseService _supabaseService;
+
   Future<Either<AppError, void>> requestCode(String phoneNumber) async {
-    await Future.delayed(const Duration(milliseconds: 700));
-    return const Right(null);
+    try {
+      await _supabaseService.requireClient.auth.signInWithOtp(
+        phone: _normalizedPhoneNumber(phoneNumber),
+      );
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
   }
 
   Future<Either<AppError, bool>> verifyCode({
     required String phoneNumber,
     required String code,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 700));
-    final bool isValid = RegExp(r"^[0-9]{6}$").hasMatch(code);
-    return Right(isValid);
+    try {
+      if (!RegExp(r"^[0-9]{6}$").hasMatch(code)) {
+        return const Right(false);
+      }
+
+      await _supabaseService.requireClient.auth.verifyOTP(
+        phone: _normalizedPhoneNumber(phoneNumber),
+        token: code,
+        type: OtpType.sms,
+      );
+      return const Right(true);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
   }
+
+  Future<Either<AppError, void>> signOut() async {
+    try {
+      if (_supabaseService.isConfigured) {
+        await _supabaseService.requireClient.auth.signOut();
+      }
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  String _normalizedPhoneNumber(String phoneNumber) =>
+      phoneNumber.replaceAll(RegExp(r"[^+0-9]"), "");
 }

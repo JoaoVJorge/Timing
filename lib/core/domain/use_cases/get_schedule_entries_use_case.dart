@@ -8,5 +8,6 @@ class GetScheduleEntriesUseCase {
 
   final ScheduleRepository _scheduleRepository;
 
-  Future<Either<AppError, List<ScheduleEntryEntity>>> call() => _scheduleRepository.getEntries();
+  Future<Either<AppError, List<ScheduleEntryEntity>>> call() =>
+      _scheduleRepository.getEntries();
 }

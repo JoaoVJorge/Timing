@@ -14,4 +14,6 @@ class PhoneAuthRepository {
     required String phoneNumber,
     required String code,
   }) => _phoneAuthDataSource.verifyCode(phoneNumber: phoneNumber, code: code);
+
+  Future<Either<AppError, void>> signOut() => _phoneAuthDataSource.signOut();
 }

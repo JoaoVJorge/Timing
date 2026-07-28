@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
+import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
@@ -11,18 +13,19 @@ import "package:share_plus/share_plus.dart";
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
 
-  static const String inviteCode = "JOAO-2841";
-
   @override
   State<FriendsPage> createState() => _FriendsPageState();
 }
 
 class _FriendsPageState extends State<FriendsPage> {
   final TextEditingController searchController = TextEditingController();
+  final SupabaseService supabaseService = Get.find();
 
-  final List<_FriendProfile> requests = List.of(_mockRequests);
-  final List<_FriendProfile> friends = List.of(_mockFriends);
+  final List<_FriendProfile> requests = [];
+  final List<_FriendProfile> friends = [];
+  String inviteCode = "";
   String query = "";
+  bool isLoading = true;
 
   List<_FriendProfile> get filteredFriends {
     final String normalizedQuery = query.trim().toLowerCase();
@@ -36,6 +39,12 @@ class _FriendsPageState extends State<FriendsPage> {
               friend.handle.toLowerCase().contains(normalizedQuery),
         )
         .toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFriends();
   }
 
   @override
@@ -74,23 +83,30 @@ class _FriendsPageState extends State<FriendsPage> {
           ),
           const Gap(18),
           _InviteCodeCard(
-            code: FriendsPage.inviteCode,
+            code: inviteCode.isEmpty ? "..." : inviteCode,
             onCopy: () => _copyInviteCode(context),
             onShare: () => _shareInviteCode(context),
           ),
-          if (query.trim().isEmpty) ...[
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else ...[
+            if (query.trim().isEmpty) ...[
+              const Gap(22),
+              _RequestsSection(
+                requests: requests,
+                onDecline: _removeRequest,
+                onAccept: _acceptRequest,
+              ),
+            ],
             const Gap(22),
-            _RequestsSection(
-              requests: requests,
-              onDecline: _removeRequest,
-              onAccept: _acceptRequest,
+            _FriendsSection(
+              friends: filteredFriends,
+              totalFriends: friends.length,
             ),
           ],
-          const Gap(22),
-          _FriendsSection(
-            friends: filteredFriends,
-            totalFriends: friends.length,
-          ),
           const Gap(20),
           _TipPill(text: _tip(context)),
         ],
@@ -98,14 +114,102 @@ class _FriendsPageState extends State<FriendsPage> {
     ),
   );
 
-  void _removeRequest(_FriendProfile profile) {
+  Future<void> _loadFriends() async {
+    final String? userId = supabaseService.currentUserId;
+    if (userId == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
+    try {
+      final Map<String, dynamic>? profileRow = await supabaseService
+          .requireClient
+          .from("profiles")
+          .select("friend_code")
+          .eq("id", userId)
+          .maybeSingle();
+      final List<Map<String, dynamic>> requestRows = await _selectRows(
+        table: "friendships",
+        filters: (query) =>
+            query.eq("addressee_id", userId).eq("status", "pending"),
+      );
+      final List<Map<String, dynamic>> friendRows = await _selectRows(
+        table: "friendships",
+        filters: (query) => query
+            .eq("status", "accepted")
+            .or("requester_id.eq.$userId,addressee_id.eq.$userId"),
+      );
+      final Set<String> profileIds = {
+        for (final Map<String, dynamic> row in requestRows)
+          row["requester_id"] as String,
+        for (final Map<String, dynamic> row in friendRows)
+          row["requester_id"] == userId
+              ? row["addressee_id"] as String
+              : row["requester_id"] as String,
+      };
+      final Map<String, Map<String, dynamic>> profilesById =
+          await _profilesById(profileIds.toList());
+
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        inviteCode =
+            profileRow?["friend_code"] as String? ??
+            userId.substring(0, 8).toUpperCase();
+        requests
+          ..clear()
+          ..addAll(
+            requestRows.map((row) {
+              final String requesterId = row["requester_id"] as String;
+              return _friendFromRow(
+                userId: requesterId,
+                friendshipId: row["id"] as String,
+                profileRow: profilesById[requesterId],
+              );
+            }),
+          );
+        friends
+          ..clear()
+          ..addAll(
+            friendRows.map((row) {
+              final String friendId = row["requester_id"] == userId
+                  ? row["addressee_id"] as String
+                  : row["requester_id"] as String;
+              return _friendFromRow(
+                userId: friendId,
+                friendshipId: row["id"] as String,
+                profileRow: profilesById[friendId],
+              );
+            }),
+          );
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => isLoading = false);
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _removeRequest(_FriendProfile profile) async {
+    await supabaseService.requireClient
+        .from("friendships")
+        .delete()
+        .eq("id", profile.friendshipId);
     setState(() => requests.remove(profile));
   }
 
-  void _acceptRequest(_FriendProfile profile) {
+  Future<void> _acceptRequest(_FriendProfile profile) async {
+    await supabaseService.requireClient
+        .from("friendships")
+        .update({"status": "accepted"})
+        .eq("id", profile.friendshipId);
     setState(() {
       requests.remove(profile);
-      if (!friends.any((friend) => friend.handle == profile.handle)) {
+      if (!friends.any((friend) => friend.id == profile.id)) {
         friends.insert(0, profile);
       }
     });
@@ -113,13 +217,61 @@ class _FriendsPageState extends State<FriendsPage> {
 
   Future<void> _copyInviteCode(BuildContext context) async {
     final String message = _copied(context);
-    await Clipboard.setData(const ClipboardData(text: FriendsPage.inviteCode));
+    await Clipboard.setData(ClipboardData(text: inviteCode));
     appNavigator.showSuccessSnackBar(message);
   }
 
   Future<void> _shareInviteCode(BuildContext context) async {
     await SharePlus.instance.share(
-      ShareParams(text: _shareText(context, FriendsPage.inviteCode)),
+      ShareParams(text: _shareText(context, inviteCode)),
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _selectRows({
+    required String table,
+    required dynamic Function(dynamic query) filters,
+  }) async {
+    final dynamic response = await filters(
+      supabaseService.requireClient.from(table).select(),
+    );
+    return (response as List<dynamic>)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+  }
+
+  Future<Map<String, Map<String, dynamic>>> _profilesById(
+    List<String> ids,
+  ) async {
+    if (ids.isEmpty) {
+      return const {};
+    }
+    final List<Map<String, dynamic>> rows = await _selectRows(
+      table: "profiles",
+      filters: (query) => query.inFilter("id", ids),
+    );
+    return {for (final Map<String, dynamic> row in rows) row["id"]: row};
+  }
+
+  _FriendProfile _friendFromRow({
+    required String userId,
+    required String friendshipId,
+    required Map<String, dynamic>? profileRow,
+  }) {
+    final String nickName = profileRow?["nick_name"] as String? ?? "";
+    final String userName = profileRow?["user_name"] as String? ?? "";
+    final String name = nickName.trim().isNotEmpty
+        ? nickName.trim()
+        : userName.trim().isNotEmpty
+        ? userName.trim()
+        : "User";
+    return _FriendProfile(
+      id: userId,
+      friendshipId: friendshipId,
+      name: name,
+      handle:
+          "@${(profileRow?["friend_code"] as String? ?? userId.substring(0, 8)).toLowerCase()}",
+      colorValue:
+          (profileRow?["accent_color_value"] as num?)?.toInt() ?? 0xFFFFC107,
     );
   }
 
@@ -760,46 +912,19 @@ class _EmptySearchCard extends StatelessWidget {
 
 class _FriendProfile {
   const _FriendProfile({
+    required this.id,
+    required this.friendshipId,
     required this.name,
     required this.handle,
     required this.colorValue,
   });
 
+  final String id;
+  final String friendshipId;
   final String name;
   final String handle;
   final int colorValue;
 }
-
-const List<_FriendProfile> _mockRequests = [
-  _FriendProfile(
-    name: "Julia Ramos",
-    handle: "@juliaramos",
-    colorValue: 0xFF7C55E7,
-  ),
-  _FriendProfile(
-    name: "Igor Martins",
-    handle: "@igorm",
-    colorValue: 0xFF18B874,
-  ),
-];
-
-const List<_FriendProfile> _mockFriends = [
-  _FriendProfile(
-    name: "Carla Dias",
-    handle: "@carladias",
-    colorValue: 0xFF00A9B8,
-  ),
-  _FriendProfile(
-    name: "Ana Souza",
-    handle: "@anasouza",
-    colorValue: 0xFF7C55E7,
-  ),
-  _FriendProfile(
-    name: "Pedro Lima",
-    handle: "@pedrolima",
-    colorValue: 0xFF18B874,
-  ),
-];
 
 BoxDecoration _cardDecoration(BuildContext context) => BoxDecoration(
   color: context.colorTokens.surface,

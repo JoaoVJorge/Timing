@@ -7,23 +7,32 @@ import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/app_config_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
+import "package:help_out/core/domain/use_cases/sign_out_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/theme/accent_presets.dart";
 
 class AppController extends GetxController {
   AppController({
     required this._getAppConfigUseCase,
+    required this._getCurrentProfileUseCase,
     required this._saveAppConfigUseCase,
     required this._syncProfileToBackendUseCase,
+    required this._signOutUseCase,
     required this._appNavigator,
+    required this._supabaseService,
   });
 
   final GetAppConfigUseCase _getAppConfigUseCase;
+  final GetCurrentProfileUseCase _getCurrentProfileUseCase;
   final SaveAppConfigUseCase _saveAppConfigUseCase;
   final SyncProfileToBackendUseCase _syncProfileToBackendUseCase;
+  final SignOutUseCase _signOutUseCase;
   final AppNavigator _appNavigator;
+  final SupabaseService _supabaseService;
 
   final RxBool isDarkMode = false.obs;
   final Rx<Color> accentColor = AppAccentPresets.defaultAccent.obs;
@@ -43,18 +52,29 @@ class AppController extends GetxController {
 
   Future<void> initialize() async {
     await Future.wait([
-      _loadAppConfig(),
+      _loadInitialConfig(),
       Future.delayed(AppConstants.splashScreenDuration),
     ]);
     await _navigateAfterSplash();
   }
 
   Future<void> _navigateAfterSplash() async {
+    if (_supabaseService.isConfigured && !_supabaseService.hasSignedInUser) {
+      await _appNavigator.offAllNamed(AppRoutes.login);
+      return;
+    }
+
     if (userName.value.isEmpty) {
       await _appNavigator.offAllNamed(AppRoutes.login);
-    } else {
-      await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
+      return;
     }
+
+    await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
+  }
+
+  Future<void> _loadInitialConfig() async {
+    await _loadAppConfig();
+    await refreshProfileFromBackend();
   }
 
   Future<void> _loadAppConfig() async {
@@ -79,6 +99,23 @@ class AppController extends GetxController {
     // build (see the comment in setLanguageCode), so it must be applied
     // explicitly too, not just left to the `locale:` constructor param.
     Get.updateLocale(_resolvedLocale(config.languageCode));
+  }
+
+  Future<bool> refreshProfileFromBackend() async {
+    if (!_supabaseService.hasSignedInUser) {
+      return false;
+    }
+
+    final Either<AppError, AppConfigEntity?> result =
+        await _getCurrentProfileUseCase();
+    return await result.fold((error) async => false, (config) async {
+      if (config == null) {
+        return false;
+      }
+      _applyConfig(config);
+      await _saveAppConfigUseCase(_currentConfig);
+      return config.userName.isNotEmpty;
+    });
   }
 
   AppConfigEntity get _currentConfig => AppConfigEntity(
@@ -178,6 +215,7 @@ class AppController extends GetxController {
   }
 
   Future<void> logOut() async {
+    await _signOutUseCase();
     userName.value = "";
     nickName.value = "";
     email.value = null;

@@ -75,17 +75,22 @@ class OtpController extends GetxController {
     );
     isSubmitting.value = false;
 
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (isValid) {
+    await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
+      isValid,
+    ) async {
       if (!isValid) {
         _appNavigator.showErrorSnackBar(Get.context!.l10n.invalidCodeError);
         return;
       }
-      _onVerified();
+      await _onVerified();
     });
   }
 
-  void _onVerified() {
-    final bool hasAccount = _appController.userName.value.isNotEmpty;
+  Future<void> _onVerified() async {
+    final bool hasRemoteProfile = await _appController
+        .refreshProfileFromBackend();
+    final bool hasAccount =
+        hasRemoteProfile || _appController.userName.value.isNotEmpty;
     if (hasAccount) {
       _appNavigator.offAllNamed(AppRoutes.mainNavigation);
     } else {

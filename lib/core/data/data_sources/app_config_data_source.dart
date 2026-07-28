@@ -11,7 +11,9 @@ class AppConfigDataSource {
 
   Future<Either<AppError, AppConfigEntity>> getAppConfig() async {
     try {
-      final String? savedConfig = await _localStorageService.read<String?>(LocalStorageKeys.appConfig);
+      final String? savedConfig = await _localStorageService.read<String?>(
+        LocalStorageKeys.appConfig,
+      );
 
       if (savedConfig == null) {
         return Right(AppConfigEntity.fallback());
@@ -25,7 +27,10 @@ class AppConfigDataSource {
 
   Future<Either<AppError, void>> saveAppConfig(AppConfigEntity config) async {
     try {
-      await _localStorageService.write(LocalStorageKeys.appConfig, config.toJson());
+      await _localStorageService.write(
+        LocalStorageKeys.appConfig,
+        config.toJson(),
+      );
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
