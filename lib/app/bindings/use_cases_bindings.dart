@@ -14,10 +14,12 @@ import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.da
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
+import "package:help_out/core/domain/use_cases/pin_subject_to_start_use_case.dart";
 import "package:help_out/core/domain/use_cases/request_phone_code_use_case.dart";
 import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_notes_use_case.dart";
+import "package:help_out/core/domain/use_cases/update_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/verify_phone_code_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
@@ -55,6 +57,14 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<UpdateSubjectNotesUseCase>(
       UpdateSubjectNotesUseCase(subjectsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<UpdateSubjectUseCase>(
+      UpdateSubjectUseCase(subjectsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<PinSubjectToStartUseCase>(
+      PinSubjectToStartUseCase(subjectsRepository: Get.find()),
       permanent: true,
     );
     Get.put<GetProfileStatsUseCase>(
