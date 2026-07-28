@@ -5,6 +5,8 @@ import "package:supabase_flutter/supabase_flutter.dart";
 class SupabaseService {
   SupabaseService._({required this.isConfigured, this.client});
 
+  static const String oauthRedirectUrl = "helpout://login-callback";
+
   final bool isConfigured;
   final SupabaseClient? client;
 
