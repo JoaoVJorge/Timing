@@ -8,7 +8,7 @@ class VerifyPhoneCodeUseCase {
   final PhoneAuthRepository _phoneAuthRepository;
 
   Future<Either<AppError, bool>> call({
-    required String phoneNumber,
+    required String emailAddress,
     required String code,
-  }) => _phoneAuthRepository.verifyCode(phoneNumber: phoneNumber, code: code);
+  }) => _phoneAuthRepository.verifyCode(emailAddress: emailAddress, code: code);
 }

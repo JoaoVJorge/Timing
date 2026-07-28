@@ -8,6 +8,7 @@ class PhoneLoginBindings extends Bindings {
       PhoneLoginController(
         requestPhoneCodeUseCase: Get.find(),
         appNavigator: Get.find(),
+        logger: Get.find(),
       ),
     );
   }

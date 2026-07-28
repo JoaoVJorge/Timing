@@ -24,5 +24,5 @@ class LoginController extends GetxController {
     _appNavigator.showErrorSnackBar(message);
   }
 
-  void onTapPhoneSignIn() => _appNavigator.toNamed(AppRoutes.phoneLogin);
+  void onTapEmailSignIn() => _appNavigator.toNamed(AppRoutes.phoneLogin);
 }

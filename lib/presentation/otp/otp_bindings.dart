@@ -6,14 +6,15 @@ import "package:help_out/presentation/otp/otp_controller.dart";
 class OtpBindings extends Bindings {
   @override
   void dependencies() {
-    final String phoneNumber = RouteArguments.of<String>(AppRoutes.otp);
+    final String emailAddress = RouteArguments.of<String>(AppRoutes.otp);
     Get.put<OtpController>(
       OtpController(
         verifyPhoneCodeUseCase: Get.find(),
         requestPhoneCodeUseCase: Get.find(),
         appController: Get.find(),
         appNavigator: Get.find(),
-        phoneNumber: phoneNumber,
+        logger: Get.find(),
+        emailAddress: emailAddress,
       ),
     );
   }

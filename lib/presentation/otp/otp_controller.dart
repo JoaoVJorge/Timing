@@ -9,6 +9,7 @@ import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/request_phone_code_use_case.dart";
 import "package:help_out/core/domain/use_cases/verify_phone_code_use_case.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 class OtpController extends GetxController {
@@ -17,7 +18,8 @@ class OtpController extends GetxController {
     required this._requestPhoneCodeUseCase,
     required this._appController,
     required this._appNavigator,
-    required this.phoneNumber,
+    required this._logger,
+    required this.emailAddress,
   });
 
   static const int codeLength = 6;
@@ -27,7 +29,8 @@ class OtpController extends GetxController {
   final RequestPhoneCodeUseCase _requestPhoneCodeUseCase;
   final AppController _appController;
   final AppNavigator _appNavigator;
-  final String phoneNumber;
+  final AppLoggerService _logger;
+  final String emailAddress;
 
   final TextEditingController codeController = TextEditingController();
   final RxBool canSubmit = false.obs;
@@ -70,20 +73,27 @@ class OtpController extends GetxController {
 
     isSubmitting.value = true;
     final Either<AppError, bool> result = await _verifyPhoneCodeUseCase(
-      phoneNumber: phoneNumber,
+      emailAddress: emailAddress,
       code: code,
     );
     isSubmitting.value = false;
 
-    await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
-      isValid,
-    ) async {
-      if (!isValid) {
-        _appNavigator.showErrorSnackBar(Get.context!.l10n.invalidCodeError);
-        return;
-      }
-      await _onVerified();
-    });
+    await result.fold(
+      (error) async {
+        _logger.logAppError(
+          "Failed to verify email OTP for ${_maskedEmail(emailAddress)}",
+          error,
+        );
+        _appNavigator.showErrorSnackBar();
+      },
+      (isValid) async {
+        if (!isValid) {
+          _appNavigator.showErrorSnackBar(Get.context!.l10n.invalidCodeError);
+          return;
+        }
+        await _onVerified();
+      },
+    );
   }
 
   Future<void> _onVerified() async {
@@ -94,18 +104,35 @@ class OtpController extends GetxController {
     if (hasAccount) {
       _appNavigator.offAllNamed(AppRoutes.mainNavigation);
     } else {
-      _appNavigator.toNamed(AppRoutes.credentials, arguments: phoneNumber);
+      _appNavigator.toNamed(AppRoutes.credentials, arguments: emailAddress);
     }
   }
 
   Future<void> onTapResend() async {
     final Either<AppError, void> result = await _requestPhoneCodeUseCase(
-      phoneNumber,
+      emailAddress,
     );
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-      _restartCountdown();
-      _appNavigator.showSuccessSnackBar(Get.context!.l10n.codeResentMessage);
-    });
+    result.fold(
+      (error) {
+        _logger.logAppError(
+          "Failed to resend email OTP for ${_maskedEmail(emailAddress)}",
+          error,
+        );
+        _appNavigator.showErrorSnackBar();
+      },
+      (_) {
+        _restartCountdown();
+        _appNavigator.showSuccessSnackBar(Get.context!.l10n.codeResentMessage);
+      },
+    );
+  }
+
+  String _maskedEmail(String value) {
+    final int atIndex = value.indexOf("@");
+    if (atIndex <= 1) {
+      return "***";
+    }
+    return "${value[0]}***${value.substring(atIndex)}";
   }
 
   @override

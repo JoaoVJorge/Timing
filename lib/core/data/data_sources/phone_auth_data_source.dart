@@ -8,10 +8,10 @@ class PhoneAuthDataSource {
 
   final SupabaseService _supabaseService;
 
-  Future<Either<AppError, void>> requestCode(String phoneNumber) async {
+  Future<Either<AppError, void>> requestCode(String emailAddress) async {
     try {
       await _supabaseService.requireClient.auth.signInWithOtp(
-        phone: _normalizedPhoneNumber(phoneNumber),
+        email: _normalizedEmailAddress(emailAddress),
       );
       return const Right(null);
     } catch (error, stackTrace) {
@@ -20,7 +20,7 @@ class PhoneAuthDataSource {
   }
 
   Future<Either<AppError, bool>> verifyCode({
-    required String phoneNumber,
+    required String emailAddress,
     required String code,
   }) async {
     try {
@@ -29,9 +29,9 @@ class PhoneAuthDataSource {
       }
 
       await _supabaseService.requireClient.auth.verifyOTP(
-        phone: _normalizedPhoneNumber(phoneNumber),
+        email: _normalizedEmailAddress(emailAddress),
         token: code,
-        type: OtpType.sms,
+        type: OtpType.email,
       );
       return const Right(true);
     } catch (error, stackTrace) {
@@ -50,6 +50,6 @@ class PhoneAuthDataSource {
     }
   }
 
-  String _normalizedPhoneNumber(String phoneNumber) =>
-      phoneNumber.replaceAll(RegExp(r"[^+0-9]"), "");
+  String _normalizedEmailAddress(String emailAddress) =>
+      emailAddress.trim().toLowerCase();
 }

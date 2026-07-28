@@ -42,12 +42,12 @@ class LoginPage extends StatelessWidget {
           const Gap(9),
           _SignInOption(
             icon: const Icon(
-              Icons.phone_iphone_rounded,
+              Icons.mail_outline_rounded,
               size: 25,
               color: AuthOnboardingColors.blueDark,
             ),
-            label: context.l10n.continueWithPhoneButton,
-            onTap: controller.onTapPhoneSignIn,
+            label: _continueWithEmailLabel(context),
+            onTap: controller.onTapEmailSignIn,
             highlighted: true,
           ),
         ],
@@ -56,6 +56,13 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
+String _continueWithEmailLabel(BuildContext context) =>
+    switch (context.languageCode) {
+      "es" => "Continuar con e-mail",
+      "pt" => "Continuar com e-mail",
+      _ => "Continue with email",
+    };
 
 class _SignInOption extends StatelessWidget {
   const _SignInOption({
