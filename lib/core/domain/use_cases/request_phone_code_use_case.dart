@@ -7,6 +7,6 @@ class RequestPhoneCodeUseCase {
 
   final PhoneAuthRepository _phoneAuthRepository;
 
-  Future<Either<AppError, void>> call(String phoneNumber) =>
-      _phoneAuthRepository.requestCode(phoneNumber);
+  Future<Either<AppError, void>> call(String emailAddress) =>
+      _phoneAuthRepository.requestCode(emailAddress);
 }

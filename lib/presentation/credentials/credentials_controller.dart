@@ -9,12 +9,12 @@ class CredentialsController extends GetxController {
   CredentialsController({
     required this._appController,
     required this._appNavigator,
-    required this.phoneNumber,
+    required this.emailAddress,
   });
 
   final AppController _appController;
   final AppNavigator _appNavigator;
-  final String phoneNumber;
+  final String emailAddress;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController nicknameController = TextEditingController();
@@ -52,7 +52,7 @@ class CredentialsController extends GetxController {
     await _appController.updateProfile(
       userName: nameController.text.trim(),
       nickName: nicknameController.text.trim(),
-      phoneNumber: phoneNumber,
+      email: emailAddress,
       birthDate: _isoDate(birthDate.value!),
     );
     isSubmitting.value = false;

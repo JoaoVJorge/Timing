@@ -17,7 +17,7 @@ class OtpPage extends StatelessWidget {
     return AuthOnboardingScaffold(
       showBackButton: true,
       title: context.l10n.otpTitle,
-      subtitle: context.l10n.otpSubtitle(controller.phoneNumber),
+      subtitle: _subtitle(context, controller.emailAddress),
       topVisual: const AuthHeroPlaceholder(icon: Icons.fact_check_rounded),
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
@@ -82,6 +82,13 @@ class OtpPage extends StatelessWidget {
     );
   }
 }
+
+String _subtitle(BuildContext context, String emailAddress) =>
+    switch (context.languageCode) {
+      "es" => "Enviamos un código de acceso a $emailAddress.",
+      "pt" => "Enviamos um código de acesso para $emailAddress.",
+      _ => "We sent an access code to $emailAddress.",
+    };
 
 class _OtpInput extends StatelessWidget {
   const _OtpInput({
