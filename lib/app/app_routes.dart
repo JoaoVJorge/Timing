@@ -27,14 +27,8 @@ import "package:help_out/presentation/login/login_bindings.dart";
 import "package:help_out/presentation/login/login_page.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_bindings.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_page.dart";
-import "package:help_out/presentation/credentials/credentials_bindings.dart";
-import "package:help_out/presentation/credentials/credentials_page.dart";
 import "package:help_out/presentation/notes/notes_bindings.dart";
 import "package:help_out/presentation/notes/notes_page.dart";
-import "package:help_out/presentation/otp/otp_bindings.dart";
-import "package:help_out/presentation/otp/otp_page.dart";
-import "package:help_out/presentation/phone_login/phone_login_bindings.dart";
-import "package:help_out/presentation/phone_login/phone_login_page.dart";
 import "package:help_out/presentation/profile/profile_bindings.dart";
 import "package:help_out/presentation/profile/profile_page.dart";
 import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
@@ -49,9 +43,6 @@ class AppRoutes {
 
   static const String splash = "/";
   static const String login = "/login";
-  static const String phoneLogin = "/phoneLogin";
-  static const String otp = "/otp";
-  static const String credentials = "/credentials";
   static const String mainNavigation = "/mainNavigation";
   static const String home = "/home";
   static const String profile = "/profile";
@@ -81,30 +72,6 @@ class AppRoutes {
       name: login,
       page: () => const LoginPage(),
       binding: LoginBindings(),
-    ),
-    GetPage(
-      name: phoneLogin,
-      page: () => const PhoneLoginPage(),
-      binding: PhoneLoginBindings(),
-      transition: Transition.rightToLeft,
-      transitionDuration: pageTransitionDuration,
-      curve: pageTransitionCurve,
-    ),
-    GetPage(
-      name: otp,
-      page: () => const OtpPage(),
-      binding: OtpBindings(),
-      transition: Transition.rightToLeft,
-      transitionDuration: pageTransitionDuration,
-      curve: pageTransitionCurve,
-    ),
-    GetPage(
-      name: credentials,
-      page: () => const CredentialsPage(),
-      binding: CredentialsBindings(),
-      transition: Transition.rightToLeft,
-      transitionDuration: pageTransitionDuration,
-      curve: pageTransitionCurve,
     ),
     GetPage(
       name: mainNavigation,

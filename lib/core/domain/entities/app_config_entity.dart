@@ -15,6 +15,7 @@ class AppConfigEntity extends Equatable {
     required this.avatarIconIndex,
     required this.notificationsEnabled,
     required this.languageCode,
+    required this.friendCode,
   });
 
   factory AppConfigEntity.fallback() => const AppConfigEntity(
@@ -29,6 +30,7 @@ class AppConfigEntity extends Equatable {
     avatarIconIndex: 0,
     notificationsEnabled: true,
     languageCode: null,
+    friendCode: "",
   );
 
   factory AppConfigEntity.fromJson(String source) =>
@@ -46,6 +48,7 @@ class AppConfigEntity extends Equatable {
     avatarIconIndex: map["avatarIconIndex"] as int? ?? 0,
     notificationsEnabled: map["notificationsEnabled"] as bool? ?? true,
     languageCode: map["languageCode"] as String?,
+    friendCode: map["friendCode"] as String? ?? "",
   );
 
   final bool isDarkMode;
@@ -61,6 +64,7 @@ class AppConfigEntity extends Equatable {
   final int avatarIconIndex;
   final bool notificationsEnabled;
   final String? languageCode;
+  final String friendCode;
 
   Map<String, dynamic> toMap() => {
     "isDarkMode": isDarkMode,
@@ -74,6 +78,7 @@ class AppConfigEntity extends Equatable {
     "avatarIconIndex": avatarIconIndex,
     "notificationsEnabled": notificationsEnabled,
     "languageCode": languageCode,
+    "friendCode": friendCode,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -90,6 +95,7 @@ class AppConfigEntity extends Equatable {
     int? avatarIconIndex,
     bool? notificationsEnabled,
     Object? languageCode = _unset,
+    String? friendCode,
   }) => AppConfigEntity(
     isDarkMode: isDarkMode ?? this.isDarkMode,
     userName: userName ?? this.userName,
@@ -108,6 +114,7 @@ class AppConfigEntity extends Equatable {
     languageCode: languageCode == _unset
         ? this.languageCode
         : languageCode as String?,
+    friendCode: friendCode ?? this.friendCode,
   );
 
   @override
@@ -123,6 +130,7 @@ class AppConfigEntity extends Equatable {
     avatarIconIndex,
     notificationsEnabled,
     languageCode,
+    friendCode,
   ];
 }
 

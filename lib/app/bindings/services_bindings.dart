@@ -32,10 +32,14 @@ class ServicesBindings extends Bindings {
       permanent: true,
     );
 
+    final SupabaseService supabaseService = await SupabaseService.initialize();
+    Get.put<SupabaseService>(supabaseService, permanent: true);
+
     Get.put<AppLocalStorageService>(
       AppLocalStorageService(
         localStorage: Get.find(),
         secureStorage: Get.find(),
+        supabaseService: Get.find(),
       ),
       permanent: true,
     );
@@ -58,8 +62,5 @@ class ServicesBindings extends Bindings {
       HttpClientService(dio: Get.find()),
       permanent: true,
     );
-
-    final SupabaseService supabaseService = await SupabaseService.initialize();
-    Get.put<SupabaseService>(supabaseService, permanent: true);
   }
 }

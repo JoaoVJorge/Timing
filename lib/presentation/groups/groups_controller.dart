@@ -114,4 +114,13 @@ class GroupsController extends GetxController {
     groups.refresh();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
+
+  void onTapJoinWithCode() {
+    final String message = switch (Get.context?.languageCode) {
+      "pt" => "Entrada por código de convite em breve.",
+      "es" => "Unirse con código estará disponible pronto.",
+      _ => "Joining with an invite code is coming soon.",
+    };
+    _appNavigator.showSnackBar(text: message);
+  }
 }

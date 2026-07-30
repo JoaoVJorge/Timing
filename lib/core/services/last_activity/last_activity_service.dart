@@ -15,9 +15,9 @@ class LastActivityService {
       final String? saved = await _localStorageService.read<String?>(
         LocalStorageKeys.lastActivity,
       );
-      if (saved != null) {
-        lastActivity.value = LastActivityEntity.fromJson(saved);
-      }
+      lastActivity.value = saved == null
+          ? null
+          : LastActivityEntity.fromJson(saved);
     } catch (_) {
       lastActivity.value = null;
     }
