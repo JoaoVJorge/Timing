@@ -83,6 +83,7 @@ class _FriendsPageState extends State<FriendsPage> {
             _InviteCodeCard(
               code: inviteCode.isEmpty ? "..." : inviteCode,
               onCopy: () => _copyInviteCode(context),
+              onShare: () => _shareInviteCode(context),
             ),
             if (isLoading)
               const Padding(
@@ -92,6 +93,7 @@ class _FriendsPageState extends State<FriendsPage> {
             else ...[
               const Gap(14),
               _ActivityShortcuts(
+                onFriendsTap: () {},
                 onPendingTap: _openPendingRequestsPage,
                 onSentTap: _openSentRequestsPage,
               ),
@@ -333,11 +335,12 @@ class _FriendsPageState extends State<FriendsPage> {
       MaterialPageRoute(
         builder: (_) => _FriendRequestsPage(
           title: _pendingPageTitle(context),
-          emptyText: _pendingEmptyText(context),
-          requests: requests,
-          mode: _FriendRequestsMode.incoming,
+          initialMode: _FriendRequestsMode.incoming,
+          incomingRequests: requests,
+          sentRequests: sentRequests,
           onAccept: _acceptRequest,
           onDecline: _declineRequest,
+          onCancel: _cancelSentRequest,
         ),
       ),
     );
@@ -348,9 +351,11 @@ class _FriendsPageState extends State<FriendsPage> {
       MaterialPageRoute(
         builder: (_) => _FriendRequestsPage(
           title: _sentPageTitle(context),
-          emptyText: _sentEmptyText(context),
-          requests: sentRequests,
-          mode: _FriendRequestsMode.sent,
+          initialMode: _FriendRequestsMode.sent,
+          incomingRequests: requests,
+          sentRequests: sentRequests,
+          onAccept: _acceptRequest,
+          onDecline: _declineRequest,
           onCancel: _cancelSentRequest,
         ),
       ),
@@ -463,20 +468,6 @@ class _FriendsPageState extends State<FriendsPage> {
         _ => "Invites",
       };
 
-  static String _pendingEmptyText(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Nadie te pidió amistad todavía.",
-        "pt" => "Ninguém te pediu amizade ainda.",
-        _ => "No one has requested to be friends yet.",
-      };
-
-  static String _sentEmptyText(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "No tienes pedidos enviados.",
-        "pt" => "Você não tem pedidos enviados.",
-        _ => "You have no sent requests.",
-      };
-
   static String _shareText(BuildContext context, String code) =>
       switch (context.languageCode) {
         "es" => "Agrégame en HelpOut con mi código: $code",
@@ -501,7 +492,7 @@ class _Header extends StatelessWidget {
               _title(context),
               style: context.textStyles.black32.copyWith(
                 color: context.colorTokens.primary,
-                fontSize: 26,
+                fontSize: 23,
                 height: 1.05,
               ),
             ),
@@ -512,7 +503,7 @@ class _Header extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
                 color: _socialMuted,
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -524,11 +515,15 @@ class _Header extends StatelessWidget {
         child: Container(
           width: 38,
           height: 38,
+          decoration: BoxDecoration(
+            color: context.colorTokens.primaryVeryLight,
+            shape: BoxShape.circle,
+          ),
           alignment: Alignment.center,
           child: Icon(
             Icons.person_add_alt_1_rounded,
             color: context.colorTokens.primary,
-            size: 28,
+            size: 23,
           ),
         ),
       ),
@@ -580,11 +575,11 @@ class _FindFriendsPageState extends State<_FindFriendsPage> {
     backgroundColor: context.colorTokens.scaffold,
     body: SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: ListView(
           children: [
             _InviteCodeHeader(onBack: () => Navigator.of(context).maybePop()),
-            const Gap(14),
+            const Gap(16),
             _InviteLookupCard(
               controller: codeController,
               isLoading: isLoading,
@@ -592,17 +587,17 @@ class _FindFriendsPageState extends State<_FindFriendsPage> {
               onSearch: _findByCode,
             ),
             if (foundUser != null) ...[
-              const Gap(16),
+              const Gap(14),
               _FoundUserSection(
                 profile: foundUser!,
                 isSent: sentRequestIds.contains(foundUser!.id),
                 onAdd: () => _send(foundUser!),
               ),
             ] else if (hasSearched && !isLoading) ...[
-              const Gap(16),
+              const Gap(14),
               _CodeNotFoundCard(text: _notFoundText(context)),
             ],
-            const Gap(16),
+            const Gap(12),
             _HowItWorksCard(),
           ],
         ),
@@ -707,17 +702,17 @@ class _InviteCodeHeader extends StatelessWidget {
       BounceTap(
         onTap: onBack,
         child: Container(
-          width: 44,
-          height: 44,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
             color: context.colorTokens.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(color: _socialBorder),
           ),
           child: Icon(
             Icons.arrow_back_rounded,
             color: context.colorTokens.textBody,
-            size: 23,
+            size: 22,
           ),
         ),
       ),
@@ -732,14 +727,14 @@ class _InviteCodeHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.black32.copyWith(
                 color: context.colorTokens.textBody,
-                fontSize: 28,
+                fontSize: 21,
                 height: 1.05,
               ),
             ),
             const Gap(4),
             Text(
               _subtitle(context),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodyMedium.copyWith(
                 color: _socialMuted,
@@ -781,16 +776,16 @@ class _InviteLookupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-    decoration: _surfaceDecoration(radius: 20),
+    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+    decoration: _surfaceDecoration(radius: 18),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 color: context.colorTokens.primaryVeryLight,
                 shape: BoxShape.circle,
@@ -798,7 +793,7 @@ class _InviteLookupCard extends StatelessWidget {
               child: Icon(
                 Icons.confirmation_number_outlined,
                 color: context.colorTokens.primary,
-                size: 25,
+                size: 21,
               ),
             ),
             const Gap(12),
@@ -809,24 +804,24 @@ class _InviteLookupCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.extraBold24.copyWith(
                   color: context.colorTokens.textBody,
-                  fontSize: 20,
+                  fontSize: 15,
                 ),
               ),
             ),
           ],
         ),
-        const Gap(16),
+        const Gap(12),
         Text(
           _fieldLabel(context),
           style: context.textStyles.bodyMedium.copyWith(
             color: _socialMuted,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
         ),
         const Gap(8),
         Container(
-          height: 56,
+          height: 50,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -840,7 +835,7 @@ class _InviteLookupCard extends StatelessWidget {
                   textCapitalization: TextCapitalization.characters,
                   style: context.textStyles.black32.copyWith(
                     color: context.colorTokens.textBody,
-                    fontSize: 24,
+                    fontSize: 17,
                     letterSpacing: 0.8,
                   ),
                   decoration: const InputDecoration(
@@ -854,7 +849,7 @@ class _InviteLookupCard extends StatelessWidget {
                 onTap: onPaste,
                 pressedScale: 0.96,
                 child: Container(
-                  height: 36,
+                  height: 32,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
                     color: context.colorTokens.primaryVeryLight,
@@ -883,27 +878,6 @@ class _InviteLookupCard extends StatelessWidget {
           ),
         ),
         const Gap(12),
-        Row(
-          children: [
-            const Icon(
-              Icons.verified_user_outlined,
-              color: _socialMuted,
-              size: 16,
-            ),
-            const Gap(8),
-            Expanded(
-              child: Text(
-                _uniqueLabel(context),
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: _socialMuted,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Gap(14),
         _WidePrimaryButton(
           label: _searchLabel(context),
           isLoading: isLoading,
@@ -932,7 +906,7 @@ class _InviteLookupCard extends StatelessWidget {
     _ => "Paste",
   };
 
-  String _uniqueLabel(BuildContext context) => switch (context.languageCode) {
+  String uniqueLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Cada usuario tiene un código único",
     "pt" => "Cada usuário possui um código único",
     _ => "Each user has a unique code",
@@ -1103,56 +1077,28 @@ class _HowItWorksCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(
-        color: context.colorTokens.primary.withValues(alpha: 0.18),
-      ),
-    ),
-    child: Column(
+    height: 48,
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    decoration: _surfaceDecoration(radius: 16),
+    child: Row(
       children: [
-        Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: context.colorTokens.primaryVeryLight,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.lightbulb_outline_rounded,
-                color: context.colorTokens.primary,
-                size: 21,
-              ),
-            ),
-            const Gap(10),
-            Text(
-              _title(context),
-              style: context.textStyles.extraBold20.copyWith(
-                color: context.colorTokens.textBody,
-              ),
-            ),
-          ],
+        Icon(
+          Icons.lightbulb_outline_rounded,
+          color: context.colorTokens.primary,
+          size: 20,
         ),
         const Gap(10),
-        _HowStep(
-          icon: Icons.group_add_outlined,
-          text: _stepOne(context),
-          isLast: false,
+        Expanded(
+          child: Text(
+            _title(context),
+            style: context.textStyles.bodyMedium.copyWith(
+              color: _socialMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
-        _HowStep(
-          icon: Icons.content_paste_rounded,
-          text: _stepTwo(context),
-          isLast: false,
-        ),
-        _HowStep(
-          icon: Icons.send_rounded,
-          text: _stepThree(context),
-          isLast: true,
-        ),
+        const Icon(Icons.keyboard_arrow_down_rounded, color: _socialMuted),
       ],
     ),
   );
@@ -1163,30 +1109,31 @@ class _HowItWorksCard extends StatelessWidget {
     _ => "How it works",
   };
 
-  String _stepOne(BuildContext context) => switch (context.languageCode) {
+  String stepOne(BuildContext context) => switch (context.languageCode) {
     "es" => "Pide el código a tu amigo",
     "pt" => "Peça o código ao seu amigo",
     _ => "Ask your friend for their code",
   };
 
-  String _stepTwo(BuildContext context) => switch (context.languageCode) {
+  String stepTwo(BuildContext context) => switch (context.languageCode) {
     "es" => "Pega el código para encontrar el perfil",
     "pt" => "Cole o código para encontrar o perfil",
     _ => "Paste the code to find the profile",
   };
 
-  String _stepThree(BuildContext context) => switch (context.languageCode) {
+  String stepThree(BuildContext context) => switch (context.languageCode) {
     "es" => "Envía la solicitud para agregar",
     "pt" => "Envie a solicitação para adicionar",
     _ => "Send the request to add them",
   };
 }
 
-class _HowStep extends StatelessWidget {
-  const _HowStep({
+class HowStep extends StatelessWidget {
+  const HowStep({
     required this.icon,
     required this.text,
     required this.isLast,
+    super.key,
   });
 
   final IconData icon;
@@ -1279,18 +1226,18 @@ enum _FriendRequestsMode { incoming, sent }
 class _FriendRequestsPage extends StatefulWidget {
   const _FriendRequestsPage({
     required this.title,
-    required this.emptyText,
-    required this.requests,
-    required this.mode,
+    required this.initialMode,
+    required this.incomingRequests,
+    required this.sentRequests,
     this.onAccept,
     this.onDecline,
     this.onCancel,
   });
 
   final String title;
-  final String emptyText;
-  final List<_FriendProfile> requests;
-  final _FriendRequestsMode mode;
+  final _FriendRequestsMode initialMode;
+  final List<_FriendProfile> incomingRequests;
+  final List<_FriendProfile> sentRequests;
   final Future<void> Function(_FriendProfile profile)? onAccept;
   final Future<void> Function(_FriendProfile profile)? onDecline;
   final Future<void> Function(_FriendProfile profile)? onCancel;
@@ -1300,14 +1247,23 @@ class _FriendRequestsPage extends StatefulWidget {
 }
 
 class _FriendRequestsPageState extends State<_FriendRequestsPage> {
-  late final List<_FriendProfile> requests = List.of(widget.requests);
+  late final List<_FriendProfile> incomingRequests = List.of(
+    widget.incomingRequests,
+  );
+  late final List<_FriendProfile> sentRequests = List.of(widget.sentRequests);
+  late _FriendRequestsMode selectedMode = widget.initialMode;
+
+  List<_FriendProfile> get currentRequests => switch (selectedMode) {
+    _FriendRequestsMode.incoming => incomingRequests,
+    _FriendRequestsMode.sent => sentRequests,
+  };
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: context.colorTokens.scaffold,
     body: SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1315,64 +1271,44 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
               title: widget.title,
               onBack: () => Navigator.of(context).maybePop(),
             ),
-            const Gap(16),
+            const Gap(18),
+            _RequestsModeTabs(
+              selectedMode: selectedMode,
+              onSelect: (mode) => setState(() => selectedMode = mode),
+            ),
+            const Gap(18),
+            Text(
+              _sectionTitle(context, currentRequests.length),
+              style: context.textStyles.bodyMedium.copyWith(
+                color: _socialText,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const Gap(10),
             Expanded(
-              child: requests.isEmpty
-                  ? _SimpleEmptyState(text: widget.emptyText)
+              child: currentRequests.isEmpty
+                  ? _RequestEmptyState(mode: selectedMode)
                   : ListView.separated(
-                      itemCount: requests.length,
-                      separatorBuilder: (context, index) => const Gap(10),
+                      itemCount: currentRequests.length,
+                      separatorBuilder: (context, index) => const Gap(12),
                       itemBuilder: (context, index) {
-                        final _FriendProfile profile = requests[index];
-                        return Container(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                          decoration: _surfaceDecoration(radius: 18),
-                          child: Row(
-                            children: [
-                              GroupMemberAvatar(
-                                name: profile.name,
-                                colorValue: profile.colorValue,
-                                size: 42,
-                              ),
-                              const Gap(10),
-                              Expanded(
-                                child: _NameBlock(
-                                  name: profile.name,
-                                  handle: profile.handle,
-                                ),
-                              ),
-                              const Gap(8),
-                              if (widget.mode == _FriendRequestsMode.incoming)
-                                Row(
-                                  children: [
-                                    _RequestActionButton(
-                                      label: _declineLabel(context),
-                                      isPrimary: false,
-                                      onTap: () =>
-                                          _runAction(profile, widget.onDecline),
-                                    ),
-                                    const Gap(6),
-                                    _RequestActionButton(
-                                      label: _acceptLabel(context),
-                                      isPrimary: true,
-                                      onTap: () =>
-                                          _runAction(profile, widget.onAccept),
-                                    ),
-                                  ],
-                                )
-                              else
-                                _RequestActionButton(
-                                  label: _cancelLabel(context),
-                                  isPrimary: false,
-                                  onTap: () =>
-                                      _runAction(profile, widget.onCancel),
-                                ),
-                            ],
-                          ),
+                        final _FriendProfile profile = currentRequests[index];
+                        return _RequestProfileCard(
+                          profile: profile,
+                          mode: selectedMode,
+                          onAccept: () => _runAction(profile, widget.onAccept),
+                          onDecline: () =>
+                              _runAction(profile, widget.onDecline),
+                          onCancel: () => _runAction(profile, widget.onCancel),
                         );
                       },
                     ),
             ),
+            if (selectedMode == _FriendRequestsMode.incoming) ...[
+              const Gap(12),
+              _SafetyNotice(),
+            ],
           ],
         ),
       ),
@@ -1390,8 +1326,245 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
     if (!mounted) {
       return;
     }
-    setState(() => requests.removeWhere((item) => item.id == profile.id));
+    setState(() {
+      incomingRequests.removeWhere((item) => item.id == profile.id);
+      sentRequests.removeWhere((item) => item.id == profile.id);
+    });
   }
+
+  String _sectionTitle(BuildContext context, int count) {
+    final String label = switch (selectedMode) {
+      _FriendRequestsMode.incoming => switch (context.languageCode) {
+        "es" => "Recibidas",
+        "pt" => "Recebidas",
+        _ => "Received",
+      },
+      _FriendRequestsMode.sent => switch (context.languageCode) {
+        "es" => "Enviadas",
+        "pt" => "Enviadas",
+        _ => "Sent",
+      },
+    };
+    return "$label ($count)";
+  }
+
+  String acceptLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Aceptar",
+    "pt" => "Aceitar",
+    _ => "Accept",
+  };
+
+  String declineLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Negar",
+    "pt" => "Negar",
+    _ => "Decline",
+  };
+
+  String cancelLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Cancelar",
+    "pt" => "Cancelar",
+    _ => "Cancel",
+  };
+}
+
+class _RequestsModeTabs extends StatelessWidget {
+  const _RequestsModeTabs({required this.selectedMode, required this.onSelect});
+
+  final _FriendRequestsMode selectedMode;
+  final ValueChanged<_FriendRequestsMode> onSelect;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: _RequestModeTab(
+          icon: Icons.download_rounded,
+          label: _receivedLabel(context),
+          isSelected: selectedMode == _FriendRequestsMode.incoming,
+          onTap: () => onSelect(_FriendRequestsMode.incoming),
+        ),
+      ),
+      const Gap(10),
+      Expanded(
+        child: _RequestModeTab(
+          icon: Icons.send_rounded,
+          label: _sentLabel(context),
+          isSelected: selectedMode == _FriendRequestsMode.sent,
+          onTap: () => onSelect(_FriendRequestsMode.sent),
+        ),
+      ),
+    ],
+  );
+
+  String _receivedLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Recibidas",
+    "pt" => "Recebidas",
+    _ => "Received",
+  };
+
+  String _sentLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Enviadas",
+    "pt" => "Enviadas",
+    _ => "Sent",
+  };
+}
+
+class _RequestModeTab extends StatelessWidget {
+  const _RequestModeTab({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.96,
+    child: Container(
+      height: 38,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: isSelected ? context.colorTokens.primaryGradient : null,
+        color: isSelected ? null : context.colorTokens.surfaceInnerLayer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 16, color: isSelected ? Colors.white : _socialMuted),
+          const Gap(7),
+          Text(
+            label,
+            style: context.textStyles.bodySmall.copyWith(
+              color: isSelected ? Colors.white : _socialMuted,
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _RequestProfileCard extends StatelessWidget {
+  const _RequestProfileCard({
+    required this.profile,
+    required this.mode,
+    required this.onAccept,
+    required this.onDecline,
+    required this.onCancel,
+  });
+
+  final _FriendProfile profile;
+  final _FriendRequestsMode mode;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+    decoration: _surfaceDecoration(radius: 18),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            GroupMemberAvatar(
+              name: profile.name,
+              colorValue: profile.colorValue,
+              size: 48,
+            ),
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _NameBlock(name: profile.name, handle: profile.handle),
+                  const Gap(5),
+                  Row(
+                    children: [
+                      Icon(
+                        mode == _FriendRequestsMode.incoming
+                            ? Icons.group_rounded
+                            : Icons.schedule_rounded,
+                        color: _socialMuted,
+                        size: 15,
+                      ),
+                      const Gap(5),
+                      Expanded(
+                        child: Text(
+                          mode == _FriendRequestsMode.incoming
+                              ? _mutualFriends(context)
+                              : _pendingLabel(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.bodySmall.copyWith(
+                            color: mode == _FriendRequestsMode.incoming
+                                ? _socialMuted
+                                : context.colorTokens.warning,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Gap(14),
+        if (mode == _FriendRequestsMode.incoming)
+          Row(
+            children: [
+              Expanded(
+                child: _RequestActionButton(
+                  label: _declineLabel(context),
+                  isPrimary: false,
+                  onTap: onDecline,
+                ),
+              ),
+              const Gap(10),
+              Expanded(
+                child: _RequestActionButton(
+                  label: _acceptLabel(context),
+                  isPrimary: true,
+                  onTap: onAccept,
+                ),
+              ),
+            ],
+          )
+        else
+          Align(
+            alignment: Alignment.centerRight,
+            child: _RequestActionButton(
+              label: _cancelLabel(context),
+              isPrimary: false,
+              onTap: onCancel,
+            ),
+          ),
+      ],
+    ),
+  );
+
+  String _mutualFriends(BuildContext context) => switch (context.languageCode) {
+    "es" => "3 amigos en común",
+    "pt" => "3 amigos em comum",
+    _ => "3 mutual friends",
+  };
+
+  String _pendingLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Pendiente",
+    "pt" => "Pendente",
+    _ => "Pending",
+  };
 
   String _acceptLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Aceptar",
@@ -1400,8 +1573,8 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
   };
 
   String _declineLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Negar",
-    "pt" => "Negar",
+    "es" => "Rechazar",
+    "pt" => "Recusar",
     _ => "Decline",
   };
 
@@ -1409,6 +1582,109 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
     "es" => "Cancelar",
     "pt" => "Cancelar",
     _ => "Cancel",
+  };
+}
+
+class _RequestEmptyState extends StatelessWidget {
+  const _RequestEmptyState({required this.mode});
+
+  final _FriendRequestsMode mode;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 30, 20, 28),
+      decoration: _surfaceDecoration(radius: 18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _PinkBadge(
+            icon: mode == _FriendRequestsMode.incoming
+                ? Icons.inbox_rounded
+                : Icons.send_rounded,
+            size: 64,
+            iconSize: 34,
+          ),
+          const Gap(14),
+          Text(
+            _title(context),
+            textAlign: TextAlign.center,
+            style: context.textStyles.extraBold20.copyWith(
+              color: _socialText,
+              fontSize: 17,
+            ),
+          ),
+          const Gap(6),
+          Text(
+            _subtitle(context),
+            textAlign: TextAlign.center,
+            style: context.textStyles.bodyMedium.copyWith(
+              color: _socialMuted,
+              fontSize: 13,
+              height: 1.25,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  String _title(BuildContext context) => switch (mode) {
+    _FriendRequestsMode.incoming => switch (context.languageCode) {
+      "es" => "Ninguna solicitud recibida",
+      "pt" => "Nenhuma solicitação recebida",
+      _ => "No received requests",
+    },
+    _FriendRequestsMode.sent => switch (context.languageCode) {
+      "es" => "Ninguna invitación enviada",
+      "pt" => "Nenhum convite enviado",
+      _ => "No sent invites",
+    },
+  };
+
+  String _subtitle(BuildContext context) => switch (mode) {
+    _FriendRequestsMode.incoming => switch (context.languageCode) {
+      "es" => "Las solicitudes aparecerán aquí.",
+      "pt" => "As solicitações aparecerão aqui.",
+      _ => "Requests will appear here.",
+    },
+    _FriendRequestsMode.sent => switch (context.languageCode) {
+      "es" => "Tus invitaciones enviadas aparecerán aquí.",
+      "pt" => "Seus convites enviados aparecerão aqui.",
+      _ => "Your sent invites will appear here.",
+    },
+  };
+}
+
+class _SafetyNotice extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+    decoration: _surfaceDecoration(radius: 16),
+    child: Row(
+      children: [
+        _PinkBadge(icon: Icons.shield_outlined, size: 34, iconSize: 19),
+        const Gap(10),
+        Expanded(
+          child: Text(
+            _text(context),
+            style: context.textStyles.bodySmall.copyWith(
+              color: _socialMuted,
+              fontWeight: FontWeight.w700,
+              height: 1.25,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  String _text(BuildContext context) => switch (context.languageCode) {
+    "es" => "Acepta solo personas que conoces y confías.",
+    "pt" => "Aceite apenas pessoas que você conhece e confia.",
+    _ => "Only accept people you know and trust.",
   };
 }
 
@@ -1453,8 +1729,8 @@ class _LocalPageHeader extends StatelessWidget {
   );
 }
 
-class _SimpleEmptyState extends StatelessWidget {
-  const _SimpleEmptyState({required this.text});
+class SimpleEmptyState extends StatelessWidget {
+  const SimpleEmptyState({required this.text, super.key});
 
   final String text;
 
@@ -1514,14 +1790,19 @@ class _SearchField extends StatelessWidget {
 }
 
 class _InviteCodeCard extends StatelessWidget {
-  const _InviteCodeCard({required this.code, required this.onCopy});
+  const _InviteCodeCard({
+    required this.code,
+    required this.onCopy,
+    required this.onShare,
+  });
 
   final String code;
   final VoidCallback onCopy;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+    padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
     decoration: _surfaceDecoration(radius: 18),
     child: Row(
       children: [
@@ -1557,19 +1838,13 @@ class _InviteCodeCard extends StatelessWidget {
         BounceTap(
           onTap: onCopy,
           pressedScale: 0.95,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.copy_rounded,
-              color: context.colorTokens.primary,
-              size: 22,
-            ),
-          ),
+          child: _InviteIconButton(icon: Icons.copy_rounded),
+        ),
+        const Gap(8),
+        BounceTap(
+          onTap: onShare,
+          pressedScale: 0.95,
+          child: _InviteIconButton(icon: Icons.share_rounded),
         ),
       ],
     ),
@@ -1582,12 +1857,32 @@ class _InviteCodeCard extends StatelessWidget {
   };
 }
 
+class _InviteIconButton extends StatelessWidget {
+  const _InviteIconButton({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 38,
+    height: 38,
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      shape: BoxShape.circle,
+      border: Border.all(color: _socialBorder),
+    ),
+    child: Icon(icon, color: context.colorTokens.primary, size: 20),
+  );
+}
+
 class _ActivityShortcuts extends StatelessWidget {
   const _ActivityShortcuts({
+    required this.onFriendsTap,
     required this.onPendingTap,
     required this.onSentTap,
   });
 
+  final VoidCallback onFriendsTap;
   final VoidCallback onPendingTap;
   final VoidCallback onSentTap;
 
@@ -1597,20 +1892,37 @@ class _ActivityShortcuts extends StatelessWidget {
       Expanded(
         child: _ShortcutTile(
           icon: Icons.group_rounded,
+          title: _friendsLabel(context),
+          isSelected: true,
+          onTap: onFriendsTap,
+        ),
+      ),
+      const Gap(8),
+      Expanded(
+        child: _ShortcutTile(
+          icon: Icons.download_rounded,
           title: _pendingLabel(context),
+          isSelected: false,
           onTap: onPendingTap,
         ),
       ),
-      const Gap(12),
+      const Gap(8),
       Expanded(
         child: _ShortcutTile(
-          icon: Icons.mail_rounded,
+          icon: Icons.send_rounded,
           title: _sentLabel(context),
+          isSelected: false,
           onTap: onSentTap,
         ),
       ),
     ],
   );
+
+  String _friendsLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Amigos",
+    "pt" => "Amigos",
+    _ => "Friends",
+  };
 
   String _pendingLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Solicitudes",
@@ -1629,11 +1941,13 @@ class _ShortcutTile extends StatelessWidget {
   const _ShortcutTile({
     required this.icon,
     required this.title,
+    required this.isSelected,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -1641,29 +1955,30 @@ class _ShortcutTile extends StatelessWidget {
     pressedScale: 0.98,
     onTap: onTap,
     child: Container(
-      height: 58,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: _surfaceDecoration(radius: 16),
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 9),
+      decoration: BoxDecoration(
+        gradient: isSelected ? context.colorTokens.primaryGradient : null,
+        color: isSelected ? null : context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: isSelected ? null : Border.all(color: _socialBorder),
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _PinkBadge(icon: icon, size: 36, iconSize: 19),
-          const Gap(10),
-          Expanded(
+          Icon(icon, color: isSelected ? Colors.white : _socialMuted, size: 17),
+          const Gap(6),
+          Flexible(
             child: Text(
               title,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
-                color: _socialText,
+                color: isSelected ? Colors.white : _socialMuted,
                 fontWeight: FontWeight.w900,
-                height: 1.12,
+                fontSize: 12,
               ),
             ),
-          ),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: _socialMuted,
-            size: 20,
           ),
         ],
       ),
@@ -2120,6 +2435,6 @@ BoxDecoration _surfaceDecoration({required double radius}) => BoxDecoration(
   borderRadius: BorderRadius.circular(radius),
   border: Border.all(color: _socialBorder),
   boxShadow: const [
-    BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 8)),
+    BoxShadow(color: Color(0x08000000), blurRadius: 10, offset: Offset(0, 4)),
   ],
 );
