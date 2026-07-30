@@ -87,7 +87,9 @@ class LoginController extends GetxController {
           .refreshProfileFromBackend();
       if (!hasRemoteProfile) {
         await _syncProfileFromAuthUser();
+        await appController.refreshProfileFromBackend();
       }
+      await appController.reloadUserScopedState();
       _hasCompletedSignIn = true;
       if (Get.currentRoute != AppRoutes.mainNavigation) {
         await appNavigator.offAllNamed(AppRoutes.mainNavigation);

@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:flutter/foundation.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
@@ -139,6 +140,7 @@ class GroupsDataSource {
     required GroupThemeType theme,
     required List<FriendOption> invitedFriends,
   }) async {
+    String operation = "checking signed-in user";
     try {
       final String? userId = _supabaseService.currentUserId;
       if (userId == null) {
@@ -150,31 +152,34 @@ class GroupsDataSource {
         );
       }
 
-      final DateTime now = DateTime.now().toUtc();
-      final Map<String, dynamic> groupRow = await _supabaseService.requireClient
-          .from("groups")
-          .insert({
-            "owner_id": userId,
-            "name": name,
-            "theme": theme.name,
-            "invite_code": _inviteCodeFor(now),
-            "privacy": "inviteOnly",
-          })
-          .select()
-          .single();
-
+      operation = "rpc public.create_group_with_members";
+      final Map<String, dynamic> createGroupPayload = {
+        "group_name": name,
+        "group_theme": theme.name,
+        "invited_friend_ids": invitedFriends
+            .map((friend) => friend.id)
+            .toList(),
+      };
+      _logSqlStep(operation, createGroupPayload);
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "create_group_with_members",
+        params: createGroupPayload,
+      );
+      final List<dynamic> rows = response as List<dynamic>;
+      if (rows.isEmpty) {
+        throw StateError("create_group_with_members returned no group row.");
+      }
+      final Map<String, dynamic> groupRow = Map<String, dynamic>.from(
+        rows.first as Map,
+      );
       final String groupId = groupRow["id"] as String;
-      await _supabaseService.requireClient.from("group_members").insert([
-        {"group_id": groupId, "user_id": userId, "role": "owner"},
-        for (final FriendOption friend in invitedFriends)
-          {"group_id": groupId, "user_id": friend.id, "role": "member"},
-      ]);
-
+      operation = "select public.profiles for group members";
       final Map<String, Map<String, dynamic>> profilesById =
           await _profilesById([
             userId,
             ...invitedFriends.map((item) => item.id),
           ]);
+      final DateTime now = DateTime.now().toUtc();
       final List<GroupMemberEntity> members = [
         _memberFromRows(
           memberRow: {
@@ -210,7 +215,14 @@ class GroupsDataSource {
         ),
       );
     } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      _logSqlError(operation, error, stackTrace);
+      return Left(
+        SqlOperationAppError(
+          operation: operation,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
     }
   }
 
@@ -343,8 +355,17 @@ class GroupsDataSource {
     return DateTime.utc(now.year, now.month);
   }
 
-  static String _inviteCodeFor(DateTime dateTime) =>
-      "H${dateTime.microsecondsSinceEpoch.toRadixString(36).toUpperCase()}";
+  void _logSqlStep(String operation, Object payload) {
+    debugPrint("[HelpOut][Supabase][$operation] payload: $payload");
+  }
+
+  void _logSqlError(String operation, Object error, StackTrace stackTrace) {
+    debugPrint(
+      "[HelpOut][Supabase][$operation] failed: "
+      "${SqlOperationAppError.describe(error)}",
+    );
+    debugPrint("[HelpOut][Supabase][$operation] stack: $stackTrace");
+  }
 }
 
 class _PeriodScores {

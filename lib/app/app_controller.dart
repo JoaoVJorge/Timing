@@ -11,8 +11,12 @@ import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart
 import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/sign_out_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
+import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
+import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/l10n/app_localizations.dart";
+import "package:help_out/presentation/groups/groups_controller.dart";
+import "package:help_out/presentation/schedule/schedule_controller.dart";
 import "package:help_out/theme/accent_presets.dart";
 
 class AppController extends GetxController {
@@ -45,6 +49,7 @@ class AppController extends GetxController {
   final RxInt avatarIconIndex = 0.obs;
   final RxBool notificationsEnabled = true.obs;
   final Rx<String?> languageCode = Rx<String?>(null);
+  final RxString friendCode = "".obs;
 
   Locale get selectedLocale => _resolvedLocale(languageCode.value);
 
@@ -95,6 +100,7 @@ class AppController extends GetxController {
     avatarIconIndex.value = config.avatarIconIndex;
     notificationsEnabled.value = config.notificationsEnabled;
     languageCode.value = config.languageCode;
+    friendCode.value = config.friendCode;
     // The saved language only reaches here after GetMaterialApp's first
     // build (see the comment in setLanguageCode), so it must be applied
     // explicitly too, not just left to the `locale:` constructor param.
@@ -130,7 +136,22 @@ class AppController extends GetxController {
     avatarIconIndex: avatarIconIndex.value,
     notificationsEnabled: notificationsEnabled.value,
     languageCode: languageCode.value,
+    friendCode: friendCode.value,
   );
+
+  Future<void> reloadUserScopedState() async {
+    final List<Future<void>> reloads = [
+      Get.find<LastActivityService>().load(),
+      Get.find<DailyProgressService>().load(),
+      Get.find<ScheduleController>().loadEntries(),
+    ];
+
+    if (Get.isRegistered<GroupsController>()) {
+      reloads.add(Get.find<GroupsController>().loadGroups());
+    }
+
+    await Future.wait(reloads);
+  }
 
   Future<void> setDarkMode(bool value) async {
     isDarkMode.value = value;
@@ -223,7 +244,8 @@ class AppController extends GetxController {
     birthDate.value = null;
     profilePhotoBase64.value = null;
     avatarIconIndex.value = 0;
-    await _saveAppConfigUseCase(_currentConfig);
+    friendCode.value = "";
+    await reloadUserScopedState();
     await _appNavigator.offAllNamed(AppRoutes.login);
   }
 }

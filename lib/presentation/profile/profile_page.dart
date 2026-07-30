@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
@@ -20,6 +21,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ProfileController controller = Get.find();
+    final AppController appController = Get.find();
 
     return AppScaffold(
       body: SingleChildScrollView(
@@ -53,7 +55,10 @@ class ProfilePage extends StatelessWidget {
               const Gap(20),
               _EvolutionSection(values: controller.evolutionFocusSeconds),
               const Gap(20),
-              _SocialSection(onTapFriends: controller.onTapFriends),
+              _SocialSection(
+                onTapFriends: controller.onTapFriends,
+                inviteCode: appController.friendCode.value,
+              ),
               const Gap(20),
               _ReadingSection(stats: stats),
             ],
@@ -832,9 +837,10 @@ class _EvolutionChartPainter extends CustomPainter {
 }
 
 class _SocialSection extends StatelessWidget {
-  const _SocialSection({required this.onTapFriends});
+  const _SocialSection({required this.onTapFriends, required this.inviteCode});
 
   final VoidCallback onTapFriends;
+  final String inviteCode;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -852,7 +858,6 @@ class _SocialSection extends StatelessWidget {
               icon: Icons.group_rounded,
               title: _friendsTitle(context),
               subtitle: _friendsSubtitle(context),
-              detail: _friendsDetail(context),
               onTap: onTapFriends,
             ),
             Divider(
@@ -865,9 +870,13 @@ class _SocialSection extends StatelessWidget {
               icon: Icons.qr_code_rounded,
               title: _inviteCodeTitle(context),
               subtitle: _inviteCodeSubtitle(context),
+              detail: inviteCode.isEmpty ? null : inviteCode,
               onTap: () async {
+                if (inviteCode.isEmpty) {
+                  return;
+                }
                 final String message = _inviteCodeCopied(context);
-                await Clipboard.setData(const ClipboardData(text: "JOAO-2841"));
+                await Clipboard.setData(ClipboardData(text: inviteCode));
                 appNavigator.showSuccessSnackBar(message);
               },
             ),
@@ -895,12 +904,6 @@ class _SocialSection extends StatelessWidget {
         "pt" => "Gerencie amigos e solicitações",
         _ => "Manage friends and requests",
       };
-
-  String _friendsDetail(BuildContext context) => switch (context.languageCode) {
-    "es" => "12 amigos • 2 pendientes",
-    "pt" => "12 amigos • 2 pendentes",
-    _ => "12 friends • 2 pending",
-  };
 
   String _inviteCodeTitle(BuildContext context) =>
       switch (context.languageCode) {

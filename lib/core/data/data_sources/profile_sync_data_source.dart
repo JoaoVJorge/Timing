@@ -14,14 +14,15 @@ class ProfileSyncDataSource {
       if (userId == null) {
         return const Right(null);
       }
+      final user = _supabaseService.client?.auth.currentUser;
 
       await _supabaseService.requireClient.from("profiles").upsert({
         "id": userId,
         "is_dark_mode": config.isDarkMode,
         "user_name": config.userName,
         "nick_name": config.nickName,
-        "email": config.email,
-        "phone_number": config.phoneNumber,
+        "email": config.email ?? user?.email,
+        "phone_number": config.phoneNumber ?? user?.phone,
         "birth_date": config.birthDate,
         "profile_photo_base64": config.profilePhotoBase64,
         "accent_color_value": config.accentColorValue,
@@ -79,6 +80,7 @@ class ProfileSyncDataSource {
           row["notifications_enabled"] as bool? ??
           fallback.notificationsEnabled,
       languageCode: row["language_code"] as String?,
+      friendCode: row["friend_code"] as String? ?? "",
     );
   }
 }
