@@ -11,7 +11,6 @@ import "package:help_out/presentation/profile/profile_category_style.dart";
 import "package:help_out/presentation/profile/profile_controller.dart";
 import "package:help_out/presentation/profile/widgets/profile_top_subjects_list.dart";
 import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
@@ -29,28 +28,30 @@ class ProfilePage extends StatelessWidget {
         child: Obx(() {
           final ProfileStatsEntity stats = controller.stats.value;
           final ProfilePeriod selectedPeriod = controller.selectedPeriod.value;
+          final int periodFocusSeconds = controller.selectedPeriodFocusSeconds;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _JourneyHeader(),
-              const Gap(6),
-              _TopAchievementsStrip(
-                hasAnyUnlockedAchievement: controller.hasAnyUnlockedAchievement,
-                hasGoalStarted: controller.hasGoalStarted,
-                hasValidFirstFocus: controller.hasValidFirstFocus,
-                onTap: controller.onTapAchievements,
-              ),
-              const Gap(16),
-              _FocusHeroCard(stats: stats),
-              const Gap(14),
+              const Gap(10),
               _PeriodTabs(
                 selectedPeriod: selectedPeriod,
                 onSelectPeriod: controller.onSelectPeriod,
               ),
-              const Gap(16),
-              _HighlightsGrid(stats: stats),
-              const Gap(20),
+              const Gap(12),
+              _FocusHeroCard(
+                focusSeconds: periodFocusSeconds,
+                selectedPeriod: selectedPeriod,
+              ),
+              const Gap(12),
+              _HighlightsGrid(
+                stats: stats,
+                focusSeconds: periodFocusSeconds,
+                pages: controller.selectedPeriodPages,
+                sessions: controller.selectedPeriodSessions,
+              ),
+              const Gap(18),
               _ProgressSection(stats: stats),
               const Gap(20),
               _EvolutionSection(values: controller.evolutionFocusSeconds),
@@ -58,6 +59,15 @@ class ProfilePage extends StatelessWidget {
               _SocialSection(
                 onTapFriends: controller.onTapFriends,
                 inviteCode: appController.friendCode.value,
+              ),
+              const Gap(20),
+              _UnlockedAchievementsSection(
+                hasGoalStarted: controller.hasGoalStarted,
+                hasValidFirstFocus: controller.hasValidFirstFocus,
+                activeDays: controller.activeDays,
+                sessions: controller.totalSessions,
+                readingPages: stats.readingTotalPages,
+                onTap: controller.onTapAchievements,
               ),
               const Gap(20),
               _ReadingSection(stats: stats),
@@ -78,7 +88,10 @@ class _JourneyHeader extends StatelessWidget {
     children: [
       Text(
         context.l10n.profileTitle,
-        style: context.textStyles.black32.copyWith(fontSize: 34),
+        style: context.textStyles.black32.copyWith(
+          color: context.colorTokens.primary,
+          fontSize: 24,
+        ),
       ),
       const Gap(4),
       Text(
@@ -87,7 +100,7 @@ class _JourneyHeader extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodyLarge.copyWith(
           color: context.colorTokens.textHint,
-          fontSize: 14,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -95,257 +108,22 @@ class _JourneyHeader extends StatelessWidget {
   );
 }
 
-class _TopAchievementsStrip extends StatelessWidget {
-  const _TopAchievementsStrip({
-    required this.hasAnyUnlockedAchievement,
-    required this.hasGoalStarted,
-    required this.hasValidFirstFocus,
-    required this.onTap,
-  });
-
-  final bool hasAnyUnlockedAchievement;
-  final bool hasGoalStarted;
-  final bool hasValidFirstFocus;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Gap(6),
-          Expanded(
-            flex: 12,
-            child: _TopAchievementChip(
-              icon: Icons.emoji_events_rounded,
-              title: context.l10n.profileAchievementFirstUnlocked,
-              color: context.colorTokens.primary,
-              isUnlocked: hasAnyUnlockedAchievement,
-              isFeatured: true,
-              onTap: onTap,
-            ),
-          ),
-          const Gap(10),
-          Expanded(
-            flex: 10,
-            child: Column(
-              children: [
-                _TopAchievementChip(
-                  icon: Icons.track_changes_rounded,
-                  title: context.l10n.profileAchievementGoalStarted,
-                  color: context.colorTokens.primary,
-                  isUnlocked: hasGoalStarted,
-                  onTap: onTap,
-                ),
-                const Gap(8),
-                _TopAchievementChip(
-                  icon: Icons.eco_rounded,
-                  title: context.l10n.profileAchievementFirstFocus,
-                  color: context.colorTokens.primary,
-                  isUnlocked: hasValidFirstFocus,
-                  onTap: onTap,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      if (!hasAnyUnlockedAchievement) ...[
-        const Gap(6),
-        Text(
-          context.l10n.profileAchievementsStartHint,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodySmall.copyWith(
-            color: context.colorTokens.textHint,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    ],
-  );
-}
-
-class _TopAchievementChip extends StatelessWidget {
-  const _TopAchievementChip({
-    required this.icon,
-    required this.title,
-    required this.color,
-    required this.isUnlocked,
-    required this.onTap,
-    this.isFeatured = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final Color color;
-  final bool isUnlocked;
-  final VoidCallback onTap;
-  final bool isFeatured;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color effectiveColor = isUnlocked
-        ? color
-        : context.colorTokens.textHint;
-    final double height = isFeatured ? 100 : 46;
-    final double iconSize = isFeatured ? 56 : 32;
-    final double innerIconSize = isFeatured ? 32 : 18;
-    final double textSize = isFeatured ? 20 : 12.5;
-    final double radius = isFeatured ? 16 : 14;
-
-    return BounceTap(
-      onTap: onTap,
-      pressedScale: 0.97,
-      child: Stack(
-        children: [
-          Container(
-            height: height,
-            padding: EdgeInsets.symmetric(
-              horizontal: isFeatured ? 12 : 12,
-              vertical: isFeatured ? 12 : 6,
-            ),
-            decoration: BoxDecoration(
-              color: context.colorTokens.surface,
-              borderRadius: BorderRadius.circular(radius),
-              border: Border.all(
-                color: isUnlocked && isFeatured
-                    ? color.withValues(alpha: 0.30)
-                    : context.colorTokens.borderUnfocused.withValues(
-                        alpha: 0.60,
-                      ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: context.colorTokens.surfaceShadow,
-                  blurRadius: 7,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: iconSize,
-                  height: iconSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: effectiveColor.withValues(
-                      alpha: isUnlocked ? 0.14 : 0.10,
-                    ),
-                  ),
-                  child: Icon(
-                    isUnlocked ? icon : Icons.lock_rounded,
-                    color: effectiveColor,
-                    size: innerIconSize,
-                  ),
-                ),
-                Gap(isFeatured ? 12 : 8),
-                Expanded(
-                  child: isFeatured
-                      ? _FeaturedAchievementTitle(
-                          title: title,
-                          color: isUnlocked
-                              ? color
-                              : context.colorTokens.textBody.withValues(
-                                  alpha: 0.72,
-                                ),
-                        )
-                      : Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.bodyMedium.copyWith(
-                            color: isUnlocked
-                                ? color
-                                : context.colorTokens.textBody.withValues(
-                                    alpha: 0.72,
-                                  ),
-                            fontSize: textSize,
-                            fontWeight: FontWeight.w900,
-                            height: 1.12,
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          ),
-          if (isUnlocked)
-            Positioned(
-              right: 10,
-              bottom: 8,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                size: isFeatured ? 16 : 12,
-                color: color.withValues(alpha: 0.35),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FeaturedAchievementTitle extends StatelessWidget {
-  const _FeaturedAchievementTitle({required this.title, required this.color});
-
-  final String title;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> parts = title.split(" ");
-    final String firstLine = parts.isEmpty ? title : parts.first;
-    final String secondLine = parts.length <= 1
-        ? ""
-        : parts.sublist(1).join(" ");
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          firstLine,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.black20.copyWith(
-            color: color,
-            fontSize: 24,
-            height: 0.96,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        if (secondLine.isNotEmpty)
-          Text(
-            secondLine,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodyMedium.copyWith(
-              color: color,
-              fontSize: 17,
-              fontWeight: FontWeight.w900,
-              height: 1.05,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _FocusHeroCard extends StatelessWidget {
-  const _FocusHeroCard({required this.stats});
+  const _FocusHeroCard({
+    required this.focusSeconds,
+    required this.selectedPeriod,
+  });
 
-  final ProfileStatsEntity stats;
+  final int focusSeconds;
+  final ProfilePeriod selectedPeriod;
 
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(18),
+    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
     decoration: BoxDecoration(
       gradient: context.colorTokens.primaryGradient,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(18),
     ),
     child: Row(
       children: [
@@ -354,34 +132,39 @@ class _FocusHeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.profileSummarySinceStartLabel,
+                context.l10n.profileSummaryFocusLabel,
                 style: context.textStyles.bodySmall.copyWith(
                   color: context.colorTokens.white,
                   fontWeight: FontWeight.w800,
+                  fontSize: 11,
                 ),
               ),
               const Gap(8),
               Text(
-                formatDurationLong(Duration(seconds: stats.totalFocusSeconds)),
+                formatDurationLong(Duration(seconds: focusSeconds)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.black32.copyWith(
                   color: context.colorTokens.primaryForeground,
+                  fontSize: 28,
+                  height: 1,
                 ),
               ),
               const Gap(2),
               Text(
-                context.l10n.profileSummaryFocusLabel,
+                _periodComparisonText(context),
                 style: context.textStyles.bodySmall.copyWith(
                   color: context.colorTokens.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
         ),
         Container(
-          width: 64,
-          height: 64,
+          width: 58,
+          height: 58,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: context.colorTokens.primaryForeground.withValues(
@@ -391,12 +174,22 @@ class _FocusHeroCard extends StatelessWidget {
           child: Icon(
             Icons.track_changes_rounded,
             color: context.colorTokens.primaryForeground,
-            size: 34,
+            size: 31,
           ),
         ),
       ],
     ),
   );
+
+  String _periodComparisonText(BuildContext context) {
+    final String period = selectedPeriod.localizedLabel(context).toLowerCase();
+
+    return switch (context.languageCode) {
+      "es" => "Datos de esta $period",
+      "pt" => "Dados deste período",
+      _ => "Data for this $period",
+    };
+  }
 }
 
 class _PeriodTabs extends StatelessWidget {
@@ -476,9 +269,17 @@ class _PeriodTab extends StatelessWidget {
 }
 
 class _HighlightsGrid extends StatelessWidget {
-  const _HighlightsGrid({required this.stats});
+  const _HighlightsGrid({
+    required this.stats,
+    required this.focusSeconds,
+    required this.pages,
+    required this.sessions,
+  });
 
   final ProfileStatsEntity stats;
+  final int focusSeconds;
+  final int pages;
+  final int sessions;
 
   @override
   Widget build(BuildContext context) => GridView(
@@ -494,33 +295,44 @@ class _HighlightsGrid extends StatelessWidget {
       _HighlightTile(
         icon: Icons.schedule_rounded,
         color: context.colorTokens.primary,
-        value: formatDurationLong(Duration(seconds: stats.totalFocusSeconds)),
+        value: formatDurationLong(Duration(seconds: focusSeconds)),
         label: context.l10n.profileSummaryFocusLabel,
       ),
       _HighlightTile(
-        icon: Icons.menu_book_rounded,
-        color: TimeCategoryType.studying.accentColor,
-        value: stats.hasTopStudyingSubject
-            ? capitalizeName(stats.topStudyingSubject!.name)
-            : context.l10n.profileTopSubjectEmptyTitle,
-        label: context.l10n.statTopSubject,
+        icon: Icons.auto_stories_rounded,
+        color: TimeCategoryType.reading.accentColor,
+        value: "$pages",
+        label: context.l10n.statPagesRead,
       ),
       _HighlightTile(
-        icon: Icons.local_fire_department_rounded,
-        color: context.colorTokens.warning,
+        icon: Icons.fitness_center_rounded,
+        color: TimeCategoryType.exercises.accentColor,
         value: formatDurationLong(
           Duration(seconds: stats.exercisesTotalSeconds),
         ),
-        label: context.l10n.statHoursExercised,
+        label: _exercisesLabel(context),
       ),
       _HighlightTile(
-        icon: Icons.trending_up_rounded,
+        icon: Icons.assignment_rounded,
         color: context.colorTokens.primary,
-        value: "${stats.readingTotalPages}",
-        label: context.l10n.statPagesRead,
+        value: "$sessions",
+        label: _sessionsLabel(context),
       ),
     ],
   );
+
+  String _exercisesLabel(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Ejercicios",
+        "pt" => "Exercícios",
+        _ => "Exercises",
+      };
+
+  String _sessionsLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Sesiones",
+    "pt" => "Sessões",
+    _ => "Sessions",
+  };
 }
 
 class _HighlightTile extends StatelessWidget {
@@ -1008,6 +820,207 @@ class _SocialTile extends StatelessWidget {
   );
 }
 
+class _UnlockedAchievementsSection extends StatelessWidget {
+  const _UnlockedAchievementsSection({
+    required this.hasGoalStarted,
+    required this.hasValidFirstFocus,
+    required this.activeDays,
+    required this.sessions,
+    required this.readingPages,
+    required this.onTap,
+  });
+
+  final bool hasGoalStarted;
+  final bool hasValidFirstFocus;
+  final int activeDays;
+  final int sessions;
+  final int readingPages;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              _title(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodySmall.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          BounceTap(
+            onTap: onTap,
+            pressedScale: 0.95,
+            child: Text(
+              _seeAll(context),
+              style: context.textStyles.bodyTiny.copyWith(
+                color: context.colorTokens.primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+      const Gap(10),
+      GridView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          mainAxisExtent: 96,
+        ),
+        children: [
+          _AchievementBadgeCard(
+            icon: Icons.emoji_events_rounded,
+            title: _streakTitle(context),
+            color: context.colorTokens.primary,
+            isUnlocked: activeDays >= 3,
+            onTap: onTap,
+          ),
+          _AchievementBadgeCard(
+            icon: Icons.explore_rounded,
+            title: context.l10n.profileAchievementFirstFocus,
+            color: context.colorTokens.primary,
+            isUnlocked: hasValidFirstFocus,
+            onTap: onTap,
+          ),
+          _AchievementBadgeCard(
+            icon: Icons.star_rounded,
+            title: context.l10n.profileAchievementGoalStarted,
+            color: context.colorTokens.warning,
+            isUnlocked: hasGoalStarted,
+            onTap: onTap,
+          ),
+          _AchievementBadgeCard(
+            icon: Icons.track_changes_rounded,
+            title: _sessionsTitle(context),
+            color: context.colorTokens.primary,
+            isUnlocked: sessions >= 5,
+            onTap: onTap,
+          ),
+          _AchievementBadgeCard(
+            icon: Icons.lock_rounded,
+            title: _daysTitle(context),
+            color: context.colorTokens.textHint,
+            isUnlocked: activeDays >= 7,
+            onTap: onTap,
+          ),
+          _AchievementBadgeCard(
+            icon: Icons.workspace_premium_rounded,
+            title: _readerTitle(context),
+            color: context.colorTokens.primary,
+            isUnlocked: readingPages >= 100,
+            onTap: onTap,
+          ),
+        ],
+      ),
+    ],
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Logros desbloqueados",
+    "pt" => "Conquistas desbloqueadas",
+    _ => "Unlocked achievements",
+  };
+
+  String _seeAll(BuildContext context) => switch (context.languageCode) {
+    "es" => "Ver todas",
+    "pt" => "Ver todas",
+    _ => "See all",
+  };
+
+  String _streakTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "3 días seguidos",
+    "pt" => "3 dias seguidos",
+    _ => "3-day streak",
+  };
+
+  String _sessionsTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "5 sesiones completas",
+    "pt" => "5 sessões concluídas",
+    _ => "5 completed sessions",
+  };
+
+  String _daysTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "7 días seguidos",
+    "pt" => "7 dias seguidos",
+    _ => "7-day streak",
+  };
+
+  String _readerTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Lector constante",
+    "pt" => "Leitor constante",
+    _ => "Consistent reader",
+  };
+}
+
+class _AchievementBadgeCard extends StatelessWidget {
+  const _AchievementBadgeCard({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.isUnlocked,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final Color color;
+  final bool isUnlocked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color effectiveColor = isUnlocked
+        ? color
+        : context.colorTokens.textHint;
+
+    return BounceTap(
+      onTap: onTap,
+      pressedScale: 0.96,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+        decoration: _cardDecoration(
+          context,
+        ).copyWith(borderRadius: BorderRadius.circular(14)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _IconBadge(
+              icon: isUnlocked ? icon : Icons.lock_rounded,
+              color: effectiveColor,
+              size: 36,
+              iconSize: 19,
+            ),
+            const Gap(7),
+            Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: context.textStyles.bodySmall.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                height: 1.08,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ReadingSection extends StatelessWidget {
   const _ReadingSection({required this.stats});
 
@@ -1075,8 +1088,20 @@ extension on TimeCategoryType {
 
 extension on ProfilePeriod {
   String localizedLabel(BuildContext context) => switch (this) {
-    ProfilePeriod.fiveDays => context.l10n.periodFiveDays,
-    ProfilePeriod.week => context.l10n.periodWeek,
-    ProfilePeriod.month => context.l10n.periodMonth,
+    ProfilePeriod.fiveDays => switch (context.languageCode) {
+      "es" => "Día",
+      "pt" => "Dia",
+      _ => "Day",
+    },
+    ProfilePeriod.week => switch (context.languageCode) {
+      "es" => "Semana",
+      "pt" => "Semana",
+      _ => "Week",
+    },
+    ProfilePeriod.month => switch (context.languageCode) {
+      "es" => "Mes",
+      "pt" => "Mês",
+      _ => "Month",
+    },
   };
 }

@@ -14,6 +14,8 @@ class LeaderboardTile extends StatelessWidget {
     required this.theme,
     required this.value,
     required this.isCurrentUser,
+    required this.isFirst,
+    required this.isLast,
     this.differenceToPrevious,
     super.key,
   });
@@ -23,17 +25,35 @@ class LeaderboardTile extends StatelessWidget {
   final GroupThemeType theme;
   final int value;
   final bool isCurrentUser;
+  final bool isFirst;
+  final bool isLast;
   final int? differenceToPrevious;
 
   @override
   Widget build(BuildContext context) {
     final bool isTopThree = rank <= 3;
     final String score = formatGroupScore(context, value, theme.unit);
+    final BorderRadius userRadius = BorderRadius.vertical(
+      top: isFirst ? const Radius.circular(18) : Radius.zero,
+      bottom: isLast ? const Radius.circular(18) : Radius.zero,
+    );
 
     return Container(
-      color: isCurrentUser
-          ? context.colorTokens.primaryVeryLight
-          : context.colorTokens.transparent,
+      decoration: BoxDecoration(
+        color: isCurrentUser
+            ? context.colorTokens.primaryVeryLight
+            : context.colorTokens.transparent,
+        borderRadius: isCurrentUser ? userRadius : BorderRadius.zero,
+        boxShadow: isCurrentUser
+            ? [
+                BoxShadow(
+                  color: context.colorTokens.primary.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
