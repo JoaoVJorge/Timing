@@ -8,8 +8,10 @@ class ScheduleRepository {
 
   final ScheduleDataSource _scheduleDataSource;
 
-  Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() => _scheduleDataSource.getEntries();
+  Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() =>
+      _scheduleDataSource.getEntries();
 
-  Future<Either<AppError, void>> saveEntries(List<ScheduleEntryEntity> entries) =>
-      _scheduleDataSource.saveEntries(entries);
+  Future<Either<AppError, void>> saveEntries(
+    List<ScheduleEntryEntity> entries,
+  ) => _scheduleDataSource.saveEntries(entries);
 }

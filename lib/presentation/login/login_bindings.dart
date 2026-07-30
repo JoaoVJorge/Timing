@@ -5,7 +5,13 @@ class LoginBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<LoginController>(
-      LoginController(appController: Get.find(), appNavigator: Get.find()),
+      LoginController(
+        signInWithGoogleUseCase: Get.find(),
+        appController: Get.find(),
+        appNavigator: Get.find(),
+        supabaseService: Get.find(),
+        logger: Get.find(),
+      ),
     );
   }
 }

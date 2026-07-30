@@ -33,7 +33,7 @@ class DailyTaskEntity extends Equatable {
 
   int get completedDays => completedDates.length;
 
-  bool get isCompleted => completedDays >= targetDays;
+  bool get isCompleted => targetDays > 0 && completedDays >= targetDays;
 
   Map<String, dynamic> toMap() => {
     "id": id,

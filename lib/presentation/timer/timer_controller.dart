@@ -6,6 +6,7 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
+import "package:help_out/core/domain/use_cases/log_activity_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/live_activity/timer_live_activity_service.dart";
@@ -17,6 +18,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   TimerController({
     required this.updateSubjectTimeUseCase,
     required this.updateSubjectPagesUseCase,
+    required this.logActivityUseCase,
     required this.lastActivityService,
     required this.dailyProgressService,
     required this.timerNotificationService,
@@ -28,6 +30,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
+  final LogActivityUseCase logActivityUseCase;
   final LastActivityService lastActivityService;
   final DailyProgressService dailyProgressService;
   final TimerNotificationService timerNotificationService;
@@ -271,6 +274,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       subject = subject.copyWith(currentPages: nextPages);
       updateSubjectPagesUseCase(subjectId: subject.id, currentPages: nextPages);
       dailyProgressService.addPages(sanitizedPages);
+      unawaited(
+        logActivityUseCase(
+          category: subject.category,
+          subjectId: subject.id,
+          subjectName: subject.name,
+          pages: sanitizedPages,
+        ),
+      );
     }
     _registerSessionIfNeeded();
     isRunning.value = false;
@@ -292,6 +303,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
     _persistedSessionSeconds = sessionSeconds.value;
     updateSubjectTimeUseCase(subjectId: subject.id, totalSeconds: totalSeconds);
+    unawaited(
+      logActivityUseCase(
+        category: subject.category,
+        subjectId: subject.id,
+        subjectName: subject.name,
+        seconds: elapsedSinceLastPersist,
+      ),
+    );
     if (!isReading) {
       dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
     }

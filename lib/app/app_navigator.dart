@@ -61,6 +61,9 @@ class AppNavigator {
     Object? arguments,
     int? id,
   }) {
+    if (id == null && Get.currentRoute == newRouteName) {
+      return Future<T?>.value();
+    }
     final Future<dynamic>? result = Get.offAllNamed<dynamic>(
       newRouteName,
       arguments: arguments,

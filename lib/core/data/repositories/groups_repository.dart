@@ -10,9 +10,11 @@ class GroupsRepository {
 
   final GroupsDataSource _groupsDataSource;
 
-  Future<Either<AppError, List<GroupEntity>>> getGroups() => _groupsDataSource.getGroups();
+  Future<Either<AppError, List<GroupEntity>>> getGroups() =>
+      _groupsDataSource.getGroups();
 
-  Future<Either<AppError, List<FriendOption>>> getInvitableFriends() => _groupsDataSource.getInvitableFriends();
+  Future<Either<AppError, List<FriendOption>>> getInvitableFriends() =>
+      _groupsDataSource.getInvitableFriends();
 
   Future<Either<AppError, GroupEntity>> createGroup({
     required String name,

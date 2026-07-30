@@ -10,33 +10,50 @@ class LanguagePickerDialog extends StatelessWidget {
   final String? currentCode;
 
   @override
-  Widget build(BuildContext context) => Dialog(
-    elevation: 0,
-    backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-    child: Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
-      decoration: BoxDecoration(
-        color: context.colorTokens.dialogSurface,
-        borderRadius: BorderRadius.circular(28),
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: EdgeInsets.fromLTRB(
+      22,
+      10,
+      22,
+      22 + MediaQuery.viewInsetsOf(context).bottom,
+    ),
+    decoration: BoxDecoration(
+      color: context.colorTokens.dialogSurface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.86,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: ListView(
+        shrinkWrap: true,
         children: [
-          Container(
-            width: 68,
-            height: 68,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.colorTokens.primaryVeryLight,
-              border: Border.all(color: context.colorTokens.primaryVeryLight),
+          Center(
+            child: Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.colorTokens.borderUnfocused,
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
-            child: Icon(
-              Icons.language_rounded,
-              color: context.colorTokens.primary,
-              size: 34,
+          ),
+          const Gap(18),
+          Center(
+            child: Container(
+              width: 68,
+              height: 68,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.colorTokens.primaryVeryLight,
+                border: Border.all(color: context.colorTokens.primaryVeryLight),
+              ),
+              child: Icon(
+                Icons.language_rounded,
+                color: context.colorTokens.primary,
+                size: 34,
+              ),
             ),
           ),
           const Gap(18),

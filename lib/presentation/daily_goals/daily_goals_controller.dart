@@ -8,6 +8,8 @@ import "package:help_out/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
   DailyGoalsController({
@@ -62,7 +64,27 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> onDeleteTask(DailyTaskEntity task) async {
+    final bool confirmed = await showDeleteConfirmationDialog(
+      itemName: task.name,
+      itemTypeName: _goalTypeName,
+    );
+    if (!confirmed) {
+      return;
+    }
+
     tasks.removeWhere((item) => item.id == task.id);
     await _deleteDailyTaskUseCase(taskId: task.id);
+  }
+
+  String? get _goalTypeName {
+    final context = Get.context;
+    if (context == null) {
+      return null;
+    }
+    return switch (context.languageCode) {
+      "en" => "goal",
+      "es" => "meta",
+      _ => "meta",
+    };
   }
 }

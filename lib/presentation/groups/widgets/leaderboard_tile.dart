@@ -112,25 +112,10 @@ class _RankMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isTopThree) {
       return Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(
-              Icons.workspace_premium_rounded,
-              size: 32,
-              color: LeaderboardMedalColors.byRank(rank),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                "$rank",
-                style: context.textStyles.bodyTiny.copyWith(
-                  color: context.colorTokens.white,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
+        child: Icon(
+          Icons.workspace_premium_rounded,
+          size: 32,
+          color: LeaderboardMedalColors.byRank(rank),
         ),
       );
     }

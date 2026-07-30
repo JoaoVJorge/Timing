@@ -14,7 +14,9 @@ class SubjectsDataSource {
 
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async {
     try {
-      final String? savedSubjects = await _localStorageService.read<String?>(LocalStorageKeys.subjects);
+      final String? savedSubjects = await _localStorageService.read<String?>(
+        LocalStorageKeys.subjects,
+      );
 
       if (savedSubjects == null) {
         return const Right([]);
@@ -25,7 +27,8 @@ class SubjectsDataSource {
       for (final dynamic item in decoded) {
         final Map<String, dynamic> map = item as Map<String, dynamic>;
         // Skips entries from removed categories (e.g. the old "working" one).
-        if (TimeCategoryType.tryByName(map["category"] as String? ?? "") == null) {
+        if (TimeCategoryType.tryByName(map["category"] as String? ?? "") ==
+            null) {
           continue;
         }
         subjects.add(SubjectEntity.fromMap(map));
@@ -36,9 +39,13 @@ class SubjectsDataSource {
     }
   }
 
-  Future<Either<AppError, void>> saveSubjects(List<SubjectEntity> subjects) async {
+  Future<Either<AppError, void>> saveSubjects(
+    List<SubjectEntity> subjects,
+  ) async {
     try {
-      final String encoded = jsonEncode(subjects.map((subject) => subject.toMap()).toList());
+      final String encoded = jsonEncode(
+        subjects.map((subject) => subject.toMap()).toList(),
+      );
       await _localStorageService.write(LocalStorageKeys.subjects, encoded);
       return const Right(null);
     } catch (error, stackTrace) {

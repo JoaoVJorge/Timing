@@ -163,7 +163,13 @@ class _GoalInput extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Icon(Icons.access_time_rounded, color: accent, size: 20),
+        Icon(
+          controller.isPageBased
+              ? Icons.menu_book_rounded
+              : Icons.access_time_rounded,
+          color: accent,
+          size: 20,
+        ),
         const Gap(12),
         Expanded(
           child: TextField(
@@ -180,7 +186,7 @@ class _GoalInput extends StatelessWidget {
                   ? context.l10n.goalPagesHint
                   : context.l10n.estimatedHoursGoalHint,
               suffixText: controller.isPageBased
-                  ? null
+                  ? _pagesSuffix(context)
                   : context.l10n.timeUnitMinutesSuffix,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -198,6 +204,15 @@ class _GoalInput extends StatelessWidget {
       ],
     ),
   );
+
+  String _pagesSuffix(BuildContext context) => switch (context.languageCode) {
+    "en" => "pages",
+    "es" => "páginas",
+    "fr" => "pages",
+    "de" => "Seiten",
+    "ar" => "صفحات",
+    _ => "páginas",
+  };
 }
 
 class _RestSection extends StatelessWidget {

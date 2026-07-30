@@ -8,5 +8,6 @@ class GetInvitableFriendsUseCase {
 
   final GroupsRepository _groupsRepository;
 
-  Future<Either<AppError, List<FriendOption>>> call() => _groupsRepository.getInvitableFriends();
+  Future<Either<AppError, List<FriendOption>>> call() =>
+      _groupsRepository.getInvitableFriends();
 }

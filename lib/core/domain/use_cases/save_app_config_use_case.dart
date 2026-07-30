@@ -8,5 +8,6 @@ class SaveAppConfigUseCase {
 
   final AppConfigRepository _appConfigRepository;
 
-  Future<Either<AppError, void>> call(AppConfigEntity config) => _appConfigRepository.saveAppConfig(config);
+  Future<Either<AppError, void>> call(AppConfigEntity config) =>
+      _appConfigRepository.saveAppConfig(config);
 }

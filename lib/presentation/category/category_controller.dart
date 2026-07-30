@@ -7,17 +7,22 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
+import "package:help_out/core/domain/use_cases/pin_subject_to_start_use_case.dart";
+import "package:help_out/shared/extensions/enum_localization_extensions.dart";
+import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
 
 class CategoryController extends GetxController {
   CategoryController({
     required this._getSubjectsUseCase,
     required this._deleteSubjectUseCase,
+    required this._pinSubjectToStartUseCase,
     required this._appNavigator,
     required this.category,
   });
 
   final GetSubjectsUseCase _getSubjectsUseCase;
   final DeleteSubjectUseCase _deleteSubjectUseCase;
+  final PinSubjectToStartUseCase _pinSubjectToStartUseCase;
   final AppNavigator _appNavigator;
 
   final TimeCategoryType category;
@@ -89,7 +94,34 @@ class CategoryController extends GetxController {
     await loadSubjects();
   }
 
+  Future<void> onTapEditSubject(SubjectEntity subject) async {
+    final dynamic result = await _appNavigator.toNamed(
+      AppRoutes.createSubject,
+      arguments: subject,
+    );
+    final SubjectEntity? updatedSubject = result as SubjectEntity?;
+    if (updatedSubject == null) {
+      return;
+    }
+
+    final int index = subjects.indexWhere((item) => item.id == subject.id);
+    if (index != -1) {
+      subjects[index] = updatedSubject;
+    }
+    await loadSubjects();
+  }
+
   Future<void> onDeleteSubject(SubjectEntity subject) async {
+    final bool confirmed = await showDeleteConfirmationDialog(
+      itemName: subject.name,
+      itemTypeName: Get.context == null
+          ? null
+          : category.itemNoun(Get.context!),
+    );
+    if (!confirmed) {
+      return;
+    }
+
     final List<SubjectEntity> previousSubjects = subjects.toList();
     subjects.removeWhere((item) => item.id == subject.id);
     final result = await _deleteSubjectUseCase(subjectId: subject.id);
@@ -97,6 +129,23 @@ class CategoryController extends GetxController {
       subjects.value = previousSubjects;
       _handleError(error);
     }, (_) {});
+  }
+
+  Future<void> onPinSubjectToStart(SubjectEntity subject) async {
+    final int index = subjects.indexWhere((item) => item.id == subject.id);
+    if (index > 0) {
+      subjects
+        ..removeAt(index)
+        ..insert(0, subject);
+    }
+
+    final Either<AppError, void> result = await _pinSubjectToStartUseCase(
+      subjectId: subject.id,
+    );
+    result.fold((error) {
+      _handleError(error);
+      loadSubjects();
+    }, (_) => loadSubjects());
   }
 
   Future<void> onTapAddSubject() {

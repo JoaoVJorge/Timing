@@ -8,12 +8,14 @@ class NotebookSwipeTile extends StatefulWidget {
   const NotebookSwipeTile({
     required this.child,
     required this.onTapNotes,
+    required this.onTapEdit,
     required this.onDelete,
     super.key,
   });
 
   final Widget child;
   final VoidCallback onTapNotes;
+  final VoidCallback onTapEdit;
   final VoidCallback onDelete;
 
   @override
@@ -22,13 +24,14 @@ class NotebookSwipeTile extends StatefulWidget {
 
 class _NotebookSwipeTileState extends State<NotebookSwipeTile>
     with SingleTickerProviderStateMixin {
-  static const double _revealWidth = 72;
+  static const double _leadingRevealWidth = 144;
+  static const double _trailingRevealWidth = 72;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 220),
-    lowerBound: -_revealWidth,
-    upperBound: _revealWidth,
+    lowerBound: -_trailingRevealWidth,
+    upperBound: _leadingRevealWidth,
     // Start centered — without this the controller defaults to lowerBound,
     // opening every tile with the delete action already revealed.
     value: 0,
@@ -42,22 +45,27 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
 
   void _onDragUpdate(DragUpdateDetails details) {
     _controller.value = (_controller.value + details.delta.dx).clamp(
-      -_revealWidth,
-      _revealWidth,
+      -_trailingRevealWidth,
+      _leadingRevealWidth,
     );
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final double target = _controller.value > _revealWidth / 2
-        ? _revealWidth
-        : _controller.value < -_revealWidth / 2
-        ? -_revealWidth
+    final double target = _controller.value > _leadingRevealWidth / 2
+        ? _leadingRevealWidth
+        : _controller.value < -_trailingRevealWidth / 2
+        ? -_trailingRevealWidth
         : 0;
     _controller.animateTo(target, curve: Curves.easeOut);
   }
 
   void _onTapNotes() {
     widget.onTapNotes();
+    _controller.animateTo(0, curve: Curves.easeOut);
+  }
+
+  void _onTapEdit() {
+    widget.onTapEdit();
     _controller.animateTo(0, curve: Curves.easeOut);
   }
 
@@ -77,10 +85,22 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
             Positioned.fill(
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: _RevealAction(
-                  iconPath: "note",
-                  gradient: context.colorTokens.primaryGradient,
-                  onTap: _onTapNotes,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _RevealAction(
+                      iconPath: "note",
+                      gradient: context.colorTokens.primaryGradient,
+                      iconColor: context.colorTokens.white,
+                      onTap: _onTapNotes,
+                    ),
+                    _RevealAction(
+                      iconData: Icons.edit_rounded,
+                      color: context.colorTokens.surface,
+                      iconColor: context.colorTokens.primary,
+                      onTap: _onTapEdit,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -109,16 +129,20 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
 
 class _RevealAction extends StatelessWidget {
   const _RevealAction({
-    required this.iconPath,
     required this.onTap,
+    this.iconPath,
+    this.iconData,
+    this.iconColor,
     this.color,
     this.gradient,
-  });
+  }) : assert(iconPath != null || iconData != null);
 
   static const double _revealWidth = 72;
   static const double _gap = 8;
 
-  final String iconPath;
+  final String? iconPath;
+  final IconData? iconData;
+  final Color? iconColor;
   final VoidCallback onTap;
   final Color? color;
   final Gradient? gradient;
@@ -135,7 +159,9 @@ class _RevealAction extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       alignment: Alignment.center,
-      child: AppIcon(iconPath, color: Colors.white, size: 28),
+      child: iconPath != null
+          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 28)
+          : Icon(iconData, color: iconColor ?? Colors.white, size: 28),
     ),
   );
 }

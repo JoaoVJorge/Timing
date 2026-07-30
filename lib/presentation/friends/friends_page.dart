@@ -1,17 +1,21 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
+import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:share_plus/share_plus.dart";
 
+const Color _socialText = Color(0xFF1F2329);
+const Color _socialMuted = Color(0xFF7A7E87);
+const Color _socialBorder = Color(0xFFE7E7E7);
+
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
-
-  static const String inviteCode = "JOAO-2841";
 
   @override
   State<FriendsPage> createState() => _FriendsPageState();
@@ -19,10 +23,15 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage> {
   final TextEditingController searchController = TextEditingController();
+  final SupabaseService supabaseService = Get.find();
 
-  final List<_FriendProfile> requests = List.of(_mockRequests);
-  final List<_FriendProfile> friends = List.of(_mockFriends);
+  final List<_FriendProfile> requests = [];
+  final List<_FriendProfile> sentRequests = [];
+  final List<_FriendProfile> friends = [];
+  final Set<String> sentRequestIds = {};
+  String inviteCode = "";
   String query = "";
+  bool isLoading = true;
 
   List<_FriendProfile> get filteredFriends {
     final String normalizedQuery = query.trim().toLowerCase();
@@ -39,6 +48,12 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadSocial();
+  }
+
+  @override
   void dispose() {
     searchController.dispose();
     super.dispose();
@@ -46,95 +61,373 @@ class _FriendsPageState extends State<FriendsPage> {
 
   @override
   Widget build(BuildContext context) => AppScaffold(
-    body: SingleChildScrollView(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _BackButton(onTap: () => Navigator.of(context).maybePop()),
-          const Gap(20),
-          Text(
-            _title(context),
-            style: context.textStyles.black32.copyWith(fontSize: 32),
-          ),
-          const Gap(2),
-          Text(
-            _subtitle(context),
-            style: context.textStyles.bodyMedium.copyWith(
-              color: context.colorTokens.textHint,
-              fontWeight: FontWeight.w600,
+    backgroundColor: context.colorTokens.scaffold,
+    body: RefreshIndicator(
+      color: context.colorTokens.primary,
+      onRefresh: _loadSocial,
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 18, bottom: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Header(onInviteTap: _openAddFriendPage),
+            const Gap(12),
+            _SearchField(
+              controller: searchController,
+              hint: _searchHint(context),
+              onChanged: (value) => setState(() => query = value),
             ),
-          ),
-          const Gap(18),
-          _SearchField(
-            controller: searchController,
-            hint: _searchHint(context),
-            onChanged: (value) => setState(() => query = value),
-          ),
-          const Gap(18),
-          _InviteCodeCard(
-            code: FriendsPage.inviteCode,
-            onCopy: () => _copyInviteCode(context),
-            onShare: () => _shareInviteCode(context),
-          ),
-          if (query.trim().isEmpty) ...[
-            const Gap(22),
-            _RequestsSection(
-              requests: requests,
-              onDecline: _removeRequest,
-              onAccept: _acceptRequest,
+            const Gap(14),
+            _InviteCodeCard(
+              code: inviteCode.isEmpty ? "..." : inviteCode,
+              onCopy: () => _copyInviteCode(context),
             ),
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else ...[
+              const Gap(14),
+              _ActivityShortcuts(
+                onPendingTap: _openPendingRequestsPage,
+                onSentTap: _openSentRequestsPage,
+              ),
+              const Gap(18),
+              _FriendsSection(
+                friends: filteredFriends,
+                totalFriends: friends.length,
+                query: query,
+                onShare: () => _shareInviteCode(context),
+              ),
+            ],
           ],
-          const Gap(22),
-          _FriendsSection(
-            friends: filteredFriends,
-            totalFriends: friends.length,
-          ),
-          const Gap(20),
-          _TipPill(text: _tip(context)),
-        ],
+        ),
       ),
     ),
   );
 
-  void _removeRequest(_FriendProfile profile) {
-    setState(() => requests.remove(profile));
+  Future<void> _loadSocial() async {
+    final String? userId = supabaseService.currentUserId;
+    if (userId == null) {
+      setState(() {
+        isLoading = false;
+        inviteCode = "";
+      });
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final Map<String, dynamic>? profileRow = await supabaseService
+          .requireClient
+          .from("profiles")
+          .select("friend_code")
+          .eq("id", userId)
+          .maybeSingle();
+      final List<Map<String, dynamic>> incomingRows = await _selectRows(
+        table: "friendships",
+        filters: (query) =>
+            query.eq("addressee_id", userId).eq("status", "pending"),
+      );
+      final List<Map<String, dynamic>> outgoingRows = await _selectRows(
+        table: "friendships",
+        filters: (query) =>
+            query.eq("requester_id", userId).eq("status", "pending"),
+      );
+      final List<Map<String, dynamic>> friendRows = await _selectRows(
+        table: "friendships",
+        filters: (query) => query
+            .eq("status", "accepted")
+            .or("requester_id.eq.$userId,addressee_id.eq.$userId"),
+      );
+      final Set<String> profileIds = {
+        for (final Map<String, dynamic> row in incomingRows)
+          row["requester_id"] as String,
+        for (final Map<String, dynamic> row in outgoingRows)
+          row["addressee_id"] as String,
+        for (final Map<String, dynamic> row in friendRows)
+          row["requester_id"] == userId
+              ? row["addressee_id"] as String
+              : row["requester_id"] as String,
+      };
+      final Map<String, Map<String, dynamic>> profilesById =
+          await _profilesById(profileIds.toList());
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        inviteCode =
+            profileRow?["friend_code"] as String? ??
+            userId.substring(0, 8).toUpperCase();
+        requests
+          ..clear()
+          ..addAll(
+            incomingRows.map((row) {
+              final String requesterId = row["requester_id"] as String;
+              return _friendFromRow(
+                userId: requesterId,
+                friendshipId: row["id"] as String,
+                profileRow: profilesById[requesterId],
+              );
+            }),
+          );
+        sentRequestIds
+          ..clear()
+          ..addAll(outgoingRows.map((row) => row["addressee_id"] as String));
+        sentRequests
+          ..clear()
+          ..addAll(
+            outgoingRows.map((row) {
+              final String addresseeId = row["addressee_id"] as String;
+              return _friendFromRow(
+                userId: addresseeId,
+                friendshipId: row["id"] as String,
+                profileRow: profilesById[addresseeId],
+              );
+            }),
+          );
+        friends
+          ..clear()
+          ..addAll(
+            friendRows.map((row) {
+              final String friendId = row["requester_id"] == userId
+                  ? row["addressee_id"] as String
+                  : row["requester_id"] as String;
+              return _friendFromRow(
+                userId: friendId,
+                friendshipId: row["id"] as String,
+                profileRow: profilesById[friendId],
+              );
+            }),
+          );
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => isLoading = false);
+      appNavigator.showErrorSnackBar();
+    }
   }
 
-  void _acceptRequest(_FriendProfile profile) {
-    setState(() {
-      requests.remove(profile);
-      if (!friends.any((friend) => friend.handle == profile.handle)) {
-        friends.insert(0, profile);
+  Future<void> _sendFriendRequest(_FriendSuggestion profile) async {
+    final String? userId = supabaseService.currentUserId;
+    if (userId == null || sentRequestIds.contains(profile.id)) {
+      return;
+    }
+    final String successMessage = _requestSent(context);
+
+    try {
+      await supabaseService.requireClient.from("friendships").insert({
+        "requester_id": userId,
+        "addressee_id": profile.id,
+        "status": "pending",
+      });
+      if (!mounted) {
+        return;
       }
-    });
+      setState(() {
+        sentRequestIds.add(profile.id);
+        sentRequests.add(
+          _FriendProfile(
+            id: profile.id,
+            friendshipId: "",
+            name: profile.name,
+            handle: profile.handle,
+            colorValue: profile.colorValue,
+          ),
+        );
+      });
+      appNavigator.showSuccessSnackBar(successMessage);
+    } catch (_) {
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _acceptRequest(_FriendProfile profile) async {
+    try {
+      await supabaseService.requireClient
+          .from("friendships")
+          .update({"status": "accepted"})
+          .eq("id", profile.friendshipId);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        requests.removeWhere((request) => request.id == profile.id);
+        if (!friends.any((friend) => friend.id == profile.id)) {
+          friends.insert(0, profile);
+        }
+      });
+    } catch (_) {
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _declineRequest(_FriendProfile profile) async {
+    try {
+      await supabaseService.requireClient
+          .from("friendships")
+          .delete()
+          .eq("id", profile.friendshipId);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        requests.removeWhere((request) => request.id == profile.id);
+      });
+    } catch (_) {
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _cancelSentRequest(_FriendProfile profile) async {
+    try {
+      if (profile.friendshipId.isNotEmpty) {
+        await supabaseService.requireClient
+            .from("friendships")
+            .delete()
+            .eq("id", profile.friendshipId);
+      } else {
+        final String? userId = supabaseService.currentUserId;
+        if (userId != null) {
+          await supabaseService.requireClient
+              .from("friendships")
+              .delete()
+              .eq("requester_id", userId)
+              .eq("addressee_id", profile.id)
+              .eq("status", "pending");
+        }
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        sentRequestIds.remove(profile.id);
+        sentRequests.removeWhere((request) => request.id == profile.id);
+      });
+    } catch (_) {
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _openAddFriendPage() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _FindFriendsPage(
+          sentRequestIds: sentRequestIds,
+          onSendRequest: _sendFriendRequest,
+        ),
+      ),
+    );
+    await _loadSocial();
+  }
+
+  Future<void> _openPendingRequestsPage() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _FriendRequestsPage(
+          title: _pendingPageTitle(context),
+          emptyText: _pendingEmptyText(context),
+          requests: requests,
+          mode: _FriendRequestsMode.incoming,
+          onAccept: _acceptRequest,
+          onDecline: _declineRequest,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSentRequestsPage() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => _FriendRequestsPage(
+          title: _sentPageTitle(context),
+          emptyText: _sentEmptyText(context),
+          requests: sentRequests,
+          mode: _FriendRequestsMode.sent,
+          onCancel: _cancelSentRequest,
+        ),
+      ),
+    );
   }
 
   Future<void> _copyInviteCode(BuildContext context) async {
+    if (inviteCode.isEmpty) {
+      return;
+    }
     final String message = _copied(context);
-    await Clipboard.setData(const ClipboardData(text: FriendsPage.inviteCode));
+    await Clipboard.setData(ClipboardData(text: inviteCode));
     appNavigator.showSuccessSnackBar(message);
   }
 
   Future<void> _shareInviteCode(BuildContext context) async {
-    await SharePlus.instance.share(
-      ShareParams(text: _shareText(context, FriendsPage.inviteCode)),
+    if (inviteCode.isEmpty) {
+      return;
+    }
+    final String text = _shareText(context, inviteCode);
+    await SharePlus.instance.share(ShareParams(text: text));
+  }
+
+  Future<List<Map<String, dynamic>>> _selectRows({
+    required String table,
+    required dynamic Function(dynamic query) filters,
+  }) async {
+    final dynamic response = await filters(
+      supabaseService.requireClient.from(table).select(),
+    );
+    return (response as List<dynamic>)
+        .map((row) => Map<String, dynamic>.from(row as Map))
+        .toList();
+  }
+
+  Future<Map<String, Map<String, dynamic>>> _profilesById(
+    List<String> ids,
+  ) async {
+    if (ids.isEmpty) {
+      return const {};
+    }
+    final List<Map<String, dynamic>> rows = await _selectRows(
+      table: "profiles",
+      filters: (query) => query.inFilter("id", ids),
+    );
+    return {for (final Map<String, dynamic> row in rows) row["id"]: row};
+  }
+
+  _FriendProfile _friendFromRow({
+    required String userId,
+    required String friendshipId,
+    required Map<String, dynamic>? profileRow,
+  }) {
+    final String name = _profileName(profileRow);
+    return _FriendProfile(
+      id: userId,
+      friendshipId: friendshipId,
+      name: name,
+      handle:
+          "@${(profileRow?["friend_code"] as String? ?? userId.substring(0, 8)).toLowerCase()}",
+      colorValue:
+          (profileRow?["accent_color_value"] as num?)?.toInt() ??
+          context.colorTokens.primary.toARGB32(),
     );
   }
 
-  static String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Amigos",
-    "pt" => "Amigos",
-    _ => "Friends",
-  };
-
-  static String _subtitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Gestiona tus conexiones e invitaciones",
-        "pt" => "Gerencie suas conexões e convites",
-        _ => "Manage your connections and invites",
-      };
+  String _profileName(Map<String, dynamic>? row) {
+    final String nickName = row?["nick_name"] as String? ?? "";
+    final String userName = row?["user_name"] as String? ?? "";
+    if (userName.trim().isNotEmpty) {
+      return userName.trim();
+    }
+    if (nickName.trim().isNotEmpty) {
+      return nickName.trim();
+    }
+    return "HelpOut User";
+  }
 
   static String _searchHint(BuildContext context) =>
       switch (context.languageCode) {
@@ -149,43 +442,1028 @@ class _FriendsPageState extends State<FriendsPage> {
     _ => "Code copied",
   };
 
+  static String _requestSent(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Solicitud enviada",
+        "pt" => "Solicitação enviada",
+        _ => "Request sent",
+      };
+
+  static String _pendingPageTitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Solicitudes",
+        "pt" => "Solicitações",
+        _ => "Requests",
+      };
+
+  static String _sentPageTitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Invitaciones",
+        "pt" => "Convites",
+        _ => "Invites",
+      };
+
+  static String _pendingEmptyText(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Nadie te pidió amistad todavía.",
+        "pt" => "Ninguém te pediu amizade ainda.",
+        _ => "No one has requested to be friends yet.",
+      };
+
+  static String _sentEmptyText(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "No tienes pedidos enviados.",
+        "pt" => "Você não tem pedidos enviados.",
+        _ => "You have no sent requests.",
+      };
+
   static String _shareText(BuildContext context, String code) =>
       switch (context.languageCode) {
         "es" => "Agrégame en HelpOut con mi código: $code",
         "pt" => "Me adicione no HelpOut com meu código: $code",
         _ => "Add me on HelpOut with my code: $code",
       };
+}
 
-  static String _tip(BuildContext context) => switch (context.languageCode) {
-    "es" => "Tip: agrega amigos para crear grupos y seguir el progreso",
-    "pt" => "Dica: adicione amigos para criar grupos e acompanhar progresso",
-    _ => "Tip: add friends to create groups and track progress",
+class _Header extends StatelessWidget {
+  const _Header({required this.onInviteTap});
+
+  final VoidCallback onInviteTap;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _title(context),
+              style: context.textStyles.black32.copyWith(
+                color: context.colorTokens.primary,
+                fontSize: 26,
+                height: 1.05,
+              ),
+            ),
+            const Gap(4),
+            Text(
+              _subtitle(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodySmall.copyWith(
+                color: _socialMuted,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+      BounceTap(
+        onTap: onInviteTap,
+        child: Container(
+          width: 38,
+          height: 38,
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.person_add_alt_1_rounded,
+            color: context.colorTokens.primary,
+            size: 28,
+          ),
+        ),
+      ),
+    ],
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Amigos",
+    "pt" => "Amigos",
+    _ => "Friends",
+  };
+
+  String _subtitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Gestiona tus conexiones e invitaciones.",
+    "pt" => "Gerencie suas conexões e convites.",
+    _ => "Manage your connections and invites.",
   };
 }
 
-class _BackButton extends StatelessWidget {
-  const _BackButton({required this.onTap});
+class _FindFriendsPage extends StatefulWidget {
+  const _FindFriendsPage({
+    required this.sentRequestIds,
+    required this.onSendRequest,
+  });
 
+  final Set<String> sentRequestIds;
+  final Future<void> Function(_FriendSuggestion profile) onSendRequest;
+
+  @override
+  State<_FindFriendsPage> createState() => _FindFriendsPageState();
+}
+
+class _FindFriendsPageState extends State<_FindFriendsPage> {
+  final TextEditingController codeController = TextEditingController();
+  final SupabaseService supabaseService = Get.find();
+  late final Set<String> sentRequestIds = Set.of(widget.sentRequestIds);
+  _FriendSuggestion? foundUser;
+  bool isLoading = false;
+  bool hasSearched = false;
+
+  @override
+  void dispose() {
+    codeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: context.colorTokens.scaffold,
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+        child: ListView(
+          children: [
+            _InviteCodeHeader(onBack: () => Navigator.of(context).maybePop()),
+            const Gap(14),
+            _InviteLookupCard(
+              controller: codeController,
+              isLoading: isLoading,
+              onPaste: _pasteCode,
+              onSearch: _findByCode,
+            ),
+            if (foundUser != null) ...[
+              const Gap(16),
+              _FoundUserSection(
+                profile: foundUser!,
+                isSent: sentRequestIds.contains(foundUser!.id),
+                onAdd: () => _send(foundUser!),
+              ),
+            ] else if (hasSearched && !isLoading) ...[
+              const Gap(16),
+              _CodeNotFoundCard(text: _notFoundText(context)),
+            ],
+            const Gap(16),
+            _HowItWorksCard(),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Future<void> _pasteCode() async {
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    final String text = data?.text?.trim() ?? "";
+    if (text.isEmpty) {
+      return;
+    }
+    codeController.text = text.toUpperCase();
+  }
+
+  Future<void> _findByCode() async {
+    final String code = codeController.text.trim().replaceAll("@", "");
+    if (code.isEmpty || isLoading) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      hasSearched = true;
+      foundUser = null;
+    });
+    try {
+      final dynamic response = await supabaseService.requireClient.rpc(
+        "find_profile_by_friend_code",
+        params: {"lookup_code": code},
+      );
+      final List<dynamic> rows = response as List<dynamic>;
+      final _FriendSuggestion? profile = rows.isEmpty
+          ? null
+          : _suggestionFromRow(Map<String, dynamic>.from(rows.first as Map));
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        foundUser = profile;
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => isLoading = false);
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
+  Future<void> _send(_FriendSuggestion profile) async {
+    await widget.onSendRequest(profile);
+    if (!mounted) {
+      return;
+    }
+    setState(() => sentRequestIds.add(profile.id));
+  }
+
+  _FriendSuggestion _suggestionFromRow(Map<String, dynamic> row) {
+    final String id = row["id"] as String;
+    final String friendCode =
+        row["friend_code"] as String? ?? id.substring(0, 8);
+    return _FriendSuggestion(
+      id: id,
+      name: _profileName(row),
+      handle: "@${friendCode.toLowerCase()}",
+      colorValue:
+          (row["accent_color_value"] as num?)?.toInt() ??
+          context.colorTokens.primary.toARGB32(),
+    );
+  }
+
+  String _profileName(Map<String, dynamic>? row) {
+    final String userName = row?["user_name"] as String? ?? "";
+    final String nickName = row?["nick_name"] as String? ?? "";
+    if (userName.trim().isNotEmpty) {
+      return userName.trim();
+    }
+    if (nickName.trim().isNotEmpty) {
+      return nickName.trim();
+    }
+    return "HelpOut User";
+  }
+
+  String _notFoundText(BuildContext context) => switch (context.languageCode) {
+    "es" => "No encontramos ningún usuario con este código.",
+    "pt" => "Não encontramos nenhum usuário com este código.",
+    _ => "We could not find a user with this code.",
+  };
+}
+
+class _InviteCodeHeader extends StatelessWidget {
+  const _InviteCodeHeader({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      BounceTap(
+        onTap: onBack,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: context.colorTokens.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _socialBorder),
+          ),
+          child: Icon(
+            Icons.arrow_back_rounded,
+            color: context.colorTokens.textBody,
+            size: 23,
+          ),
+        ),
+      ),
+      const Gap(12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _title(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.black32.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 28,
+                height: 1.05,
+              ),
+            ),
+            const Gap(4),
+            Text(
+              _subtitle(context),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: _socialMuted,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Adicionar amigo",
+    "pt" => "Adicionar amigo",
+    _ => "Add friend",
+  };
+
+  String _subtitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Agrega amigos usando el código de invitación",
+    "pt" => "Adicione amigos usando o código de convite",
+    _ => "Add friends using an invite code",
+  };
+}
+
+class _InviteLookupCard extends StatelessWidget {
+  const _InviteLookupCard({
+    required this.controller,
+    required this.isLoading,
+    required this.onPaste,
+    required this.onSearch,
+  });
+
+  final TextEditingController controller;
+  final bool isLoading;
+  final VoidCallback onPaste;
+  final VoidCallback onSearch;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+    decoration: _surfaceDecoration(radius: 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: context.colorTokens.primaryVeryLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.confirmation_number_outlined,
+                color: context.colorTokens.primary,
+                size: 25,
+              ),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Text(
+                _title(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.extraBold24.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Gap(16),
+        Text(
+          _fieldLabel(context),
+          style: context.textStyles.bodyMedium.copyWith(
+            color: _socialMuted,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Gap(8),
+        Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.colorTokens.primary, width: 1.2),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  textCapitalization: TextCapitalization.characters,
+                  style: context.textStyles.black32.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontSize: 24,
+                    letterSpacing: 0.8,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const Gap(8),
+              BounceTap(
+                onTap: onPaste,
+                pressedScale: 0.96,
+                child: Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: context.colorTokens.primaryVeryLight,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.content_paste_rounded,
+                        color: context.colorTokens.primary,
+                        size: 18,
+                      ),
+                      const Gap(6),
+                      Text(
+                        _pasteLabel(context),
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: context.colorTokens.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Gap(12),
+        Row(
+          children: [
+            const Icon(
+              Icons.verified_user_outlined,
+              color: _socialMuted,
+              size: 16,
+            ),
+            const Gap(8),
+            Expanded(
+              child: Text(
+                _uniqueLabel(context),
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: _socialMuted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Gap(14),
+        _WidePrimaryButton(
+          label: _searchLabel(context),
+          isLoading: isLoading,
+          onTap: onSearch,
+          icon: Icons.search_rounded,
+        ),
+      ],
+    ),
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Código de invitación",
+    "pt" => "Código de convite",
+    _ => "Invite code",
+  };
+
+  String _fieldLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Escribe o pega el código",
+    "pt" => "Digite ou cole o código",
+    _ => "Type or paste the code",
+  };
+
+  String _pasteLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Pegar",
+    "pt" => "Colar",
+    _ => "Paste",
+  };
+
+  String _uniqueLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Cada usuario tiene un código único",
+    "pt" => "Cada usuário possui um código único",
+    _ => "Each user has a unique code",
+  };
+
+  String _searchLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Buscar código",
+    "pt" => "Buscar código",
+    _ => "Search code",
+  };
+}
+
+class _FoundUserSection extends StatelessWidget {
+  const _FoundUserSection({
+    required this.profile,
+    required this.isSent,
+    required this.onAdd,
+  });
+
+  final _FriendSuggestion profile;
+  final bool isSent;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          const Icon(
+            Icons.check_circle_rounded,
+            color: Color(0xFF44A75A),
+            size: 28,
+          ),
+          const Gap(8),
+          Text(
+            _title(context),
+            style: context.textStyles.extraBold24.copyWith(
+              color: context.colorTokens.textBody,
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+      const Gap(8),
+      Container(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        decoration: _surfaceDecoration(radius: 18),
+        child: Row(
+          children: [
+            GroupMemberAvatar(
+              name: profile.name,
+              colorValue: profile.colorValue,
+              size: 52,
+            ),
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.extraBold24.copyWith(
+                      color: context.colorTokens.textBody,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const Gap(2),
+                  Text(
+                    profile.handle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: _socialMuted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const Gap(6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5F4E8),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle_outline_rounded,
+                          color: Color(0xFF3D8B4D),
+                          size: 16,
+                        ),
+                        const Gap(5),
+                        Text(
+                          _foundByCode(context),
+                          style: context.textStyles.bodySmall.copyWith(
+                            color: const Color(0xFF3D8B4D),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(10),
+            isSent
+                ? _SentChip(label: _sentLabel(context))
+                : _AddButton(label: _addLabel(context), onTap: onAdd),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Usuario encontrado",
+    "pt" => "Usuário encontrado",
+    _ => "User found",
+  };
+
+  String _foundByCode(BuildContext context) => switch (context.languageCode) {
+    "es" => "Encontrado por código",
+    "pt" => "Encontrado pelo código",
+    _ => "Found by code",
+  };
+
+  String _addLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Agregar",
+    "pt" => "Adicionar",
+    _ => "Add",
+  };
+
+  String _sentLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Enviado",
+    "pt" => "Enviado",
+    _ => "Sent",
+  };
+}
+
+class _CodeNotFoundCard extends StatelessWidget {
+  const _CodeNotFoundCard({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: _surfaceDecoration(radius: 18),
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: context.textStyles.bodyMedium.copyWith(color: _socialMuted),
+    ),
+  );
+}
+
+class _HowItWorksCard extends StatelessWidget {
+  const _HowItWorksCard();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: context.colorTokens.primary.withValues(alpha: 0.18),
+      ),
+    ),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: context.colorTokens.primaryVeryLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.lightbulb_outline_rounded,
+                color: context.colorTokens.primary,
+                size: 21,
+              ),
+            ),
+            const Gap(10),
+            Text(
+              _title(context),
+              style: context.textStyles.extraBold20.copyWith(
+                color: context.colorTokens.textBody,
+              ),
+            ),
+          ],
+        ),
+        const Gap(10),
+        _HowStep(
+          icon: Icons.group_add_outlined,
+          text: _stepOne(context),
+          isLast: false,
+        ),
+        _HowStep(
+          icon: Icons.content_paste_rounded,
+          text: _stepTwo(context),
+          isLast: false,
+        ),
+        _HowStep(
+          icon: Icons.send_rounded,
+          text: _stepThree(context),
+          isLast: true,
+        ),
+      ],
+    ),
+  );
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "es" => "Cómo funciona",
+    "pt" => "Como funciona",
+    _ => "How it works",
+  };
+
+  String _stepOne(BuildContext context) => switch (context.languageCode) {
+    "es" => "Pide el código a tu amigo",
+    "pt" => "Peça o código ao seu amigo",
+    _ => "Ask your friend for their code",
+  };
+
+  String _stepTwo(BuildContext context) => switch (context.languageCode) {
+    "es" => "Pega el código para encontrar el perfil",
+    "pt" => "Cole o código para encontrar o perfil",
+    _ => "Paste the code to find the profile",
+  };
+
+  String _stepThree(BuildContext context) => switch (context.languageCode) {
+    "es" => "Envía la solicitud para agregar",
+    "pt" => "Envie a solicitação para adicionar",
+    _ => "Send the request to add them",
+  };
+}
+
+class _HowStep extends StatelessWidget {
+  const _HowStep({
+    required this.icon,
+    required this.text,
+    required this.isLast,
+  });
+
+  final IconData icon;
+  final String text;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      Row(
+        children: [
+          SizedBox(
+            width: 42,
+            child: Icon(icon, color: context.colorTokens.primary, size: 22),
+          ),
+          const Gap(10),
+          Expanded(
+            child: Text(
+              text,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+      if (!isLast)
+        Divider(height: 16, indent: 50, color: context.colorTokens.divider),
+    ],
+  );
+}
+
+class _WidePrimaryButton extends StatelessWidget {
+  const _WidePrimaryButton({
+    required this.label,
+    required this.isLoading,
+    required this.onTap,
+    required this.icon,
+  });
+
+  final String label;
+  final bool isLoading;
   final VoidCallback onTap;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
+    pressedScale: 0.97,
+    onTap: isLoading ? () {} : onTap,
     child: Container(
-      width: 40,
-      height: 40,
+      width: double.infinity,
+      height: 46,
       decoration: BoxDecoration(
-        color: context.colorTokens.surface,
+        gradient: context.colorTokens.primaryGradient,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (isLoading)
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2.4,
+              ),
+            )
+          else
+            Icon(icon, color: Colors.white, size: 21),
+          const Gap(8),
+          Text(
+            label,
+            style: context.textStyles.textPrimaryButton.copyWith(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+enum _FriendRequestsMode { incoming, sent }
+
+class _FriendRequestsPage extends StatefulWidget {
+  const _FriendRequestsPage({
+    required this.title,
+    required this.emptyText,
+    required this.requests,
+    required this.mode,
+    this.onAccept,
+    this.onDecline,
+    this.onCancel,
+  });
+
+  final String title;
+  final String emptyText;
+  final List<_FriendProfile> requests;
+  final _FriendRequestsMode mode;
+  final Future<void> Function(_FriendProfile profile)? onAccept;
+  final Future<void> Function(_FriendProfile profile)? onDecline;
+  final Future<void> Function(_FriendProfile profile)? onCancel;
+
+  @override
+  State<_FriendRequestsPage> createState() => _FriendRequestsPageState();
+}
+
+class _FriendRequestsPageState extends State<_FriendRequestsPage> {
+  late final List<_FriendProfile> requests = List.of(widget.requests);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: context.colorTokens.scaffold,
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _LocalPageHeader(
+              title: widget.title,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
+            const Gap(16),
+            Expanded(
+              child: requests.isEmpty
+                  ? _SimpleEmptyState(text: widget.emptyText)
+                  : ListView.separated(
+                      itemCount: requests.length,
+                      separatorBuilder: (context, index) => const Gap(10),
+                      itemBuilder: (context, index) {
+                        final _FriendProfile profile = requests[index];
+                        return Container(
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                          decoration: _surfaceDecoration(radius: 18),
+                          child: Row(
+                            children: [
+                              GroupMemberAvatar(
+                                name: profile.name,
+                                colorValue: profile.colorValue,
+                                size: 42,
+                              ),
+                              const Gap(10),
+                              Expanded(
+                                child: _NameBlock(
+                                  name: profile.name,
+                                  handle: profile.handle,
+                                ),
+                              ),
+                              const Gap(8),
+                              if (widget.mode == _FriendRequestsMode.incoming)
+                                Row(
+                                  children: [
+                                    _RequestActionButton(
+                                      label: _declineLabel(context),
+                                      isPrimary: false,
+                                      onTap: () =>
+                                          _runAction(profile, widget.onDecline),
+                                    ),
+                                    const Gap(6),
+                                    _RequestActionButton(
+                                      label: _acceptLabel(context),
+                                      isPrimary: true,
+                                      onTap: () =>
+                                          _runAction(profile, widget.onAccept),
+                                    ),
+                                  ],
+                                )
+                              else
+                                _RequestActionButton(
+                                  label: _cancelLabel(context),
+                                  isPrimary: false,
+                                  onTap: () =>
+                                      _runAction(profile, widget.onCancel),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
-      child: Icon(
-        Icons.arrow_back_rounded,
-        color: context.colorTokens.textBody,
-        size: 22,
+    ),
+  );
+
+  Future<void> _runAction(
+    _FriendProfile profile,
+    Future<void> Function(_FriendProfile profile)? action,
+  ) async {
+    if (action == null) {
+      return;
+    }
+    await action(profile);
+    if (!mounted) {
+      return;
+    }
+    setState(() => requests.removeWhere((item) => item.id == profile.id));
+  }
+
+  String _acceptLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Aceptar",
+    "pt" => "Aceitar",
+    _ => "Accept",
+  };
+
+  String _declineLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Negar",
+    "pt" => "Negar",
+    _ => "Decline",
+  };
+
+  String _cancelLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Cancelar",
+    "pt" => "Cancelar",
+    _ => "Cancel",
+  };
+}
+
+class _LocalPageHeader extends StatelessWidget {
+  const _LocalPageHeader({required this.title, required this.onBack});
+
+  final String title;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      BounceTap(
+        onTap: onBack,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: context.colorTokens.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: _socialBorder),
+          ),
+          child: Icon(
+            Icons.arrow_back_rounded,
+            color: context.colorTokens.textBody,
+            size: 22,
+          ),
+        ),
       ),
+      const Gap(12),
+      Expanded(
+        child: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.extraBold24.copyWith(
+            color: context.colorTokens.textBody,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _SimpleEmptyState extends StatelessWidget {
+  const _SimpleEmptyState({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: context.textStyles.bodyMedium.copyWith(color: _socialMuted),
     ),
   );
 }
@@ -203,18 +1481,12 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 50,
+    height: 46,
     padding: const EdgeInsets.symmetric(horizontal: 14),
-    decoration: _cardDecoration(
-      context,
-    ).copyWith(borderRadius: BorderRadius.circular(18)),
+    decoration: _surfaceDecoration(radius: 18),
     child: Row(
       children: [
-        Icon(
-          Icons.search_rounded,
-          color: context.colorTokens.textHint,
-          size: 23,
-        ),
+        const Icon(Icons.search_rounded, color: _socialMuted, size: 21),
         const Gap(10),
         Expanded(
           child: TextField(
@@ -222,14 +1494,14 @@ class _SearchField extends StatelessWidget {
             onChanged: onChanged,
             textInputAction: TextInputAction.search,
             style: context.textStyles.bodyMedium.copyWith(
-              color: context.colorTokens.textBody,
-              fontWeight: FontWeight.w600,
+              color: _socialText,
+              fontWeight: FontWeight.w700,
             ),
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: hint,
               hintStyle: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textHint,
+                color: _socialMuted,
                 fontWeight: FontWeight.w600,
               ),
               isDense: true,
@@ -242,307 +1514,200 @@ class _SearchField extends StatelessWidget {
 }
 
 class _InviteCodeCard extends StatelessWidget {
-  const _InviteCodeCard({
-    required this.code,
-    required this.onCopy,
-    required this.onShare,
-  });
+  const _InviteCodeCard({required this.code, required this.onCopy});
 
   final String code;
   final VoidCallback onCopy;
-  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(
-        color: context.colorTokens.primary.withValues(alpha: 0.14),
-      ),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+    decoration: _surfaceDecoration(radius: 18),
+    child: Row(
       children: [
-        Row(
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: context.colorTokens.primaryVeryLight,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.qr_code_rounded,
-                color: context.colorTokens.primary,
-                size: 25,
-              ),
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _inviteLabel(context),
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: context.colorTokens.textHint,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Gap(2),
-                  Text(
-                    code,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.black20.copyWith(
-                      color: context.colorTokens.primary,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        _PinkBadge(icon: Icons.qr_code_rounded, size: 46, iconSize: 24),
         const Gap(12),
-        Row(
-          children: [
-            Expanded(
-              child: _InviteAction(
-                icon: Icons.copy_rounded,
-                label: _copyLabel(context),
-                onTap: onCopy,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _label(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodySmall.copyWith(
+                  color: _socialMuted,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const Gap(10),
-            Expanded(
-              child: _InviteAction(
-                icon: Icons.ios_share_rounded,
-                label: _shareLabel(context),
-                onTap: onShare,
+              const Gap(2),
+              Text(
+                code,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.black20.copyWith(
+                  color: context.colorTokens.primary,
+                  fontSize: 18,
+                  letterSpacing: 0,
+                ),
               ),
+            ],
+          ),
+        ),
+        BounceTap(
+          onTap: onCopy,
+          pressedScale: 0.95,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              borderRadius: BorderRadius.circular(14),
             ),
-          ],
+            child: Icon(
+              Icons.copy_rounded,
+              color: context.colorTokens.primary,
+              size: 22,
+            ),
+          ),
         ),
       ],
     ),
   );
 
-  String _inviteLabel(BuildContext context) => switch (context.languageCode) {
+  String _label(BuildContext context) => switch (context.languageCode) {
     "es" => "Tu código de invitación",
     "pt" => "Seu código de convite",
     _ => "Your invite code",
   };
-
-  String _copyLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Copiar",
-    "pt" => "Copiar",
-    _ => "Copy",
-  };
-
-  String _shareLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Compartir",
-    "pt" => "Compartilhar",
-    _ => "Share",
-  };
 }
 
-class _InviteAction extends StatelessWidget {
-  const _InviteAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
+class _ActivityShortcuts extends StatelessWidget {
+  const _ActivityShortcuts({
+    required this.onPendingTap,
+    required this.onSentTap,
   });
 
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+  final VoidCallback onPendingTap;
+  final VoidCallback onSentTap;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.96,
-    onTap: onTap,
-    child: Container(
-      height: 38,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: context.colorTokens.primary,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 19, color: context.colorTokens.primaryForeground),
-          const Gap(6),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.primaryForeground,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _RequestsSection extends StatelessWidget {
-  const _RequestsSection({
-    required this.requests,
-    required this.onDecline,
-    required this.onAccept,
-  });
-
-  final List<_FriendProfile> requests;
-  final ValueChanged<_FriendProfile> onDecline;
-  final ValueChanged<_FriendProfile> onAccept;
-
-  @override
-  Widget build(BuildContext context) {
-    if (requests.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(_title(context), style: context.textStyles.extraBold20),
-            const Gap(8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: BoxDecoration(
-                color: context.colorTokens.primaryVeryLight,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                "${requests.length}",
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: _ShortcutTile(
+          icon: Icons.group_rounded,
+          title: _pendingLabel(context),
+          onTap: onPendingTap,
         ),
-        const Gap(10),
-        for (final _FriendProfile request in requests) ...[
-          _RequestCard(
-            profile: request,
-            onDecline: () => onDecline(request),
-            onAccept: () => onAccept(request),
-          ),
-          if (request != requests.last) const Gap(8),
-        ],
-      ],
-    );
-  }
+      ),
+      const Gap(12),
+      Expanded(
+        child: _ShortcutTile(
+          icon: Icons.mail_rounded,
+          title: _sentLabel(context),
+          onTap: onSentTap,
+        ),
+      ),
+    ],
+  );
 
-  String _title(BuildContext context) => switch (context.languageCode) {
+  String _pendingLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Solicitudes",
     "pt" => "Solicitações",
     _ => "Requests",
   };
+
+  String _sentLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Invitaciones",
+    "pt" => "Convites",
+    _ => "Invites",
+  };
 }
 
-class _RequestCard extends StatelessWidget {
-  const _RequestCard({
-    required this.profile,
-    required this.onDecline,
-    required this.onAccept,
+class _ShortcutTile extends StatelessWidget {
+  const _ShortcutTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
   });
 
-  final _FriendProfile profile;
-  final VoidCallback onDecline;
-  final VoidCallback onAccept;
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-    decoration: _cardDecoration(
-      context,
-    ).copyWith(borderRadius: BorderRadius.circular(18)),
-    child: Row(
-      children: [
-        GroupMemberAvatar(
-          name: profile.name,
-          colorValue: profile.colorValue,
-          size: 42,
-        ),
-        const Gap(10),
-        Expanded(child: _FriendTexts(profile: profile)),
-        const Gap(8),
-        _OutlineAction(label: _declineLabel(context), onTap: onDecline),
-        const Gap(6),
-        _PrimaryAction(label: _acceptLabel(context), onTap: onAccept),
-      ],
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.98,
+    onTap: onTap,
+    child: Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: _surfaceDecoration(radius: 16),
+      child: Row(
+        children: [
+          _PinkBadge(icon: icon, size: 36, iconSize: 19),
+          const Gap(10),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodySmall.copyWith(
+                color: _socialText,
+                fontWeight: FontWeight.w900,
+                height: 1.12,
+              ),
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: _socialMuted,
+            size: 20,
+          ),
+        ],
+      ),
     ),
   );
-
-  String _declineLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Rechazar",
-    "pt" => "Recusar",
-    _ => "Decline",
-  };
-
-  String _acceptLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Aceptar",
-    "pt" => "Aceitar",
-    _ => "Accept",
-  };
 }
 
 class _FriendsSection extends StatelessWidget {
-  const _FriendsSection({required this.friends, required this.totalFriends});
+  const _FriendsSection({
+    required this.friends,
+    required this.totalFriends,
+    required this.query,
+    required this.onShare,
+  });
 
   final List<_FriendProfile> friends;
   final int totalFriends;
+  final String query;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Row(
-        children: [
-          Expanded(
-            child: Text(_title(context), style: context.textStyles.extraBold20),
-          ),
-          Text(
-            _totalLabel(context, totalFriends),
-            style: context.textStyles.bodyMedium.copyWith(
-              color: context.colorTokens.textHint,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      _SectionHeader(
+        title: _title(context, totalFriends),
+        action: friends.isEmpty ? null : _seeAll(context),
       ),
-      const Gap(10),
+      const Gap(12),
       if (friends.isEmpty)
-        _EmptySearchCard(text: _emptySearch(context))
+        _EmptyFriendsCard(hasQuery: query.trim().isNotEmpty, onShare: onShare)
       else
         Container(
-          decoration: _cardDecoration(
-            context,
-          ).copyWith(borderRadius: BorderRadius.circular(18)),
+          decoration: _surfaceDecoration(radius: 18),
           child: Column(
             children: [
               for (int index = 0; index < friends.length; index++) ...[
-                _FriendRow(profile: friends[index]),
+                _FriendRow(profile: friends[index], index: index),
                 if (index < friends.length - 1)
-                  Divider(
+                  const Divider(
                     height: 1,
-                    indent: 64,
-                    endIndent: 18,
-                    color: context.colorTokens.divider,
+                    indent: 58,
+                    endIndent: 14,
+                    color: _socialBorder,
                   ),
               ],
             ],
@@ -551,91 +1716,239 @@ class _FriendsSection extends StatelessWidget {
     ],
   );
 
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Tus amigos",
-    "pt" => "Seus amigos",
-    _ => "Your friends",
-  };
-
-  String _totalLabel(BuildContext context, int count) =>
+  String _title(BuildContext context, int count) =>
       switch (context.languageCode) {
-        "es" => "$count amigos",
-        "pt" => "$count amigos",
-        _ => "$count friends",
+        "es" => "Tus amigos ($count)",
+        "pt" => "Seus amigos ($count)",
+        _ => "Your friends ($count)",
       };
 
-  String _emptySearch(BuildContext context) => switch (context.languageCode) {
-    "es" => "Ningún amigo encontrado",
-    "pt" => "Nenhum amigo encontrado",
-    _ => "No friends found",
+  String _seeAll(BuildContext context) => switch (context.languageCode) {
+    "es" => "Ver todos",
+    "pt" => "Ver todos",
+    _ => "View all",
   };
 }
 
 class _FriendRow extends StatelessWidget {
-  const _FriendRow({required this.profile});
+  const _FriendRow({required this.profile, required this.index});
 
   final _FriendProfile profile;
+  final int index;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.98,
-    onTap: () {},
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Row(
-        children: [
-          GroupMemberAvatar(
-            name: profile.name,
-            colorValue: profile.colorValue,
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+    child: Row(
+      children: [
+        GroupMemberAvatar(
+          name: profile.name,
+          colorValue: profile.colorValue,
+          size: 40,
+        ),
+        const Gap(10),
+        Expanded(
+          child: _NameBlock(name: profile.name, handle: profile.handle),
+        ),
+        Text(
+          _statusLabel(context, index),
+          style: context.textStyles.bodySmall.copyWith(
+            color: index < 2 ? const Color(0xFF25A85A) : _socialMuted,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Gap(8),
+        const Icon(Icons.more_vert_rounded, color: _socialMuted, size: 20),
+      ],
+    ),
+  );
+
+  String _statusLabel(BuildContext context, int index) {
+    if (index < 2) {
+      return "Online";
+    }
+    return switch (context.languageCode) {
+      "es" => "Hace ${index + 1} min",
+      "pt" => "Há ${index + 1} min",
+      _ => "${index + 1} min ago",
+    };
+  }
+}
+
+class _EmptyFriendsCard extends StatelessWidget {
+  const _EmptyFriendsCard({required this.hasQuery, required this.onShare});
+
+  final bool hasQuery;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(18, 26, 18, 18),
+    decoration: _surfaceDecoration(radius: 18),
+    child: Column(
+      children: [
+        Container(
+          width: 88,
+          height: 62,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: context.colorTokens.primaryVeryLight,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Icon(
+            Icons.diversity_3_rounded,
+            color: context.colorTokens.primary,
             size: 42,
           ),
-          const Gap(10),
-          Expanded(child: _FriendTexts(profile: profile)),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 26,
-            color: context.colorTokens.textHint,
+        ),
+        const Gap(14),
+        Text(
+          hasQuery ? _notFoundTitle(context) : _emptyTitle(context),
+          textAlign: TextAlign.center,
+          style: context.textStyles.extraBold20.copyWith(
+            color: _socialText,
+            fontSize: 17,
           ),
+        ),
+        const Gap(6),
+        Text(
+          hasQuery ? _notFoundSubtitle(context) : _emptySubtitle(context),
+          textAlign: TextAlign.center,
+          style: context.textStyles.bodyMedium.copyWith(
+            color: _socialMuted,
+            height: 1.28,
+          ),
+        ),
+        if (!hasQuery) ...[
+          const Gap(18),
+          _ShareButton(onTap: onShare, label: _shareLabel(context)),
         ],
-      ),
+      ],
     ),
+  );
+
+  String _emptyTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Aún no tienes amigos",
+    "pt" => "Você ainda não tem amigos",
+    _ => "You do not have friends yet",
+  };
+
+  String _emptySubtitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Busca personas arriba o comparte tu código de invitación.",
+    "pt" => "Busque pessoas acima ou compartilhe seu código de convite.",
+    _ => "Search people above or share your invite code.",
+  };
+
+  String _notFoundTitle(BuildContext context) => switch (context.languageCode) {
+    "es" => "Nadie encontrado",
+    "pt" => "Ninguém encontrado",
+    _ => "No one found",
+  };
+
+  String _notFoundSubtitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Intenta buscar por otro nombre o @usuario.",
+        "pt" => "Tente buscar por outro nome ou @usuário.",
+        _ => "Try another name or @username.",
+      };
+
+  String _shareLabel(BuildContext context) => switch (context.languageCode) {
+    "es" => "Compartir código",
+    "pt" => "Compartilhar código",
+    _ => "Share code",
+  };
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, this.action});
+
+  final String title;
+  final String? action;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          title,
+          style: context.textStyles.bodyMedium.copyWith(
+            color: _socialText,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+      if (action != null)
+        Text(
+          action!,
+          style: context.textStyles.bodySmall.copyWith(
+            color: context.colorTokens.primary,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+    ],
   );
 }
 
-class _FriendTexts extends StatelessWidget {
-  const _FriendTexts({required this.profile});
+class _NameBlock extends StatelessWidget {
+  const _NameBlock({required this.name, required this.handle});
 
-  final _FriendProfile profile;
+  final String name;
+  final String handle;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        profile.name,
+        name,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodyMedium.copyWith(
-          color: context.colorTokens.textBody,
+          color: _socialText,
           fontWeight: FontWeight.w900,
         ),
       ),
       const Gap(1),
       Text(
-        profile.handle,
+        handle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodySmall.copyWith(
-          color: context.colorTokens.textHint,
-          fontWeight: FontWeight.w600,
+          color: _socialMuted,
+          fontWeight: FontWeight.w700,
         ),
       ),
     ],
   );
 }
 
-class _OutlineAction extends StatelessWidget {
-  const _OutlineAction({required this.label, required this.onTap});
+class _PinkBadge extends StatelessWidget {
+  const _PinkBadge({
+    required this.icon,
+    required this.size,
+    required this.iconSize,
+  });
+
+  final IconData icon;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      color: context.colorTokens.primaryVeryLight,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(icon, color: context.colorTokens.primary, size: iconSize),
+  );
+}
+
+class _AddButton extends StatelessWidget {
+  const _AddButton({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
@@ -645,20 +1958,19 @@ class _OutlineAction extends StatelessWidget {
     pressedScale: 0.96,
     onTap: onTap,
     child: Container(
-      height: 34,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: context.colorTokens.borderUnfocused),
+        gradient: context.colorTokens.primaryGradient,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodySmall.copyWith(
-          color: context.colorTokens.textHint,
+          color: Colors.white,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -666,10 +1978,45 @@ class _OutlineAction extends StatelessWidget {
   );
 }
 
-class _PrimaryAction extends StatelessWidget {
-  const _PrimaryAction({required this.label, required this.onTap});
+class _SentChip extends StatelessWidget {
+  const _SentChip({required this.label});
 
   final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 30,
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: const Color(0xFFE9E9E9),
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.check_rounded, size: 16, color: _socialMuted),
+        const Gap(4),
+        Text(
+          label,
+          style: context.textStyles.bodySmall.copyWith(
+            color: _socialMuted,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _RequestActionButton extends StatelessWidget {
+  const _RequestActionButton({
+    required this.label,
+    required this.isPrimary,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isPrimary;
   final VoidCallback onTap;
 
   @override
@@ -677,57 +2024,59 @@ class _PrimaryAction extends StatelessWidget {
     pressedScale: 0.96,
     onTap: onTap,
     child: Container(
-      height: 34,
+      height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        gradient: context.colorTokens.primaryGradient,
-        borderRadius: BorderRadius.circular(13),
+        gradient: isPrimary ? context.colorTokens.primaryGradient : null,
+        color: isPrimary ? null : context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: isPrimary ? null : Border.all(color: _socialBorder),
       ),
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.textPrimaryButton.copyWith(fontSize: 12),
+        style: context.textStyles.bodySmall.copyWith(
+          color: isPrimary ? Colors.white : _socialMuted,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     ),
   );
 }
 
-class _TipPill extends StatelessWidget {
-  const _TipPill({required this.text});
+class _ShareButton extends StatelessWidget {
+  const _ShareButton({required this.onTap, required this.label});
 
-  final String text;
+  final VoidCallback onTap;
+  final String label;
 
   @override
-  Widget build(BuildContext context) => Center(
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.96,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 22),
       decoration: BoxDecoration(
-        color: context.colorTokens.surface.withValues(alpha: 0.80),
+        border: Border.all(color: context.colorTokens.primary),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.60),
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.auto_awesome_rounded,
-            size: 16,
+            Icons.ios_share_rounded,
             color: context.colorTokens.primary,
+            size: 18,
           ),
-          const Gap(7),
-          Flexible(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
-                fontWeight: FontWeight.w600,
-              ),
+          const Gap(8),
+          Text(
+            label,
+            style: context.textStyles.bodyMedium.copyWith(
+              color: context.colorTokens.primary,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -736,75 +2085,41 @@ class _TipPill extends StatelessWidget {
   );
 }
 
-class _EmptySearchCard extends StatelessWidget {
-  const _EmptySearchCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: _cardDecoration(
-      context,
-    ).copyWith(borderRadius: BorderRadius.circular(18)),
-    alignment: Alignment.center,
-    child: Text(
-      text,
-      style: context.textStyles.bodyMedium.copyWith(
-        color: context.colorTokens.textHint,
-      ),
-    ),
-  );
-}
-
 class _FriendProfile {
   const _FriendProfile({
+    required this.id,
+    required this.friendshipId,
     required this.name,
     required this.handle,
     required this.colorValue,
   });
 
+  final String id;
+  final String friendshipId;
   final String name;
   final String handle;
   final int colorValue;
 }
 
-const List<_FriendProfile> _mockRequests = [
-  _FriendProfile(
-    name: "Julia Ramos",
-    handle: "@juliaramos",
-    colorValue: 0xFF7C55E7,
-  ),
-  _FriendProfile(
-    name: "Igor Martins",
-    handle: "@igorm",
-    colorValue: 0xFF18B874,
-  ),
-];
+class _FriendSuggestion {
+  const _FriendSuggestion({
+    required this.id,
+    required this.name,
+    required this.handle,
+    required this.colorValue,
+  });
 
-const List<_FriendProfile> _mockFriends = [
-  _FriendProfile(
-    name: "Carla Dias",
-    handle: "@carladias",
-    colorValue: 0xFF00A9B8,
-  ),
-  _FriendProfile(
-    name: "Ana Souza",
-    handle: "@anasouza",
-    colorValue: 0xFF7C55E7,
-  ),
-  _FriendProfile(
-    name: "Pedro Lima",
-    handle: "@pedrolima",
-    colorValue: 0xFF18B874,
-  ),
-];
+  final String id;
+  final String name;
+  final String handle;
+  final int colorValue;
+}
 
-BoxDecoration _cardDecoration(BuildContext context) => BoxDecoration(
-  color: context.colorTokens.surface,
-  borderRadius: BorderRadius.circular(18),
-  border: Border.all(
-    color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
-  ),
+BoxDecoration _surfaceDecoration({required double radius}) => BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(radius),
+  border: Border.all(color: _socialBorder),
+  boxShadow: const [
+    BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 8)),
+  ],
 );

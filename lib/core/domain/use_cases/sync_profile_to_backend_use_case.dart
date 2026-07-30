@@ -8,5 +8,6 @@ class SyncProfileToBackendUseCase {
 
   final ProfileSyncRepository _profileSyncRepository;
 
-  Future<Either<AppError, void>> call(AppConfigEntity config) => _profileSyncRepository.syncProfile(config);
+  Future<Either<AppError, void>> call(AppConfigEntity config) =>
+      _profileSyncRepository.syncProfile(config);
 }

@@ -5,7 +5,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 
-class DailyTaskTile extends StatelessWidget {
+class DailyTaskTile extends StatefulWidget {
   const DailyTaskTile({
     required this.task,
     required this.onToggle,
@@ -18,25 +18,90 @@ class DailyTaskTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
-    final Color taskColor = Color(task.colorValue);
-    final bool isCheckedToday = task.isCheckedToday;
-    final double progress = task.targetDays == 0
-        ? 0
-        : (task.completedDays / task.targetDays).clamp(0.0, 1.0);
+  State<DailyTaskTile> createState() => _DailyTaskTileState();
+}
 
-    return Dismissible(
-      key: ValueKey(task.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: context.colorTokens.error,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const AppIcon("trash", color: Colors.white, size: 26),
+class _DailyTaskTileState extends State<DailyTaskTile>
+    with SingleTickerProviderStateMixin {
+  static const double _revealWidth = 72;
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    lowerBound: -_revealWidth,
+    upperBound: 0,
+    value: 0,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    _controller.value = (_controller.value + details.delta.dx).clamp(
+      -_revealWidth,
+      0,
+    );
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final double target = _controller.value < -_revealWidth / 2
+        ? -_revealWidth
+        : 0;
+    _controller.animateTo(target, curve: Curves.easeOut);
+  }
+
+  void _onTapDelete() {
+    _controller.animateTo(0, curve: Curves.easeOut);
+    widget.onDelete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color taskColor = Color(widget.task.colorValue);
+    final bool isCheckedToday = widget.task.isCheckedToday;
+    final double progress = widget.task.targetDays == 0
+        ? 0
+        : (widget.task.completedDays / widget.task.targetDays).clamp(0.0, 1.0);
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Stack(
+        children: [
+          if (_controller.value < 0)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: _onTapDelete,
+                  child: Container(
+                    width: 64,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.colorTokens.error,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    alignment: Alignment.center,
+                    child: const AppIcon(
+                      "trash",
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          GestureDetector(
+            onHorizontalDragUpdate: _onDragUpdate,
+            onHorizontalDragEnd: _onDragEnd,
+            child: Transform.translate(
+              offset: Offset(_controller.value, 0),
+              child: child,
+            ),
+          ),
+        ],
       ),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -47,7 +112,7 @@ class DailyTaskTile extends StatelessWidget {
         child: Row(
           children: [
             BounceTap(
-              onTap: onToggle,
+              onTap: widget.onToggle,
               child: Container(
                 width: 32,
                 height: 32,
@@ -69,7 +134,7 @@ class DailyTaskTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    task.name,
+                    widget.task.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodyLarge.copyWith(
@@ -91,14 +156,14 @@ class DailyTaskTile extends StatelessWidget {
             ),
             const Gap(12),
             Text(
-              task.isCompleted
+              widget.task.isCompleted
                   ? context.l10n.taskCompletedLabel
                   : context.l10n.taskDaysProgress(
-                      task.completedDays,
-                      task.targetDays,
+                      widget.task.completedDays,
+                      widget.task.targetDays,
                     ),
               style: context.textStyles.bodySmall.copyWith(
-                color: task.isCompleted
+                color: widget.task.isCompleted
                     ? context.colorTokens.success
                     : context.colorTokens.textHint,
                 fontWeight: FontWeight.w700,

@@ -13,23 +13,39 @@ class ScheduleDataSource {
 
   Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() async {
     try {
-      final String? saved = await _localStorageService.read<String?>(LocalStorageKeys.scheduleEntries);
+      final String? saved = await _localStorageService.read<String?>(
+        LocalStorageKeys.scheduleEntries,
+      );
 
       if (saved == null) {
         return const Right([]);
       }
 
       final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
-      return Right(decoded.map((item) => ScheduleEntryEntity.fromMap(item as Map<String, dynamic>)).toList());
+      return Right(
+        decoded
+            .map(
+              (item) =>
+                  ScheduleEntryEntity.fromMap(item as Map<String, dynamic>),
+            )
+            .toList(),
+      );
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
     }
   }
 
-  Future<Either<AppError, void>> saveEntries(List<ScheduleEntryEntity> entries) async {
+  Future<Either<AppError, void>> saveEntries(
+    List<ScheduleEntryEntity> entries,
+  ) async {
     try {
-      final String encoded = jsonEncode(entries.map((entry) => entry.toMap()).toList());
-      await _localStorageService.write(LocalStorageKeys.scheduleEntries, encoded);
+      final String encoded = jsonEncode(
+        entries.map((entry) => entry.toMap()).toList(),
+      );
+      await _localStorageService.write(
+        LocalStorageKeys.scheduleEntries,
+        encoded,
+      );
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
