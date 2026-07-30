@@ -24,32 +24,38 @@ class WeekdaySelector extends StatelessWidget {
       now.day,
     ).subtract(Duration(days: now.weekday - DateTime.monday));
 
-    return Row(
-      children: [
-        for (
-          int weekday = DateTime.monday;
-          weekday <= DateTime.sunday;
-          weekday++
-        ) ...[
-          if (weekday > DateTime.monday) const Gap(6),
-          Expanded(
-            child: _WeekdayChip(
-              label: DateFormat.E(locale)
-                  .format(weekStart.add(Duration(days: weekday - 1)))
-                  .characters
-                  .take(3)
-                  .toString()
-                  .toUpperCase(),
-              day: DateFormat(
-                "dd",
-                locale,
-              ).format(weekStart.add(Duration(days: weekday - 1))),
-              isSelected: weekday == selectedWeekday,
-              onTap: () => onSelectWeekday(weekday),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        children: [
+          for (
+            int weekday = DateTime.monday;
+            weekday <= DateTime.sunday;
+            weekday++
+          ) ...[
+            if (weekday > DateTime.monday) const Gap(8),
+            SizedBox(
+              width: 62,
+              child: _WeekdayChip(
+                label: DateFormat.E(locale)
+                    .format(weekStart.add(Duration(days: weekday - 1)))
+                    .characters
+                    .take(3)
+                    .toString()
+                    .toUpperCase(),
+                day: DateFormat(
+                  "dd",
+                  locale,
+                ).format(weekStart.add(Duration(days: weekday - 1))),
+                isSelected: weekday == selectedWeekday,
+                onTap: () => onSelectWeekday(weekday),
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -77,7 +83,7 @@ class _WeekdayChip extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 76,
-            width: double.infinity,
+            width: 62,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               color: isSelected

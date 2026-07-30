@@ -10,7 +10,8 @@ class GetProfileStatsUseCase {
   final SubjectsRepository _subjectsRepository;
 
   Future<Either<AppError, ProfileStatsEntity>> call() async {
-    final Either<AppError, List<SubjectEntity>> result = await _subjectsRepository.getSubjects();
+    final Either<AppError, List<SubjectEntity>> result =
+        await _subjectsRepository.getSubjects();
     return result.map(ProfileStatsEntity.fromSubjects);
   }
 }

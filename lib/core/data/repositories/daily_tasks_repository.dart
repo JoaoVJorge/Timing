@@ -8,7 +8,9 @@ class DailyTasksRepository {
 
   final DailyTasksDataSource _dailyTasksDataSource;
 
-  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() => _dailyTasksDataSource.getTasks();
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() =>
+      _dailyTasksDataSource.getTasks();
 
-  Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) => _dailyTasksDataSource.saveTasks(tasks);
+  Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) =>
+      _dailyTasksDataSource.saveTasks(tasks);
 }

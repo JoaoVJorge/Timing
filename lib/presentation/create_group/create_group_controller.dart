@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
@@ -32,12 +33,19 @@ class CreateGroupController extends GetxController {
   final RxBool hasLoadError = false.obs;
   final RxBool isCreating = false.obs;
   final RxBool canCreate = false.obs;
+  final RxInt currentStep = 0.obs;
 
   bool get hasName => groupName.value.trim().isNotEmpty;
 
   bool get hasTheme => selectedTheme.value != null;
 
   bool get hasFriends => selectedFriendIds.isNotEmpty;
+
+  bool get isInformationStep => currentStep.value == 0;
+
+  bool get isFriendsStep => currentStep.value == 1;
+
+  bool get isSummaryStep => currentStep.value == 2;
 
   List<FriendOption> get filteredFriends {
     final String query = friendSearchQuery.value.trim().toLowerCase();
@@ -91,6 +99,14 @@ class CreateGroupController extends GetxController {
     _refreshCanCreate();
   }
 
+  void onTapBack() {
+    if (currentStep.value == 0) {
+      _appNavigator.back();
+      return;
+    }
+    currentStep.value--;
+  }
+
   void _refreshCanCreate() =>
       canCreate.value = hasName && hasTheme && hasFriends;
 
@@ -104,8 +120,7 @@ class CreateGroupController extends GetxController {
     if (!hasFriends) {
       return context.l10n.createGroupMissingFriends;
     }
-    final int count = selectedFriendIds.length;
-    return context.l10n.createGroupWithFriendsButton(count);
+    return context.l10n.createGroupWithFriendsButton(selectedFriendIds.length);
   }
 
   void onToggleFriend(String friendId) {
@@ -115,6 +130,40 @@ class CreateGroupController extends GetxController {
       selectedFriendIds.add(friendId);
     }
     _refreshCanCreate();
+  }
+
+  Future<void> onTapAddFriends() async {
+    await _appNavigator.toNamed<void>(AppRoutes.friends);
+    await loadFriends();
+  }
+
+  void onTapContinue() {
+    if (isInformationStep) {
+      final String name = groupNameController.text.trim();
+      if (name.isEmpty) {
+        _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
+        return;
+      }
+      if (selectedTheme.value == null) {
+        _appNavigator.showErrorSnackBar(
+          Get.context!.l10n.groupThemeRequiredError,
+        );
+        return;
+      }
+      currentStep.value = 1;
+      return;
+    }
+
+    if (isFriendsStep) {
+      if (selectedFriendIds.isEmpty) {
+        _appNavigator.showErrorSnackBar(
+          Get.context!.l10n.groupNeedsFriendError,
+        );
+        return;
+      }
+      currentStep.value = 2;
+      return;
+    }
   }
 
   Future<void> onTapCreate() async {
@@ -138,7 +187,6 @@ class CreateGroupController extends GetxController {
       _appNavigator.showErrorSnackBar(Get.context!.l10n.groupNeedsFriendError);
       return;
     }
-
     isCreating.value = true;
     final List<FriendOption> invitedFriends = availableFriends
         .where((friend) => selectedFriendIds.contains(friend.id))
@@ -151,8 +199,8 @@ class CreateGroupController extends GetxController {
     isCreating.value = false;
 
     result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (group) => _appNavigator.back<GroupEntity>(result: group),
+      (error) => _appNavigator.showErrorSnackBar(error.message),
+      (group) => Get.back<GroupEntity>(result: group, closeOverlays: true),
     );
   }
 

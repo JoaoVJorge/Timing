@@ -8,7 +8,8 @@ class SubjectsRepository {
 
   final SubjectsDataSource _subjectsDataSource;
 
-  Future<Either<AppError, List<SubjectEntity>>> getSubjects() => _subjectsDataSource.getSubjects();
+  Future<Either<AppError, List<SubjectEntity>>> getSubjects() =>
+      _subjectsDataSource.getSubjects();
 
   Future<Either<AppError, void>> saveSubjects(List<SubjectEntity> subjects) =>
       _subjectsDataSource.saveSubjects(subjects);

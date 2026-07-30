@@ -31,9 +31,10 @@ class ProfileStatsEntity extends Equatable {
     // Reading is measured in pages, not time — a tap on a reading subject logs
     // pages via a dialog while the other categories run a timer. So it is
     // ranked by [currentPages], and its totals/goals are page counts.
-    final List<SubjectEntity> readingSubjects =
-        _byCategory(subjects, TimeCategoryType.reading)
-          ..sort((a, b) => b.currentPages.compareTo(a.currentPages));
+    final List<SubjectEntity> readingSubjects = _byCategory(
+      subjects,
+      TimeCategoryType.reading,
+    )..sort((a, b) => b.currentPages.compareTo(a.currentPages));
 
     return ProfileStatsEntity(
       studyingTotalSeconds: _sumSeconds(studyingSubjects),
@@ -90,8 +91,7 @@ class ProfileStatsEntity extends Equatable {
   int get totalFocusSeconds =>
       studyingTotalSeconds + exercisesTotalSeconds + hobbiesTotalSeconds;
 
-  int get totalFocusGoalSeconds =>
-      studyingGoalSeconds + exercisesGoalSeconds;
+  int get totalFocusGoalSeconds => studyingGoalSeconds + exercisesGoalSeconds;
 
   /// Whether the top studying subject has any tracked time to highlight.
   bool get hasTopStudyingSubject =>

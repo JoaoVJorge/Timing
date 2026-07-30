@@ -29,19 +29,18 @@ class DailyProgressService {
       final String? saved = await _localStorageService.read<String?>(
         LocalStorageKeys.dailyProgress,
       );
+      _byDate.clear();
       if (saved != null) {
         final Map<String, dynamic> decoded =
             jsonDecode(saved) as Map<String, dynamic>;
-        _byDate
-          ..clear()
-          ..addAll(
-            decoded.map(
-              (key, value) => MapEntry(
-                key,
-                DailyProgressEntity.fromMap(value as Map<String, dynamic>),
-              ),
+        _byDate.addAll(
+          decoded.map(
+            (key, value) => MapEntry(
+              key,
+              DailyProgressEntity.fromMap(value as Map<String, dynamic>),
             ),
-          );
+          ),
+        );
       }
     } catch (_) {
       _byDate.clear();

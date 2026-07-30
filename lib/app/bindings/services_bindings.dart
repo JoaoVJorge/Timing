@@ -8,6 +8,7 @@ import "package:help_out/core/services/live_activity/timer_live_activity_service
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/notifications/timer_notification_service.dart";
+import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/env/environment_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -31,10 +32,14 @@ class ServicesBindings extends Bindings {
       permanent: true,
     );
 
+    final SupabaseService supabaseService = await SupabaseService.initialize();
+    Get.put<SupabaseService>(supabaseService, permanent: true);
+
     Get.put<AppLocalStorageService>(
       AppLocalStorageService(
         localStorage: Get.find(),
         secureStorage: Get.find(),
+        supabaseService: Get.find(),
       ),
       permanent: true,
     );

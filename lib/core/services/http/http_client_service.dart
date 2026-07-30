@@ -9,13 +9,19 @@ class HttpClientService {
 
   final Dio _dio;
 
-  Future<Either<AppError, Map<String, dynamic>>> request(AppHttpRequest request) async {
+  Future<Either<AppError, Map<String, dynamic>>> request(
+    AppHttpRequest request,
+  ) async {
     try {
       final Response<Map<String, dynamic>> response = await _dio.request(
         request.path,
         data: request.body,
         queryParameters: request.queryParameters,
-        options: Options(method: request.method.label, headers: request.headers, validateStatus: (_) => true),
+        options: Options(
+          method: request.method.label,
+          headers: request.headers,
+          validateStatus: (_) => true,
+        ),
       );
 
       return handleResponse(response);
@@ -24,9 +30,13 @@ class HttpClientService {
     }
   }
 
-  Either<AppError, Map<String, dynamic>> handleResponse(Response<Map<String, dynamic>> response) {
+  Either<AppError, Map<String, dynamic>> handleResponse(
+    Response<Map<String, dynamic>> response,
+  ) {
     final Map<String, dynamic> data = response.data ?? {};
-    final HttpStatusCode statusCode = HttpStatusCode.fromInt(response.statusCode);
+    final HttpStatusCode statusCode = HttpStatusCode.fromInt(
+      response.statusCode,
+    );
 
     if (statusCode.isSuccess) {
       return Right(data["data"] as Map<String, dynamic>? ?? {});

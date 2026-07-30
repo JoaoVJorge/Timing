@@ -23,12 +23,15 @@ class DailyProgressEntity extends Equatable {
 
   bool get isEmpty => focusSeconds == 0 && sessions == 0 && pages == 0;
 
-  DailyProgressEntity copyWith({int? focusSeconds, int? sessions, int? pages}) =>
-      DailyProgressEntity(
-        focusSeconds: focusSeconds ?? this.focusSeconds,
-        sessions: sessions ?? this.sessions,
-        pages: pages ?? this.pages,
-      );
+  DailyProgressEntity copyWith({
+    int? focusSeconds,
+    int? sessions,
+    int? pages,
+  }) => DailyProgressEntity(
+    focusSeconds: focusSeconds ?? this.focusSeconds,
+    sessions: sessions ?? this.sessions,
+    pages: pages ?? this.pages,
+  );
 
   Map<String, dynamic> toMap() => {
     "focusSeconds": focusSeconds,
