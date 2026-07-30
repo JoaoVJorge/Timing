@@ -7,6 +7,7 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/presentation/groups/groups_controller.dart";
 import "package:help_out/presentation/groups/widgets/current_user_rank_card.dart";
+import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/presentation/groups/widgets/group_selector.dart";
 import "package:help_out/presentation/groups/widgets/leaderboard_tile.dart";
 import "package:help_out/presentation/groups/widgets/period_selector.dart";
@@ -188,6 +189,8 @@ class GroupsPage extends StatelessWidget {
                             isCurrentUser: controller.isCurrentUser(
                               members[index],
                             ),
+                            isFirst: index == 0,
+                            isLast: index == members.length - 1,
                             differenceToPrevious: controller
                                 .differenceToPrevious(members[index]),
                           ),
@@ -389,14 +392,65 @@ class _GroupSelectorSkeleton extends StatelessWidget {
   const _GroupSelectorSkeleton();
 
   @override
-  Widget build(BuildContext context) => const Padding(
-    padding: EdgeInsets.only(top: 6, bottom: 2),
-    child: Row(
-      children: [
-        Expanded(child: _SkeletonBox(height: 54, radius: 18)),
-        Gap(10),
-        _SkeletonBox(width: 54, height: 54, radius: 18),
-      ],
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 6, bottom: 2),
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              height: 62,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                gradient: context.colorTokens.primaryGradient,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.25),
+                    ),
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const Gap(10),
+                  _SkeletonBox(
+                    width: 118,
+                    height: 16,
+                    radius: 8,
+                    color: Colors.white.withValues(alpha: 0.36),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(6),
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: context.colorTokens.surface,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Icon(
+                Icons.add_rounded,
+                color: context.colorTokens.primary,
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
@@ -408,46 +462,23 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.only(bottom: 18),
     children: [
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-          ),
-        ),
-        child: const Row(
-          children: [
-            _SkeletonBox(width: 54, height: 54, radius: 27),
-            Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SkeletonBox(width: 130, height: 16, radius: 8),
-                  Gap(10),
-                  _SkeletonBox(width: 190, height: 12, radius: 6),
-                ],
-              ),
-            ),
-            _SkeletonBox(width: 48, height: 30, radius: 12),
-          ],
-        ),
-      ),
+      const _CurrentUserRankSkeleton(),
       const Gap(14),
-      const Row(
+      Row(
         children: [
-          _SkeletonBox(width: 18, height: 18, radius: 9),
-          Gap(8),
-          Expanded(child: _SkeletonBox(height: 12, radius: 6)),
+          Icon(
+            Icons.info_outline_rounded,
+            size: 14,
+            color: context.colorTokens.textHint,
+          ),
+          const Gap(6),
+          const Expanded(child: _SkeletonBox(height: 12, radius: 6)),
         ],
       ),
-      const Gap(18),
-      const _SkeletonBox(width: 150, height: 22, radius: 10),
+      const Gap(16),
+      const _SkeletonBox(width: 116, height: 22, radius: 10),
       const Gap(14),
       Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: context.colorTokens.surface,
           borderRadius: BorderRadius.circular(18),
@@ -457,10 +488,29 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
         ),
         child: const Column(
           children: [
-            _SkeletonLeaderboardRow(),
-            _SkeletonLeaderboardRow(),
-            _SkeletonLeaderboardRow(),
-            _SkeletonLeaderboardRow(),
+            _SkeletonLeaderboardRow(
+              rank: 1,
+              name: "Ana",
+              colorValue: 0xFFE85888,
+              scoreWidth: 62,
+              isFirst: true,
+            ),
+            Divider(height: 1, indent: 22, endIndent: 22),
+            _SkeletonLeaderboardRow(
+              rank: 2,
+              name: "Bia",
+              colorValue: 0xFF4F7DF3,
+              scoreWidth: 54,
+              isCurrentUser: true,
+            ),
+            Divider(height: 1, indent: 22, endIndent: 22),
+            _SkeletonLeaderboardRow(
+              rank: 3,
+              name: "Leo",
+              colorValue: 0xFF42B976,
+              scoreWidth: 48,
+              isLast: true,
+            ),
           ],
         ),
       ),
@@ -468,53 +518,185 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
   );
 }
 
-class _SkeletonLeaderboardRow extends StatelessWidget {
-  const _SkeletonLeaderboardRow();
+class _CurrentUserRankSkeleton extends StatelessWidget {
+  const _CurrentUserRankSkeleton();
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-    child: Row(
-      children: const [
-        _SkeletonBox(width: 28, height: 20, radius: 8),
-        Gap(12),
-        _SkeletonBox(width: 42, height: 42, radius: 21),
-        Gap(12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SkeletonBox(width: 118, height: 14, radius: 7),
-              Gap(8),
-              _SkeletonBox(width: 78, height: 10, radius: 5),
-            ],
-          ),
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: context.colorTokens.primaryVeryLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.emoji_events_rounded,
+                size: 30,
+                color: context.colorTokens.primary,
+              ),
+            ),
+            const Gap(14),
+            const Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _SkeletonBox(width: 86, height: 12, radius: 6),
+                  Gap(8),
+                  _SkeletonBox(width: 64, height: 24, radius: 10),
+                ],
+              ),
+            ),
+            const Gap(8),
+          ],
         ),
-        _SkeletonBox(width: 58, height: 16, radius: 8),
+        const Gap(14),
+        Divider(height: 1, color: context.colorTokens.divider),
+        const Gap(14),
+        Row(
+          spacing: 10,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.schedule_rounded,
+              size: 22,
+              color: context.colorTokens.primary,
+            ),
+            const _SkeletonBox(width: 76, height: 24, radius: 10),
+          ],
+        ),
+        const Gap(8),
+        const _SkeletonBox(width: 160, height: 12, radius: 6),
       ],
     ),
   );
 }
 
+class _SkeletonLeaderboardRow extends StatelessWidget {
+  const _SkeletonLeaderboardRow({
+    required this.rank,
+    required this.name,
+    required this.colorValue,
+    required this.scoreWidth,
+    this.isCurrentUser = false,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  final int rank;
+  final String name;
+  final int colorValue;
+  final double scoreWidth;
+  final bool isCurrentUser;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final BorderRadius userRadius = BorderRadius.vertical(
+      top: isFirst ? const Radius.circular(18) : Radius.zero,
+      bottom: isLast ? const Radius.circular(18) : Radius.zero,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrentUser
+            ? context.colorTokens.primaryVeryLight
+            : context.colorTokens.transparent,
+        borderRadius: isCurrentUser ? userRadius : BorderRadius.zero,
+        boxShadow: isCurrentUser
+            ? [
+                BoxShadow(
+                  color: context.colorTokens.primary.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 34,
+            child: Center(
+              child: Icon(
+                Icons.workspace_premium_rounded,
+                size: 32,
+                color: _SkeletonMedalColors.byRank(rank),
+              ),
+            ),
+          ),
+          const Gap(6),
+          GroupMemberAvatar(name: name, colorValue: colorValue, size: 50),
+          const Gap(14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SkeletonBox(width: 118, height: 16, radius: 8),
+                Gap(8),
+                _SkeletonBox(width: 94, height: 11, radius: 6),
+              ],
+            ),
+          ),
+          const Gap(10),
+          _SkeletonBox(width: scoreWidth, height: 16, radius: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkeletonMedalColors {
+  static Color byRank(int rank) => switch (rank) {
+    1 => const Color(0xFFE4B13B),
+    2 => const Color(0xFF9AA3AD),
+    3 => const Color(0xFFC98549),
+    _ => const Color(0xFF9AA3AD),
+  };
+}
+
 class _SkeletonBox extends StatelessWidget {
-  const _SkeletonBox({required this.height, this.width, this.radius = 14});
+  const _SkeletonBox({
+    required this.height,
+    this.width,
+    this.radius = 14,
+    this.color,
+  });
 
   final double height;
   final double? width;
   final double radius;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color color = isDarkMode
-        ? context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.74)
-        : context.colorTokens.primaryVeryLight.withValues(alpha: 0.64);
+    final Color effectiveColor =
+        color ??
+        (isDarkMode ? const Color(0xFF343434) : const Color(0xFFE5E5E5));
 
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color,
+        color: effectiveColor,
         borderRadius: BorderRadius.circular(radius),
       ),
     );

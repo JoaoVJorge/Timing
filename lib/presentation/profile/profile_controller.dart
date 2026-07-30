@@ -37,7 +37,7 @@ class ProfileController extends GetxController {
   ).obs;
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
-  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.fiveDays.obs;
+  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.week.obs;
 
   bool get hasGoalStarted =>
       tasks.any((task) => task.completedDays > 0 || task.isCheckedToday);
@@ -60,6 +60,42 @@ class ProfileController extends GetxController {
         .progressForLastDays(selectedPeriod.value.dayCount)
         .map((progress) => progress.focusSeconds)
         .toList();
+  }
+
+  int get selectedPeriodFocusSeconds {
+    _dailyProgressService.today.value;
+    return _dailyProgressService
+        .progressForLastDays(selectedPeriod.value.dayCount)
+        .fold(0, (total, progress) => total + progress.focusSeconds);
+  }
+
+  int get selectedPeriodPages {
+    _dailyProgressService.today.value;
+    return _dailyProgressService
+        .progressForLastDays(selectedPeriod.value.dayCount)
+        .fold(0, (total, progress) => total + progress.pages);
+  }
+
+  int get selectedPeriodSessions {
+    _dailyProgressService.today.value;
+    return _dailyProgressService
+        .progressForLastDays(selectedPeriod.value.dayCount)
+        .fold(0, (total, progress) => total + progress.sessions);
+  }
+
+  int get totalSessions {
+    _dailyProgressService.today.value;
+    return _dailyProgressService.allProgress.fold(
+      0,
+      (total, progress) => total + progress.sessions,
+    );
+  }
+
+  int get activeDays {
+    _dailyProgressService.today.value;
+    return _dailyProgressService.allProgress
+        .where((progress) => !progress.isEmpty)
+        .length;
   }
 
   @override
@@ -97,7 +133,7 @@ class ProfileController extends GetxController {
 
 extension ProfilePeriodX on ProfilePeriod {
   int get dayCount => switch (this) {
-    ProfilePeriod.fiveDays => 5,
+    ProfilePeriod.fiveDays => 1,
     ProfilePeriod.week => 7,
     ProfilePeriod.month => 30,
   };
