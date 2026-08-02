@@ -94,6 +94,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                       iconColor: context.colorTokens.white,
                       onTap: _onTapNotes,
                     ),
+                    const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
                       iconData: Icons.edit_rounded,
                       color: context.colorTokens.surface,
@@ -138,7 +139,7 @@ class _RevealAction extends StatelessWidget {
   }) : assert(iconPath != null || iconData != null);
 
   static const double _revealWidth = 72;
-  static const double _gap = 8;
+  static const double gap = 8;
 
   final String? iconPath;
   final IconData? iconData;
@@ -151,7 +152,7 @@ class _RevealAction extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      width: _revealWidth - _gap,
+      width: _revealWidth - gap,
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: color,
