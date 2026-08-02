@@ -84,7 +84,7 @@ class HomeAgendaCard extends StatelessWidget {
       };
 
   String _planDayLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Planificar mi dia",
+    "es" => "Planificar mi día",
     "pt" => "Planejar meu dia",
     _ => "Plan my day",
   };
@@ -134,8 +134,8 @@ class _NextAgendaEntry extends StatelessWidget {
   }
 
   String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Proximo compromiso",
-    "pt" => "Proximo compromisso",
+    "es" => "Próximo compromiso",
+    "pt" => "Próximo compromisso",
     _ => "Next commitment",
   };
 
@@ -190,14 +190,14 @@ class _EmptyAgenda extends StatelessWidget {
   );
 
   String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Tu dia esta libre",
-    "pt" => "Seu dia esta livre",
+    "es" => "Tu día está libre",
+    "pt" => "Seu dia está livre",
     _ => "Your day is free",
   };
 
   String _description(BuildContext context) => switch (context.languageCode) {
     "es" => "Planifica un horario para mantener tu rutina.",
-    "pt" => "Planeje um horario para manter sua rotina.",
+    "pt" => "Planeje um horário para manter sua rotina.",
     _ => "Plan a time to keep your routine.",
   };
 }

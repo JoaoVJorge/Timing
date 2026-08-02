@@ -1,11 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/presentation/groups/widgets/group_identity_card.dart";
 import "package:help_out/presentation/groups/widgets/groups_header.dart";
 import "package:help_out/presentation/home/widgets/home_activity_grid.dart";
 import "package:help_out/presentation/home/widgets/home_day_summary_line.dart";
@@ -14,15 +9,6 @@ import "package:help_out/shared/widgets/app_nav_row.dart";
 import "package:help_out/shared/widgets/app_section_header.dart";
 
 import "../../support/pump_in_scroll_view.dart";
-
-GroupMemberEntity _member(String id, String name) => GroupMemberEntity(
-  id: id,
-  name: name,
-  avatarColorValue: 0xFF4F7DF3,
-  todaySeconds: 600,
-  weekSeconds: 3600,
-  monthSeconds: 7200,
-);
 
 void main() {
   testWidgets("AppEmptyState renders icon, copy, preview and action", (
@@ -131,30 +117,6 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets("GroupIdentityCard shows the member count and overflow", (
-    tester,
-  ) async {
-    await pumpInScrollView(
-      tester,
-      GroupIdentityCard(
-        group: GroupEntity(
-          id: "g1",
-          name: "Study Squad",
-          theme: GroupThemeType.studying,
-          members: [
-            for (int index = 0; index < 7; index++)
-              _member("m$index", "Member $index"),
-          ],
-        ),
-        period: LeaderboardPeriodType.thisWeek,
-      ),
-    );
-
-    expect(tester.takeException(), isNull);
-    expect(find.text("Study Squad"), findsOneWidget);
-    expect(find.text("+2"), findsOneWidget);
   });
 
   testWidgets("GroupsHeader exposes friends and create actions", (

@@ -1762,8 +1762,8 @@ class _InviteCodeDisclosureState extends State<_InviteCodeDisclosure> {
   );
 
   String _label(BuildContext context) => switch (context.languageCode) {
-    "es" => "Mi codigo",
-    "pt" => "Meu codigo",
+    "es" => "Mi código",
+    "pt" => "Meu código",
     _ => "My code",
   };
 }

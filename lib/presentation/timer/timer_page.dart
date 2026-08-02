@@ -670,7 +670,7 @@ class _TimerViewData {
       totalTimeLabel: isReading
           ? "tempo de leitura"
           : "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
-      nextBreakLabel: isReading ? "Paginas atuais" : "Proxima pausa em",
+      nextBreakLabel: isReading ? "Páginas atuais" : "Próxima pausa em",
       nextBreak: isReading
           ? "${controller.subject.currentPages}"
           : formatDurationClock(

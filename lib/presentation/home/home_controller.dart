@@ -50,7 +50,7 @@ class HomeController extends GetxController {
     load();
   }
 
-  Future<void> load() async {
+  Future<void> load({bool reloadSchedule = true}) async {
     final Either<AppError, List<SubjectEntity>> subjectsResult =
         await _getSubjectsUseCase();
     subjectsResult.fold((error) {
@@ -65,7 +65,9 @@ class HomeController extends GetxController {
       _appNavigator.showErrorSnackBar(error.message);
     }, (value) => dailyTasks.value = value);
 
-    await _scheduleController.loadEntries();
+    if (reloadSchedule) {
+      await _scheduleController.loadEntries();
+    }
   }
 
   bool get hasSubjects => subjects.isNotEmpty;
@@ -135,17 +137,25 @@ class HomeController extends GetxController {
     return upcoming.isEmpty ? null : upcoming.first;
   }
 
-  Future<void> onTapCategory(TimeCategoryType category) =>
-      _navigateAndRefresh(AppRoutes.category, arguments: category);
+  Future<void> onTapCategory(TimeCategoryType category) => _navigateAndRefresh(
+    AppRoutes.category,
+    arguments: category,
+    reloadSchedule: false,
+  );
 
-  Future<void> onTapDailyGoals() => _navigateAndRefresh(AppRoutes.dailyGoals);
+  Future<void> onTapDailyGoals() =>
+      _navigateAndRefresh(AppRoutes.dailyGoals, reloadSchedule: false);
 
   Future<void> onContinue() {
     final SubjectEntity? subject = resumableSubject;
     if (subject == null) {
       return Future<void>.value();
     }
-    return _navigateAndRefresh(AppRoutes.timer, arguments: subject);
+    return _navigateAndRefresh(
+      AppRoutes.timer,
+      arguments: subject,
+      reloadSchedule: false,
+    );
   }
 
   Future<void> onStartSuggested() {
@@ -153,12 +163,17 @@ class HomeController extends GetxController {
     if (subject == null) {
       return Future<void>.value();
     }
-    return _navigateAndRefresh(AppRoutes.timer, arguments: subject);
+    return _navigateAndRefresh(
+      AppRoutes.timer,
+      arguments: subject,
+      reloadSchedule: false,
+    );
   }
 
   Future<void> onCreateFirstSubject() => _navigateAndRefresh(
     AppRoutes.category,
     arguments: TimeCategoryType.studying,
+    reloadSchedule: false,
   );
 
   Future<void> onTapSchedule() => _navigateAndRefresh(AppRoutes.schedule);
@@ -168,9 +183,15 @@ class HomeController extends GetxController {
     await load();
   }
 
-  Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
+  /// The schedule only changes on the routes that can edit it, so screens that
+  /// cannot touch it skip re-reading and re-decoding the stored entries.
+  Future<void> _navigateAndRefresh(
+    String route, {
+    Object? arguments,
+    bool reloadSchedule = true,
+  }) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??
         Future<void>.value());
-    await load();
+    await load(reloadSchedule: reloadSchedule);
   }
 }

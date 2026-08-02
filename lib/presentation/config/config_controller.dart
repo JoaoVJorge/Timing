@@ -1,3 +1,5 @@
+import "dart:typed_data";
+
 import "package:get/get.dart";
 import "package:flutter/material.dart";
 import "package:help_out/app/app_controller.dart";
@@ -19,6 +21,8 @@ class ConfigController extends GetxController {
   RxString get nickName => _appController.nickName;
   RxInt get avatarIconIndex => _appController.avatarIconIndex;
   Rx<String?> get profilePhotoBase64 => _appController.profilePhotoBase64;
+
+  Uint8List? get profilePhotoBytes => _appController.profilePhotoBytes;
   Rx<Color> get accentColor => _appController.accentColor;
   RxBool get notificationsEnabled => _appController.notificationsEnabled;
   Rx<String?> get languageCode => _appController.languageCode;

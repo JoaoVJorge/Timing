@@ -1,3 +1,6 @@
+import "dart:convert";
+import "dart:typed_data";
+
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
@@ -50,6 +53,26 @@ class AppController extends GetxController {
   final RxBool notificationsEnabled = true.obs;
   final Rx<String?> languageCode = Rx<String?>(null);
   final RxString friendCode = "".obs;
+
+  String? _decodedPhotoSource;
+  Uint8List? _decodedPhotoBytes;
+
+  /// Decoded once per photo change and reused afterwards: `Image.memory` keys
+  /// its cache by byte-list identity, so handing it a fresh list on every
+  /// rebuild would re-decode the whole image each frame.
+  Uint8List? get profilePhotoBytes {
+    final String? source = profilePhotoBase64.value;
+    if (source == null) {
+      _decodedPhotoSource = null;
+      _decodedPhotoBytes = null;
+      return null;
+    }
+    if (_decodedPhotoSource != source) {
+      _decodedPhotoSource = source;
+      _decodedPhotoBytes = base64Decode(source);
+    }
+    return _decodedPhotoBytes;
+  }
 
   Locale get selectedLocale => _resolvedLocale(languageCode.value);
 
