@@ -9,6 +9,7 @@ import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
 import "package:share_plus/share_plus.dart";
 
 const Color _socialText = Color(0xFF1F2329);
@@ -74,6 +75,7 @@ class _FriendsPageState extends State<FriendsPage> {
                 friends: friends,
                 totalFriends: friends.length,
                 onShare: () => _shareInviteCode(context),
+                onRemove: _removeFriend,
               ),
             ],
           ],
@@ -289,6 +291,44 @@ class _FriendsPageState extends State<FriendsPage> {
     }
   }
 
+  Future<void> _removeFriend(_FriendProfile profile) async {
+    final bool confirmed = await showDeleteConfirmationDialog(
+      itemName: profile.name,
+      itemTypeName: _friendTypeName(context),
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      if (profile.friendshipId.isNotEmpty) {
+        await supabaseService.requireClient
+            .from("friendships")
+            .delete()
+            .eq("id", profile.friendshipId);
+      } else {
+        final String? userId = supabaseService.currentUserId;
+        if (userId != null) {
+          await supabaseService.requireClient
+              .from("friendships")
+              .delete()
+              .eq("status", "accepted")
+              .or(
+                "and(requester_id.eq.$userId,addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.$userId)",
+              );
+        }
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        friends.removeWhere((friend) => friend.id == profile.id);
+      });
+    } catch (_) {
+      appNavigator.showErrorSnackBar();
+    }
+  }
+
   Future<void> _openAddFriendPage() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -438,6 +478,12 @@ class _FriendsPageState extends State<FriendsPage> {
         "pt" => "Me adicione no HelpOut com meu código: $code",
         _ => "Add me on HelpOut with my code: $code",
       };
+  static String _friendTypeName(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "amigo",
+        "pt" => "amigo",
+        _ => "friend",
+      };
 }
 
 class _Header extends StatelessWidget {
@@ -456,7 +502,7 @@ class _Header extends StatelessWidget {
               _title(context),
               style: context.textStyles.black32.copyWith(
                 color: context.colorTokens.primary,
-                fontSize: 23,
+                fontSize: 28,
                 height: 1.05,
               ),
             ),
@@ -477,8 +523,8 @@ class _Header extends StatelessWidget {
       BounceTap(
         onTap: onInviteTap,
         child: Container(
-          width: 38,
-          height: 38,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: context.colorTokens.primaryVeryLight,
             shape: BoxShape.circle,
@@ -487,7 +533,7 @@ class _Header extends StatelessWidget {
           child: Icon(
             Icons.person_add_alt_1_rounded,
             color: context.colorTokens.primary,
-            size: 23,
+            size: 26,
           ),
         ),
       ),
@@ -804,9 +850,9 @@ class _InviteLookupCard extends StatelessWidget {
   };
 
   String _fieldHint(BuildContext context) => switch (context.languageCode) {
-    "es" => "Ej.: HELPOUT42",
-    "pt" => "Ex.: HELPOUT42",
-    _ => "E.g. HELPOUT42",
+    "es" => "Como ABCDE12345",
+    "pt" => "Como ABCDE12345",
+    _ => "Like ABCDE12345",
   };
 
   String _pasteLabel(BuildContext context) => switch (context.languageCode) {
@@ -1902,11 +1948,13 @@ class _FriendsSection extends StatelessWidget {
     required this.friends,
     required this.totalFriends,
     required this.onShare,
+    required this.onRemove,
   });
 
   final List<_FriendProfile> friends;
   final int totalFriends;
   final VoidCallback onShare;
+  final ValueChanged<_FriendProfile> onRemove;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -1925,7 +1973,11 @@ class _FriendsSection extends StatelessWidget {
           child: Column(
             children: [
               for (int index = 0; index < friends.length; index++) ...[
-                _FriendRow(profile: friends[index], index: index),
+                _FriendRow(
+                  profile: friends[index],
+                  index: index,
+                  onRemove: () => onRemove(friends[index]),
+                ),
                 if (index < friends.length - 1)
                   const Divider(
                     height: 1,
@@ -1955,10 +2007,15 @@ class _FriendsSection extends StatelessWidget {
 }
 
 class _FriendRow extends StatelessWidget {
-  const _FriendRow({required this.profile, required this.index});
+  const _FriendRow({
+    required this.profile,
+    required this.index,
+    required this.onRemove,
+  });
 
   final _FriendProfile profile;
   final int index;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -1974,11 +2031,25 @@ class _FriendRow extends StatelessWidget {
         Expanded(
           child: _NameBlock(name: profile.name, handle: profile.handle),
         ),
-        Text(
-          _statusLabel(context, index),
-          style: context.textStyles.bodySmall.copyWith(
-            color: index < 2 ? const Color(0xFF25A85A) : _socialMuted,
-            fontWeight: FontWeight.w700,
+        const Gap(10),
+        _FriendStatusChip(label: _statusLabel(context, index), index: index),
+        const Gap(8),
+        BounceTap(
+          onTap: onRemove,
+          pressedScale: 0.94,
+          child: Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.colorTokens.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.delete_outline_rounded,
+              color: context.colorTokens.error,
+              size: 19,
+            ),
           ),
         ),
       ],
@@ -1994,6 +2065,36 @@ class _FriendRow extends StatelessWidget {
       "pt" => "Há ${index + 1} min",
       _ => "${index + 1} min ago",
     };
+  }
+}
+
+class _FriendStatusChip extends StatelessWidget {
+  const _FriendStatusChip({required this.label, required this.index});
+
+  final String label;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = index < 2 ? const Color(0xFF25A85A) : _socialMuted;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodySmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w800,
+          fontSize: 11,
+        ),
+      ),
+    );
   }
 }
 
