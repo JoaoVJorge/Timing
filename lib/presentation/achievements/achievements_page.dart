@@ -540,8 +540,8 @@ class _AchievementsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      const double spacing = 8;
-      const int columns = 3;
+      const double spacing = 10;
+      const int columns = 2;
       final double itemWidth =
           (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -588,8 +588,8 @@ class _AchievementCardState extends State<_AchievementCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        height: _isExpanded ? 192 : 136,
-        padding: const EdgeInsets.fromLTRB(7, 12, 7, 10),
+        height: _isExpanded ? 208 : 168,
+        padding: const EdgeInsets.fromLTRB(10, 14, 10, 12),
         decoration: _cardDecoration(context, radius: 16),
         child: Stack(
           children: [
@@ -603,8 +603,8 @@ class _AchievementCardState extends State<_AchievementCard> {
                   icon: achievement.icon,
                   color: effectiveColor,
                   isUnlocked: achievement.isUnlocked,
-                  size: _isExpanded ? 50 : 46,
-                  iconSize: _isExpanded ? 26 : 24,
+                  size: _isExpanded ? 52 : 48,
+                  iconSize: _isExpanded ? 27 : 24,
                 ),
                 const Gap(10),
                 Text(
@@ -622,7 +622,7 @@ class _AchievementCardState extends State<_AchievementCard> {
                 Expanded(
                   child: Text(
                     achievement.description,
-                    maxLines: 3,
+                    maxLines: _isExpanded ? 4 : 3,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: context.textStyles.bodyTiny.copyWith(
