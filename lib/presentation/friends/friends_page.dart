@@ -7,6 +7,7 @@ import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -93,7 +94,6 @@ class _FriendsPageState extends State<FriendsPage> {
             else ...[
               const Gap(14),
               _ActivityShortcuts(
-                onFriendsTap: () {},
                 onPendingTap: _openPendingRequestsPage,
                 onSentTap: _openSentRequestsPage,
               ),
@@ -571,39 +571,44 @@ class _FindFriendsPageState extends State<_FindFriendsPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.colorTokens.scaffold,
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: ListView(
-          children: [
-            _InviteCodeHeader(onBack: () => Navigator.of(context).maybePop()),
-            const Gap(16),
-            _InviteLookupCard(
-              controller: codeController,
-              isLoading: isLoading,
-              onPaste: _pasteCode,
-              onSearch: _findByCode,
-            ),
-            if (foundUser != null) ...[
-              const Gap(14),
-              _FoundUserSection(
-                profile: foundUser!,
-                isSent: sentRequestIds.contains(foundUser!.id),
-                onAdd: () => _send(foundUser!),
-              ),
-            ] else if (hasSearched && !isLoading) ...[
-              const Gap(14),
-              _CodeNotFoundCard(text: _notFoundText(context)),
-            ],
-            const Gap(12),
-            _HowItWorksCard(),
-          ],
+  Widget build(BuildContext context) => AppScaffold(
+    topBar: AppTopBar(
+      title: _addFriendTitle(context),
+      showBackButton: true,
+      onBack: () => Navigator.of(context).maybePop(),
+    ),
+    body: ListView(
+      padding: const EdgeInsets.only(bottom: 14),
+      children: [
+        _InviteLookupCard(
+          controller: codeController,
+          isLoading: isLoading,
+          onPaste: _pasteCode,
+          onSearch: _findByCode,
         ),
-      ),
+        if (foundUser != null) ...[
+          const Gap(14),
+          _FoundUserSection(
+            profile: foundUser!,
+            isSent: sentRequestIds.contains(foundUser!.id),
+            onAdd: () => _send(foundUser!),
+          ),
+        ] else if (hasSearched && !isLoading) ...[
+          const Gap(14),
+          _CodeNotFoundCard(text: _notFoundText(context)),
+        ],
+        const Gap(12),
+        _HowItWorksCard(),
+      ],
     ),
   );
+
+  String _addFriendTitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Adicionar amigo",
+        "pt" => "Adicionar amigo",
+        _ => "Add friend",
+      };
 
   Future<void> _pasteCode() async {
     final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -690,77 +695,6 @@ class _FindFriendsPageState extends State<_FindFriendsPage> {
   };
 }
 
-class _InviteCodeHeader extends StatelessWidget {
-  const _InviteCodeHeader({required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      BounceTap(
-        onTap: onBack,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: context.colorTokens.surface,
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: _socialBorder),
-          ),
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: context.colorTokens.textBody,
-            size: 22,
-          ),
-        ),
-      ),
-      const Gap(12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _title(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.black32.copyWith(
-                color: context.colorTokens.textBody,
-                fontSize: 21,
-                height: 1.05,
-              ),
-            ),
-            const Gap(4),
-            Text(
-              _subtitle(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyMedium.copyWith(
-                color: _socialMuted,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Adicionar amigo",
-    "pt" => "Adicionar amigo",
-    _ => "Add friend",
-  };
-
-  String _subtitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Agrega amigos usando el código de invitación",
-    "pt" => "Adicione amigos usando o código de convite",
-    _ => "Add friends using an invite code",
-  };
-}
-
 class _InviteLookupCard extends StatelessWidget {
   const _InviteLookupCard({
     required this.controller,
@@ -838,8 +772,13 @@ class _InviteLookupCard extends StatelessWidget {
                     fontSize: 17,
                     letterSpacing: 0.8,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
+                    hintText: _fieldHint(context),
+                    hintStyle: context.textStyles.bodyMedium.copyWith(
+                      color: _socialMuted,
+                      fontWeight: FontWeight.w700,
+                    ),
                     isDense: true,
                   ),
                 ),
@@ -898,6 +837,12 @@ class _InviteLookupCard extends StatelessWidget {
     "es" => "Escribe o pega el código",
     "pt" => "Digite ou cole o código",
     _ => "Type or paste the code",
+  };
+
+  String _fieldHint(BuildContext context) => switch (context.languageCode) {
+    "es" => "Ej.: HELPOUT42",
+    "pt" => "Ex.: HELPOUT42",
+    _ => "E.g. HELPOUT42",
   };
 
   String _pasteLabel(BuildContext context) => switch (context.languageCode) {
@@ -1072,34 +1017,74 @@ class _CodeNotFoundCard extends StatelessWidget {
   );
 }
 
-class _HowItWorksCard extends StatelessWidget {
+class _HowItWorksCard extends StatefulWidget {
   const _HowItWorksCard();
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 48,
-    padding: const EdgeInsets.symmetric(horizontal: 14),
-    decoration: _surfaceDecoration(radius: 16),
-    child: Row(
-      children: [
-        Icon(
-          Icons.lightbulb_outline_rounded,
-          color: context.colorTokens.primary,
-          size: 20,
-        ),
-        const Gap(10),
-        Expanded(
-          child: Text(
-            _title(context),
-            style: context.textStyles.bodyMedium.copyWith(
-              color: _socialMuted,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
+  State<_HowItWorksCard> createState() => _HowItWorksCardState();
+}
+
+class _HowItWorksCardState extends State<_HowItWorksCard> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: () => setState(() => isExpanded = !isExpanded),
+    pressedScale: 0.98,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      padding: const EdgeInsets.all(14),
+      decoration: _surfaceDecoration(radius: 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                color: context.colorTokens.primary,
+                size: 20,
+              ),
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  _title(context),
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: _socialMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              AnimatedRotation(
+                turns: isExpanded ? 0.5 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: _socialMuted,
+                ),
+              ),
+            ],
           ),
-        ),
-        const Icon(Icons.keyboard_arrow_down_rounded, color: _socialMuted),
-      ],
+          if (isExpanded) ...[
+            const Gap(12),
+            HowStep(
+              icon: Icons.chat_bubble_outline_rounded,
+              text: stepOne(context),
+              isLast: false,
+            ),
+            HowStep(
+              icon: Icons.content_paste_rounded,
+              text: stepTwo(context),
+              isLast: false,
+            ),
+            HowStep(
+              icon: Icons.person_add_alt_1_rounded,
+              text: stepThree(context),
+              isLast: true,
+            ),
+          ],
+        ],
+      ),
     ),
   );
 
@@ -1259,59 +1244,52 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
   };
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.colorTokens.scaffold,
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _LocalPageHeader(
-              title: widget.title,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            const Gap(18),
-            _RequestsModeTabs(
-              selectedMode: selectedMode,
-              onSelect: (mode) => setState(() => selectedMode = mode),
-            ),
-            const Gap(18),
-            Text(
-              _sectionTitle(context, currentRequests.length),
-              style: context.textStyles.bodyMedium.copyWith(
-                color: _socialText,
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const Gap(10),
-            Expanded(
-              child: currentRequests.isEmpty
-                  ? _RequestEmptyState(mode: selectedMode)
-                  : ListView.separated(
-                      itemCount: currentRequests.length,
-                      separatorBuilder: (context, index) => const Gap(12),
-                      itemBuilder: (context, index) {
-                        final _FriendProfile profile = currentRequests[index];
-                        return _RequestProfileCard(
-                          profile: profile,
-                          mode: selectedMode,
-                          onAccept: () => _runAction(profile, widget.onAccept),
-                          onDecline: () =>
-                              _runAction(profile, widget.onDecline),
-                          onCancel: () => _runAction(profile, widget.onCancel),
-                        );
-                      },
-                    ),
-            ),
-            if (selectedMode == _FriendRequestsMode.incoming) ...[
-              const Gap(12),
-              _SafetyNotice(),
-            ],
-          ],
+  Widget build(BuildContext context) => AppScaffold(
+    topBar: AppTopBar(
+      title: widget.title,
+      showBackButton: true,
+      onBack: () => Navigator.of(context).maybePop(),
+    ),
+    body: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _RequestsModeTabs(
+          selectedMode: selectedMode,
+          onSelect: (mode) => setState(() => selectedMode = mode),
         ),
-      ),
+        const Gap(18),
+        Text(
+          _sectionTitle(context, currentRequests.length),
+          style: context.textStyles.bodyMedium.copyWith(
+            color: _socialText,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const Gap(10),
+        Expanded(
+          child: currentRequests.isEmpty
+              ? _RequestEmptyState(mode: selectedMode)
+              : ListView.separated(
+                  itemCount: currentRequests.length,
+                  separatorBuilder: (context, index) => const Gap(12),
+                  itemBuilder: (context, index) {
+                    final _FriendProfile profile = currentRequests[index];
+                    return _RequestProfileCard(
+                      profile: profile,
+                      mode: selectedMode,
+                      onAccept: () => _runAction(profile, widget.onAccept),
+                      onDecline: () => _runAction(profile, widget.onDecline),
+                      onCancel: () => _runAction(profile, widget.onCancel),
+                    );
+                  },
+                ),
+        ),
+        if (selectedMode == _FriendRequestsMode.incoming) ...[
+          const Gap(12),
+          _SafetyNotice(),
+        ],
+      ],
     ),
   );
 
@@ -1688,47 +1666,6 @@ class _SafetyNotice extends StatelessWidget {
   };
 }
 
-class _LocalPageHeader extends StatelessWidget {
-  const _LocalPageHeader({required this.title, required this.onBack});
-
-  final String title;
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      BounceTap(
-        onTap: onBack,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: context.colorTokens.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: _socialBorder),
-          ),
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: context.colorTokens.textBody,
-            size: 22,
-          ),
-        ),
-      ),
-      const Gap(12),
-      Expanded(
-        child: Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.extraBold24.copyWith(
-            color: context.colorTokens.textBody,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
 class SimpleEmptyState extends StatelessWidget {
   const SimpleEmptyState({required this.text, super.key});
 
@@ -1877,12 +1814,10 @@ class _InviteIconButton extends StatelessWidget {
 
 class _ActivityShortcuts extends StatelessWidget {
   const _ActivityShortcuts({
-    required this.onFriendsTap,
     required this.onPendingTap,
     required this.onSentTap,
   });
 
-  final VoidCallback onFriendsTap;
   final VoidCallback onPendingTap;
   final VoidCallback onSentTap;
 
@@ -1891,18 +1826,8 @@ class _ActivityShortcuts extends StatelessWidget {
     children: [
       Expanded(
         child: _ShortcutTile(
-          icon: Icons.group_rounded,
-          title: _friendsLabel(context),
-          isSelected: true,
-          onTap: onFriendsTap,
-        ),
-      ),
-      const Gap(8),
-      Expanded(
-        child: _ShortcutTile(
           icon: Icons.download_rounded,
           title: _pendingLabel(context),
-          isSelected: false,
           onTap: onPendingTap,
         ),
       ),
@@ -1911,22 +1836,15 @@ class _ActivityShortcuts extends StatelessWidget {
         child: _ShortcutTile(
           icon: Icons.send_rounded,
           title: _sentLabel(context),
-          isSelected: false,
           onTap: onSentTap,
         ),
       ),
     ],
   );
 
-  String _friendsLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Amigos",
-    "pt" => "Amigos",
-    _ => "Friends",
-  };
-
   String _pendingLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Solicitudes",
-    "pt" => "Solicitações",
+    "pt" => "Solicita\u00e7\u00f5es",
     _ => "Requests",
   };
 
@@ -1941,13 +1859,11 @@ class _ShortcutTile extends StatelessWidget {
   const _ShortcutTile({
     required this.icon,
     required this.title,
-    required this.isSelected,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
-  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -1958,15 +1874,14 @@ class _ShortcutTile extends StatelessWidget {
       height: 42,
       padding: const EdgeInsets.symmetric(horizontal: 9),
       decoration: BoxDecoration(
-        gradient: isSelected ? context.colorTokens.primaryGradient : null,
-        color: isSelected ? null : context.colorTokens.surface,
+        color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(999),
-        border: isSelected ? null : Border.all(color: _socialBorder),
+        border: Border.all(color: _socialBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: isSelected ? Colors.white : _socialMuted, size: 17),
+          Icon(icon, color: context.colorTokens.primary, size: 17),
           const Gap(6),
           Flexible(
             child: Text(
@@ -1974,7 +1889,7 @@ class _ShortcutTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
-                color: isSelected ? Colors.white : _socialMuted,
+                color: _socialMuted,
                 fontWeight: FontWeight.w900,
                 fontSize: 12,
               ),
