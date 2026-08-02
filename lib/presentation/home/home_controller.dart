@@ -107,6 +107,21 @@ class HomeController extends GetxController {
   bool hasSubjectsIn(TimeCategoryType category) =>
       subjects.any((s) => s.category == category);
 
+  /// Most-tracked subject of a category, used as the tile's "what you were
+  /// working on" line.
+  SubjectEntity? topSubjectIn(TimeCategoryType category) {
+    final List<SubjectEntity> inCategory = subjects
+        .where((s) => s.category == category)
+        .toList();
+    if (inCategory.isEmpty) {
+      return null;
+    }
+    return inCategory.reduce(
+      (best, current) =>
+          current.totalSeconds > best.totalSeconds ? current : best,
+    );
+  }
+
   List<ScheduleEntryEntity> get todayScheduleEntries =>
       _scheduleController.todayEntries;
 

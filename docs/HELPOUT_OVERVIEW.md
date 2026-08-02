@@ -548,16 +548,18 @@ Detalhe tecnico importante:
 
 ---
 
-## 14. Perfil
+## 14. Progresso
 
-Controller: `ProfileController`.
+Controller: `ProgressController` (`lib/presentation/progress/`).
 
-Mostra:
+Responde apenas "o que ja fiz?":
 
-- nome, apelido e avatar globais;
-- estatisticas agregadas de subjects;
-- agenda de hoje vinda do `ScheduleController`;
-- atalhos para editar perfil, categorias, agenda e metas.
+- seletor de periodo (dia / semana / mes);
+- resultado principal de foco com comparacao ao periodo anterior;
+- metricas complementares (paginas, exercicios, metas concluidas);
+- distribuicao por atividade, grafico de evolucao e conquistas.
+
+Amigos e codigo de convite ficam em Grupos; agenda e metas ficam na Home.
 
 `ProfileStatsEntity.fromSubjects` calcula:
 
@@ -794,7 +796,7 @@ MainNavigation
 | Home | `lib/presentation/home/home_controller.dart` |
 | Categorias | `lib/presentation/category/category_controller.dart` |
 | Agenda | `lib/presentation/schedule/schedule_controller.dart` |
-| Perfil | `lib/presentation/profile/profile_controller.dart` |
+| Progresso | `lib/presentation/progress/progress_controller.dart` |
 | Grupos | `lib/presentation/groups/groups_controller.dart` |
 | Tema | `lib/theme/` |
 | Traducoes | `lib/l10n/` |

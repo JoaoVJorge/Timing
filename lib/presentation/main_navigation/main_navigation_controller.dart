@@ -31,8 +31,8 @@ class MainNavigationController extends GetxController {
     switch (type) {
       case BottomNavButtonType.home:
         _navigateToTab(AppRoutes.home);
-      case BottomNavButtonType.profile:
-        _navigateToTab(AppRoutes.profile);
+      case BottomNavButtonType.progress:
+        _navigateToTab(AppRoutes.progress);
       case BottomNavButtonType.groups:
         _navigateToTab(AppRoutes.groups);
       case BottomNavButtonType.config:

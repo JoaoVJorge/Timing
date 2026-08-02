@@ -1054,18 +1054,6 @@ abstract class AppLocalizations {
   /// **'End'**
   String get timerExitDialogConfirm;
 
-  /// No description provided for @profileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Journey'**
-  String get profileTitle;
-
-  /// No description provided for @profileSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Track your progress and key milestones'**
-  String get profileSubtitle;
-
   /// No description provided for @editButton.
   ///
   /// In en, this message translates to:
@@ -2164,12 +2152,6 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get navHome;
 
-  /// No description provided for @navProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Journey'**
-  String get navProfile;
-
   /// No description provided for @navGroups.
   ///
   /// In en, this message translates to:
@@ -2445,6 +2427,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish'**
   String get finishButton;
+
+  /// No description provided for @navProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get navProgress;
+
+  /// No description provided for @progressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progressTitle;
+
+  /// No description provided for @progressSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything you have done so far'**
+  String get progressSubtitle;
+
+  /// No description provided for @progressPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get progressPeriodDay;
+
+  /// No description provided for @progressPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get progressPeriodWeek;
+
+  /// No description provided for @progressPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get progressPeriodMonth;
+
+  /// No description provided for @progressFocusResultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus in this period'**
+  String get progressFocusResultLabel;
+
+  /// No description provided for @progressComparisonMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} more than the previous period'**
+  String progressComparisonMore(String value);
+
+  /// No description provided for @progressComparisonLess.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} less than the previous period'**
+  String progressComparisonLess(String value);
+
+  /// No description provided for @progressComparisonSame.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as the previous period'**
+  String get progressComparisonSame;
+
+  /// No description provided for @progressComparisonFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first data for this period'**
+  String get progressComparisonFirst;
+
+  /// No description provided for @progressStatExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises'**
+  String get progressStatExercises;
+
+  /// No description provided for @progressStatGoalsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals done'**
+  String get progressStatGoalsDone;
+
+  /// No description provided for @progressDistributionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By activity'**
+  String get progressDistributionTitle;
+
+  /// No description provided for @homeTodayInline.
+  ///
+  /// In en, this message translates to:
+  /// **'Today: {focus} focus · {pages} pages · {goals} goals'**
+  String homeTodayInline(String focus, int pages, int goals);
+
+  /// No description provided for @homePlanDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan my day'**
+  String get homePlanDayTitle;
+
+  /// No description provided for @homePlanDaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goals and weekly schedule'**
+  String get homePlanDaySubtitle;
+
+  /// No description provided for @groupsFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get groupsFriendsTitle;
+
+  /// No description provided for @groupsFriendsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests, invites and your code'**
+  String get groupsFriendsSubtitle;
+
+  /// No description provided for @groupMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String groupMembersCount(int count);
+
+  /// No description provided for @createScheduleEntryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create entry'**
+  String get createScheduleEntryButton;
+
+  /// No description provided for @scheduleEntryMissingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the title, start and end time to continue'**
+  String get scheduleEntryMissingFields;
+
+  /// No description provided for @timerSessionCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus {current} of {total}'**
+  String timerSessionCounter(int current, int total);
+
+  /// No description provided for @timerExitBackToFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to focus'**
+  String get timerExitBackToFocus;
+
+  /// No description provided for @timerExitSaveAndEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and end'**
+  String get timerExitSaveAndEnd;
+
+  /// No description provided for @notesSavedNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved just now'**
+  String get notesSavedNow;
+
+  /// No description provided for @notesSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get notesSaving;
+
+  /// No description provided for @dailyGoalsPendingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get dailyGoalsPendingSection;
+
+  /// No description provided for @dailyGoalsCompletedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get dailyGoalsCompletedSection;
+
+  /// No description provided for @dailyGoalsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals for today yet'**
+  String get dailyGoalsEmptyTitle;
+
+  /// No description provided for @dailyGoalsEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a goal above or pick one of the suggestions to start your day.'**
+  String get dailyGoalsEmptyDescription;
+
+  /// No description provided for @achievementProgressValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String achievementProgressValue(String current, String total);
+
+  /// No description provided for @categoryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get categoryEmptyTitle;
+
+  /// No description provided for @categoryEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first item to start tracking focus time.'**
+  String get categoryEmptyDescription;
+
+  /// No description provided for @scheduleEmptyExampleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get scheduleEmptyExampleLabel;
+
+  /// No description provided for @progressAchievementsNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next achievement'**
+  String get progressAchievementsNextTitle;
+
+  /// No description provided for @achievementFocusHourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'1 hour of focus'**
+  String get achievementFocusHourTitle;
+
+  /// No description provided for @achievementSessionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'5 completed sessions'**
+  String get achievementSessionsTitle;
+
+  /// No description provided for @achievementStreakTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day streak'**
+  String get achievementStreakTitle;
+
+  /// No description provided for @achievementReaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'100 pages read'**
+  String get achievementReaderTitle;
+
+  /// No description provided for @achievementGoalStartedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First goal started'**
+  String get achievementGoalStartedTitle;
+
+  /// No description provided for @unitMinutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} min'**
+  String unitMinutesShort(int value);
+
+  /// No description provided for @unitSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} sessions'**
+  String unitSessions(int value);
+
+  /// No description provided for @unitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} days'**
+  String unitDays(int value);
+
+  /// No description provided for @currentUserRankNextStepNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{score} to reach {name}'**
+  String currentUserRankNextStepNamed(String score, String name);
+
+  /// No description provided for @timerKeepAwakeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The screen stays on during the session'**
+  String get timerKeepAwakeNote;
+
+  /// No description provided for @scheduleWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String scheduleWeekLabel(String date);
+
+  /// No description provided for @deleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteButton;
 }
 
 class _AppLocalizationsDelegate

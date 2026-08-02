@@ -51,7 +51,7 @@ extension LeaderboardPeriodTypeLocalizationX on LeaderboardPeriodType {
 extension BottomNavButtonTypeLocalizationX on BottomNavButtonType {
   String localizedLabel(BuildContext context) => switch (this) {
     BottomNavButtonType.home => context.l10n.navHome,
-    BottomNavButtonType.profile => context.l10n.navProfile,
+    BottomNavButtonType.progress => context.l10n.navProgress,
     BottomNavButtonType.groups => context.l10n.navGroups,
     BottomNavButtonType.config => context.l10n.navSettings,
   };

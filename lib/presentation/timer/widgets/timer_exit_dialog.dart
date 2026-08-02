@@ -123,26 +123,20 @@ class _TimerExitDialog extends StatelessWidget {
             const Gap(24),
             Divider(color: context.colorTokens.divider),
             const Gap(22),
-            Row(
-              children: [
-                Expanded(
-                  child: _TimerExitDialogButton(
-                    label: cancelLabel,
-                    textColor: context.colorTokens.dialogTextMuted,
-                    borderColor: context.colorTokens.borderFocused,
-                    onTap: () => appNavigator.back<bool>(result: false),
-                  ),
-                ),
-                const Gap(14),
-                Expanded(
-                  child: _TimerExitDialogButton(
-                    label: confirmLabel,
-                    textColor: context.colorTokens.white,
-                    backgroundColor: accentColor,
-                    onTap: () => appNavigator.back<bool>(result: true),
-                  ),
-                ),
-              ],
+            // Staying in the session is the safe, common choice, so it carries
+            // the primary weight and ending is the secondary action.
+            _TimerExitDialogButton(
+              label: cancelLabel,
+              textColor: context.colorTokens.white,
+              backgroundColor: accentColor,
+              onTap: () => appNavigator.back<bool>(result: false),
+            ),
+            const Gap(12),
+            _TimerExitDialogButton(
+              label: confirmLabel,
+              textColor: context.colorTokens.dialogTextMuted,
+              borderColor: context.colorTokens.borderFocused,
+              onTap: () => appNavigator.back<bool>(result: true),
             ),
           ],
         ),
@@ -265,28 +259,20 @@ class _ReadingExitDialogState extends State<_ReadingExitDialog> {
             const Gap(24),
             Divider(color: context.colorTokens.divider),
             const Gap(22),
-            Row(
-              children: [
-                Expanded(
-                  child: _TimerExitDialogButton(
-                    label: widget.cancelLabel,
-                    textColor: context.colorTokens.dialogTextMuted,
-                    borderColor: context.colorTokens.borderFocused,
-                    onTap: () => appNavigator.back<int>(),
-                  ),
-                ),
-                const Gap(14),
-                Expanded(
-                  child: _TimerExitDialogButton(
-                    label: widget.confirmLabel,
-                    textColor: context.colorTokens.white,
-                    backgroundColor: widget.accentColor,
-                    onTap: () => appNavigator.back<int>(
-                      result: int.tryParse(_pagesController.text.trim()) ?? 0,
-                    ),
-                  ),
-                ),
-              ],
+            _TimerExitDialogButton(
+              label: widget.cancelLabel,
+              textColor: context.colorTokens.white,
+              backgroundColor: widget.accentColor,
+              onTap: () => appNavigator.back<int>(),
+            ),
+            const Gap(12),
+            _TimerExitDialogButton(
+              label: widget.confirmLabel,
+              textColor: context.colorTokens.dialogTextMuted,
+              borderColor: context.colorTokens.borderFocused,
+              onTap: () => appNavigator.back<int>(
+                result: int.tryParse(_pagesController.text.trim()) ?? 0,
+              ),
             ),
           ],
         ),

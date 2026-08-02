@@ -59,13 +59,13 @@ class AppColorTokens extends ThemeExtension<AppColorTokens> {
       borderFocused: isDark ? const Color(0xFFBBBBBB) : const Color(0xFF444444),
       textBody: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444),
       textHint: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444))
-          .withValues(alpha: 0.5),
+          .withValues(alpha: isDark ? 0.62 : 0.72),
       error: const Color(0xFFF14336),
       success: isDark ? const Color(0xFF5AB663) : const Color(0xFF3FA65D),
       warning: isDark ? const Color(0xFFF2C230) : const Color(0xFFE0A400),
       info: isDark ? const Color(0xFF2BB8BC) : const Color(0xFF1FA2A6),
       iconDisabled: (isDark ? const Color(0xFFEEEEEE) : const Color(0xFF444444))
-          .withValues(alpha: 0.5),
+          .withValues(alpha: isDark ? 0.58 : 0.65),
       overlayDark: const Color(
         0xFF000000,
       ).withValues(alpha: isDark ? 0.6 : 0.5),

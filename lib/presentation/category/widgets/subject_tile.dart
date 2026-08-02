@@ -45,22 +45,13 @@ class SubjectTile extends StatelessWidget {
                 ),
                 Text(
                   hasGoal
-                      ? context.l10n.durationProgress(
-                          formatDurationLong(
-                            Duration(seconds: subject.totalSeconds),
-                          ),
-                          formatDurationLong(
-                            Duration(seconds: subject.goalSeconds),
-                          ),
-                        )
+                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.goalSeconds)))} · ${(progress * 100).round()}%"
                       : formatDurationLong(
                           Duration(seconds: subject.totalSeconds),
                         ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
-                  ),
+                  style: context.textStyles.caption.copyWith(fontSize: 12),
                 ),
                 if (hasGoal) ...[
                   const SizedBox(height: 8),

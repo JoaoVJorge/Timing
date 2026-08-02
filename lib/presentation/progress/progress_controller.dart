@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/core/domain/entities/daily_progress_entity.dart";
 import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
@@ -9,10 +10,10 @@ import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 
-enum ProfilePeriod { fiveDays, week, month }
+enum ProgressPeriod { day, week, month }
 
-class ProfileController extends GetxController {
-  ProfileController({
+class ProgressController extends GetxController {
+  ProgressController({
     required this._getProfileStatsUseCase,
     required this._getDailyTasksUseCase,
     required this._dailyProgressService,
@@ -37,12 +38,14 @@ class ProfileController extends GetxController {
   ).obs;
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
-  final Rx<ProfilePeriod> selectedPeriod = ProfilePeriod.week.obs;
+  final Rx<ProgressPeriod> selectedPeriod = ProgressPeriod.week.obs;
 
   bool get hasGoalStarted =>
       tasks.any((task) => task.completedDays > 0 || task.isCheckedToday);
 
   bool get hasValidFirstFocus => stats.value.totalFocusSeconds >= 60;
+
+  int get goalsDone => tasks.where((task) => task.isCheckedToday).length;
 
   bool get hasAnyUnlockedAchievement {
     final ProfileStatsEntity currentStats = stats.value;
@@ -54,34 +57,27 @@ class ProfileController extends GetxController {
         currentStats.readingTotalPages > 0;
   }
 
-  List<int> get evolutionFocusSeconds {
-    _dailyProgressService.today.value;
-    return _dailyProgressService
-        .progressForLastDays(selectedPeriod.value.dayCount)
-        .map((progress) => progress.focusSeconds)
-        .toList();
+  List<int> get evolutionFocusSeconds =>
+      _currentPeriod.map((progress) => progress.focusSeconds).toList();
+
+  int get selectedPeriodFocusSeconds => _sumFocus(_currentPeriod);
+
+  int get previousPeriodFocusSeconds => _sumFocus(_previousPeriod);
+
+  /// `null` when there is nothing earlier to compare against, so the UI can say
+  /// "your first data here" instead of claiming a meaningless +100%.
+  int? get focusDifferenceToPreviousPeriod {
+    if (_previousPeriod.every((progress) => progress.isEmpty)) {
+      return null;
+    }
+    return selectedPeriodFocusSeconds - previousPeriodFocusSeconds;
   }
 
-  int get selectedPeriodFocusSeconds {
-    _dailyProgressService.today.value;
-    return _dailyProgressService
-        .progressForLastDays(selectedPeriod.value.dayCount)
-        .fold(0, (total, progress) => total + progress.focusSeconds);
-  }
+  int get selectedPeriodPages =>
+      _currentPeriod.fold(0, (total, progress) => total + progress.pages);
 
-  int get selectedPeriodPages {
-    _dailyProgressService.today.value;
-    return _dailyProgressService
-        .progressForLastDays(selectedPeriod.value.dayCount)
-        .fold(0, (total, progress) => total + progress.pages);
-  }
-
-  int get selectedPeriodSessions {
-    _dailyProgressService.today.value;
-    return _dailyProgressService
-        .progressForLastDays(selectedPeriod.value.dayCount)
-        .fold(0, (total, progress) => total + progress.sessions);
-  }
+  int get selectedPeriodSessions =>
+      _currentPeriod.fold(0, (total, progress) => total + progress.sessions);
 
   int get totalSessions {
     _dailyProgressService.today.value;
@@ -97,6 +93,20 @@ class ProfileController extends GetxController {
         .where((progress) => !progress.isEmpty)
         .length;
   }
+
+  /// The selected window plus the one immediately before it, oldest first.
+  List<DailyProgressEntity> get _bothPeriods {
+    _dailyProgressService.today.value;
+    return _dailyProgressService.progressForLastDays(
+      selectedPeriod.value.dayCount * 2,
+    );
+  }
+
+  List<DailyProgressEntity> get _currentPeriod =>
+      _bothPeriods.sublist(selectedPeriod.value.dayCount);
+
+  List<DailyProgressEntity> get _previousPeriod =>
+      _bothPeriods.sublist(0, selectedPeriod.value.dayCount);
 
   @override
   void onInit() {
@@ -119,10 +129,10 @@ class ProfileController extends GetxController {
   Future<void> onTapAchievements() =>
       _navigateAndRefresh(AppRoutes.achievements);
 
-  Future<void> onTapFriends() async =>
-      _appNavigator.toNamed(AppRoutes.friends, id: 1);
+  void onSelectPeriod(ProgressPeriod period) => selectedPeriod.value = period;
 
-  void onSelectPeriod(ProfilePeriod period) => selectedPeriod.value = period;
+  int _sumFocus(List<DailyProgressEntity> period) =>
+      period.fold(0, (total, progress) => total + progress.focusSeconds);
 
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??
@@ -131,10 +141,10 @@ class ProfileController extends GetxController {
   }
 }
 
-extension ProfilePeriodX on ProfilePeriod {
+extension ProgressPeriodX on ProgressPeriod {
   int get dayCount => switch (this) {
-    ProfilePeriod.fiveDays => 1,
-    ProfilePeriod.week => 7,
-    ProfilePeriod.month => 30,
+    ProgressPeriod.day => 1,
+    ProgressPeriod.week => 7,
+    ProgressPeriod.month => 30,
   };
 }

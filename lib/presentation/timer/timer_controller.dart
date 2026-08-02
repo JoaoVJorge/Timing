@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
@@ -160,6 +161,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     isRunning.value = !isRunning.value;
     _lastTickAt = DateTime.now();
 
+    unawaited(HapticFeedback.selectionClick());
     if (!isRunning.value) {
       _persistAccumulatedTime();
     }
@@ -197,6 +199,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     isRunning.value = false;
     isSessionFinished.value = true;
     _ticker?.cancel();
+    unawaited(HapticFeedback.mediumImpact());
     timerNotificationService.cancel();
     unawaited(timerLiveActivityService.end());
   }
@@ -214,8 +217,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         accentColor: Color(subject.colorValue),
         title: context.l10n.timerExitDialogTitle,
         content: _readingExitContent(context),
-        cancelLabel: context.l10n.timerExitDialogCancel,
-        confirmLabel: context.l10n.timerExitDialogConfirm,
+        cancelLabel: context.l10n.timerExitBackToFocus,
+        confirmLabel: context.l10n.timerExitSaveAndEnd,
       );
 
       if (pagesRead != null) {
@@ -233,8 +236,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         _formatMinutesForDialog(sessionSeconds.value),
         subject.name,
       ),
-      cancelLabel: context.l10n.timerExitDialogCancel,
-      confirmLabel: context.l10n.timerExitDialogConfirm,
+      cancelLabel: context.l10n.timerExitBackToFocus,
+      confirmLabel: context.l10n.timerExitSaveAndEnd,
     );
 
     if (shouldExit == true) {
@@ -255,8 +258,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       accentColor: Color(subject.colorValue),
       title: context.l10n.timerExitDialogTitle,
       content: _readingExitContent(context),
-      cancelLabel: context.l10n.timerExitDialogCancel,
-      confirmLabel: context.l10n.timerExitDialogConfirm,
+      cancelLabel: context.l10n.timerExitBackToFocus,
+      confirmLabel: context.l10n.timerExitSaveAndEnd,
     );
 
     if (pagesRead == null) {

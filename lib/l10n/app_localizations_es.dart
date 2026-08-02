@@ -558,12 +558,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get timerExitDialogConfirm => 'Cerrar';
 
   @override
-  String get profileTitle => 'Jornada';
-
-  @override
-  String get profileSubtitle => 'Sigue tu evolución y tus principales hitos';
-
-  @override
   String get editButton => 'Editar';
 
   @override
@@ -1166,9 +1160,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navHome => 'Inicio';
 
   @override
-  String get navProfile => 'Jornada';
-
-  @override
   String get navGroups => 'Grupos';
 
   @override
@@ -1325,4 +1316,174 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get finishButton => 'Finalizar';
+
+  @override
+  String get navProgress => 'Progreso';
+
+  @override
+  String get progressTitle => 'Progreso';
+
+  @override
+  String get progressSubtitle => 'Todo lo que ya hiciste';
+
+  @override
+  String get progressPeriodDay => 'Día';
+
+  @override
+  String get progressPeriodWeek => 'Semana';
+
+  @override
+  String get progressPeriodMonth => 'Mes';
+
+  @override
+  String get progressFocusResultLabel => 'Enfoque en este período';
+
+  @override
+  String progressComparisonMore(String value) {
+    return '$value más que en el período anterior';
+  }
+
+  @override
+  String progressComparisonLess(String value) {
+    return '$value menos que en el período anterior';
+  }
+
+  @override
+  String get progressComparisonSame => 'Igual que el período anterior';
+
+  @override
+  String get progressComparisonFirst => 'Tus primeros datos en este período';
+
+  @override
+  String get progressStatExercises => 'Ejercicios';
+
+  @override
+  String get progressStatGoalsDone => 'Metas cumplidas';
+
+  @override
+  String get progressDistributionTitle => 'Por actividad';
+
+  @override
+  String homeTodayInline(String focus, int pages, int goals) {
+    return 'Hoy: $focus de enfoque · $pages páginas · $goals metas';
+  }
+
+  @override
+  String get homePlanDayTitle => 'Planear mi día';
+
+  @override
+  String get homePlanDaySubtitle => 'Metas diarias y agenda semanal';
+
+  @override
+  String get groupsFriendsTitle => 'Amigos';
+
+  @override
+  String get groupsFriendsSubtitle => 'Solicitudes, invitaciones y tu código';
+
+  @override
+  String groupMembersCount(int count) {
+    return '$count miembros';
+  }
+
+  @override
+  String get createScheduleEntryButton => 'Crear compromiso';
+
+  @override
+  String get scheduleEntryMissingFields =>
+      'Completa título, inicio y fin para continuar';
+
+  @override
+  String timerSessionCounter(int current, int total) {
+    return 'Enfoque $current de $total';
+  }
+
+  @override
+  String get timerExitBackToFocus => 'Volver al enfoque';
+
+  @override
+  String get timerExitSaveAndEnd => 'Guardar y terminar';
+
+  @override
+  String get notesSavedNow => 'Guardado ahora';
+
+  @override
+  String get notesSaving => 'Guardando…';
+
+  @override
+  String get dailyGoalsPendingSection => 'Pendientes';
+
+  @override
+  String get dailyGoalsCompletedSection => 'Completadas';
+
+  @override
+  String get dailyGoalsEmptyTitle => 'Aún no hay metas para hoy';
+
+  @override
+  String get dailyGoalsEmptyDescription =>
+      'Escribe una meta arriba o elige una sugerencia para empezar el día.';
+
+  @override
+  String achievementProgressValue(String current, String total) {
+    return '$current de $total';
+  }
+
+  @override
+  String get categoryEmptyTitle => 'Nada por aquí todavía';
+
+  @override
+  String get categoryEmptyDescription =>
+      'Crea tu primer elemento para empezar a registrar tu enfoque.';
+
+  @override
+  String get scheduleEmptyExampleLabel => 'Ejemplo';
+
+  @override
+  String get progressAchievementsNextTitle => 'Próximo logro';
+
+  @override
+  String get achievementFocusHourTitle => '1 hora de enfoque';
+
+  @override
+  String get achievementSessionsTitle => '5 sesiones completadas';
+
+  @override
+  String get achievementStreakTitle => '7 días seguidos';
+
+  @override
+  String get achievementReaderTitle => '100 páginas leídas';
+
+  @override
+  String get achievementGoalStartedTitle => 'Primera meta iniciada';
+
+  @override
+  String unitMinutesShort(int value) {
+    return '$value min';
+  }
+
+  @override
+  String unitSessions(int value) {
+    return '$value sesiones';
+  }
+
+  @override
+  String unitDays(int value) {
+    return '$value días';
+  }
+
+  @override
+  String currentUserRankNextStepNamed(String score, String name) {
+    return '$score para alcanzar a $name';
+  }
+
+  @override
+  String get timerKeepAwakeNote =>
+      'La pantalla permanece encendida durante la sesión';
+
+  @override
+  String scheduleWeekLabel(String date) {
+    return 'Semana del $date';
+  }
+
+  @override
+  String get deleteButton => 'Eliminar';
 }

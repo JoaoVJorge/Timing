@@ -28,6 +28,14 @@ class DailyGoalsController extends GetxController {
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
 
+  List<DailyTaskEntity> get pendingTasks =>
+      tasks.where((task) => !task.isCheckedToday).toList();
+
+  List<DailyTaskEntity> get completedTasks =>
+      tasks.where((task) => task.isCheckedToday).toList();
+
+  int get doneTodayCount => completedTasks.length;
+
   @override
   void onInit() {
     super.onInit();

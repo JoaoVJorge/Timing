@@ -6,10 +6,13 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/schedule/schedule_controller.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:help_out/presentation/schedule/widgets/weekday_selector.dart";
+import "package:help_out/shared/widgets/app_empty_state.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/theme/app_spacing.dart";
+import "package:intl/intl.dart";
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -27,26 +30,34 @@ class SchedulePage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const _WeekLabel(),
+          const Gap(AppSpacing.titleToDescription),
           Obx(
             () => WeekdaySelector(
               selectedWeekday: controller.selectedWeekday.value,
               onSelectWeekday: controller.onSelectWeekday,
             ),
           ),
-          const Gap(12),
+          const Gap(AppSpacing.betweenRelated),
           Expanded(
             child: Obx(() {
               final List<ScheduleEntryEntity> entries =
                   controller.sortedEntries;
 
               if (entries.isEmpty) {
-                return const _ScheduleEmptyState();
+                return _ScheduleEmptyState(
+                  onAddEntry: controller.onTapAddEntry,
+                );
               }
 
               return ListView.separated(
-                padding: const EdgeInsets.only(top: 8, bottom: 12),
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.titleToDescription,
+                  bottom: AppSpacing.betweenRelated,
+                ),
                 itemCount: entries.length,
-                separatorBuilder: (context, index) => const Gap(8),
+                separatorBuilder: (context, index) =>
+                    const Gap(AppSpacing.titleToDescription),
                 itemBuilder: (context, index) {
                   final ScheduleEntryEntity entry = entries[index];
                   return Dismissible(
@@ -60,12 +71,15 @@ class SchedulePage extends StatelessWidget {
                         color: context.colorTokens.error,
                         borderRadius: BorderRadius.circular(18),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.delete_outline_rounded,
-                        color: Colors.white,
+                        color: context.colorTokens.white,
                       ),
                     ),
-                    child: ScheduleEntryTile(entry: entry),
+                    child: ScheduleEntryTile(
+                      entry: entry,
+                      status: controller.statusOf(entry),
+                    ),
                   );
                 },
               );
@@ -77,48 +91,73 @@ class SchedulePage extends StatelessWidget {
   }
 }
 
-class _ScheduleEmptyState extends StatelessWidget {
-  const _ScheduleEmptyState();
+class _WeekLabel extends StatelessWidget {
+  const _WeekLabel();
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final String locale = Localizations.localeOf(context).toString();
+    final DateTime now = DateTime.now();
+    final DateTime weekStart = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - DateTime.monday));
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return Text(
+      context.l10n.scheduleWeekLabel(
+        DateFormat("d MMMM", locale).format(weekStart),
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textStyles.caption,
+    );
+  }
+}
+
+/// Shows a dimmed sample day so the feature explains itself before there is
+/// anything in it.
+class _ScheduleEmptyState extends StatelessWidget {
+  const _ScheduleEmptyState({required this.onAddEntry});
+
+  final VoidCallback onAddEntry;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.only(
+      top: AppSpacing.titleToDescription,
+      bottom: AppSpacing.betweenRelated,
+    ),
+    children: [
+      AppEmptyState(
+        icon: Icons.calendar_month_rounded,
+        title: context.l10n.noScheduleYet,
+        description: context.l10n.noScheduleYetDescription,
+        preview: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              isDarkMode
-                  ? "assets/images/calendar_dark.png"
-                  : "assets/images/calendar.png",
-              width: 168,
-              height: 168,
-              fit: BoxFit.contain,
-            ),
-            const Gap(12),
             Text(
-              context.l10n.noScheduleYet,
-              textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(fontSize: 22),
+              context.l10n.scheduleEmptyExampleLabel,
+              style: context.textStyles.caption.copyWith(fontSize: 11),
             ),
-            const Gap(8),
-            Text(
-              context.l10n.noScheduleYetDescription,
-              textAlign: TextAlign.center,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.textHint,
-                fontSize: 14,
-                height: 1.35,
+            const Gap(6),
+            IgnorePointer(
+              child: ScheduleEntryTile(
+                entry: ScheduleEntryEntity(
+                  id: "schedule-example",
+                  title: context.l10n.categoryStudying,
+                  weekday: DateTime.now().weekday,
+                  startMinutes: 8 * 60,
+                  endMinutes: 9 * 60 + 30,
+                  colorValue: context.colorTokens.primary.toARGB32(),
+                ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ],
+  );
 }
 
 class _ScheduleAddButton extends StatelessWidget {
@@ -145,7 +184,7 @@ class _ScheduleAddButton extends StatelessWidget {
             color: context.colorTokens.primaryForeground,
             size: 20,
           ),
-          const Gap(12),
+          const Gap(AppSpacing.betweenRelated),
           Flexible(
             child: Text(
               context.l10n.addScheduleEntryButton,

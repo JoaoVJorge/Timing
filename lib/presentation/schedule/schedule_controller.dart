@@ -8,6 +8,7 @@ import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart"
 import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
+import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 
 class ScheduleController extends GetxController {
   ScheduleController({
@@ -31,6 +32,25 @@ class ScheduleController extends GetxController {
 
   List<ScheduleEntryEntity> get todayEntries =>
       _sortedEntriesForWeekday(DateTime.now().weekday);
+
+  bool get isViewingToday => selectedWeekday.value == DateTime.now().weekday;
+
+  /// Only meaningful for today: on other days every entry is simply upcoming.
+  ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
+    if (!isViewingToday) {
+      return ScheduleEntryStatus.upcoming;
+    }
+    final DateTime now = DateTime.now();
+    final int nowMinutes = now.hour * 60 + now.minute;
+    final int endMinutes = entry.endMinutes ?? entry.startMinutes;
+    if (nowMinutes >= endMinutes && nowMinutes > entry.startMinutes) {
+      return ScheduleEntryStatus.past;
+    }
+    if (nowMinutes >= entry.startMinutes) {
+      return ScheduleEntryStatus.current;
+    }
+    return ScheduleEntryStatus.upcoming;
+  }
 
   List<ScheduleEntryEntity> _sortedEntriesForWeekday(int weekday) =>
       entries.where((entry) => entry.weekday == weekday).toList()

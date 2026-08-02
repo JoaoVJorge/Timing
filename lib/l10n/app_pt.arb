@@ -182,8 +182,6 @@
   "timerExitDialogContinueLater": "Você poderá continuar depois.",
   "timerExitDialogConfirm": "Encerrar",
 
-  "profileTitle": "Jornada",
-  "profileSubtitle": "Acompanhe sua evolução e seus principais marcos",
   "editButton": "Editar",
   "nicknameFallback": "usuario",
 
@@ -388,7 +386,6 @@
   },
 
   "navHome": "Início",
-  "navProfile": "Jornada",
   "navGroups": "Grupos",
   "navSettings": "Config",
 
@@ -457,5 +454,117 @@
   "credentialsSubtitle": "Conte um pouco sobre você para personalizar sua experiência.",
   "birthDateHint": "Data de nascimento",
   "profileEditableLaterNote": "Você poderá editar isso depois.",
-  "finishButton": "Concluir"
+  "finishButton": "Concluir",
+
+  "navProgress": "Progresso",
+  "progressTitle": "Progresso",
+  "progressSubtitle": "Tudo o que você já fez",
+  "progressPeriodDay": "Dia",
+  "progressPeriodWeek": "Semana",
+  "progressPeriodMonth": "Mês",
+  "progressFocusResultLabel": "Foco neste período",
+  "progressComparisonMore": "{value} a mais que no período anterior",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonLess": "{value} a menos que no período anterior",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonSame": "Igual ao período anterior",
+  "progressComparisonFirst": "Seus primeiros dados neste período",
+  "progressStatExercises": "Exercícios",
+  "progressStatGoalsDone": "Metas concluídas",
+  "progressDistributionTitle": "Por atividade",
+  "homeTodayInline": "Hoje: {focus} de foco · {pages} páginas · {goals} metas",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": { "type": "String" },
+      "pages": { "type": "int" },
+      "goals": { "type": "int" }
+    }
+  },
+  "homePlanDayTitle": "Planejar meu dia",
+  "homePlanDaySubtitle": "Metas diárias e agenda semanal",
+  "groupsFriendsTitle": "Amigos",
+  "groupsFriendsSubtitle": "Solicitações, convites e seu código",
+  "groupMembersCount": "{count} membros",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createScheduleEntryButton": "Criar compromisso",
+  "scheduleEntryMissingFields": "Preencha título, início e término para continuar",
+  "timerSessionCounter": "Foco {current} de {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "timerExitBackToFocus": "Voltar ao foco",
+  "timerExitSaveAndEnd": "Salvar e encerrar",
+  "notesSavedNow": "Salvo agora",
+  "notesSaving": "Salvando…",
+  "dailyGoalsPendingSection": "Pendentes",
+  "dailyGoalsCompletedSection": "Concluídas",
+  "dailyGoalsEmptyTitle": "Nenhuma meta para hoje ainda",
+  "dailyGoalsEmptyDescription": "Escreva uma meta acima ou escolha uma sugestão para começar o dia.",
+  "achievementProgressValue": "{current} de {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "categoryEmptyTitle": "Nada por aqui ainda",
+  "categoryEmptyDescription": "Crie o primeiro item para começar a registrar seu foco.",
+  "scheduleEmptyExampleLabel": "Exemplo",
+
+  "progressAchievementsNextTitle": "Próxima conquista",
+  "achievementFocusHourTitle": "1 hora de foco",
+  "achievementSessionsTitle": "5 sessões concluídas",
+  "achievementStreakTitle": "7 dias seguidos",
+  "achievementReaderTitle": "100 páginas lidas",
+  "achievementGoalStartedTitle": "Primeira meta iniciada",
+  "unitMinutesShort": "{value} min",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitSessions": "{value} sessões",
+  "@unitSessions": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitDays": "{value} dias",
+  "@unitDays": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "currentUserRankNextStepNamed": "{score} para alcançar {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
+  "timerKeepAwakeNote": "A tela fica ligada durante a sessão",
+  "scheduleWeekLabel": "Semana de {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "deleteButton": "Excluir"
 }

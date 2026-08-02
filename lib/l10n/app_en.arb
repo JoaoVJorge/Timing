@@ -281,8 +281,6 @@
   "timerExitDialogContinueLater": "You can continue later.",
   "timerExitDialogConfirm": "End",
 
-  "profileTitle": "Journey",
-  "profileSubtitle": "Track your progress and key milestones",
   "editButton": "Edit",
   "nicknameFallback": "user",
 
@@ -535,7 +533,6 @@
   },
 
   "navHome": "Home",
-  "navProfile": "Journey",
   "navGroups": "Groups",
   "navSettings": "Settings",
 
@@ -607,5 +604,117 @@
   "credentialsSubtitle": "Tell us a bit about yourself to personalize your experience.",
   "birthDateHint": "Date of birth",
   "profileEditableLaterNote": "You can edit this later.",
-  "finishButton": "Finish"
+  "finishButton": "Finish",
+
+  "navProgress": "Progress",
+  "progressTitle": "Progress",
+  "progressSubtitle": "Everything you have done so far",
+  "progressPeriodDay": "Day",
+  "progressPeriodWeek": "Week",
+  "progressPeriodMonth": "Month",
+  "progressFocusResultLabel": "Focus in this period",
+  "progressComparisonMore": "{value} more than the previous period",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonLess": "{value} less than the previous period",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonSame": "Same as the previous period",
+  "progressComparisonFirst": "Your first data for this period",
+  "progressStatExercises": "Exercises",
+  "progressStatGoalsDone": "Goals done",
+  "progressDistributionTitle": "By activity",
+  "homeTodayInline": "Today: {focus} focus · {pages} pages · {goals} goals",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": { "type": "String" },
+      "pages": { "type": "int" },
+      "goals": { "type": "int" }
+    }
+  },
+  "homePlanDayTitle": "Plan my day",
+  "homePlanDaySubtitle": "Daily goals and weekly schedule",
+  "groupsFriendsTitle": "Friends",
+  "groupsFriendsSubtitle": "Requests, invites and your code",
+  "groupMembersCount": "{count} members",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createScheduleEntryButton": "Create entry",
+  "scheduleEntryMissingFields": "Fill in the title, start and end time to continue",
+  "timerSessionCounter": "Focus {current} of {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "timerExitBackToFocus": "Back to focus",
+  "timerExitSaveAndEnd": "Save and end",
+  "notesSavedNow": "Saved just now",
+  "notesSaving": "Saving…",
+  "dailyGoalsPendingSection": "Pending",
+  "dailyGoalsCompletedSection": "Completed",
+  "dailyGoalsEmptyTitle": "No goals for today yet",
+  "dailyGoalsEmptyDescription": "Write a goal above or pick one of the suggestions to start your day.",
+  "achievementProgressValue": "{current} of {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "categoryEmptyTitle": "Nothing here yet",
+  "categoryEmptyDescription": "Create your first item to start tracking focus time.",
+  "scheduleEmptyExampleLabel": "Example",
+
+  "progressAchievementsNextTitle": "Next achievement",
+  "achievementFocusHourTitle": "1 hour of focus",
+  "achievementSessionsTitle": "5 completed sessions",
+  "achievementStreakTitle": "7-day streak",
+  "achievementReaderTitle": "100 pages read",
+  "achievementGoalStartedTitle": "First goal started",
+  "unitMinutesShort": "{value} min",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitSessions": "{value} sessions",
+  "@unitSessions": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitDays": "{value} days",
+  "@unitDays": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "currentUserRankNextStepNamed": "{score} to reach {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
+  "timerKeepAwakeNote": "The screen stays on during the session",
+  "scheduleWeekLabel": "Week of {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "deleteButton": "Delete"
 }

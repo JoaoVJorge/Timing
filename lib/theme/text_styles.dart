@@ -40,6 +40,46 @@ class AppTextStyles {
 
   TextStyle get titleFont => black28;
 
+  /// Page level: one per screen, sits alone at the top.
+  TextStyle get pageTitle => TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w900,
+    color: _tokens.primary,
+    height: 1.15,
+  );
+
+  /// Section level: introduces a group of cards inside a page.
+  TextStyle get sectionTitle => TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w800,
+    color: _tokens.textBody,
+    height: 1.2,
+  );
+
+  /// Card level: the headline inside a single card or row.
+  TextStyle get cardTitle => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    color: _tokens.textBody,
+    height: 1.2,
+  );
+
+  /// Numeric readout: the figure a metric card exists to show.
+  TextStyle get metricValue => TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.w900,
+    color: _tokens.textBody,
+    height: 1.05,
+  );
+
+  /// Supporting copy: labels under numbers, hints, meta lines.
+  TextStyle get caption => TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: _tokens.textHint,
+    height: 1.25,
+  );
+
   TextStyle get bodyLarge => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
