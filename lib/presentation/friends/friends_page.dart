@@ -23,7 +23,6 @@ class FriendsPage extends StatefulWidget {
 }
 
 class _FriendsPageState extends State<FriendsPage> {
-  final TextEditingController searchController = TextEditingController();
   final SupabaseService supabaseService = Get.find();
 
   final List<_FriendProfile> requests = [];
@@ -31,33 +30,12 @@ class _FriendsPageState extends State<FriendsPage> {
   final List<_FriendProfile> friends = [];
   final Set<String> sentRequestIds = {};
   String inviteCode = "";
-  String query = "";
   bool isLoading = true;
-
-  List<_FriendProfile> get filteredFriends {
-    final String normalizedQuery = query.trim().toLowerCase();
-    if (normalizedQuery.isEmpty) {
-      return friends;
-    }
-    return friends
-        .where(
-          (friend) =>
-              friend.name.toLowerCase().contains(normalizedQuery) ||
-              friend.handle.toLowerCase().contains(normalizedQuery),
-        )
-        .toList();
-  }
 
   @override
   void initState() {
     super.initState();
     _loadSocial();
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -75,13 +53,7 @@ class _FriendsPageState extends State<FriendsPage> {
           children: [
             _Header(onInviteTap: _openAddFriendPage),
             const Gap(12),
-            _SearchField(
-              controller: searchController,
-              hint: _searchHint(context),
-              onChanged: (value) => setState(() => query = value),
-            ),
-            const Gap(14),
-            _InviteCodeCard(
+            _InviteCodeDisclosure(
               code: inviteCode.isEmpty ? "..." : inviteCode,
               onCopy: () => _copyInviteCode(context),
               onShare: () => _shareInviteCode(context),
@@ -99,9 +71,8 @@ class _FriendsPageState extends State<FriendsPage> {
               ),
               const Gap(18),
               _FriendsSection(
-                friends: filteredFriends,
+                friends: friends,
                 totalFriends: friends.length,
-                query: query,
                 onShare: () => _shareInviteCode(context),
               ),
             ],
@@ -433,13 +404,6 @@ class _FriendsPageState extends State<FriendsPage> {
     }
     return "HelpOut User";
   }
-
-  static String _searchHint(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Buscar por nombre o @usuario",
-        "pt" => "Buscar por nome ou @usuário",
-        _ => "Search by name or @username",
-      };
 
   static String _copied(BuildContext context) => switch (context.languageCode) {
     "es" => "Código copiado",
@@ -1681,49 +1645,81 @@ class SimpleEmptyState extends StatelessWidget {
   );
 }
 
-class _SearchField extends StatelessWidget {
-  const _SearchField({
-    required this.controller,
-    required this.hint,
-    required this.onChanged,
+class _InviteCodeDisclosure extends StatefulWidget {
+  const _InviteCodeDisclosure({
+    required this.code,
+    required this.onCopy,
+    required this.onShare,
   });
 
-  final TextEditingController controller;
-  final String hint;
-  final ValueChanged<String> onChanged;
+  final String code;
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 46,
-    padding: const EdgeInsets.symmetric(horizontal: 14),
-    decoration: _surfaceDecoration(radius: 18),
-    child: Row(
-      children: [
-        const Icon(Icons.search_rounded, color: _socialMuted, size: 21),
-        const Gap(10),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            onChanged: onChanged,
-            textInputAction: TextInputAction.search,
-            style: context.textStyles.bodyMedium.copyWith(
-              color: _socialText,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: context.textStyles.bodyMedium.copyWith(
-                color: _socialMuted,
-                fontWeight: FontWeight.w600,
+  State<_InviteCodeDisclosure> createState() => _InviteCodeDisclosureState();
+}
+
+class _InviteCodeDisclosureState extends State<_InviteCodeDisclosure> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      BounceTap(
+        onTap: () => setState(() => isExpanded = !isExpanded),
+        pressedScale: 0.98,
+        child: Container(
+          height: 46,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: _surfaceDecoration(radius: 18),
+          child: Row(
+            children: [
+              Icon(
+                Icons.qr_code_rounded,
+                color: context.colorTokens.primary,
+                size: 21,
               ),
-              isDense: true,
-            ),
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  _label(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: _socialText,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              AnimatedRotation(
+                turns: isExpanded ? 0.5 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: _socialMuted,
+                ),
+              ),
+            ],
           ),
         ),
+      ),
+      if (isExpanded) ...[
+        const Gap(10),
+        _InviteCodeCard(
+          code: widget.code,
+          onCopy: widget.onCopy,
+          onShare: widget.onShare,
+        ),
       ],
-    ),
+    ],
   );
+
+  String _label(BuildContext context) => switch (context.languageCode) {
+    "es" => "Mi codigo",
+    "pt" => "Meu codigo",
+    _ => "My code",
+  };
 }
 
 class _InviteCodeCard extends StatelessWidget {
@@ -1905,13 +1901,11 @@ class _FriendsSection extends StatelessWidget {
   const _FriendsSection({
     required this.friends,
     required this.totalFriends,
-    required this.query,
     required this.onShare,
   });
 
   final List<_FriendProfile> friends;
   final int totalFriends;
-  final String query;
   final VoidCallback onShare;
 
   @override
@@ -1920,11 +1914,11 @@ class _FriendsSection extends StatelessWidget {
     children: [
       _SectionHeader(
         title: _title(context, totalFriends),
-        action: friends.isEmpty ? null : _seeAll(context),
+        action: friends.length > 5 ? _seeAll(context) : null,
       ),
       const Gap(12),
       if (friends.isEmpty)
-        _EmptyFriendsCard(hasQuery: query.trim().isNotEmpty, onShare: onShare)
+        _EmptyFriendsCard(onShare: onShare)
       else
         Container(
           decoration: _surfaceDecoration(radius: 18),
@@ -1987,8 +1981,6 @@ class _FriendRow extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const Gap(8),
-        const Icon(Icons.more_vert_rounded, color: _socialMuted, size: 20),
       ],
     ),
   );
@@ -2006,9 +1998,8 @@ class _FriendRow extends StatelessWidget {
 }
 
 class _EmptyFriendsCard extends StatelessWidget {
-  const _EmptyFriendsCard({required this.hasQuery, required this.onShare});
+  const _EmptyFriendsCard({required this.onShare});
 
-  final bool hasQuery;
   final VoidCallback onShare;
 
   @override
@@ -2034,7 +2025,7 @@ class _EmptyFriendsCard extends StatelessWidget {
         ),
         const Gap(14),
         Text(
-          hasQuery ? _notFoundTitle(context) : _emptyTitle(context),
+          _emptyTitle(context),
           textAlign: TextAlign.center,
           style: context.textStyles.extraBold20.copyWith(
             color: _socialText,
@@ -2043,17 +2034,15 @@ class _EmptyFriendsCard extends StatelessWidget {
         ),
         const Gap(6),
         Text(
-          hasQuery ? _notFoundSubtitle(context) : _emptySubtitle(context),
+          _emptySubtitle(context),
           textAlign: TextAlign.center,
           style: context.textStyles.bodyMedium.copyWith(
             color: _socialMuted,
             height: 1.28,
           ),
         ),
-        if (!hasQuery) ...[
-          const Gap(18),
-          _ShareButton(onTap: onShare, label: _shareLabel(context)),
-        ],
+        const Gap(18),
+        _ShareButton(onTap: onShare, label: _shareLabel(context)),
       ],
     ),
   );
@@ -2069,19 +2058,6 @@ class _EmptyFriendsCard extends StatelessWidget {
     "pt" => "Busque pessoas acima ou compartilhe seu código de convite.",
     _ => "Search people above or share your invite code.",
   };
-
-  String _notFoundTitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Nadie encontrado",
-    "pt" => "Ninguém encontrado",
-    _ => "No one found",
-  };
-
-  String _notFoundSubtitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Intenta buscar por otro nombre o @usuario.",
-        "pt" => "Tente buscar por outro nome ou @usuário.",
-        _ => "Try another name or @username.",
-      };
 
   String _shareLabel(BuildContext context) => switch (context.languageCode) {
     "es" => "Compartir código",
