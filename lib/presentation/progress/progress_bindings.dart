@@ -1,11 +1,11 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/profile/profile_controller.dart";
+import "package:help_out/presentation/progress/progress_controller.dart";
 
-class ProfileBindings extends Bindings {
+class ProgressBindings extends Bindings {
   @override
   void dependencies() {
-    Get.put<ProfileController>(
-      ProfileController(
+    Get.put<ProgressController>(
+      ProgressController(
         getProfileStatsUseCase: Get.find(),
         getDailyTasksUseCase: Get.find(),
         dailyProgressService: Get.find(),

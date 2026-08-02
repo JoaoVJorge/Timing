@@ -1,19 +1,25 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/home/home_controller.dart";
-import "package:help_out/presentation/home/widgets/category_card.dart";
 import "package:help_out/presentation/home/widgets/home_action_card.dart";
+import "package:help_out/presentation/home/widgets/home_activity_grid.dart";
 import "package:help_out/presentation/home/widgets/home_agenda_card.dart";
-import "package:help_out/presentation/home/widgets/home_today_summary.dart";
+import "package:help_out/presentation/home/widgets/home_day_summary_line.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/functions/format_relative_time.dart";
 import "package:help_out/shared/functions/format_schedule_time.dart";
+import "package:help_out/shared/widgets/app_nav_row.dart";
+import "package:help_out/shared/widgets/app_section_header.dart";
+import "package:help_out/theme/app_spacing.dart";
 
+/// Answers "what should I do now?" and, right below it, "what am I doing
+/// today?". Historical statistics live on Progress.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -24,71 +30,85 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.fromLTRB(
-          16,
-          32 + context.mediaQuery.padding.top,
-          16,
+          AppSpacing.page,
+          AppSpacing.betweenSections + context.mediaQuery.padding.top,
+          AppSpacing.page,
           0,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(
-              () => Text(
-                controller.userName.value.isEmpty
-                    ? context.l10n.homeGreetingDefault
-                    : context.l10n.homeGreetingWithName(
-                        capitalizeName(controller.userName.value),
-                      ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.extraBold24.copyWith(
-                  color: context.colorTokens.primary,
-                ),
-              ),
-            ),
-            const Gap(4),
-            Obx(
-              () => Text(
-                _subtitle(context, controller),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: context.colorTokens.textHint,
-                ),
-              ),
-            ),
-            const Gap(12),
+            const _Greeting(),
+            const Gap(AppSpacing.betweenSections - 4),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(
+                  bottom: AppSpacing.betweenSections,
+                ),
                 children: [
                   const _HomeActionCardSection(),
-                  const Gap(12),
-                  _SectionHeader(context.l10n.homeSummaryTitle),
-                  const Gap(12),
-                  Obx(
-                    () => HomeTodaySummary(
-                      items: _summaryItems(context, controller),
-                    ),
-                  ),
-                  const Gap(12),
+                  const Gap(AppSpacing.betweenRelated),
                   Obx(
                     () => HomeAgendaCard(
                       entries: controller.todayScheduleEntries,
                       onTapSchedule: controller.onTapSchedule,
-                      onAddEntry: controller.onAddScheduleEntry,
                     ),
                   ),
-                  const Gap(24),
-                  _SectionHeader(context.l10n.homeCategoriesSection),
-                  const Gap(12),
+                  const Gap(AppSpacing.betweenSections),
+                  AppSectionHeader(
+                    title: context.l10n.homePlanDayTitle,
+                    description: context.l10n.homePlanDaySubtitle,
+                  ),
+                  const Gap(AppSpacing.betweenRelated),
+                  const _PlanDayRows(),
+                  const Gap(AppSpacing.betweenSections),
+                  AppSectionHeader(title: context.l10n.homeCategoriesSection),
+                  const Gap(AppSpacing.betweenRelated),
                   const _HomeActivitiesSection(),
+                  const Gap(AppSpacing.betweenSections),
+                  const _DaySummary(),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Greeting extends StatelessWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context) {
+    final HomeController controller = Get.find();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Obx(
+          () => Text(
+            controller.userName.value.isEmpty
+                ? context.l10n.homeGreetingDefault
+                : context.l10n.homeGreetingWithName(
+                    capitalizeName(controller.userName.value),
+                  ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.pageTitle,
+          ),
+        ),
+        const Gap(AppSpacing.titleToDescription),
+        Obx(
+          () => Text(
+            _subtitle(context, controller),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.caption,
+          ),
+        ),
+      ],
     );
   }
 
@@ -108,45 +128,6 @@ class HomePage extends StatelessWidget {
     }
     return context.l10n.homeSubtitleStart;
   }
-
-  List<({IconData icon, String value, String label})> _summaryItems(
-    BuildContext context,
-    HomeController controller,
-  ) {
-    final progress = controller.todayProgress.value;
-    return [
-      (
-        icon: Icons.schedule_rounded,
-        value: formatDurationLong(Duration(seconds: progress.focusSeconds)),
-        label: context.l10n.homeSummaryFocus,
-      ),
-      (
-        icon: Icons.track_changes_rounded,
-        value: "${controller.goalsDoneToday}/${controller.goalsTotal}",
-        label: context.l10n.homeSummaryGoals,
-      ),
-      (
-        icon: Icons.description_rounded,
-        value: "${progress.pages}",
-        label: context.l10n.homeSummaryPages,
-      ),
-      (
-        icon: Icons.trending_up_rounded,
-        value: "${progress.sessions}",
-        label: context.l10n.homeSummarySessions,
-      ),
-    ];
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) =>
-      Text(title, style: context.textStyles.extraBold20);
 }
 
 class _HomeActionCardSection extends StatelessWidget {
@@ -189,57 +170,98 @@ class _HomeActionCardSection extends StatelessWidget {
   });
 }
 
+/// Planning shortcuts. Daily goals are not an activity to track, they are
+/// something you decide beforehand, so they sit here and not in the grid.
+class _PlanDayRows extends StatelessWidget {
+  const _PlanDayRows();
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final HomeController controller = Get.find();
+
+    return AppNavRowGroup(
+      rows: [
+        AppNavRow(
+          icon: Icons.task_alt_rounded,
+          title: context.l10n.homeTasksSection,
+          subtitle: controller.goalsTotal > 0
+              ? context.l10n.homeGoalsProgress(
+                  controller.goalsDoneToday,
+                  controller.goalsTotal,
+                )
+              : context.l10n.dailyGoalsEmptyTitle,
+          onTap: controller.onTapDailyGoals,
+        ),
+        AppNavRow(
+          icon: Icons.calendar_month_rounded,
+          title: context.l10n.myScheduleTitle,
+          subtitle: context.l10n.homePlanDaySubtitle,
+          onTap: controller.onTapSchedule,
+        ),
+      ],
+    );
+  });
+}
+
 class _HomeActivitiesSection extends StatelessWidget {
   const _HomeActivitiesSection();
 
   @override
   Widget build(BuildContext context) => Obx(() {
     final HomeController controller = Get.find();
-    return Column(
-      children: [
-        for (final TimeCategoryType category in TimeCategoryType.values) ...[
-          CategoryCard(
-            iconName: category.iconName,
+
+    return HomeActivityGrid(
+      activities: [
+        for (final TimeCategoryType category in TimeCategoryType.values)
+          (
+            category: category,
             label: category.localizedLabel(context),
-            subtitle: _categorySubtitle(context, controller, category),
-            onTap: () => controller.onTapCategory(category),
+            value: _categoryValue(context, controller, category),
+            meta: _categoryMeta(context, controller, category),
           ),
-          const Gap(12),
-          if (category == TimeCategoryType.studying)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: CategoryCard(
-                iconName: "trophy",
-                label: context.l10n.homeTasksSection,
-                subtitle: controller.goalsTotal > 0
-                    ? context.l10n.homeGoalsProgress(
-                        controller.goalsDoneToday,
-                        controller.goalsTotal,
-                      )
-                    : context.l10n.homeCategoryEmpty,
-                onTap: controller.onTapDailyGoals,
-              ),
-            ),
-        ],
       ],
+      onTapActivity: controller.onTapCategory,
     );
   });
 
-  String _categorySubtitle(
+  String _categoryValue(
     BuildContext context,
     HomeController controller,
     TimeCategoryType category,
   ) {
     if (category == TimeCategoryType.reading) {
-      final int pages = controller.pagesIn(category);
-      return pages > 0
-          ? context.l10n.metricPagesValue(pages)
-          : context.l10n.homeCategoryEmpty;
+      return context.l10n.metricPagesValue(controller.pagesIn(category));
     }
-    return controller.hasSubjectsIn(category)
-        ? formatDurationLong(
-            Duration(seconds: controller.focusSecondsIn(category)),
-          )
-        : context.l10n.homeCategoryEmpty;
+    return formatDurationLong(
+      Duration(seconds: controller.focusSecondsIn(category)),
+    );
   }
+
+  String _categoryMeta(
+    BuildContext context,
+    HomeController controller,
+    TimeCategoryType category,
+  ) {
+    final SubjectEntity? top = controller.topSubjectIn(category);
+    return top == null
+        ? context.l10n.homeCategoryEmpty
+        : capitalizeName(top.name);
+  }
+}
+
+class _DaySummary extends StatelessWidget {
+  const _DaySummary();
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final HomeController controller = Get.find();
+
+    return HomeDaySummaryLine(
+      focus: formatDurationLong(
+        Duration(seconds: controller.todayProgress.value.focusSeconds),
+      ),
+      pages: controller.todayProgress.value.pages,
+      goals: controller.goalsDoneToday,
+    );
+  });
 }

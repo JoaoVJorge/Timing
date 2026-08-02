@@ -50,8 +50,13 @@ class AppScaffold extends StatelessWidget {
           ),
           if (bottomBar != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: Center(child: bottomBar!),
+              padding: const EdgeInsets.fromLTRB(
+                AppUiConstants.pagePadding,
+                12,
+                AppUiConstants.pagePadding,
+                16,
+              ),
+              child: bottomBar!,
             ),
         ],
       ),

@@ -1,14 +1,11 @@
 {
   "@@locale": "es",
-
   "appTitle": "HelpOut",
   "genericErrorMessage": "Algo salió mal. Inténtalo de nuevo más tarde.",
-
   "loginHeadline": "Empecemos",
   "loginSubtitle": "Inicia sesión para continuar tus estudios y organizar tu rutina.",
   "loginNameHint": "Tu nombre",
   "loginButton": "Empecemos",
-
   "homeGreetingDefault": "Hola",
   "homeGreetingWithName": "Hola, {userName}",
   "homeSubtitle": "¿Qué haremos hoy?",
@@ -35,7 +32,6 @@
   "homeTodayAgendaTitle": "Agenda de hoy",
   "homeNextScheduleEmpty": "Sin horario hoy",
   "homeNextScheduleAdd": "Agregar horario",
-
   "addTaskButton": "Añadir meta",
   "createTaskTitle": "Nueva meta",
   "taskNameHint": "Nombre de la meta",
@@ -44,31 +40,26 @@
   "targetDaysHint": "Objetivo personalizado",
   "taskDaysProgress": "{completed}/{target} días",
   "taskCompletedLabel": "¡Completada!",
-
   "lastActivityLabel": "Última actividad",
   "lastActivityNone": "Nada aún — ¡empieza algo!",
   "lastActivityJustNow": "justo ahora",
   "lastActivityMinutesAgo": "hace {minutes} min",
   "lastActivityHoursAgo": "hace {hours} h",
   "lastActivityDaysAgo": "hace {days} d",
-
   "categoryStudying": "Estudios",
   "categoryExercises": "Ejercicio",
   "categoryReading": "Lectura",
   "categoryHobbies": "Hobbies",
-
   "itemNounStudying": "Materia",
   "itemNounExercises": "Ejercicio",
   "itemNounReading": "Libro",
   "itemNounHobbies": "Hobby",
-
   "iconLabel": "Icono",
   "restTimeLabel": "Tiempo de descanso",
   "restMinutesChip": "{minutes} min",
   "timeUnitHoursSuffix": "h",
   "timeUnitMinutesSuffix": "min",
   "wallpaperLabel": "Fondo del timer",
-
   "addItemButton": "Añadir {itemNoun}",
   "itemNameHint": "Nombre de {itemNoun}",
   "colorLabel": "Color",
@@ -78,7 +69,6 @@
   "cancelButton": "Cancelar",
   "confirmButton": "Confirmar",
   "addButton": "Añadir",
-
   "createSubjectTitleStudying": "Nueva materia",
   "createSubjectTitleReading": "Nueva lectura",
   "createSubjectTitleExercises": "Nueva actividad física",
@@ -114,7 +104,11 @@
   "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
   "createSubjectPagesValue": "{value} páginas",
   "@createSubjectPagesValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
   "createSubjectColorSemantic": "Color {index}",
   "createSubjectButtonStudying": "Crear materia",
@@ -128,12 +122,10 @@
   "createSubjectSuccessReading": "Lectura creada correctamente",
   "createSubjectSuccessExercises": "Actividad creada correctamente",
   "createSubjectSuccessHobbies": "Hobby creado correctamente",
-
   "pagesProgress": "{currentPages} de {goalPages} páginas",
   "pagesReadOnly": "{currentPages} páginas leídas",
   "pagesReadNowHint": "Páginas leídas ahora",
   "logPagesButton": "Registrar páginas",
-
   "notesLabel": "Notas",
   "notesHint": "Escribe tus notas aquí...",
   "saveNotesButton": "Guardar",
@@ -141,13 +133,15 @@
   "notesPageCounter": "Página {currentPage} de {pageCount}",
   "@notesPageCounter": {
     "placeholders": {
-      "currentPage": {"type": "int"},
-      "pageCount": {"type": "int"}
+      "currentPage": {
+        "type": "int"
+      },
+      "pageCount": {
+        "type": "int"
+      }
     }
   },
-
   "durationProgress": "{duration} de {goalDuration}",
-
   "timerTotalLabel": "Total: {duration}",
   "timerNextBreakLabel": "Próximo descanso en {duration}",
   "timerRestingLabel": "Descansando — vuelve en {duration}",
@@ -181,23 +175,17 @@
   "timerExitDialogCancel": "Continuar",
   "timerExitDialogContinueLater": "Podrás continuar después.",
   "timerExitDialogConfirm": "Cerrar",
-
-  "profileTitle": "Jornada",
-  "profileSubtitle": "Sigue tu evolución y tus principales hitos",
   "editButton": "Editar",
   "nicknameFallback": "usuario",
-
   "profileSummaryLabel": "Resumen total",
   "profileSummarySinceStartLabel": "Desde el inicio",
   "profileSummaryAccumulatedFocus": "{duration} de enfoque acumulado",
   "profileSummaryFocusLabel": "Tiempo total de enfoque",
   "profileSummaryFocusDescription": "Estudio, ejercicio y hobbies",
-
   "statHoursStudied": "Estudio",
   "statHoursExercised": "Ejercicio",
   "statPagesRead": "Páginas leídas",
   "statTopSubject": "Más estudiada",
-
   "profileStatTimeEmptyTitle": "Comienza tu primer enfoque",
   "profileStatTimeEmptyDescription": "Tu tiempo aparecerá aquí",
   "profileStatExerciseEmptyTitle": "Aún sin ejercicio",
@@ -206,7 +194,6 @@
   "profileStatReadingEmptyDescription": "Registra tu primera lectura",
   "profileTopSubjectEmptyTitle": "Aún ninguna",
   "profileTopSubjectEmptyDescription": "Estudia una materia para destacarla aquí",
-
   "profileEmptyTitle": "Tu progreso empieza aquí",
   "profileEmptyDescription": "Inicia una sesión, registra una lectura o crea una meta desde Inicio para seguir tu evolución en HelpOut.",
   "profileEmptyGuidance": "Después de eso, tu tiempo total, actividades principales y lecturas destacadas aparecerán aquí.",
@@ -215,7 +202,6 @@
   "profileShortcutCreateSubject": "Crear materia",
   "profileShortcutCreateGoal": "Crear meta",
   "profileShortcutAddSchedule": "Agregar horario",
-
   "profileEvolutionTitle": "Tu progreso",
   "profileEvolutionFocus": "Acumulaste {duration} de enfoque.",
   "profileEvolutionTopSubject": "Tu materia más estudiada es {name}.",
@@ -236,16 +222,13 @@
   "periodWeek": "1 semana",
   "periodMonth": "1 mes",
   "periodTotal": "Total",
-
   "profileAgendaTitle": "Agenda de hoy",
   "profileAgendaEmptyTitle": "Sin horarios planeados",
   "profileAgendaEmptyDescription": "Agrega bloques para organizar tu rutina.",
   "profileAgendaAddButton": "Agregar horario",
-
   "profileTopReadingTitle": "Lecturas principales",
   "profileTopReadingEmptyTitle": "Sin lecturas registradas",
   "profileTopReadingEmptyDescription": "Registra páginas leídas para ver aquí tus temas principales.",
-
   "groupsTitle": "Grupos",
   "groupsSubtitle": "Compara tu progreso con amigos",
   "noGroupSelected": "Ningún grupo seleccionado todavía.",
@@ -278,7 +261,6 @@
   "leaderboardTopPosition": "lidera este ranking",
   "leaderboardDifferenceAhead": "+{value} por delante",
   "groupCreatedSuccess": "Grupo creado correctamente",
-
   "settingsTitle": "Configuración",
   "settingsSubtitle": "Ajusta tu cuenta y preferencias",
   "myProfileFallback": "Mi Perfil",
@@ -317,11 +299,9 @@
   "sessionSection": "Sesión",
   "logOutLabel": "Cerrar sesión",
   "logOutSettingsSubtitle": "Cerrar sesión en este dispositivo",
-
   "logOutDialogTitle": "¿Cerrar sesión?",
   "logOutDialogContent": "Tendrás que iniciar sesión de nuevo para acceder a esta cuenta en este dispositivo. Tus datos locales de estudio se mantendrán.",
   "logOutConfirmButton": "Cerrar sesión",
-
   "myProfileTitle": "Mi Perfil",
   "avatarLabel": "Avatar",
   "nameLabel": "Nombre",
@@ -336,7 +316,6 @@
   "profileSavedMessage": "Perfil guardado",
   "profilePhotoSelectLabel": "Agregar foto",
   "profilePhotoRemoveLabel": "Quitar foto",
-
   "faqTitle": "Preguntas frecuentes",
   "faqQ1": "¿Cómo funciona el temporizador de estudio?",
   "faqA1": "Elige una materia, pulsa play, y el temporizador registra tu sesión actual, sumándola al tiempo total de esa materia. Pulsa pausa en cualquier momento para detenerte y guardar tu progreso.",
@@ -348,7 +327,6 @@
   "faqA4": "Los grupos muestran una clasificación basada en el tema: horas de enfoque, días de metas completadas o páginas leídas. Cambia entre Hoy, Semana y Mes para comparar el progreso.",
   "faqQ5": "¿Puedo cambiar el tema de colores de la app?",
   "faqA5": "Sí, ve a Configuración > Mi Perfil y elige cualquier color de tema. Cada gradiente, botón y detalle de la app se actualiza para combinar, incluido el modo oscuro.",
-
   "createGroupTitle": "Nuevo grupo",
   "createGroupSubtitle": "Elige un tema e invita amigos",
   "groupNameLabel": "Nombre del grupo",
@@ -377,21 +355,25 @@
   "createGroupRequirementTheme": "Tema elegido",
   "createGroupRequirementFriends": "Al menos 1 amigo",
   "groupPrivacyNote": "Tus amigos solo verán tu nombre, avatar y progreso en este tema.",
-
   "metricDaysValue": "{value} días",
   "@metricDaysValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
   "metricPagesValue": "{value} páginas",
   "@metricPagesValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
-
   "navHome": "Inicio",
-  "navProfile": "Jornada",
   "navGroups": "Grupos",
   "navSettings": "Ajustes",
-
   "myScheduleCardTitle": "Tu Agenda",
   "myScheduleTitle": "Tu Agenda",
   "noScheduleYet": "Todavía no hay horarios",
@@ -404,21 +386,37 @@
   "schedulePreviewSection": "Vista previa",
   "scheduleDurationLabel": "Duración: {duration}",
   "@scheduleDurationLabel": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "scheduleDurationMinutes": "{minutes} min",
   "@scheduleDurationMinutes": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "scheduleDurationHours": "{hours}h",
   "@scheduleDurationHours": {
-    "placeholders": { "hours": { "type": "int" } }
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
   "@scheduleDurationHoursMinutes": {
     "placeholders": {
-      "hours": { "type": "int" },
-      "minutes": { "type": "int" }
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "scheduleTitleHint": "Título",
@@ -429,11 +427,9 @@
   "nameRequiredError": "Ingresa un nombre primero.",
   "groupThemeRequiredError": "Elige un tema para tu grupo.",
   "groupNeedsFriendError": "Invita al menos a un amigo — un grupo no puede crearse solo.",
-
   "continueWithGoogleButton": "Continuar con Google",
   "continueWithAppleButton": "Continuar con Apple",
   "continueWithPhoneButton": "Continuar con el teléfono",
-
   "phoneLoginTitle": "Tu número",
   "phoneLoginSubtitle": "Ingresa tu teléfono para recibir un código de acceso.",
   "sendCodeButton": "Enviar código",
@@ -441,21 +437,163 @@
   "selectCountryTitle": "Selecciona el país",
   "searchCountryHint": "Buscar país",
   "otpCodeExpired": "Código expirado. Reenvíalo para recibir uno nuevo.",
-
   "otpTitle": "Verifica tu número",
   "otpSubtitle": "Ingresa el código de 6 dígitos que enviamos a {phone}.",
   "verifyCodeButton": "Verificar",
   "resendCodeButton": "Reenviar código",
   "otpCodeValidFor": "Código válido por {time}",
   "@otpCodeValidFor": {
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "codeResentMessage": "Código de verificación enviado",
   "invalidCodeError": "Código no válido. Inténtalo de nuevo.",
-
   "credentialsTitle": "Crea tu perfil",
   "credentialsSubtitle": "Cuéntanos un poco sobre ti para personalizar tu experiencia.",
   "birthDateHint": "Fecha de nacimiento",
   "profileEditableLaterNote": "Podrás editar esto después.",
-  "finishButton": "Finalizar"
+  "finishButton": "Finalizar",
+  "navProgress": "Progreso",
+  "progressTitle": "Progreso",
+  "progressSubtitle": "Todo lo que ya hiciste",
+  "progressPeriodDay": "Día",
+  "progressPeriodWeek": "Semana",
+  "progressPeriodMonth": "Mes",
+  "progressFocusResultLabel": "Enfoque en este período",
+  "progressComparisonMore": "{value} más que en el período anterior",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "progressComparisonLess": "{value} menos que en el período anterior",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "progressComparisonSame": "Igual que el período anterior",
+  "progressComparisonFirst": "Tus primeros datos en este período",
+  "progressStatExercises": "Ejercicios",
+  "progressStatGoalsDone": "Metas cumplidas",
+  "progressDistributionTitle": "Por actividad",
+  "homeTodayInline": "Hoy: {focus} de enfoque · {pages} páginas · {goals} metas",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "goals": {
+        "type": "int"
+      }
+    }
+  },
+  "homePlanDayTitle": "Planear mi día",
+  "homePlanDaySubtitle": "Metas diarias y agenda semanal",
+  "groupsFriendsTitle": "Amigos",
+  "groupsFriendsSubtitle": "Solicitudes, invitaciones y tu código",
+  "groupMembersCount": "{count} miembros",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createScheduleEntryButton": "Crear compromiso",
+  "scheduleEntryMissingFields": "Completa título, inicio y fin para continuar",
+  "timerSessionCounter": "Enfoque {current} de {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "timerExitBackToFocus": "Volver al enfoque",
+  "timerExitSaveAndEnd": "Guardar y terminar",
+  "notesSavedNow": "Guardado ahora",
+  "notesSaving": "Guardando…",
+  "dailyGoalsPendingSection": "Pendientes",
+  "dailyGoalsCompletedSection": "Completadas",
+  "dailyGoalsEmptyTitle": "Aún no hay metas para hoy",
+  "dailyGoalsEmptyDescription": "Escribe una meta arriba o elige una sugerencia para empezar el día.",
+  "achievementProgressValue": "{current} de {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryEmptyTitle": "Nada por aquí todavía",
+  "categoryEmptyDescription": "Crea tu primer elemento para empezar a registrar tu enfoque.",
+  "scheduleEmptyExampleLabel": "Ejemplo",
+  "progressAchievementsNextTitle": "Próximo logro",
+  "achievementFocusHourTitle": "1 hora de enfoque",
+  "achievementSessionsTitle": "5 sesiones completadas",
+  "achievementStreakTitle": "7 días seguidos",
+  "achievementReaderTitle": "100 páginas leídas",
+  "achievementGoalStartedTitle": "Primera meta iniciada",
+  "unitMinutesShort": "{value} min",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "unitSessions": "{value} sesiones",
+  "@unitSessions": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "unitDays": "{value} días",
+  "@unitDays": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "currentUserRankNextStepNamed": "{score} para alcanzar a {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "timerKeepAwakeNote": "La pantalla permanece encendida durante la sesión",
+  "scheduleWeekLabel": "Semana del {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteButton": "Eliminar"
 }

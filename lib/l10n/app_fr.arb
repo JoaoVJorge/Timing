@@ -537,8 +537,6 @@
   "timerExitDialogCancel": "Continuer",
   "timerExitDialogContinueLater": "Vous pourrez continuer plus tard.",
   "timerExitDialogConfirm": "Fin",
-  "profileTitle": "Voyage",
-  "profileSubtitle": "Suivez vos progrès et les étapes clés",
   "editButton": "Modifier",
   "nicknameFallback": "utilisateur",
   "profileSummaryLabel": "Résumé total",
@@ -722,7 +720,6 @@
   "metricDaysValue": "{value} jours",
   "metricPagesValue": "{value} pages",
   "navHome": "Accueil",
-  "navProfile": "Voyage",
   "navGroups": "Groupes",
   "navSettings": "Paramètres",
   "myScheduleCardTitle": "Mon emploi du temps",
@@ -768,5 +765,117 @@
   "credentialsSubtitle": "Parlez-nous un peu de vous pour personnaliser votre expérience.",
   "birthDateHint": "Date de naissance",
   "profileEditableLaterNote": "Vous pourrez le modifier plus tard.",
-  "finishButton": "Terminer"
+  "finishButton": "Terminer",
+
+  "navProgress": "Progression",
+  "progressTitle": "Progression",
+  "progressSubtitle": "Tout ce que vous avez déjà fait",
+  "progressPeriodDay": "Jour",
+  "progressPeriodWeek": "Semaine",
+  "progressPeriodMonth": "Mois",
+  "progressFocusResultLabel": "Concentration sur cette période",
+  "progressComparisonMore": "{value} de plus que la période précédente",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonLess": "{value} de moins que la période précédente",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonSame": "Identique à la période précédente",
+  "progressComparisonFirst": "Vos premières données sur cette période",
+  "progressStatExercises": "Exercices",
+  "progressStatGoalsDone": "Objectifs atteints",
+  "progressDistributionTitle": "Par activité",
+  "homeTodayInline": "Aujourd'hui : {focus} de focus · {pages} pages · {goals} objectifs",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": { "type": "String" },
+      "pages": { "type": "int" },
+      "goals": { "type": "int" }
+    }
+  },
+  "homePlanDayTitle": "Planifier ma journée",
+  "homePlanDaySubtitle": "Objectifs quotidiens et agenda hebdomadaire",
+  "groupsFriendsTitle": "Amis",
+  "groupsFriendsSubtitle": "Demandes, invitations et votre code",
+  "groupMembersCount": "{count} membres",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createScheduleEntryButton": "Créer le créneau",
+  "scheduleEntryMissingFields": "Renseignez le titre, le début et la fin pour continuer",
+  "timerSessionCounter": "Focus {current} sur {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "timerExitBackToFocus": "Revenir au focus",
+  "timerExitSaveAndEnd": "Enregistrer et terminer",
+  "notesSavedNow": "Enregistré à l'instant",
+  "notesSaving": "Enregistrement…",
+  "dailyGoalsPendingSection": "En cours",
+  "dailyGoalsCompletedSection": "Terminés",
+  "dailyGoalsEmptyTitle": "Aucun objectif pour aujourd'hui",
+  "dailyGoalsEmptyDescription": "Écrivez un objectif ci-dessus ou choisissez une suggestion pour commencer la journée.",
+  "achievementProgressValue": "{current} sur {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "categoryEmptyTitle": "Rien ici pour l'instant",
+  "categoryEmptyDescription": "Créez votre premier élément pour commencer à suivre votre concentration.",
+  "scheduleEmptyExampleLabel": "Exemple",
+
+  "progressAchievementsNextTitle": "Prochain succès",
+  "achievementFocusHourTitle": "1 heure de concentration",
+  "achievementSessionsTitle": "5 sessions terminées",
+  "achievementStreakTitle": "7 jours d'affilée",
+  "achievementReaderTitle": "100 pages lues",
+  "achievementGoalStartedTitle": "Premier objectif lancé",
+  "unitMinutesShort": "{value} min",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitSessions": "{value} sessions",
+  "@unitSessions": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitDays": "{value} jours",
+  "@unitDays": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "currentUserRankNextStepNamed": "{score} pour rattraper {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
+  "timerKeepAwakeNote": "L'écran reste allumé pendant la session",
+  "scheduleWeekLabel": "Semaine du {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "deleteButton": "Supprimer"
 }
