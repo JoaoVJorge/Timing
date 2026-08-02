@@ -1,4 +1,4 @@
-import "dart:convert";
+import "dart:typed_data";
 
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
@@ -228,7 +228,7 @@ class _ProfilePhotoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Obx(() {
-    final String? photoBase64 = controller.profilePhotoBase64.value;
+    final Uint8List? photoBytes = controller.profilePhotoBytes;
 
     return SizedBox(
       width: 100,
@@ -237,23 +237,32 @@ class _ProfilePhotoPreview extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: photoBase64 == null
-                    ? context.colorTokens.primaryGradient
-                    : null,
-                shape: BoxShape.circle,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: photoBase64 == null
-                  ? Icon(
-                      AppAvatarPresets.byIndex(
-                        controller.avatarIconIndex.value,
+            child: BounceTap(
+              onTap: controller.onTapSelectPhoto,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: photoBytes == null
+                      ? context.colorTokens.primaryGradient
+                      : null,
+                  shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: photoBytes == null
+                    ? Icon(
+                        AppAvatarPresets.byIndex(
+                          controller.avatarIconIndex.value,
+                        ),
+                        color: Colors.white,
+                        size: 44,
+                      )
+                    : Image.memory(
+                        photoBytes,
+                        fit: BoxFit.cover,
+                        cacheWidth:
+                            (100 * MediaQuery.devicePixelRatioOf(context))
+                                .round(),
                       ),
-                      color: Colors.white,
-                      size: 44,
-                    )
-                  : Image.memory(base64Decode(photoBase64), fit: BoxFit.cover),
+              ),
             ),
           ),
           Positioned(

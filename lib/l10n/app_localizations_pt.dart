@@ -560,7 +560,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get editButton => 'Editar';
 
   @override
-  String get nicknameFallback => 'usuario';
+  String get nicknameFallback => 'usuário';
 
   @override
   String get profileSummaryLabel => 'Resumo total';

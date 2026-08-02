@@ -4,8 +4,8 @@ import "package:get/get.dart";
 import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/schedule/schedule_controller.dart";
+import "package:help_out/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
-import "package:help_out/presentation/schedule/widgets/weekday_selector.dart";
 import "package:help_out/shared/widgets/app_empty_state.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
@@ -33,9 +33,9 @@ class SchedulePage extends StatelessWidget {
           const _WeekLabel(),
           const Gap(AppSpacing.titleToDescription),
           Obx(
-            () => WeekdaySelector(
-              selectedWeekday: controller.selectedWeekday.value,
-              onSelectWeekday: controller.onSelectWeekday,
+            () => ScheduleDateStrip(
+              selectedDate: controller.selectedDate.value,
+              onSelectDate: controller.onSelectDate,
             ),
           ),
           const Gap(AppSpacing.betweenRelated),

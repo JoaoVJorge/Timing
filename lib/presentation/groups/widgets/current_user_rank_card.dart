@@ -149,7 +149,7 @@ class CurrentUserRankCard extends StatelessWidget {
     if (isTiedForFirst) {
       return switch (context.languageCode) {
         "es" => "Empate en el liderazgo.",
-        "pt" => "Empate na lideranca.",
+        "pt" => "Empate na liderança.",
         _ => "Tied for the lead.",
       };
     }
@@ -167,7 +167,7 @@ class CurrentUserRankCard extends StatelessWidget {
   String _tiedFirstLabel(BuildContext context) =>
       switch (context.languageCode) {
         "es" => "Empate en 1er lugar",
-        "pt" => "Empate em 1 lugar",
+        "pt" => "Empate em 1º lugar",
         _ => "Tied for 1st",
       };
 }

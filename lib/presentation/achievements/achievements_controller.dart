@@ -11,6 +11,25 @@ import "package:help_out/core/services/daily_progress/daily_progress_service.dar
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/achievements/achievements_models.dart";
 
+/// Everything the 50 achievement definitions are derived from. Records give
+/// value equality for free, which is what makes the cache check cheap.
+typedef _AchievementInputs = ({
+  int focusMinutes,
+  int totalSessions,
+  int totalPages,
+  int completedGoalDays,
+  int activeDays,
+  int studyingSeconds,
+  int exercisesSeconds,
+  int hobbiesSeconds,
+  int focusGoalSeconds,
+  bool hasTopStudyingSubject,
+  bool hasGoal,
+  bool hasCompletedGoal,
+  bool allGoalsDoneToday,
+  String languageCode,
+});
+
 class AchievementsController extends GetxController {
   AchievementsController({
     required this.getProfileStatsUseCase,
@@ -76,14 +95,24 @@ class AchievementsController extends GetxController {
     selectedCategory.value = options[nextIndex];
   }
 
+  /// Rebuilding the 50 definitions is expensive and the page reads this getter
+  /// several times per frame, so the result is kept until an input changes.
+  List<AchievementDefinition> _cachedAchievements = const [];
+  _AchievementInputs? _cachedInputs;
+
   List<AchievementDefinition> get achievements {
-    dailyProgressService.today.value;
-    final List<AchievementDefinition> base = _baseAchievements;
+    final _AchievementInputs inputs = _currentInputs;
+    if (_cachedInputs == inputs) {
+      return _cachedAchievements;
+    }
+
+    final List<AchievementDefinition> base = _baseAchievements(inputs);
     final int unlockedWithoutHunter = base
         .where((achievement) => achievement.isUnlocked)
         .length;
 
-    return [
+    _cachedInputs = inputs;
+    _cachedAchievements = [
       ...base,
       _achievement(
         50,
@@ -94,24 +123,49 @@ class AchievementsController extends GetxController {
         unlockedWithoutHunter >= 25,
       ),
     ];
+    return _cachedAchievements;
   }
 
-  List<AchievementDefinition> get _baseAchievements {
-    final ProfileStatsEntity currentStats = stats.value;
-    final int focusMinutes = currentStats.totalFocusSeconds ~/ 60;
-    final int totalSessions = dailyProgressService.allProgress.fold<int>(
-      0,
-      (total, progress) => total + progress.sessions,
+  /// Reads every reactive source the definitions depend on, so `Obx` keeps
+  /// tracking them even when the cached list is returned.
+  _AchievementInputs get _currentInputs {
+    dailyProgressService.today.value;
+    final ProfileStatsEntity profileStats = stats.value;
+
+    return (
+      focusMinutes: profileStats.totalFocusSeconds ~/ 60,
+      totalSessions: dailyProgressService.allProgress.fold<int>(
+        0,
+        (total, progress) => total + progress.sessions,
+      ),
+      totalPages: profileStats.readingTotalPages,
+      completedGoalDays: tasks.fold<int>(
+        0,
+        (total, task) => total + task.completedDays,
+      ),
+      activeDays: activeDays,
+      studyingSeconds: profileStats.studyingTotalSeconds,
+      exercisesSeconds: profileStats.exercisesTotalSeconds,
+      hobbiesSeconds: profileStats.hobbiesTotalSeconds,
+      focusGoalSeconds: profileStats.totalFocusGoalSeconds,
+      hasTopStudyingSubject: profileStats.hasTopStudyingSubject,
+      hasGoal: tasks.isNotEmpty,
+      hasCompletedGoal: tasks.any((task) => task.isCompleted),
+      allGoalsDoneToday:
+          tasks.isNotEmpty && tasks.every((task) => task.isCheckedToday),
+      languageCode: _languageCode,
     );
-    final int totalPages = currentStats.readingTotalPages;
-    final int completedGoalDays = tasks.fold<int>(
-      0,
-      (total, task) => total + task.completedDays,
-    );
-    final bool hasGoal = tasks.isNotEmpty;
-    final bool hasCompletedGoal = tasks.any((task) => task.isCompleted);
-    final bool allGoalsDoneToday =
-        tasks.isNotEmpty && tasks.every((task) => task.isCheckedToday);
+  }
+
+  List<AchievementDefinition> _baseAchievements(_AchievementInputs inputs) {
+    final int focusMinutes = inputs.focusMinutes;
+    final int totalSessions = inputs.totalSessions;
+    final int totalPages = inputs.totalPages;
+    final int completedGoalDays = inputs.completedGoalDays;
+    final int activeDays = inputs.activeDays;
+    final bool hasGoal = inputs.hasGoal;
+    final bool hasCompletedGoal = inputs.hasCompletedGoal;
+    final bool allGoalsDoneToday = inputs.allGoalsDoneToday;
 
     return [
       _achievement(
@@ -200,7 +254,7 @@ class AchievementsController extends GetxController {
         Icons.menu_book_rounded,
         "Study Started",
         "Create your first study record",
-        currentStats.studyingTotalSeconds > 0,
+        inputs.studyingSeconds > 0,
       ),
       _achievement(
         12,
@@ -232,7 +286,7 @@ class AchievementsController extends GetxController {
         Icons.search_rounded,
         "Subject Explorer",
         "Study at least one subject",
-        currentStats.hasTopStudyingSubject,
+        inputs.hasTopStudyingSubject,
       ),
       _achievement(
         16,
@@ -240,7 +294,7 @@ class AchievementsController extends GetxController {
         Icons.sync_rounded,
         "Revision Hero",
         "Reach 5 hours studying",
-        currentStats.studyingTotalSeconds >= 18000,
+        inputs.studyingSeconds >= 18000,
       ),
       _achievement(
         17,
@@ -256,7 +310,7 @@ class AchievementsController extends GetxController {
         Icons.calendar_month_rounded,
         "Study Planner",
         "Create a focus goal",
-        currentStats.totalFocusGoalSeconds > 0,
+        inputs.focusGoalSeconds > 0,
       ),
       _achievement(
         19,
@@ -264,7 +318,7 @@ class AchievementsController extends GetxController {
         Icons.assignment_turned_in_rounded,
         "Exam Ready",
         "Reach 20 hours studying",
-        currentStats.studyingTotalSeconds >= 72000,
+        inputs.studyingSeconds >= 72000,
       ),
       _achievement(
         20,
@@ -272,7 +326,7 @@ class AchievementsController extends GetxController {
         Icons.emoji_events_rounded,
         "Scholar Mode",
         "Reach 50 hours studying",
-        currentStats.studyingTotalSeconds >= 180000,
+        inputs.studyingSeconds >= 180000,
       ),
       _achievement(
         21,
@@ -472,7 +526,7 @@ class AchievementsController extends GetxController {
         Icons.directions_run_rounded,
         "Exercise Start",
         "Log exercise focus",
-        currentStats.exercisesTotalSeconds > 0,
+        inputs.exercisesSeconds > 0,
       ),
       _achievement(
         46,
@@ -480,7 +534,7 @@ class AchievementsController extends GetxController {
         Icons.timer_rounded,
         "30-Min Workout",
         "Exercise for 30 minutes",
-        currentStats.exercisesTotalSeconds >= 1800,
+        inputs.exercisesSeconds >= 1800,
       ),
       _achievement(
         47,
@@ -488,7 +542,7 @@ class AchievementsController extends GetxController {
         Icons.palette_rounded,
         "Hobby Time",
         "Log hobby focus",
-        currentStats.hobbiesTotalSeconds > 0,
+        inputs.hobbiesSeconds > 0,
       ),
       _achievement(
         48,
@@ -496,7 +550,7 @@ class AchievementsController extends GetxController {
         Icons.lightbulb_rounded,
         "Creative Spark",
         "Reach 30 minutes of hobbies",
-        currentStats.hobbiesTotalSeconds >= 1800,
+        inputs.hobbiesSeconds >= 1800,
       ),
       _achievement(
         49,
@@ -504,7 +558,7 @@ class AchievementsController extends GetxController {
         Icons.sports_martial_arts_rounded,
         "Weekend Warrior",
         "Reach 2 hours exercising",
-        currentStats.exercisesTotalSeconds >= 7200,
+        inputs.exercisesSeconds >= 7200,
       ),
     ];
   }
@@ -537,6 +591,8 @@ class AchievementsController extends GetxController {
   int get xp => unlockedCount * 80;
 
   int get level => (xp ~/ 800) + 1;
+
+  RankTier get currentTier => RankTierX.forLevel(level);
 
   int get levelXp => xp % 800;
 
@@ -577,88 +633,88 @@ class AchievementsController extends GetxController {
 
 const Map<int, String> _ptTitles = {
   1: "Primeiro foco",
-  2: "Comeco de 25 min",
+  2: "Começo de 25 min",
   3: "1 hora de foco",
   4: "Foco profundo",
-  5: "Zero distracoes",
+  5: "Zero distrações",
   6: "Maratona de foco",
   7: "Madrugador",
   8: "Coruja da noite",
-  9: "Sequencia de foco",
+  9: "Sequência de foco",
   10: "Mestre do foco",
   11: "Estudo iniciado",
-  12: "3 sessoes",
-  13: "5 sessoes",
-  14: "10 sessoes",
-  15: "Explorador de materias",
-  16: "Heroi da revisao",
+  12: "3 sessões",
+  13: "5 sessões",
+  14: "10 sessões",
+  15: "Explorador de matérias",
+  16: "Herói da revisão",
   17: "Quiz finalizado",
   18: "Planejador de estudos",
   19: "Pronto para prova",
   20: "Modo estudante",
-  21: "Primeira pagina",
-  22: "10 paginas",
-  23: "25 paginas",
-  24: "50 paginas",
-  25: "100 paginas",
-  26: "Capitulo completo",
+  21: "Primeira página",
+  22: "10 páginas",
+  23: "25 páginas",
+  24: "50 páginas",
+  25: "100 páginas",
+  26: "Capítulo completo",
   27: "Leitor de fim de semana",
-  28: "Leitor diario",
+  28: "Leitor diário",
   29: "Leitor dedicado",
   30: "Lenda da biblioteca",
   31: "Primeira meta",
   32: "Meta vencida",
   33: "Todas as metas feitas",
-  34: "Rotina da manha",
+  34: "Rotina da manhã",
   35: "Dia equilibrado",
-  36: "Construtor de habito",
+  36: "Construtor de hábito",
   37: "Dia perfeito",
   38: "Retomada",
-  39: "Estrela da constancia",
-  40: "Imparavel",
+  39: "Estrela da constância",
+  40: "Imparável",
   41: "Primeiro grupo",
   42: "Jogador em equipe",
   43: "Amigo prestativo",
   44: "Vencedor de desafio",
-  45: "Exercicio iniciado",
+  45: "Exercício iniciado",
   46: "Treino de 30 min",
   47: "Hora do hobby",
-  48: "Faisca criativa",
+  48: "Faísca criativa",
   49: "Guerreiro do fim de semana",
-  50: "Cacador de conquistas",
+  50: "Caçador de conquistas",
 };
 
 const Map<int, String> _ptDescriptions = {
-  1: "Conclua sua primeira sessao de foco",
+  1: "Conclua sua primeira sessão de foco",
   2: "Foque por 25 minutos",
   3: "Foque por 1 hora",
   4: "Alcance 2 horas de foco",
-  5: "Conclua 3 sessoes de foco",
+  5: "Conclua 3 sessões de foco",
   6: "Alcance 10 horas de foco",
   7: "Registre foco em 5 dias",
-  8: "Conclua 10 sessoes de foco",
+  8: "Conclua 10 sessões de foco",
   9: "Registre foco em 7 dias",
   10: "Alcance 25 horas de foco",
   11: "Crie seu primeiro registro de estudo",
-  12: "Conclua 3 sessoes",
-  13: "Conclua 5 sessoes",
-  14: "Conclua 10 sessoes",
-  15: "Estude pelo menos uma materia",
+  12: "Conclua 3 sessões",
+  13: "Conclua 5 sessões",
+  14: "Conclua 10 sessões",
+  15: "Estude pelo menos uma matéria",
   16: "Alcance 5 horas estudando",
-  17: "Conclua 15 sessoes",
+  17: "Conclua 15 sessões",
   18: "Crie uma meta de foco",
   19: "Alcance 20 horas estudando",
   20: "Alcance 50 horas estudando",
-  21: "Leia sua primeira pagina",
-  22: "Leia 10 paginas",
-  23: "Leia 25 paginas",
-  24: "Leia 50 paginas",
-  25: "Leia 100 paginas",
-  26: "Leia 150 paginas",
-  27: "Leia 250 paginas",
-  28: "Leia 300 paginas",
-  29: "Leia 500 paginas",
-  30: "Leia 1000 paginas",
+  21: "Leia sua primeira página",
+  22: "Leia 10 páginas",
+  23: "Leia 25 páginas",
+  24: "Leia 50 páginas",
+  25: "Leia 100 páginas",
+  26: "Leia 150 páginas",
+  27: "Leia 250 páginas",
+  28: "Leia 300 páginas",
+  29: "Leia 500 páginas",
+  30: "Leia 1000 páginas",
   31: "Crie sua primeira meta",
   32: "Conclua uma meta",
   33: "Finalize todas as metas hoje",
@@ -671,9 +727,9 @@ const Map<int, String> _ptDescriptions = {
   40: "Conclua metas em 50 dias",
   41: "Entre em um grupo de estudos",
   42: "Compita com amigos",
-  43: "Ajude um amigo a manter constancia",
-  44: "Venca um desafio",
-  45: "Registre foco em exercicio",
+  43: "Ajude um amigo a manter constância",
+  44: "Vença um desafio",
+  45: "Registre foco em exercício",
   46: "Exercite-se por 30 minutos",
   47: "Registre foco em hobby",
   48: "Alcance 30 minutos em hobbies",
@@ -687,7 +743,7 @@ const Map<int, String> _esTitles = {
   3: "1 hora de enfoque",
   4: "Enfoque profundo",
   5: "Cero distracciones",
-  6: "Maraton de enfoque",
+  6: "Maratón de enfoque",
   7: "Madrugador",
   8: "Nocturno",
   9: "Racha de enfoque",
@@ -697,17 +753,17 @@ const Map<int, String> _esTitles = {
   13: "5 sesiones",
   14: "10 sesiones",
   15: "Explorador de materias",
-  16: "Heroe de revision",
+  16: "Héroe de revisión",
   17: "Quiz finalizado",
   18: "Planificador de estudios",
   19: "Listo para el examen",
   20: "Modo estudiante",
-  21: "Primera pagina",
-  22: "10 paginas",
-  23: "25 paginas",
-  24: "50 paginas",
-  25: "100 paginas",
-  26: "Capitulo completo",
+  21: "Primera página",
+  22: "10 páginas",
+  23: "25 páginas",
+  24: "50 páginas",
+  25: "100 páginas",
+  26: "Capítulo completo",
   27: "Lector de fin de semana",
   28: "Lector diario",
   29: "Lector dedicado",
@@ -715,17 +771,17 @@ const Map<int, String> _esTitles = {
   31: "Primera meta",
   32: "Meta lograda",
   33: "Todas las metas hechas",
-  34: "Rutina de manana",
-  35: "Dia equilibrado",
-  36: "Constructor de habito",
-  37: "Dia perfecto",
+  34: "Rutina de mañana",
+  35: "Día equilibrado",
+  36: "Constructor de hábito",
+  37: "Día perfecto",
   38: "Regreso",
   39: "Estrella constante",
   40: "Imparable",
   41: "Primer grupo",
   42: "Jugador de equipo",
   43: "Amigo servicial",
-  44: "Ganador de desafio",
+  44: "Ganador de desafío",
   45: "Ejercicio iniciado",
   46: "Entreno de 30 min",
   47: "Hora del hobby",
@@ -735,15 +791,15 @@ const Map<int, String> _esTitles = {
 };
 
 const Map<int, String> _esDescriptions = {
-  1: "Completa tu primera sesion de enfoque",
-  2: "Enfocate durante 25 minutos",
-  3: "Enfocate durante 1 hora",
+  1: "Completa tu primera sesión de enfoque",
+  2: "Enfócate durante 25 minutos",
+  3: "Enfócate durante 1 hora",
   4: "Alcanza 2 horas de enfoque",
   5: "Completa 3 sesiones de enfoque",
   6: "Alcanza 10 horas de enfoque",
-  7: "Registra enfoque en 5 dias",
+  7: "Registra enfoque en 5 días",
   8: "Completa 10 sesiones de enfoque",
-  9: "Registra enfoque en 7 dias",
+  9: "Registra enfoque en 7 días",
   10: "Alcanza 25 horas de enfoque",
   11: "Crea tu primer registro de estudio",
   12: "Completa 3 sesiones",
@@ -755,30 +811,30 @@ const Map<int, String> _esDescriptions = {
   18: "Crea una meta de enfoque",
   19: "Alcanza 20 horas estudiando",
   20: "Alcanza 50 horas estudiando",
-  21: "Lee tu primera pagina",
-  22: "Lee 10 paginas",
-  23: "Lee 25 paginas",
-  24: "Lee 50 paginas",
-  25: "Lee 100 paginas",
-  26: "Lee 150 paginas",
-  27: "Lee 250 paginas",
-  28: "Lee 300 paginas",
-  29: "Lee 500 paginas",
-  30: "Lee 1000 paginas",
+  21: "Lee tu primera página",
+  22: "Lee 10 páginas",
+  23: "Lee 25 páginas",
+  24: "Lee 50 páginas",
+  25: "Lee 100 páginas",
+  26: "Lee 150 páginas",
+  27: "Lee 250 páginas",
+  28: "Lee 300 páginas",
+  29: "Lee 500 páginas",
+  30: "Lee 1000 páginas",
   31: "Crea tu primera meta",
   32: "Completa una meta",
   33: "Termina todas las metas hoy",
-  34: "Completa metas en 3 dias",
-  35: "Completa metas en 5 dias",
-  36: "Completa metas en 10 dias",
-  37: "Completa metas en 15 dias",
-  38: "Completa metas en 20 dias",
-  39: "Completa metas en 30 dias",
-  40: "Completa metas en 50 dias",
-  41: "Unete a un grupo de estudio",
+  34: "Completa metas en 3 días",
+  35: "Completa metas en 5 días",
+  36: "Completa metas en 10 días",
+  37: "Completa metas en 15 días",
+  38: "Completa metas en 20 días",
+  39: "Completa metas en 30 días",
+  40: "Completa metas en 50 días",
+  41: "Únete a un grupo de estudio",
   42: "Compite con amigos",
   43: "Ayuda a un amigo a ser constante",
-  44: "Gana un desafio",
+  44: "Gana un desafío",
   45: "Registra enfoque en ejercicio",
   46: "Haz ejercicio durante 30 minutos",
   47: "Registra enfoque en hobby",

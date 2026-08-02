@@ -4,53 +4,86 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:intl/intl.dart";
 
-class WeekdaySelector extends StatelessWidget {
-  const WeekdaySelector({
-    required this.selectedWeekday,
-    required this.onSelectWeekday,
+class ScheduleDateStrip extends StatefulWidget {
+  const ScheduleDateStrip({
+    required this.selectedDate,
+    required this.onSelectDate,
     super.key,
   });
 
-  final int selectedWeekday;
-  final ValueChanged<int> onSelectWeekday;
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onSelectDate;
+
+  static const int _daysBefore = 10;
+  static const int _daysAfter = 10;
+  static const double _chipWidth = 62;
+  static const double _chipGap = 8;
+
+  @override
+  State<ScheduleDateStrip> createState() => _ScheduleDateStripState();
+}
+
+class _ScheduleDateStripState extends State<ScheduleDateStrip> {
+  late final ScrollController _scrollController;
+  late final DateTime _today;
+  late final List<DateTime> _dates;
+
+  @override
+  void initState() {
+    super.initState();
+    final DateTime now = DateTime.now();
+    _today = DateTime(now.year, now.month, now.day);
+    _dates = [
+      for (
+        int offset = -ScheduleDateStrip._daysBefore;
+        offset <= ScheduleDateStrip._daysAfter;
+        offset++
+      )
+        _today.add(Duration(days: offset)),
+    ];
+    // Open with today as the first visible card; earlier days stay scrollable
+    // to the left.
+    final double todayOffset =
+        ScheduleDateStrip._daysBefore *
+        (ScheduleDateStrip._chipWidth + ScheduleDateStrip._chipGap);
+    _scrollController = ScrollController(initialScrollOffset: todayOffset);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  bool _isSameDate(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
     final String locale = Localizations.localeOf(context).toString();
-    final DateTime now = DateTime.now();
-    final DateTime weekStart = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: now.weekday - DateTime.monday));
 
     return SingleChildScrollView(
+      controller: _scrollController,
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
         children: [
-          for (
-            int weekday = DateTime.monday;
-            weekday <= DateTime.sunday;
-            weekday++
-          ) ...[
-            if (weekday > DateTime.monday) const Gap(8),
+          for (int index = 0; index < _dates.length; index++) ...[
+            if (index > 0) const Gap(ScheduleDateStrip._chipGap),
             SizedBox(
-              width: 62,
-              child: _WeekdayChip(
+              width: ScheduleDateStrip._chipWidth,
+              child: _DateChip(
                 label: DateFormat.E(locale)
-                    .format(weekStart.add(Duration(days: weekday - 1)))
+                    .format(_dates[index])
                     .characters
                     .take(3)
                     .toString()
                     .toUpperCase(),
-                day: DateFormat(
-                  "dd",
-                  locale,
-                ).format(weekStart.add(Duration(days: weekday - 1))),
-                isSelected: weekday == selectedWeekday,
-                onTap: () => onSelectWeekday(weekday),
+                day: DateFormat("dd", locale).format(_dates[index]),
+                isSelected: _isSameDate(_dates[index], widget.selectedDate),
+                isToday: _isSameDate(_dates[index], _today),
+                onTap: () => widget.onSelectDate(_dates[index]),
               ),
             ),
           ],
@@ -60,17 +93,19 @@ class WeekdaySelector extends StatelessWidget {
   }
 }
 
-class _WeekdayChip extends StatelessWidget {
-  const _WeekdayChip({
+class _DateChip extends StatelessWidget {
+  const _DateChip({
     required this.label,
     required this.day,
     required this.isSelected,
+    required this.isToday,
     required this.onTap,
   });
 
   final String label;
   final String day;
   final bool isSelected;
+  final bool isToday;
   final VoidCallback onTap;
 
   @override
@@ -83,7 +118,7 @@ class _WeekdayChip extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 76,
-            width: 62,
+            width: ScheduleDateStrip._chipWidth,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               color: isSelected
@@ -137,6 +172,8 @@ class _WeekdayChip extends StatelessWidget {
               shape: BoxShape.circle,
               color: isSelected
                   ? context.colorTokens.primary
+                  : isToday
+                  ? context.colorTokens.primary.withValues(alpha: 0.4)
                   : context.colorTokens.borderUnfocused.withValues(alpha: 0.65),
             ),
           ),
