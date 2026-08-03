@@ -81,7 +81,7 @@ class ProgressPage extends StatelessWidget {
                     icon: Icons.assignment_rounded,
                     value: "${controller.selectedPeriodSessions}",
                     label: context.l10n.homeSummarySessions,
-                    accent: context.colorTokens.primary,
+                    accent: ProgressAccentColors.blue,
                   ),
                 ],
               ),

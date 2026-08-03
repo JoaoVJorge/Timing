@@ -30,10 +30,14 @@ class TimerPage extends StatelessWidget {
       );
 
       return PopScope(
-        canPop: !controller.hasActiveSession,
+        canPop: !controller.hasActiveSession && !controller.isFocusLockActive,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) {
             controller.saveProgress();
+            return;
+          }
+          if (controller.isFocusLockActive) {
+            controller.warnFocusLock();
             return;
           }
           if (await controller.confirmExitIfNeeded()) {
@@ -43,6 +47,10 @@ class TimerPage extends StatelessWidget {
         child: _TimerScaffold(
           data: data,
           onBackTap: () async {
+            if (controller.isFocusLockActive) {
+              controller.warnFocusLock();
+              return;
+            }
             if (await controller.confirmExitIfNeeded()) {
               appNavigator.back(result: controller.subject);
             }
@@ -150,6 +158,15 @@ class _TimerScaffold extends StatelessWidget {
                                     value: data.nextBreak,
                                     accentColor: data.accentColor,
                                   ),
+                                  if (!data.isReading) ...[
+                                    const Gap(10),
+                                    _TimerInfoRow(
+                                      icon: Icons.repeat_rounded,
+                                      label: "Seção atual",
+                                      value: data.focusSectionLabel,
+                                      accentColor: data.accentColor,
+                                    ),
+                                  ],
                                   const Gap(10),
                                   _TimerInfoRow(
                                     icon: Icons.bar_chart_rounded,
@@ -601,6 +618,8 @@ class _TimerViewData {
     required this.totalTimeLabel,
     required this.nextBreakLabel,
     required this.nextBreak,
+    required this.focusSectionLabel,
+    required this.isReading,
     required this.totalSubjectTimeLabel,
     required this.accentColor,
     required this.headerIconColor,
@@ -678,6 +697,9 @@ class _TimerViewData {
           : _formatRestDuration(
               Duration(seconds: controller.restIntervalSeconds),
             ),
+      focusSectionLabel:
+          "${controller.currentFocusSection}/${controller.focusSessionCount}",
+      isReading: isReading,
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.totalSeconds),
       ),
@@ -747,6 +769,8 @@ class _TimerViewData {
   final String totalTimeLabel;
   final String nextBreakLabel;
   final String nextBreak;
+  final String focusSectionLabel;
+  final bool isReading;
   final String totalSubjectTimeLabel;
   final Color accentColor;
   final Color headerIconColor;

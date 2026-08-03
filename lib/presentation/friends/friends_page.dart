@@ -1712,55 +1712,80 @@ class _InviteCodeDisclosureState extends State<_InviteCodeDisclosure> {
   bool isExpanded = false;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      BounceTap(
-        onTap: () => setState(() => isExpanded = !isExpanded),
-        pressedScale: 0.98,
-        child: Container(
-          height: 46,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: _surfaceDecoration(radius: 18),
-          child: Row(
-            children: [
-              Icon(
-                Icons.qr_code_rounded,
-                color: context.colorTokens.primary,
-                size: 21,
-              ),
-              const Gap(10),
-              Expanded(
-                child: Text(
-                  _label(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: _socialText,
-                    fontWeight: FontWeight.w900,
-                  ),
+  Widget build(BuildContext context) => Container(
+    decoration: _surfaceDecoration(radius: 18),
+    child: AnimatedSize(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: Column(
+        children: [
+          BounceTap(
+            onTap: () => setState(() => isExpanded = !isExpanded),
+            pressedScale: 0.98,
+            child: SizedBox(
+              height: 46,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.qr_code_rounded,
+                      color: context.colorTokens.primary,
+                      size: 21,
+                    ),
+                    const Gap(10),
+                    Expanded(
+                      child: Text(
+                        _label(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: _socialText,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _socialMuted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              AnimatedRotation(
-                turns: isExpanded ? 0.5 : 0,
-                duration: const Duration(milliseconds: 180),
-                child: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: _socialMuted,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: isExpanded
+                ? Column(
+                    key: const ValueKey("invite-code-open"),
+                    children: [
+                      const Divider(
+                        height: 1,
+                        indent: 14,
+                        endIndent: 14,
+                        color: _socialBorder,
+                      ),
+                      _InviteCodeCard(
+                        code: widget.code,
+                        onCopy: widget.onCopy,
+                        onShare: widget.onShare,
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(key: ValueKey("invite-code-closed")),
+          ),
+        ],
       ),
-      if (isExpanded) ...[
-        const Gap(10),
-        _InviteCodeCard(
-          code: widget.code,
-          onCopy: widget.onCopy,
-          onShare: widget.onShare,
-        ),
-      ],
-    ],
+    ),
   );
 
   String _label(BuildContext context) => switch (context.languageCode) {
@@ -1784,7 +1809,6 @@ class _InviteCodeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-    decoration: _surfaceDecoration(radius: 18),
     child: Row(
       children: [
         _PinkBadge(icon: Icons.qr_code_rounded, size: 46, iconSize: 24),
@@ -1971,6 +1995,7 @@ class _FriendsSection extends StatelessWidget {
         _EmptyFriendsCard(onShare: onShare)
       else
         Container(
+          clipBehavior: Clip.antiAlias,
           decoration: _surfaceDecoration(radius: 18),
           child: Column(
             children: [
@@ -2008,7 +2033,7 @@ class _FriendsSection extends StatelessWidget {
   };
 }
 
-class _FriendRow extends StatelessWidget {
+class _FriendRow extends StatefulWidget {
   const _FriendRow({
     required this.profile,
     required this.index,
@@ -2020,41 +2045,108 @@ class _FriendRow extends StatelessWidget {
   final VoidCallback onRemove;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-    child: Row(
+  State<_FriendRow> createState() => _FriendRowState();
+}
+
+class _FriendRowState extends State<_FriendRow>
+    with SingleTickerProviderStateMixin {
+  static const double _revealWidth = 72;
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    lowerBound: -_revealWidth,
+    upperBound: 0,
+    value: 0,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    _controller.value = (_controller.value + details.delta.dx).clamp(
+      -_revealWidth,
+      0,
+    );
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final double target = _controller.value < -_revealWidth / 2
+        ? -_revealWidth
+        : 0;
+    _controller.animateTo(target, curve: Curves.easeOutCubic);
+  }
+
+  void _onTapDelete() {
+    _controller.animateTo(0, curve: Curves.easeOutCubic);
+    widget.onRemove();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    builder: (context, child) => Stack(
       children: [
-        GroupMemberAvatar(
-          name: profile.name,
-          colorValue: profile.colorValue,
-          size: 40,
-        ),
-        const Gap(10),
-        Expanded(
-          child: _NameBlock(name: profile.name, handle: profile.handle),
-        ),
-        const Gap(10),
-        _FriendStatusChip(label: _statusLabel(context, index), index: index),
-        const Gap(8),
-        BounceTap(
-          onTap: onRemove,
-          pressedScale: 0.94,
-          child: Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colorTokens.error.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+        if (_controller.value < 0)
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: _onTapDelete,
+                child: Container(
+                  width: 64,
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.colorTokens.error,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+              ),
             ),
-            child: Icon(
-              Icons.delete_outline_rounded,
-              color: context.colorTokens.error,
-              size: 19,
-            ),
+          ),
+        GestureDetector(
+          onHorizontalDragUpdate: _onDragUpdate,
+          onHorizontalDragEnd: _onDragEnd,
+          child: Transform.translate(
+            offset: Offset(_controller.value, 0),
+            child: child,
           ),
         ),
       ],
+    ),
+    child: Container(
+      color: context.colorTokens.surface,
+      padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+      child: Row(
+        children: [
+          GroupMemberAvatar(
+            name: widget.profile.name,
+            colorValue: widget.profile.colorValue,
+            size: 40,
+          ),
+          const Gap(10),
+          Expanded(
+            child: _NameBlock(
+              name: widget.profile.name,
+              handle: widget.profile.handle,
+            ),
+          ),
+          const Gap(10),
+          _FriendStatusChip(
+            label: _statusLabel(context, widget.index),
+            index: widget.index,
+          ),
+        ],
+      ),
     ),
   );
 

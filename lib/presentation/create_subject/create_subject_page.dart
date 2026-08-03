@@ -38,6 +38,8 @@ class CreateSubjectPage extends StatelessWidget {
         _GoalSection(controller: controller),
         if (!controller.isPageBased) ...[
           const Gap(12),
+          _FocusSessionCountSection(controller: controller),
+          const Gap(12),
           _RestSection(controller: controller),
         ],
         const Gap(12),
@@ -213,6 +215,98 @@ class _GoalInput extends StatelessWidget {
     "ar" => "صفحات",
     _ => "páginas",
   };
+}
+
+class _FocusSessionCountSection extends StatelessWidget {
+  const _FocusSessionCountSection({required this.controller});
+
+  final CreateSubjectController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final Color accent = controller.selectedColor.value;
+
+    return CreationConfigCard(
+      accent: accent,
+      header: CreationSectionHeader(
+        icon: Icons.repeat_rounded,
+        label: "Seções de foco",
+        accent: accent,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PresetRow(
+            children: controller.focusSessionCountOptions
+                .map(
+                  (count) => CreationSelectableChip(
+                    label: "$count",
+                    isSelected: count == controller.focusSessionCount.value,
+                    accent: accent,
+                    onTap: () => controller.setFocusSessionCount(count),
+                  ),
+                )
+                .toList(),
+          ),
+          const Gap(12),
+          _FocusSessionCountInput(controller: controller, accent: accent),
+        ],
+      ),
+    );
+  });
+}
+
+class _FocusSessionCountInput extends StatelessWidget {
+  const _FocusSessionCountInput({
+    required this.controller,
+    required this.accent,
+  });
+
+  final CreateSubjectController controller;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 48,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.scaffold.withValues(alpha: 0.36),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.repeat_one_rounded, color: accent, size: 20),
+        const Gap(12),
+        Expanded(
+          child: TextField(
+            controller: controller.focusSessionCountController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: TextStyle(
+              color: context.colorTokens.textBody,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+            decoration: InputDecoration(
+              hintText: "Quantidade de seções",
+              suffixText: "seções",
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+              hintStyle: TextStyle(
+                color: context.colorTokens.textHint.withValues(alpha: 0.62),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _RestSection extends StatelessWidget {

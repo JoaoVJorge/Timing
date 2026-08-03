@@ -32,6 +32,8 @@ class CreateSubjectController extends GetxController {
   final TextEditingController restMinutesController = TextEditingController(
     text: SubjectEntity.defaultRestMinutes.toString(),
   );
+  final TextEditingController focusSessionCountController =
+      TextEditingController(text: "1");
 
   late final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   late final RxString selectedIconName = SubjectIcons.suggestionsFor(
@@ -41,12 +43,14 @@ class CreateSubjectController extends GetxController {
   bool _hasInitializedThemeColor = false;
 
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
+  final RxInt focusSessionCount = 1.obs;
   final RxInt wallpaperIndex = 0.obs;
   final RxBool isSaving = false.obs;
   final RxString name = "".obs;
   final RxString goal = "".obs;
 
   final List<int> restMinutesOptions = [5, 10, 15, 20];
+  final List<int> focusSessionCountOptions = [1, 2, 3, 4];
   final List<int> timeGoalPresets = [15, 25, 30, 45];
   final List<int> pageGoalPresets = [5, 10, 25, 50];
 
@@ -206,6 +210,11 @@ class CreateSubjectController extends GetxController {
     restMinutesController.text = minutes.toString();
   }
 
+  void setFocusSessionCount(int count) {
+    focusSessionCount.value = count;
+    focusSessionCountController.text = count.toString();
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -218,6 +227,8 @@ class CreateSubjectController extends GetxController {
           : subject.iconName;
       restMinutes.value = subject.restMinutes;
       restMinutesController.text = subject.restMinutes.toString();
+      focusSessionCount.value = subject.focusSessionCount;
+      focusSessionCountController.text = subject.focusSessionCount.toString();
       wallpaperIndex.value = subject.wallpaperIndex;
       goalController.text = isPageBased
           ? subject.goalPages.toString()
@@ -234,6 +245,12 @@ class CreateSubjectController extends GetxController {
       final int? minutes = int.tryParse(restMinutesController.text.trim());
       if (minutes != null && minutes > 0) {
         restMinutes.value = minutes;
+      }
+    });
+    focusSessionCountController.addListener(() {
+      final int? count = int.tryParse(focusSessionCountController.text.trim());
+      if (count != null && count > 0) {
+        focusSessionCount.value = count;
       }
     });
   }
@@ -274,6 +291,7 @@ class CreateSubjectController extends GetxController {
             goalPages: goalPages,
             iconName: selectedIconName.value,
             restMinutes: restMinutes.value,
+            focusSessionCount: focusSessionCount.value,
             wallpaperIndex: wallpaperIndex.value,
           )
         : await _updateSubjectUseCase(
@@ -284,6 +302,7 @@ class CreateSubjectController extends GetxController {
             goalPages: goalPages,
             iconName: selectedIconName.value,
             restMinutes: restMinutes.value,
+            focusSessionCount: focusSessionCount.value,
             wallpaperIndex: wallpaperIndex.value,
           );
 
@@ -304,6 +323,7 @@ class CreateSubjectController extends GetxController {
     nameController.dispose();
     goalController.dispose();
     restMinutesController.dispose();
+    focusSessionCountController.dispose();
     super.onClose();
   }
 }

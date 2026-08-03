@@ -87,201 +87,201 @@ class _LevelCard extends StatelessWidget {
       pressedScale: 0.98,
       onTap: () => _showRanksSheet(context, controller),
       child: Container(
-      padding: const EdgeInsets.all(14),
-      decoration: _cardDecoration(context, radius: 22),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 66,
-                height: 66,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: tier.color.withValues(alpha: 0.16),
+        padding: const EdgeInsets.all(14),
+        decoration: _cardDecoration(context, radius: 22),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 66,
+                  height: 66,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: tier.color.withValues(alpha: 0.16),
+                  ),
+                  child: Icon(tier.icon, color: tier.color, size: 36),
                 ),
-                child: Icon(tier.icon, color: tier.color, size: 36),
-              ),
-              const Gap(14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _localizedText(
-                              context,
-                              en: "Current level",
-                              pt: "Nível atual",
-                              es: "Nivel actual",
-                            ),
-                            style: context.textStyles.bodySmall.copyWith(
-                              color: context.colorTokens.textHint,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: context.colorTokens.textHint,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    const Gap(2),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            tier.learnerLabel(context),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.textStyles.extraBold20.copyWith(
-                              color: context.colorTokens.textBody,
-                            ),
-                          ),
-                        ),
-                        const Gap(6),
-                        _LevelPill(level: controller.level),
-                      ],
-                    ),
-                    const Gap(8),
-                    Text.rich(
-                      TextSpan(
+                const Gap(14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          TextSpan(
-                            text: "${controller.levelXp}",
-                            style: TextStyle(
-                              color: context.colorTokens.primary,
-                              fontWeight: FontWeight.w900,
+                          Expanded(
+                            child: Text(
+                              _localizedText(
+                                context,
+                                en: "Current level",
+                                pt: "Nível atual",
+                                es: "Nivel actual",
+                              ),
+                              style: context.textStyles.bodySmall.copyWith(
+                                color: context.colorTokens.textHint,
+                              ),
                             ),
                           ),
-                          TextSpan(
-                            text: " / 800 XP",
-                            style: TextStyle(
-                              color: context.colorTokens.textHint,
-                            ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: context.colorTokens.textHint,
+                            size: 20,
                           ),
                         ],
                       ),
-                      style: context.textStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.w800,
+                      const Gap(2),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              tier.learnerLabel(context),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textStyles.extraBold20.copyWith(
+                                color: context.colorTokens.textBody,
+                              ),
+                            ),
+                          ),
+                          const Gap(6),
+                          _LevelPill(level: controller.level),
+                        ],
                       ),
-                    ),
-                    const Gap(6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        minHeight: 7,
-                        value: controller.levelProgress,
-                        backgroundColor: context.colorTokens.primaryVeryLight,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.colorTokens.primary,
+                      const Gap(8),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "${controller.levelXp}",
+                              style: TextStyle(
+                                color: context.colorTokens.primary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            TextSpan(
+                              text: " / 800 XP",
+                              style: TextStyle(
+                                color: context.colorTokens.textHint,
+                              ),
+                            ),
+                          ],
+                        ),
+                        style: context.textStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                  ],
+                      const Gap(6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          minHeight: 7,
+                          value: controller.levelProgress,
+                          backgroundColor: context.colorTokens.primaryVeryLight,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            context.colorTokens.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const Gap(12),
-          Divider(color: context.colorTokens.divider),
-          const Gap(10),
-          Row(
-            children: [
-              _SmallBadge(
-                icon: nextUnlock?.icon ?? Icons.done_all_rounded,
-                color: nextUnlock?.color ?? context.colorTokens.success,
-                isUnlocked: true,
-                size: 38,
-                iconSize: 19,
-              ),
-              const Gap(10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nextUnlock == null
-                          ? _localizedText(
+              ],
+            ),
+            const Gap(12),
+            Divider(color: context.colorTokens.divider),
+            const Gap(10),
+            Row(
+              children: [
+                _SmallBadge(
+                  icon: nextUnlock?.icon ?? Icons.done_all_rounded,
+                  color: nextUnlock?.color ?? context.colorTokens.success,
+                  isUnlocked: true,
+                  size: 38,
+                  iconSize: 19,
+                ),
+                const Gap(10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        nextUnlock == null
+                            ? _localizedText(
+                                context,
+                                en: "All unlocked",
+                                pt: "Tudo desbloqueado",
+                                es: "Todo desbloqueado",
+                              )
+                            : _localizedText(
+                                context,
+                                en: "Next unlock",
+                                pt: "Próxima conquista",
+                                es: "Próximo logro",
+                              ),
+                        style: context.textStyles.bodyTiny.copyWith(
+                          color: context.colorTokens.textHint,
+                        ),
+                      ),
+                      const Gap(2),
+                      Text(
+                        nextUnlock?.title ??
+                            _localizedText(
                               context,
-                              en: "All unlocked",
-                              pt: "Tudo desbloqueado",
-                              es: "Todo desbloqueado",
-                            )
-                          : _localizedText(
-                              context,
-                              en: "Next unlock",
-                              pt: "Próxima conquista",
-                              es: "Próximo logro",
+                              en: "Achievement Hunter",
+                              pt: "Caçador de conquistas",
+                              es: "Cazador de logros",
                             ),
-                      style: context.textStyles.bodyTiny.copyWith(
-                        color: context.colorTokens.textHint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                    ),
-                    const Gap(2),
-                    Text(
-                      nextUnlock?.title ??
-                          _localizedText(
-                            context,
-                            en: "Achievement Hunter",
-                            pt: "Caçador de conquistas",
-                            es: "Cazador de logros",
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w900,
+                      Text(
+                        nextUnlock?.description ??
+                            _localizedText(
+                              context,
+                              en: "You unlocked everything.",
+                              pt: "Você desbloqueou tudo.",
+                              es: "Desbloqueaste todo.",
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyTiny.copyWith(
+                          color: context.colorTokens.textHint,
+                        ),
                       ),
-                    ),
-                    Text(
-                      nextUnlock?.description ??
-                          _localizedText(
-                            context,
-                            en: "You unlocked everything.",
-                            pt: "Você desbloqueou tudo.",
-                            es: "Desbloqueaste todo.",
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyTiny.copyWith(
-                        color: context.colorTokens.textHint,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Gap(8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: context.colorTokens.borderUnfocused,
+                    ],
                   ),
                 ),
-                child: Text(
-                  _localizedText(
-                    context,
-                    en: "${800 - controller.levelXp} XP to go",
-                    pt: "Faltam ${800 - controller.levelXp} XP",
-                    es: "Faltan ${800 - controller.levelXp} XP",
+                const Gap(8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
                   ),
-                  style: context.textStyles.bodyTiny.copyWith(
-                    color: context.colorTokens.primary,
-                    fontWeight: FontWeight.w900,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: context.colorTokens.borderUnfocused,
+                    ),
+                  ),
+                  child: Text(
+                    _localizedText(
+                      context,
+                      en: "${800 - controller.levelXp} XP to go",
+                      pt: "Faltam ${800 - controller.levelXp} XP",
+                      es: "Faltan ${800 - controller.levelXp} XP",
+                    ),
+                    style: context.textStyles.bodyTiny.copyWith(
+                      color: context.colorTokens.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -547,8 +547,8 @@ class _AchievementsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      const double spacing = 10;
-      const int columns = 2;
+      const double spacing = 8;
+      const int columns = 3;
       final double itemWidth =
           (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -592,67 +592,53 @@ class _AchievementCardState extends State<_AchievementCard> {
     return BounceTap(
       onTap: () => setState(() => _isExpanded = !_isExpanded),
       pressedScale: 0.97,
-      child: AnimatedContainer(
+      child: AnimatedSize(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        height: _isExpanded ? 208 : 168,
-        padding: const EdgeInsets.fromLTRB(10, 14, 10, 12),
-        decoration: _cardDecoration(context, radius: 16),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: _StatusBadge(isUnlocked: achievement.isUnlocked),
-            ),
-            Column(
-              children: [
-                _SmallBadge(
-                  icon: achievement.icon,
-                  color: effectiveColor,
-                  isUnlocked: achievement.isUnlocked,
-                  size: _isExpanded ? 52 : 48,
-                  iconSize: _isExpanded ? 27 : 24,
+        alignment: Alignment.topCenter,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+          decoration: _cardDecoration(context, radius: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SmallBadge(
+                icon: achievement.icon,
+                color: effectiveColor,
+                isUnlocked: achievement.isUnlocked,
+                size: _isExpanded ? 38 : 34,
+                iconSize: _isExpanded ? 20 : 18,
+              ),
+              const Gap(6),
+              Text(
+                achievement.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: context.textStyles.bodyTiny.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  height: 1.08,
                 ),
-                const Gap(10),
-                Text(
-                  achievement.title,
-                  maxLines: _isExpanded ? 3 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textBody,
-                    fontWeight: FontWeight.w900,
-                    height: 1.12,
-                  ),
+              ),
+              const Gap(3),
+              Text(
+                achievement.description,
+                maxLines: _isExpanded ? null : 2,
+                overflow: _isExpanded
+                    ? TextOverflow.visible
+                    : TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: context.textStyles.bodyTiny.copyWith(
+                  color: context.colorTokens.textHint,
+                  height: 1.1,
                 ),
-                const Gap(5),
-                Expanded(
-                  child: Text(
-                    achievement.description,
-                    maxLines: _isExpanded ? 4 : 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: context.textStyles.bodyTiny.copyWith(
-                      color: context.colorTokens.textHint,
-                      height: 1.15,
-                    ),
-                  ),
-                ),
-                if (_isExpanded) ...[
-                  const Gap(5),
-                  Text(
-                    achievement.category.label(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodyTiny.copyWith(
-                      color: effectiveColor,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
+              ),
+              const Gap(5),
+              _StatusBadge(isUnlocked: achievement.isUnlocked),
+            ],
+          ),
         ),
       ),
     );
@@ -737,11 +723,15 @@ Future<void> _showRanksSheet(
   AchievementsController controller,
 ) => showModalBottomSheet<void>(
   context: context,
+  isScrollControlled: true,
   backgroundColor: context.colorTokens.surface,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
   ),
-  builder: (_) => _RanksSheet(controller: controller),
+  builder: (_) => FractionallySizedBox(
+    heightFactor: 0.82,
+    child: _RanksSheet(controller: controller),
+  ),
 );
 
 class _RanksSheet extends StatelessWidget {
@@ -756,10 +746,9 @@ class _RanksSheet extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
@@ -830,7 +819,7 @@ class _RankRow extends StatelessWidget {
         : context.colorTokens.iconDisabled;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isCurrent
             ? tier.color.withValues(alpha: 0.10)
@@ -846,22 +835,24 @@ class _RankRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: color.withValues(alpha: 0.16),
               border: Border.all(color: color.withValues(alpha: 0.2)),
             ),
-            child: Icon(tier.icon, color: color, size: 24),
+            child: Icon(tier.icon, color: color, size: 21),
           ),
-          const Gap(12),
+          const Gap(10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   tier.label(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodyMedium.copyWith(
                     color: context.colorTokens.textBody,
                     fontWeight: FontWeight.w900,

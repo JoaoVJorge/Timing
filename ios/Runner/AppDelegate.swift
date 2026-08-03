@@ -17,5 +17,26 @@ import UIKit
     ) {
       TimerLiveActivityPlugin.register(with: registrar)
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(
+      forPlugin: "FocusGuardPlugin"
+    ) {
+      let channel = FlutterMethodChannel(
+        name: "help_out/focus_guard",
+        binaryMessenger: registrar.messenger()
+      )
+      channel.setMethodCallHandler { call, result in
+        switch call.method {
+        case "setKeepScreenOn":
+          let arguments = call.arguments as? [String: Any]
+          UIApplication.shared.isIdleTimerDisabled =
+            arguments?["enabled"] as? Bool ?? false
+          result(nil)
+        case "bringAppToFront":
+          result(nil)
+        default:
+          result(FlutterMethodNotImplemented)
+        }
+      }
+    }
   }
 }

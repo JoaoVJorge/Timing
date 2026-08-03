@@ -16,6 +16,7 @@ class UpdateSubjectUseCase {
     required int goalPages,
     required String iconName,
     required int restMinutes,
+    required int focusSessionCount,
     required int wallpaperIndex,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
@@ -35,6 +36,7 @@ class UpdateSubjectUseCase {
           goalPages: goalPages,
           iconName: iconName,
           restMinutes: restMinutes,
+          focusSessionCount: focusSessionCount,
           wallpaperIndex: wallpaperIndex,
         );
         return updatedSubject!;

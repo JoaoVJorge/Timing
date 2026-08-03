@@ -20,6 +20,10 @@ class TimerBindings extends Bindings {
         dailyProgressService: Get.find(),
         timerNotificationService: Get.find(),
         timerLiveActivityService: Get.find(),
+        focusFeedbackService: Get.find(),
+        focusGuardService: Get.find(),
+        appController: Get.find(),
+        appNavigator: Get.find(),
         subject: subject,
       ),
     );

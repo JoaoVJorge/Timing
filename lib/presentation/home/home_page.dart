@@ -12,6 +12,7 @@ import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/functions/format_relative_time.dart";
 import "package:help_out/shared/functions/format_schedule_time.dart";
 import "package:help_out/shared/widgets/app_section_header.dart";
+import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
 
@@ -21,41 +22,30 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.page,
-          AppSpacing.betweenSections + context.mediaQuery.padding.top,
-          AppSpacing.page,
-          0,
+  Widget build(BuildContext context) => AppScaffold(
+    body: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Gap(16),
+        const _Greeting(),
+        const Gap(AppSpacing.betweenSections - 4),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+            children: [
+              const _HomeActionCardSection(),
+              const Gap(AppSpacing.betweenSections),
+              const _PlanDayRows(),
+              const Gap(AppSpacing.betweenSections),
+              AppSectionHeader(title: context.l10n.homeCategoriesSection),
+              const Gap(AppSpacing.betweenRelated),
+              const _HomeActivitiesSection(),
+            ],
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _Greeting(),
-            const Gap(AppSpacing.betweenSections - 4),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.only(
-                  bottom: AppSpacing.betweenSections,
-                ),
-                children: [
-                  const _HomeActionCardSection(),
-                  const Gap(AppSpacing.betweenSections),
-                  const _PlanDayRows(),
-                  const Gap(AppSpacing.betweenSections),
-                  AppSectionHeader(title: context.l10n.homeCategoriesSection),
-                  const Gap(AppSpacing.betweenRelated),
-                  const _HomeActivitiesSection(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }
 
 class _Greeting extends StatelessWidget {
