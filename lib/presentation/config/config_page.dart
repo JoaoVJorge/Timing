@@ -154,78 +154,241 @@ class ConfigPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: context.colorTokens.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.82,
         child: SafeArea(
           child: Obx(
-            () => ListView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-              children: [
-                Text(
-                  "Modo concentração",
-                  style: context.textStyles.sectionTitle.copyWith(fontSize: 18),
-                ),
-                const Gap(6),
-                Text(
-                  "Ao ativar uma atividade, o app tenta manter você dentro do foco até pausar ou encerrar.",
-                  style: context.textStyles.caption,
-                ),
-                const Gap(AppSpacing.betweenRelated),
-                SettingsSection(
-                  title: "Atividades",
-                  children: [
-                    SettingsTile.toggle(
-                      icon: Icons.school_rounded,
-                      title: "Estudo",
-                      subtitle: "Impede sair do app durante focos de estudo.",
-                      value: controller.focusLockStudyingEnabled.value,
-                      onChanged: (value) => controller.onToggleFocusLock(
-                        TimeCategoryType.studying,
-                        value,
+            () => Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 54,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: context.colorTokens.borderUnfocused,
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      tint: const Color(0xFF2F80ED),
                     ),
-                    SettingsTile.toggle(
-                      icon: Icons.fitness_center_rounded,
-                      title: "Exercícios",
-                      subtitle:
-                          "Impede sair do app durante focos de exercício.",
-                      value: controller.focusLockExercisesEnabled.value,
-                      onChanged: (value) => controller.onToggleFocusLock(
-                        TimeCategoryType.exercises,
-                        value,
+                  ),
+                  const Gap(26),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _ConcentrationHeroBadge(),
+                      const Gap(18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Modo concentração",
+                              style: context.textStyles.extraBold24,
+                            ),
+                            const Gap(8),
+                            Text(
+                              "Quando ativado, o app ajuda você a se manter focado durante a atividade até pausar ou finalizar.",
+                              style: context.textStyles.bodyMedium.copyWith(
+                                color: context.colorTokens.textHint,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      tint: const Color(0xFF27AE60),
+                    ],
+                  ),
+                  const Gap(28),
+                  Text(
+                    "Atividades",
+                    style: context.textStyles.sectionTitle.copyWith(
+                      color: context.colorTokens.primary,
                     ),
-                    SettingsTile.toggle(
-                      icon: Icons.menu_book_rounded,
-                      title: "Leitura",
-                      subtitle: "Impede sair do app durante focos de leitura.",
-                      value: controller.focusLockReadingEnabled.value,
-                      onChanged: (value) => controller.onToggleFocusLock(
-                        TimeCategoryType.reading,
-                        value,
-                      ),
-                      tint: const Color(0xFFF2994A),
+                  ),
+                  const Gap(12),
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        _ConcentrationActivityTile(
+                          icon: Icons.school_rounded,
+                          title: "Estudo",
+                          subtitle: "Foco total nos seus estudos.",
+                          color: const Color(0xFF2F80ED),
+                          value: controller.focusLockStudyingEnabled.value,
+                          onChanged: (value) => controller.onToggleFocusLock(
+                            TimeCategoryType.studying,
+                            value,
+                          ),
+                        ),
+                        const Gap(10),
+                        _ConcentrationActivityTile(
+                          icon: Icons.fitness_center_rounded,
+                          title: "Exercícios",
+                          subtitle: "Concentre-se nos seus treinos.",
+                          color: const Color(0xFF27AE60),
+                          value: controller.focusLockExercisesEnabled.value,
+                          onChanged: (value) => controller.onToggleFocusLock(
+                            TimeCategoryType.exercises,
+                            value,
+                          ),
+                        ),
+                        const Gap(10),
+                        _ConcentrationActivityTile(
+                          icon: Icons.menu_book_rounded,
+                          title: "Leitura",
+                          subtitle: "Mergulhe nas suas leituras.",
+                          color: const Color(0xFFF2994A),
+                          value: controller.focusLockReadingEnabled.value,
+                          onChanged: (value) => controller.onToggleFocusLock(
+                            TimeCategoryType.reading,
+                            value,
+                          ),
+                        ),
+                        const Gap(10),
+                        _ConcentrationActivityTile(
+                          icon: Icons.sports_esports_rounded,
+                          title: "Hobbies",
+                          subtitle: "Aproveite seus hobbies com foco.",
+                          color: const Color(0xFF9B51E0),
+                          value: controller.focusLockHobbiesEnabled.value,
+                          onChanged: (value) => controller.onToggleFocusLock(
+                            TimeCategoryType.hobbies,
+                            value,
+                          ),
+                        ),
+                      ],
                     ),
-                    SettingsTile.toggle(
-                      icon: Icons.palette_rounded,
-                      title: "Hobbie",
-                      subtitle: "Impede sair do app durante focos de hobbie.",
-                      value: controller.focusLockHobbiesEnabled.value,
-                      onChanged: (value) => controller.onToggleFocusLock(
-                        TimeCategoryType.hobbies,
-                        value,
-                      ),
-                      tint: const Color(0xFF9B51E0),
-                    ),
-                  ],
-                ),
-                const Gap(8),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ConcentrationHeroBadge extends StatelessWidget {
+  const _ConcentrationHeroBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.colorTokens;
+
+    return Container(
+      width: 92,
+      height: 92,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: tokens.primaryVeryLight,
+        border: Border.all(color: tokens.primary.withValues(alpha: 0.16)),
+      ),
+      child: Center(
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: tokens.primary.withValues(alpha: 0.10),
+          ),
+          child: Icon(
+            Icons.shield_moon_rounded,
+            color: tokens.primary,
+            size: 38,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConcentrationActivityTile extends StatelessWidget {
+  const _ConcentrationActivityTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.colorTokens;
+
+    return Container(
+      constraints: const BoxConstraints(minHeight: 78),
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: tokens.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: tokens.borderUnfocused.withValues(alpha: 0.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.surfaceShadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.14),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const Gap(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(title, style: context.textStyles.cardTitle),
+                const Gap(4),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.caption.copyWith(
+                    color: tokens.textHint,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Gap(10),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: tokens.white,
+            activeTrackColor: color,
+            inactiveThumbColor: tokens.white,
+            inactiveTrackColor: tokens.borderUnfocused,
+            trackOutlineColor: WidgetStateProperty.all(tokens.transparent),
+          ),
+        ],
       ),
     );
   }
