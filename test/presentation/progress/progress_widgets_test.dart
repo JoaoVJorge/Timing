@@ -15,9 +15,24 @@ void main() {
         tester,
         const ProgressStatRow(
           stats: [
-            (icon: Icons.auto_stories_rounded, value: "15", label: "Pages"),
-            (icon: Icons.fitness_center_rounded, value: "30m", label: "Reps"),
-            (icon: Icons.task_alt_rounded, value: "2/4", label: "Goals"),
+            (
+              icon: Icons.auto_stories_rounded,
+              value: "15",
+              label: "Pages",
+              accent: Colors.orange,
+            ),
+            (
+              icon: Icons.fitness_center_rounded,
+              value: "30m",
+              label: "Reps",
+              accent: Colors.green,
+            ),
+            (
+              icon: Icons.task_alt_rounded,
+              value: "2/4",
+              label: "Goals",
+              accent: Colors.blue,
+            ),
           ],
         ),
       );
@@ -37,16 +52,23 @@ void main() {
         tester,
         const ProgressStatRow(
           stats: [
-            (icon: Icons.auto_stories_rounded, value: "15", label: "Pages"),
+            (
+              icon: Icons.auto_stories_rounded,
+              value: "15",
+              label: "Pages",
+              accent: Colors.orange,
+            ),
             (
               icon: Icons.fitness_center_rounded,
               value: "30m",
               label: "Exercises",
+              accent: Colors.green,
             ),
             (
               icon: Icons.task_alt_rounded,
               value: "2/4",
               label: "Metas concluidas",
+              accent: Colors.blue,
             ),
           ],
         ),
@@ -75,10 +97,7 @@ void main() {
   ) async {
     await pumpInScrollView(
       tester,
-      const ProgressHeroCard(
-        focusSeconds: 0,
-        differenceToPreviousPeriod: null,
-      ),
+      const ProgressHeroCard(focusSeconds: 0, differenceToPreviousPeriod: null),
     );
 
     expect(tester.takeException(), isNull);
