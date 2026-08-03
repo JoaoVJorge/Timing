@@ -100,11 +100,6 @@ class SettingsTile extends StatelessWidget {
     if (_isDanger) {
       return context.colorTokens.error;
     }
-    if (variant == SettingsTileVariant.toggle) {
-      return (value ?? false)
-          ? tint ?? context.colorTokens.primary
-          : context.colorTokens.textHint;
-    }
     return tint ?? context.colorTokens.textHint;
   }
 
@@ -137,7 +132,12 @@ class SettingsTile extends StatelessWidget {
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.caption.copyWith(fontSize: 12),
+                  style: context.textStyles.caption.copyWith(
+                    color: context.isDarkMode
+                        ? context.colorTokens.textHint
+                        : const Color(0xFF777A7E),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -176,7 +176,7 @@ class _SettingsIconBadge extends StatelessWidget {
     width: 40,
     height: 40,
     decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.6),
+      color: tint.withValues(alpha: context.isDarkMode ? 0.18 : 0.12),
       shape: BoxShape.circle,
     ),
     child: Center(
@@ -210,12 +210,11 @@ class _Trailing extends StatelessWidget {
       return Switch(
         value: value ?? false,
         onChanged: onChanged,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         activeThumbColor: context.colorTokens.white,
         activeTrackColor: tint,
         inactiveThumbColor: context.colorTokens.white,
-        inactiveTrackColor: context.colorTokens.textHint.withValues(
-          alpha: 0.28,
-        ),
+        inactiveTrackColor: const Color(0xFFD7D9DC),
         trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
           (states) => context.colorTokens.transparent,
         ),
@@ -245,9 +244,7 @@ class _Trailing extends StatelessWidget {
             decoration: BoxDecoration(
               color: trailingSwatch,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: context.colorTokens.borderUnfocused,
-              ),
+              border: Border.all(color: context.colorTokens.borderUnfocused),
             ),
           ),
           const Gap(AppSpacing.titleToDescription),

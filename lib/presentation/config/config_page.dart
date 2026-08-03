@@ -57,7 +57,7 @@ class ConfigPage extends StatelessWidget {
                     subtitle: context.l10n.darkModeDisabledSubtitle,
                     value: controller.isDarkMode.value,
                     onChanged: controller.onToggleDarkMode,
-                    tint: context.colorTokens.primary,
+                    tint: const Color(0xFF6C5CE7),
                   ),
                   SettingsTile.toggle(
                     icon: Icons.notifications_active_rounded,
@@ -73,6 +73,7 @@ class ConfigPage extends StatelessWidget {
                     subtitle: context.l10n.appLanguageSubtitle,
                     trailingText: controller.languageLabel,
                     onTap: controller.onTapLanguage,
+                    tint: const Color(0xFF2684D5),
                   ),
                 ],
               ),
@@ -86,12 +87,14 @@ class ConfigPage extends StatelessWidget {
                   title: context.l10n.faqLabel,
                   subtitle: context.l10n.faqSettingsSubtitle,
                   onTap: controller.onTapFaq,
+                  tint: context.colorTokens.success,
                 ),
                 SettingsTile.navigation(
                   icon: Icons.feedback_outlined,
                   title: context.l10n.sendFeedbackTitle,
                   subtitle: context.l10n.sendFeedbackSubtitle,
                   onTap: controller.onTapFeedback,
+                  tint: context.colorTokens.info,
                 ),
               ],
             ),
@@ -105,12 +108,14 @@ class ConfigPage extends StatelessWidget {
                   subtitle: context.l10n.appVersionValue(
                     AppConstants.appVersion,
                   ),
+                  tint: context.colorTokens.textHint,
                 ),
                 if (AppConstants.useMockData && kDebugMode)
                   SettingsTile.info(
                     icon: Icons.developer_mode_rounded,
                     title: context.l10n.debugEnvironmentTitle,
                     subtitle: context.l10n.debugEnvironmentSubtitle,
+                    tint: context.colorTokens.textHint,
                   ),
               ],
             ),
