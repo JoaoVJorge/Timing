@@ -265,6 +265,19 @@ class AppController extends GetxController {
     await _saveAppConfigUseCase(_currentConfig);
   }
 
+  Future<void> setFocusLockPreferences({
+    required bool studying,
+    required bool exercises,
+    required bool reading,
+    required bool hobbies,
+  }) async {
+    focusLockStudyingEnabled.value = studying;
+    focusLockExercisesEnabled.value = exercises;
+    focusLockReadingEnabled.value = reading;
+    focusLockHobbiesEnabled.value = hobbies;
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
   Locale _resolvedLocale(String? code) {
     if (code != null) {
       return Locale(code);
