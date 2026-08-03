@@ -62,14 +62,15 @@ class ProgressHeroCard extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(_comparisonIcon, size: 16, color: Colors.white),
-                    const Gap(4),
+                    const Gap(6),
                     Flexible(
                       child: Text(
                         _comparisonText(context),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
                         style: context.textStyles.bodySmall.copyWith(
                           color: Colors.white,
                           fontSize: 12,

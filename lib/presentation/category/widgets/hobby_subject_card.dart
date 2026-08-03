@@ -152,38 +152,38 @@ class _HobbyOptionsSheet extends StatelessWidget {
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(
-          18,
-          8,
-          18,
-          18 + MediaQuery.viewInsetsOf(context).bottom,
+          16,
+          6,
+          16,
+          16 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         decoration: BoxDecoration(
           color: context.colorTokens.dialogSurface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 54,
-              height: 5,
+              width: 52,
+              height: 3,
               decoration: BoxDecoration(
                 color: context.colorTokens.borderUnfocused,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
-            const Gap(18),
+            const Gap(16),
             Row(
               children: [
                 _HobbySheetIcon(
                   color: accent.withValues(alpha: 0.14),
                   child: AppIcon(
                     _hobbyIconName(subject),
-                    size: 24,
+                    size: 22,
                     color: accent,
                   ),
                 ),
-                const Gap(12),
+                const Gap(10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,10 +194,10 @@ class _HobbyOptionsSheet extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.extraBold24.copyWith(
                           color: context.colorTokens.dialogText,
-                          fontSize: 22,
+                          fontSize: 20,
                         ),
                       ),
-                      const Gap(4),
+                      const Gap(2),
                       Text(
                         _practiceLabel(context),
                         maxLines: 1,
@@ -210,12 +210,12 @@ class _HobbyOptionsSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Gap(10),
+                const Gap(8),
                 BounceTap(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
-                    width: 44,
-                    height: 44,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
@@ -223,17 +223,17 @@ class _HobbyOptionsSheet extends StatelessWidget {
                     child: Icon(
                       Icons.close_rounded,
                       color: context.colorTokens.dialogTextMuted,
-                      size: 26,
+                      size: 24,
                     ),
                   ),
                 ),
               ],
             ),
-            const Gap(20),
+            const Gap(18),
             Container(
               decoration: BoxDecoration(
                 color: context.colorTokens.surface,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: context.colorTokens.divider),
               ),
               child: Column(
@@ -260,7 +260,7 @@ class _HobbyOptionsSheet extends StatelessWidget {
                 ],
               ),
             ),
-            const Gap(16),
+            const Gap(14),
             _HobbyDeleteAction(
               accent: context.colorTokens.error,
               label: _deleteLabel(context),
@@ -316,8 +316,8 @@ class _HobbySheetIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 48,
-    height: 48,
+    width: 46,
+    height: 46,
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     alignment: Alignment.center,
     child: child,
@@ -344,15 +344,15 @@ class _HobbySheetAction extends StatelessWidget {
     behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
           _HobbySheetIcon(
             color: accent.withValues(alpha: 0.12),
-            child: Icon(icon, color: accent, size: 24),
+            child: Icon(icon, color: accent, size: 22),
           ),
-          const Gap(14),
+          const Gap(12),
           Expanded(
             child: Text(
               label,
@@ -360,13 +360,13 @@ class _HobbySheetAction extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodyLarge.copyWith(
                 color: context.colorTokens.dialogText,
-                fontSize: 17,
+                fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
           trailing ??
-              Icon(Icons.chevron_right_rounded, color: accent, size: 30),
+              Icon(Icons.chevron_right_rounded, color: accent, size: 28),
         ],
       ),
     ),
@@ -391,20 +391,20 @@ class _HobbyDeleteAction extends StatelessWidget {
     behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
-      constraints: const BoxConstraints(minHeight: 74),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      constraints: const BoxConstraints(minHeight: 72),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: accent.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           _HobbySheetIcon(
             color: accent.withValues(alpha: 0.14),
-            child: Icon(Icons.delete_outline_rounded, color: accent, size: 24),
+            child: Icon(Icons.delete_outline_rounded, color: accent, size: 22),
           ),
-          const Gap(14),
+          const Gap(12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,11 +416,11 @@ class _HobbyDeleteAction extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodyLarge.copyWith(
                     color: accent,
-                    fontSize: 17,
+                    fontSize: 15,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const Gap(4),
+                const Gap(2),
                 Text(
                   subtitle,
                   maxLines: 1,
@@ -433,8 +433,8 @@ class _HobbyDeleteAction extends StatelessWidget {
               ],
             ),
           ),
-          const Gap(10),
-          Icon(Icons.chevron_right_rounded, color: accent, size: 28),
+          const Gap(8),
+          Icon(Icons.chevron_right_rounded, color: accent, size: 26),
         ],
       ),
     ),

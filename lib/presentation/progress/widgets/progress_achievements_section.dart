@@ -83,31 +83,10 @@ class ProgressAchievementsSection extends StatelessWidget {
                 _UnlockedChip(title: milestone.title, icon: milestone.icon),
             ],
           ),
-          if (unlocked.length > 3) ...[
-            const Gap(AppSpacing.titleToDescription),
-            BounceTap(
-              onTap: onTap,
-              pressedScale: 0.97,
-              child: Text(
-                _seeAllAchievementsLabel(context, unlocked.length),
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primary,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          ],
         ],
       ],
     );
   }
-
-  String _seeAllAchievementsLabel(BuildContext context, int count) =>
-      switch (context.languageCode) {
-        "es" => "Ver los $count logros",
-        "pt" => "Ver todas as $count conquistas",
-        _ => "See all $count achievements",
-      };
 
   /// Closest one to completion, so the user always sees an achievable target.
   _Milestone? _nextMilestone(List<_Milestone> milestones) {
