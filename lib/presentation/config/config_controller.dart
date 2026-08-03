@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/config/widgets/config_dialogs.dart";
 import "package:help_out/shared/functions/format_name.dart";
@@ -26,6 +27,12 @@ class ConfigController extends GetxController {
   Rx<Color> get accentColor => _appController.accentColor;
   RxBool get notificationsEnabled => _appController.notificationsEnabled;
   Rx<String?> get languageCode => _appController.languageCode;
+  RxBool get focusLockStudyingEnabled =>
+      _appController.focusLockStudyingEnabled;
+  RxBool get focusLockExercisesEnabled =>
+      _appController.focusLockExercisesEnabled;
+  RxBool get focusLockReadingEnabled => _appController.focusLockReadingEnabled;
+  RxBool get focusLockHobbiesEnabled => _appController.focusLockHobbiesEnabled;
 
   String get displayName {
     final String value = capitalizeName(userName.value);
@@ -46,6 +53,11 @@ class ConfigController extends GetxController {
 
   Future<void> onToggleNotifications(bool value) async {
     await _appController.setNotificationsEnabled(value);
+    _appNavigator.showSuccessSnackBar(Get.context!.l10n.preferenceSavedMessage);
+  }
+
+  Future<void> onToggleFocusLock(TimeCategoryType category, bool value) async {
+    await _appController.setFocusLockEnabledFor(category, value);
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.preferenceSavedMessage);
   }
 

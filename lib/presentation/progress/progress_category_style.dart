@@ -1,14 +1,25 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:help_out/theme/accent_presets.dart";
 
 /// Per-category accent colors used to differentiate the progress stat cards.
 /// Kept local to the progress feature so the global theme stays primary-based;
 /// only the small tinted icon badges use these hues, the text stays neutral.
 extension ProgressCategoryStyleX on TimeCategoryType {
   Color get accentColor => switch (this) {
-    TimeCategoryType.studying => const Color(0xFF6C5CE7),
-    TimeCategoryType.exercises => const Color(0xFF27AE60),
-    TimeCategoryType.reading => const Color(0xFFE8862E),
-    TimeCategoryType.hobbies => const Color(0xFFEC4899),
+    TimeCategoryType.studying => ProgressAccentColors.purple,
+    TimeCategoryType.exercises => ProgressAccentColors.green,
+    TimeCategoryType.reading => ProgressAccentColors.orange,
+    TimeCategoryType.hobbies => ProgressAccentColors.pink,
   };
+}
+
+class ProgressAccentColors {
+  const ProgressAccentColors._();
+
+  static Color get blue => AppAccentPresets.values[0];
+  static Color get purple => AppAccentPresets.values[1];
+  static Color get green => AppAccentPresets.values[2];
+  static Color get pink => AppAccentPresets.values[3];
+  static Color get orange => AppAccentPresets.values[6];
 }

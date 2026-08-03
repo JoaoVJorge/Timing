@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_constants.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/config/config_controller.dart";
 import "package:help_out/presentation/config/widgets/settings_section.dart";
@@ -75,6 +76,14 @@ class ConfigPage extends StatelessWidget {
                     onTap: controller.onTapLanguage,
                     tint: const Color(0xFF2684D5),
                   ),
+                  SettingsTile.navigation(
+                    icon: Icons.lock_clock_rounded,
+                    title: "Modo concentração",
+                    subtitle: "Escolha quais focos bloqueiam a saída do app.",
+                    onTap: () =>
+                        _showConcentrationModeSheet(context, controller),
+                    tint: const Color(0xFF7C3AED),
+                  ),
                 ],
               ),
             ),
@@ -132,6 +141,90 @@ class ConfigPage extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showConcentrationModeSheet(
+    BuildContext context,
+    ConfigController controller,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.82,
+        child: SafeArea(
+          child: Obx(
+            () => ListView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+              children: [
+                Text(
+                  "Modo concentração",
+                  style: context.textStyles.sectionTitle.copyWith(fontSize: 18),
+                ),
+                const Gap(6),
+                Text(
+                  "Ao ativar uma atividade, o app tenta manter você dentro do foco até pausar ou encerrar.",
+                  style: context.textStyles.caption,
+                ),
+                const Gap(AppSpacing.betweenRelated),
+                SettingsSection(
+                  title: "Atividades",
+                  children: [
+                    SettingsTile.toggle(
+                      icon: Icons.school_rounded,
+                      title: "Estudo",
+                      subtitle: "Impede sair do app durante focos de estudo.",
+                      value: controller.focusLockStudyingEnabled.value,
+                      onChanged: (value) => controller.onToggleFocusLock(
+                        TimeCategoryType.studying,
+                        value,
+                      ),
+                      tint: const Color(0xFF2F80ED),
+                    ),
+                    SettingsTile.toggle(
+                      icon: Icons.fitness_center_rounded,
+                      title: "Exercícios",
+                      subtitle:
+                          "Impede sair do app durante focos de exercício.",
+                      value: controller.focusLockExercisesEnabled.value,
+                      onChanged: (value) => controller.onToggleFocusLock(
+                        TimeCategoryType.exercises,
+                        value,
+                      ),
+                      tint: const Color(0xFF27AE60),
+                    ),
+                    SettingsTile.toggle(
+                      icon: Icons.menu_book_rounded,
+                      title: "Leitura",
+                      subtitle: "Impede sair do app durante focos de leitura.",
+                      value: controller.focusLockReadingEnabled.value,
+                      onChanged: (value) => controller.onToggleFocusLock(
+                        TimeCategoryType.reading,
+                        value,
+                      ),
+                      tint: const Color(0xFFF2994A),
+                    ),
+                    SettingsTile.toggle(
+                      icon: Icons.palette_rounded,
+                      title: "Hobbie",
+                      subtitle: "Impede sair do app durante focos de hobbie.",
+                      value: controller.focusLockHobbiesEnabled.value,
+                      onChanged: (value) => controller.onToggleFocusLock(
+                        TimeCategoryType.hobbies,
+                        value,
+                      ),
+                      tint: const Color(0xFF9B51E0),
+                    ),
+                  ],
+                ),
+                const Gap(8),
+              ],
+            ),
+          ),
         ),
       ),
     );

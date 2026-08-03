@@ -16,6 +16,10 @@ class AppConfigEntity extends Equatable {
     required this.notificationsEnabled,
     required this.languageCode,
     required this.friendCode,
+    required this.focusLockStudyingEnabled,
+    required this.focusLockExercisesEnabled,
+    required this.focusLockReadingEnabled,
+    required this.focusLockHobbiesEnabled,
   });
 
   factory AppConfigEntity.fallback() => const AppConfigEntity(
@@ -31,6 +35,10 @@ class AppConfigEntity extends Equatable {
     notificationsEnabled: true,
     languageCode: null,
     friendCode: "",
+    focusLockStudyingEnabled: false,
+    focusLockExercisesEnabled: false,
+    focusLockReadingEnabled: false,
+    focusLockHobbiesEnabled: false,
   );
 
   factory AppConfigEntity.fromJson(String source) =>
@@ -49,6 +57,11 @@ class AppConfigEntity extends Equatable {
     notificationsEnabled: map["notificationsEnabled"] as bool? ?? true,
     languageCode: map["languageCode"] as String?,
     friendCode: map["friendCode"] as String? ?? "",
+    focusLockStudyingEnabled: map["focusLockStudyingEnabled"] as bool? ?? false,
+    focusLockExercisesEnabled:
+        map["focusLockExercisesEnabled"] as bool? ?? false,
+    focusLockReadingEnabled: map["focusLockReadingEnabled"] as bool? ?? false,
+    focusLockHobbiesEnabled: map["focusLockHobbiesEnabled"] as bool? ?? false,
   );
 
   final bool isDarkMode;
@@ -65,6 +78,10 @@ class AppConfigEntity extends Equatable {
   final bool notificationsEnabled;
   final String? languageCode;
   final String friendCode;
+  final bool focusLockStudyingEnabled;
+  final bool focusLockExercisesEnabled;
+  final bool focusLockReadingEnabled;
+  final bool focusLockHobbiesEnabled;
 
   Map<String, dynamic> toMap() => {
     "isDarkMode": isDarkMode,
@@ -79,6 +96,10 @@ class AppConfigEntity extends Equatable {
     "notificationsEnabled": notificationsEnabled,
     "languageCode": languageCode,
     "friendCode": friendCode,
+    "focusLockStudyingEnabled": focusLockStudyingEnabled,
+    "focusLockExercisesEnabled": focusLockExercisesEnabled,
+    "focusLockReadingEnabled": focusLockReadingEnabled,
+    "focusLockHobbiesEnabled": focusLockHobbiesEnabled,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -96,6 +117,10 @@ class AppConfigEntity extends Equatable {
     bool? notificationsEnabled,
     Object? languageCode = _unset,
     String? friendCode,
+    bool? focusLockStudyingEnabled,
+    bool? focusLockExercisesEnabled,
+    bool? focusLockReadingEnabled,
+    bool? focusLockHobbiesEnabled,
   }) => AppConfigEntity(
     isDarkMode: isDarkMode ?? this.isDarkMode,
     userName: userName ?? this.userName,
@@ -115,6 +140,14 @@ class AppConfigEntity extends Equatable {
         ? this.languageCode
         : languageCode as String?,
     friendCode: friendCode ?? this.friendCode,
+    focusLockStudyingEnabled:
+        focusLockStudyingEnabled ?? this.focusLockStudyingEnabled,
+    focusLockExercisesEnabled:
+        focusLockExercisesEnabled ?? this.focusLockExercisesEnabled,
+    focusLockReadingEnabled:
+        focusLockReadingEnabled ?? this.focusLockReadingEnabled,
+    focusLockHobbiesEnabled:
+        focusLockHobbiesEnabled ?? this.focusLockHobbiesEnabled,
   );
 
   @override
@@ -131,6 +164,10 @@ class AppConfigEntity extends Equatable {
     notificationsEnabled,
     languageCode,
     friendCode,
+    focusLockStudyingEnabled,
+    focusLockExercisesEnabled,
+    focusLockReadingEnabled,
+    focusLockHobbiesEnabled,
   ];
 }
 

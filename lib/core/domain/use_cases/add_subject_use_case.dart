@@ -17,6 +17,7 @@ class AddSubjectUseCase {
     int goalPages = 0,
     String iconName = "",
     int restMinutes = SubjectEntity.defaultRestMinutes,
+    int focusSessionCount = 1,
     int wallpaperIndex = 0,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
@@ -35,6 +36,7 @@ class AddSubjectUseCase {
         notes: "",
         iconName: iconName,
         restMinutes: restMinutes,
+        focusSessionCount: focusSessionCount,
         wallpaperIndex: wallpaperIndex,
       );
 

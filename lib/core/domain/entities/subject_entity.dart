@@ -16,6 +16,7 @@ class SubjectEntity extends Equatable {
     required this.notes,
     required this.iconName,
     required this.restMinutes,
+    required this.focusSessionCount,
     required this.wallpaperIndex,
   });
 
@@ -34,6 +35,7 @@ class SubjectEntity extends Equatable {
     notes: map["notes"] as String? ?? "",
     iconName: map["iconName"] as String? ?? "",
     restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
+    focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
   );
 
@@ -50,6 +52,7 @@ class SubjectEntity extends Equatable {
   final String notes;
   final String iconName;
   final int restMinutes;
+  final int focusSessionCount;
   final int wallpaperIndex;
 
   Map<String, dynamic> toMap() => {
@@ -64,6 +67,7 @@ class SubjectEntity extends Equatable {
     "notes": notes,
     "iconName": iconName,
     "restMinutes": restMinutes,
+    "focusSessionCount": focusSessionCount,
     "wallpaperIndex": wallpaperIndex,
   };
 
@@ -79,6 +83,7 @@ class SubjectEntity extends Equatable {
     String? notes,
     String? iconName,
     int? restMinutes,
+    int? focusSessionCount,
     int? wallpaperIndex,
   }) => SubjectEntity(
     id: id,
@@ -92,6 +97,7 @@ class SubjectEntity extends Equatable {
     notes: notes ?? this.notes,
     iconName: iconName ?? this.iconName,
     restMinutes: restMinutes ?? this.restMinutes,
+    focusSessionCount: focusSessionCount ?? this.focusSessionCount,
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
   );
 
@@ -108,6 +114,7 @@ class SubjectEntity extends Equatable {
     notes,
     iconName,
     restMinutes,
+    focusSessionCount,
     wallpaperIndex,
   ];
 }

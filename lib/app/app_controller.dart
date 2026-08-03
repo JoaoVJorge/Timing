@@ -8,6 +8,7 @@ import "package:help_out/app/app_constants.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/app_config_entity.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart";
@@ -53,6 +54,10 @@ class AppController extends GetxController {
   final RxBool notificationsEnabled = true.obs;
   final Rx<String?> languageCode = Rx<String?>(null);
   final RxString friendCode = "".obs;
+  final RxBool focusLockStudyingEnabled = false.obs;
+  final RxBool focusLockExercisesEnabled = false.obs;
+  final RxBool focusLockReadingEnabled = false.obs;
+  final RxBool focusLockHobbiesEnabled = false.obs;
 
   String? _decodedPhotoSource;
   Uint8List? _decodedPhotoBytes;
@@ -124,6 +129,10 @@ class AppController extends GetxController {
     notificationsEnabled.value = config.notificationsEnabled;
     languageCode.value = config.languageCode;
     friendCode.value = config.friendCode;
+    focusLockStudyingEnabled.value = config.focusLockStudyingEnabled;
+    focusLockExercisesEnabled.value = config.focusLockExercisesEnabled;
+    focusLockReadingEnabled.value = config.focusLockReadingEnabled;
+    focusLockHobbiesEnabled.value = config.focusLockHobbiesEnabled;
     // The saved language only reaches here after GetMaterialApp's first
     // build (see the comment in setLanguageCode), so it must be applied
     // explicitly too, not just left to the `locale:` constructor param.
@@ -141,11 +150,22 @@ class AppController extends GetxController {
       if (config == null) {
         return false;
       }
-      _applyConfig(config);
+      final AppConfigEntity mergedConfig = _withLocalConcentrationSettings(
+        config,
+      );
+      _applyConfig(mergedConfig);
       await _saveAppConfigUseCase(_currentConfig);
       return config.userName.isNotEmpty;
     });
   }
+
+  AppConfigEntity _withLocalConcentrationSettings(AppConfigEntity config) =>
+      config.copyWith(
+        focusLockStudyingEnabled: focusLockStudyingEnabled.value,
+        focusLockExercisesEnabled: focusLockExercisesEnabled.value,
+        focusLockReadingEnabled: focusLockReadingEnabled.value,
+        focusLockHobbiesEnabled: focusLockHobbiesEnabled.value,
+      );
 
   AppConfigEntity get _currentConfig => AppConfigEntity(
     isDarkMode: isDarkMode.value,
@@ -160,6 +180,10 @@ class AppController extends GetxController {
     notificationsEnabled: notificationsEnabled.value,
     languageCode: languageCode.value,
     friendCode: friendCode.value,
+    focusLockStudyingEnabled: focusLockStudyingEnabled.value,
+    focusLockExercisesEnabled: focusLockExercisesEnabled.value,
+    focusLockReadingEnabled: focusLockReadingEnabled.value,
+    focusLockHobbiesEnabled: focusLockHobbiesEnabled.value,
   );
 
   Future<void> reloadUserScopedState() async {
@@ -217,6 +241,30 @@ class AppController extends GetxController {
     await _saveAppConfigUseCase(_currentConfig);
   }
 
+  bool isFocusLockEnabledFor(TimeCategoryType category) => switch (category) {
+    TimeCategoryType.studying => focusLockStudyingEnabled.value,
+    TimeCategoryType.exercises => focusLockExercisesEnabled.value,
+    TimeCategoryType.reading => focusLockReadingEnabled.value,
+    TimeCategoryType.hobbies => focusLockHobbiesEnabled.value,
+  };
+
+  Future<void> setFocusLockEnabledFor(
+    TimeCategoryType category,
+    bool value,
+  ) async {
+    switch (category) {
+      case TimeCategoryType.studying:
+        focusLockStudyingEnabled.value = value;
+      case TimeCategoryType.exercises:
+        focusLockExercisesEnabled.value = value;
+      case TimeCategoryType.reading:
+        focusLockReadingEnabled.value = value;
+      case TimeCategoryType.hobbies:
+        focusLockHobbiesEnabled.value = value;
+    }
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
   Locale _resolvedLocale(String? code) {
     if (code != null) {
       return Locale(code);
@@ -268,6 +316,10 @@ class AppController extends GetxController {
     profilePhotoBase64.value = null;
     avatarIconIndex.value = 0;
     friendCode.value = "";
+    focusLockStudyingEnabled.value = false;
+    focusLockExercisesEnabled.value = false;
+    focusLockReadingEnabled.value = false;
+    focusLockHobbiesEnabled.value = false;
     await reloadUserScopedState();
     await _appNavigator.offAllNamed(AppRoutes.login);
   }

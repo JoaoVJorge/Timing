@@ -92,7 +92,7 @@ class CurrentUserRankCard extends StatelessWidget {
                     Text(
                       rankText,
                       textAlign: TextAlign.center,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.black20.copyWith(fontSize: 26),
                     ),
@@ -166,8 +166,8 @@ class CurrentUserRankCard extends StatelessWidget {
 
   String _tiedFirstLabel(BuildContext context) =>
       switch (context.languageCode) {
-        "es" => "Empate en 1er lugar",
-        "pt" => "Empate em 1º lugar",
+        "es" => "Empate en 1er",
+        "pt" => "Empate em 1º",
         _ => "Tied for 1st",
       };
 }
