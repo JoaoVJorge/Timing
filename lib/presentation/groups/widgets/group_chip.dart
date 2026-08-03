@@ -25,7 +25,7 @@ class GroupChip extends StatelessWidget {
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: 62,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.only(right: 16, left: 12),
       decoration: BoxDecoration(
         gradient: isSelected
             ? context.colorTokens.primaryGradient

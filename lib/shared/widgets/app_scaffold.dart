@@ -29,32 +29,40 @@ class AppScaffold extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Padding(
-              padding:
-                  padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: AppUiConstants.pagePadding,
+            child: topBar == null
+                ? Padding(padding: _bodyPadding, child: body)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Gap(8),
+                      Padding(padding: _topBarPadding, child: topBar!),
+                      const Gap(8),
+                      Expanded(
+                        child: Padding(padding: _bodyPadding, child: body),
+                      ),
+                    ],
                   ),
-              child: topBar == null
-                  ? body
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Gap(16),
-                        topBar!,
-                        const Gap(12),
-                        Expanded(child: body),
-                      ],
-                    ),
-            ),
           ),
           if (bottomBar != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: Center(child: bottomBar!),
+              padding: const EdgeInsets.fromLTRB(
+                AppUiConstants.pagePadding,
+                12,
+                AppUiConstants.pagePadding,
+                16,
+              ),
+              child: bottomBar!,
             ),
         ],
       ),
     ),
+  );
+
+  EdgeInsetsGeometry get _bodyPadding =>
+      padding ??
+      const EdgeInsets.symmetric(horizontal: AppUiConstants.pagePadding);
+
+  static const EdgeInsetsGeometry _topBarPadding = EdgeInsets.symmetric(
+    horizontal: AppUiConstants.pagePadding,
   );
 }

@@ -2,12 +2,14 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/profile/widgets/top_theme_tile.dart";
+import "package:help_out/presentation/progress/widgets/top_theme_tile.dart";
+import "package:help_out/theme/app_spacing.dart";
+import "package:help_out/theme/app_surfaces.dart";
 
-/// "Top reading" section for the Profile screen. Lists the reading subjects
+/// "Top reading" section for the Progress screen. Lists the reading subjects
 /// with the most pages logged, or a guidance empty state when there are none.
-class ProfileTopSubjectsList extends StatelessWidget {
-  const ProfileTopSubjectsList({required this.subjects, super.key});
+class ProgressTopSubjectsList extends StatelessWidget {
+  const ProgressTopSubjectsList({required this.subjects, super.key});
 
   final List<SubjectEntity> subjects;
 
@@ -17,24 +19,18 @@ class ProfileTopSubjectsList extends StatelessWidget {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: context.colorTokens.borderUnfocused),
-        ),
+        decoration: AppSurfaces.content(context.colorTokens),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               context.l10n.profileTopReadingEmptyTitle,
-              style: context.textStyles.bodyLarge,
+              style: context.textStyles.cardTitle,
             ),
-            const Gap(4),
+            const Gap(AppSpacing.titleToDescription),
             Text(
               context.l10n.profileTopReadingEmptyDescription,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
-              ),
+              style: context.textStyles.caption,
             ),
           ],
         ),
@@ -44,7 +40,7 @@ class ProfileTopSubjectsList extends StatelessWidget {
     return Column(
       children: [
         for (int index = 0; index < subjects.length; index++) ...[
-          if (index > 0) const Gap(12),
+          if (index > 0) const Gap(AppSpacing.betweenRelated),
           TopThemeTile(rank: index + 1, subject: subjects[index]),
         ],
       ],

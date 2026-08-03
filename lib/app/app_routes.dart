@@ -29,8 +29,8 @@ import "package:help_out/presentation/main_navigation/main_navigation_bindings.d
 import "package:help_out/presentation/main_navigation/main_navigation_page.dart";
 import "package:help_out/presentation/notes/notes_bindings.dart";
 import "package:help_out/presentation/notes/notes_page.dart";
-import "package:help_out/presentation/profile/profile_bindings.dart";
-import "package:help_out/presentation/profile/profile_page.dart";
+import "package:help_out/presentation/progress/progress_bindings.dart";
+import "package:help_out/presentation/progress/progress_page.dart";
 import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
 import "package:help_out/presentation/splash/splash_bindings.dart";
@@ -45,7 +45,7 @@ class AppRoutes {
   static const String login = "/login";
   static const String mainNavigation = "/mainNavigation";
   static const String home = "/home";
-  static const String profile = "/profile";
+  static const String progress = "/progress";
   static const String friends = "/friends";
   static const String groups = "/groups";
   static const String config = "/config";
@@ -85,9 +85,9 @@ class AppRoutes {
           binding: HomeBindings(),
         ),
         GetPage(
-          name: profile,
-          page: () => const ProfilePage(),
-          binding: ProfileBindings(),
+          name: progress,
+          page: () => const ProgressPage(),
+          binding: ProgressBindings(),
         ),
         GetPage(name: friends, page: () => const FriendsPage()),
         GetPage(

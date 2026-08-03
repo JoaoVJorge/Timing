@@ -4,16 +4,22 @@ import "package:get/get.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/presentation/groups/groups_controller.dart";
 import "package:help_out/presentation/groups/widgets/current_user_rank_card.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
 import "package:help_out/presentation/groups/widgets/group_selector.dart";
+import "package:help_out/presentation/groups/widgets/groups_header.dart";
 import "package:help_out/presentation/groups/widgets/leaderboard_tile.dart";
 import "package:help_out/presentation/groups/widgets/period_selector.dart";
+import "package:help_out/shared/widgets/app_empty_state.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/shared/widgets/app_section_header.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:help_out/theme/app_spacing.dart";
+import "package:help_out/theme/app_surfaces.dart";
 
+/// Answers "how am I doing next to other people?". Owns both the group
+/// leaderboards and the friends area they are built from.
 class GroupsPage extends StatelessWidget {
   const GroupsPage({super.key});
 
@@ -25,62 +31,31 @@ class GroupsPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Gap(18),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.groupsTitle,
-                style: context.textStyles.black32.copyWith(fontSize: 34),
-              ),
-              const Gap(4),
-              Text(
-                context.l10n.groupsSubtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyLarge.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          const Gap(16),
+          GroupsHeader(
+            onTapFriends: controller.onTapFriends,
+            onTapCreateGroup: controller.onTapCreateGroup,
           ),
+          const Gap(AppSpacing.betweenRelated),
           Obx(() {
             if (controller.isLoading.value && controller.groups.isEmpty) {
               return const _GroupSelectorSkeleton();
             }
-
             if (controller.groups.isEmpty) {
-              return const Gap(24);
+              return const Gap(AppSpacing.betweenSections);
             }
 
             return Column(
               children: [
-                const Gap(6),
                 GroupSelector(
                   groups: controller.groups,
                   selectedGroupId: controller.selectedGroup.value?.id,
                   onSelectGroup: controller.onSelectGroup,
-                  onCreateGroup: controller.onTapCreateGroup,
                 ),
+                const Gap(AppSpacing.titleToDescription),
               ],
             );
           }),
-          const Gap(6),
-          Obx(
-            () => controller.groups.isEmpty
-                ? const SizedBox.shrink()
-                : Column(
-                    children: [
-                      GroupPeriodSelector(
-                        selectedPeriod: controller.selectedPeriod.value,
-                        onSelectPeriod: controller.onSelectPeriod,
-                      ),
-                      const Gap(18),
-                    ],
-                  ),
-          ),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value && controller.groups.isEmpty) {
@@ -103,16 +78,21 @@ class GroupsPage extends StatelessWidget {
                 return Center(
                   child: Text(
                     context.l10n.noGroupSelected,
-                    style: context.textStyles.bodyMedium.copyWith(
-                      color: context.colorTokens.textHint,
-                    ),
+                    style: context.textStyles.caption,
                   ),
                 );
               }
 
               return ListView(
-                padding: const EdgeInsets.only(bottom: 18),
+                padding: const EdgeInsets.only(
+                  bottom: AppSpacing.betweenSections,
+                ),
                 children: [
+                  GroupPeriodSelector(
+                    selectedPeriod: controller.selectedPeriod.value,
+                    onSelectPeriod: controller.onSelectPeriod,
+                  ),
+                  const Gap(AppSpacing.betweenSections),
                   if (currentUser != null) ...[
                     CurrentUserRankCard(
                       rank: controller.currentUserRank,
@@ -123,55 +103,15 @@ class GroupsPage extends StatelessWidget {
                       differenceToPrevious: controller.differenceToPrevious(
                         currentUser,
                       ),
+                      memberAhead: controller.memberAheadOfCurrentUser,
+                      isTiedForFirst: controller.currentUserIsTiedForFirst,
                     ),
-                    const Gap(14),
+                    const Gap(AppSpacing.betweenSections),
                   ],
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 14,
-                        color: context.colorTokens.textHint,
-                      ),
-                      const Gap(6),
-                      Expanded(
-                        child: Text(
-                          leaderboardDescription(
-                            context,
-                            group.theme,
-                            controller.selectedPeriod.value,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.bodySmall.copyWith(
-                            color: context.colorTokens.textHint,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Gap(16),
-                  Text(
-                    context.l10n.leaderboardTitle,
-                    style: context.textStyles.extraBold24.copyWith(
-                      color: context.colorTokens.textBody.withValues(
-                        alpha: 0.94,
-                      ),
-                      fontSize: 22,
-                    ),
-                  ),
-                  const Gap(14),
+                  AppSectionHeader(title: context.l10n.leaderboardTitle),
+                  const Gap(AppSpacing.betweenRelated),
                   Container(
-                    decoration: BoxDecoration(
-                      color: context.colorTokens.surface,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: context.colorTokens.borderUnfocused.withValues(
-                          alpha: 0.45,
-                        ),
-                      ),
-                    ),
+                    decoration: AppSurfaces.rowGroup(context.colorTokens),
                     child: Column(
                       children: [
                         for (
@@ -180,7 +120,7 @@ class GroupsPage extends StatelessWidget {
                           index++
                         ) ...[
                           LeaderboardTile(
-                            rank: index + 1,
+                            rank: controller.rankOf(members[index]),
                             member: members[index],
                             theme: group.theme,
                             value: members[index].secondsFor(
@@ -226,99 +166,46 @@ class _GroupsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.only(bottom: 14),
+    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
     children: [
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(18, 22, 18, 20),
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: context.colorTokens.borderUnfocused.withValues(alpha: 0.70),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 82,
-              height: 82,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: context.colorTokens.primaryVeryLight,
-              ),
-              child: Icon(
-                Icons.groups_2_outlined,
-                size: 46,
-                color: context.colorTokens.primary,
-              ),
-            ),
-            const Gap(16),
-            Text(
-              context.l10n.groupsEmptyTitle,
-              textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(
-                color: context.colorTokens.textBody,
-                fontSize: 21,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const Gap(8),
-            Text(
-              context.l10n.groupsEmptyDescription,
-              textAlign: TextAlign.center,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.textHint,
-                fontSize: 13,
-                height: 1.28,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(16),
-            _EmptyPrimaryButton(
-              label: context.l10n.groupsEmptyButton,
-              onTap: onCreateGroup,
-            ),
-            const Gap(10),
-            _EmptySecondaryButton(
-              label: _joinWithCodeLabel(context),
-              onTap: onJoinWithCode,
-            ),
-          ],
-        ),
+      AppEmptyState(
+        icon: Icons.groups_2_outlined,
+        title: context.l10n.groupsEmptyTitle,
+        description: context.l10n.groupsEmptyDescription,
+        actionLabel: context.l10n.groupsEmptyButton,
+        onTapAction: onCreateGroup,
       ),
-      const Gap(22),
+      const Gap(AppSpacing.betweenRelated),
+      _JoinWithCodeButton(
+        label: _joinWithCodeLabel(context),
+        onTap: onJoinWithCode,
+      ),
+      const Gap(AppSpacing.betweenSections),
       Center(child: _BenefitsHeader(label: _benefitsHeader(context))),
-      const Gap(12),
-      Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 96,
-              child: _BenefitTile(
-                icon: Icons.leaderboard_rounded,
-                label: _rankingLabel(context),
-              ),
+      const Gap(AppSpacing.betweenRelated),
+      Row(
+        children: [
+          Expanded(
+            child: _BenefitTile(
+              icon: Icons.leaderboard_rounded,
+              label: _rankingLabel(context),
             ),
-            const Gap(10),
-            SizedBox(
-              width: 96,
-              child: _BenefitTile(
-                icon: Icons.show_chart_rounded,
-                label: _progressLabel(context),
-              ),
+          ),
+          const Gap(AppSpacing.titleToDescription),
+          Expanded(
+            child: _BenefitTile(
+              icon: Icons.show_chart_rounded,
+              label: _progressLabel(context),
             ),
-            const Gap(10),
-            SizedBox(
-              width: 96,
-              child: _BenefitTile(
-                icon: Icons.favorite_border_rounded,
-                label: _friendsLabel(context),
-              ),
+          ),
+          const Gap(AppSpacing.titleToDescription),
+          Expanded(
+            child: _BenefitTile(
+              icon: Icons.favorite_border_rounded,
+              label: context.l10n.groupsFriendsTitle,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ],
   );
@@ -348,16 +235,10 @@ class _GroupsEmptyState extends StatelessWidget {
     "pt" => "Progresso",
     _ => "Progress",
   };
-
-  String _friendsLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Amigos",
-    "pt" => "Amigos",
-    _ => "Friends",
-  };
 }
 
-class _EmptyPrimaryButton extends StatelessWidget {
-  const _EmptyPrimaryButton({required this.label, required this.onTap});
+class _JoinWithCodeButton extends StatelessWidget {
+  const _JoinWithCodeButton({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
@@ -368,21 +249,21 @@ class _EmptyPrimaryButton extends StatelessWidget {
     pressedScale: 0.97,
     child: Container(
       width: double.infinity,
-      height: 46,
+      height: AppSpacing.minTapTarget,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        gradient: context.colorTokens.primaryGradient,
-        borderRadius: BorderRadius.circular(13),
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.95),
+          width: 1.4,
+        ),
       ),
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.textPrimaryButton.copyWith(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w900,
-        ),
+        style: context.textStyles.cardTitle,
       ),
     ),
   );
@@ -393,64 +274,46 @@ class _GroupSelectorSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 6, bottom: 2),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            Container(
-              height: 62,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                gradient: context.colorTokens.primaryGradient,
-                borderRadius: BorderRadius.circular(30),
+    padding: const EdgeInsets.only(
+      top: 10,
+      bottom: AppSpacing.titleToDescription,
+    ),
+    child: Row(
+      children: [
+        Container(
+          height: 62,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            gradient: context.colorTokens.primaryGradient,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colorTokens.white.withValues(alpha: 0.25),
+                ),
+                child: Icon(
+                  Icons.school_rounded,
+                  color: context.colorTokens.white,
+                  size: 20,
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.25),
-                    ),
-                    child: const Icon(
-                      Icons.school_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const Gap(10),
-                  _SkeletonBox(
-                    width: 118,
-                    height: 16,
-                    radius: 8,
-                    color: Colors.white.withValues(alpha: 0.36),
-                  ),
-                ],
+              const Gap(10),
+              _SkeletonBox(
+                width: 118,
+                height: 16,
+                radius: 8,
+                color: context.colorTokens.white.withValues(alpha: 0.36),
               ),
-            ),
-            const Gap(6),
-            Container(
-              width: 62,
-              height: 62,
-              decoration: BoxDecoration(
-                color: context.colorTokens.surface,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Icon(
-                Icons.add_rounded,
-                color: context.colorTokens.primary,
-                size: 24,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     ),
   );
 }
@@ -460,10 +323,10 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.only(bottom: 18),
+    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
     children: [
       const _CurrentUserRankSkeleton(),
-      const Gap(14),
+      const Gap(AppSpacing.betweenRelated),
       Row(
         children: [
           Icon(
@@ -475,17 +338,11 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
           const Expanded(child: _SkeletonBox(height: 12, radius: 6)),
         ],
       ),
-      const Gap(16),
+      const Gap(AppSpacing.betweenSections),
       const _SkeletonBox(width: 116, height: 22, radius: 10),
-      const Gap(14),
+      const Gap(AppSpacing.betweenRelated),
       Container(
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-          ),
-        ),
+        decoration: AppSurfaces.rowGroup(context.colorTokens),
         child: const Column(
           children: [
             _SkeletonLeaderboardRow(
@@ -525,15 +382,8 @@ class _CurrentUserRankSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-      ),
-    ),
+    decoration: AppSurfaces.content(context.colorTokens),
     child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -554,15 +404,14 @@ class _CurrentUserRankSkeleton extends StatelessWidget {
             const Gap(14),
             const Flexible(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _SkeletonBox(width: 86, height: 12, radius: 6),
-                  Gap(8),
+                  Gap(AppSpacing.titleToDescription),
                   _SkeletonBox(width: 64, height: 24, radius: 10),
                 ],
               ),
             ),
-            const Gap(8),
+            const Gap(AppSpacing.titleToDescription),
           ],
         ),
         const Gap(14),
@@ -580,7 +429,7 @@ class _CurrentUserRankSkeleton extends StatelessWidget {
             const _SkeletonBox(width: 76, height: 24, radius: 10),
           ],
         ),
-        const Gap(8),
+        const Gap(AppSpacing.titleToDescription),
         const _SkeletonBox(width: 160, height: 12, radius: 6),
       ],
     ),
@@ -619,15 +468,6 @@ class _SkeletonLeaderboardRow extends StatelessWidget {
             ? context.colorTokens.primaryVeryLight
             : context.colorTokens.transparent,
         borderRadius: isCurrentUser ? userRadius : BorderRadius.zero,
-        boxShadow: isCurrentUser
-            ? [
-                BoxShadow(
-                  color: context.colorTokens.primary.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(
@@ -650,7 +490,7 @@ class _SkeletonLeaderboardRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _SkeletonBox(width: 118, height: 16, radius: 8),
-                Gap(8),
+                Gap(AppSpacing.titleToDescription),
                 _SkeletonBox(width: 94, height: 11, radius: 6),
               ],
             ),
@@ -703,42 +543,6 @@ class _SkeletonBox extends StatelessWidget {
   }
 }
 
-class _EmptySecondaryButton extends StatelessWidget {
-  const _EmptySecondaryButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    pressedScale: 0.97,
-    child: Container(
-      width: double.infinity,
-      height: 46,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.95),
-          width: 1.4,
-        ),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodyLarge.copyWith(
-          color: context.colorTokens.textBody,
-          fontSize: 14,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    ),
-  );
-}
-
 class _BenefitsHeader extends StatelessWidget {
   const _BenefitsHeader({required this.label});
 
@@ -751,14 +555,7 @@ class _BenefitsHeader extends StatelessWidget {
       _HeaderLine(color: context.colorTokens.borderUnfocused),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Text(
-          label,
-          style: context.textStyles.bodyMedium.copyWith(
-            color: context.colorTokens.textHint,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        child: Text(label, style: context.textStyles.caption),
       ),
       _HeaderLine(color: context.colorTokens.borderUnfocused),
     ],
@@ -785,28 +582,18 @@ class _BenefitTile extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 88,
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.70),
-      ),
-    ),
+    decoration: AppSurfaces.content(context.colorTokens),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, size: 28, color: context.colorTokens.primary),
-        const Gap(8),
+        Icon(icon, size: 26, color: context.colorTokens.primary),
+        const Gap(AppSpacing.titleToDescription),
         Text(
           label,
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodyLarge.copyWith(
-            color: context.colorTokens.textBody,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
+          style: context.textStyles.cardTitle.copyWith(fontSize: 14),
         ),
       ],
     ),

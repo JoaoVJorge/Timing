@@ -537,8 +537,6 @@
   "timerExitDialogCancel": "Weiter",
   "timerExitDialogContinueLater": "Sie können später fortfahren.",
   "timerExitDialogConfirm": "Ende",
-  "profileTitle": "Reise",
-  "profileSubtitle": "Verfolgen Sie Ihren Fortschritt und wichtige Meilensteine",
   "editButton": "Bearbeiten",
   "nicknameFallback": "Benutzer",
   "profileSummaryLabel": "Gesamtzusammenfassung",
@@ -722,7 +720,6 @@
   "metricDaysValue": "{value} Tage",
   "metricPagesValue": "{value} Seiten",
   "navHome": "Zuhause",
-  "navProfile": "Reise",
   "navGroups": "Gruppen",
   "navSettings": "Einstellungen",
   "myScheduleCardTitle": "Mein Zeitplan",
@@ -768,5 +765,117 @@
   "credentialsSubtitle": "Erzählen Sie uns etwas über sich, um Ihr Erlebnis individuell zu gestalten.",
   "birthDateHint": "Geburtsdatum",
   "profileEditableLaterNote": "Sie können dies später bearbeiten.",
-  "finishButton": "Fertig"
+  "finishButton": "Fertig",
+
+  "navProgress": "Fortschritt",
+  "progressTitle": "Fortschritt",
+  "progressSubtitle": "Alles, was du bisher geschafft hast",
+  "progressPeriodDay": "Tag",
+  "progressPeriodWeek": "Woche",
+  "progressPeriodMonth": "Monat",
+  "progressFocusResultLabel": "Fokus in diesem Zeitraum",
+  "progressComparisonMore": "{value} mehr als im vorherigen Zeitraum",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonLess": "{value} weniger als im vorherigen Zeitraum",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonSame": "Genauso wie im vorherigen Zeitraum",
+  "progressComparisonFirst": "Deine ersten Daten in diesem Zeitraum",
+  "progressStatExercises": "Übungen",
+  "progressStatGoalsDone": "Erledigte Ziele",
+  "progressDistributionTitle": "Nach Aktivität",
+  "homeTodayInline": "Heute: {focus} Fokus · {pages} Seiten · {goals} Ziele",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": { "type": "String" },
+      "pages": { "type": "int" },
+      "goals": { "type": "int" }
+    }
+  },
+  "homePlanDayTitle": "Meinen Tag planen",
+  "homePlanDaySubtitle": "Tagesziele und Wochenplan",
+  "groupsFriendsTitle": "Freunde",
+  "groupsFriendsSubtitle": "Anfragen, Einladungen und dein Code",
+  "groupMembersCount": "{count} Mitglieder",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createScheduleEntryButton": "Termin erstellen",
+  "scheduleEntryMissingFields": "Titel, Beginn und Ende ausfüllen, um fortzufahren",
+  "timerSessionCounter": "Fokus {current} von {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "timerExitBackToFocus": "Zurück zum Fokus",
+  "timerExitSaveAndEnd": "Speichern und beenden",
+  "notesSavedNow": "Gerade gespeichert",
+  "notesSaving": "Wird gespeichert …",
+  "dailyGoalsPendingSection": "Offen",
+  "dailyGoalsCompletedSection": "Erledigt",
+  "dailyGoalsEmptyTitle": "Noch keine Ziele für heute",
+  "dailyGoalsEmptyDescription": "Schreib oben ein Ziel oder wähle einen Vorschlag, um den Tag zu starten.",
+  "achievementProgressValue": "{current} von {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "categoryEmptyTitle": "Hier ist noch nichts",
+  "categoryEmptyDescription": "Erstelle dein erstes Element, um deine Fokuszeit zu erfassen.",
+  "scheduleEmptyExampleLabel": "Beispiel",
+
+  "progressAchievementsNextTitle": "Nächster Erfolg",
+  "achievementFocusHourTitle": "1 Stunde Fokus",
+  "achievementSessionsTitle": "5 abgeschlossene Sitzungen",
+  "achievementStreakTitle": "7 Tage in Folge",
+  "achievementReaderTitle": "100 gelesene Seiten",
+  "achievementGoalStartedTitle": "Erstes Ziel gestartet",
+  "unitMinutesShort": "{value} Min.",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitSessions": "{value} Sitzungen",
+  "@unitSessions": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitDays": "{value} Tage",
+  "@unitDays": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "currentUserRankNextStepNamed": "{score} bis zu {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
+  "timerKeepAwakeNote": "Der Bildschirm bleibt während der Sitzung an",
+  "scheduleWeekLabel": "Woche vom {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "deleteButton": "Löschen"
 }

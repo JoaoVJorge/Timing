@@ -8,6 +8,7 @@ import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart"
 import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
+import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 
 class ScheduleController extends GetxController {
   ScheduleController({
@@ -24,13 +25,48 @@ class ScheduleController extends GetxController {
 
   final RxList<ScheduleEntryEntity> entries = <ScheduleEntryEntity>[].obs;
   final RxBool isLoading = true.obs;
-  final RxInt selectedWeekday = DateTime.now().weekday.obs;
+  final Rx<DateTime> selectedDate = _todayDate().obs;
+
+  int get selectedWeekday => selectedDate.value.weekday;
 
   List<ScheduleEntryEntity> get sortedEntries =>
-      _sortedEntriesForWeekday(selectedWeekday.value);
+      _sortedEntriesForWeekday(selectedWeekday);
 
   List<ScheduleEntryEntity> get todayEntries =>
       _sortedEntriesForWeekday(DateTime.now().weekday);
+
+  bool get isViewingToday => _isSameDate(selectedDate.value, _todayDate());
+
+  static DateTime _todayDate() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  static bool _isSameDate(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// Only meaningful for today: on other days every entry is simply upcoming.
+  ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
+    if (!isViewingToday) {
+      return ScheduleEntryStatus.upcoming;
+    }
+    final DateTime now = DateTime.now();
+    final int nowMinutes = now.hour * 60 + now.minute;
+    final int endMinutes = entry.endMinutes ?? entry.startMinutes;
+    if (nowMinutes >= endMinutes && nowMinutes > entry.startMinutes) {
+      return ScheduleEntryStatus.past;
+    }
+    if (nowMinutes >= entry.startMinutes) {
+      return ScheduleEntryStatus.current;
+    }
+    return ScheduleEntryStatus.upcoming;
+  }
+
+  DateTime _nextDateForWeekday(int weekday) {
+    final DateTime today = _todayDate();
+    final int diff = (weekday - today.weekday + 7) % 7;
+    return today.add(Duration(days: diff));
+  }
 
   List<ScheduleEntryEntity> _sortedEntriesForWeekday(int weekday) =>
       entries.where((entry) => entry.weekday == weekday).toList()
@@ -42,7 +78,8 @@ class ScheduleController extends GetxController {
     loadEntries();
   }
 
-  void onSelectWeekday(int weekday) => selectedWeekday.value = weekday;
+  void onSelectDate(DateTime date) =>
+      selectedDate.value = DateTime(date.year, date.month, date.day);
 
   Future<void> loadEntries() async {
     isLoading.value = true;
@@ -58,7 +95,7 @@ class ScheduleController extends GetxController {
   Future<void> onTapAddEntry() async {
     final dynamic rawResult = await _appNavigator.toNamed<dynamic>(
       AppRoutes.addScheduleEntry,
-      arguments: selectedWeekday.value,
+      arguments: selectedWeekday,
     );
     final AddScheduleEntryResult? result = rawResult as AddScheduleEntryResult?;
 
@@ -96,7 +133,7 @@ class ScheduleController extends GetxController {
     }
 
     entries.addAll(addedEntries);
-    selectedWeekday.value = addedEntries.first.weekday;
+    selectedDate.value = _nextDateForWeekday(addedEntries.first.weekday);
     entries.refresh();
   }
 

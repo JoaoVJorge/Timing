@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -8,6 +9,7 @@ import "package:help_out/presentation/config/widgets/settings_section.dart";
 import "package:help_out/presentation/config/widgets/settings_tile.dart";
 import "package:help_out/presentation/config/widgets/settings_user_card.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/theme/app_spacing.dart";
 
 class ConfigPage extends StatelessWidget {
   const ConfigPage({super.key});
@@ -25,26 +27,24 @@ class ConfigPage extends StatelessWidget {
             const Gap(16),
             Text(
               context.l10n.settingsTitle,
-              style: context.textStyles.titleFont,
+              style: context.textStyles.pageTitle,
             ),
-            const Gap(8),
+            const Gap(AppSpacing.titleToDescription),
             Text(
               context.l10n.settingsSubtitle,
-              style: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textHint,
-              ),
+              style: context.textStyles.caption,
             ),
-            const Gap(24),
+            const Gap(AppSpacing.betweenSections),
             Obx(
               () => SettingsUserCard(
                 name: controller.displayName,
                 nickname: controller.displayNickname,
                 avatarIconIndex: controller.avatarIconIndex.value,
-                profilePhotoBase64: controller.profilePhotoBase64.value,
+                profilePhotoBytes: controller.profilePhotoBytes,
                 onTap: controller.onTapMyProfile,
               ),
             ),
-            const Gap(28),
+            const Gap(AppSpacing.betweenSections + 4),
             Obx(
               () => SettingsSection(
                 title: context.l10n.preferencesSection,
@@ -57,14 +57,7 @@ class ConfigPage extends StatelessWidget {
                     subtitle: context.l10n.darkModeDisabledSubtitle,
                     value: controller.isDarkMode.value,
                     onChanged: controller.onToggleDarkMode,
-                    tint: context.colorTokens.primary,
-                  ),
-                  SettingsTile.navigation(
-                    icon: Icons.palette_rounded,
-                    title: context.l10n.accentColorSettingsTitle,
-                    subtitle: context.l10n.accentColorSettingsSubtitle,
-                    tint: controller.accentColor.value,
-                    onTap: controller.onTapAccentColor,
+                    tint: const Color(0xFF6C5CE7),
                   ),
                   SettingsTile.toggle(
                     icon: Icons.notifications_active_rounded,
@@ -79,13 +72,13 @@ class ConfigPage extends StatelessWidget {
                     title: context.l10n.language,
                     subtitle: context.l10n.appLanguageSubtitle,
                     trailingText: controller.languageLabel,
-                    tint: context.colorTokens.linkColor,
                     onTap: controller.onTapLanguage,
+                    tint: const Color(0xFF2684D5),
                   ),
                 ],
               ),
             ),
-            const Gap(28),
+            const Gap(AppSpacing.betweenSections + 4),
             SettingsSection(
               title: context.l10n.helpSection,
               children: [
@@ -93,19 +86,19 @@ class ConfigPage extends StatelessWidget {
                   iconName: "faq",
                   title: context.l10n.faqLabel,
                   subtitle: context.l10n.faqSettingsSubtitle,
-                  tint: context.colorTokens.success,
                   onTap: controller.onTapFaq,
+                  tint: context.colorTokens.success,
                 ),
                 SettingsTile.navigation(
                   icon: Icons.feedback_outlined,
                   title: context.l10n.sendFeedbackTitle,
                   subtitle: context.l10n.sendFeedbackSubtitle,
-                  tint: context.colorTokens.info,
                   onTap: controller.onTapFeedback,
+                  tint: context.colorTokens.info,
                 ),
               ],
             ),
-            const Gap(28),
+            const Gap(AppSpacing.betweenSections + 4),
             SettingsSection(
               title: context.l10n.aboutSection,
               children: [
@@ -117,7 +110,7 @@ class ConfigPage extends StatelessWidget {
                   ),
                   tint: context.colorTokens.textHint,
                 ),
-                if (AppConstants.useMockData)
+                if (AppConstants.useMockData && kDebugMode)
                   SettingsTile.info(
                     icon: Icons.developer_mode_rounded,
                     title: context.l10n.debugEnvironmentTitle,
@@ -126,7 +119,7 @@ class ConfigPage extends StatelessWidget {
                   ),
               ],
             ),
-            const Gap(28),
+            const Gap(AppSpacing.betweenSections + 4),
             SettingsSection(
               title: context.l10n.sessionSection,
               children: [

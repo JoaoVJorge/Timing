@@ -537,8 +537,6 @@
   "timerExitDialogCancel": "متابعة",
   "timerExitDialogContinueLater": "يمكنك الاستمرار في وقت لاحق.",
   "timerExitDialogConfirm": "نهاية",
-  "profileTitle": "رحلة",
-  "profileSubtitle": "تتبع التقدم المحرز الخاص بك والمعالم الرئيسية",
   "editButton": "تحرير",
   "nicknameFallback": "user",
   "profileSummaryLabel": "ملخص إجمالي",
@@ -722,7 +720,6 @@
   "metricDaysValue": "{value} يوم",
   "metricPagesValue": "صفحات {value}",
   "navHome": "الصفحة الرئيسية",
-  "navProfile": "رحلة",
   "navGroups": "المجموعات",
   "navSettings": "الإعدادات",
   "myScheduleCardTitle": "الجدول الزمني الخاص بي",
@@ -768,5 +765,117 @@
   "credentialsSubtitle": "أخبرنا قليلاً عن نفسك لتخصيص تجربتك.",
   "birthDateHint": "تاريخ الميلاد",
   "profileEditableLaterNote": "يمكنك تعديل هذا لاحقا.",
-  "finishButton": "إنهاء"
+  "finishButton": "إنهاء",
+
+  "navProgress": "التقدم",
+  "progressTitle": "التقدم",
+  "progressSubtitle": "كل ما أنجزته حتى الآن",
+  "progressPeriodDay": "يوم",
+  "progressPeriodWeek": "أسبوع",
+  "progressPeriodMonth": "شهر",
+  "progressFocusResultLabel": "التركيز في هذه الفترة",
+  "progressComparisonMore": "{value} أكثر من الفترة السابقة",
+  "@progressComparisonMore": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonLess": "{value} أقل من الفترة السابقة",
+  "@progressComparisonLess": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "progressComparisonSame": "مثل الفترة السابقة",
+  "progressComparisonFirst": "أول بياناتك في هذه الفترة",
+  "progressStatExercises": "التمارين",
+  "progressStatGoalsDone": "الأهداف المنجزة",
+  "progressDistributionTitle": "حسب النشاط",
+  "homeTodayInline": "اليوم: {focus} تركيز · {pages} صفحة · {goals} هدف",
+  "@homeTodayInline": {
+    "placeholders": {
+      "focus": { "type": "String" },
+      "pages": { "type": "int" },
+      "goals": { "type": "int" }
+    }
+  },
+  "homePlanDayTitle": "خطّط يومي",
+  "homePlanDaySubtitle": "الأهداف اليومية والجدول الأسبوعي",
+  "groupsFriendsTitle": "الأصدقاء",
+  "groupsFriendsSubtitle": "الطلبات والدعوات ورمزك",
+  "groupMembersCount": "{count} أعضاء",
+  "@groupMembersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "createScheduleEntryButton": "إنشاء موعد",
+  "scheduleEntryMissingFields": "أكمل العنوان ووقت البدء والانتهاء للمتابعة",
+  "timerSessionCounter": "تركيز {current} من {total}",
+  "@timerSessionCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "timerExitBackToFocus": "العودة إلى التركيز",
+  "timerExitSaveAndEnd": "حفظ وإنهاء",
+  "notesSavedNow": "تم الحفظ الآن",
+  "notesSaving": "جارٍ الحفظ…",
+  "dailyGoalsPendingSection": "قيد التنفيذ",
+  "dailyGoalsCompletedSection": "مكتملة",
+  "dailyGoalsEmptyTitle": "لا توجد أهداف لليوم بعد",
+  "dailyGoalsEmptyDescription": "اكتب هدفًا في الأعلى أو اختر أحد الاقتراحات لتبدأ يومك.",
+  "achievementProgressValue": "{current} من {total}",
+  "@achievementProgressValue": {
+    "placeholders": {
+      "current": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "categoryEmptyTitle": "لا شيء هنا بعد",
+  "categoryEmptyDescription": "أنشئ عنصرك الأول لتبدأ بتسجيل وقت تركيزك.",
+  "scheduleEmptyExampleLabel": "مثال",
+
+  "progressAchievementsNextTitle": "الإنجاز التالي",
+  "achievementFocusHourTitle": "ساعة من التركيز",
+  "achievementSessionsTitle": "5 جلسات مكتملة",
+  "achievementStreakTitle": "7 أيام متتالية",
+  "achievementReaderTitle": "100 صفحة مقروءة",
+  "achievementGoalStartedTitle": "بدء أول هدف",
+  "unitMinutesShort": "{value} د",
+  "@unitMinutesShort": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitSessions": "{value} جلسة",
+  "@unitSessions": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "unitDays": "{value} يوم",
+  "@unitDays": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+
+  "currentUserRankNextStepNamed": "{score} للحاق بـ {name}",
+  "@currentUserRankNextStepNamed": {
+    "placeholders": {
+      "score": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
+  "timerKeepAwakeNote": "تبقى الشاشة مضاءة أثناء الجلسة",
+  "scheduleWeekLabel": "أسبوع {date}",
+  "@scheduleWeekLabel": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "deleteButton": "حذف"
 }

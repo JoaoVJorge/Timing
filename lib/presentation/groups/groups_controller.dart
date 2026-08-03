@@ -53,8 +53,45 @@ class GroupsController extends GetxController {
   }
 
   int get currentUserRank {
-    final int index = rankedMembers.indexWhere(isCurrentUser);
-    return index < 0 ? 0 : index + 1;
+    final GroupMemberEntity? member = currentUserMember;
+    return member == null ? 0 : rankOf(member);
+  }
+
+  int rankOf(GroupMemberEntity member) {
+    final int value = member.secondsFor(selectedPeriod.value);
+    return rankedMembers
+            .where((item) => item.secondsFor(selectedPeriod.value) > value)
+            .length +
+        1;
+  }
+
+  bool get currentUserIsTiedForFirst {
+    final GroupMemberEntity? member = currentUserMember;
+    if (member == null || rankOf(member) != 1) {
+      return false;
+    }
+    final int value = member.secondsFor(selectedPeriod.value);
+    return rankedMembers
+            .where((item) => item.secondsFor(selectedPeriod.value) == value)
+            .length >
+        1;
+  }
+
+  /// Member ranked immediately above the current user, used to turn "2nd place"
+  /// into a concrete target.
+  GroupMemberEntity? get memberAheadOfCurrentUser {
+    final List<GroupMemberEntity> members = rankedMembers;
+    final int index = members.indexWhere(isCurrentUser);
+    if (index <= 0) {
+      return null;
+    }
+    final int currentValue = members[index].secondsFor(selectedPeriod.value);
+    for (int i = index - 1; i >= 0; i--) {
+      if (members[i].secondsFor(selectedPeriod.value) > currentValue) {
+        return members[i];
+      }
+    }
+    return null;
   }
 
   int? differenceToPrevious(GroupMemberEntity member) {
@@ -63,8 +100,18 @@ class GroupsController extends GetxController {
     if (index <= 0) {
       return null;
     }
-    return members[index - 1].secondsFor(selectedPeriod.value) -
-        member.secondsFor(selectedPeriod.value);
+    final int value = member.secondsFor(selectedPeriod.value);
+    GroupMemberEntity? previous;
+    for (int i = index - 1; i >= 0; i--) {
+      if (members[i].secondsFor(selectedPeriod.value) > value) {
+        previous = members[i];
+        break;
+      }
+    }
+    if (previous == null) {
+      return 0;
+    }
+    return previous.secondsFor(selectedPeriod.value) - value;
   }
 
   bool isCurrentUser(GroupMemberEntity member) => member.id == currentUserId;
@@ -114,6 +161,10 @@ class GroupsController extends GetxController {
     groups.refresh();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
+
+  /// Friends live next to Groups: both answer "how am I doing with others?".
+  Future<void> onTapFriends() =>
+      _appNavigator.toNamed(AppRoutes.friends, id: 1) ?? Future<void>.value();
 
   void onTapJoinWithCode() {
     final String message = switch (Get.context?.languageCode) {

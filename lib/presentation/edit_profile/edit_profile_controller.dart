@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:typed_data";
 
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
@@ -35,6 +36,8 @@ class EditProfileController extends GetxController {
   Rx<Color> get accentColor => _appController.accentColor;
   RxInt get avatarIconIndex => _appController.avatarIconIndex;
   Rx<String?> get profilePhotoBase64 => _appController.profilePhotoBase64;
+
+  Uint8List? get profilePhotoBytes => _appController.profilePhotoBytes;
   final RxBool isSaving = false.obs;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -90,8 +93,8 @@ class EditProfileController extends GetxController {
 
   String _removePhotoContent(BuildContext context) =>
       switch (context.languageCode) {
-        "es" => "Tu avatar volvera a aparecer en el perfil.",
-        "pt" => "Seu avatar voltara a aparecer no perfil.",
+        "es" => "Tu avatar volverá a aparecer en el perfil.",
+        "pt" => "Seu avatar voltará a aparecer no perfil.",
         _ => "Your avatar will show on the profile again.",
       };
 

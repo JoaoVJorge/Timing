@@ -10,9 +10,11 @@ import "package:help_out/presentation/category/widgets/notebook_swipe_tile.dart"
 import "package:help_out/presentation/category/widgets/reading_subject_tile.dart";
 import "package:help_out/presentation/category/widgets/subject_tile.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
+import "package:help_out/shared/widgets/app_empty_state.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
+import "package:help_out/theme/app_spacing.dart";
 
 class CategoryPage extends StatelessWidget {
   const CategoryPage({super.key});
@@ -28,6 +30,23 @@ class CategoryPage extends StatelessWidget {
       ),
       body: Obx(() {
         final List<SubjectEntity> subjects = controller.subjects;
+
+        if (subjects.isEmpty) {
+          return ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+            children: [
+              AppEmptyState(
+                icon: Icons.add_task_rounded,
+                title: context.l10n.categoryEmptyTitle,
+                description: context.l10n.categoryEmptyDescription,
+                actionLabel: context.l10n.addItemButton(
+                  controller.category.itemNoun(context),
+                ),
+                onTapAction: controller.onTapAddSubject,
+              ),
+            ],
+          );
+        }
 
         if (controller.category == TimeCategoryType.hobbies) {
           return GridView.builder(
