@@ -1,4 +1,4 @@
-import "dart:convert";
+import "dart:typed_data";
 
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
@@ -11,7 +11,7 @@ class SettingsUserCard extends StatelessWidget {
     required this.name,
     required this.nickname,
     required this.avatarIconIndex,
-    required this.profilePhotoBase64,
+    required this.profilePhotoBytes,
     required this.onTap,
     super.key,
   });
@@ -19,7 +19,7 @@ class SettingsUserCard extends StatelessWidget {
   final String name;
   final String nickname;
   final int avatarIconIndex;
-  final String? profilePhotoBase64;
+  final Uint8List? profilePhotoBytes;
   final VoidCallback onTap;
 
   @override
@@ -40,20 +40,22 @@ class SettingsUserCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              gradient: profilePhotoBase64 == null
+              gradient: profilePhotoBytes == null
                   ? context.colorTokens.primaryGradient
                   : null,
               shape: BoxShape.circle,
             ),
             clipBehavior: Clip.antiAlias,
-            child: profilePhotoBase64 == null
+            child: profilePhotoBytes == null
                 ? Icon(
                     AppAvatarPresets.byIndex(avatarIconIndex),
                     color: Colors.white,
                   )
                 : Image.memory(
-                    base64Decode(profilePhotoBase64!),
+                    profilePhotoBytes!,
                     fit: BoxFit.cover,
+                    cacheWidth: (52 * MediaQuery.devicePixelRatioOf(context))
+                        .round(),
                   ),
           ),
           const Gap(16),

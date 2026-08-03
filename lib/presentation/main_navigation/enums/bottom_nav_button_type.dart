@@ -1,6 +1,6 @@
 enum BottomNavButtonType {
   home(iconName: "home"),
-  profile(iconName: "trophy"),
+  progress(iconName: "trophy"),
   groups(iconName: "group"),
   config(iconName: "settings");
 

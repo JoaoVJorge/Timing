@@ -11,6 +11,7 @@ import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
+import "package:help_out/theme/app_spacing.dart";
 import "package:help_out/theme/decoration.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:intl/intl.dart";
@@ -135,9 +136,14 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       title: context.l10n.addScheduleEntryTitle,
       showBackButton: true,
     ),
-    bottomBar: _SubmitButton(onTap: _onSubmit),
+    bottomBar: _SubmitButton(
+      isEnabled: _isComplete,
+      hint: _isComplete ? null : context.l10n.scheduleEntryMissingFields,
+      onTap: _onSubmit,
+    ),
     body: SingleChildScrollView(
-      padding: EdgeInsets.zero,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -151,7 +157,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                 const Gap(8),
                 TextField(
                   controller: _titleController,
-                  autofocus: true,
+                  textInputAction: TextInputAction.next,
                   decoration: AppInputDecoration.withBorder(
                     tokens: context.colorTokens,
                     hintText: context.l10n.scheduleTitleHint,
@@ -160,7 +166,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
               ],
             ),
           ),
-          const Gap(16),
+          const Gap(AppSpacing.page),
           _FormSection(
             title: context.l10n.scheduleWhenSection,
             icon: "schedule",
@@ -179,23 +185,25 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                         label: context.l10n.startTimeLabel,
                         controller: _startTimeController,
                         focusNode: _startTimeFocusNode,
+                        onPickTime: () => _pickTime(_startTimeController),
                         onCompleted: () => FocusScope.of(
                           context,
                         ).requestFocus(_endTimeFocusNode),
                       ),
                     ),
-                    const Gap(12),
+                    const Gap(AppSpacing.betweenRelated),
                     Expanded(
                       child: _TimeTextField(
                         label: context.l10n.endTimeOptionalLabel,
                         controller: _endTimeController,
                         focusNode: _endTimeFocusNode,
+                        onPickTime: () => _pickTime(_endTimeController),
                       ),
                     ),
                   ],
                 ),
                 if (_durationLabel(context) != null) ...[
-                  const Gap(12),
+                  const Gap(AppSpacing.betweenRelated),
                   Row(
                     children: [
                       Icon(
@@ -219,7 +227,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
               ],
             ),
           ),
-          const Gap(16),
+          const Gap(AppSpacing.page),
           _FormSection(
             title: context.l10n.scheduleColorSection,
             icon: Icons.palette_rounded,
@@ -228,7 +236,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
               onSelected: (color) => setState(() => _selectedColor = color),
             ),
           ),
-          const Gap(16),
+          const Gap(AppSpacing.page),
           _FormSection(
             title: context.l10n.schedulePreviewSection,
             icon: Icons.visibility_rounded,
@@ -240,6 +248,31 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       ),
     ),
   );
+
+  bool get _isComplete {
+    final int? start = _startMinutes;
+    final int? end = _endMinutes;
+    return _titleController.text.trim().isNotEmpty &&
+        start != null &&
+        end != null &&
+        end > start;
+  }
+
+  Future<void> _pickTime(TextEditingController controller) async {
+    final ({int hour, int minute})? current = _parseTime(controller.text);
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: current == null
+          ? TimeOfDay.now()
+          : TimeOfDay(hour: current.hour % 24, minute: current.minute),
+    );
+    if (picked == null) {
+      return;
+    }
+    controller.text =
+        "${picked.hour.toString().padLeft(2, "0")}:"
+        "${picked.minute.toString().padLeft(2, "0")}";
+  }
 
   String get _previewTitle {
     final String title = _titleController.text.trim();
@@ -488,36 +521,72 @@ class _PreviewFrame extends StatelessWidget {
   );
 }
 
+/// Pinned above the keyboard. When it is disabled it says *why*, instead of
+/// leaving the user tapping a dead button.
 class _SubmitButton extends StatelessWidget {
-  const _SubmitButton({required this.onTap});
+  const _SubmitButton({
+    required this.isEnabled,
+    required this.hint,
+    required this.onTap,
+  });
 
+  final bool isEnabled;
+  final String? hint;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: context.colorTokens.white,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AppIcon("schedule", color: context.colorTokens.primary),
-          const Gap(8),
-          Text(
-            context.l10n.addScheduleEntryButton,
-            style: context.textStyles.bodyLarge.copyWith(
-              color: context.colorTokens.primary,
-              fontWeight: FontWeight.w900,
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      if (hint != null) ...[
+        Text(
+          hint!,
+          textAlign: TextAlign.center,
+          style: context.textStyles.caption.copyWith(fontSize: 12),
+        ),
+        const Gap(AppSpacing.titleToDescription),
+      ],
+      Semantics(
+        button: true,
+        enabled: isEnabled,
+        child: BounceTap(
+          pressedScale: isEnabled ? 0.97 : 1,
+          onTap: onTap,
+          child: Opacity(
+            opacity: isEnabled ? 1 : 0.45,
+            child: Container(
+              width: double.infinity,
+              height: 56,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                gradient: context.colorTokens.primaryGradient,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AppIcon(
+                    "schedule",
+                    color: context.colorTokens.primaryForeground,
+                  ),
+                  const Gap(AppSpacing.titleToDescription),
+                  Flexible(
+                    child: Text(
+                      context.l10n.createScheduleEntryButton,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.textPrimaryButton.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
-    ),
+    ],
   );
 }
 
@@ -592,12 +661,14 @@ class _TimeTextField extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.focusNode,
+    required this.onPickTime,
     this.onCompleted,
   });
 
   final String label;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final VoidCallback onPickTime;
   final VoidCallback? onCompleted;
 
   @override
@@ -622,6 +693,20 @@ class _TimeTextField extends StatelessWidget {
         decoration: AppInputDecoration.withBorder(
           tokens: context.colorTokens,
           hintText: "00:00",
+        ).copyWith(
+          suffixIcon: IconButton(
+            onPressed: onPickTime,
+            tooltip: label,
+            icon: Icon(
+              Icons.schedule_rounded,
+              size: 20,
+              color: context.colorTokens.primary,
+            ),
+          ),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 40,
+          ),
         ),
       ),
     ],

@@ -81,8 +81,12 @@ class _LevelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AchievementDefinition? nextUnlock = controller.nextUnlock;
+    final RankTier tier = controller.currentTier;
 
-    return Container(
+    return BounceTap(
+      pressedScale: 0.98,
+      onTap: () => _showRanksSheet(context, controller),
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: _cardDecoration(context, radius: 22),
       child: Column(
@@ -94,41 +98,43 @@ class _LevelCard extends StatelessWidget {
                 height: 66,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: context.colorTokens.primaryVeryLight,
+                  color: tier.color.withValues(alpha: 0.16),
                 ),
-                child: Icon(
-                  Icons.emoji_events_rounded,
-                  color: context.colorTokens.primary,
-                  size: 36,
-                ),
+                child: Icon(tier.icon, color: tier.color, size: 36),
               ),
               const Gap(14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _localizedText(
-                        context,
-                        en: "Current level",
-                        pt: "Nivel atual",
-                        es: "Nivel actual",
-                      ),
-                      style: context.textStyles.bodySmall.copyWith(
-                        color: context.colorTokens.textHint,
-                      ),
-                    ),
-                    const Gap(2),
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             _localizedText(
                               context,
-                              en: "Gold Learner",
-                              pt: "Aprendiz ouro",
-                              es: "Aprendiz oro",
+                              en: "Current level",
+                              pt: "Nível atual",
+                              es: "Nivel actual",
                             ),
+                            style: context.textStyles.bodySmall.copyWith(
+                              color: context.colorTokens.textHint,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: context.colorTokens.textHint,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                    const Gap(2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            tier.learnerLabel(context),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: context.textStyles.extraBold20.copyWith(
@@ -208,8 +214,8 @@ class _LevelCard extends StatelessWidget {
                           : _localizedText(
                               context,
                               en: "Next unlock",
-                              pt: "Proxima conquista",
-                              es: "Proximo logro",
+                              pt: "Próxima conquista",
+                              es: "Próximo logro",
                             ),
                       style: context.textStyles.bodyTiny.copyWith(
                         color: context.colorTokens.textHint,
@@ -221,7 +227,7 @@ class _LevelCard extends StatelessWidget {
                           _localizedText(
                             context,
                             en: "Achievement Hunter",
-                            pt: "Cacador de conquistas",
+                            pt: "Caçador de conquistas",
                             es: "Cazador de logros",
                           ),
                       maxLines: 1,
@@ -235,7 +241,7 @@ class _LevelCard extends StatelessWidget {
                           _localizedText(
                             context,
                             en: "You unlocked everything.",
-                            pt: "Voce desbloqueou tudo.",
+                            pt: "Você desbloqueou tudo.",
                             es: "Desbloqueaste todo.",
                           ),
                       maxLines: 1,
@@ -276,6 +282,7 @@ class _LevelCard extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -296,7 +303,7 @@ class _LevelPill extends StatelessWidget {
       _localizedText(
         context,
         en: "Level $level",
-        pt: "Nivel $level",
+        pt: "Nível $level",
         es: "Nivel $level",
       ),
       style: context.textStyles.bodyTiny.copyWith(
@@ -540,8 +547,8 @@ class _AchievementsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      const double spacing = 8;
-      const int columns = 3;
+      const double spacing = 10;
+      const int columns = 2;
       final double itemWidth =
           (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -588,8 +595,8 @@ class _AchievementCardState extends State<_AchievementCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        height: _isExpanded ? 192 : 136,
-        padding: const EdgeInsets.fromLTRB(7, 12, 7, 10),
+        height: _isExpanded ? 208 : 168,
+        padding: const EdgeInsets.fromLTRB(10, 14, 10, 12),
         decoration: _cardDecoration(context, radius: 16),
         child: Stack(
           children: [
@@ -603,8 +610,8 @@ class _AchievementCardState extends State<_AchievementCard> {
                   icon: achievement.icon,
                   color: effectiveColor,
                   isUnlocked: achievement.isUnlocked,
-                  size: _isExpanded ? 50 : 46,
-                  iconSize: _isExpanded ? 26 : 24,
+                  size: _isExpanded ? 52 : 48,
+                  iconSize: _isExpanded ? 27 : 24,
                 ),
                 const Gap(10),
                 Text(
@@ -622,7 +629,7 @@ class _AchievementCardState extends State<_AchievementCard> {
                 Expanded(
                   child: Text(
                     achievement.description,
-                    maxLines: 3,
+                    maxLines: _isExpanded ? 4 : 3,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: context.textStyles.bodyTiny.copyWith(
@@ -724,6 +731,190 @@ BoxDecoration _cardDecoration(BuildContext context, {required double radius}) =>
         ),
       ],
     );
+
+Future<void> _showRanksSheet(
+  BuildContext context,
+  AchievementsController controller,
+) => showModalBottomSheet<void>(
+  context: context,
+  backgroundColor: context.colorTokens.surface,
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+  ),
+  builder: (_) => _RanksSheet(controller: controller),
+);
+
+class _RanksSheet extends StatelessWidget {
+  const _RanksSheet({required this.controller});
+
+  final AchievementsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final int level = controller.level;
+    final RankTier currentTier = controller.currentTier;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: context.colorTokens.borderUnfocused,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const Gap(18),
+            Text(
+              _localizedText(
+                context,
+                en: "All levels",
+                pt: "Todos os níveis",
+                es: "Todos los niveles",
+              ),
+              style: context.textStyles.extraBold20.copyWith(
+                color: context.colorTokens.textBody,
+              ),
+            ),
+            const Gap(4),
+            Text(
+              _localizedText(
+                context,
+                en: "Unlock achievements to climb the ranks.",
+                pt: "Desbloqueie conquistas para subir de nível.",
+                es: "Desbloquea logros para subir de nivel.",
+              ),
+              style: context.textStyles.bodySmall.copyWith(
+                color: context.colorTokens.textHint,
+              ),
+            ),
+            const Gap(16),
+            for (final RankTier tier in RankTier.values) ...[
+              _RankRow(
+                tier: tier,
+                isCurrent: tier == currentTier,
+                isUnlocked: level >= tier.minLevel,
+              ),
+              if (tier != RankTier.values.last) const Gap(10),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RankRow extends StatelessWidget {
+  const _RankRow({
+    required this.tier,
+    required this.isCurrent,
+    required this.isUnlocked,
+  });
+
+  final RankTier tier;
+  final bool isCurrent;
+  final bool isUnlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = isUnlocked
+        ? tier.color
+        : context.colorTokens.iconDisabled;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? tier.color.withValues(alpha: 0.10)
+            : context.colorTokens.surfaceInnerLayer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isCurrent
+              ? tier.color.withValues(alpha: 0.6)
+              : context.colorTokens.borderUnfocused,
+          width: isCurrent ? 1.4 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.16),
+              border: Border.all(color: color.withValues(alpha: 0.2)),
+            ),
+            child: Icon(tier.icon, color: color, size: 24),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tier.label(context),
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  _localizedText(
+                    context,
+                    en: "Level ${tier.minLevel}+",
+                    pt: "Nível ${tier.minLevel}+",
+                    es: "Nivel ${tier.minLevel}+",
+                  ),
+                  style: context.textStyles.bodyTiny.copyWith(
+                    color: context.colorTokens.textHint,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Gap(8),
+          if (isCurrent)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: tier.color,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                _localizedText(
+                  context,
+                  en: "Current",
+                  pt: "Atual",
+                  es: "Actual",
+                ),
+                style: context.textStyles.bodyTiny.copyWith(
+                  color: context.colorTokens.white,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            )
+          else
+            Icon(
+              isUnlocked ? Icons.check_circle_rounded : Icons.lock_rounded,
+              color: isUnlocked
+                  ? tier.color
+                  : context.colorTokens.borderUnfocused,
+              size: 22,
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 String _localizedText(
   BuildContext context, {

@@ -22,6 +22,7 @@ class GroupsDataSource {
 
       final List<Map<String, dynamic>> currentMemberships = await _selectRows(
         table: "group_members",
+        columns: "group_id",
         filters: (query) => query.eq("user_id", userId),
       );
       final List<String> groupIds = currentMemberships
@@ -33,10 +34,12 @@ class GroupsDataSource {
 
       final List<Map<String, dynamic>> groupRows = await _selectRows(
         table: "groups",
+        columns: "id, name, theme, owner_id, created_at, invite_code, privacy",
         filters: (query) => query.inFilter("id", groupIds),
       );
       final List<Map<String, dynamic>> memberRows = await _selectRows(
         table: "group_members",
+        columns: "group_id, user_id, role, joined_at",
         filters: (query) => query.inFilter("group_id", groupIds),
       );
       final List<String> memberIds = memberRows
@@ -44,11 +47,13 @@ class GroupsDataSource {
           .toSet()
           .toList();
       final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(memberIds);
+          await _profilesById(memberIds, withPhoto: true);
       final List<Map<String, dynamic>> activityRows = memberIds.isEmpty
           ? []
           : await _selectRows(
               table: "activity_entries",
+              columns:
+                  "user_id, category, occurred_at, seconds, pages, completed_tasks",
               filters: (query) => query
                   .inFilter("user_id", memberIds)
                   .gte("occurred_at", _monthStart().toIso8601String()),
@@ -60,11 +65,19 @@ class GroupsDataSource {
         membersByGroup.putIfAbsent(groupId, () => []).add(row);
       }
 
+      // One pass per theme, shared by every group that uses it.
+      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {};
+
       return Right(
         groupRows.map((row) {
           final GroupThemeType theme = GroupThemeType.byName(
             row["theme"] as String?,
           );
+          final Map<String, _PeriodScores> scoresByUser = scoresByTheme
+              .putIfAbsent(
+                theme,
+                () => _scoresByUser(theme: theme, activityRows: activityRows),
+              );
           final String groupId = row["id"] as String;
           final List<GroupMemberEntity> members =
               membersByGroup[groupId]
@@ -72,7 +85,7 @@ class GroupsDataSource {
                     (memberRow) => _memberFromRows(
                       memberRow: memberRow,
                       profileRow: profilesById[memberRow["user_id"]],
-                      activityRows: activityRows,
+                      scoresByUser: scoresByUser,
                       theme: theme,
                     ),
                   )
@@ -105,6 +118,7 @@ class GroupsDataSource {
 
       final List<Map<String, dynamic>> friendshipRows = await _selectRows(
         table: "friendships",
+        columns: "requester_id, addressee_id",
         filters: (query) => query
             .eq("status", "accepted")
             .or("requester_id.eq.$userId,addressee_id.eq.$userId"),
@@ -178,7 +192,7 @@ class GroupsDataSource {
           await _profilesById([
             userId,
             ...invitedFriends.map((item) => item.id),
-          ]);
+          ], withPhoto: true);
       final DateTime now = DateTime.now().toUtc();
       final List<GroupMemberEntity> members = [
         _memberFromRows(
@@ -188,7 +202,7 @@ class GroupsDataSource {
             "joined_at": now.toIso8601String(),
           },
           profileRow: profilesById[userId],
-          activityRows: const [],
+          scoresByUser: const {},
           theme: theme,
         ),
         for (int index = 0; index < invitedFriends.length; index++)
@@ -228,24 +242,31 @@ class GroupsDataSource {
 
   Future<List<Map<String, dynamic>>> _selectRows({
     required String table,
+    required String columns,
     required dynamic Function(dynamic query) filters,
   }) async {
     final dynamic response = await filters(
-      _supabaseService.requireClient.from(table).select(),
+      _supabaseService.requireClient.from(table).select(columns),
     );
     return (response as List<dynamic>)
         .map((row) => Map<String, dynamic>.from(row as Map))
         .toList();
   }
 
+  /// [withPhoto] stays off wherever the avatar is not rendered: the photo is an
+  /// inline base64 blob and dominates the payload size.
   Future<Map<String, Map<String, dynamic>>> _profilesById(
-    List<String> ids,
-  ) async {
+    List<String> ids, {
+    bool withPhoto = false,
+  }) async {
     if (ids.isEmpty) {
       return const {};
     }
     final List<Map<String, dynamic>> profileRows = await _selectRows(
       table: "profiles",
+      columns: withPhoto
+          ? "id, nick_name, user_name, accent_color_value, profile_photo_base64"
+          : "id, nick_name, user_name, accent_color_value",
       filters: (query) => query.inFilter("id", ids),
     );
     return {
@@ -257,15 +278,13 @@ class GroupsDataSource {
   GroupMemberEntity _memberFromRows({
     required Map<String, dynamic> memberRow,
     required Map<String, dynamic>? profileRow,
-    required List<Map<String, dynamic>> activityRows,
+    required Map<String, _PeriodScores> scoresByUser,
     required GroupThemeType theme,
   }) {
     final String userId = memberRow["user_id"] as String;
-    final _PeriodScores scores = _scoresFor(
-      userId: userId,
-      theme: theme,
-      activityRows: activityRows,
-    );
+    final _PeriodScores scores =
+        scoresByUser[userId] ??
+        const _PeriodScores(today: 0, week: 0, month: 0);
 
     return GroupMemberEntity(
       id: userId,
@@ -282,20 +301,19 @@ class GroupsDataSource {
     );
   }
 
-  _PeriodScores _scoresFor({
-    required String userId,
+  /// Walks the activity rows once and parses each timestamp once, instead of
+  /// re-scanning the whole list for every member of every group.
+  Map<String, _PeriodScores> _scoresByUser({
     required GroupThemeType theme,
     required List<Map<String, dynamic>> activityRows,
   }) {
     final DateTime todayStart = _todayStart();
     final DateTime weekStart = _weekStart();
     final DateTime monthStart = _monthStart();
-    int today = 0;
-    int week = 0;
-    int month = 0;
+    final Map<String, _PeriodScores> scores = {};
 
     for (final Map<String, dynamic> row in activityRows) {
-      if (row["user_id"] != userId || row["category"] != theme.name) {
+      if (row["category"] != theme.name) {
         continue;
       }
       final DateTime? occurredAt = DateTime.tryParse(
@@ -305,17 +323,22 @@ class GroupsDataSource {
         continue;
       }
 
+      final String userId = row["user_id"] as String;
+      final _PeriodScores current =
+          scores[userId] ?? const _PeriodScores(today: 0, week: 0, month: 0);
       final int value = _scoreValue(row, theme);
-      month += value;
-      if (!occurredAt.isBefore(weekStart)) {
-        week += value;
-      }
-      if (!occurredAt.isBefore(todayStart)) {
-        today += value;
-      }
+      scores[userId] = _PeriodScores(
+        today: !occurredAt.isBefore(todayStart)
+            ? current.today + value
+            : current.today,
+        week: !occurredAt.isBefore(weekStart)
+            ? current.week + value
+            : current.week,
+        month: current.month + value,
+      );
     }
 
-    return _PeriodScores(today: today, week: week, month: month);
+    return scores;
   }
 
   int _scoreValue(Map<String, dynamic> row, GroupThemeType theme) =>

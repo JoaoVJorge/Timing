@@ -554,12 +554,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerExitDialogConfirm => 'End';
 
   @override
-  String get profileTitle => 'Journey';
-
-  @override
-  String get profileSubtitle => 'Track your progress and key milestones';
-
-  @override
   String get editButton => 'Edit';
 
   @override
@@ -1157,9 +1151,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navProfile => 'Journey';
-
-  @override
   String get navGroups => 'Groups';
 
   @override
@@ -1315,4 +1306,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get finishButton => 'Finish';
+
+  @override
+  String get navProgress => 'Progress';
+
+  @override
+  String get progressTitle => 'Progress';
+
+  @override
+  String get progressSubtitle => 'Everything you have done so far';
+
+  @override
+  String get progressPeriodDay => 'Day';
+
+  @override
+  String get progressPeriodWeek => 'Week';
+
+  @override
+  String get progressPeriodMonth => 'Month';
+
+  @override
+  String get progressFocusResultLabel => 'Focus in this period';
+
+  @override
+  String progressComparisonMore(String value) {
+    return '$value more than the previous period';
+  }
+
+  @override
+  String progressComparisonLess(String value) {
+    return '$value less than the previous period';
+  }
+
+  @override
+  String get progressComparisonSame => 'Same as the previous period';
+
+  @override
+  String get progressComparisonFirst => 'Your first data for this period';
+
+  @override
+  String get progressStatExercises => 'Exercises';
+
+  @override
+  String get progressStatGoalsDone => 'Goals done';
+
+  @override
+  String get progressDistributionTitle => 'By activity';
+
+  @override
+  String homeTodayInline(String focus, int pages, int goals) {
+    return 'Today: $focus focus · $pages pages · $goals goals';
+  }
+
+  @override
+  String get homePlanDayTitle => 'Plan my day';
+
+  @override
+  String get homePlanDaySubtitle => 'Daily goals and weekly schedule';
+
+  @override
+  String get groupsFriendsTitle => 'Friends';
+
+  @override
+  String get groupsFriendsSubtitle => 'Requests, invites and your code';
+
+  @override
+  String groupMembersCount(int count) {
+    return '$count members';
+  }
+
+  @override
+  String get createScheduleEntryButton => 'Create entry';
+
+  @override
+  String get scheduleEntryMissingFields =>
+      'Fill in the title, start and end time to continue';
+
+  @override
+  String timerSessionCounter(int current, int total) {
+    return 'Focus $current of $total';
+  }
+
+  @override
+  String get timerExitBackToFocus => 'Back to focus';
+
+  @override
+  String get timerExitSaveAndEnd => 'Save and end';
+
+  @override
+  String get notesSavedNow => 'Saved just now';
+
+  @override
+  String get notesSaving => 'Saving…';
+
+  @override
+  String get dailyGoalsPendingSection => 'Pending';
+
+  @override
+  String get dailyGoalsCompletedSection => 'Completed';
+
+  @override
+  String get dailyGoalsEmptyTitle => 'No goals for today yet';
+
+  @override
+  String get dailyGoalsEmptyDescription =>
+      'Write a goal above or pick one of the suggestions to start your day.';
+
+  @override
+  String achievementProgressValue(String current, String total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get categoryEmptyTitle => 'Nothing here yet';
+
+  @override
+  String get categoryEmptyDescription =>
+      'Create your first item to start tracking focus time.';
+
+  @override
+  String get scheduleEmptyExampleLabel => 'Example';
+
+  @override
+  String get progressAchievementsNextTitle => 'Next achievement';
+
+  @override
+  String get achievementFocusHourTitle => '1 hour of focus';
+
+  @override
+  String get achievementSessionsTitle => '5 completed sessions';
+
+  @override
+  String get achievementStreakTitle => '7-day streak';
+
+  @override
+  String get achievementReaderTitle => '100 pages read';
+
+  @override
+  String get achievementGoalStartedTitle => 'First goal started';
+
+  @override
+  String unitMinutesShort(int value) {
+    return '$value min';
+  }
+
+  @override
+  String unitSessions(int value) {
+    return '$value sessions';
+  }
+
+  @override
+  String unitDays(int value) {
+    return '$value days';
+  }
+
+  @override
+  String currentUserRankNextStepNamed(String score, String name) {
+    return '$score to reach $name';
+  }
+
+  @override
+  String get timerKeepAwakeNote => 'The screen stays on during the session';
+
+  @override
+  String scheduleWeekLabel(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String get deleteButton => 'Delete';
 }
