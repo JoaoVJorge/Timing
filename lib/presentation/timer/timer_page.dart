@@ -670,11 +670,13 @@ class _TimerViewData {
       totalTimeLabel: isReading
           ? "tempo de leitura"
           : "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
-      nextBreakLabel: isReading ? "Páginas atuais" : "Próxima pausa em",
+      nextBreakLabel: isReading
+          ? "Páginas atuais"
+          : _nextBreakDurationLabel(context),
       nextBreak: isReading
           ? "${controller.subject.currentPages}"
-          : formatDurationClock(
-              Duration(seconds: controller.breakCountdownSeconds.value),
+          : _formatRestDuration(
+              Duration(seconds: controller.restIntervalSeconds),
             ),
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.totalSeconds),
@@ -724,6 +726,18 @@ class _TimerViewData {
         TimeCategoryType.exercises => "fitness",
         TimeCategoryType.hobbies => "music",
       };
+
+  static String _nextBreakDurationLabel(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Duracion de la proxima pausa",
+        "pt" => "Duração da próxima pausa",
+        "fr" => "Duree de la prochaine pause",
+        "de" => "Dauer der nachsten Pause",
+        _ => "Next break duration",
+      };
+
+  static String _formatRestDuration(Duration duration) =>
+      formatDurationLong(duration);
 
   final TimerVisualState state;
   final String subjectName;
