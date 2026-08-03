@@ -20,7 +20,7 @@ class ProgressHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(20),
+    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
     decoration: AppSurfaces.primary(context.colorTokens),
     child: Row(
       children: [
@@ -33,9 +33,8 @@ class ProgressHeroCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.primaryForeground.withValues(
-                    alpha: 0.85,
-                  ),
+                  color: Colors.white,
+                  fontSize: 13,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -45,35 +44,41 @@ class ProgressHeroCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.metricValue.copyWith(
-                  color: context.colorTokens.primaryForeground,
-                  fontSize: 32,
+                  color: Colors.white,
+                  fontSize: 34,
                 ),
               ),
-              const Gap(6),
-              Row(
-                children: [
-                  Icon(
-                    _comparisonIcon,
-                    size: 16,
-                    color: context.colorTokens.primaryForeground.withValues(
-                      alpha: 0.9,
-                    ),
+              const Gap(8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colorTokens.primaryForeground.withValues(
+                    alpha: 0.12,
                   ),
-                  const Gap(4),
-                  Expanded(
-                    child: Text(
-                      _comparisonText(context),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodySmall.copyWith(
-                        color: context.colorTokens.primaryForeground.withValues(
-                          alpha: 0.9,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(_comparisonIcon, size: 16, color: Colors.white),
+                    const Gap(4),
+                    Flexible(
+                      child: Text(
+                        _comparisonText(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodySmall.copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
                         ),
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -88,11 +93,7 @@ class ProgressHeroCard extends StatelessWidget {
               alpha: 0.18,
             ),
           ),
-          child: Icon(
-            Icons.timer_rounded,
-            color: context.colorTokens.primaryForeground,
-            size: 30,
-          ),
+          child: Icon(Icons.timer_rounded, color: Colors.white, size: 30),
         ),
       ],
     ),

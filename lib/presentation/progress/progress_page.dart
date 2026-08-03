@@ -56,9 +56,18 @@ class ProgressPage extends StatelessWidget {
               ProgressStatRow(
                 stats: [
                   (
+                    icon: Icons.schedule_rounded,
+                    value: formatDurationLong(
+                      Duration(seconds: controller.selectedPeriodFocusSeconds),
+                    ),
+                    label: _totalFocusTimeLabel(context),
+                    accent: TimeCategoryType.studying.accentColor,
+                  ),
+                  (
                     icon: Icons.auto_stories_rounded,
                     value: "${controller.selectedPeriodPages}",
                     label: context.l10n.statPagesRead,
+                    accent: TimeCategoryType.reading.accentColor,
                   ),
                   (
                     icon: Icons.fitness_center_rounded,
@@ -66,12 +75,13 @@ class ProgressPage extends StatelessWidget {
                       Duration(seconds: stats.exercisesTotalSeconds),
                     ),
                     label: context.l10n.progressStatExercises,
+                    accent: TimeCategoryType.exercises.accentColor,
                   ),
                   (
-                    icon: Icons.task_alt_rounded,
-                    value:
-                        "${controller.goalsDone}/${controller.tasks.length}",
-                    label: context.l10n.progressStatGoalsDone,
+                    icon: Icons.assignment_rounded,
+                    value: "${controller.selectedPeriodSessions}",
+                    label: context.l10n.homeSummarySessions,
+                    accent: context.colorTokens.primary,
                   ),
                 ],
               ),
@@ -104,6 +114,15 @@ class ProgressPage extends StatelessWidget {
     );
   }
 }
+
+String _totalFocusTimeLabel(BuildContext context) =>
+    switch (context.languageCode) {
+      "es" => "Tiempo total de enfoque",
+      "pt" => "Tempo total de foco",
+      "fr" => "Temps total de focus",
+      "de" => "Gesamte Fokuszeit",
+      _ => "Total focus time",
+    };
 
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader();
