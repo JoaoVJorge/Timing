@@ -1281,6 +1281,7 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
           child: currentRequests.isEmpty
               ? _RequestEmptyState(mode: selectedMode)
               : ListView.separated(
+                  padding: const EdgeInsets.only(bottom: 18),
                   itemCount: currentRequests.length,
                   separatorBuilder: (context, index) => const Gap(12),
                   itemBuilder: (context, index) {
@@ -1299,6 +1300,7 @@ class _FriendRequestsPageState extends State<_FriendRequestsPage> {
           const Gap(12),
           _SafetyNotice(),
         ],
+        const Gap(18),
       ],
     ),
   );

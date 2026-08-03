@@ -39,7 +39,6 @@ class AppTopBar extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(AppSpacing.titleToDescription),
         ],
         Expanded(
           child: Semantics(
@@ -54,7 +53,10 @@ class AppTopBar extends StatelessWidget {
             ),
           ),
         ),
-        if (trailing != null) ...[const Gap(AppSpacing.titleToDescription), trailing!],
+        if (trailing != null) ...[
+          const Gap(AppSpacing.titleToDescription),
+          trailing!,
+        ],
       ],
     );
   }
