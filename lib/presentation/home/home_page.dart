@@ -1,21 +1,18 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/home/home_controller.dart";
 import "package:help_out/presentation/home/widgets/home_action_card.dart";
 import "package:help_out/presentation/home/widgets/home_activity_grid.dart";
-import "package:help_out/presentation/home/widgets/home_agenda_card.dart";
-import "package:help_out/presentation/home/widgets/home_day_summary_line.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/functions/format_relative_time.dart";
 import "package:help_out/shared/functions/format_schedule_time.dart";
-import "package:help_out/shared/widgets/app_nav_row.dart";
 import "package:help_out/shared/widgets/app_section_header.dart";
+import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
 
 /// Answers "what should I do now?" and, right below it, "what am I doing
@@ -25,8 +22,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.find();
-
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -47,26 +42,12 @@ class HomePage extends StatelessWidget {
                 ),
                 children: [
                   const _HomeActionCardSection(),
-                  const Gap(AppSpacing.betweenRelated),
-                  Obx(
-                    () => HomeAgendaCard(
-                      entries: controller.todayScheduleEntries,
-                      onTapSchedule: controller.onTapSchedule,
-                    ),
-                  ),
                   const Gap(AppSpacing.betweenSections),
-                  AppSectionHeader(
-                    title: context.l10n.homePlanDayTitle,
-                    description: context.l10n.homePlanDaySubtitle,
-                  ),
-                  const Gap(AppSpacing.betweenRelated),
                   const _PlanDayRows(),
                   const Gap(AppSpacing.betweenSections),
                   AppSectionHeader(title: context.l10n.homeCategoriesSection),
                   const Gap(AppSpacing.betweenRelated),
                   const _HomeActivitiesSection(),
-                  const Gap(AppSpacing.betweenSections),
-                  const _DaySummary(),
                 ],
               ),
             ),
@@ -178,30 +159,191 @@ class _PlanDayRows extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final HomeController controller = Get.find();
+    final next = controller.nextTodayEntry;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color accent = context.colorTokens.primary;
+    final Color background = isDarkMode
+        ? Color.lerp(context.colorTokens.surface, accent, 0.08) ??
+              context.colorTokens.surface
+        : context.colorTokens.surface;
 
-    return AppNavRowGroup(
-      rows: [
-        AppNavRow(
-          icon: Icons.task_alt_rounded,
-          title: context.l10n.homeTasksSection,
-          subtitle: controller.goalsTotal > 0
-              ? context.l10n.homeGoalsProgress(
-                  controller.goalsDoneToday,
-                  controller.goalsTotal,
-                )
-              : context.l10n.dailyGoalsEmptyTitle,
-          onTap: controller.onTapDailyGoals,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDarkMode
+              ? accent.withValues(alpha: 0.18)
+              : context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
         ),
-        AppNavRow(
-          icon: Icons.calendar_month_rounded,
-          title: context.l10n.myScheduleTitle,
-          subtitle: context.l10n.homePlanDaySubtitle,
-          onTap: controller.onTapSchedule,
-        ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: context.colorTokens.surfaceShadow,
+            blurRadius: 18,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.event_note_rounded, color: accent, size: 22),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  context.l10n.homePlanDayTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.cardTitle.copyWith(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+          const Gap(12),
+          Container(
+            decoration: BoxDecoration(
+              color: context.colorTokens.transparent,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: context.colorTokens.borderUnfocused.withValues(
+                  alpha: isDarkMode ? 0.35 : 0.55,
+                ),
+              ),
+            ),
+            child: Column(
+              children: [
+                _PlanDayRow(
+                  icon: Icons.event_available_rounded,
+                  title: context.l10n.homeTasksSection,
+                  subtitle: controller.goalsTotal > 0
+                      ? context.l10n.homeGoalsProgress(
+                          controller.goalsDoneToday,
+                          controller.goalsTotal,
+                        )
+                      : context.l10n.dailyGoalsEmptyTitle,
+                  accent: accent,
+                  onTap: controller.onTapDailyGoals,
+                ),
+                Divider(
+                  height: 1,
+                  indent: 64,
+                  color: context.colorTokens.divider.withValues(alpha: 0.7),
+                ),
+                _PlanDayRow(
+                  icon: Icons.calendar_month_rounded,
+                  title: _nextCommitmentTitle(context),
+                  subtitle: next == null
+                      ? _scheduleSubtitle(context)
+                      : "${_todayLabel(context)}, ${formatScheduleRange(context, next.startMinutes, next.endMinutes)}",
+                  accent: accent,
+                  onTap: controller.onTapSchedule,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   });
+
+  String _scheduleSubtitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "es" => "Próximos horarios y rutina semanal",
+        "pt" => "Próximos horários e rotina semanal",
+        _ => "Upcoming times and weekly routine",
+      };
 }
+
+class _PlanDayRow extends StatelessWidget {
+  const _PlanDayRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.99,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.lerp(accent, Colors.white, 0.22) ?? accent,
+                  accent,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.22),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 22),
+          ),
+          const Gap(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.cardTitle.copyWith(fontSize: 15),
+                ),
+                const Gap(3),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.caption.copyWith(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          const Gap(8),
+          Icon(Icons.chevron_right_rounded, color: accent, size: 28),
+        ],
+      ),
+    ),
+  );
+}
+
+String _nextCommitmentTitle(BuildContext context) =>
+    switch (context.languageCode) {
+      "es" => "Próximo compromiso",
+      "pt" => "Próximo compromisso",
+      _ => "Next commitment",
+    };
+
+String _todayLabel(BuildContext context) => switch (context.languageCode) {
+  "es" => "Hoy",
+  "pt" => "Hoje",
+  _ => "Today",
+};
 
 class _HomeActivitiesSection extends StatelessWidget {
   const _HomeActivitiesSection();
@@ -217,7 +359,6 @@ class _HomeActivitiesSection extends StatelessWidget {
             category: category,
             label: category.localizedLabel(context),
             value: _categoryValue(context, controller, category),
-            meta: _categoryMeta(context, controller, category),
           ),
       ],
       onTapActivity: controller.onTapCategory,
@@ -236,32 +377,4 @@ class _HomeActivitiesSection extends StatelessWidget {
       Duration(seconds: controller.focusSecondsIn(category)),
     );
   }
-
-  String _categoryMeta(
-    BuildContext context,
-    HomeController controller,
-    TimeCategoryType category,
-  ) {
-    final SubjectEntity? top = controller.topSubjectIn(category);
-    return top == null
-        ? context.l10n.homeCategoryEmpty
-        : capitalizeName(top.name);
-  }
-}
-
-class _DaySummary extends StatelessWidget {
-  const _DaySummary();
-
-  @override
-  Widget build(BuildContext context) => Obx(() {
-    final HomeController controller = Get.find();
-
-    return HomeDaySummaryLine(
-      focus: formatDurationLong(
-        Duration(seconds: controller.todayProgress.value.focusSeconds),
-      ),
-      pages: controller.todayProgress.value.pages,
-      goals: controller.goalsDoneToday,
-    );
-  });
 }

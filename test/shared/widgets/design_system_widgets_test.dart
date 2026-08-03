@@ -95,12 +95,7 @@ void main() {
       HomeActivityGrid(
         activities: [
           for (final TimeCategoryType category in TimeCategoryType.values)
-            (
-              category: category,
-              label: category.name,
-              value: "12m",
-              meta: "Biology",
-            ),
+            (category: category, label: category.name, value: "12m"),
         ],
         onTapActivity: (_) {},
       ),

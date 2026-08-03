@@ -4,18 +4,15 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
 
 typedef HomeActivity = ({
   TimeCategoryType category,
   String label,
   String value,
-  String meta,
 });
 
-/// 2x2 grid of activity areas. Each tile carries its own headline figure so the
-/// grid replaces the separate row of metric cards instead of duplicating it.
+/// Activity areas displayed as large tappable rows, matching the category list
+/// pattern used elsewhere in the app.
 class HomeActivityGrid extends StatelessWidget {
   const HomeActivityGrid({
     required this.activities,
@@ -27,26 +24,16 @@ class HomeActivityGrid extends StatelessWidget {
   final ValueChanged<TimeCategoryType> onTapActivity;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      const double spacing = AppSpacing.betweenRelated;
-      final double tileWidth = (constraints.maxWidth - spacing) / 2;
-
-      return Wrap(
-        spacing: spacing,
-        runSpacing: spacing,
-        children: [
-          for (final HomeActivity activity in activities)
-            SizedBox(
-              width: tileWidth,
-              child: _ActivityTile(
-                activity: activity,
-                onTap: () => onTapActivity(activity.category),
-              ),
-            ),
-        ],
-      );
-    },
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (int index = 0; index < activities.length; index++) ...[
+        if (index > 0) const Gap(10),
+        _ActivityTile(
+          activity: activities[index],
+          onTap: () => onTapActivity(activities[index].category),
+        ),
+      ],
+    ],
   );
 }
 
@@ -57,59 +44,104 @@ class _ActivityTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.97,
-    onTap: onTap,
-    child: Container(
-      constraints: const BoxConstraints(minHeight: 128),
-      padding: const EdgeInsets.all(14),
-      decoration: AppSurfaces.content(context.colorTokens),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight,
-              shape: BoxShape.circle,
+  Widget build(BuildContext context) {
+    final Color accent = context.colorTokens.primary;
+    final _ActivityStyle style = _ActivityStyle.fromPrimaryColor(
+      accent,
+      isDarkMode: Theme.of(context).brightness == Brightness.dark,
+    );
+
+    return BounceTap(
+      pressedScale: 0.985,
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 78),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: style.background,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.surfaceShadow,
+              blurRadius: 14,
+              offset: const Offset(0, 5),
             ),
-            child: SizedBox.square(
-              dimension: 19,
-              child: ClipRect(
-                child: AppIcon(
-                  activity.category.iconName,
-                  size: 19,
-                  color: context.colorTokens.primary,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: style.badgeBackground,
+                shape: BoxShape.circle,
+              ),
+              child: SizedBox.square(
+                dimension: 23,
+                child: ClipRect(
+                  child: AppIcon(
+                    activity.category.iconName,
+                    size: 23,
+                    color: style.accent,
+                  ),
                 ),
               ),
             ),
-          ),
-          const Gap(AppSpacing.betweenRelated),
-          Text(
-            activity.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.cardTitle.copyWith(fontSize: 15),
-          ),
-          const Gap(4),
-          Text(
-            activity.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.metricValue.copyWith(fontSize: 20),
-          ),
-          const Gap(2),
-          Text(
-            activity.meta,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.caption.copyWith(fontSize: 12),
-          ),
-        ],
+            const Gap(16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    activity.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.cardTitle.copyWith(fontSize: 16),
+                  ),
+                  const Gap(3),
+                  Text(
+                    activity.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.caption.copyWith(fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(8),
+            Icon(Icons.chevron_right_rounded, size: 28, color: accent),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+class _ActivityStyle {
+  const _ActivityStyle({
+    required this.background,
+    required this.badgeBackground,
+    required this.accent,
+  });
+
+  final Color background;
+  final Color badgeBackground;
+  final Color accent;
+
+  factory _ActivityStyle.fromPrimaryColor(
+    Color accent, {
+    required bool isDarkMode,
+  }) {
+    return _ActivityStyle(
+      background: isDarkMode
+          ? Color.lerp(const Color(0xFF1E1E1E), accent, 0.08) ??
+                const Color(0xFF1E1E1E)
+          : Colors.white,
+      badgeBackground: accent.withValues(alpha: isDarkMode ? 0.18 : 0.13),
+      accent: accent,
+    );
+  }
 }
