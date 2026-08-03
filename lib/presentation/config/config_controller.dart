@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/config/widgets/config_dialogs.dart";
 import "package:help_out/shared/functions/format_name.dart";
@@ -56,8 +55,27 @@ class ConfigController extends GetxController {
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.preferenceSavedMessage);
   }
 
-  Future<void> onToggleFocusLock(TimeCategoryType category, bool value) async {
-    await _appController.setFocusLockEnabledFor(category, value);
+  Future<void> onSaveFocusLockPreferences({
+    required bool studying,
+    required bool exercises,
+    required bool reading,
+    required bool hobbies,
+  }) async {
+    final bool hasChanges =
+        studying != focusLockStudyingEnabled.value ||
+        exercises != focusLockExercisesEnabled.value ||
+        reading != focusLockReadingEnabled.value ||
+        hobbies != focusLockHobbiesEnabled.value;
+    if (!hasChanges) {
+      return;
+    }
+
+    await _appController.setFocusLockPreferences(
+      studying: studying,
+      exercises: exercises,
+      reading: reading,
+      hobbies: hobbies,
+    );
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.preferenceSavedMessage);
   }
 

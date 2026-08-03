@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_constants.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/config/config_controller.dart";
 import "package:help_out/presentation/config/widgets/settings_section.dart";
@@ -146,11 +145,16 @@ class ConfigPage extends StatelessWidget {
     );
   }
 
-  void _showConcentrationModeSheet(
+  Future<void> _showConcentrationModeSheet(
     BuildContext context,
     ConfigController controller,
-  ) {
-    showModalBottomSheet<void>(
+  ) async {
+    final studying = controller.focusLockStudyingEnabled.value.obs;
+    final exercises = controller.focusLockExercisesEnabled.value.obs;
+    final reading = controller.focusLockReadingEnabled.value.obs;
+    final hobbies = controller.focusLockHobbiesEnabled.value.obs;
+
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -221,11 +225,8 @@ class ConfigPage extends StatelessWidget {
                           title: "Estudo",
                           subtitle: "Foco total nos seus estudos.",
                           color: const Color(0xFF2F80ED),
-                          value: controller.focusLockStudyingEnabled.value,
-                          onChanged: (value) => controller.onToggleFocusLock(
-                            TimeCategoryType.studying,
-                            value,
-                          ),
+                          value: studying.value,
+                          onChanged: (value) => studying.value = value,
                         ),
                         const Gap(10),
                         _ConcentrationActivityTile(
@@ -233,11 +234,8 @@ class ConfigPage extends StatelessWidget {
                           title: "Exercícios",
                           subtitle: "Concentre-se nos seus treinos.",
                           color: const Color(0xFF27AE60),
-                          value: controller.focusLockExercisesEnabled.value,
-                          onChanged: (value) => controller.onToggleFocusLock(
-                            TimeCategoryType.exercises,
-                            value,
-                          ),
+                          value: exercises.value,
+                          onChanged: (value) => exercises.value = value,
                         ),
                         const Gap(10),
                         _ConcentrationActivityTile(
@@ -245,11 +243,8 @@ class ConfigPage extends StatelessWidget {
                           title: "Leitura",
                           subtitle: "Mergulhe nas suas leituras.",
                           color: const Color(0xFFF2994A),
-                          value: controller.focusLockReadingEnabled.value,
-                          onChanged: (value) => controller.onToggleFocusLock(
-                            TimeCategoryType.reading,
-                            value,
-                          ),
+                          value: reading.value,
+                          onChanged: (value) => reading.value = value,
                         ),
                         const Gap(10),
                         _ConcentrationActivityTile(
@@ -257,11 +252,8 @@ class ConfigPage extends StatelessWidget {
                           title: "Hobbies",
                           subtitle: "Aproveite seus hobbies com foco.",
                           color: const Color(0xFF9B51E0),
-                          value: controller.focusLockHobbiesEnabled.value,
-                          onChanged: (value) => controller.onToggleFocusLock(
-                            TimeCategoryType.hobbies,
-                            value,
-                          ),
+                          value: hobbies.value,
+                          onChanged: (value) => hobbies.value = value,
                         ),
                       ],
                     ),
@@ -272,6 +264,13 @@ class ConfigPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    await controller.onSaveFocusLockPreferences(
+      studying: studying.value,
+      exercises: exercises.value,
+      reading: reading.value,
+      hobbies: hobbies.value,
     );
   }
 }
