@@ -17,6 +17,8 @@ import "package:help_out/core/domain/use_cases/sign_out_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
+import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
+import "package:help_out/core/services/local_storage/local_storage_keys.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/presentation/groups/groups_controller.dart";
@@ -32,7 +34,11 @@ class AppController extends GetxController {
     required this._signOutUseCase,
     required this._appNavigator,
     required this._supabaseService,
-  });
+    required this.localStorageService,
+    int? initialAccentColorValue,
+  }) : accentColor = Color(
+         initialAccentColorValue ?? AppAccentPresets.defaultAccentValue,
+       ).obs;
 
   final GetAppConfigUseCase _getAppConfigUseCase;
   final GetCurrentProfileUseCase _getCurrentProfileUseCase;
@@ -41,9 +47,10 @@ class AppController extends GetxController {
   final SignOutUseCase _signOutUseCase;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
+  final AppLocalStorageService localStorageService;
 
   final RxBool isDarkMode = false.obs;
-  final Rx<Color> accentColor = AppAccentPresets.defaultAccent.obs;
+  final Rx<Color> accentColor;
   final RxString userName = "".obs;
   final RxString nickName = "".obs;
   final Rx<String?> email = Rx<String?>(null);
@@ -119,6 +126,7 @@ class AppController extends GetxController {
   void _applyConfig(AppConfigEntity config) {
     isDarkMode.value = config.isDarkMode;
     accentColor.value = Color(config.accentColorValue);
+    _saveCachedAccentColorValue(config.accentColorValue);
     userName.value = config.userName;
     nickName.value = config.nickName;
     email.value = config.email;
@@ -207,6 +215,7 @@ class AppController extends GetxController {
 
   Future<void> setAccentColor(Color value) async {
     accentColor.value = value;
+    await _saveCachedAccentColorValue(value.toARGB32());
     await _saveAppConfigUseCase(_currentConfig);
   }
 
@@ -333,7 +342,12 @@ class AppController extends GetxController {
     focusLockExercisesEnabled.value = false;
     focusLockReadingEnabled.value = false;
     focusLockHobbiesEnabled.value = false;
+    accentColor.value = AppAccentPresets.defaultAccent;
+    await _saveCachedAccentColorValue(AppAccentPresets.defaultAccentValue);
     await reloadUserScopedState();
     await _appNavigator.offAllNamed(AppRoutes.login);
   }
+
+  Future<void> _saveCachedAccentColorValue(int value) =>
+      localStorageService.write(LocalStorageKeys.cachedAccentColorValue, value);
 }

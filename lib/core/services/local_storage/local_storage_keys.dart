@@ -5,6 +5,7 @@ enum LocalStorageKeys {
   lastActivity(hasSensitiveData: false, isUserScoped: true),
   dailyProgress(hasSensitiveData: false, isUserScoped: true),
   scheduleEntries(hasSensitiveData: false, isUserScoped: true),
+  cachedAccentColorValue(hasSensitiveData: false, isUserScoped: false),
   accessToken(hasSensitiveData: true, isUserScoped: false),
   refreshToken(hasSensitiveData: true, isUserScoped: false);
 
