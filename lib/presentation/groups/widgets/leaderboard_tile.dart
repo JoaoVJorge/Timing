@@ -32,8 +32,9 @@ class LeaderboardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isTopThree = rank <= 3;
+    final bool isLeader = rank == 1;
     final String score = formatGroupScore(context, value, theme.unit);
-    final BorderRadius userRadius = BorderRadius.vertical(
+    final BorderRadius rowRadius = BorderRadius.vertical(
       top: isFirst ? const Radius.circular(18) : Radius.zero,
       bottom: isLast ? const Radius.circular(18) : Radius.zero,
     );
@@ -43,18 +44,18 @@ class LeaderboardTile extends StatelessWidget {
         color: isCurrentUser
             ? context.colorTokens.primaryVeryLight
             : context.colorTokens.transparent,
-        borderRadius: isCurrentUser ? userRadius : BorderRadius.zero,
+        borderRadius: isCurrentUser ? BorderRadius.circular(18) : rowRadius,
         boxShadow: isCurrentUser
             ? [
                 BoxShadow(
                   color: context.colorTokens.primary.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
                 ),
               ]
             : null,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -81,13 +82,13 @@ class LeaderboardTile extends StatelessWidget {
                 ),
                 const Gap(2),
                 Text(
-                  isCurrentUser
-                      ? context.l10n.currentUserRankSubtitle
-                      : _differenceText(context),
+                  _subtitleText(context, isLeader: isLeader),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
+                    color: isCurrentUser
+                        ? context.colorTokens.primary
+                        : context.colorTokens.textHint,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -95,20 +96,45 @@ class LeaderboardTile extends StatelessWidget {
             ),
           ),
           const Gap(10),
-          Text(
-            score,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodyLarge.copyWith(
-              color: isCurrentUser
-                  ? context.colorTokens.primary
-                  : context.colorTokens.textBody,
-              fontWeight: FontWeight.w800,
-            ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                score,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge.copyWith(
+                  color: isCurrentUser
+                      ? context.colorTokens.primary
+                      : context.colorTokens.textBody,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  String _subtitleText(BuildContext context, {required bool isLeader}) {
+    if (isCurrentUser) {
+      return switch (context.languageCode) {
+        "es" => "Tu posición actual",
+        "pt" => "Sua posição atual",
+        _ => context.l10n.currentUserRankSubtitle,
+      };
+    }
+    if (isLeader) {
+      return switch (context.languageCode) {
+        "es" => "Líder de este ranking",
+        "pt" => "Líder deste ranking",
+        _ => context.l10n.leaderboardTopPosition,
+      };
+    }
+    return _differenceText(context);
   }
 
   String _differenceText(BuildContext context) {

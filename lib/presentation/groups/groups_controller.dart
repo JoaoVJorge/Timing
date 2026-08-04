@@ -187,8 +187,8 @@ class GroupsController extends GetxController {
 
   void onTapEditGroup() {
     final String message = switch (Get.context?.languageCode) {
-      "pt" => "Edicao de grupo em breve.",
-      "es" => "Edicion del grupo proximamente.",
+      "pt" => "Edição de grupo em breve.",
+      "es" => "Edición del grupo próximamente.",
       _ => "Group editing is coming soon.",
     };
     _appNavigator.showSnackBar(text: message);
@@ -196,8 +196,8 @@ class GroupsController extends GetxController {
 
   void onTapLeaveGroup() {
     final String message = switch (Get.context?.languageCode) {
-      "pt" => "Saida de grupo em breve.",
-      "es" => "Salir del grupo proximamente.",
+      "pt" => "Saída de grupo em breve.",
+      "es" => "Salir del grupo próximamente.",
       _ => "Leaving groups is coming soon.",
     };
     _appNavigator.showSnackBar(text: message, isAnError: true);
