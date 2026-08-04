@@ -7,13 +7,8 @@ import "package:help_out/theme/app_spacing.dart";
 /// Groups owns everything social, so Friends is reachable from here instead of
 /// sitting in the middle of the Progress statistics.
 class GroupsHeader extends StatelessWidget {
-  const GroupsHeader({
-    required this.onTapFriends,
-    required this.onTapCreateGroup,
-    super.key,
-  });
+  const GroupsHeader({required this.onTapCreateGroup, super.key});
 
-  final VoidCallback onTapFriends;
   final VoidCallback onTapCreateGroup;
 
   @override
@@ -40,12 +35,6 @@ class GroupsHeader extends StatelessWidget {
         ),
       ),
       const Gap(AppSpacing.betweenRelated),
-      _HeaderAction(
-        icon: Icons.group_rounded,
-        semanticLabel: context.l10n.groupsFriendsTitle,
-        onTap: onTapFriends,
-      ),
-      const Gap(AppSpacing.titleToDescription),
       _HeaderAction(
         icon: Icons.add_rounded,
         semanticLabel: context.l10n.groupHeaderCreateButton,

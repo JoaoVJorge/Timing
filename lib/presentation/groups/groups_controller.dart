@@ -10,6 +10,8 @@ import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 
+enum GroupDetailsTab { ranking, goals, chat }
+
 class GroupsController extends GetxController {
   GroupsController({
     required this._getGroupsUseCase,
@@ -25,7 +27,10 @@ class GroupsController extends GetxController {
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
   final Rx<LeaderboardPeriodType> selectedPeriod =
       LeaderboardPeriodType.today.obs;
+  final Rx<GroupDetailsTab> selectedDetailsTab = GroupDetailsTab.ranking.obs;
   final RxBool isLoading = true.obs;
+  final RxBool isShowingGroupDetails = false.obs;
+  final RxBool isShowingMemberManagement = false.obs;
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
 
@@ -136,10 +141,24 @@ class GroupsController extends GetxController {
     isLoading.value = false;
   }
 
-  void onSelectGroup(GroupEntity group) => selectedGroup.value = group;
+  void onSelectGroup(GroupEntity group) {
+    selectedGroup.value = group;
+    selectedDetailsTab.value = GroupDetailsTab.ranking;
+    isShowingGroupDetails.value = true;
+    isShowingMemberManagement.value = false;
+  }
 
-  void onSelectPeriod(LeaderboardPeriodType period) =>
-      selectedPeriod.value = period;
+  void onBackToGroupList() {
+    isShowingMemberManagement.value = false;
+    isShowingGroupDetails.value = false;
+  }
+
+  void onManageMembers() => isShowingMemberManagement.value = true;
+
+  void onBackToGroupDetails() => isShowingMemberManagement.value = false;
+
+  void onSelectDetailsTab(GroupDetailsTab tab) =>
+      selectedDetailsTab.value = tab;
 
   Future<void> onTapCreateGroup() async {
     // Get.toNamed<T> with a concrete type crashes at runtime (GetX types the
@@ -165,6 +184,24 @@ class GroupsController extends GetxController {
   /// Friends live next to Groups: both answer "how am I doing with others?".
   Future<void> onTapFriends() =>
       _appNavigator.toNamed(AppRoutes.friends, id: 1) ?? Future<void>.value();
+
+  void onTapEditGroup() {
+    final String message = switch (Get.context?.languageCode) {
+      "pt" => "Edicao de grupo em breve.",
+      "es" => "Edicion del grupo proximamente.",
+      _ => "Group editing is coming soon.",
+    };
+    _appNavigator.showSnackBar(text: message);
+  }
+
+  void onTapLeaveGroup() {
+    final String message = switch (Get.context?.languageCode) {
+      "pt" => "Saida de grupo em breve.",
+      "es" => "Salir del grupo proximamente.",
+      _ => "Leaving groups is coming soon.",
+    };
+    _appNavigator.showSnackBar(text: message, isAnError: true);
+  }
 
   void onTapJoinWithCode() {
     final String message = switch (Get.context?.languageCode) {

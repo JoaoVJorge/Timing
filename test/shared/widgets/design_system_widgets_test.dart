@@ -114,24 +114,16 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets("GroupsHeader exposes friends and create actions", (
-    tester,
-  ) async {
-    int friends = 0;
+  testWidgets("GroupsHeader exposes create action", (tester) async {
     int create = 0;
 
     await pumpInScrollView(
       tester,
-      GroupsHeader(
-        onTapFriends: () => friends++,
-        onTapCreateGroup: () => create++,
-      ),
+      GroupsHeader(onTapCreateGroup: () => create++),
     );
 
-    await tester.tap(find.byIcon(Icons.group_rounded));
     await tester.tap(find.byIcon(Icons.add_rounded));
 
-    expect(friends, 1);
     expect(create, 1);
   });
 }

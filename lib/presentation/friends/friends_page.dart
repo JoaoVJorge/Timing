@@ -52,7 +52,10 @@ class _FriendsPageState extends State<FriendsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Header(onInviteTap: _openAddFriendPage),
+            _Header(
+              onBack: () => appNavigator.back<void>(id: 1),
+              onInviteTap: _openAddFriendPage,
+            ),
             const Gap(12),
             _InviteCodeDisclosure(
               code: inviteCode.isEmpty ? "..." : inviteCode,
@@ -487,37 +490,36 @@ class _FriendsPageState extends State<FriendsPage> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onInviteTap});
+  const _Header({required this.onBack, required this.onInviteTap});
 
+  final VoidCallback onBack;
   final VoidCallback onInviteTap;
 
   @override
   Widget build(BuildContext context) => Row(
     children: [
+      BounceTap(
+        onTap: onBack,
+        pressedScale: 0.92,
+        child: SizedBox(
+          width: 42,
+          height: 48,
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: context.colorTokens.textBody,
+            size: 22,
+          ),
+        ),
+      ),
+      const Gap(4),
       Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _title(context),
-              style: context.textStyles.black32.copyWith(
-                color: context.colorTokens.primary,
-                fontSize: 28,
-                height: 1.05,
-              ),
-            ),
-            const Gap(4),
-            Text(
-              _subtitle(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: _socialMuted,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
+        child: Text(
+          _title(context),
+          style: context.textStyles.black32.copyWith(
+            color: context.colorTokens.primary,
+            fontSize: 28,
+            height: 1.05,
+          ),
         ),
       ),
       BounceTap(
@@ -544,12 +546,6 @@ class _Header extends StatelessWidget {
     "es" => "Amigos",
     "pt" => "Amigos",
     _ => "Friends",
-  };
-
-  String _subtitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Gestiona tus conexiones e invitaciones.",
-    "pt" => "Gerencie suas conexões e convites.",
-    _ => "Manage your connections and invites.",
   };
 }
 
