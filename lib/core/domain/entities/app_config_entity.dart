@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
+import "package:help_out/theme/accent_presets.dart";
 
 class AppConfigEntity extends Equatable {
   const AppConfigEntity({
@@ -30,7 +31,7 @@ class AppConfigEntity extends Equatable {
     phoneNumber: null,
     birthDate: null,
     profilePhotoBase64: null,
-    accentColorValue: 0xFFFFC107,
+    accentColorValue: AppAccentPresets.defaultAccentValue,
     avatarIconIndex: 0,
     notificationsEnabled: true,
     languageCode: null,

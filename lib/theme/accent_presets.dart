@@ -13,5 +13,6 @@ class AppAccentPresets {
     Color(0xFFFF8C00), // Laranja
   ];
 
-  static Color get defaultAccent => values.first;
+  static const int defaultAccentValue = 0xFF1976D2;
+  static const Color defaultAccent = Color(defaultAccentValue);
 }
