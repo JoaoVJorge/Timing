@@ -36,6 +36,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   });
 
   static const int defaultFocusIntervalSeconds = 25 * 60;
+  static const Duration autoSaveInterval = Duration(seconds: 10);
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
@@ -64,7 +65,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _hasLoggedTime = false;
   bool _hasRecordedLastActivity = false;
   bool _isConsumingLiveActivityAction = false;
+  bool _isAppInForeground = true;
+  bool _isCatchingUpAfterBackground = false;
+  bool _isPersistingTime = false;
+  bool _shouldPersistAgain = false;
   late DateTime _lastTickAt;
+  late DateTime _lastAutoSaveAt;
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
@@ -106,6 +112,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _lastTickAt = DateTime.now();
+    _lastAutoSaveAt = _lastTickAt;
     _ticker = Timer.periodic(
       const Duration(seconds: 1),
       (timer) => unawaited(_tick()),
@@ -132,6 +139,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     _advanceBy(elapsedSeconds);
+    _autoSaveIfNeeded(now);
   }
 
   void _advanceBy(int seconds) {
@@ -178,7 +186,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       focusSessionCount,
     );
     unawaited(dailyProgressService.registerSession());
-    unawaited(focusFeedbackService.playFocusFinishedFeedback());
+    if (_isAppInForeground && !_isCatchingUpAfterBackground) {
+      unawaited(focusFeedbackService.playFocusFinishedFeedback());
+    }
 
     if (completedFocusSections.value >= focusSessionCount) {
       finishSession();
@@ -346,17 +356,44 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _persistAccumulatedTime() {
+    if (_isPersistingTime) {
+      _shouldPersistAgain = true;
+      return;
+    }
+    _isPersistingTime = true;
+    unawaited(_persistAccumulatedTimeLoop());
+  }
+
+  Future<void> _persistAccumulatedTimeLoop() async {
+    try {
+      do {
+        _shouldPersistAgain = false;
+        await _persistAccumulatedTimeOnce();
+      } while (_shouldPersistAgain);
+    } finally {
+      _isPersistingTime = false;
+    }
+  }
+
+  Future<void> _persistAccumulatedTimeOnce() async {
+    final int sessionSecondsToPersist = sessionSeconds.value;
     final int elapsedSinceLastPersist =
-        sessionSeconds.value - _persistedSessionSeconds;
+        sessionSecondsToPersist - _persistedSessionSeconds;
     if (elapsedSinceLastPersist <= 0) {
       return;
     }
 
-    if (elapsedSinceLastPersist > 0) {
-      _hasLoggedTime = true;
+    final result = await updateSubjectTimeUseCase(
+      subjectId: subject.id,
+      totalSeconds: subject.totalSeconds + sessionSecondsToPersist,
+    );
+    final bool didPersist = result.fold((_) => false, (_) => true);
+    if (!didPersist) {
+      return;
     }
-    _persistedSessionSeconds = sessionSeconds.value;
-    updateSubjectTimeUseCase(subjectId: subject.id, totalSeconds: totalSeconds);
+
+    _hasLoggedTime = true;
+    _persistedSessionSeconds = sessionSecondsToPersist;
     unawaited(
       logActivityUseCase(
         category: subject.category,
@@ -368,6 +405,20 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (!isReading) {
       dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
     }
+    if (sessionSeconds.value > sessionSecondsToPersist) {
+      _shouldPersistAgain = true;
+    }
+  }
+
+  void _autoSaveIfNeeded(DateTime now) {
+    if (sessionSeconds.value <= _persistedSessionSeconds) {
+      return;
+    }
+    if (now.difference(_lastAutoSaveAt) < autoSaveInterval) {
+      return;
+    }
+    _lastAutoSaveAt = now;
+    _persistAccumulatedTime();
   }
 
   void _recordLastActivityIfNeeded() {
@@ -414,6 +465,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     if (!isRunning.value) {
+      timerNotificationService.cancelFocusFinished();
       timerNotificationService.showStatic(
         title: subject.name,
         body: context.l10n.timerNotificationPaused,
@@ -422,6 +474,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     if (isResting.value) {
+      timerNotificationService.cancelFocusFinished();
       timerNotificationService.showStatic(
         title: subject.name,
         body: context.l10n.timerNotificationResting,
@@ -436,6 +489,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         Duration(seconds: sessionSeconds.value),
       ),
     );
+    if (!_isAppInForeground) {
+      timerNotificationService.scheduleFocusFinished(
+        title: subject.name,
+        body: context.l10n.timerNotificationResting,
+        remaining: Duration(seconds: breakCountdownSeconds.value),
+      );
+    }
   }
 
   Future<bool> _consumeLiveActivityAction() async {
@@ -498,7 +558,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(_tick());
+      _isAppInForeground = true;
+      timerNotificationService.cancelFocusFinished();
+      unawaited(_catchUpAfterBackground());
       if (isFocusLockActive) {
         warnFocusLock();
       }
@@ -507,11 +569,25 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused) {
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _isAppInForeground = false;
+      _persistAccumulatedTime();
+      _recordLastActivityIfNeeded();
+      _updateNotification();
       if (isFocusLockActive) {
         unawaited(focusFeedbackService.warnFocusLock());
         unawaited(focusGuardService.bringAppToFront());
       }
+    }
+  }
+
+  Future<void> _catchUpAfterBackground() async {
+    _isCatchingUpAfterBackground = true;
+    try {
+      await _tick();
+    } finally {
+      _isCatchingUpAfterBackground = false;
     }
   }
 

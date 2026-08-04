@@ -3,15 +3,16 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
+import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/presentation/groups/groups_controller.dart";
 import "package:help_out/presentation/groups/widgets/current_user_rank_card.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/presentation/groups/widgets/group_selector.dart";
 import "package:help_out/presentation/groups/widgets/groups_header.dart";
 import "package:help_out/presentation/groups/widgets/leaderboard_tile.dart";
-import "package:help_out/presentation/groups/widgets/period_selector.dart";
 import "package:help_out/shared/widgets/app_empty_state.dart";
+import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_section_header.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
@@ -27,132 +28,1442 @@ class GroupsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GroupsController controller = Get.find();
 
-    return AppScaffold(
-      body: Column(
+    return Obx(() {
+      if (controller.isShowingMemberManagement.value) {
+        return AppScaffold(body: _ManageMembersView(controller: controller));
+      }
+
+      if (controller.isShowingGroupDetails.value) {
+        return AppScaffold(body: _GroupDetailsView(controller: controller));
+      }
+
+      return AppScaffold(body: _GroupsHomeView(controller: controller));
+    });
+  }
+}
+
+class _GroupsHomeView extends StatelessWidget {
+  const _GroupsHomeView({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Gap(16),
+      GroupsHeader(onTapCreateGroup: controller.onTapCreateGroup),
+      const Gap(AppSpacing.betweenSections),
+      Expanded(
+        child: Obx(() {
+          if (controller.isLoading.value && controller.groups.isEmpty) {
+            return const _GroupsLoadingSkeleton();
+          }
+
+          if (controller.groups.isEmpty) {
+            return _GroupsEmptyState(
+              onCreateGroup: controller.onTapCreateGroup,
+              onJoinWithCode: controller.onTapJoinWithCode,
+            );
+          }
+
+          return _GroupsList(
+            groups: controller.groups,
+            onTapFriends: controller.onTapFriends,
+            onSelectGroup: controller.onSelectGroup,
+          );
+        }),
+      ),
+    ],
+  );
+}
+
+class _GroupDetailsView extends StatelessWidget {
+  const _GroupDetailsView({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final GroupEntity? group = controller.selectedGroup.value;
+      final List<GroupMemberEntity> members = controller.rankedMembers;
+
+      if (group == null || members.isEmpty) {
+        return Center(
+          child: Text(
+            context.l10n.noGroupSelected,
+            style: context.textStyles.caption,
+          ),
+        );
+      }
+
+      final Widget selectedContent =
+          switch (controller.selectedDetailsTab.value) {
+            GroupDetailsTab.ranking => _RankingTab(
+              controller: controller,
+              group: group,
+              members: members,
+            ),
+            GroupDetailsTab.goals => _GoalsTab(group: group),
+            GroupDetailsTab.chat => _ChatTab(group: group),
+          };
+
+      return Column(
+        children: [
+          const Gap(14),
+          _GroupDetailsHeader(
+            group: group,
+            onBack: controller.onBackToGroupList,
+            onActions: () => _showGroupActionsSheet(context, controller),
+          ),
+          _GroupDetailsTabs(
+            selectedTab: controller.selectedDetailsTab.value,
+            onSelectTab: controller.onSelectDetailsTab,
+          ),
+          const Gap(10),
+          Expanded(
+            child: controller.selectedDetailsTab.value == GroupDetailsTab.chat
+                ? selectedContent
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                      bottom: AppSpacing.betweenSections,
+                    ),
+                    child: selectedContent,
+                  ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _GroupsList extends StatelessWidget {
+  const _GroupsList({
+    required this.groups,
+    required this.onTapFriends,
+    required this.onSelectGroup,
+  });
+
+  final List<GroupEntity> groups;
+  final VoidCallback onTapFriends;
+  final ValueChanged<GroupEntity> onSelectGroup;
+
+  @override
+  Widget build(BuildContext context) => ListView.separated(
+    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+    itemCount: groups.length + 1,
+    separatorBuilder: (_, _) => const Gap(AppSpacing.betweenRelated),
+    itemBuilder: (context, index) {
+      if (index == 0) {
+        return _FriendsCard(groupCount: groups.length, onTap: onTapFriends);
+      }
+      final GroupEntity group = groups[index - 1];
+      return _GroupCard(group: group, onTap: () => onSelectGroup(group));
+    },
+  );
+}
+
+class _RankingTab extends StatelessWidget {
+  const _RankingTab({
+    required this.controller,
+    required this.group,
+    required this.members,
+  });
+
+  final GroupsController controller;
+  final GroupEntity group;
+  final List<GroupMemberEntity> members;
+
+  @override
+  Widget build(BuildContext context) {
+    final GroupMemberEntity? currentUser = controller.currentUserMember;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (currentUser != null) ...[
+          CurrentUserRankCard(
+            rank: controller.currentUserRank,
+            theme: group.theme,
+            value: currentUser.secondsFor(controller.selectedPeriod.value),
+            differenceToPrevious: controller.differenceToPrevious(currentUser),
+            memberAhead: controller.memberAheadOfCurrentUser,
+            isTiedForFirst: controller.currentUserIsTiedForFirst,
+          ),
+          const Gap(AppSpacing.betweenSections),
+        ],
+        AppSectionHeader(title: context.l10n.leaderboardTitle),
+        const Gap(AppSpacing.betweenRelated),
+        Container(
+          decoration: AppSurfaces.rowGroup(context.colorTokens),
+          child: Column(
+            children: [
+              for (int index = 0; index < members.length; index++) ...[
+                LeaderboardTile(
+                  rank: controller.rankOf(members[index]),
+                  member: members[index],
+                  theme: group.theme,
+                  value: members[index].secondsFor(
+                    controller.selectedPeriod.value,
+                  ),
+                  isCurrentUser: controller.isCurrentUser(members[index]),
+                  isFirst: index == 0,
+                  isLast: index == members.length - 1,
+                  differenceToPrevious: controller.differenceToPrevious(
+                    members[index],
+                  ),
+                ),
+                if (index < members.length - 1)
+                  Divider(
+                    height: 1,
+                    indent: 22,
+                    endIndent: 22,
+                    color: context.colorTokens.divider,
+                  ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ManageMembersView extends StatelessWidget {
+  const _ManageMembersView({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final GroupEntity? group = controller.selectedGroup.value;
+    if (group == null) {
+      return Center(
+        child: Text(
+          context.l10n.noGroupSelected,
+          style: context.textStyles.caption,
+        ),
+      );
+    }
+
+    final GroupMemberEntity? leader = _leaderFor(group);
+    final List<GroupMemberEntity> members = group.members
+        .where((member) => member.id != leader?.id)
+        .toList();
+
+    return Column(
+      children: [
+        const Gap(16),
+        _ManageMembersHeader(
+          group: group,
+          onBack: controller.onBackToGroupDetails,
+        ),
+        const Gap(AppSpacing.betweenSections),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+            children: [
+              _ManageGroupSummaryCard(group: group),
+              const Gap(AppSpacing.betweenSections),
+              if (leader != null) ...[
+                _MembersSectionLabel(label: "Lider"),
+                const Gap(AppSpacing.betweenRelated),
+                _MemberRow(
+                  member: leader,
+                  roleLabel: "Lider do grupo",
+                  badgeLabel: "Lider",
+                  isFirst: true,
+                  isLast: true,
+                ),
+                const Gap(AppSpacing.betweenSections),
+              ],
+              _MembersSectionLabel(label: "Membros"),
+              const Gap(AppSpacing.betweenRelated),
+              Container(
+                decoration: AppSurfaces.rowGroup(context.colorTokens),
+                child: Column(
+                  children: [
+                    for (int index = 0; index < members.length; index++) ...[
+                      _MemberRow(
+                        member: members[index],
+                        roleLabel: "Membro",
+                        isFirst: index == 0,
+                        isLast: index == members.length - 1,
+                      ),
+                      if (index < members.length - 1)
+                        Divider(
+                          height: 1,
+                          indent: 78,
+                          color: context.colorTokens.divider,
+                        ),
+                    ],
+                  ],
+                ),
+              ),
+              const Gap(18),
+              _AddMemberButton(onTap: controller.onTapFriends),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ManageMembersHeader extends StatelessWidget {
+  const _ManageMembersHeader({required this.group, required this.onBack});
+
+  final GroupEntity group;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 58,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _DetailIconButton(
+            icon: Icons.arrow_back_ios_new_rounded,
+            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
+            onTap: onBack,
+          ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Gerenciar membros",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.black20.copyWith(fontSize: 22),
+            ),
+            const Gap(4),
+            Text(
+              localizedGroupName(context, group),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.caption.copyWith(
+                color: context.colorTokens.textBody,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+class _ManageGroupSummaryCard extends StatelessWidget {
+  const _ManageGroupSummaryCard({required this.group});
+
+  final GroupEntity group;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: AppSurfaces.content(context.colorTokens),
+    child: Row(
+      children: [
+        _GroupIcon(theme: group.theme, size: 66, iconSize: 32),
+        const Gap(16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                localizedGroupName(context, group),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.black20.copyWith(fontSize: 22),
+              ),
+              const Gap(6),
+              Text(
+                "${group.members.length} participantes",
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: context.colorTokens.textHint,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _MembersSectionLabel extends StatelessWidget {
+  const _MembersSectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    label,
+    style: context.textStyles.sectionTitle.copyWith(
+      color: context.colorTokens.textHint,
+      fontSize: 18,
+    ),
+  );
+}
+
+class _MemberRow extends StatelessWidget {
+  const _MemberRow({
+    required this.member,
+    required this.roleLabel,
+    required this.isFirst,
+    required this.isLast,
+    this.badgeLabel,
+  });
+
+  final GroupMemberEntity member;
+  final String roleLabel;
+  final bool isFirst;
+  final bool isLast;
+  final String? badgeLabel;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(minHeight: 78),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.vertical(
+        top: isFirst ? const Radius.circular(18) : Radius.zero,
+        bottom: isLast ? const Radius.circular(18) : Radius.zero,
+      ),
+      border: badgeLabel == null
+          ? null
+          : Border.all(
+              color: context.colorTokens.borderUnfocused.withValues(alpha: 0.4),
+            ),
+    ),
+    child: Row(
+      children: [
+        GroupMemberAvatar(
+          name: member.name,
+          colorValue: member.avatarColorValue,
+          avatar: member.avatar,
+          size: 54,
+        ),
+        const Gap(16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                member.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge.copyWith(fontSize: 17),
+              ),
+              const Gap(4),
+              Text(
+                roleLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: context.colorTokens.textHint,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (badgeLabel != null) ...[
+          const Gap(10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              badgeLabel!,
+              style: context.textStyles.bodySmall.copyWith(
+                color: context.colorTokens.primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+        const Gap(8),
+        Icon(
+          Icons.more_vert_rounded,
+          size: 24,
+          color: context.colorTokens.textBody,
+        ),
+      ],
+    ),
+  );
+}
+
+class _AddMemberButton extends StatelessWidget {
+  const _AddMemberButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.98,
+    child: Container(
+      height: 58,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colorTokens.primary, width: 1.4),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_add_alt_1_rounded,
+            color: context.colorTokens.primary,
+            size: 24,
+          ),
+          const Gap(10),
+          Text(
+            "Adicionar membro",
+            style: context.textStyles.cardTitle.copyWith(
+              color: context.colorTokens.primary,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _GroupCard extends StatelessWidget {
+  const _GroupCard({required this.group, required this.onTap});
+
+  final GroupEntity group;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.98,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 124),
+      padding: const EdgeInsets.all(14),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Gap(16),
-          GroupsHeader(
-            onTapFriends: controller.onTapFriends,
-            onTapCreateGroup: controller.onTapCreateGroup,
-          ),
-          const Gap(AppSpacing.betweenRelated),
-          Obx(() {
-            if (controller.isLoading.value && controller.groups.isEmpty) {
-              return const _GroupSelectorSkeleton();
-            }
-            if (controller.groups.isEmpty) {
-              return const Gap(AppSpacing.betweenSections);
-            }
-
-            return Column(
-              children: [
-                GroupSelector(
-                  groups: controller.groups,
-                  selectedGroupId: controller.selectedGroup.value?.id,
-                  onSelectGroup: controller.onSelectGroup,
-                ),
-                const Gap(AppSpacing.titleToDescription),
-              ],
-            );
-          }),
+          _GroupIcon(theme: group.theme, size: 72, iconSize: 34),
+          const Gap(14),
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.groups.isEmpty) {
-                return const _GroupsLoadingSkeleton();
-              }
-
-              if (controller.groups.isEmpty) {
-                return _GroupsEmptyState(
-                  onCreateGroup: controller.onTapCreateGroup,
-                  onJoinWithCode: controller.onTapJoinWithCode,
-                );
-              }
-
-              final List<GroupMemberEntity> members = controller.rankedMembers;
-              final GroupEntity? group = controller.selectedGroup.value;
-              final GroupMemberEntity? currentUser =
-                  controller.currentUserMember;
-
-              if (members.isEmpty || group == null) {
-                return Center(
-                  child: Text(
-                    context.l10n.noGroupSelected,
-                    style: context.textStyles.caption,
-                  ),
-                );
-              }
-
-              return ListView(
-                padding: const EdgeInsets.only(
-                  bottom: AppSpacing.betweenSections,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizedGroupName(context, group),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.black20.copyWith(fontSize: 22),
                 ),
-                children: [
-                  GroupPeriodSelector(
-                    selectedPeriod: controller.selectedPeriod.value,
-                    onSelectPeriod: controller.onSelectPeriod,
+                const Gap(4),
+                Text(
+                  _groupDescription(context, group),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(height: 1.28),
+                ),
+                const Gap(12),
+                _OverlappingMembers(members: group.members),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _FriendsCard extends StatelessWidget {
+  const _FriendsCard({required this.groupCount, required this.onTap});
+
+  final int groupCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.98,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 78),
+      padding: const EdgeInsets.all(14),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.person_outline_rounded,
+              size: 26,
+              color: context.colorTokens.primary,
+            ),
+          ),
+          const Gap(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  context.l10n.groupsFriendsTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.cardTitle.copyWith(
+                    color: context.colorTokens.primary,
                   ),
-                  const Gap(AppSpacing.betweenSections),
-                  if (currentUser != null) ...[
-                    CurrentUserRankCard(
-                      rank: controller.currentUserRank,
-                      theme: group.theme,
-                      value: currentUser.secondsFor(
-                        controller.selectedPeriod.value,
-                      ),
-                      differenceToPrevious: controller.differenceToPrevious(
-                        currentUser,
-                      ),
-                      memberAhead: controller.memberAheadOfCurrentUser,
-                      isTiedForFirst: controller.currentUserIsTiedForFirst,
-                    ),
-                    const Gap(AppSpacing.betweenSections),
-                  ],
-                  AppSectionHeader(title: context.l10n.leaderboardTitle),
-                  const Gap(AppSpacing.betweenRelated),
-                  Container(
-                    decoration: AppSurfaces.rowGroup(context.colorTokens),
-                    child: Column(
-                      children: [
-                        for (
-                          int index = 0;
-                          index < members.length;
-                          index++
-                        ) ...[
-                          LeaderboardTile(
-                            rank: controller.rankOf(members[index]),
-                            member: members[index],
-                            theme: group.theme,
-                            value: members[index].secondsFor(
-                              controller.selectedPeriod.value,
-                            ),
-                            isCurrentUser: controller.isCurrentUser(
-                              members[index],
-                            ),
-                            isFirst: index == 0,
-                            isLast: index == members.length - 1,
-                            differenceToPrevious: controller
-                                .differenceToPrevious(members[index]),
-                          ),
-                          if (index < members.length - 1)
-                            Divider(
-                              height: 1,
-                              indent: 22,
-                              endIndent: 22,
-                              color: context.colorTokens.divider,
-                            ),
-                        ],
-                      ],
+                ),
+                const Gap(3),
+                Text(
+                  _friendsCardSubtitle(context, groupCount),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Gap(12),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 28,
+            color: context.colorTokens.textHint,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _OverlappingMembers extends StatelessWidget {
+  const _OverlappingMembers({required this.members});
+
+  final List<GroupMemberEntity> members;
+
+  @override
+  Widget build(BuildContext context) {
+    const int visibleCount = 3;
+    const double size = 30;
+    const double overlap = 10;
+    final List<GroupMemberEntity> visibleMembers = members
+        .take(visibleCount)
+        .toList();
+    final int extraCount = members.length - visibleMembers.length;
+
+    return SizedBox(
+      height: size,
+      width: visibleMembers.isEmpty
+          ? 0
+          : size +
+                (visibleMembers.length - 1) * (size - overlap) +
+                (extraCount > 0 ? size - overlap : 0),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (int index = 0; index < visibleMembers.length; index++)
+            Positioned(
+              left: index * (size - overlap),
+              child: GroupMemberAvatar(
+                name: visibleMembers[index].name,
+                colorValue: visibleMembers[index].avatarColorValue,
+                avatar: visibleMembers[index].avatar,
+                size: size,
+                borderColor: context.colorTokens.surface,
+              ),
+            ),
+          if (extraCount > 0)
+            Positioned(
+              left: visibleMembers.length * (size - overlap),
+              child: Container(
+                width: size,
+                height: size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: context.colorTokens.primaryVeryLight,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: context.colorTokens.surface,
+                    width: 2,
+                  ),
+                ),
+                child: Text(
+                  "+$extraCount",
+                  maxLines: 1,
+                  style: context.textStyles.bodyTiny.copyWith(
+                    color: context.colorTokens.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GroupDetailsHeader extends StatelessWidget {
+  const _GroupDetailsHeader({
+    required this.group,
+    required this.onBack,
+    required this.onActions,
+  });
+
+  final GroupEntity group;
+  final VoidCallback onBack;
+  final VoidCallback onActions;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      SizedBox(
+        height: 184,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: _DetailIconButton(
+                icon: Icons.arrow_back_ios_new_rounded,
+                semanticLabel: MaterialLocalizations.of(
+                  context,
+                ).backButtonTooltip,
+                onTap: onBack,
+              ),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: _DetailIconButton(
+                icon: Icons.more_vert_rounded,
+                semanticLabel: "Acoes do grupo",
+                onTap: onActions,
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Column(
+                children: [
+                  _GroupIcon(theme: group.theme, size: 88, iconSize: 42),
+                  const Gap(7),
+                  Text(
+                    localizedGroupName(context, group),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.black28.copyWith(fontSize: 30),
+                  ),
+                  const Gap(3),
+                  Text(
+                    _groupDescription(context, group),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.caption.copyWith(
+                      color: context.colorTokens.textBody,
                     ),
                   ),
                 ],
-              );
-            }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _GroupDetailsTabs extends StatelessWidget {
+  const _GroupDetailsTabs({
+    required this.selectedTab,
+    required this.onSelectTab,
+  });
+
+  final GroupDetailsTab selectedTab;
+  final ValueChanged<GroupDetailsTab> onSelectTab;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 42,
+    padding: const EdgeInsets.all(3),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(
+        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
+      ),
+    ),
+    child: Row(
+      children: [
+        _TabPill(
+          label: "Ranking",
+          isSelected: selectedTab == GroupDetailsTab.ranking,
+          onTap: () => onSelectTab(GroupDetailsTab.ranking),
+        ),
+        _TabPill(
+          label: "Metas",
+          isSelected: selectedTab == GroupDetailsTab.goals,
+          onTap: () => onSelectTab(GroupDetailsTab.goals),
+        ),
+        _TabPill(
+          label: "Chat",
+          isSelected: selectedTab == GroupDetailsTab.chat,
+          onTap: () => onSelectTab(GroupDetailsTab.chat),
+        ),
+      ],
+    ),
+  );
+}
+
+class _GoalsTab extends StatelessWidget {
+  const _GoalsTab({required this.group});
+
+  final GroupEntity group;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      _GroupInfoCard(
+        icon: Icons.track_changes_rounded,
+        title: "Meta do grupo",
+        value: _goalTitle(context, group),
+        description: _goalDescription(context, group),
+      ),
+      const Gap(10),
+      _GroupInfoCard(
+        icon: Icons.shield_outlined,
+        title: "Regra principal",
+        description: _ruleDescription(context, group),
+      ),
+      const Gap(10),
+      _ProgressInfoCard(memberCount: group.members.length),
+      const Gap(10),
+      _GroupInfoCard(
+        icon: Icons.flag_outlined,
+        title: "Proximo marco",
+        value:
+            "${(group.members.length * 0.7).ceil()}/${group.members.length} membros",
+        description: "para liberar o selo \"Foco Total\"",
+      ),
+    ],
+  );
+}
+
+class _GroupInfoCard extends StatelessWidget {
+  const _GroupInfoCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.value,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? value;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(14),
+    decoration: AppSurfaces.content(context.colorTokens),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 28, color: context.colorTokens.primary),
+        const Gap(12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: context.textStyles.cardTitle),
+              if (value != null) ...[
+                const Gap(3),
+                Text(
+                  value!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.black20.copyWith(fontSize: 19),
+                ),
+              ],
+              const Gap(6),
+              Text(
+                description,
+                style: context.textStyles.bodyMedium.copyWith(
+                  fontSize: 13,
+                  height: 1.24,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ProgressInfoCard extends StatelessWidget {
+  const _ProgressInfoCard({required this.memberCount});
+
+  final int memberCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final int completed = memberCount == 0
+        ? 0
+        : (memberCount * 0.45).round().clamp(1, memberCount).toInt();
+    final double progress = memberCount == 0 ? 0 : completed / memberCount;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.groups_2_outlined,
+            size: 27,
+            color: context.colorTokens.primary,
+          ),
+          const Gap(12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Progresso coletivo", style: context.textStyles.cardTitle),
+                const Gap(5),
+                Row(
+                  children: [
+                    Text(
+                      "${(progress * 100).round()}%",
+                      style: context.textStyles.black20,
+                    ),
+                    const Gap(12),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 8,
+                          color: context.colorTokens.primary,
+                          backgroundColor: context.colorTokens.surfaceInnerLayer
+                              .withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Gap(4),
+                Text(
+                  "$completed/$memberCount membros concluiram hoje",
+                  style: context.textStyles.bodyMedium.copyWith(fontSize: 13),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _ChatTab extends StatelessWidget {
+  const _ChatTab({required this.group});
+
+  final GroupEntity group;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<GroupMemberEntity> members = group.members.take(3).toList();
+
+    return Column(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: SingleChildScrollView(
+              reverse: true,
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _ChatBubble(
+                    member: members.isEmpty ? null : members.first,
+                    message: "Fechei 30 min hoje. Bora pra mais!",
+                    time: "09:15",
+                    isMine: false,
+                  ),
+                  const Gap(14),
+                  _ChatBubble(
+                    member: members.length < 2 ? null : members[1],
+                    message: "Boa! Vou comecar agora. Foco total!",
+                    time: "09:18",
+                    isMine: true,
+                  ),
+                  const Gap(14),
+                  _ChatBubble(
+                    member: members.length < 3 ? null : members[2],
+                    message: "Bora manter a meta do grupo",
+                    time: "09:19",
+                    isMine: false,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const Gap(12),
+        Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: context.colorTokens.surface,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.attach_file_rounded,
+                color: context.colorTokens.textHint,
+              ),
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  "Enviar mensagem...",
+                  style: context.textStyles.caption,
+                ),
+              ),
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: context.colorTokens.primaryGradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.send_rounded,
+                  color: context.colorTokens.primaryForeground,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Gap(8),
+      ],
+    );
+  }
+}
+
+class _ChatBubble extends StatelessWidget {
+  const _ChatBubble({
+    required this.member,
+    required this.message,
+    required this.time,
+    required this.isMine,
+  });
+
+  final GroupMemberEntity? member;
+  final String message;
+  final String time;
+  final bool isMine;
+
+  @override
+  Widget build(BuildContext context) {
+    final GroupMemberEntity effectiveMember =
+        member ??
+        const GroupMemberEntity(
+          id: "",
+          name: "Membro",
+          avatarColorValue: 0xFF6B9528,
+          todaySeconds: 0,
+          weekSeconds: 0,
+          monthSeconds: 0,
+        );
+
+    return Row(
+      mainAxisAlignment: isMine
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (!isMine) ...[
+          GroupMemberAvatar(
+            name: effectiveMember.name,
+            colorValue: effectiveMember.avatarColorValue,
+            avatar: effectiveMember.avatar,
+            size: 42,
+          ),
+          const Gap(8),
+        ],
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 14, 10),
+            decoration: BoxDecoration(
+              color: isMine
+                  ? context.colorTokens.primaryVeryLight
+                  : context.colorTokens.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.colorTokens.borderUnfocused.withValues(
+                  alpha: 0.38,
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  effectiveMember.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: isMine
+                        ? context.colorTokens.primary
+                        : const Color(0xFFE85888),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(4),
+                Text(message, style: context.textStyles.bodyMedium),
+                const Gap(4),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(time, style: context.textStyles.bodyTiny),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isMine) ...[
+          const Gap(8),
+          GroupMemberAvatar(
+            name: effectiveMember.name,
+            colorValue: effectiveMember.avatarColorValue,
+            avatar: effectiveMember.avatar,
+            size: 42,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _TabPill extends StatelessWidget {
+  const _TabPill({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: BounceTap(
+      onTap: onTap,
+      pressedScale: 0.98,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: isSelected ? context.colorTokens.primaryGradient : null,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.bodySmall.copyWith(
+            color: isSelected
+                ? context.colorTokens.primaryForeground
+                : context.colorTokens.textBody,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _DetailIconButton extends StatelessWidget {
+  const _DetailIconButton({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: semanticLabel,
+    child: BounceTap(
+      onTap: onTap,
+      pressedScale: 0.92,
+      child: SizedBox(
+        width: AppSpacing.minTapTarget,
+        height: AppSpacing.minTapTarget,
+        child: Icon(icon, size: 24, color: context.colorTokens.textBody),
+      ),
+    ),
+  );
+}
+
+Future<void> _showGroupActionsSheet(
+  BuildContext context,
+  GroupsController controller,
+) => showModalBottomSheet<void>(
+  context: context,
+  backgroundColor: context.colorTokens.transparent,
+  barrierColor: context.colorTokens.black.withValues(alpha: 0.42),
+  builder: (sheetContext) => _GroupActionsSheet(
+    onManageMembers: () {
+      Navigator.of(sheetContext).pop();
+      controller.onManageMembers();
+    },
+    onEditGroup: () {
+      Navigator.of(sheetContext).pop();
+      controller.onTapEditGroup();
+    },
+    onLeaveGroup: () {
+      Navigator.of(sheetContext).pop();
+      controller.onTapLeaveGroup();
+    },
+  ),
+);
+
+class _GroupActionsSheet extends StatelessWidget {
+  const _GroupActionsSheet({
+    required this.onManageMembers,
+    required this.onEditGroup,
+    required this.onLeaveGroup,
+  });
+
+  final VoidCallback onManageMembers;
+  final VoidCallback onEditGroup;
+  final VoidCallback onLeaveGroup;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    top: false,
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 58,
+            height: 5,
+            decoration: BoxDecoration(
+              color: context.colorTokens.textHint.withValues(alpha: 0.42),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          const Gap(20),
+          _GroupActionRow(
+            icon: Icons.groups_2_outlined,
+            label: "Gerenciar membros",
+            onTap: onManageMembers,
+          ),
+          const Gap(12),
+          _GroupActionRow(
+            icon: Icons.edit_outlined,
+            label: "Editar grupo",
+            onTap: onEditGroup,
+          ),
+          const Gap(12),
+          _GroupActionRow(
+            icon: Icons.logout_rounded,
+            label: "Sair do grupo",
+            isDestructive: true,
+            onTap: onLeaveGroup,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _GroupActionRow extends StatelessWidget {
+  const _GroupActionRow({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = isDestructive
+        ? context.colorTokens.error
+        : context.colorTokens.primary;
+
+    return BounceTap(
+      onTap: onTap,
+      pressedScale: 0.98,
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: isDestructive
+              ? context.colorTokens.error.withValues(alpha: 0.08)
+              : context.colorTokens.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 25),
+            ),
+            const Gap(18),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.cardTitle.copyWith(
+                  color: isDestructive ? color : context.colorTokens.textBody,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: color, size: 28),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GroupIcon extends StatelessWidget {
+  const _GroupIcon({
+    required this.theme,
+    required this.size,
+    required this.iconSize,
+  });
+
+  final GroupThemeType theme;
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      gradient: context.colorTokens.primaryGradient,
+      shape: BoxShape.circle,
+    ),
+    child: Center(
+      child: AppIcon(
+        theme.iconName,
+        size: iconSize,
+        color: context.colorTokens.primaryForeground,
+      ),
+    ),
+  );
+}
+
+String _groupDescription(BuildContext context, GroupEntity group) {
+  final String metric = groupMetricDescription(context, group.theme);
+  return switch (context.languageCode) {
+    "pt" => "Compartilhando $metric e superando desafios.",
+    "es" => "Compartiendo $metric y superando retos.",
+    _ => "Sharing $metric and beating challenges together.",
+  };
+}
+
+GroupMemberEntity? _leaderFor(GroupEntity group) {
+  for (final GroupMemberEntity member in group.members) {
+    if (member.id == group.ownerId || member.role == "owner") {
+      return member;
+    }
+  }
+  return group.members.isEmpty ? null : group.members.first;
+}
+
+String _friendsCardSubtitle(BuildContext context, int groupCount) =>
+    switch (context.languageCode) {
+      "pt" => "Solicitacoes, convites e $groupCount em grupos",
+      "es" => "Solicitudes, invitaciones y $groupCount en grupos",
+      _ => "Requests, invites and $groupCount in groups",
+    };
+
+String _goalTitle(BuildContext context, GroupEntity group) {
+  final String metric = groupMetricDescription(context, group.theme);
+  return switch (context.languageCode) {
+    "pt" => "Manter $metric todos os dias",
+    "es" => "Mantener $metric todos los dias",
+    _ => "Keep $metric every day",
+  };
+}
+
+String _goalDescription(BuildContext context, GroupEntity group) {
+  final String metric = groupMetricDescription(context, group.theme);
+  return switch (context.languageCode) {
+    "pt" =>
+      "Cada participante deve registrar progresso em $metric para manter a sequencia do grupo.",
+    "es" =>
+      "Cada participante debe registrar progreso en $metric para mantener la racha del grupo.",
+    _ =>
+      "Each member should log progress in $metric to keep the group streak going.",
+  };
+}
+
+String _ruleDescription(BuildContext context, GroupEntity group) {
+  final String metric = groupMetricDescription(context, group.theme);
+  return switch (context.languageCode) {
+    "pt" =>
+      "Registre pelo menos uma atividade de $metric por dia. Manter a sequencia fortalece o grupo.",
+    "es" =>
+      "Registra al menos una actividad de $metric por dia. Mantener la racha fortalece el grupo.",
+    _ =>
+      "Log at least one $metric activity per day. Keeping the streak strengthens the group.",
+  };
 }
 
 class _GroupsEmptyState extends StatelessWidget {
@@ -269,47 +1580,55 @@ class _JoinWithCodeButton extends StatelessWidget {
   );
 }
 
-class _GroupSelectorSkeleton extends StatelessWidget {
-  const _GroupSelectorSkeleton();
+class _GroupsLoadingSkeleton extends StatelessWidget {
+  const _GroupsLoadingSkeleton();
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(
-      top: 10,
-      bottom: AppSpacing.titleToDescription,
-    ),
+  Widget build(BuildContext context) => ListView(
+    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+    children: const [
+      _SkeletonGroupCard(isFriends: true),
+      Gap(AppSpacing.betweenRelated),
+      _SkeletonGroupCard(),
+      Gap(AppSpacing.betweenRelated),
+      _SkeletonGroupCard(),
+      Gap(AppSpacing.betweenRelated),
+      _SkeletonGroupCard(),
+    ],
+  );
+}
+
+class _SkeletonGroupCard extends StatelessWidget {
+  const _SkeletonGroupCard({this.isFriends = false});
+
+  final bool isFriends;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: BoxConstraints(minHeight: isFriends ? 78 : 124),
+    padding: const EdgeInsets.all(14),
+    decoration: AppSurfaces.content(context.colorTokens),
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 62,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          width: isFriends ? 46 : 72,
+          height: isFriends ? 46 : 72,
           decoration: BoxDecoration(
-            gradient: context.colorTokens.primaryGradient,
-            borderRadius: BorderRadius.circular(30),
+            color: context.colorTokens.primaryVeryLight,
+            shape: BoxShape.circle,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+        ),
+        const Gap(14),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.colorTokens.white.withValues(alpha: 0.25),
-                ),
-                child: Icon(
-                  Icons.school_rounded,
-                  color: context.colorTokens.white,
-                  size: 20,
-                ),
-              ),
-              const Gap(10),
-              _SkeletonBox(
-                width: 118,
-                height: 16,
-                radius: 8,
-                color: context.colorTokens.white.withValues(alpha: 0.36),
-              ),
+              _SkeletonBox(width: 96, height: 18, radius: 8),
+              Gap(8),
+              _SkeletonBox(height: 12, radius: 6),
+              Gap(10),
+              _SkeletonAvatarRow(),
             ],
           ),
         ),
@@ -318,219 +1637,51 @@ class _GroupSelectorSkeleton extends StatelessWidget {
   );
 }
 
-class _GroupsLoadingSkeleton extends StatelessWidget {
-  const _GroupsLoadingSkeleton();
+class _SkeletonAvatarRow extends StatelessWidget {
+  const _SkeletonAvatarRow();
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
-    children: [
-      const _CurrentUserRankSkeleton(),
-      const Gap(AppSpacing.betweenRelated),
-      Row(
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: context.colorTokens.textHint,
-          ),
-          const Gap(6),
-          const Expanded(child: _SkeletonBox(height: 12, radius: 6)),
-        ],
-      ),
-      const Gap(AppSpacing.betweenSections),
-      const _SkeletonBox(width: 116, height: 22, radius: 10),
-      const Gap(AppSpacing.betweenRelated),
-      Container(
-        decoration: AppSurfaces.rowGroup(context.colorTokens),
-        child: const Column(
-          children: [
-            _SkeletonLeaderboardRow(
-              rank: 1,
-              name: "Ana",
-              colorValue: 0xFFE85888,
-              scoreWidth: 62,
-              isFirst: true,
-            ),
-            Divider(height: 1, indent: 22, endIndent: 22),
-            _SkeletonLeaderboardRow(
-              rank: 2,
-              name: "Bia",
-              colorValue: 0xFF4F7DF3,
-              scoreWidth: 54,
-              isCurrentUser: true,
-            ),
-            Divider(height: 1, indent: 22, endIndent: 22),
-            _SkeletonLeaderboardRow(
-              rank: 3,
-              name: "Leo",
-              colorValue: 0xFF42B976,
-              scoreWidth: 48,
-              isLast: true,
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-class _CurrentUserRankSkeleton extends StatelessWidget {
-  const _CurrentUserRankSkeleton();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: AppSurfaces.content(context.colorTokens),
-    child: Column(
+  Widget build(BuildContext context) => SizedBox(
+    width: 86,
+    height: 30,
+    child: Stack(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 58,
-              height: 58,
+        for (int index = 0; index < 3; index++)
+          Positioned(
+            left: index * 20,
+            child: Container(
+              width: 30,
+              height: 30,
               decoration: BoxDecoration(
-                color: context.colorTokens.primaryVeryLight,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF343434)
+                    : const Color(0xFFE5E5E5),
                 shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.emoji_events_rounded,
-                size: 30,
-                color: context.colorTokens.primary,
-              ),
-            ),
-            const Gap(14),
-            const Flexible(
-              child: Column(
-                children: [
-                  _SkeletonBox(width: 86, height: 12, radius: 6),
-                  Gap(AppSpacing.titleToDescription),
-                  _SkeletonBox(width: 64, height: 24, radius: 10),
-                ],
+                border: Border.all(
+                  color: context.colorTokens.surface,
+                  width: 2,
+                ),
               ),
             ),
-            const Gap(AppSpacing.titleToDescription),
-          ],
-        ),
-        const Gap(14),
-        Divider(height: 1, color: context.colorTokens.divider),
-        const Gap(14),
-        Row(
-          spacing: 10,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.schedule_rounded,
-              size: 22,
-              color: context.colorTokens.primary,
-            ),
-            const _SkeletonBox(width: 76, height: 24, radius: 10),
-          ],
-        ),
-        const Gap(AppSpacing.titleToDescription),
-        const _SkeletonBox(width: 160, height: 12, radius: 6),
+          ),
       ],
     ),
   );
 }
 
-class _SkeletonLeaderboardRow extends StatelessWidget {
-  const _SkeletonLeaderboardRow({
-    required this.rank,
-    required this.name,
-    required this.colorValue,
-    required this.scoreWidth,
-    this.isCurrentUser = false,
-    this.isFirst = false,
-    this.isLast = false,
-  });
-
-  final int rank;
-  final String name;
-  final int colorValue;
-  final double scoreWidth;
-  final bool isCurrentUser;
-  final bool isFirst;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final BorderRadius userRadius = BorderRadius.vertical(
-      top: isFirst ? const Radius.circular(18) : Radius.zero,
-      bottom: isLast ? const Radius.circular(18) : Radius.zero,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isCurrentUser
-            ? context.colorTokens.primaryVeryLight
-            : context.colorTokens.transparent,
-        borderRadius: isCurrentUser ? userRadius : BorderRadius.zero,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 34,
-            child: Center(
-              child: Icon(
-                Icons.workspace_premium_rounded,
-                size: 32,
-                color: _SkeletonMedalColors.byRank(rank),
-              ),
-            ),
-          ),
-          const Gap(6),
-          GroupMemberAvatar(name: name, colorValue: colorValue, size: 50),
-          const Gap(14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SkeletonBox(width: 118, height: 16, radius: 8),
-                Gap(AppSpacing.titleToDescription),
-                _SkeletonBox(width: 94, height: 11, radius: 6),
-              ],
-            ),
-          ),
-          const Gap(10),
-          _SkeletonBox(width: scoreWidth, height: 16, radius: 8),
-        ],
-      ),
-    );
-  }
-}
-
-class _SkeletonMedalColors {
-  static Color byRank(int rank) => switch (rank) {
-    1 => const Color(0xFFE4B13B),
-    2 => const Color(0xFF9AA3AD),
-    3 => const Color(0xFFC98549),
-    _ => const Color(0xFF9AA3AD),
-  };
-}
-
 class _SkeletonBox extends StatelessWidget {
-  const _SkeletonBox({
-    required this.height,
-    this.width,
-    this.radius = 14,
-    this.color,
-  });
+  const _SkeletonBox({required this.height, this.width, this.radius = 14});
 
   final double height;
   final double? width;
   final double radius;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color effectiveColor =
-        color ??
-        (isDarkMode ? const Color(0xFF343434) : const Color(0xFFE5E5E5));
+    final Color effectiveColor = isDarkMode
+        ? const Color(0xFF343434)
+        : const Color(0xFFE5E5E5);
 
     return Container(
       width: width,
