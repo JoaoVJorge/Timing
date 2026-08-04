@@ -14,7 +14,7 @@ import "package:help_out/presentation/groups/widgets/leaderboard_tile.dart";
 import "package:help_out/shared/widgets/app_empty_state.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
+import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
 import "package:help_out/theme/app_surfaces.dart";
@@ -111,12 +111,13 @@ class _GroupDetailsView extends StatelessWidget {
 
       return Column(
         children: [
-          const Gap(14),
+          Gap(4),
           _GroupDetailsHeader(
             group: group,
             onBack: controller.onBackToGroupList,
             onActions: () => _showGroupActionsSheet(context, controller),
           ),
+          const Gap(8),
           _GroupDetailsTabs(
             selectedTab: controller.selectedDetailsTab.value,
             onSelectTab: controller.onSelectDetailsTab,
@@ -193,7 +194,7 @@ class _RankingTab extends StatelessWidget {
           ),
           const Gap(AppSpacing.betweenSections),
         ],
-        AppSectionHeader(title: context.l10n.leaderboardTitle),
+        _GroupSectionTitle(title: context.l10n.leaderboardTitle),
         const Gap(AppSpacing.betweenRelated),
         Container(
           decoration: AppSurfaces.rowGroup(context.colorTokens),
@@ -214,7 +215,9 @@ class _RankingTab extends StatelessWidget {
                     members[index],
                   ),
                 ),
-                if (index < members.length - 1)
+                if (index < members.length - 1 &&
+                    !controller.isCurrentUser(members[index]) &&
+                    !controller.isCurrentUser(members[index + 1]))
                   Divider(
                     height: 1,
                     indent: 22,
@@ -228,6 +231,38 @@ class _RankingTab extends StatelessWidget {
       ],
     );
   }
+}
+
+class _GroupSectionTitle extends StatelessWidget {
+  const _GroupSectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Container(
+        width: 5,
+        height: 22,
+        decoration: BoxDecoration(
+          color: context.colorTokens.primary,
+          borderRadius: BorderRadius.circular(999),
+        ),
+      ),
+      const Gap(10),
+      Expanded(
+        child: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.sectionTitle.copyWith(
+            color: context.colorTokens.black,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 class _ManageMembersView extends StatelessWidget {
@@ -254,32 +289,33 @@ class _ManageMembersView extends StatelessWidget {
 
     return Column(
       children: [
-        const Gap(16),
-        _ManageMembersHeader(
-          group: group,
+        const Gap(10),
+        AppTopBar(
+          title: "Gerenciar membros",
+          showBackButton: true,
           onBack: controller.onBackToGroupDetails,
         ),
-        const Gap(AppSpacing.betweenSections),
+        const Gap(12),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
             children: [
               _ManageGroupSummaryCard(group: group),
-              const Gap(AppSpacing.betweenSections),
+              const Gap(12),
               if (leader != null) ...[
-                _MembersSectionLabel(label: "Lider"),
-                const Gap(AppSpacing.betweenRelated),
+                _MembersSectionLabel(label: "Líder"),
+                const Gap(8),
                 _MemberRow(
                   member: leader,
-                  roleLabel: "Lider do grupo",
-                  badgeLabel: "Lider",
+                  roleLabel: "Líder do grupo",
+                  badgeLabel: "Líder",
                   isFirst: true,
                   isLast: true,
                 ),
-                const Gap(AppSpacing.betweenSections),
+                const Gap(12),
               ],
               _MembersSectionLabel(label: "Membros"),
-              const Gap(AppSpacing.betweenRelated),
+              const Gap(8),
               Container(
                 decoration: AppSurfaces.rowGroup(context.colorTokens),
                 child: Column(
@@ -301,7 +337,7 @@ class _ManageMembersView extends StatelessWidget {
                   ],
                 ),
               ),
-              const Gap(18),
+              const Gap(14),
               _AddMemberButton(onTap: controller.onTapFriends),
             ],
           ),
@@ -311,51 +347,6 @@ class _ManageMembersView extends StatelessWidget {
   }
 }
 
-class _ManageMembersHeader extends StatelessWidget {
-  const _ManageMembersHeader({required this.group, required this.onBack});
-
-  final GroupEntity group;
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 58,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _DetailIconButton(
-            icon: Icons.arrow_back_ios_new_rounded,
-            semanticLabel: MaterialLocalizations.of(context).backButtonTooltip,
-            onTap: onBack,
-          ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Gerenciar membros",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.black20.copyWith(fontSize: 22),
-            ),
-            const Gap(4),
-            Text(
-              localizedGroupName(context, group),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.caption.copyWith(
-                color: context.colorTokens.textBody,
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
 class _ManageGroupSummaryCard extends StatelessWidget {
   const _ManageGroupSummaryCard({required this.group});
 
@@ -363,12 +354,12 @@ class _ManageGroupSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(12),
     decoration: AppSurfaces.content(context.colorTokens),
     child: Row(
       children: [
-        _GroupIcon(theme: group.theme, size: 66, iconSize: 32),
-        const Gap(16),
+        _GroupIcon(theme: group.theme, size: 54, iconSize: 26),
+        const Gap(12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,9 +368,9 @@ class _ManageGroupSummaryCard extends StatelessWidget {
                 localizedGroupName(context, group),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(fontSize: 22),
+                style: context.textStyles.black20.copyWith(fontSize: 20),
               ),
-              const Gap(6),
+              const Gap(3),
               Text(
                 "${group.members.length} participantes",
                 style: context.textStyles.bodyMedium.copyWith(
@@ -405,7 +396,7 @@ class _MembersSectionLabel extends StatelessWidget {
     label,
     style: context.textStyles.sectionTitle.copyWith(
       color: context.colorTokens.textHint,
-      fontSize: 18,
+      fontSize: 16,
     ),
   );
 }
@@ -427,8 +418,8 @@ class _MemberRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 78),
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    constraints: const BoxConstraints(minHeight: 64),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.vertical(
@@ -447,9 +438,9 @@ class _MemberRow extends StatelessWidget {
           name: member.name,
           colorValue: member.avatarColorValue,
           avatar: member.avatar,
-          size: 54,
+          size: 44,
         ),
-        const Gap(16),
+        const Gap(12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,9 +450,9 @@ class _MemberRow extends StatelessWidget {
                 member.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyLarge.copyWith(fontSize: 17),
+                style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
               ),
-              const Gap(4),
+              const Gap(2),
               Text(
                 roleLabel,
                 maxLines: 1,
@@ -474,9 +465,9 @@ class _MemberRow extends StatelessWidget {
           ),
         ),
         if (badgeLabel != null) ...[
-          const Gap(10),
+          const Gap(8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: context.colorTokens.primaryVeryLight,
               borderRadius: BorderRadius.circular(999),
@@ -493,7 +484,7 @@ class _MemberRow extends StatelessWidget {
         const Gap(8),
         Icon(
           Icons.more_vert_rounded,
-          size: 24,
+          size: 22,
           color: context.colorTokens.textBody,
         ),
       ],
@@ -511,7 +502,7 @@ class _AddMemberButton extends StatelessWidget {
     onTap: onTap,
     pressedScale: 0.98,
     child: Container(
-      height: 58,
+      height: 50,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
@@ -524,9 +515,9 @@ class _AddMemberButton extends StatelessWidget {
           Icon(
             Icons.person_add_alt_1_rounded,
             color: context.colorTokens.primary,
-            size: 24,
+            size: 22,
           ),
-          const Gap(10),
+          const Gap(8),
           Text(
             "Adicionar membro",
             style: context.textStyles.cardTitle.copyWith(
@@ -736,48 +727,53 @@ class _GroupDetailsHeader extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       SizedBox(
-        height: 184,
+        height: 84,
         child: Stack(
           children: [
             Align(
-              alignment: Alignment.topLeft,
-              child: _DetailIconButton(
-                icon: Icons.arrow_back_ios_new_rounded,
-                semanticLabel: MaterialLocalizations.of(
-                  context,
-                ).backButtonTooltip,
-                onTap: onBack,
-              ),
+              alignment: Alignment.centerLeft,
+              child: _DetailBackButton(onTap: onBack),
             ),
             Align(
-              alignment: Alignment.topRight,
+              alignment: Alignment.centerRight,
               child: _DetailIconButton(
                 icon: Icons.more_vert_rounded,
-                semanticLabel: "Acoes do grupo",
+                semanticLabel: "Ações do grupo",
                 onTap: onActions,
               ),
             ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Column(
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _GroupIcon(theme: group.theme, size: 88, iconSize: 42),
-                  const Gap(7),
-                  Text(
-                    localizedGroupName(context, group),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.black28.copyWith(fontSize: 30),
-                  ),
-                  const Gap(3),
-                  Text(
-                    _groupDescription(context, group),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.caption.copyWith(
-                      color: context.colorTokens.textBody,
+                  _GroupIcon(theme: group.theme, size: 68, iconSize: 32),
+                  const Gap(14),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 174),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizedGroupName(context, group),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.black28.copyWith(
+                            color: context.colorTokens.black,
+                            fontSize: 28,
+                            height: 1,
+                          ),
+                        ),
+                        const Gap(5),
+                        Text(
+                          "${group.members.length} membros",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.caption.copyWith(
+                            color: context.colorTokens.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -801,14 +797,21 @@ class _GroupDetailsTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 42,
-    padding: const EdgeInsets.all(3),
+    height: 56,
+    padding: const EdgeInsets.all(5),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
+        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
       ),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ],
     ),
     child: Row(
       children: [
@@ -857,7 +860,7 @@ class _GoalsTab extends StatelessWidget {
       const Gap(10),
       _GroupInfoCard(
         icon: Icons.flag_outlined,
-        title: "Proximo marco",
+        title: "Próximo marco",
         value:
             "${(group.members.length * 0.7).ceil()}/${group.members.length} membros",
         description: "para liberar o selo \"Foco Total\"",
@@ -973,7 +976,7 @@ class _ProgressInfoCard extends StatelessWidget {
                 ),
                 const Gap(4),
                 Text(
-                  "$completed/$memberCount membros concluiram hoje",
+                  "$completed/$memberCount membros concluíram hoje",
                   style: context.textStyles.bodyMedium.copyWith(fontSize: 13),
                 ),
               ],
@@ -1014,7 +1017,7 @@ class _ChatTab extends StatelessWidget {
                   const Gap(14),
                   _ChatBubble(
                     member: members.length < 2 ? null : members[1],
-                    message: "Boa! Vou comecar agora. Foco total!",
+                    message: "Boa! Vou começar agora. Foco total!",
                     time: "09:18",
                     isMine: true,
                   ),
@@ -1191,13 +1194,14 @@ class _TabPill extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: isSelected ? context.colorTokens.primaryGradient : null,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Text(
           label,
+          textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodySmall.copyWith(
+          style: context.textStyles.bodyMedium.copyWith(
             color: isSelected
                 ? context.colorTokens.primaryForeground
                 : context.colorTokens.textBody,
@@ -1230,7 +1234,34 @@ class _DetailIconButton extends StatelessWidget {
       child: SizedBox(
         width: AppSpacing.minTapTarget,
         height: AppSpacing.minTapTarget,
-        child: Icon(icon, size: 24, color: context.colorTokens.textBody),
+        child: Icon(icon, size: 24, color: context.colorTokens.primary),
+      ),
+    ),
+  );
+}
+
+class _DetailBackButton extends StatelessWidget {
+  const _DetailBackButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: MaterialLocalizations.of(context).backButtonTooltip,
+    child: BounceTap(
+      onTap: onTap,
+      pressedScale: 0.92,
+      child: SizedBox(
+        width: AppSpacing.minTapTarget,
+        height: AppSpacing.minTapTarget,
+        child: Center(
+          child: AppIcon(
+            "left_back",
+            size: 20,
+            color: context.colorTokens.primary,
+          ),
+        ),
       ),
     ),
   );
@@ -1274,7 +1305,7 @@ class _GroupActionsSheet extends StatelessWidget {
   Widget build(BuildContext context) => SafeArea(
     top: false,
     child: Container(
-      padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+      padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -1283,26 +1314,26 @@ class _GroupActionsSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 58,
-            height: 5,
+            width: 48,
+            height: 4,
             decoration: BoxDecoration(
               color: context.colorTokens.textHint.withValues(alpha: 0.42),
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const Gap(20),
+          const Gap(14),
           _GroupActionRow(
             icon: Icons.groups_2_outlined,
             label: "Gerenciar membros",
             onTap: onManageMembers,
           ),
-          const Gap(12),
+          const Gap(8),
           _GroupActionRow(
             icon: Icons.edit_outlined,
             label: "Editar grupo",
             onTap: onEditGroup,
           ),
-          const Gap(12),
+          const Gap(8),
           _GroupActionRow(
             icon: Icons.logout_rounded,
             label: "Sair do grupo",
@@ -1338,13 +1369,13 @@ class _GroupActionRow extends StatelessWidget {
       onTap: onTap,
       pressedScale: 0.98,
       child: Container(
-        height: 72,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        height: 58,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: isDestructive
               ? context.colorTokens.error.withValues(alpha: 0.08)
               : context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
           ),
@@ -1353,14 +1384,14 @@ class _GroupActionRow extends StatelessWidget {
           children: [
             Container(
               width: 44,
-              height: 44,
+              height: 38,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(icon, color: color, size: 25),
+              child: Icon(icon, color: color, size: 22),
             ),
-            const Gap(18),
+            const Gap(14),
             Expanded(
               child: Text(
                 label,
@@ -1371,7 +1402,7 @@ class _GroupActionRow extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: color, size: 28),
+            Icon(Icons.chevron_right_rounded, color: color, size: 24),
           ],
         ),
       ),
@@ -1428,7 +1459,7 @@ GroupMemberEntity? _leaderFor(GroupEntity group) {
 
 String _friendsCardSubtitle(BuildContext context, int groupCount) =>
     switch (context.languageCode) {
-      "pt" => "Solicitacoes, convites e $groupCount em grupos",
+      "pt" => "Solicitações, convites e $groupCount em grupos",
       "es" => "Solicitudes, invitaciones y $groupCount en grupos",
       _ => "Requests, invites and $groupCount in groups",
     };
@@ -1446,7 +1477,7 @@ String _goalDescription(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
   return switch (context.languageCode) {
     "pt" =>
-      "Cada participante deve registrar progresso em $metric para manter a sequencia do grupo.",
+      "Cada participante deve registrar progresso em $metric para manter a sequência do grupo.",
     "es" =>
       "Cada participante debe registrar progreso en $metric para mantener la racha del grupo.",
     _ =>
@@ -1458,9 +1489,9 @@ String _ruleDescription(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
   return switch (context.languageCode) {
     "pt" =>
-      "Registre pelo menos uma atividade de $metric por dia. Manter a sequencia fortalece o grupo.",
+      "Registre pelo menos uma atividade de $metric por dia. Manter a sequência fortalece o grupo.",
     "es" =>
-      "Registra al menos una actividad de $metric por dia. Mantener la racha fortalece el grupo.",
+      "Registra al menos una actividad de $metric por día. Mantener la racha fortalece el grupo.",
     _ =>
       "Log at least one $metric activity per day. Keeping the streak strengthens the group.",
   };

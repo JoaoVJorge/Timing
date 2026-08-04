@@ -42,21 +42,22 @@ class _FriendsPageState extends State<FriendsPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     backgroundColor: context.colorTokens.scaffold,
+    topBar: AppTopBar(
+      title: _friendsTitle(context),
+      showBackButton: true,
+      onBack: () => appNavigator.back<void>(id: 1),
+      trailing: _AddFriendHeaderButton(onTap: _openAddFriendPage),
+    ),
     body: RefreshIndicator(
       color: context.colorTokens.primary,
       onRefresh: _loadSocial,
       child: SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(top: 18, bottom: 18),
+        padding: const EdgeInsets.only(bottom: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Header(
-              onBack: () => appNavigator.back<void>(id: 1),
-              onInviteTap: _openAddFriendPage,
-            ),
-            const Gap(12),
             _InviteCodeDisclosure(
               code: inviteCode.isEmpty ? "..." : inviteCode,
               onCopy: () => _copyInviteCode(context),
@@ -489,64 +490,35 @@ class _FriendsPageState extends State<FriendsPage> {
       };
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.onBack, required this.onInviteTap});
+String _friendsTitle(BuildContext context) => switch (context.languageCode) {
+  "es" => "Amigos",
+  "pt" => "Amigos",
+  _ => "Friends",
+};
 
-  final VoidCallback onBack;
-  final VoidCallback onInviteTap;
+class _AddFriendHeaderButton extends StatelessWidget {
+  const _AddFriendHeaderButton({required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      BounceTap(
-        onTap: onBack,
-        pressedScale: 0.92,
-        child: SizedBox(
-          width: 42,
-          height: 48,
-          child: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: context.colorTokens.textBody,
-            size: 22,
-          ),
-        ),
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    child: Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: context.colorTokens.primaryVeryLight,
+        shape: BoxShape.circle,
       ),
-      const Gap(4),
-      Expanded(
-        child: Text(
-          _title(context),
-          style: context.textStyles.black32.copyWith(
-            color: context.colorTokens.primary,
-            fontSize: 28,
-            height: 1.05,
-          ),
-        ),
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.person_add_alt_1_rounded,
+        color: context.colorTokens.primary,
+        size: 26,
       ),
-      BounceTap(
-        onTap: onInviteTap,
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: context.colorTokens.primaryVeryLight,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.person_add_alt_1_rounded,
-            color: context.colorTokens.primary,
-            size: 26,
-          ),
-        ),
-      ),
-    ],
+    ),
   );
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Amigos",
-    "pt" => "Amigos",
-    _ => "Friends",
-  };
 }
 
 class _FindFriendsPage extends StatefulWidget {
@@ -1736,10 +1708,7 @@ class _InviteCodeDisclosureState extends State<_InviteCodeDisclosure> {
                         _label(context),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodyMedium.copyWith(
-                          color: _socialText,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: context.textStyles.cardTitle.copyWith(),
                       ),
                     ),
                     AnimatedRotation(
@@ -2303,11 +2272,10 @@ class _NameBlock extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodyMedium.copyWith(
-          color: _socialText,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
         ),
       ),
-      const Gap(1),
+      const Gap(2),
       Text(
         handle,
         maxLines: 1,

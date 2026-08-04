@@ -34,18 +34,18 @@ String leaderboardDescription(
   groupMetricDescription(context, theme),
 );
 
+String displayMemberName(
+  BuildContext context,
+  GroupMemberEntity member,
+  String currentUserId,
+) => member.id == currentUserId ? context.l10n.you : member.name;
+
 String localizedGroupName(BuildContext context, GroupEntity group) =>
     switch (group.id) {
       "study-squad" => context.l10n.mockStudyGroupName,
       "work-crew" => context.l10n.mockWorkoutGroupName,
       _ => group.name,
     };
-
-String displayMemberName(
-  BuildContext context,
-  GroupMemberEntity member,
-  String currentUserId,
-) => member.id == currentUserId ? context.l10n.you : member.name;
 
 String formatRankLabel(BuildContext context, int rank) {
   final String languageCode = Localizations.localeOf(context).languageCode;
