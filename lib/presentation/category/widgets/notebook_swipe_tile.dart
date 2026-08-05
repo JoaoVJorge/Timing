@@ -24,8 +24,8 @@ class NotebookSwipeTile extends StatefulWidget {
 
 class _NotebookSwipeTileState extends State<NotebookSwipeTile>
     with SingleTickerProviderStateMixin {
-  static const double _leadingRevealWidth = 108;
-  static const double _trailingRevealWidth = 58;
+  static const double _leadingRevealWidth = 132;
+  static const double _trailingRevealWidth = 66;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -138,7 +138,7 @@ class _RevealAction extends StatelessWidget {
     this.gradient,
   }) : assert(iconPath != null || iconData != null);
 
-  static const double _revealWidth = 50;
+  static const double _revealWidth = 58;
   static const double gap = 8;
 
   final String? iconPath;
@@ -161,8 +161,8 @@ class _RevealAction extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: iconPath != null
-          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 23)
-          : Icon(iconData, color: iconColor ?? Colors.white, size: 23),
+          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 25)
+          : Icon(iconData, color: iconColor ?? Colors.white, size: 25),
     ),
   );
 }
