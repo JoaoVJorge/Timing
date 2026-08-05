@@ -8,12 +8,14 @@ import "package:help_out/shared/widgets/bounce_tap.dart";
 class DailyTaskTile extends StatefulWidget {
   const DailyTaskTile({
     required this.task,
+    required this.onEdit,
     required this.onToggle,
     required this.onDelete,
     super.key,
   });
 
   final DailyTaskEntity task;
+  final VoidCallback onEdit;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
 
@@ -23,13 +25,13 @@ class DailyTaskTile extends StatefulWidget {
 
 class _DailyTaskTileState extends State<DailyTaskTile>
     with SingleTickerProviderStateMixin {
-  static const double _revealWidth = 72;
+  static const double _revealWidth = 58;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 220),
     lowerBound: -_revealWidth,
-    upperBound: 0,
+    upperBound: _revealWidth,
     value: 0,
   );
 
@@ -42,15 +44,22 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   void _onDragUpdate(DragUpdateDetails details) {
     _controller.value = (_controller.value + details.delta.dx).clamp(
       -_revealWidth,
-      0,
+      _revealWidth,
     );
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final double target = _controller.value < -_revealWidth / 2
+    final double target = _controller.value > _revealWidth / 2
+        ? _revealWidth
+        : _controller.value < -_revealWidth / 2
         ? -_revealWidth
         : 0;
     _controller.animateTo(target, curve: Curves.easeOut);
+  }
+
+  void _onTapEdit() {
+    _controller.animateTo(0, curve: Curves.easeOut);
+    widget.onEdit();
   }
 
   void _onTapDelete() {
@@ -62,14 +71,40 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   Widget build(BuildContext context) {
     final Color taskColor = Color(widget.task.colorValue);
     final bool isCheckedToday = widget.task.isCheckedToday;
-    final double progress = widget.task.targetDays == 0
+    final double progress = widget.task.currentTarget == 0
         ? 0
-        : (widget.task.completedDays / widget.task.targetDays).clamp(0.0, 1.0);
+        : (widget.task.currentProgress / widget.task.currentTarget).clamp(
+            0.0,
+            1.0,
+          );
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => Stack(
         children: [
+          if (_controller.value > 0)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: _onTapEdit,
+                  child: Container(
+                    width: _revealWidth - 8,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.colorTokens.surface,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.edit_rounded,
+                      color: context.colorTokens.primary,
+                      size: 23,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (_controller.value < 0)
             Positioned.fill(
               child: Align(
@@ -77,17 +112,17 @@ class _DailyTaskTileState extends State<DailyTaskTile>
                 child: GestureDetector(
                   onTap: _onTapDelete,
                   child: Container(
-                    width: 64,
+                    width: _revealWidth - 8,
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
                       color: context.colorTokens.error,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     alignment: Alignment.center,
                     child: const AppIcon(
                       "trash",
                       color: Colors.white,
-                      size: 28,
+                      size: 23,
                     ),
                   ),
                 ),
@@ -159,8 +194,8 @@ class _DailyTaskTileState extends State<DailyTaskTile>
               widget.task.isCompleted
                   ? context.l10n.taskCompletedLabel
                   : context.l10n.taskDaysProgress(
-                      widget.task.completedDays,
-                      widget.task.targetDays,
+                      widget.task.currentProgress,
+                      widget.task.currentTarget,
                     ),
               style: context.textStyles.bodySmall.copyWith(
                 color: widget.task.isCompleted

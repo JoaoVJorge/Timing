@@ -50,6 +50,7 @@ class DailyGoalsPage extends StatelessWidget {
                 for (final DailyTaskEntity task in pending) ...[
                   DailyTaskTile(
                     task: task,
+                    onEdit: () => controller.onEditTask(task),
                     onToggle: () => controller.onToggleTask(task),
                     onDelete: () => controller.onDeleteTask(task),
                   ),
@@ -72,6 +73,7 @@ class DailyGoalsPage extends StatelessWidget {
                 for (final DailyTaskEntity task in completed) ...[
                   DailyTaskTile(
                     task: task,
+                    onEdit: () => controller.onEditTask(task),
                     onToggle: () => controller.onToggleTask(task),
                     onDelete: () => controller.onDeleteTask(task),
                   ),

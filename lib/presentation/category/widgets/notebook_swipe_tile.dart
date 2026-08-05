@@ -24,8 +24,8 @@ class NotebookSwipeTile extends StatefulWidget {
 
 class _NotebookSwipeTileState extends State<NotebookSwipeTile>
     with SingleTickerProviderStateMixin {
-  static const double _leadingRevealWidth = 144;
-  static const double _trailingRevealWidth = 72;
+  static const double _leadingRevealWidth = 108;
+  static const double _trailingRevealWidth = 58;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -138,7 +138,7 @@ class _RevealAction extends StatelessWidget {
     this.gradient,
   }) : assert(iconPath != null || iconData != null);
 
-  static const double _revealWidth = 72;
+  static const double _revealWidth = 50;
   static const double gap = 8;
 
   final String? iconPath;
@@ -152,17 +152,17 @@ class _RevealAction extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      width: _revealWidth - gap,
+      width: _revealWidth,
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: color,
         gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
       alignment: Alignment.center,
       child: iconPath != null
-          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 28)
-          : Icon(iconData, color: iconColor ?? Colors.white, size: 28),
+          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 23)
+          : Icon(iconData, color: iconColor ?? Colors.white, size: 23),
     ),
   );
 }
