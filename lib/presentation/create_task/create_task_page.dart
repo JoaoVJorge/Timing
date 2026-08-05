@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_task/create_task_controller.dart";
 import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
@@ -18,7 +19,9 @@ class CreateTaskPage extends StatelessWidget {
     return CreationPageScaffold(
       submitButton: Obx(
         () => CreationSubmitButton(
-          label: context.l10n.addButton,
+          label: controller.isEditing
+              ? context.l10n.editButton
+              : context.l10n.addButton,
           isLoading: controller.isSaving.value,
           accent: controller.selectedColor.value,
           onTap: controller.onSubmit,
@@ -29,12 +32,70 @@ class CreateTaskPage extends StatelessWidget {
         const Gap(14),
         _NameField(controller: controller),
         const Gap(12),
+        _GoalTypeSection(controller: controller),
+        const Gap(12),
         _TargetDaysSection(controller: controller),
         const Gap(12),
         _ColorSection(controller: controller),
       ],
     );
   }
+}
+
+class _GoalTypeSection extends StatelessWidget {
+  const _GoalTypeSection({required this.controller});
+
+  final CreateTaskController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final Color accent = controller.selectedColor.value;
+
+    return CreationConfigCard(
+      accent: accent,
+      header: CreationSectionHeader(
+        icon: Icons.repeat_rounded,
+        label: _goalTypeLabel(context),
+        accent: accent,
+      ),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          CreationSelectableChip(
+            label: _dailyLabel(context),
+            isSelected: controller.goalType.value == DailyTaskGoalType.daily,
+            accent: accent,
+            onTap: () => controller.onSelectGoalType(DailyTaskGoalType.daily),
+          ),
+          CreationSelectableChip(
+            label: _totalLabel(context),
+            isSelected: controller.goalType.value == DailyTaskGoalType.total,
+            accent: accent,
+            onTap: () => controller.onSelectGoalType(DailyTaskGoalType.total),
+          ),
+        ],
+      ),
+    );
+  });
+
+  String _goalTypeLabel(BuildContext context) => switch (context.languageCode) {
+    "en" => "Goal type",
+    "es" => "Tipo de meta",
+    _ => "Tipo da meta",
+  };
+
+  String _dailyLabel(BuildContext context) => switch (context.languageCode) {
+    "en" => "Daily",
+    "es" => "Diaria",
+    _ => "Diaria",
+  };
+
+  String _totalLabel(BuildContext context) => switch (context.languageCode) {
+    "en" => "Total",
+    "es" => "Total",
+    _ => "Total",
+  };
 }
 
 class _HeroHeader extends StatelessWidget {
@@ -79,6 +140,9 @@ class _TargetDaysSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color accent = controller.selectedColor.value;
+    if (controller.goalType.value == DailyTaskGoalType.daily) {
+      return const SizedBox.shrink();
+    }
 
     return CreationConfigCard(
       accent: accent,

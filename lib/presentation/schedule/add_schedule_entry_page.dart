@@ -317,7 +317,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       return null;
     }
 
-    final int totalMinutes = end - start;
+    final int totalMinutes = (end - start) * _selectedWeekdays.length;
     final int hours = totalMinutes ~/ 60;
     final int minutes = totalMinutes % 60;
     if (hours == 0) {
@@ -690,24 +690,25 @@ class _TimeTextField extends StatelessWidget {
             onCompleted?.call();
           }
         },
-        decoration: AppInputDecoration.withBorder(
-          tokens: context.colorTokens,
-          hintText: "00:00",
-        ).copyWith(
-          suffixIcon: IconButton(
-            onPressed: onPickTime,
-            tooltip: label,
-            icon: Icon(
-              Icons.schedule_rounded,
-              size: 20,
-              color: context.colorTokens.primary,
+        decoration:
+            AppInputDecoration.withBorder(
+              tokens: context.colorTokens,
+              hintText: "00:00",
+            ).copyWith(
+              suffixIcon: IconButton(
+                onPressed: onPickTime,
+                tooltip: label,
+                icon: Icon(
+                  Icons.schedule_rounded,
+                  size: 20,
+                  color: context.colorTokens.primary,
+                ),
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minWidth: 40,
+                minHeight: 40,
+              ),
             ),
-          ),
-          suffixIconConstraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-          ),
-        ),
       ),
     ],
   );

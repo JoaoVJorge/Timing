@@ -12,6 +12,7 @@ class AddDailyTaskUseCase {
     required String name,
     required int colorValue,
     required int targetDays,
+    required DailyTaskGoalType goalType,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
@@ -23,6 +24,7 @@ class AddDailyTaskUseCase {
         colorValue: colorValue,
         targetDays: targetDays,
         completedDates: const [],
+        goalType: goalType,
       );
 
       final Either<AppError, void> saveResult = await _dailyTasksRepository

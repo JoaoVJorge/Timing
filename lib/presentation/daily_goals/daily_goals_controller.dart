@@ -56,6 +56,21 @@ class DailyGoalsController extends GetxController {
     }
   }
 
+  Future<void> onEditTask(DailyTaskEntity task) async {
+    final dynamic result = await _appNavigator.toNamed(
+      AppRoutes.createTask,
+      arguments: task,
+    );
+    final DailyTaskEntity? updatedTask = result as DailyTaskEntity?;
+    if (updatedTask == null) {
+      return;
+    }
+    final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
+    if (index != -1) {
+      tasks[index] = updatedTask;
+    }
+  }
+
   Future<void> onToggleTask(DailyTaskEntity task) async {
     final Either<AppError, DailyTaskEntity> result =
         await _toggleDailyTaskCheckUseCase(taskId: task.id);

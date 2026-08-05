@@ -25,6 +25,7 @@ import "package:help_out/core/domain/use_cases/update_subject_notes_use_case.dar
 import "package:help_out/core/domain/use_cases/update_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
+import "package:help_out/core/domain/use_cases/update_daily_task_use_case.dart";
 
 class UseCasesBindings extends Bindings {
   @override
@@ -83,6 +84,10 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<AddDailyTaskUseCase>(
       AddDailyTaskUseCase(dailyTasksRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<UpdateDailyTaskUseCase>(
+      UpdateDailyTaskUseCase(dailyTasksRepository: Get.find()),
       permanent: true,
     );
     Get.put<ToggleDailyTaskCheckUseCase>(

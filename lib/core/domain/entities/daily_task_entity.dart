@@ -1,5 +1,16 @@
 import "package:equatable/equatable.dart";
 
+enum DailyTaskGoalType {
+  daily,
+  total;
+
+  factory DailyTaskGoalType.fromName(String? name) =>
+      DailyTaskGoalType.values.firstWhere(
+        (type) => type.name == name,
+        orElse: () => DailyTaskGoalType.total,
+      );
+}
+
 class DailyTaskEntity extends Equatable {
   const DailyTaskEntity({
     required this.id,
@@ -7,6 +18,7 @@ class DailyTaskEntity extends Equatable {
     required this.colorValue,
     required this.targetDays,
     required this.completedDates,
+    this.goalType = DailyTaskGoalType.total,
   });
 
   factory DailyTaskEntity.fromMap(Map<String, dynamic> map) => DailyTaskEntity(
@@ -16,6 +28,7 @@ class DailyTaskEntity extends Equatable {
     targetDays: map["targetDays"] as int,
     completedDates: (map["completedDates"] as List<dynamic>? ?? [])
         .cast<String>(),
+    goalType: DailyTaskGoalType.fromName(map["goalType"] as String?),
   );
 
   final String id;
@@ -23,6 +36,7 @@ class DailyTaskEntity extends Equatable {
   final int colorValue;
   final int targetDays;
   final List<String> completedDates;
+  final DailyTaskGoalType goalType;
 
   static String dateKey(DateTime date) =>
       "${date.year.toString().padLeft(4, "0")}-"
@@ -33,7 +47,17 @@ class DailyTaskEntity extends Equatable {
 
   int get completedDays => completedDates.length;
 
-  bool get isCompleted => targetDays > 0 && completedDays >= targetDays;
+  int get currentProgress => switch (goalType) {
+    DailyTaskGoalType.daily => isCheckedToday ? 1 : 0,
+    DailyTaskGoalType.total => completedDays,
+  };
+
+  int get currentTarget => switch (goalType) {
+    DailyTaskGoalType.daily => 1,
+    DailyTaskGoalType.total => targetDays,
+  };
+
+  bool get isCompleted => currentTarget > 0 && currentProgress >= currentTarget;
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -41,6 +65,7 @@ class DailyTaskEntity extends Equatable {
     "colorValue": colorValue,
     "targetDays": targetDays,
     "completedDates": completedDates,
+    "goalType": goalType.name,
   };
 
   DailyTaskEntity copyWith({
@@ -48,14 +73,23 @@ class DailyTaskEntity extends Equatable {
     int? colorValue,
     int? targetDays,
     List<String>? completedDates,
+    DailyTaskGoalType? goalType,
   }) => DailyTaskEntity(
     id: id,
     name: name ?? this.name,
     colorValue: colorValue ?? this.colorValue,
     targetDays: targetDays ?? this.targetDays,
     completedDates: completedDates ?? this.completedDates,
+    goalType: goalType ?? this.goalType,
   );
 
   @override
-  List<Object?> get props => [id, name, colorValue, targetDays, completedDates];
+  List<Object?> get props => [
+    id,
+    name,
+    colorValue,
+    targetDays,
+    completedDates,
+    goalType,
+  ];
 }
