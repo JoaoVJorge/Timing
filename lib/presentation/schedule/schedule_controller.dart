@@ -45,11 +45,16 @@ class ScheduleController extends GetxController {
   static bool _isSameDate(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  /// Only meaningful for today: on other days every entry is simply upcoming.
   ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
-    if (!isViewingToday) {
+    final DateTime viewedDate = selectedDate.value;
+    final DateTime today = _todayDate();
+    if (viewedDate.isBefore(today)) {
+      return ScheduleEntryStatus.past;
+    }
+    if (viewedDate.isAfter(today)) {
       return ScheduleEntryStatus.upcoming;
     }
+
     final DateTime now = DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
     final int endMinutes = entry.endMinutes ?? entry.startMinutes;
