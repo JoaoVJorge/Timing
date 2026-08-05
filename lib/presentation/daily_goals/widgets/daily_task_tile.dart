@@ -25,7 +25,7 @@ class DailyTaskTile extends StatefulWidget {
 
 class _DailyTaskTileState extends State<DailyTaskTile>
     with SingleTickerProviderStateMixin {
-  static const double _revealWidth = 58;
+  static const double _revealWidth = 66;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -99,7 +99,7 @@ class _DailyTaskTileState extends State<DailyTaskTile>
                     child: Icon(
                       Icons.edit_rounded,
                       color: context.colorTokens.primary,
-                      size: 23,
+                      size: 25,
                     ),
                   ),
                 ),
@@ -122,7 +122,7 @@ class _DailyTaskTileState extends State<DailyTaskTile>
                     child: const AppIcon(
                       "trash",
                       color: Colors.white,
-                      size: 23,
+                      size: 25,
                     ),
                   ),
                 ),
