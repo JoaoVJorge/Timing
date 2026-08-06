@@ -30,6 +30,7 @@ class ProgressPeriodTabs extends StatelessWidget {
         for (final ProgressPeriod period in ProgressPeriod.values) ...[
           if (period != ProgressPeriod.values.first) const Gap(4),
           Expanded(
+            flex: period == ProgressPeriod.day ? 4 : 3,
             child: _PeriodTab(
               label: period.localizedLabel(context),
               isSelected: selectedPeriod == period,
