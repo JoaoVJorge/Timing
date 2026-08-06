@@ -16,6 +16,7 @@ import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/sign_out_use_case.dart";
 import "package:help_out/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
+import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
@@ -198,6 +199,7 @@ class AppController extends GetxController {
     final List<Future<void>> reloads = [
       Get.find<LastActivityService>().load(),
       Get.find<DailyProgressService>().load(),
+      Get.find<SubjectDailyHistoryService>().load(),
       Get.find<ScheduleController>().loadEntries(),
     ];
 

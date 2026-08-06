@@ -2,12 +2,13 @@ import "package:flutter/material.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
-/// Horizontal swipe tile with two reveals: drag right for notes, drag left to
-/// delete. The revealed action stays open until tapped or swiped back.
+/// Horizontal swipe tile with two reveals: drag right for notes/statistics,
+/// drag left to edit/delete. The reveal stays open until tapped or swiped back.
 class NotebookSwipeTile extends StatefulWidget {
   const NotebookSwipeTile({
     required this.child,
     required this.onTapNotes,
+    required this.onTapStats,
     required this.onTapEdit,
     required this.onDelete,
     super.key,
@@ -15,6 +16,7 @@ class NotebookSwipeTile extends StatefulWidget {
 
   final Widget child;
   final VoidCallback onTapNotes;
+  final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
   final VoidCallback onDelete;
 
@@ -25,7 +27,7 @@ class NotebookSwipeTile extends StatefulWidget {
 class _NotebookSwipeTileState extends State<NotebookSwipeTile>
     with SingleTickerProviderStateMixin {
   static const double _leadingRevealWidth = 132;
-  static const double _trailingRevealWidth = 66;
+  static const double _trailingRevealWidth = 132;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -69,6 +71,11 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
     _controller.animateTo(0, curve: Curves.easeOut);
   }
 
+  void _onTapStats() {
+    widget.onTapStats();
+    _controller.animateTo(0, curve: Curves.easeOut);
+  }
+
   void _onTapDelete() {
     _controller.animateTo(0, curve: Curves.easeOut);
     widget.onDelete();
@@ -96,10 +103,10 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     ),
                     const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
-                      iconData: Icons.edit_rounded,
+                      iconData: Icons.bar_chart_rounded,
                       color: context.colorTokens.surface,
                       iconColor: context.colorTokens.primary,
-                      onTap: _onTapEdit,
+                      onTap: _onTapStats,
                     ),
                   ],
                 ),
@@ -109,10 +116,22 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
             Positioned.fill(
               child: Align(
                 alignment: Alignment.centerRight,
-                child: _RevealAction(
-                  iconPath: "trash",
-                  color: context.colorTokens.error,
-                  onTap: _onTapDelete,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _RevealAction(
+                      iconData: Icons.edit_rounded,
+                      color: context.colorTokens.surface,
+                      iconColor: context.colorTokens.primary,
+                      onTap: _onTapEdit,
+                    ),
+                    const SizedBox(width: _RevealAction.gap),
+                    _RevealAction(
+                      iconPath: "trash",
+                      color: context.colorTokens.error,
+                      onTap: _onTapDelete,
+                    ),
+                  ],
                 ),
               ),
             ),

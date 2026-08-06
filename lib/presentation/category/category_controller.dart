@@ -94,6 +94,11 @@ class CategoryController extends GetxController {
     await loadSubjects();
   }
 
+  Future<void> onTapSubjectStats(SubjectEntity subject) async {
+    await _appNavigator.toNamed(AppRoutes.subjectStats, arguments: subject);
+    await loadSubjects();
+  }
+
   Future<void> onTapEditSubject(SubjectEntity subject) async {
     final dynamic result = await _appNavigator.toNamed(
       AppRoutes.createSubject,
