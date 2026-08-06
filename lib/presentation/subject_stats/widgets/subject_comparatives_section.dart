@@ -195,7 +195,6 @@ class _ToggleTab extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodyMedium.copyWith(
             color: isSelected ? accent : context.colorTokens.textHint,
-            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -216,28 +215,30 @@ class _Headline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle headlineStyle = context.textStyles.extraBold24.copyWith(
-      color: accent,
-      fontSize: 26,
-      fontWeight: FontWeight.w900,
+    final TextStyle headlineStyle = DefaultTextStyle.of(
+      context,
+    ).style.merge(
+      context.textStyles.extraBold24.copyWith(color: accent),
     );
 
-    return RichText(
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        children: [
-          TextSpan(text: valueLabel, style: headlineStyle),
-          TextSpan(
-            text: " $unitLabel",
-            style: headlineStyle.copyWith(
-              color: context.colorTokens.textHint,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            valueLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: headlineStyle,
           ),
-        ],
-      ),
+        ),
+        const Gap(4),
+        Text(
+          unitLabel,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: headlineStyle.copyWith(color: context.colorTokens.textHint),
+        ),
+      ],
     );
   }
 }
@@ -262,7 +263,7 @@ class _DeltaLine extends StatelessWidget {
         _noComparison(context),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.caption.copyWith(fontSize: 12),
+        style: context.textStyles.caption,
       );
     }
 
@@ -290,9 +291,7 @@ class _DeltaLine extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textStyles.caption.copyWith(
-              fontSize: 12,
               color: color,
-              fontWeight: FontWeight.w800,
             ),
           ),
         ),
