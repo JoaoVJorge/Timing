@@ -64,7 +64,7 @@ class _SubjectComparativesSectionState
             accent: widget.accent,
             onSelect: (isMonth) => setState(() => _isMonth = isMonth),
           ),
-          const Gap(16),
+          const Gap(12),
           _Headline(
             valueLabel: _totalLabel(currentTotal),
             unitLabel: _unitLabel(context),
@@ -117,15 +117,7 @@ class _PeriodToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      border: Border.all(
-        color: context.colorTokens.surfaceInnerLayer.withValues(
-          alpha: _isDark(context) ? 0.5 : 0.7,
-        ),
-        width: 1.5,
-      ),
-      borderRadius: BorderRadius.circular(16),
-    ),
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
     child: Row(
       children: [
         Expanded(
@@ -176,15 +168,8 @@ class _ToggleTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? accent.withValues(alpha: _isDark(context) ? 0.22 : 0.14)
-              : context.colorTokens.surface,
+              : context.colorTokens.transparent,
           borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? null
-              : Border.all(
-                  color: context.colorTokens.borderUnfocused.withValues(
-                    alpha: 0.65,
-                  ),
-                ),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -193,6 +178,7 @@ class _ToggleTab extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodyMedium.copyWith(
             color: isSelected ? accent : context.colorTokens.textHint,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -212,33 +198,25 @@ class _Headline extends StatelessWidget {
   final Color accent;
 
   @override
-  Widget build(BuildContext context) {
-    final TextStyle headlineStyle = DefaultTextStyle.of(
-      context,
-    ).style.merge(
-      context.textStyles.extraBold24.copyWith(color: accent),
-    );
-
-    return Row(
+  Widget build(BuildContext context) => RichText(
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    text: TextSpan(
       children: [
-        Flexible(
-          child: Text(
-            valueLabel,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: headlineStyle,
+        TextSpan(
+          text: valueLabel,
+          style: context.textStyles.metricValue.copyWith(
+            color: accent,
+            fontSize: 26,
           ),
         ),
-        const Gap(4),
-        Text(
-          unitLabel,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: headlineStyle.copyWith(color: context.colorTokens.textHint),
+        TextSpan(
+          text: " $unitLabel",
+          style: context.textStyles.caption.copyWith(fontSize: 14),
         ),
       ],
-    );
-  }
+    ),
+  );
 }
 
 class _DeltaLine extends StatelessWidget {
@@ -288,9 +266,7 @@ class _DeltaLine extends StatelessWidget {
             "$sign$percent% ${_versusLabel(context, isMonth)}",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textStyles.caption.copyWith(
-              color: color,
-            ),
+            style: context.textStyles.caption.copyWith(color: color),
           ),
         ),
       ],
