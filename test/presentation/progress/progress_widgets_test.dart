@@ -112,6 +112,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets("EvolutionBarChart paints minutes and pages units", (
+    tester,
+  ) async {
+    await pumpInScrollView(
+      tester,
+      const SizedBox(
+        width: 320,
+        height: 180,
+        child: EvolutionBarChart(
+          values: [600, 900, 0, 1200, 720, 1080, 300],
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await pumpInScrollView(
+      tester,
+      const SizedBox(
+        width: 320,
+        height: 180,
+        child: EvolutionBarChart(
+          values: [2, 5, 0, 8, 3, 6, 1],
+          unit: EvolutionValueUnit.pages,
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets("ProgressAchievementsSection renders locked progress", (
     tester,
   ) async {
