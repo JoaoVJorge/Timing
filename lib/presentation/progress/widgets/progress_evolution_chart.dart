@@ -15,15 +15,9 @@ class ProgressEvolutionChart extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 232,
     padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
-    decoration: _chartSurfaceDecoration(context).copyWith(
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow,
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    ),
+    decoration: AppSurfaces.content(
+      context.colorTokens,
+    ).copyWith(borderRadius: BorderRadius.circular(8)),
     child: EvolutionBarChart(values: values),
   );
 }
@@ -578,8 +572,3 @@ List<String> _dayLabels(BuildContext context, int count) {
       },
   ];
 }
-
-BoxDecoration _chartSurfaceDecoration(BuildContext context) =>
-    AppSurfaces.content(context.colorTokens).copyWith(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-    );

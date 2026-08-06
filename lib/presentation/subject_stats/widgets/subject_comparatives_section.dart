@@ -55,16 +55,9 @@ class _SubjectComparativesSectionState
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: AppSurfaces.content(context.colorTokens).copyWith(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: AppSurfaces.content(
+        context.colorTokens,
+      ).copyWith(borderRadius: BorderRadius.circular(8)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -127,8 +120,11 @@ class _PeriodToggle extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(
-        alpha: _isDark(context) ? 0.5 : 0.7,
+      border: Border.all(
+        color: context.colorTokens.surfaceInnerLayer.withValues(
+          alpha: _isDark(context) ? 0.5 : 0.7,
+        ),
+        width: 1.5,
       ),
       borderRadius: BorderRadius.circular(16),
     ),
@@ -182,8 +178,15 @@ class _ToggleTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? accent.withValues(alpha: _isDark(context) ? 0.22 : 0.14)
-              : context.colorTokens.transparent,
+              : context.colorTokens.surface,
           borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? null
+              : Border.all(
+                  color: context.colorTokens.borderUnfocused.withValues(
+                    alpha: 0.65,
+                  ),
+                ),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -212,25 +215,31 @@ class _Headline extends StatelessWidget {
   final Color accent;
 
   @override
-  Widget build(BuildContext context) => RichText(
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    text: TextSpan(
-      children: [
-        TextSpan(
-          text: valueLabel,
-          style: context.textStyles.metricValue.copyWith(
-            color: accent,
-            fontSize: 26,
+  Widget build(BuildContext context) {
+    final TextStyle headlineStyle = context.textStyles.extraBold24.copyWith(
+      color: accent,
+      fontSize: 26,
+      fontWeight: FontWeight.w900,
+    );
+
+    return RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        children: [
+          TextSpan(text: valueLabel, style: headlineStyle),
+          TextSpan(
+            text: " $unitLabel",
+            style: headlineStyle.copyWith(
+              color: context.colorTokens.textHint,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-        TextSpan(
-          text: " $unitLabel",
-          style: context.textStyles.caption.copyWith(fontSize: 14),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _DeltaLine extends StatelessWidget {

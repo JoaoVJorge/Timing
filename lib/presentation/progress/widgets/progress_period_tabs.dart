@@ -67,8 +67,15 @@ class _PeriodTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? context.colorTokens.primaryVeryLight
-              : context.colorTokens.transparent,
+              : context.colorTokens.surface,
           borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? null
+              : Border.all(
+                  color: context.colorTokens.borderUnfocused.withValues(
+                    alpha: 0.65,
+                  ),
+                ),
         ),
         alignment: Alignment.center,
         child: Text(
