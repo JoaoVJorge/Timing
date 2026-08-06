@@ -85,6 +85,7 @@ class ProgressPage extends StatelessWidget {
                   ),
                 ],
               ),
+              const Gap(AppSpacing.betweenSections),
               AppSectionHeader(title: context.l10n.profileEvolutionTitle),
               const Gap(AppSpacing.betweenRelated),
               ProgressEvolutionChart(values: controller.evolutionFocusSeconds),

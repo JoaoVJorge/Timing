@@ -78,7 +78,7 @@ class HomeActionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         title,
-                        maxLines: 2,
+                        maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.extraBold24.copyWith(
                           color: Colors.white,
@@ -111,17 +111,27 @@ class HomeActionCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: SizedBox.square(
-                dimension: 20,
-                child: ClipRect(
-                  child: AppIcon(
-                    actionIconName,
-                    size: 20,
-                    color: context.colorTokens.primary,
-                  ),
-                ),
+              child: actionIconName == "plus"
+                  ? Text(
+                      "+",
+                      style: context.textStyles.extraBold24.copyWith(
+                        color: context.colorTokens.primary,
+                        fontSize: 32,
+                        height: 0.92,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    )
+                  : SizedBox.square(
+                      dimension: 20,
+                      child: ClipRect(
+                        child: AppIcon(
+                          actionIconName,
+                          size: 20,
+                          color: context.colorTokens.primary,
+                        ),
+                      ),
+                    ),
               ),
-            ),
           ),
         ],
       ),
