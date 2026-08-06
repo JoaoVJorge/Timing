@@ -35,6 +35,7 @@ import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
 import "package:help_out/presentation/splash/splash_bindings.dart";
 import "package:help_out/presentation/splash/splash_page.dart";
+import "package:help_out/presentation/subject_stats/subject_stats_page.dart";
 import "package:help_out/presentation/timer/timer_bindings.dart";
 import "package:help_out/presentation/timer/timer_page.dart";
 
@@ -61,6 +62,7 @@ class AppRoutes {
   static const String addScheduleEntry = "/addScheduleEntry";
   static const String notes = "/notes";
   static const String achievements = "/achievements";
+  static const String subjectStats = "/subjectStats";
 
   static final List<GetPage<dynamic>> getPages = [
     GetPage(
@@ -192,6 +194,13 @@ class AppRoutes {
       name: achievements,
       page: () => const AchievementsPage(),
       binding: AchievementsBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: subjectStats,
+      page: () => const SubjectStatsPage(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

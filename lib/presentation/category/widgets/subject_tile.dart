@@ -20,7 +20,7 @@ class SubjectTile extends StatelessWidget {
     final Color color = Color(subject.colorValue);
     final bool hasGoal = subject.goalSeconds > 0;
     final double progress = hasGoal
-        ? (subject.totalSeconds / subject.goalSeconds).clamp(0, 1)
+        ? (subject.totalSeconds / subject.totalGoalSeconds).clamp(0, 1)
         : 0;
 
     return Container(
@@ -45,7 +45,7 @@ class SubjectTile extends StatelessWidget {
                 ),
                 Text(
                   hasGoal
-                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.goalSeconds)))} · ${(progress * 100).round()}%"
+                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.totalGoalSeconds)))} · ${(progress * 100).round()}%"
                       : formatDurationLong(
                           Duration(seconds: subject.totalSeconds),
                         ),

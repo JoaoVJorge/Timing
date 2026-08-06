@@ -8,6 +8,7 @@ import "package:help_out/theme/subject_icons.dart";
 class SubjectIconBadge extends StatelessWidget {
   const SubjectIconBadge({
     required this.subject,
+    this.color,
     this.width = 44,
     this.height = 44,
     this.iconSize = 22,
@@ -16,6 +17,7 @@ class SubjectIconBadge extends StatelessWidget {
   });
 
   final SubjectEntity subject;
+  final Color? color;
   final double width;
   final double height;
   final double iconSize;
@@ -23,7 +25,7 @@ class SubjectIconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = Color(subject.colorValue);
+    final Color badgeColor = color ?? Color(subject.colorValue);
     final String iconName = subject.iconName.isEmpty
         ? _fallbackIconName(subject.category)
         : subject.iconName;
@@ -33,7 +35,7 @@ class SubjectIconBadge extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color,
+        color: badgeColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Center(

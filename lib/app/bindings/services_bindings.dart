@@ -2,6 +2,7 @@ import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
+import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/services/focus/focus_feedback_service.dart";
 import "package:help_out/core/services/focus/focus_guard_service.dart";
 import "package:help_out/core/services/http/http_client_service.dart";
@@ -59,6 +60,14 @@ class ServicesBindings extends Bindings {
     );
     await dailyProgressService.load();
     Get.put<DailyProgressService>(dailyProgressService, permanent: true);
+
+    final SubjectDailyHistoryService subjectDailyHistoryService =
+        SubjectDailyHistoryService(localStorageService: Get.find());
+    await subjectDailyHistoryService.load();
+    Get.put<SubjectDailyHistoryService>(
+      subjectDailyHistoryService,
+      permanent: true,
+    );
 
     final Dio dio = Dio(BaseOptions(baseUrl: EnvironmentKeys.baseUrl));
     Get.put<Dio>(dio, permanent: true);
