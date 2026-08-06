@@ -11,6 +11,7 @@ import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dar
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/domain/use_cases/log_activity_use_case.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
+import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/services/focus/focus_feedback_service.dart";
 import "package:help_out/core/services/focus/focus_guard_service.dart";
 import "package:help_out/core/services/last_activity/last_activity_service.dart";
@@ -26,6 +27,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.logActivityUseCase,
     required this.lastActivityService,
     required this.dailyProgressService,
+    required this.subjectDailyHistoryService,
     required this.timerNotificationService,
     required this.timerLiveActivityService,
     required this.focusFeedbackService,
@@ -43,6 +45,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final LogActivityUseCase logActivityUseCase;
   final LastActivityService lastActivityService;
   final DailyProgressService dailyProgressService;
+  final SubjectDailyHistoryService subjectDailyHistoryService;
   final TimerNotificationService timerNotificationService;
   final TimerLiveActivityService timerLiveActivityService;
   final FocusFeedbackService focusFeedbackService;
@@ -258,9 +261,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void warnFocusLock() {
     unawaited(focusFeedbackService.warnFocusLock());
-    appNavigator.showSnackBar(
-      text: "Modo concentração ativo. Termine ou pause o foco para sair.",
-      isAnError: true,
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return;
+    }
+    appNavigator.showSuccessSnackBar(
+      "Modo concentração ativo. Termine ou pause o foco para sair.",
     );
   }
 
@@ -274,7 +280,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (isReading) {
       final int? pagesRead = await showReadingExitDialog(
         context: context,
-        accentColor: Color(subject.colorValue),
+        accentColor: context.colorTokens.primary,
         title: context.l10n.timerExitDialogTitle,
         content: _readingExitContent(context),
         cancelLabel: context.l10n.timerExitBackToFocus,
@@ -290,7 +296,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     final bool? shouldExit = await showTimerExitDialog(
       context: context,
-      accentColor: Color(subject.colorValue),
+      accentColor: context.colorTokens.primary,
       title: context.l10n.timerExitDialogTitle,
       content: context.l10n.timerExitDialogContent(
         _formatMinutesForDialog(sessionSeconds.value),
@@ -315,7 +321,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     final BuildContext context = Get.context!;
     final int? pagesRead = await showReadingExitDialog(
       context: context,
-      accentColor: Color(subject.colorValue),
+      accentColor: context.colorTokens.primary,
       title: context.l10n.timerExitDialogTitle,
       content: _readingExitContent(context),
       cancelLabel: context.l10n.timerExitBackToFocus,
@@ -337,6 +343,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       subject = subject.copyWith(currentPages: nextPages);
       updateSubjectPagesUseCase(subjectId: subject.id, currentPages: nextPages);
       dailyProgressService.addPages(sanitizedPages);
+      subjectDailyHistoryService.addPages(subject.id, sanitizedPages);
       unawaited(
         logActivityUseCase(
           category: subject.category,
@@ -404,6 +411,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
     if (!isReading) {
       dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+      subjectDailyHistoryService.addFocusSeconds(
+        subject.id,
+        elapsedSinceLastPersist,
+      );
     }
     if (sessionSeconds.value > sessionSecondsToPersist) {
       _shouldPersistAgain = true;
@@ -561,9 +572,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _isAppInForeground = true;
       timerNotificationService.cancelFocusFinished();
       unawaited(_catchUpAfterBackground());
-      if (isFocusLockActive) {
-        warnFocusLock();
-      }
       _syncFocusGuard();
       return;
     }
@@ -576,7 +584,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _recordLastActivityIfNeeded();
       _updateNotification();
       if (isFocusLockActive) {
-        unawaited(focusFeedbackService.warnFocusLock());
+        warnFocusLock();
         unawaited(focusGuardService.bringAppToFront());
       }
     }
