@@ -94,7 +94,7 @@ class _Greeting extends StatelessWidget {
     if (next != null) {
       return context.l10n.homeSubtitleNextSchedule(
         next.title,
-        formatMinutesOfDay(context, next.startMinutes),
+        formatMinutesOfDay(context, next.startMinutes!),
       );
     }
     return context.l10n.homeSubtitleStart;

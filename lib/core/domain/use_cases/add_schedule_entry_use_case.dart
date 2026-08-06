@@ -11,8 +11,8 @@ class AddScheduleEntryUseCase {
   Future<Either<AppError, ScheduleEntryEntity>> call({
     required String title,
     required int weekday,
-    required int startMinutes,
-    required int endMinutes,
+    required int? startMinutes,
+    required int? endMinutes,
     required int colorValue,
   }) async {
     final Either<AppError, List<ScheduleEntryEntity>> getResult =

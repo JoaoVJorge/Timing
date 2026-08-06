@@ -132,8 +132,12 @@ class HomeController extends GetxController {
     final DateTime now = DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
     final List<ScheduleEntryEntity> upcoming =
-        todayScheduleEntries.where((e) => e.startMinutes >= nowMinutes).toList()
-          ..sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
+        todayScheduleEntries
+            .where(
+              (e) => e.startMinutes != null && e.startMinutes! >= nowMinutes,
+            )
+            .toList()
+          ..sort((a, b) => a.startMinutes!.compareTo(b.startMinutes!));
     return upcoming.isEmpty ? null : upcoming.first;
   }
 

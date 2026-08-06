@@ -15,9 +15,30 @@ String formatMinutesOfDay(BuildContext context, int minutes) {
 /// Formats a schedule slot as "start" or "start - end" when an end is set.
 String formatScheduleRange(
   BuildContext context,
-  int startMinutes,
+  int? startMinutes,
   int? endMinutes,
-) => endMinutes == null
-    ? formatMinutesOfDay(context, startMinutes)
-    : "${formatMinutesOfDay(context, startMinutes)} - "
-          "${formatMinutesOfDay(context, endMinutes)}";
+) {
+  if (startMinutes == null && endMinutes == null) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      "pt" => "Sem horario",
+      "es" => "Sin horario",
+      "fr" => "Sans horaire",
+      "de" => "Ohne Uhrzeit",
+      _ => "No time",
+    };
+  }
+  if (startMinutes == null) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      "pt" => "Ate ${formatMinutesOfDay(context, endMinutes!)}",
+      "es" => "Hasta ${formatMinutesOfDay(context, endMinutes!)}",
+      "fr" => "Jusqu'a ${formatMinutesOfDay(context, endMinutes!)}",
+      "de" => "Bis ${formatMinutesOfDay(context, endMinutes!)}",
+      _ => "Until ${formatMinutesOfDay(context, endMinutes!)}",
+    };
+  }
+  if (endMinutes == null) {
+    return formatMinutesOfDay(context, startMinutes);
+  }
+  return "${formatMinutesOfDay(context, startMinutes)} - "
+      "${formatMinutesOfDay(context, endMinutes)}";
+}

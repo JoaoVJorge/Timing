@@ -1,3 +1,5 @@
+import "dart:ui";
+
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -6,8 +8,6 @@ import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/schedule/schedule_controller.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
-import "package:help_out/shared/widgets/app_empty_state.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
@@ -22,68 +22,47 @@ class SchedulePage extends StatelessWidget {
     final ScheduleController controller = Get.find();
 
     return AppScaffold(
-      topBar: AppTopBar(
-        title: context.l10n.myScheduleTitle,
-        showBackButton: true,
-      ),
-      bottomBar: _ScheduleAddButton(onTap: controller.onTapAddEntry),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      topBar: Obx(() {
+        final DateTime selectedDate = controller.selectedDate.value;
+        return AppTopBar(
+          title: _monthLabel(context, selectedDate),
+          showBackButton: true,
+          onTitleTap: () => _showMonthYearPicker(context, controller),
+        );
+      }),
+      padding: EdgeInsets.zero,
+      body: Stack(
         children: [
-          const _WeekLabel(),
-          const Gap(AppSpacing.titleToDescription),
-          Obx(
-            () => ScheduleDateStrip(
-              selectedDate: controller.selectedDate.value,
-              onSelectDate: controller.onSelectDate,
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+              child: Obx(
+                () => ScheduleDateStrip(
+                  selectedDate: controller.selectedDate.value,
+                  onSelectDate: controller.onSelectDate,
+                  hasEntryForDate: controller.hasEntriesForDate,
+                  eventColorsForDate: controller.entryColorsForDate,
+                ),
+              ),
             ),
           ),
-          const Gap(AppSpacing.betweenRelated),
-          Expanded(
-            child: Obx(() {
-              final List<ScheduleEntryEntity> entries =
-                  controller.sortedEntries;
-
-              if (entries.isEmpty) {
-                return _ScheduleEmptyState(
-                  onAddEntry: controller.onTapAddEntry,
-                );
-              }
-
-              return ListView.separated(
-                padding: const EdgeInsets.only(
-                  top: AppSpacing.titleToDescription,
-                  bottom: AppSpacing.betweenRelated,
-                ),
-                itemCount: entries.length,
-                separatorBuilder: (context, index) =>
-                    const Gap(AppSpacing.titleToDescription),
-                itemBuilder: (context, index) {
-                  final ScheduleEntryEntity entry = entries[index];
-                  return Dismissible(
-                    key: ValueKey(entry.id),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (_) => controller.onDeleteEntry(entry.id),
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 20),
-                      decoration: BoxDecoration(
-                        color: context.colorTokens.error,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Icon(
-                        Icons.delete_outline_rounded,
-                        color: context.colorTokens.white,
-                      ),
-                    ),
-                    child: ScheduleEntryTile(
-                      entry: entry,
-                      status: controller.statusOf(entry),
-                    ),
-                  );
-                },
-              );
-            }),
+          DraggableScrollableSheet(
+            initialChildSize: 0.43,
+            minChildSize: 0.32,
+            maxChildSize: 0.98,
+            snap: true,
+            snapSizes: const [0.43, 0.98],
+            builder: (context, scrollController) => Obx(
+              () => _DayEventsPanel(
+                selectedDate: controller.selectedDate.value,
+                entries: controller.sortedEntries,
+                statusOf: controller.statusOf,
+                onDeleteEntry: controller.onDeleteEntry,
+                onAddEntry: controller.onTapAddEntry,
+                scrollController: scrollController,
+              ),
+            ),
           ),
         ],
       ),
@@ -91,112 +70,510 @@ class SchedulePage extends StatelessWidget {
   }
 }
 
-class _WeekLabel extends StatelessWidget {
-  const _WeekLabel();
+class _DayEventsPanel extends StatelessWidget {
+  const _DayEventsPanel({
+    required this.selectedDate,
+    required this.entries,
+    required this.statusOf,
+    required this.onDeleteEntry,
+    required this.onAddEntry,
+    required this.scrollController,
+  });
+
+  final DateTime selectedDate;
+  final List<ScheduleEntryEntity> entries;
+  final ScheduleEntryStatus Function(ScheduleEntryEntity entry) statusOf;
+  final ValueChanged<String> onDeleteEntry;
+  final VoidCallback onAddEntry;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     final String locale = Localizations.localeOf(context).toString();
-    final DateTime now = DateTime.now();
-    final DateTime weekStart = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: now.weekday - DateTime.monday));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.34
+                    : 0.12,
+              ),
+              blurRadius: 26,
+              spreadRadius: 2,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          child: ColoredBox(
+            color: context.colorTokens.surface,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.page,
+                10,
+                AppSpacing.page,
+                0,
+              ),
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 34,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: context.colorTokens.textHint.withValues(
+                                alpha: 0.42,
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                        const Gap(20),
+                        _DayEventsHeader(
+                          dateLabel: _selectedDateLabel(locale, selectedDate),
+                          entryCount: entries.length,
+                        ),
+                        const Gap(20),
+                      ],
+                    ),
+                  ),
+                  SliverList.separated(
+                    itemCount: entries.length + 1,
+                    separatorBuilder: (context, index) =>
+                        const Gap(AppSpacing.titleToDescription),
+                    itemBuilder: (context, index) {
+                      if (index == entries.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 18),
+                          child: _InlineAddScheduleButton(onTap: onAddEntry),
+                        );
+                      }
 
-    return Text(
-      context.l10n.scheduleWeekLabel(
-        DateFormat("d MMMM", locale).format(weekStart),
+                      final ScheduleEntryEntity entry = entries[index];
+                      return Dismissible(
+                        key: ValueKey(entry.id),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (_) => onDeleteEntry(entry.id),
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          decoration: BoxDecoration(
+                            color: context.colorTokens.error,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Icon(
+                            Icons.delete_outline_rounded,
+                            color: context.colorTokens.white,
+                          ),
+                        ),
+                        child: ScheduleEntryTile(
+                          entry: entry,
+                          status: statusOf(entry),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.caption,
     );
   }
 }
 
-/// Shows a dimmed sample day so the feature explains itself before there is
-/// anything in it.
-class _ScheduleEmptyState extends StatelessWidget {
-  const _ScheduleEmptyState({required this.onAddEntry});
+class _DayEventsHeader extends StatelessWidget {
+  const _DayEventsHeader({required this.dateLabel, required this.entryCount});
 
-  final VoidCallback onAddEntry;
+  final String dateLabel;
+  final int entryCount;
 
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.only(
-      top: AppSpacing.titleToDescription,
-      bottom: AppSpacing.betweenRelated,
-    ),
+  Widget build(BuildContext context) => Row(
     children: [
-      AppEmptyState(
-        icon: Icons.calendar_month_rounded,
-        title: context.l10n.noScheduleYet,
-        description: context.l10n.noScheduleYetDescription,
-        preview: Column(
+      Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: context.colorTokens.primaryVeryLight,
+        ),
+        child: Icon(
+          Icons.calendar_month_rounded,
+          color: context.colorTokens.primary,
+          size: 25,
+        ),
+      ),
+      const Gap(12),
+      Expanded(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.l10n.scheduleEmptyExampleLabel,
-              style: context.textStyles.caption.copyWith(fontSize: 11),
+              dateLabel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyLarge.copyWith(
+                color: context.colorTokens.primary,
+                fontWeight: FontWeight.w900,
+              ),
             ),
-            const Gap(6),
-            IgnorePointer(
-              child: ScheduleEntryTile(
-                entry: ScheduleEntryEntity(
-                  id: "schedule-example",
-                  title: context.l10n.categoryStudying,
-                  weekday: DateTime.now().weekday,
-                  startMinutes: 8 * 60,
-                  endMinutes: 9 * 60 + 30,
-                  colorValue: context.colorTokens.primary.toARGB32(),
-                ),
+            const Gap(2),
+            Text(
+              _dayEventsTitle(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.caption.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
+        ),
+      ),
+      const Gap(12),
+      Container(
+        constraints: const BoxConstraints(minWidth: 32),
+        height: 28,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: context.colorTokens.primaryVeryLight,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          "$entryCount",
+          style: context.textStyles.bodyMedium.copyWith(
+            color: context.colorTokens.textBody,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     ],
   );
 }
 
-class _ScheduleAddButton extends StatelessWidget {
-  const _ScheduleAddButton({required this.onTap});
+class _InlineAddScheduleButton extends StatelessWidget {
+  const _InlineAddScheduleButton({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.97,
+    pressedScale: 0.98,
     onTap: onTap,
-    child: Container(
-      width: double.infinity,
-      height: 52,
-      decoration: BoxDecoration(
-        gradient: context.colorTokens.primaryGradient,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AppIcon(
-            "plus",
-            color: context.colorTokens.primaryForeground,
-            size: 20,
-          ),
-          const Gap(AppSpacing.betweenRelated),
-          Flexible(
-            child: Text(
+    child: CustomPaint(
+      painter: _DashedBorderPainter(context.colorTokens.divider),
+      child: Container(
+        width: double.infinity,
+        height: 68,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_rounded, color: context.colorTokens.textBody),
+            const Gap(6),
+            Text(
               context.l10n.addScheduleEntryButton,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.black20.copyWith(
-                color: context.colorTokens.primaryForeground,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: context.colorTokens.textBody,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
 }
+
+String _monthLabel(BuildContext context, DateTime selectedDate) {
+  final String locale = Localizations.localeOf(context).toString();
+  final String raw = DateFormat.yMMMM(locale).format(selectedDate);
+  if (raw.isEmpty) {
+    return raw;
+  }
+  return raw.replaceFirst(raw[0], raw[0].toUpperCase());
+}
+
+Future<void> _showMonthYearPicker(
+  BuildContext context,
+  ScheduleController controller,
+) async {
+  final DateTime selectedDate = controller.selectedDate.value;
+  final ({int year, int month})? result =
+      await showDialog<({int year, int month})>(
+        context: context,
+        builder: (context) => _MonthYearPickerDialog(initialDate: selectedDate),
+      );
+  if (result == null) {
+    return;
+  }
+  controller.onSelectMonth(result.year, result.month);
+}
+
+String _selectedDateLabel(String locale, DateTime selectedDate) {
+  final String raw = DateFormat.MMMMEEEEd(locale).format(selectedDate);
+  if (raw.isEmpty) {
+    return raw;
+  }
+  return raw.replaceFirst(raw[0], raw[0].toUpperCase());
+}
+
+String _dayEventsTitle(BuildContext context) => switch (context.languageCode) {
+  "pt" => "Eventos do dia",
+  "es" => "Eventos del dia",
+  "fr" => "Evenements du jour",
+  "de" => "Termine des Tages",
+  _ => "Day events",
+};
+
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final RRect rect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(16),
+    );
+    final Path path = Path()..addRRect(rect);
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+    for (final PathMetric metric in path.computeMetrics()) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final Path extractPath = metric.extractPath(
+          distance,
+          (distance + 7).clamp(0, metric.length),
+        );
+        canvas.drawPath(extractPath, paint);
+        distance += 13;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+class _MonthYearPickerDialog extends StatefulWidget {
+  const _MonthYearPickerDialog({required this.initialDate});
+
+  final DateTime initialDate;
+
+  @override
+  State<_MonthYearPickerDialog> createState() => _MonthYearPickerDialogState();
+}
+
+class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
+  late int _year = widget.initialDate.year;
+  late int _month = widget.initialDate.month;
+
+  @override
+  Widget build(BuildContext context) {
+    final String locale = Localizations.localeOf(context).toString();
+    return Dialog(
+      backgroundColor: context.colorTokens.dialogSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => setState(() => _year--),
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  color: context.colorTokens.primary,
+                ),
+                Expanded(
+                  child: Text(
+                    "$_year",
+                    textAlign: TextAlign.center,
+                    style: context.textStyles.extraBold24.copyWith(
+                      color: context.colorTokens.dialogText,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => setState(() => _year++),
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  color: context.colorTokens.primary,
+                ),
+              ],
+            ),
+            const Gap(12),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisExtent: 44,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: 12,
+              itemBuilder: (context, index) {
+                final int month = index + 1;
+                final bool isSelected = month == _month;
+                return BounceTap(
+                  onTap: () => setState(() => _month = month),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? context.colorTokens.primary
+                          : context.colorTokens.surfaceInnerLayer.withValues(
+                              alpha:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? 0.5
+                                  : 0.7,
+                            ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _shortMonthLabel(locale, month),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        color: isSelected
+                            ? context.colorTokens.primaryForeground
+                            : context.colorTokens.dialogText,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const Gap(16),
+            Row(
+              children: [
+                Expanded(
+                  child: _MonthPickerTextButton(
+                    label: _cancelLabel(context),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+                const Gap(18),
+                Expanded(
+                  child: _MonthPickerConfirmButton(
+                    label: _confirmLabel(context),
+                    onPressed: () =>
+                        Navigator.of(context).pop((year: _year, month: _month)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _shortMonthLabel(String locale, int month) {
+    final String raw = DateFormat.MMM(locale).format(DateTime(_year, month));
+    if (raw.isEmpty) {
+      return raw;
+    }
+    return raw.replaceFirst(raw[0], raw[0].toUpperCase());
+  }
+}
+
+class _MonthPickerTextButton extends StatelessWidget {
+  const _MonthPickerTextButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onPressed,
+    child: Container(
+      height: 48,
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyMedium.copyWith(
+          color: context.colorTokens.primary,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
+  );
+}
+
+class _MonthPickerConfirmButton extends StatelessWidget {
+  const _MonthPickerConfirmButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.97,
+    onTap: onPressed,
+    child: Container(
+      height: 48,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: context.colorTokens.primaryGradient,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.textPrimaryButton.copyWith(
+          color: context.colorTokens.primaryForeground,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
+  );
+}
+
+String _cancelLabel(BuildContext context) => switch (context.languageCode) {
+  "pt" => "Cancelar",
+  "es" => "Cancelar",
+  "fr" => "Annuler",
+  "de" => "Abbrechen",
+  _ => "Cancel",
+};
+
+String _confirmLabel(BuildContext context) => switch (context.languageCode) {
+  "pt" => "Confirmar",
+  "es" => "Confirmar",
+  "fr" => "Confirmer",
+  "de" => "Bestätigen",
+  _ => "Confirm",
+};
