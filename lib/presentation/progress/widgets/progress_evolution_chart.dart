@@ -15,9 +15,7 @@ class ProgressEvolutionChart extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     height: 232,
     padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
-    decoration: AppSurfaces.content(
-      context.colorTokens,
-    ).copyWith(borderRadius: BorderRadius.circular(8)),
+    decoration: AppSurfaces.content(context.colorTokens),
     child: EvolutionBarChart(values: values),
   );
 }

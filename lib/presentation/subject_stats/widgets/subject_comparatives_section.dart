@@ -55,9 +55,7 @@ class _SubjectComparativesSectionState
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: AppSurfaces.content(
-        context.colorTokens,
-      ).copyWith(borderRadius: BorderRadius.circular(8)),
+      decoration: AppSurfaces.content(context.colorTokens),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
