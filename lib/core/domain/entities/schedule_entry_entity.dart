@@ -20,7 +20,7 @@ class ScheduleEntryEntity extends Equatable {
         id: map["id"] as String,
         title: map["title"] as String,
         weekday: map["weekday"] as int? ?? DateTime.monday,
-        startMinutes: map["startMinutes"] as int,
+        startMinutes: map["startMinutes"] as int?,
         endMinutes: map["endMinutes"] as int?,
         colorValue: map["colorValue"] as int,
       );
@@ -28,7 +28,7 @@ class ScheduleEntryEntity extends Equatable {
   final String id;
   final String title;
   final int weekday;
-  final int startMinutes;
+  final int? startMinutes;
   final int? endMinutes;
   final int colorValue;
 

@@ -19,8 +19,8 @@ import "package:intl/intl.dart";
 typedef AddScheduleEntryResult = ({
   String title,
   List<int> weekdays,
-  int startMinutes,
-  int endMinutes,
+  int? startMinutes,
+  int? endMinutes,
   int colorValue,
 });
 
@@ -107,14 +107,20 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       _endTimeController.text,
     );
 
-    if (title.isEmpty || startTime == null || endTime == null) {
+    if (title.isEmpty) {
       appNavigator.showErrorSnackBar(context.l10n.incompleteScheduleEntryError);
       return;
     }
 
-    final int startMinutes = startTime.hour * 60 + startTime.minute;
-    final int endMinutes = endTime.hour * 60 + endTime.minute;
-    if (endMinutes <= startMinutes) {
+    final int? startMinutes = startTime == null
+        ? null
+        : startTime.hour * 60 + startTime.minute;
+    final int? endMinutes = endTime == null
+        ? null
+        : endTime.hour * 60 + endTime.minute;
+    if (startMinutes != null &&
+        endMinutes != null &&
+        endMinutes <= startMinutes) {
       appNavigator.showErrorSnackBar(context.l10n.endTimeBeforeStartError);
       return;
     }
@@ -138,7 +144,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     ),
     bottomBar: _SubmitButton(
       isEnabled: _isComplete,
-      hint: _isComplete ? null : context.l10n.scheduleEntryMissingFields,
+      hint: _isComplete ? null : _missingFieldsHint(context),
       onTap: _onSubmit,
     ),
     body: SingleChildScrollView(
@@ -253,9 +259,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     final int? start = _startMinutes;
     final int? end = _endMinutes;
     return _titleController.text.trim().isNotEmpty &&
-        start != null &&
-        end != null &&
-        end > start;
+        (start == null || end == null || end > start);
   }
 
   Future<void> _pickTime(TextEditingController controller) async {
@@ -283,7 +287,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     id: "schedule-preview",
     title: _previewTitle,
     weekday: _selectedWeekdays.first,
-    startMinutes: _startMinutes ?? 0,
+    startMinutes: _startMinutes,
     endMinutes: _endMinutes,
     colorValue: _selectedColor.toARGB32(),
   );
@@ -327,6 +331,19 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       return context.l10n.scheduleDurationHours(hours);
     }
     return context.l10n.scheduleDurationHoursMinutes(hours, minutes);
+  }
+
+  String _missingFieldsHint(BuildContext context) {
+    if (_titleController.text.trim().isEmpty) {
+      return switch (context.languageCode) {
+        "pt" => "Preencha o titulo para continuar",
+        "es" => "Completa el titulo para continuar",
+        "fr" => "Ajoutez un titre pour continuer",
+        "de" => "Titel ausfuellen, um fortzufahren",
+        _ => "Fill in the title to continue",
+      };
+    }
+    return context.l10n.endTimeBeforeStartError;
   }
 }
 

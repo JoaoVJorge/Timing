@@ -34,21 +34,31 @@ class ScheduleEntryTile extends StatelessWidget {
       opacity: isPast ? 0.55 : 1,
       child: Container(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
-        padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+        padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
         decoration: BoxDecoration(
           color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
           border: isCurrent ? Border.all(color: color, width: 1.4) : null,
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.surfaceShadow,
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: isCurrent ? 4 : 3,
-              height: 30,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(2),
+                shape: BoxShape.circle,
+                color: color.withValues(
+                  alpha: context.isDarkMode ? 0.22 : 0.12,
+                ),
               ),
+              child: Icon(Icons.menu_book_rounded, color: color, size: 24),
             ),
             const Gap(AppSpacing.betweenRelated),
             Expanded(
@@ -80,7 +90,13 @@ class ScheduleEntryTile extends StatelessWidget {
                     timeRange,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.caption.copyWith(fontSize: 12),
+                    style: context.textStyles.caption.copyWith(
+                      color: context.colorTokens.textBody.withValues(
+                        alpha: 0.72,
+                      ),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),

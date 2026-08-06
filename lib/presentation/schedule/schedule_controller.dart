@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
@@ -57,11 +58,15 @@ class ScheduleController extends GetxController {
 
     final DateTime now = DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
-    final int endMinutes = entry.endMinutes ?? entry.startMinutes;
-    if (nowMinutes >= endMinutes && nowMinutes > entry.startMinutes) {
+    final int? startMinutes = entry.startMinutes;
+    if (startMinutes == null) {
+      return ScheduleEntryStatus.upcoming;
+    }
+    final int endMinutes = entry.endMinutes ?? startMinutes;
+    if (nowMinutes >= endMinutes && nowMinutes > startMinutes) {
       return ScheduleEntryStatus.past;
     }
-    if (nowMinutes >= entry.startMinutes) {
+    if (nowMinutes >= startMinutes) {
       return ScheduleEntryStatus.current;
     }
     return ScheduleEntryStatus.upcoming;
@@ -73,9 +78,32 @@ class ScheduleController extends GetxController {
     return today.add(Duration(days: diff));
   }
 
+  bool hasEntriesForDate(DateTime date) =>
+      entries.any((entry) => entry.weekday == date.weekday);
+
+  Color? firstEntryColorForDate(DateTime date) {
+    final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForWeekday(
+      date.weekday,
+    );
+    if (dayEntries.isEmpty) {
+      return null;
+    }
+    return Color(dayEntries.first.colorValue);
+  }
+
+  List<Color> entryColorsForDate(DateTime date) => [
+    for (final ScheduleEntryEntity entry in _sortedEntriesForWeekday(
+      date.weekday,
+    ))
+      Color(entry.colorValue),
+  ];
+
   List<ScheduleEntryEntity> _sortedEntriesForWeekday(int weekday) =>
-      entries.where((entry) => entry.weekday == weekday).toList()
-        ..sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
+      entries.where((entry) => entry.weekday == weekday).toList()..sort((a, b) {
+        final int aMinutes = a.startMinutes ?? 24 * 60 + 1;
+        final int bMinutes = b.startMinutes ?? 24 * 60 + 1;
+        return aMinutes.compareTo(bMinutes);
+      });
 
   @override
   void onInit() {
@@ -85,6 +113,14 @@ class ScheduleController extends GetxController {
 
   void onSelectDate(DateTime date) =>
       selectedDate.value = DateTime(date.year, date.month, date.day);
+
+  void onSelectMonth(int year, int month) {
+    final int clampedDay = selectedDate.value.day.clamp(
+      1,
+      DateUtils.getDaysInMonth(year, month),
+    );
+    selectedDate.value = DateTime(year, month, clampedDay);
+  }
 
   Future<void> loadEntries() async {
     isLoading.value = true;

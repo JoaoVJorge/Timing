@@ -9,14 +9,18 @@ class AppTopBar extends StatelessWidget {
     required this.title,
     this.showBackButton = false,
     this.onBack,
+    this.onTitleTap,
     this.trailing,
+    this.titleMaxLines = 2,
     super.key,
   });
 
   final String title;
   final bool showBackButton;
   final VoidCallback? onBack;
+  final VoidCallback? onTitleTap;
   final Widget? trailing;
+  final int titleMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +33,8 @@ class AppTopBar extends StatelessWidget {
                 .clamp(0, constraints.maxWidth)
                 .toDouble();
 
-        return SizedBox(
-          height: AppSpacing.minTapTarget,
+        return ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -40,15 +44,22 @@ class AppTopBar extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: titleMaxWidth),
                   child: Semantics(
                     header: true,
-                    child: Text(
-                      title,
-                      // Titles like "Perguntas frequentes" get clipped on narrow
-                      // screens when forced onto a single line.
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: context.textStyles.pageTitle.copyWith(
-                        fontSize: 24,
+                    button: onTitleTap != null,
+                    child: GestureDetector(
+                      behavior: onTitleTap == null
+                          ? HitTestBehavior.deferToChild
+                          : HitTestBehavior.opaque,
+                      onTap: onTitleTap,
+                      child: Text(
+                        title,
+                        // Titles like "Perguntas frequentes" get clipped on narrow
+                        // screens when forced onto a single line.
+                        maxLines: titleMaxLines,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: context.textStyles.pageTitle.copyWith(
+                          fontSize: 24,
+                        ),
                       ),
                     ),
                   ),
