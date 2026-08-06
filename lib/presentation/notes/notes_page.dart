@@ -19,7 +19,8 @@ class NotesPage extends StatelessWidget {
     return AppScaffold(
       backgroundColor: context.colorTokens.scaffold,
       topBar: AppTopBar(
-        title: "${context.l10n.notesLabel} · ${controller.subject.name}",
+        title: "${context.l10n.notesLabel}\n${controller.subject.name}",
+        titleMaxLines: 3,
         showBackButton: true,
         onBack: controller.onBack,
         trailing: IconButton(
