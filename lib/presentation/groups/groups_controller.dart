@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
+import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
@@ -13,6 +14,7 @@ import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 
 enum GroupDetailsTab { ranking, goals, chat }
@@ -158,11 +160,15 @@ class GroupsController extends GetxController {
     selectedDetailsTab.value = GroupDetailsTab.ranking;
     isShowingGroupDetails.value = true;
     isShowingMemberManagement.value = false;
+    _appNavigator.toNamed(AppRoutes.groupDetails);
   }
 
   void onBackToGroupList() {
     isShowingMemberManagement.value = false;
     isShowingGroupDetails.value = false;
+    if (Get.currentRoute == AppRoutes.groupDetails) {
+      _appNavigator.back<void>();
+    }
   }
 
   void onManageMembers() => isShowingMemberManagement.value = true;
@@ -194,8 +200,12 @@ class GroupsController extends GetxController {
   }
 
   Future<void> onTapSendGroupImage(String groupId) async {
+    final ImageSource? source = await _pickImageSource();
+    if (source == null) {
+      return;
+    }
     final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
+      source: source,
       maxWidth: 1280,
       maxHeight: 1280,
       imageQuality: 78,
@@ -241,7 +251,7 @@ class GroupsController extends GetxController {
 
   /// Friends live next to Groups: both answer "how am I doing with others?".
   Future<void> onTapFriends() =>
-      _appNavigator.toNamed(AppRoutes.friends, id: 1) ?? Future<void>.value();
+      _appNavigator.toNamed(AppRoutes.friends) ?? Future<void>.value();
 
   void onTapEditGroup() {
     final String message = switch (Get.context?.languageCode) {
@@ -254,14 +264,6 @@ class GroupsController extends GetxController {
 
   Future<void> onTapLeaveGroup() async {
     await onConfirmLeaveGroup();
-    return;
-    // ignore: dead_code
-    final String message = switch (Get.context?.languageCode) {
-      "pt" => "Saída de grupo em breve.",
-      "es" => "Salir del grupo próximamente.",
-      _ => "Leaving groups is coming soon.",
-    };
-    _appNavigator.showSnackBar(text: message, isAnError: true);
   }
 
   Future<void> onConfirmLeaveGroup() async {
@@ -290,12 +292,74 @@ class GroupsController extends GetxController {
     _ => "You left the group.",
   };
 
-  void onTapJoinWithCode() {
-    final String message = switch (Get.context?.languageCode) {
-      "pt" => "Entrada por código de convite em breve.",
-      "es" => "Unirse con código estará disponible pronto.",
-      _ => "Joining with an invite code is coming soon.",
-    };
-    _appNavigator.showSnackBar(text: message);
+  Future<void> onTapJoinWithCode() async {
+    final dynamic result = await _appNavigator.toNamed(AppRoutes.joinGroup);
+    final GroupEntity? joinedGroup = result as GroupEntity?;
+    if (joinedGroup == null) {
+      return;
+    }
+    final int existingIndex = groups.indexWhere(
+      (group) => group.id == joinedGroup.id,
+    );
+    if (existingIndex >= 0) {
+      groups[existingIndex] = joinedGroup;
+    } else {
+      groups.add(joinedGroup);
+    }
+    selectedGroup.value = joinedGroup;
+    groups.refresh();
+    onSelectGroup(joinedGroup);
+    _appNavigator.showSuccessSnackBar(_joinedGroupMessage);
   }
+
+  Future<ImageSource?> _pickImageSource() {
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return Future<ImageSource?>.value(null);
+    }
+    return showPhotoSourceBottomSheet(
+      context: context,
+      title: _imageSourceTitle,
+      subtitle: _imageSourceSubtitle,
+      cameraLabel: _cameraLabel,
+      galleryLabel: _galleryLabel,
+      cancelLabel: _cancelLabel,
+    );
+  }
+
+  String get _imageSourceTitle => switch (Get.context?.languageCode) {
+    "pt" => "Enviar imagem",
+    "es" => "Enviar imagen",
+    _ => "Send image",
+  };
+
+  String get _imageSourceSubtitle => switch (Get.context?.languageCode) {
+    "pt" => "Escolha como deseja enviar a imagem",
+    "es" => "Elige como deseas enviar la imagen",
+    _ => "Choose how you want to send the image",
+  };
+
+  String get _cameraLabel => switch (Get.context?.languageCode) {
+    "pt" => "Tirar foto",
+    "es" => "Tomar foto",
+    _ => "Take photo",
+  };
+
+  String get _galleryLabel => switch (Get.context?.languageCode) {
+    "pt" => "Escolher da galeria",
+    "es" => "Elegir de la galeria",
+    _ => "Choose from gallery",
+  };
+
+  String get _cancelLabel => switch (Get.context?.languageCode) {
+    "pt" => "Cancelar",
+    "es" => "Cancelar",
+    _ => "Cancel",
+  };
+
+  String get _joinedGroupMessage => switch (Get.context?.languageCode) {
+    "pt" => "Voce entrou no grupo.",
+    "es" => "Te uniste al grupo.",
+    _ => "You joined the group.",
+  };
 }

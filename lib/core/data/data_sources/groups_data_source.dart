@@ -243,6 +243,45 @@ class GroupsDataSource {
     }
   }
 
+  Future<Either<AppError, GroupEntity>> joinGroupByInviteCode(
+    String inviteCode,
+  ) async {
+    String operation = "rpc public.join_group_by_invite_code";
+    try {
+      final String code = inviteCode.trim().toUpperCase();
+      if (code.isEmpty) {
+        throw ArgumentError("Invite code must not be empty.");
+      }
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "join_group_by_invite_code",
+        params: {"lookup_code": code},
+      );
+      final List<dynamic> rows = response as List<dynamic>;
+      if (rows.isEmpty) {
+        throw StateError("join_group_by_invite_code returned no group row.");
+      }
+      final String groupId = (rows.first as Map)["id"] as String;
+      final Either<AppError, List<GroupEntity>> groupsResult =
+          await getGroups();
+      return groupsResult.fold(Left.new, (groups) {
+        GroupEntity? group;
+        for (final GroupEntity item in groups) {
+          if (item.id == groupId) {
+            group = item;
+            break;
+          }
+        }
+        if (group == null) {
+          throw StateError("Joined group was not returned by getGroups.");
+        }
+        return Right(group);
+      });
+    } catch (error, stackTrace) {
+      _logSqlError(operation, error, stackTrace);
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   Future<Either<AppError, GroupEntity>> createGroup({
     required String name,
     required GroupThemeType theme,
