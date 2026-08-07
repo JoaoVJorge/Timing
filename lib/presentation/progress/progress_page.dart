@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/app/app_ui_constants.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
@@ -29,10 +30,13 @@ class ProgressPage extends StatelessWidget {
     final ProgressController controller = Get.find();
 
     return AppScaffold(
+      padding: EdgeInsets.zero,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          top: 16,
-          bottom: AppSpacing.betweenSections,
+        padding: const EdgeInsets.fromLTRB(
+          AppUiConstants.pagePadding,
+          16,
+          AppUiConstants.pagePadding,
+          AppSpacing.betweenSections,
         ),
         child: Obx(() {
           final ProfileStatsEntity stats = controller.stats.value;
