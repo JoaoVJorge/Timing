@@ -9,6 +9,7 @@ import "package:help_out/app/app_controller.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 
 class EditProfileController extends GetxController {
@@ -68,8 +69,12 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> onTapSelectPhoto() async {
+    final ImageSource? source = await _pickImageSource();
+    if (source == null) {
+      return;
+    }
     final XFile? image = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
+      source: source,
       maxWidth: 512,
       maxHeight: 512,
       imageQuality: 82,
@@ -83,6 +88,47 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> onTapRemovePhoto() => _appController.setProfilePhotoBase64(null);
+
+  Future<ImageSource?> _pickImageSource() {
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return Future<ImageSource?>.value(null);
+    }
+    return showPhotoSourceBottomSheet(
+      context: context,
+      title: _photoSourceTitle(context),
+      subtitle: _photoSourceSubtitle(context),
+      cameraLabel: _cameraLabel(context),
+      galleryLabel: _galleryLabel(context),
+      cancelLabel: context.l10n.cancelButton,
+    );
+  }
+
+  String _photoSourceTitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "pt" => "Foto de perfil",
+        "es" => "Foto de perfil",
+        _ => "Profile photo",
+      };
+
+  String _photoSourceSubtitle(BuildContext context) =>
+      switch (context.languageCode) {
+        "pt" => "Escolha como deseja atualizar sua foto",
+        "es" => "Elige como deseas actualizar tu foto",
+        _ => "Choose how you want to update your photo",
+      };
+
+  String _cameraLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Tirar foto",
+    "es" => "Tomar foto",
+    _ => "Take photo",
+  };
+
+  String _galleryLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Escolher da galeria",
+    "es" => "Elegir de la galeria",
+    _ => "Choose from gallery",
+  };
 
   String _removePhotoTitle(BuildContext context) =>
       switch (context.languageCode) {
