@@ -16,10 +16,12 @@ class AppConfigDataSource {
       );
 
       if (savedConfig == null) {
-        return Right(AppConfigEntity.fallback());
+        return Right(await _withLocalDarkMode(AppConfigEntity.fallback()));
       }
 
-      return Right(AppConfigEntity.fromJson(savedConfig));
+      return Right(
+        await _withLocalDarkMode(AppConfigEntity.fromJson(savedConfig)),
+      );
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
     }
@@ -31,9 +33,20 @@ class AppConfigDataSource {
         LocalStorageKeys.appConfig,
         config.toJson(),
       );
+      await _localStorageService.write(
+        LocalStorageKeys.isDarkMode,
+        config.isDarkMode,
+      );
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
+  }
+
+  Future<AppConfigEntity> _withLocalDarkMode(AppConfigEntity config) async {
+    final bool? savedDarkMode = await _localStorageService.read<bool?>(
+      LocalStorageKeys.isDarkMode,
+    );
+    return config.copyWith(isDarkMode: savedDarkMode ?? config.isDarkMode);
   }
 }

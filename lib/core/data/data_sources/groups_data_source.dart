@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:flutter/foundation.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
+import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
@@ -144,6 +145,99 @@ class GroupsDataSource {
             )
             .toList(),
       );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, List<GroupImageMessageEntity>>> getImageMessages(
+    String groupId,
+  ) async {
+    try {
+      final String? userId = _supabaseService.currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
+      final List<Map<String, dynamic>> rows = await _selectRows(
+        table: "group_image_messages",
+        columns: "id, group_id, sender_id, image_base64, created_at",
+        filters: (query) =>
+            query.eq("group_id", groupId).order("created_at", ascending: true),
+      );
+      final List<String> senderIds = rows
+          .map((row) => row["sender_id"] as String)
+          .toSet()
+          .toList();
+      final Map<String, Map<String, dynamic>> profilesById =
+          await _profilesById(senderIds, withPhoto: true);
+
+      return Right(
+        rows
+            .map(
+              (row) => _imageMessageFromRow(
+                row,
+                profileRow: profilesById[row["sender_id"]],
+              ),
+            )
+            .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, GroupImageMessageEntity>> sendImageMessage({
+    required String groupId,
+    required String imageBase64,
+  }) async {
+    try {
+      final String? userId = _supabaseService.currentUserId;
+      if (userId == null) {
+        return Left(
+          GenericAppError(
+            error: StateError("User must be signed in to send images."),
+            stackTrace: StackTrace.current,
+          ),
+        );
+      }
+
+      final Map<String, dynamic> row = await _supabaseService.requireClient
+          .from("group_image_messages")
+          .insert({
+            "group_id": groupId,
+            "sender_id": userId,
+            "image_base64": imageBase64,
+          })
+          .select("id, group_id, sender_id, image_base64, created_at")
+          .single();
+      final Map<String, Map<String, dynamic>> profilesById =
+          await _profilesById([userId], withPhoto: true);
+
+      return Right(_imageMessageFromRow(row, profileRow: profilesById[userId]));
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, void>> leaveGroup(String groupId) async {
+    try {
+      final String? userId = _supabaseService.currentUserId;
+      if (userId == null) {
+        return Left(
+          GenericAppError(
+            error: StateError("User must be signed in to leave a group."),
+            stackTrace: StackTrace.current,
+          ),
+        );
+      }
+
+      await _supabaseService.requireClient
+          .from("group_members")
+          .delete()
+          .eq("group_id", groupId)
+          .eq("user_id", userId);
+      return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
@@ -298,6 +392,27 @@ class GroupsDataSource {
       monthSeconds: scores.month,
       role: memberRow["role"] as String? ?? "member",
       joinedAt: DateTime.tryParse(memberRow["joined_at"] as String? ?? ""),
+    );
+  }
+
+  GroupImageMessageEntity _imageMessageFromRow(
+    Map<String, dynamic> row, {
+    required Map<String, dynamic>? profileRow,
+  }) {
+    final String senderId = row["sender_id"] as String;
+    return GroupImageMessageEntity(
+      id: row["id"] as String,
+      groupId: row["group_id"] as String,
+      senderId: senderId,
+      imageBase64: row["image_base64"] as String? ?? "",
+      createdAt:
+          DateTime.tryParse(row["created_at"] as String? ?? "") ??
+          DateTime.now(),
+      senderName: _displayName(profileRow, fallback: "Membro"),
+      senderAvatar: profileRow?["profile_photo_base64"] as String? ?? "",
+      senderAvatarColorValue:
+          (profileRow?["accent_color_value"] as num?)?.toInt() ??
+          GroupAvatarColors.byIndex(senderId.hashCode.abs()),
     );
   }
 

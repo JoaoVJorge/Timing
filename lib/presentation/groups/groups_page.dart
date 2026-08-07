@@ -1,7 +1,11 @@
+import "dart:convert";
+import "dart:typed_data";
+
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
+import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
@@ -98,16 +102,17 @@ class _GroupDetailsView extends StatelessWidget {
         );
       }
 
-      final Widget selectedContent =
-          switch (controller.selectedDetailsTab.value) {
-            GroupDetailsTab.ranking => _RankingTab(
-              controller: controller,
-              group: group,
-              members: members,
-            ),
-            GroupDetailsTab.goals => _GoalsTab(group: group),
-            GroupDetailsTab.chat => _ChatTab(group: group),
-          };
+      final Widget selectedContent = switch (controller
+          .selectedDetailsTab
+          .value) {
+        GroupDetailsTab.ranking => _RankingTab(
+          controller: controller,
+          group: group,
+          members: members,
+        ),
+        GroupDetailsTab.goals => _GoalsTab(group: group),
+        GroupDetailsTab.chat => _ChatTab(controller: controller, group: group),
+      };
 
       return Column(
         children: [
@@ -989,8 +994,225 @@ class _ProgressInfoCard extends StatelessWidget {
 }
 
 class _ChatTab extends StatelessWidget {
-  const _ChatTab({required this.group});
+  const _ChatTab({required this.controller, required this.group});
 
+  final GroupsController controller;
+  final GroupEntity group;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final List<GroupImageMessageEntity> messages = controller.imageMessagesFor(
+      group.id,
+    );
+
+    return Column(
+      children: [
+        Expanded(
+          child: controller.isLoadingChat.value && messages.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : messages.isEmpty
+              ? _ChatEmptyImages(
+                  onTapSend: () => controller.onTapSendGroupImage(group.id),
+                )
+              : ListView.separated(
+                  reverse: true,
+                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  itemCount: messages.length,
+                  separatorBuilder: (_, _) => const Gap(14),
+                  itemBuilder: (context, index) {
+                    final GroupImageMessageEntity message =
+                        messages[messages.length - index - 1];
+                    return _ImageMessageBubble(
+                      message: message,
+                      isMine: message.senderId == controller.currentUserId,
+                    );
+                  },
+                ),
+        ),
+        const Gap(12),
+        _SendImageBar(
+          isSending: controller.isSendingImage.value,
+          onTap: () => controller.onTapSendGroupImage(group.id),
+        ),
+        Gap(8),
+      ],
+    );
+  });
+}
+
+class _ImageMessageBubble extends StatelessWidget {
+  const _ImageMessageBubble({required this.message, required this.isMine});
+
+  final GroupImageMessageEntity message;
+  final bool isMine;
+
+  @override
+  Widget build(BuildContext context) {
+    final Uint8List imageBytes = base64Decode(message.imageBase64);
+
+    return Row(
+      mainAxisAlignment: isMine
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (!isMine) ...[
+          GroupMemberAvatar(
+            name: message.senderName,
+            colorValue: message.senderAvatarColorValue,
+            avatar: message.senderAvatar,
+            size: 42,
+          ),
+          const Gap(8),
+        ],
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            decoration: BoxDecoration(
+              color: isMine
+                  ? context.colorTokens.primaryVeryLight
+                  : context.colorTokens.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: context.colorTokens.borderUnfocused.withValues(
+                  alpha: 0.38,
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.senderName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: isMine
+                        ? context.colorTokens.primary
+                        : const Color(0xFFE85888),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    imageBytes,
+                    width: 220,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const Gap(6),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _messageTime(message.createdAt),
+                    style: context.textStyles.bodyTiny,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isMine) ...[
+          const Gap(8),
+          GroupMemberAvatar(
+            name: message.senderName,
+            colorValue: message.senderAvatarColorValue,
+            avatar: message.senderAvatar,
+            size: 42,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ChatEmptyImages extends StatelessWidget {
+  const _ChatEmptyImages({required this.onTapSend});
+
+  final VoidCallback onTapSend;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: AppEmptyState(
+      icon: Icons.image_outlined,
+      title: "Nenhuma imagem ainda",
+      description: "Envie a primeira imagem do grupo.",
+      actionLabel: "Enviar imagem",
+      onTapAction: onTapSend,
+    ),
+  );
+}
+
+class _SendImageBar extends StatelessWidget {
+  const _SendImageBar({required this.isSending, required this.onTap});
+
+  final bool isSending;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: isSending ? () {} : onTap,
+    pressedScale: 0.98,
+    child: Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.image_outlined, color: context.colorTokens.primary),
+          const Gap(10),
+          Expanded(
+            child: Text(
+              isSending ? "Enviando imagem..." : "Enviar imagem",
+              style: context.textStyles.cardTitle.copyWith(fontSize: 15),
+            ),
+          ),
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              gradient: context.colorTokens.primaryGradient,
+              shape: BoxShape.circle,
+            ),
+            child: isSending
+                ? Padding(
+                    padding: const EdgeInsets.all(11),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.colorTokens.primaryForeground,
+                    ),
+                  )
+                : Icon(
+                    Icons.add_photo_alternate_outlined,
+                    color: context.colorTokens.primaryForeground,
+                    size: 22,
+                  ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+String _messageTime(DateTime date) {
+  final DateTime local = date.toLocal();
+  return "${local.hour.toString().padLeft(2, "0")}:"
+      "${local.minute.toString().padLeft(2, "0")}";
+}
+
+// ignore: unused_element
+class _MockChatTab extends StatelessWidget {
+  const _MockChatTab({required this.controller, required this.group});
+
+  final GroupsController controller;
   final GroupEntity group;
 
   @override
@@ -1285,7 +1507,7 @@ Future<void> _showGroupActionsSheet(
     },
     onLeaveGroup: () {
       Navigator.of(sheetContext).pop();
-      controller.onTapLeaveGroup();
+      controller.onConfirmLeaveGroup();
     },
   ),
 );

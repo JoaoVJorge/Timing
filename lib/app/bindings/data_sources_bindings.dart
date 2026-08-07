@@ -20,11 +20,17 @@ class DataSourcesBindings extends Bindings {
       permanent: true,
     );
     Get.put<SubjectsDataSource>(
-      SubjectsDataSource(localStorageService: Get.find()),
+      SubjectsDataSource(
+        localStorageService: Get.find(),
+        supabaseService: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<DailyTasksDataSource>(
-      DailyTasksDataSource(localStorageService: Get.find()),
+      DailyTasksDataSource(
+        localStorageService: Get.find(),
+        supabaseService: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<GroupsDataSource>(
@@ -40,7 +46,10 @@ class DataSourcesBindings extends Bindings {
       permanent: true,
     );
     Get.put<ScheduleDataSource>(
-      ScheduleDataSource(localStorageService: Get.find()),
+      ScheduleDataSource(
+        localStorageService: Get.find(),
+        supabaseService: Get.find(),
+      ),
       permanent: true,
     );
   }
