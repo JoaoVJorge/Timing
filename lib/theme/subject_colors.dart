@@ -17,5 +17,23 @@ class SubjectColors {
 
   static Color byIndex(int index) => values[index % values.length];
 
-  static Color fromThemeAccent(Color accent) => accent;
+  static Color fromThemeAccent(Color accent) {
+    Color closest = values.first;
+    double closestDistance = double.infinity;
+    for (final Color value in values) {
+      final double distance = _colorDistance(value, accent);
+      if (distance < closestDistance) {
+        closest = value;
+        closestDistance = distance;
+      }
+    }
+    return closest;
+  }
+
+  static double _colorDistance(Color a, Color b) {
+    final double red = a.r - b.r;
+    final double green = a.g - b.g;
+    final double blue = a.b - b.b;
+    return red * red + green * green + blue * blue;
+  }
 }
