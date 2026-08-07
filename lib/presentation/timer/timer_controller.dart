@@ -57,7 +57,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   SubjectEntity subject;
 
   final RxInt sessionSeconds = 0.obs;
-  late final RxInt breakCountdownSeconds = focusIntervalSeconds.obs;
+  late final RxInt breakCountdownSeconds = _initialBreakCountdownSeconds.obs;
   late final RxInt restCountdownSeconds = restIntervalSeconds.obs;
   final RxBool isRunning = true.obs;
   final RxBool isResting = false.obs;
@@ -113,6 +113,17 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   int get currentFocusSection =>
       (completedFocusSections.value + 1).clamp(1, focusSessionCount);
+
+  int get _initialBreakCountdownSeconds {
+    if (isReading || focusIntervalSeconds <= 0) {
+      return focusIntervalSeconds;
+    }
+    final int elapsedInSection = subject.totalSeconds % focusIntervalSeconds;
+    if (elapsedInSection == 0) {
+      return focusIntervalSeconds;
+    }
+    return focusIntervalSeconds - elapsedInSection;
+  }
 
   @override
   void onInit() {
