@@ -32,6 +32,10 @@ class GroupsRepository {
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
 
+  Future<Either<AppError, GroupEntity>> joinGroupByInviteCode(
+    String inviteCode,
+  ) => _groupsDataSource.joinGroupByInviteCode(inviteCode);
+
   Future<Either<AppError, GroupEntity>> createGroup({
     required String name,
     required GroupThemeType theme,

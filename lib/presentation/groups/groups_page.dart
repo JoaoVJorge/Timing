@@ -26,23 +26,24 @@ import "package:help_out/theme/app_surfaces.dart";
 /// Answers "how am I doing next to other people?". Owns both the group
 /// leaderboards and the friends area they are built from.
 class GroupsPage extends StatelessWidget {
-  const GroupsPage({super.key});
+  const GroupsPage({this.showGroupFlowOnly = false, super.key});
+
+  final bool showGroupFlowOnly;
 
   @override
   Widget build(BuildContext context) {
     final GroupsController controller = Get.find();
 
-    return Obx(() {
-      if (controller.isShowingMemberManagement.value) {
-        return AppScaffold(body: _ManageMembersView(controller: controller));
-      }
-
-      if (controller.isShowingGroupDetails.value) {
+    if (showGroupFlowOnly) {
+      return Obx(() {
+        if (controller.isShowingMemberManagement.value) {
+          return AppScaffold(body: _ManageMembersView(controller: controller));
+        }
         return AppScaffold(body: _GroupDetailsView(controller: controller));
-      }
+      });
+    }
 
-      return AppScaffold(body: _GroupsHomeView(controller: controller));
-    });
+    return AppScaffold(body: _GroupsHomeView(controller: controller));
   }
 }
 
@@ -261,7 +262,7 @@ class _GroupSectionTitle extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.sectionTitle.copyWith(
-            color: context.colorTokens.black,
+            color: context.colorTokens.textBody,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -764,7 +765,7 @@ class _GroupDetailsHeader extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.textStyles.black28.copyWith(
-                            color: context.colorTokens.black,
+                            color: context.colorTokens.textBody,
                             fontSize: 28,
                             height: 1,
                           ),
@@ -1524,45 +1525,47 @@ class _GroupActionsSheet extends StatelessWidget {
   final VoidCallback onLeaveGroup;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    top: false,
-    child: Container(
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 48,
-            height: 4,
-            decoration: BoxDecoration(
-              color: context.colorTokens.textHint.withValues(alpha: 0.42),
-              borderRadius: BorderRadius.circular(999),
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    child: SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.colorTokens.textHint.withValues(alpha: 0.42),
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
-          ),
-          const Gap(14),
-          _GroupActionRow(
-            icon: Icons.groups_2_outlined,
-            label: "Gerenciar membros",
-            onTap: onManageMembers,
-          ),
-          const Gap(8),
-          _GroupActionRow(
-            icon: Icons.edit_outlined,
-            label: "Editar grupo",
-            onTap: onEditGroup,
-          ),
-          const Gap(8),
-          _GroupActionRow(
-            icon: Icons.logout_rounded,
-            label: "Sair do grupo",
-            isDestructive: true,
-            onTap: onLeaveGroup,
-          ),
-        ],
+            const Gap(14),
+            _GroupActionRow(
+              icon: Icons.groups_2_outlined,
+              label: "Gerenciar membros",
+              onTap: onManageMembers,
+            ),
+            const Gap(8),
+            _GroupActionRow(
+              icon: Icons.edit_outlined,
+              label: "Editar grupo",
+              onTap: onEditGroup,
+            ),
+            const Gap(8),
+            _GroupActionRow(
+              icon: Icons.logout_rounded,
+              label: "Sair do grupo",
+              isDestructive: true,
+              onTap: onLeaveGroup,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -1906,9 +1909,7 @@ class _SkeletonAvatarRow extends StatelessWidget {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF343434)
-                    : const Color(0xFFE5E5E5),
+                color: context.colorTokens.surfaceInnerLayer,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: context.colorTokens.surface,
@@ -1930,21 +1931,14 @@ class _SkeletonBox extends StatelessWidget {
   final double radius;
 
   @override
-  Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color effectiveColor = isDarkMode
-        ? const Color(0xFF343434)
-        : const Color(0xFFE5E5E5);
-
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: effectiveColor,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: context.colorTokens.surfaceInnerLayer,
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
 }
 
 class _BenefitsHeader extends StatelessWidget {
