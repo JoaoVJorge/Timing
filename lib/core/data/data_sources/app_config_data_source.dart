@@ -16,11 +16,11 @@ class AppConfigDataSource {
       );
 
       if (savedConfig == null) {
-        return Right(await _withLocalDarkMode(AppConfigEntity.fallback()));
+        return Right(await _withLocalPreferences(AppConfigEntity.fallback()));
       }
 
       return Right(
-        await _withLocalDarkMode(AppConfigEntity.fromJson(savedConfig)),
+        await _withLocalPreferences(AppConfigEntity.fromJson(savedConfig)),
       );
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
@@ -37,16 +37,31 @@ class AppConfigDataSource {
         LocalStorageKeys.isDarkMode,
         config.isDarkMode,
       );
+      final String? languageCode = config.languageCode;
+      if (languageCode == null) {
+        await _localStorageService.delete(LocalStorageKeys.languageCode);
+      } else {
+        await _localStorageService.write(
+          LocalStorageKeys.languageCode,
+          languageCode,
+        );
+      }
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
 
-  Future<AppConfigEntity> _withLocalDarkMode(AppConfigEntity config) async {
+  Future<AppConfigEntity> _withLocalPreferences(AppConfigEntity config) async {
     final bool? savedDarkMode = await _localStorageService.read<bool?>(
       LocalStorageKeys.isDarkMode,
     );
-    return config.copyWith(isDarkMode: savedDarkMode ?? config.isDarkMode);
+    final String? savedLanguageCode = await _localStorageService.read<String?>(
+      LocalStorageKeys.languageCode,
+    );
+    return config.copyWith(
+      isDarkMode: savedDarkMode ?? config.isDarkMode,
+      languageCode: savedLanguageCode ?? config.languageCode,
+    );
   }
 }
