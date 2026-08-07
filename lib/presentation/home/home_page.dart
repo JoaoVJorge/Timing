@@ -11,8 +11,8 @@ import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/functions/format_name.dart";
 import "package:help_out/shared/functions/format_relative_time.dart";
 import "package:help_out/shared/functions/format_schedule_time.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
+import "package:help_out/shared/widgets/app_section_header.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
 
@@ -282,13 +282,6 @@ class _PlanDayRow extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.22),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
             ),
             child: Icon(icon, color: Colors.white, size: 22),
           ),

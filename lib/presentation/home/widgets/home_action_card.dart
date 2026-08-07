@@ -131,7 +131,7 @@ class HomeActionCard extends StatelessWidget {
                         ),
                       ),
                     ),
-              ),
+            ),
           ),
         ],
       ),
