@@ -18,11 +18,13 @@ import "package:help_out/presentation/edit_profile/edit_profile_bindings.dart";
 import "package:help_out/presentation/edit_profile/edit_profile_page.dart";
 import "package:help_out/presentation/faq/faq_bindings.dart";
 import "package:help_out/presentation/faq/faq_page.dart";
+import "package:help_out/presentation/friends/friends_bindings.dart";
 import "package:help_out/presentation/friends/friends_page.dart";
 import "package:help_out/presentation/groups/groups_bindings.dart";
 import "package:help_out/presentation/groups/groups_page.dart";
 import "package:help_out/presentation/home/home_bindings.dart";
 import "package:help_out/presentation/home/home_page.dart";
+import "package:help_out/presentation/join_group/join_group_page.dart";
 import "package:help_out/presentation/login/login_bindings.dart";
 import "package:help_out/presentation/login/login_page.dart";
 import "package:help_out/presentation/main_navigation/main_navigation_bindings.dart";
@@ -35,6 +37,7 @@ import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
 import "package:help_out/presentation/schedule/schedule_page.dart";
 import "package:help_out/presentation/splash/splash_bindings.dart";
 import "package:help_out/presentation/splash/splash_page.dart";
+import "package:help_out/presentation/subject_stats/subject_stats_bindings.dart";
 import "package:help_out/presentation/subject_stats/subject_stats_page.dart";
 import "package:help_out/presentation/timer/timer_bindings.dart";
 import "package:help_out/presentation/timer/timer_page.dart";
@@ -49,6 +52,7 @@ class AppRoutes {
   static const String progress = "/progress";
   static const String friends = "/friends";
   static const String groups = "/groups";
+  static const String groupDetails = "/groupDetails";
   static const String config = "/config";
   static const String category = "/category";
   static const String createSubject = "/createSubject";
@@ -58,6 +62,7 @@ class AppRoutes {
   static const String editProfile = "/editProfile";
   static const String faq = "/faq";
   static const String createGroup = "/createGroup";
+  static const String joinGroup = "/joinGroup";
   static const String schedule = "/schedule";
   static const String addScheduleEntry = "/addScheduleEntry";
   static const String notes = "/notes";
@@ -91,7 +96,6 @@ class AppRoutes {
           page: () => const ProgressPage(),
           binding: ProgressBindings(),
         ),
-        GetPage(name: friends, page: () => const FriendsPage()),
         GetPage(
           name: groups,
           page: () => const GroupsPage(),
@@ -108,6 +112,14 @@ class AppRoutes {
       name: category,
       page: () => const CategoryPage(),
       binding: CategoryBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: friends,
+      page: () => const FriendsPage(),
+      binding: FriendsBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
@@ -169,6 +181,21 @@ class AppRoutes {
       curve: pageTransitionCurve,
     ),
     GetPage(
+      name: groupDetails,
+      page: () => const GroupsPage(showGroupFlowOnly: true),
+      binding: GroupsBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: joinGroup,
+      page: () => const JoinGroupPage(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
       name: schedule,
       page: () => const SchedulePage(),
       transition: Transition.rightToLeft,
@@ -201,6 +228,7 @@ class AppRoutes {
     GetPage(
       name: subjectStats,
       page: () => const SubjectStatsPage(),
+      binding: SubjectStatsBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
