@@ -673,7 +673,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectRestHelp.
   ///
   /// In en, this message translates to:
-  /// **'The timer suggests a break after 25 min of focus.'**
+  /// **'The timer suggests a break after 30 min of focus.'**
   String get createSubjectRestHelp;
 
   /// No description provided for @customRestMinutesHint.
@@ -1927,7 +1927,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqA2.
   ///
   /// In en, this message translates to:
-  /// **'Each session follows a classic Pomodoro cycle: a 25 minute countdown to your next break. When it reaches zero it simply resets, it\'s a reminder, not a hard stop.'**
+  /// **'Each session follows a focus cycle: a 30 minute countdown to your next break. When it reaches zero it simply resets, it\'s a reminder, not a hard stop.'**
   String get faqA2;
 
   /// No description provided for @faqQ3.

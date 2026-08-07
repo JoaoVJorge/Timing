@@ -58,8 +58,8 @@ class SubjectEntity extends Equatable {
   /// Number of focus sessions, never below one.
   int get sessionCount => focusSessionCount > 0 ? focusSessionCount : 1;
 
-  /// The day's total study goal: each session runs [goalSeconds], so a "2x25"
-  /// subject targets 50 minutes, not 25.
+  /// The day's total study goal: each session runs [goalSeconds], so a "2x30"
+  /// subject targets 60 minutes, not 30.
   int get totalGoalSeconds => goalSeconds * sessionCount;
 
   Map<String, dynamic> toMap() => {
