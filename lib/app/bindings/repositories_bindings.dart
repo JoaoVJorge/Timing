@@ -2,6 +2,7 @@ import "package:get/get.dart";
 import "package:help_out/core/data/repositories/activity_repository.dart";
 import "package:help_out/core/data/repositories/app_config_repository.dart";
 import "package:help_out/core/data/repositories/daily_tasks_repository.dart";
+import "package:help_out/core/data/repositories/friends_repository.dart";
 import "package:help_out/core/data/repositories/groups_repository.dart";
 import "package:help_out/core/data/repositories/phone_auth_repository.dart";
 import "package:help_out/core/data/repositories/profile_sync_repository.dart";
@@ -29,6 +30,10 @@ class RepositoriesBindings extends Bindings {
     );
     Get.put<GroupsRepository>(
       GroupsRepository(groupsDataSource: Get.find()),
+      permanent: true,
+    );
+    Get.put<FriendsRepository>(
+      FriendsRepository(friendsDataSource: Get.find()),
       permanent: true,
     );
     Get.put<ProfileSyncRepository>(

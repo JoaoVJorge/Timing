@@ -4,6 +4,13 @@ import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart"
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
+import "package:help_out/core/domain/use_cases/accept_friend_request_use_case.dart";
+import "package:help_out/core/domain/use_cases/cancel_friend_request_use_case.dart";
+import "package:help_out/core/domain/use_cases/decline_friend_request_use_case.dart";
+import "package:help_out/core/domain/use_cases/find_profile_by_code_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:help_out/core/domain/use_cases/remove_friend_use_case.dart";
+import "package:help_out/core/domain/use_cases/send_friend_request_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
@@ -108,6 +115,34 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<CreateGroupUseCase>(
       CreateGroupUseCase(groupsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<GetFriendsSocialUseCase>(
+      GetFriendsSocialUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<SendFriendRequestUseCase>(
+      SendFriendRequestUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<AcceptFriendRequestUseCase>(
+      AcceptFriendRequestUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<DeclineFriendRequestUseCase>(
+      DeclineFriendRequestUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<CancelFriendRequestUseCase>(
+      CancelFriendRequestUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<RemoveFriendUseCase>(
+      RemoveFriendUseCase(friendsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<FindProfileByCodeUseCase>(
+      FindProfileByCodeUseCase(friendsRepository: Get.find()),
       permanent: true,
     );
     Get.put<SyncProfileToBackendUseCase>(
