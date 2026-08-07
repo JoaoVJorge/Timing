@@ -18,7 +18,6 @@ class ProfileSyncDataSource {
 
       await _supabaseService.requireClient.from("profiles").upsert({
         "id": userId,
-        "is_dark_mode": config.isDarkMode,
         "user_name": config.userName,
         "nick_name": config.nickName,
         "email": config.email ?? user?.email,
@@ -29,6 +28,10 @@ class ProfileSyncDataSource {
         "avatar_icon_index": config.avatarIconIndex,
         "notifications_enabled": config.notificationsEnabled,
         "language_code": config.languageCode,
+        "focus_lock_studying_enabled": config.focusLockStudyingEnabled,
+        "focus_lock_exercises_enabled": config.focusLockExercisesEnabled,
+        "focus_lock_reading_enabled": config.focusLockReadingEnabled,
+        "focus_lock_hobbies_enabled": config.focusLockHobbiesEnabled,
         "updated_at": DateTime.now().toUtc().toIso8601String(),
       }, onConflict: "id");
       return const Right(null);
@@ -63,7 +66,6 @@ class ProfileSyncDataSource {
   AppConfigEntity _profileFromRow(Map<String, dynamic> row) {
     final AppConfigEntity fallback = AppConfigEntity.fallback();
     return fallback.copyWith(
-      isDarkMode: row["is_dark_mode"] as bool? ?? fallback.isDarkMode,
       userName: row["user_name"] as String? ?? "",
       nickName: row["nick_name"] as String? ?? "",
       email: row["email"] as String?,
@@ -81,6 +83,18 @@ class ProfileSyncDataSource {
           fallback.notificationsEnabled,
       languageCode: row["language_code"] as String?,
       friendCode: row["friend_code"] as String? ?? "",
+      focusLockStudyingEnabled:
+          row["focus_lock_studying_enabled"] as bool? ??
+          fallback.focusLockStudyingEnabled,
+      focusLockExercisesEnabled:
+          row["focus_lock_exercises_enabled"] as bool? ??
+          fallback.focusLockExercisesEnabled,
+      focusLockReadingEnabled:
+          row["focus_lock_reading_enabled"] as bool? ??
+          fallback.focusLockReadingEnabled,
+      focusLockHobbiesEnabled:
+          row["focus_lock_hobbies_enabled"] as bool? ??
+          fallback.focusLockHobbiesEnabled,
     );
   }
 }

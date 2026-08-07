@@ -1,27 +1,35 @@
+import "dart:convert";
+
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/core/data/repositories/groups_repository.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
+import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:image_picker/image_picker.dart";
 
 enum GroupDetailsTab { ranking, goals, chat }
 
 class GroupsController extends GetxController {
   GroupsController({
     required this._getGroupsUseCase,
+    required this._groupsRepository,
     required this._appNavigator,
     required this._supabaseService,
   });
 
   final GetGroupsUseCase _getGroupsUseCase;
+  final GroupsRepository _groupsRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
+  final ImagePicker _imagePicker = ImagePicker();
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
@@ -31,6 +39,10 @@ class GroupsController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxBool isShowingGroupDetails = false.obs;
   final RxBool isShowingMemberManagement = false.obs;
+  final RxBool isLoadingChat = false.obs;
+  final RxBool isSendingImage = false.obs;
+  final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
+      <String, List<GroupImageMessageEntity>>{}.obs;
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
 
@@ -157,8 +169,54 @@ class GroupsController extends GetxController {
 
   void onBackToGroupDetails() => isShowingMemberManagement.value = false;
 
-  void onSelectDetailsTab(GroupDetailsTab tab) =>
-      selectedDetailsTab.value = tab;
+  void onSelectDetailsTab(GroupDetailsTab tab) {
+    selectedDetailsTab.value = tab;
+    if (tab == GroupDetailsTab.chat) {
+      final String? groupId = selectedGroup.value?.id;
+      if (groupId != null) {
+        loadImageMessages(groupId);
+      }
+    }
+  }
+
+  List<GroupImageMessageEntity> imageMessagesFor(String groupId) =>
+      imageMessagesByGroup[groupId] ?? const [];
+
+  Future<void> loadImageMessages(String groupId) async {
+    isLoadingChat.value = true;
+    final Either<AppError, List<GroupImageMessageEntity>> result =
+        await _groupsRepository.getImageMessages(groupId);
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(),
+      (messages) => imageMessagesByGroup[groupId] = messages,
+    );
+    isLoadingChat.value = false;
+  }
+
+  Future<void> onTapSendGroupImage(String groupId) async {
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1280,
+      maxHeight: 1280,
+      imageQuality: 78,
+    );
+    if (image == null) {
+      return;
+    }
+
+    isSendingImage.value = true;
+    final List<int> bytes = await image.readAsBytes();
+    final Either<AppError, GroupImageMessageEntity> result =
+        await _groupsRepository.sendImageMessage(
+          groupId: groupId,
+          imageBase64: base64Encode(bytes),
+        );
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (message) {
+      final List<GroupImageMessageEntity> current = imageMessagesFor(groupId);
+      imageMessagesByGroup[groupId] = [...current, message];
+    });
+    isSendingImage.value = false;
+  }
 
   Future<void> onTapCreateGroup() async {
     // Get.toNamed<T> with a concrete type crashes at runtime (GetX types the
@@ -194,7 +252,10 @@ class GroupsController extends GetxController {
     _appNavigator.showSnackBar(text: message);
   }
 
-  void onTapLeaveGroup() {
+  Future<void> onTapLeaveGroup() async {
+    await onConfirmLeaveGroup();
+    return;
+    // ignore: dead_code
     final String message = switch (Get.context?.languageCode) {
       "pt" => "Saída de grupo em breve.",
       "es" => "Salir del grupo próximamente.",
@@ -202,6 +263,32 @@ class GroupsController extends GetxController {
     };
     _appNavigator.showSnackBar(text: message, isAnError: true);
   }
+
+  Future<void> onConfirmLeaveGroup() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null) {
+      return;
+    }
+
+    final Either<AppError, void> result = await _groupsRepository.leaveGroup(
+      group.id,
+    );
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+      groups.removeWhere((item) => item.id == group.id);
+      imageMessagesByGroup.remove(group.id);
+      selectedGroup.value = groups.isEmpty ? null : groups.first;
+      isShowingMemberManagement.value = false;
+      isShowingGroupDetails.value = false;
+      groups.refresh();
+      _appNavigator.showSuccessSnackBar(_leftGroupMessage);
+    });
+  }
+
+  String get _leftGroupMessage => switch (Get.context?.languageCode) {
+    "pt" => "Voce saiu do grupo.",
+    "es" => "Saliste del grupo.",
+    _ => "You left the group.",
+  };
 
   void onTapJoinWithCode() {
     final String message = switch (Get.context?.languageCode) {

@@ -170,6 +170,7 @@ class AppController extends GetxController {
 
   AppConfigEntity _withLocalConcentrationSettings(AppConfigEntity config) =>
       config.copyWith(
+        isDarkMode: isDarkMode.value,
         focusLockStudyingEnabled: focusLockStudyingEnabled.value,
         focusLockExercisesEnabled: focusLockExercisesEnabled.value,
         focusLockReadingEnabled: focusLockReadingEnabled.value,
