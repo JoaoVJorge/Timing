@@ -1,12 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/progress/widgets/progress_evolution_chart.dart";
+import "package:help_out/presentation/subject_stats/subject_stats_controller.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
@@ -14,93 +11,67 @@ import "package:help_out/theme/app_surfaces.dart";
 
 /// The "Comparativos" card: a Week/Month bar chart of the subject's own daily
 /// history, plus the period total and how it compares to the period before.
-class SubjectComparativesSection extends StatefulWidget {
-  const SubjectComparativesSection({
-    required this.subject,
-    required this.accent,
-    super.key,
-  });
+class SubjectComparativesSection extends StatelessWidget {
+  const SubjectComparativesSection({required this.accent, super.key});
 
-  final SubjectEntity subject;
   final Color accent;
 
   @override
-  State<SubjectComparativesSection> createState() =>
-      _SubjectComparativesSectionState();
-}
-
-class _SubjectComparativesSectionState
-    extends State<SubjectComparativesSection> {
-  final SubjectDailyHistoryService _history =
-      Get.find<SubjectDailyHistoryService>();
-  bool _isMonth = false;
-
-  int get _days => _isMonth ? 30 : 7;
-
-  bool get _isReading => widget.subject.category == TimeCategoryType.reading;
-
-  @override
   Widget build(BuildContext context) {
-    final List<DailyProgressEntity> full = _history.historyForLastDays(
-      widget.subject.id,
-      _days * 2,
-    );
-    final List<int> current = [
-      for (final DailyProgressEntity day in full.sublist(_days)) _metric(day),
-    ];
-    final int currentTotal = current.fold(0, (sum, value) => sum + value);
-    final int previousTotal = full
-        .sublist(0, _days)
-        .fold(0, (sum, day) => sum + _metric(day));
+    final SubjectStatsController controller = Get.find();
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: AppSurfaces.content(context.colorTokens),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PeriodToggle(
-            isMonth: _isMonth,
-            accent: widget.accent,
-            onSelect: (isMonth) => setState(() => _isMonth = isMonth),
-          ),
-          const Gap(12),
-          _Headline(
-            valueLabel: _totalLabel(currentTotal),
-            unitLabel: _unitLabel(context),
-            accent: widget.accent,
-          ),
-          const Gap(6),
-          _DeltaLine(
-            currentTotal: currentTotal,
-            previousTotal: previousTotal,
-            accent: widget.accent,
-            isMonth: _isMonth,
-          ),
-          const Gap(16),
-          SizedBox(
-            height: 168,
-            child: EvolutionBarChart(
-              values: current,
-              unit: _isReading
-                  ? EvolutionValueUnit.pages
-                  : EvolutionValueUnit.minutes,
+    return Obx(() {
+      final bool isMonth = controller.isMonth.value;
+      final bool isReading = controller.isReading;
+      final SubjectComparatives data = controller.comparatives;
+
+      return Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        decoration: AppSurfaces.content(context.colorTokens),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _PeriodToggle(
+              isMonth: isMonth,
+              accent: accent,
+              onSelect: (value) => controller.selectPeriod(isMonth: value),
             ),
-          ),
-        ],
-      ),
-    );
+            const Gap(12),
+            _Headline(
+              valueLabel: _totalLabel(context, isReading, data.currentTotal),
+              unitLabel: _unitLabel(context, isReading),
+              accent: accent,
+            ),
+            const Gap(6),
+            _DeltaLine(
+              currentTotal: data.currentTotal,
+              previousTotal: data.previousTotal,
+              accent: accent,
+              isMonth: isMonth,
+            ),
+            const Gap(16),
+            SizedBox(
+              height: 168,
+              child: EvolutionBarChart(
+                values: data.values,
+                unit: isReading
+                    ? EvolutionValueUnit.pages
+                    : EvolutionValueUnit.minutes,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  int _metric(DailyProgressEntity day) =>
-      _isReading ? day.pages : day.focusSeconds;
-
-  String _totalLabel(int total) => _isReading
+  String _totalLabel(BuildContext context, bool isReading, int total) =>
+      isReading
       ? context.l10n.metricPagesValue(total)
       : formatDurationLong(Duration(seconds: total));
 
-  String _unitLabel(BuildContext context) =>
-      _isReading ? _readPagesUnit(context) : _studiedUnit(context);
+  String _unitLabel(BuildContext context, bool isReading) =>
+      isReading ? _readPagesUnit(context) : _studiedUnit(context);
 }
 
 class _PeriodToggle extends StatelessWidget {
