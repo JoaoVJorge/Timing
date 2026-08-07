@@ -1,13 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:get/get.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/app/route_arguments.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/category/widgets/subject_icon_badge.dart";
+import "package:help_out/presentation/subject_stats/subject_stats_controller.dart";
 import "package:help_out/presentation/subject_stats/widgets/subject_comparatives_section.dart";
 import "package:help_out/shared/extensions/enum_localization_extensions.dart";
 import "package:help_out/shared/functions/format_duration.dart";
@@ -17,20 +13,14 @@ import "package:help_out/shared/widgets/app_section_header.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/theme/app_spacing.dart";
 import "package:help_out/theme/app_surfaces.dart";
+import "package:get/get.dart";
 
-class SubjectStatsPage extends StatelessWidget {
+class SubjectStatsPage extends GetView<SubjectStatsController> {
   const SubjectStatsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final SubjectEntity subject = RouteArguments.of<SubjectEntity>(
-      AppRoutes.subjectStats,
-    );
     final Color accent = context.colorTokens.primary;
-    final bool isReading = subject.category == TimeCategoryType.reading;
-    final int current = isReading ? subject.currentPages : subject.totalSeconds;
-    final int goal = isReading ? subject.goalPages : subject.totalGoalSeconds;
-    final double progress = goal <= 0 ? 0 : (current / goal).clamp(0, 1);
 
     return AppScaffold(
       topBar: AppTopBar(title: _title(context), showBackButton: true),
@@ -38,18 +28,18 @@ class SubjectStatsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
         children: [
           _SubjectStatsHero(
-            subject: subject,
+            subject: controller.subject,
             accent: accent,
-            progress: progress,
+            progress: controller.progress,
           ),
           const Gap(AppSpacing.betweenSections),
           AppSectionHeader(title: overviewTitle(context)),
           const Gap(AppSpacing.betweenRelated),
-          _StatsGrid(subject: subject, accent: accent),
+          _StatsGrid(controller: controller, accent: accent),
           const Gap(AppSpacing.betweenSections),
           AppSectionHeader(title: comparativesTitle(context)),
           const Gap(AppSpacing.betweenRelated),
-          SubjectComparativesSection(subject: subject, accent: accent),
+          SubjectComparativesSection(accent: accent),
         ],
       ),
     );
@@ -111,69 +101,65 @@ class _SubjectStatsHero extends StatelessWidget {
 }
 
 class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.subject, required this.accent});
+  const _StatsGrid({required this.controller, required this.accent});
 
-  final SubjectEntity subject;
+  final SubjectStatsController controller;
   final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    final bool isReading = subject.category == TimeCategoryType.reading;
-    final int pagesReadToday = isReading
-        ? Get.find<SubjectDailyHistoryService>()
-              .historyForLastDays(subject.id, 1)
-              .first
-              .pages
-        : 0;
-    final List<_StatItem> items = [
-      if (isReading) ...[
-        _StatItem(
-          icon: Icons.schedule_rounded,
-          value: formatDurationLong(Duration(seconds: subject.totalSeconds)),
-          label: _readingTimeLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.auto_stories_rounded,
-          value: context.l10n.metricPagesValue(subject.currentPages),
-          label: _totalPagesReadLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.today_rounded,
-          value: context.l10n.metricPagesValue(pagesReadToday),
-          label: _pagesReadTodayLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.flag_rounded,
-          value: _goalValue(context, subject.currentPages, subject.goalPages),
-          label: _goalLabel(context),
-        ),
-      ] else ...[
-        _StatItem(
-          icon: Icons.schedule_rounded,
-          value: formatDurationLong(Duration(seconds: subject.totalSeconds)),
-          label: _studiedTimeLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.flag_rounded,
-          value: _goalValue(
-            context,
-            subject.totalSeconds,
-            subject.totalGoalSeconds,
-          ),
-          label: _goalLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.timer_rounded,
-          value: "${subject.focusSessionCount}",
-          label: _sessionsLabel(context),
-        ),
-        _StatItem(
-          icon: Icons.local_cafe_rounded,
-          value: "${subject.restMinutes}m",
-          label: _restLabel(context),
-        ),
-      ],
-    ];
+    final SubjectEntity subject = controller.subject;
+    final List<_StatItem> items = controller.isReading
+        ? [
+            _StatItem(
+              icon: Icons.schedule_rounded,
+              value: formatDurationLong(
+                Duration(seconds: subject.totalSeconds),
+              ),
+              label: _readingTimeLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.auto_stories_rounded,
+              value: context.l10n.metricPagesValue(subject.currentPages),
+              label: _totalPagesReadLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.today_rounded,
+              value: context.l10n.metricPagesValue(controller.pagesReadToday),
+              label: _pagesReadTodayLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.flag_rounded,
+              value:
+                  "${controller.goalPercent(subject.currentPages, subject.goalPages)}%",
+              label: _goalLabel(context),
+            ),
+          ]
+        : [
+            _StatItem(
+              icon: Icons.schedule_rounded,
+              value: formatDurationLong(
+                Duration(seconds: subject.totalSeconds),
+              ),
+              label: _studiedTimeLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.flag_rounded,
+              value:
+                  "${controller.goalPercent(subject.totalSeconds, subject.totalGoalSeconds)}%",
+              label: _goalLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.timer_rounded,
+              value: "${subject.focusSessionCount}",
+              label: _sessionsLabel(context),
+            ),
+            _StatItem(
+              icon: Icons.local_cafe_rounded,
+              value: "${subject.restMinutes}m",
+              label: _restLabel(context),
+            ),
+          ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -311,10 +297,3 @@ String _restLabel(BuildContext context) => switch (context.languageCode) {
   "de" => "Pause",
   _ => "Rest",
 };
-
-String _goalValue(BuildContext context, int current, int goal) {
-  if (goal <= 0) {
-    return "0%";
-  }
-  return "${((current / goal).clamp(0, 1) * 100).round()}%";
-}
