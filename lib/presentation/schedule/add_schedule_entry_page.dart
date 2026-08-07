@@ -5,6 +5,7 @@ import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/route_arguments.dart";
 import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
@@ -22,6 +23,8 @@ typedef AddScheduleEntryResult = ({
   int? startMinutes,
   int? endMinutes,
   int colorValue,
+  DateTime activeFrom,
+  DateTime? activeUntil,
 });
 
 class AddScheduleEntryPage extends StatefulWidget {
@@ -38,9 +41,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   final FocusNode _startTimeFocusNode = FocusNode();
   final FocusNode _endTimeFocusNode = FocusNode();
 
-  late final Set<int> _selectedWeekdays = {
-    RouteArguments.maybeOf<int>() ?? DateTime.now().weekday,
-  };
+  late DateTime _activeFrom = _initialDate();
+  DateTime? _activeUntil;
+  late final Set<int> _selectedWeekdays = {_initialDate().weekday};
   Color _selectedColor = SubjectColors.values.first;
   bool _hasInitializedThemeColor = false;
 
@@ -53,15 +56,6 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_hasInitializedThemeColor) {
-      return;
-    }
-    _selectedColor = SubjectColors.fromThemeAccent(context.colorTokens.primary);
-    _hasInitializedThemeColor = true;
-  }
-
   @override
   void dispose() {
     _titleController.removeListener(_rebuildPreview);
@@ -132,8 +126,20 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
         startMinutes: startMinutes,
         endMinutes: endMinutes,
         colorValue: _selectedColor.toARGB32(),
+        activeFrom: _activeFrom,
+        activeUntil: _activeUntil,
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    _selectedColor = SubjectColors.fromThemeAccent(context.colorTokens.primary);
+    _hasInitializedThemeColor = true;
   }
 
   @override
@@ -207,6 +213,14 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                       ),
                     ),
                   ],
+                ),
+                const Gap(14),
+                _DateRangeSelector(
+                  activeFrom: _activeFrom,
+                  activeUntil: _activeUntil,
+                  onPickStart: () => _pickActiveDate(isStart: true),
+                  onPickEnd: () => _pickActiveDate(isStart: false),
+                  onClearEnd: () => setState(() => _activeUntil = null),
                 ),
                 if (_durationLabel(context) != null) ...[
                   const Gap(AppSpacing.betweenRelated),
@@ -290,6 +304,8 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     startMinutes: _startMinutes,
     endMinutes: _endMinutes,
     colorValue: _selectedColor.toARGB32(),
+    activeFrom: _activeFrom,
+    activeUntil: _activeUntil,
   );
 
   void _toggleWeekday(int weekday) {
@@ -312,6 +328,47 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   int? get _endMinutes {
     final ({int hour, int minute})? time = _parseTime(_endTimeController.text);
     return time == null ? null : time.hour * 60 + time.minute;
+  }
+
+  static DateTime _todayDate() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  static DateTime _initialDate() {
+    final DateTime? selectedDate = RouteArguments.maybeOf<DateTime>();
+    if (selectedDate == null) {
+      return _todayDate();
+    }
+    return DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+  }
+
+  Future<void> _pickActiveDate({required bool isStart}) async {
+    final DateTime initialDate = isStart
+        ? _activeFrom
+        : (_activeUntil ?? _activeFrom);
+    final DateTime? picked = await showDialog<DateTime>(
+      context: context,
+      barrierColor: context.colorTokens.black.withValues(alpha: 0.54),
+      builder: (context) => _ScheduleDatePickerDialog(
+        initialDate: initialDate,
+        firstDate: isStart ? DateTime(2020) : _activeFrom,
+      ),
+    );
+    if (picked == null) {
+      return;
+    }
+    setState(() {
+      final DateTime date = DateTime(picked.year, picked.month, picked.day);
+      if (isStart) {
+        _activeFrom = date;
+        if (_activeUntil != null && _activeUntil!.isBefore(date)) {
+          _activeUntil = null;
+        }
+        return;
+      }
+      _activeUntil = date;
+    });
   }
 
   String? _durationLabel(BuildContext context) {
@@ -369,6 +426,450 @@ class _ScheduleColorSelector extends StatelessWidget {
           ),
         )
         .toList(),
+  );
+}
+
+class _DateRangeSelector extends StatelessWidget {
+  const _DateRangeSelector({
+    required this.activeFrom,
+    required this.activeUntil,
+    required this.onPickStart,
+    required this.onPickEnd,
+    required this.onClearEnd,
+  });
+
+  final DateTime activeFrom;
+  final DateTime? activeUntil;
+  final VoidCallback onPickStart;
+  final VoidCallback onPickEnd;
+  final VoidCallback onClearEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final String locale = Localizations.localeOf(context).toString();
+    return Row(
+      children: [
+        Expanded(
+          child: _DateChip(
+            label: _startLabel(context),
+            value: DateFormat.yMd(locale).format(activeFrom),
+            icon: Icons.event_available_rounded,
+            onTap: onPickStart,
+          ),
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        Expanded(
+          child: _DateChip(
+            label: _endLabel(context),
+            value: activeUntil == null
+                ? _optionalLabel(context)
+                : DateFormat.yMd(locale).format(activeUntil!),
+            icon: Icons.event_busy_rounded,
+            onTap: onPickEnd,
+            onClear: activeUntil == null ? null : onClearEnd,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _startLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Começa em",
+    "es" => "Comienza",
+    _ => "Starts",
+  };
+
+  String _endLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Termina em",
+    "es" => "Termina",
+    _ => "Ends",
+  };
+
+  String _optionalLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Opcional",
+    "es" => "Opcional",
+    _ => "Optional",
+  };
+}
+
+class _DateChip extends StatelessWidget {
+  const _DateChip({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.onTap,
+    this.onClear,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final VoidCallback onTap;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.98,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 58),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: context.colorTokens.scaffold.withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colorTokens.borderUnfocused),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: context.colorTokens.primary, size: 20),
+          const Gap(8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const Gap(2),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onClear != null)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onClear,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Icon(
+                  Icons.close_rounded,
+                  color: context.colorTokens.textHint,
+                  size: 18,
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ScheduleDatePickerDialog extends StatefulWidget {
+  const _ScheduleDatePickerDialog({
+    required this.initialDate,
+    required this.firstDate,
+  });
+
+  final DateTime initialDate;
+  final DateTime firstDate;
+
+  @override
+  State<_ScheduleDatePickerDialog> createState() =>
+      _ScheduleDatePickerDialogState();
+}
+
+class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
+  late DateTime _selectedDate = _dateOnly(widget.initialDate);
+
+  @override
+  Widget build(BuildContext context) {
+    final String locale = Localizations.localeOf(context).toString();
+    return Dialog(
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      backgroundColor: context.colorTokens.dialogSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _title(context),
+              textAlign: TextAlign.center,
+              style: context.textStyles.extraBold24.copyWith(
+                color: context.colorTokens.dialogText,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const Gap(18),
+            _CalendarMonthHeader(
+              label: _monthLabel(locale, _selectedDate),
+              onPrevious: _onPreviousMonth,
+              onNext: _onNextMonth,
+            ),
+            const Gap(22),
+            ScheduleDateStrip(
+              selectedDate: _selectedDate,
+              onSelectDate: _onSelectDate,
+              hasEntryForDate: (_) => false,
+              eventColorsForDate: (_) => const [],
+            ),
+            const Gap(16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              decoration: BoxDecoration(
+                color: context.colorTokens.surfaceInnerLayer,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.calendar_month_rounded,
+                    color: context.colorTokens.primary,
+                    size: 18,
+                  ),
+                  const Gap(8),
+                  Flexible(
+                    child: Text(
+                      _hint(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        color: context.colorTokens.dialogTextMuted,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(18),
+            Row(
+              children: [
+                Expanded(
+                  child: _DialogSecondaryButton(
+                    label: _todayLabel(context),
+                    onTap: () => _onSelectDate(_todayDate()),
+                  ),
+                ),
+                const Gap(14),
+                Expanded(
+                  flex: 2,
+                  child: _DialogPrimaryButton(
+                    label: _confirmLabel(context),
+                    onTap: () => Navigator.of(context).pop(_selectedDate),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onPreviousMonth() {
+    final DateTime previous = _clampedMonth(_selectedDate, -1);
+    if (previous.isBefore(_dateOnly(widget.firstDate))) {
+      setState(() => _selectedDate = _dateOnly(widget.firstDate));
+      return;
+    }
+    setState(() => _selectedDate = previous);
+  }
+
+  void _onNextMonth() =>
+      setState(() => _selectedDate = _clampedMonth(_selectedDate, 1));
+
+  void _onSelectDate(DateTime date) {
+    final DateTime normalized = _dateOnly(date);
+    if (normalized.isBefore(_dateOnly(widget.firstDate))) {
+      return;
+    }
+    setState(() => _selectedDate = normalized);
+  }
+
+  DateTime _clampedMonth(DateTime value, int monthDelta) {
+    final DateTime monthStart = DateTime(value.year, value.month + monthDelta);
+    final int day = value.day.clamp(
+      1,
+      DateUtils.getDaysInMonth(monthStart.year, monthStart.month),
+    );
+    return DateTime(monthStart.year, monthStart.month, day);
+  }
+
+  static DateTime _dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+
+  static DateTime _todayDate() {
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  String _monthLabel(String locale, DateTime date) {
+    final String raw = DateFormat.yMMMM(locale).format(date);
+    if (raw.isEmpty) {
+      return raw;
+    }
+    return raw.replaceFirst(raw[0], raw[0].toUpperCase());
+  }
+
+  String _title(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Selecionar data",
+    "es" => "Seleccionar fecha",
+    _ => "Select date",
+  };
+
+  String _hint(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Toque em um dia para selecionar",
+    "es" => "Toca un dia para seleccionar",
+    _ => "Tap a day to select",
+  };
+
+  String _todayLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Hoje",
+    "es" => "Hoy",
+    _ => "Today",
+  };
+
+  String _confirmLabel(BuildContext context) => switch (context.languageCode) {
+    "pt" => "Confirmar",
+    "es" => "Confirmar",
+    _ => "Confirm",
+  };
+}
+
+class _CalendarMonthHeader extends StatelessWidget {
+  const _CalendarMonthHeader({
+    required this.label,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  final String label;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 58,
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.10),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        _MonthArrowButton(icon: Icons.chevron_left_rounded, onTap: onPrevious),
+        Expanded(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.extraBold20.copyWith(
+              color: context.colorTokens.primary,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        _MonthArrowButton(icon: Icons.chevron_right_rounded, onTap: onNext),
+      ],
+    ),
+  );
+}
+
+class _MonthArrowButton extends StatelessWidget {
+  const _MonthArrowButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.92,
+    child: SizedBox(
+      width: 46,
+      height: 46,
+      child: Icon(icon, color: context.colorTokens.primary, size: 34),
+    ),
+  );
+}
+
+class _DialogSecondaryButton extends StatelessWidget {
+  const _DialogSecondaryButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.97,
+    child: Container(
+      height: 56,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.colorTokens.borderUnfocused),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyMedium.copyWith(
+          color: context.colorTokens.primary,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
+  );
+}
+
+class _DialogPrimaryButton extends StatelessWidget {
+  const _DialogPrimaryButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.97,
+    child: Container(
+      height: 56,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: context.colorTokens.primaryGradient,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.textPrimaryButton.copyWith(
+          color: context.colorTokens.primaryForeground,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ),
   );
 }
 

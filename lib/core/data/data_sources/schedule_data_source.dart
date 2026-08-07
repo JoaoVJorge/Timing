@@ -81,6 +81,7 @@ class ScheduleDataSource {
           .from("schedule_entries")
           .select()
           .eq("user_id", userId)
+          .order("active_from")
           .order("weekday")
           .order("start_minutes");
 
@@ -132,6 +133,8 @@ class ScheduleDataSource {
         "startMinutes": (row["start_minutes"] as num?)?.toInt(),
         "endMinutes": (row["end_minutes"] as num?)?.toInt(),
         "colorValue": (row["color_value"] as num?)?.toInt() ?? 0,
+        "activeFrom": row["active_from"],
+        "activeUntil": row["active_until"],
       });
 
   Map<String, dynamic> _entryToRow(ScheduleEntryEntity entry, String userId) =>
@@ -143,6 +146,15 @@ class ScheduleDataSource {
         "start_minutes": entry.startMinutes,
         "end_minutes": entry.endMinutes,
         "color_value": entry.colorValue,
+        "active_from": _dateOnly(entry.activeFrom),
+        "active_until": entry.activeUntil == null
+            ? null
+            : _dateOnly(entry.activeUntil!),
         "updated_at": DateTime.now().toUtc().toIso8601String(),
       };
+
+  String _dateOnly(DateTime value) =>
+      "${value.year.toString().padLeft(4, "0")}-"
+      "${value.month.toString().padLeft(2, "0")}-"
+      "${value.day.toString().padLeft(2, "0")}";
 }

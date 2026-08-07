@@ -14,6 +14,8 @@ class AddScheduleEntryUseCase {
     required int? startMinutes,
     required int? endMinutes,
     required int colorValue,
+    required DateTime activeFrom,
+    required DateTime? activeUntil,
   }) async {
     final Either<AppError, List<ScheduleEntryEntity>> getResult =
         await _scheduleRepository.getEntries();
@@ -26,6 +28,10 @@ class AddScheduleEntryUseCase {
         startMinutes: startMinutes,
         endMinutes: endMinutes,
         colorValue: colorValue,
+        activeFrom: DateTime(activeFrom.year, activeFrom.month, activeFrom.day),
+        activeUntil: activeUntil == null
+            ? null
+            : DateTime(activeUntil.year, activeUntil.month, activeUntil.day),
       );
 
       final Either<AppError, void> saveResult = await _scheduleRepository
