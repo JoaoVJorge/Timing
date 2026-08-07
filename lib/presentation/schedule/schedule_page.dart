@@ -97,11 +97,7 @@ class _DayEventsPanel extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
           boxShadow: [
             BoxShadow(
-              color: context.colorTokens.black.withValues(
-                alpha: Theme.of(context).brightness == Brightness.dark
-                    ? 0.34
-                    : 0.12,
-              ),
+              color: context.colorTokens.surfaceShadow.withValues(alpha: 0.18),
               blurRadius: 26,
               spreadRadius: 2,
               offset: const Offset(0, -4),
@@ -141,7 +137,6 @@ class _DayEventsPanel extends StatelessWidget {
                         const Gap(20),
                         _DayEventsHeader(
                           dateLabel: _selectedDateLabel(locale, selectedDate),
-                          entryCount: entries.length,
                         ),
                         const Gap(20),
                       ],
@@ -194,10 +189,9 @@ class _DayEventsPanel extends StatelessWidget {
 }
 
 class _DayEventsHeader extends StatelessWidget {
-  const _DayEventsHeader({required this.dateLabel, required this.entryCount});
+  const _DayEventsHeader({required this.dateLabel});
 
   final String dateLabel;
-  final int entryCount;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -241,23 +235,6 @@ class _DayEventsHeader extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-      const Gap(12),
-      Container(
-        constraints: const BoxConstraints(minWidth: 32),
-        height: 28,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: context.colorTokens.primaryVeryLight,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          "$entryCount",
-          style: context.textStyles.bodyMedium.copyWith(
-            color: context.colorTokens.textBody,
-            fontWeight: FontWeight.w900,
-          ),
         ),
       ),
     ],
@@ -445,13 +422,7 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? context.colorTokens.primary
-                          : context.colorTokens.surfaceInnerLayer.withValues(
-                              alpha:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? 0.5
-                                  : 0.7,
-                            ),
+                          : context.colorTokens.surfaceInnerLayer,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

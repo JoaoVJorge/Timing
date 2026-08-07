@@ -31,10 +31,10 @@ class ScheduleController extends GetxController {
   int get selectedWeekday => selectedDate.value.weekday;
 
   List<ScheduleEntryEntity> get sortedEntries =>
-      _sortedEntriesForWeekday(selectedWeekday);
+      _sortedEntriesForDate(selectedDate.value);
 
   List<ScheduleEntryEntity> get todayEntries =>
-      _sortedEntriesForWeekday(DateTime.now().weekday);
+      _sortedEntriesForDate(_todayDate());
 
   bool get isViewingToday => _isSameDate(selectedDate.value, _todayDate());
 
@@ -72,19 +72,20 @@ class ScheduleController extends GetxController {
     return ScheduleEntryStatus.upcoming;
   }
 
-  DateTime _nextDateForWeekday(int weekday) {
+  DateTime _nextDateForWeekday(int weekday, DateTime activeFrom) {
     final DateTime today = _todayDate();
-    final int diff = (weekday - today.weekday + 7) % 7;
-    return today.add(Duration(days: diff));
+    final DateTime firstAllowed = activeFrom.isAfter(today)
+        ? activeFrom
+        : today;
+    final int diff = (weekday - firstAllowed.weekday + 7) % 7;
+    return firstAllowed.add(Duration(days: diff));
   }
 
   bool hasEntriesForDate(DateTime date) =>
-      entries.any((entry) => entry.weekday == date.weekday);
+      entries.any((entry) => _isEntryActiveOn(entry, date));
 
   Color? firstEntryColorForDate(DateTime date) {
-    final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForWeekday(
-      date.weekday,
-    );
+    final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForDate(date);
     if (dayEntries.isEmpty) {
       return null;
     }
@@ -92,18 +93,36 @@ class ScheduleController extends GetxController {
   }
 
   List<Color> entryColorsForDate(DateTime date) => [
-    for (final ScheduleEntryEntity entry in _sortedEntriesForWeekday(
-      date.weekday,
-    ))
+    for (final ScheduleEntryEntity entry in _sortedEntriesForDate(date))
       Color(entry.colorValue),
   ];
 
-  List<ScheduleEntryEntity> _sortedEntriesForWeekday(int weekday) =>
-      entries.where((entry) => entry.weekday == weekday).toList()..sort((a, b) {
-        final int aMinutes = a.startMinutes ?? 24 * 60 + 1;
-        final int bMinutes = b.startMinutes ?? 24 * 60 + 1;
-        return aMinutes.compareTo(bMinutes);
-      });
+  List<ScheduleEntryEntity> _sortedEntriesForDate(DateTime date) =>
+      entries.where((entry) => _isEntryActiveOn(entry, date)).toList()
+        ..sort((a, b) {
+          final int aMinutes = a.startMinutes ?? 24 * 60 + 1;
+          final int bMinutes = b.startMinutes ?? 24 * 60 + 1;
+          return aMinutes.compareTo(bMinutes);
+        });
+
+  bool _isEntryActiveOn(ScheduleEntryEntity entry, DateTime date) {
+    final DateTime dateOnly = DateTime(date.year, date.month, date.day);
+    final DateTime start = DateTime(
+      entry.activeFrom.year,
+      entry.activeFrom.month,
+      entry.activeFrom.day,
+    );
+    final DateTime? end = entry.activeUntil == null
+        ? null
+        : DateTime(
+            entry.activeUntil!.year,
+            entry.activeUntil!.month,
+            entry.activeUntil!.day,
+          );
+    return entry.weekday == dateOnly.weekday &&
+        !dateOnly.isBefore(start) &&
+        (end == null || !dateOnly.isAfter(end));
+  }
 
   @override
   void onInit() {
@@ -136,7 +155,7 @@ class ScheduleController extends GetxController {
   Future<void> onTapAddEntry() async {
     final dynamic rawResult = await _appNavigator.toNamed<dynamic>(
       AppRoutes.addScheduleEntry,
-      arguments: selectedWeekday,
+      arguments: selectedDate.value,
     );
     final AddScheduleEntryResult? result = rawResult as AddScheduleEntryResult?;
 
@@ -153,6 +172,8 @@ class ScheduleController extends GetxController {
             startMinutes: result.startMinutes,
             endMinutes: result.endMinutes,
             colorValue: result.colorValue,
+            activeFrom: result.activeFrom,
+            activeUntil: result.activeUntil,
           );
       final bool hasError = addResult.fold(
         (error) {
@@ -174,7 +195,10 @@ class ScheduleController extends GetxController {
     }
 
     entries.addAll(addedEntries);
-    selectedDate.value = _nextDateForWeekday(addedEntries.first.weekday);
+    selectedDate.value = _nextDateForWeekday(
+      addedEntries.first.weekday,
+      addedEntries.first.activeFrom,
+    );
     entries.refresh();
   }
 
