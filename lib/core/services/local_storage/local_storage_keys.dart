@@ -7,6 +7,7 @@ enum LocalStorageKeys {
   subjectDailyHistory(hasSensitiveData: false, isUserScoped: true),
   scheduleEntries(hasSensitiveData: false, isUserScoped: true),
   isDarkMode(hasSensitiveData: false, isUserScoped: false),
+  languageCode(hasSensitiveData: false, isUserScoped: false),
   cachedAccentColorValue(hasSensitiveData: false, isUserScoped: false),
   accessToken(hasSensitiveData: true, isUserScoped: false),
   refreshToken(hasSensitiveData: true, isUserScoped: false);
