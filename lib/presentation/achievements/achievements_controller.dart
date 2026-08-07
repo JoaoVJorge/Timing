@@ -49,6 +49,7 @@ class AchievementsController extends GetxController {
     exercisesTotalSeconds: 0,
     exercisesGoalSeconds: 0,
     hobbiesTotalSeconds: 0,
+    readingTotalSeconds: 0,
     readingTotalPages: 0,
     readingGoalPages: 0,
     topStudyingSubject: null,

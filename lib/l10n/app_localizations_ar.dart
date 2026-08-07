@@ -323,7 +323,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get createSubjectRestHelp =>
-      'يقترح الموقت استراحة بعد 25 دقيقة من التركيز.';
+      'يقترح الموقت استراحة بعد 30 دقيقة من التركيز.';
 
   @override
   String get customRestMinutesHint => 'فاصل مخصص (دقيقة)';
@@ -1020,7 +1020,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get faqA2 =>
-      'تتبع كل جلسة دورة بومودورو الكلاسيكية: عد تنازلي مدته 25 دقيقة حتى استراحتك التالية. عندما يصل إلى الصفر، يتم إعادة ضبطه ببساطة، وهذا بمثابة تذكير، وليس توقفًا صعبًا.';
+      'تتبع كل جلسة دورة تركيز: عد تنازلي مدته 30 دقيقة حتى استراحتك التالية. عندما يصل إلى الصفر، يتم إعادة ضبطه ببساطة، وهذا بمثابة تذكير، وليس توقفًا صعبًا.';
 
   @override
   String get faqQ3 => 'كيف أضيف موضوع جديد؟';

@@ -326,7 +326,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createSubjectRestHelp =>
-      'The timer suggests a break after 25 min of focus.';
+      'The timer suggests a break after 30 min of focus.';
 
   @override
   String get customRestMinutesHint => 'Custom break (min)';
@@ -1022,7 +1022,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get faqA2 =>
-      'Each session follows a classic Pomodoro cycle: a 25 minute countdown to your next break. When it reaches zero it simply resets, it\'s a reminder, not a hard stop.';
+      'Each session follows a focus cycle: a 30 minute countdown to your next break. When it reaches zero it simply resets, it\'s a reminder, not a hard stop.';
 
   @override
   String get faqQ3 => 'How do I add a new subject?';

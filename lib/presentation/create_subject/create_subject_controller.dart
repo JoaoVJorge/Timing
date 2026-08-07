@@ -51,7 +51,7 @@ class CreateSubjectController extends GetxController {
 
   final List<int> restMinutesOptions = [5, 10, 15, 20];
   final List<int> focusSessionCountOptions = [1, 2, 3, 4];
-  final List<int> timeGoalPresets = [15, 25, 30, 45];
+  final List<int> timeGoalPresets = [15, 30, 45, 60];
   final List<int> pageGoalPresets = [5, 10, 25, 50];
 
   bool get isPageBased => category == TimeCategoryType.reading;
@@ -236,7 +236,7 @@ class CreateSubjectController extends GetxController {
       goal.value = goalController.text;
       name.value = nameController.text;
     } else if (!isPageBased && goalController.text.trim().isEmpty) {
-      goalController.text = "25";
+      goalController.text = "30";
       goal.value = goalController.text;
     }
     nameController.addListener(() => name.value = nameController.text);

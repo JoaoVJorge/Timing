@@ -9,6 +9,7 @@ class ProfileStatsEntity extends Equatable {
     required this.exercisesTotalSeconds,
     required this.exercisesGoalSeconds,
     required this.hobbiesTotalSeconds,
+    required this.readingTotalSeconds,
     required this.readingTotalPages,
     required this.readingGoalPages,
     required this.topStudyingSubject,
@@ -42,6 +43,7 @@ class ProfileStatsEntity extends Equatable {
       exercisesTotalSeconds: _sumSeconds(exerciseSubjects),
       exercisesGoalSeconds: _sumGoalSeconds(exerciseSubjects),
       hobbiesTotalSeconds: _sumSeconds(hobbySubjects),
+      readingTotalSeconds: _sumSeconds(readingSubjects),
       readingTotalPages: _sumPages(readingSubjects),
       readingGoalPages: _sumGoalPages(readingSubjects),
       topStudyingSubject: _topSubject(studyingSubjects),
@@ -81,15 +83,17 @@ class ProfileStatsEntity extends Equatable {
   final int exercisesTotalSeconds;
   final int exercisesGoalSeconds;
   final int hobbiesTotalSeconds;
+  final int readingTotalSeconds;
   final int readingTotalPages;
   final int readingGoalPages;
   final SubjectEntity? topStudyingSubject;
   final List<SubjectEntity> topReadingSubjects;
 
-  /// Timed focus across the categories tracked by a timer (reading is excluded
-  /// because it is page-based, not time-based).
   int get totalFocusSeconds =>
-      studyingTotalSeconds + exercisesTotalSeconds + hobbiesTotalSeconds;
+      studyingTotalSeconds +
+      exercisesTotalSeconds +
+      hobbiesTotalSeconds +
+      readingTotalSeconds;
 
   int get totalFocusGoalSeconds => studyingGoalSeconds + exercisesGoalSeconds;
 
@@ -107,6 +111,7 @@ class ProfileStatsEntity extends Equatable {
     exercisesTotalSeconds,
     exercisesGoalSeconds,
     hobbiesTotalSeconds,
+    readingTotalSeconds,
     readingTotalPages,
     readingGoalPages,
     topStudyingSubject,

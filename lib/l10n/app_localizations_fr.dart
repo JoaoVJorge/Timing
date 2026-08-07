@@ -331,7 +331,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get createSubjectRestHelp =>
-      'Le timer propose une pause après 25 min de concentration.';
+      'Le timer propose une pause après 30 min de concentration.';
 
   @override
   String get customRestMinutesHint => 'Pause personnalisée (min)';
@@ -1041,7 +1041,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get faqA2 =>
-      'Chaque séance suit un cycle Pomodoro classique : un compte à rebours de 25 minutes jusqu\'à votre prochaine pause. Lorsqu\'il atteint zéro, il se réinitialise simplement, c\'est un rappel, pas un arrêt brutal.';
+      'Chaque séance suit un cycle de concentration : un compte à rebours de 30 minutes jusqu\'à votre prochaine pause. Lorsqu\'il atteint zéro, il se réinitialise simplement, c\'est un rappel, pas un arrêt brutal.';
 
   @override
   String get faqQ3 => 'Comment ajouter un nouveau sujet ?';

@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
+import "package:get/get.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/app/route_arguments.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/category/widgets/subject_icon_badge.dart";
 import "package:help_out/presentation/subject_stats/widgets/subject_comparatives_section.dart";
@@ -117,37 +119,60 @@ class _StatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isReading = subject.category == TimeCategoryType.reading;
+    final int pagesReadToday = isReading
+        ? Get.find<SubjectDailyHistoryService>()
+              .historyForLastDays(subject.id, 1)
+              .first
+              .pages
+        : 0;
     final List<_StatItem> items = [
-      _StatItem(
-        icon: isReading ? Icons.auto_stories_rounded : Icons.schedule_rounded,
-        value: isReading
-            ? context.l10n.metricPagesValue(subject.currentPages)
-            : formatDurationLong(Duration(seconds: subject.totalSeconds)),
-        label: isReading
-            ? _pagesReadLabel(context)
-            : _studiedTimeLabel(context),
-      ),
-      _StatItem(
-        icon: Icons.flag_rounded,
-        value: isReading
-            ? _goalValue(context, subject.currentPages, subject.goalPages)
-            : _goalValue(
-                context,
-                subject.totalSeconds,
-                subject.totalGoalSeconds,
-              ),
-        label: _goalLabel(context),
-      ),
-      _StatItem(
-        icon: Icons.timer_rounded,
-        value: "${subject.focusSessionCount}",
-        label: _sessionsLabel(context),
-      ),
-      _StatItem(
-        icon: Icons.local_cafe_rounded,
-        value: "${subject.restMinutes}m",
-        label: _restLabel(context),
-      ),
+      if (isReading) ...[
+        _StatItem(
+          icon: Icons.schedule_rounded,
+          value: formatDurationLong(Duration(seconds: subject.totalSeconds)),
+          label: _readingTimeLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.auto_stories_rounded,
+          value: context.l10n.metricPagesValue(subject.currentPages),
+          label: _totalPagesReadLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.today_rounded,
+          value: context.l10n.metricPagesValue(pagesReadToday),
+          label: _pagesReadTodayLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.flag_rounded,
+          value: _goalValue(context, subject.currentPages, subject.goalPages),
+          label: _goalLabel(context),
+        ),
+      ] else ...[
+        _StatItem(
+          icon: Icons.schedule_rounded,
+          value: formatDurationLong(Duration(seconds: subject.totalSeconds)),
+          label: _studiedTimeLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.flag_rounded,
+          value: _goalValue(
+            context,
+            subject.totalSeconds,
+            subject.totalGoalSeconds,
+          ),
+          label: _goalLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.timer_rounded,
+          value: "${subject.focusSessionCount}",
+          label: _sessionsLabel(context),
+        ),
+        _StatItem(
+          icon: Icons.local_cafe_rounded,
+          value: "${subject.restMinutes}m",
+          label: _restLabel(context),
+        ),
+      ],
     ];
 
     return LayoutBuilder(
@@ -236,13 +261,32 @@ String _studiedTimeLabel(BuildContext context) =>
       _ => "Studied time",
     };
 
-String _pagesReadLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Paginas lidas",
-  "es" => "Paginas leidas",
-  "fr" => "Pages lues",
-  "de" => "Gelesene Seiten",
-  _ => "Pages read",
-};
+String _readingTimeLabel(BuildContext context) =>
+    switch (context.languageCode) {
+      "pt" => "Tempo lido",
+      "es" => "Tiempo leido",
+      "fr" => "Temps lu",
+      "de" => "Lesezeit",
+      _ => "Reading time",
+    };
+
+String _totalPagesReadLabel(BuildContext context) =>
+    switch (context.languageCode) {
+      "pt" => "Total de paginas",
+      "es" => "Total de paginas",
+      "fr" => "Total des pages",
+      "de" => "Seiten gesamt",
+      _ => "Total pages",
+    };
+
+String _pagesReadTodayLabel(BuildContext context) =>
+    switch (context.languageCode) {
+      "pt" => "Paginas hoje",
+      "es" => "Paginas hoy",
+      "fr" => "Pages aujourd'hui",
+      "de" => "Seiten heute",
+      _ => "Pages today",
+    };
 
 String _goalLabel(BuildContext context) => switch (context.languageCode) {
   "pt" => "Meta",

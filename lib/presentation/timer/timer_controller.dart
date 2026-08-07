@@ -37,8 +37,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.subject,
   });
 
-  static const int defaultFocusIntervalSeconds = 25 * 60;
+  static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
+  static const Duration focusLockWarningCooldown = Duration(seconds: 5);
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
@@ -72,6 +73,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isCatchingUpAfterBackground = false;
   bool _isPersistingTime = false;
   bool _shouldPersistAgain = false;
+  bool _isRequestingFocusLockReturn = false;
+  DateTime? _lastFocusLockWarningAt;
+  Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
   late DateTime _lastAutoSaveAt;
 
@@ -409,13 +413,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         seconds: elapsedSinceLastPersist,
       ),
     );
-    if (!isReading) {
-      dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
-      subjectDailyHistoryService.addFocusSeconds(
-        subject.id,
-        elapsedSinceLastPersist,
-      );
-    }
+    dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
+    subjectDailyHistoryService.addFocusSeconds(
+      subject.id,
+      elapsedSinceLastPersist,
+    );
     if (sessionSeconds.value > sessionSecondsToPersist) {
       _shouldPersistAgain = true;
     }
@@ -570,6 +572,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
+      _clearFocusLockReturnRequest();
       timerNotificationService.cancelFocusFinished();
       unawaited(_catchUpAfterBackground());
       _syncFocusGuard();
@@ -584,10 +587,36 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _recordLastActivityIfNeeded();
       _updateNotification();
       if (isFocusLockActive) {
-        warnFocusLock();
-        unawaited(focusGuardService.bringAppToFront());
+        _requestFocusLockReturn();
       }
     }
+  }
+
+  void _requestFocusLockReturn() {
+    final DateTime now = DateTime.now();
+    if (_lastFocusLockWarningAt == null ||
+        now.difference(_lastFocusLockWarningAt!) >= focusLockWarningCooldown) {
+      _lastFocusLockWarningAt = now;
+      warnFocusLock();
+    }
+
+    if (_isRequestingFocusLockReturn) {
+      return;
+    }
+
+    _isRequestingFocusLockReturn = true;
+    _focusLockReturnResetTimer?.cancel();
+    _focusLockReturnResetTimer = Timer(
+      focusLockWarningCooldown,
+      _clearFocusLockReturnRequest,
+    );
+    unawaited(focusGuardService.bringAppToFront());
+  }
+
+  void _clearFocusLockReturnRequest() {
+    _focusLockReturnResetTimer?.cancel();
+    _focusLockReturnResetTimer = null;
+    _isRequestingFocusLockReturn = false;
   }
 
   Future<void> _catchUpAfterBackground() async {
@@ -611,6 +640,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
+    _focusLockReturnResetTimer?.cancel();
     _persistAccumulatedTime();
     _recordLastActivityIfNeeded();
     timerNotificationService.cancel();

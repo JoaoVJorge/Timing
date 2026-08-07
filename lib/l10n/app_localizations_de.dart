@@ -329,7 +329,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get createSubjectRestHelp =>
-      'Der Timer schlägt nach 25 Minuten Fokus eine Pause vor.';
+      'Der Timer schlägt nach 30 Minuten Fokus eine Pause vor.';
 
   @override
   String get customRestMinutesHint => 'Benutzerdefinierte Pause (Min.)';
@@ -1040,7 +1040,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get faqA2 =>
-      'Jede Sitzung folgt einem klassischen Pomodoro-Zyklus: einem 25-minütigen Countdown bis zur nächsten Pause. Wenn der Wert Null erreicht, wird er einfach zurückgesetzt. Es handelt sich um eine Erinnerung und nicht um einen harten Stopp.';
+      'Jede Sitzung folgt einem Fokuszyklus: einem 30-minütigen Countdown bis zur nächsten Pause. Wenn der Wert Null erreicht, wird er einfach zurückgesetzt. Es handelt sich um eine Erinnerung und nicht um einen harten Stopp.';
 
   @override
   String get faqQ3 => 'Wie füge ich einen neuen Betreff hinzu?';

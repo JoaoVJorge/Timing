@@ -328,7 +328,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get createSubjectRestHelp =>
-      'O timer sugere uma pausa depois de 25 min de foco.';
+      'O timer sugere uma pausa depois de 30 min de foco.';
 
   @override
   String get customRestMinutesHint => 'Pausa personalizada (min)';
@@ -1029,7 +1029,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get faqA2 =>
-      'Cada sessão segue um ciclo clássico Pomodoro: uma contagem regressiva de 25 minutos até sua próxima pausa. Quando chega a zero, ela simplesmente reinicia — é um lembrete, não uma parada obrigatória.';
+      'Cada sessão segue um ciclo de foco: uma contagem regressiva de 30 minutos até sua próxima pausa. Quando chega a zero, ela simplesmente reinicia — é um lembrete, não uma parada obrigatória.';
 
   @override
   String get faqQ3 => 'Como adiciono uma nova matéria?';
