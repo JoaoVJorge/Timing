@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
@@ -849,6 +850,7 @@ class _GoalsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
+      _GroupActivityCard(group: group),
       _GroupInfoCard(
         icon: Icons.track_changes_rounded,
         title: "Meta do grupo",
@@ -873,6 +875,134 @@ class _GoalsTab extends StatelessWidget {
       ),
     ],
   );
+}
+
+class _GroupActivityCard extends StatelessWidget {
+  const _GroupActivityCard({required this.group});
+
+  final GroupEntity group;
+
+  @override
+  Widget build(BuildContext context) {
+    final GroupsController controller = Get.find<GroupsController>();
+    return Obx(() {
+      final List<GroupActivityProgressEntity> headers =
+          controller.activityHeaders;
+      if (headers.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        children: [
+          for (final GroupActivityProgressEntity header in headers) ...[
+            _activityCard(context, controller, header),
+            const Gap(10),
+          ],
+        ],
+      );
+    });
+  }
+
+  Widget _activityCard(
+    BuildContext context,
+    GroupsController controller,
+    GroupActivityProgressEntity header,
+  ) {
+    final int reached = controller.reachedCount(header.activityId);
+    final int total = group.members.length;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                header.isGoal
+                    ? Icons.flag_rounded
+                    : Icons.menu_book_rounded,
+                size: 27,
+                color: context.colorTokens.primary,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Atividade do grupo",
+                      style: context.textStyles.bodyMedium.copyWith(
+                        fontSize: 13,
+                        color: context.colorTokens.textHint,
+                      ),
+                    ),
+                    const Gap(2),
+                    Text(
+                      header.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.cardTitle,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Gap(6),
+          Text(
+            "$reached/$total atingiram a meta",
+            style: context.textStyles.bodyMedium.copyWith(
+              fontSize: 13,
+              color: context.colorTokens.textHint,
+            ),
+          ),
+          const Gap(12),
+          for (final GroupMemberEntity member in group.members) ...[
+            _memberRow(context, controller, member, header.activityId),
+            const Gap(10),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _memberRow(
+    BuildContext context,
+    GroupsController controller,
+    GroupMemberEntity member,
+    String activityId,
+  ) {
+    final bool reached =
+        controller.progressFor(member.id, activityId)?.reached ?? false;
+    return Row(
+      children: [
+        GroupMemberAvatar(
+          name: member.name,
+          colorValue: member.avatarColorValue,
+        ),
+        const Gap(10),
+        Expanded(
+          child: Text(
+            member.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyLarge,
+          ),
+        ),
+        Icon(
+          reached
+              ? Icons.check_circle_rounded
+              : Icons.radio_button_unchecked_rounded,
+          size: 22,
+          color: reached
+              ? context.colorTokens.primary
+              : context.colorTokens.borderUnfocused,
+        ),
+      ],
+    );
+  }
 }
 
 class _GroupInfoCard extends StatelessWidget {

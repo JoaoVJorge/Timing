@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:help_out/core/data/data_sources/groups_data_source.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_activity_draft.dart";
+import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
@@ -17,6 +18,10 @@ class GroupsRepository {
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() =>
       _groupsDataSource.getInvitableFriends();
+
+  Future<Either<AppError, List<GroupActivityProgressEntity>>>
+  getGroupActivityProgress(String groupId, {String? localDate}) =>
+      _groupsDataSource.getGroupActivityProgress(groupId, localDate: localDate);
 
   Future<Either<AppError, List<GroupImageMessageEntity>>> getImageMessages(
     String groupId,

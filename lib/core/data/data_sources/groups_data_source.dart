@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:flutter/foundation.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_activity_draft.dart";
+import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
@@ -108,6 +109,28 @@ class GroupsDataSource {
             privacy: row["privacy"] as String? ?? "inviteOnly",
           );
         }).toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, List<GroupActivityProgressEntity>>>
+  getGroupActivityProgress(String groupId, {String? localDate}) async {
+    try {
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "group_activity_progress",
+        params: {"target_group_id": groupId, "local_date": localDate},
+      );
+      final List<dynamic> rows = response as List<dynamic>? ?? const [];
+      return Right(
+        rows
+            .map(
+              (row) => GroupActivityProgressEntity.fromMap(
+                Map<String, dynamic>.from(row as Map),
+              ),
+            )
+            .toList(),
       );
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
