@@ -10,6 +10,7 @@ class HobbySubjectCard extends StatelessWidget {
   const HobbySubjectCard({
     required this.subject,
     required this.onTapPlay,
+    required this.onTapStats,
     required this.onTapEdit,
     required this.onTapPin,
     required this.onDelete,
@@ -19,6 +20,7 @@ class HobbySubjectCard extends StatelessWidget {
 
   final SubjectEntity subject;
   final VoidCallback onTapPlay;
+  final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
   final VoidCallback onTapPin;
   final VoidCallback onDelete;
@@ -117,6 +119,9 @@ class HobbySubjectCard extends StatelessWidget {
       ),
     );
 
+    if (action == "stats") {
+      onTapStats();
+    }
     if (action == "edit") {
       onTapEdit();
     }
@@ -239,6 +244,13 @@ class _HobbyOptionsSheet extends StatelessWidget {
               child: Column(
                 children: [
                   _HobbySheetAction(
+                    icon: Icons.bar_chart_rounded,
+                    label: _statsLabel(context),
+                    accent: accent,
+                    onTap: () => onAction("stats"),
+                  ),
+                  Divider(height: 1, color: context.colorTokens.divider),
+                  _HobbySheetAction(
                     icon: Icons.edit_rounded,
                     label: _editLabel(context),
                     accent: accent,
@@ -281,6 +293,12 @@ class _HobbyOptionsSheet extends StatelessWidget {
       _ => "$minutes min de prática",
     };
   }
+
+  String _statsLabel(BuildContext context) => switch (context.languageCode) {
+    "en" => "View statistics",
+    "es" => "Ver estadísticas",
+    _ => "Ver estatísticas",
+  };
 
   String _editLabel(BuildContext context) => switch (context.languageCode) {
     "en" => "Edit hobby",
