@@ -3,13 +3,37 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
+import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
+import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
+import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
+import "package:help_out/theme/subject_colors.dart";
+import "package:help_out/theme/subject_icons.dart";
+
+/// The kinds of activity a group can hand out: the four subject categories plus
+/// a daily-goal ("meta"). Maps to a [TimeCategoryType] for subjects, or `null`
+/// for goals.
+enum GroupActivityOption { studying, exercises, reading, hobbies, goal }
+
+extension GroupActivityOptionX on GroupActivityOption {
+  TimeCategoryType? get category => switch (this) {
+    GroupActivityOption.studying => TimeCategoryType.studying,
+    GroupActivityOption.exercises => TimeCategoryType.exercises,
+    GroupActivityOption.reading => TimeCategoryType.reading,
+    GroupActivityOption.hobbies => TimeCategoryType.hobbies,
+    GroupActivityOption.goal => null,
+  };
+
+  bool get isGoal => this == GroupActivityOption.goal;
+
+  bool get isReading => this == GroupActivityOption.reading;
+}
 
 class CreateGroupController extends GetxController {
   CreateGroupController({
@@ -18,17 +42,31 @@ class CreateGroupController extends GetxController {
     required this._appNavigator,
   });
 
+  static const int lastStep = 3;
+
   final GetInvitableFriendsUseCase _getInvitableFriendsUseCase;
   final CreateGroupUseCase _createGroupUseCase;
   final AppNavigator _appNavigator;
 
   final TextEditingController groupNameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   final TextEditingController friendSearchController = TextEditingController();
+  final TextEditingController activityNameController = TextEditingController();
+  final TextEditingController activityGoalController = TextEditingController();
+
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
   final Rx<GroupThemeType?> selectedTheme = Rx<GroupThemeType?>(null);
   final RxString groupName = "".obs;
+  final RxString groupDescription = "".obs;
   final RxString friendSearchQuery = "".obs;
+
+  final Rx<GroupActivityOption?> activityOption = Rx<GroupActivityOption?>(null);
+  final RxString activityName = "".obs;
+  final RxString activityGoal = "".obs;
+  final Rx<Color> activityColor = SubjectColors.values.first.obs;
+  final Rx<DailyTaskGoalType> activityGoalType = DailyTaskGoalType.total.obs;
+
   final RxBool isLoading = true.obs;
   final RxBool hasLoadError = false.obs;
   final RxBool isCreating = false.obs;
@@ -43,9 +81,36 @@ class CreateGroupController extends GetxController {
 
   bool get isInformationStep => currentStep.value == 0;
 
-  bool get isFriendsStep => currentStep.value == 1;
+  bool get isActivityStep => currentStep.value == 1;
 
-  bool get isSummaryStep => currentStep.value == 2;
+  bool get isFriendsStep => currentStep.value == 2;
+
+  bool get isSummaryStep => currentStep.value == lastStep;
+
+  bool get hasActivityType => activityOption.value != null;
+
+  bool get isGoalActivity => activityOption.value?.isGoal ?? false;
+
+  bool get isReadingActivity => activityOption.value?.isReading ?? false;
+
+  bool get hasValidActivityGoal {
+    final GroupActivityOption? option = activityOption.value;
+    if (option == null) {
+      return false;
+    }
+    if (option.isGoal) {
+      if (activityGoalType.value == DailyTaskGoalType.daily) {
+        return true;
+      }
+      return (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
+    }
+    return (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
+  }
+
+  bool get hasActivity =>
+      hasActivityType &&
+      activityName.value.trim().isNotEmpty &&
+      hasValidActivityGoal;
 
   List<FriendOption> get filteredFriends {
     final String query = friendSearchQuery.value.trim().toLowerCase();
@@ -61,6 +126,17 @@ class CreateGroupController extends GetxController {
   void onInit() {
     super.onInit();
     groupNameController.addListener(_syncGroupName);
+    descriptionController.addListener(
+      () => groupDescription.value = descriptionController.text,
+    );
+    activityNameController.addListener(() {
+      activityName.value = activityNameController.text;
+      _refreshCanCreate();
+    });
+    activityGoalController.addListener(() {
+      activityGoal.value = activityGoalController.text;
+      _refreshCanCreate();
+    });
     loadFriends();
   }
 
@@ -99,6 +175,26 @@ class CreateGroupController extends GetxController {
     _refreshCanCreate();
   }
 
+  void onSelectActivityOption(GroupActivityOption option) {
+    activityOption.value = option;
+    if (activityGoalController.text.trim().isEmpty) {
+      activityGoalController.text = switch (option) {
+        GroupActivityOption.goal => "7",
+        GroupActivityOption.reading => "10",
+        _ => "30",
+      };
+    }
+    activityGoal.value = activityGoalController.text;
+    _refreshCanCreate();
+  }
+
+  void onSelectActivityColor(Color color) => activityColor.value = color;
+
+  void onSelectActivityGoalType(DailyTaskGoalType type) {
+    activityGoalType.value = type;
+    _refreshCanCreate();
+  }
+
   void onTapBack() {
     if (currentStep.value == 0) {
       _appNavigator.back();
@@ -107,21 +203,8 @@ class CreateGroupController extends GetxController {
     currentStep.value--;
   }
 
-  void _refreshCanCreate() =>
-      canCreate.value = hasName && hasTheme && hasFriends;
-
-  String createButtonText(BuildContext context) {
-    if (!hasName) {
-      return context.l10n.createGroupMissingName;
-    }
-    if (!hasTheme) {
-      return context.l10n.createGroupMissingTheme;
-    }
-    if (!hasFriends) {
-      return context.l10n.createGroupMissingFriends;
-    }
-    return context.l10n.createGroupWithFriendsButton(selectedFriendIds.length);
-  }
+  void _refreshCanCreate() => canCreate.value =
+      hasName && hasTheme && hasActivity && hasFriends;
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -139,18 +222,34 @@ class CreateGroupController extends GetxController {
 
   void onTapContinue() {
     if (isInformationStep) {
-      final String name = groupNameController.text.trim();
-      if (name.isEmpty) {
+      if (!hasName) {
         _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
         return;
       }
-      if (selectedTheme.value == null) {
+      if (!hasTheme) {
         _appNavigator.showErrorSnackBar(
           Get.context!.l10n.groupThemeRequiredError,
         );
         return;
       }
       currentStep.value = 1;
+      return;
+    }
+
+    if (isActivityStep) {
+      if (!hasActivityType) {
+        _appNavigator.showErrorSnackBar("Escolha uma atividade para o grupo.");
+        return;
+      }
+      if (activityName.value.trim().isEmpty) {
+        _appNavigator.showErrorSnackBar("Dê um nome para a atividade.");
+        return;
+      }
+      if (!hasValidActivityGoal) {
+        _appNavigator.showErrorSnackBar("Defina uma meta válida.");
+        return;
+      }
+      currentStep.value = 2;
       return;
     }
 
@@ -161,9 +260,52 @@ class CreateGroupController extends GetxController {
         );
         return;
       }
-      currentStep.value = 2;
+      currentStep.value = lastStep;
       return;
     }
+  }
+
+  GroupActivityDraft? buildActivityDraft() {
+    final GroupActivityOption? option = activityOption.value;
+    if (option == null) {
+      return null;
+    }
+    final String name = activityNameController.text.trim();
+    if (name.isEmpty) {
+      return null;
+    }
+    final int colorValue = activityColor.value.toARGB32();
+
+    if (option.isGoal) {
+      final bool isDaily = activityGoalType.value == DailyTaskGoalType.daily;
+      final int targetDays = isDaily
+          ? 1
+          : (int.tryParse(activityGoalController.text.trim()) ?? 0);
+      if (targetDays <= 0) {
+        return null;
+      }
+      return GroupActivityDraft.goal(
+        name: name,
+        colorValue: colorValue,
+        targetDays: targetDays,
+        goalType: activityGoalType.value.name,
+      );
+    }
+
+    final TimeCategoryType category = option.category!;
+    final int goalNumber = int.tryParse(activityGoalController.text.trim()) ?? 0;
+    if (goalNumber <= 0) {
+      return null;
+    }
+    final bool isReading = category == TimeCategoryType.reading;
+    return GroupActivityDraft.subject(
+      name: name,
+      category: category,
+      colorValue: colorValue,
+      goalSeconds: isReading ? 0 : goalNumber * 60,
+      goalPages: isReading ? goalNumber : 0,
+      iconName: SubjectIcons.suggestionsFor(category).first,
+    );
   }
 
   Future<void> onTapCreate() async {
@@ -183,6 +325,10 @@ class CreateGroupController extends GetxController {
       );
       return;
     }
+    if (!hasActivity) {
+      _appNavigator.showErrorSnackBar("Defina a atividade do grupo.");
+      return;
+    }
     if (selectedFriendIds.isEmpty) {
       _appNavigator.showErrorSnackBar(Get.context!.l10n.groupNeedsFriendError);
       return;
@@ -195,6 +341,8 @@ class CreateGroupController extends GetxController {
       name: name,
       theme: theme,
       invitedFriends: invitedFriends,
+      description: descriptionController.text.trim(),
+      activity: buildActivityDraft(),
     );
     isCreating.value = false;
 
@@ -208,7 +356,10 @@ class CreateGroupController extends GetxController {
   void onClose() {
     groupNameController.removeListener(_syncGroupName);
     groupNameController.dispose();
+    descriptionController.dispose();
     friendSearchController.dispose();
+    activityNameController.dispose();
+    activityGoalController.dispose();
     super.onClose();
   }
 }
