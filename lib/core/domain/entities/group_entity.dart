@@ -10,6 +10,7 @@ class GroupEntity extends Equatable {
     required this.name,
     required this.theme,
     required this.members,
+    this.description = "",
     this.ownerId = "",
     this.createdAt,
     this.inviteCode = "",
@@ -26,6 +27,7 @@ class GroupEntity extends Equatable {
     members: (map["members"] as List<dynamic>)
         .map((item) => GroupMemberEntity.fromMap(item as Map<String, dynamic>))
         .toList(),
+    description: map["description"] as String? ?? "",
     ownerId: map["ownerId"] as String? ?? "",
     createdAt: DateTime.tryParse(map["createdAt"] as String? ?? ""),
     inviteCode: map["inviteCode"] as String? ?? "",
@@ -36,6 +38,7 @@ class GroupEntity extends Equatable {
   final String name;
   final GroupThemeType theme;
   final List<GroupMemberEntity> members;
+  final String description;
   final String ownerId;
   final DateTime? createdAt;
   final String inviteCode;
@@ -46,6 +49,7 @@ class GroupEntity extends Equatable {
     "name": name,
     "theme": theme.name,
     "members": members.map((member) => member.toMap()).toList(),
+    "description": description,
     "ownerId": ownerId,
     "createdAt": createdAt?.toIso8601String(),
     "inviteCode": inviteCode,
@@ -60,6 +64,7 @@ class GroupEntity extends Equatable {
     name,
     theme,
     members,
+    description,
     ownerId,
     createdAt,
     inviteCode,

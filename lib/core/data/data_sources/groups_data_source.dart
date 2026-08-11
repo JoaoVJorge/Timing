@@ -1,6 +1,7 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/foundation.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
+import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
@@ -35,7 +36,9 @@ class GroupsDataSource {
 
       final List<Map<String, dynamic>> groupRows = await _selectRows(
         table: "groups",
-        columns: "id, name, theme, owner_id, created_at, invite_code, privacy",
+        columns:
+            "id, name, theme, description, owner_id, created_at, "
+            "invite_code, privacy",
         filters: (query) => query.inFilter("id", groupIds),
       );
       final List<Map<String, dynamic>> memberRows = await _selectRows(
@@ -98,6 +101,7 @@ class GroupsDataSource {
             name: row["name"] as String? ?? "",
             theme: theme,
             members: members,
+            description: row["description"] as String? ?? "",
             ownerId: row["owner_id"] as String? ?? "",
             createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
             inviteCode: row["invite_code"] as String? ?? "",
@@ -286,6 +290,8 @@ class GroupsDataSource {
     required String name,
     required GroupThemeType theme,
     required List<FriendOption> invitedFriends,
+    String description = "",
+    GroupActivityDraft? activity,
   }) async {
     String operation = "checking signed-in user";
     try {
@@ -306,6 +312,9 @@ class GroupsDataSource {
         "invited_friend_ids": invitedFriends
             .map((friend) => friend.id)
             .toList(),
+        "group_description": description,
+        "activity_kind": activity?.kindName,
+        "activity_payload": activity?.toPayload(),
       };
       _logSqlStep(operation, createGroupPayload);
       final dynamic response = await _supabaseService.requireClient.rpc(
@@ -355,6 +364,7 @@ class GroupsDataSource {
           name: name,
           theme: theme,
           members: members,
+          description: groupRow["description"] as String? ?? description,
           ownerId: userId,
           createdAt: DateTime.tryParse(groupRow["created_at"] as String? ?? ""),
           inviteCode: groupRow["invite_code"] as String? ?? "",
