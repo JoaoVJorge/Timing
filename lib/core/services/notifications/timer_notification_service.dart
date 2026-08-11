@@ -17,6 +17,7 @@ class TimerNotificationService {
   static const String _finishChannelDescription =
       "Alerts when a focus section ends";
   static const String _finishSound = "finish_focus_alarm";
+  static const String _notificationIcon = "@drawable/ic_notification";
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -30,7 +31,7 @@ class TimerNotificationService {
     }
 
     const InitializationSettings settings = InitializationSettings(
-      android: AndroidInitializationSettings("@mipmap/ic_launcher"),
+      android: AndroidInitializationSettings(_notificationIcon),
     );
     tz.initializeTimeZones();
     await _plugin.initialize(settings: settings);
@@ -68,6 +69,7 @@ class TimerNotificationService {
             when: startedAt.millisecondsSinceEpoch,
             visibility: NotificationVisibility.public,
             category: AndroidNotificationCategory.stopwatch,
+            icon: _notificationIcon,
             onlyAlertOnce: true,
             playSound: false,
             enableVibration: false,
@@ -102,6 +104,7 @@ class TimerNotificationService {
             showWhen: false,
             visibility: NotificationVisibility.public,
             category: AndroidNotificationCategory.stopwatch,
+            icon: _notificationIcon,
             onlyAlertOnce: true,
             playSound: false,
             enableVibration: false,
@@ -140,6 +143,7 @@ class TimerNotificationService {
             showWhen: true,
             visibility: NotificationVisibility.public,
             category: AndroidNotificationCategory.alarm,
+            icon: _notificationIcon,
             playSound: true,
             sound: RawResourceAndroidNotificationSound(_finishSound),
             enableVibration: true,

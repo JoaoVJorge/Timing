@@ -21,13 +21,7 @@ class SplashPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Transform.scale(
-              scale: 1.6,
-              child: Image.asset(
-                "assets/images/logo_without_background.png",
-                height: 75,
-              ),
-            ),
+            Image.asset(AppConstants.appLogo, height: 80),
             Text(
               AppConstants.appTitle,
               style: context.textStyles.textPrimaryButton.copyWith(
