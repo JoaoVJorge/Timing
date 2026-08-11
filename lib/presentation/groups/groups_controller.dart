@@ -7,6 +7,7 @@ import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/data/repositories/groups_repository.dart";
+import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
@@ -50,6 +51,8 @@ class GroupsController extends GetxController {
   final RxBool isSendingImage = false.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
+  final RxList<GroupActivityProgressEntity> activityProgress =
+      <GroupActivityProgressEntity>[].obs;
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
 
@@ -165,7 +168,60 @@ class GroupsController extends GetxController {
     selectedDetailsTab.value = GroupDetailsTab.ranking;
     isShowingGroupDetails.value = true;
     isShowingMemberManagement.value = false;
+    unawaited(loadActivityProgress());
     _appNavigator.toNamed(AppRoutes.groupDetails);
+  }
+
+  /// Per-member completion of the selected group's activities, used by the
+  /// group's "Metas" tab to mark who reached the goal.
+  Future<void> loadActivityProgress() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null) {
+      activityProgress.clear();
+      return;
+    }
+    final Either<AppError, List<GroupActivityProgressEntity>> result =
+        await _groupsRepository.getGroupActivityProgress(
+          group.id,
+          localDate: _todayKey(),
+        );
+    result.fold(
+      (error) => activityProgress.clear(),
+      (value) => activityProgress.value = value,
+    );
+  }
+
+  /// One entry per distinct group activity (usually just one), for the tab
+  /// header.
+  List<GroupActivityProgressEntity> get activityHeaders {
+    final Set<String> seen = {};
+    final List<GroupActivityProgressEntity> headers = [];
+    for (final GroupActivityProgressEntity item in activityProgress) {
+      if (seen.add(item.activityId)) {
+        headers.add(item);
+      }
+    }
+    return headers;
+  }
+
+  GroupActivityProgressEntity? progressFor(String memberId, String activityId) {
+    for (final GroupActivityProgressEntity item in activityProgress) {
+      if (item.memberId == memberId && item.activityId == activityId) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  int reachedCount(String activityId) => activityProgress
+      .where((item) => item.activityId == activityId && item.reached)
+      .length;
+
+  String _todayKey() {
+    final DateTime now = DateTime.now();
+    return "${now.year.toString().padLeft(4, "0")}-"
+        "${now.month.toString().padLeft(2, "0")}-"
+        "${now.day.toString().padLeft(2, "0")}";
   }
 
   void onBackToGroupList() {
@@ -187,6 +243,9 @@ class GroupsController extends GetxController {
       if (groupId != null) {
         loadImageMessages(groupId);
       }
+    }
+    if (tab == GroupDetailsTab.goals) {
+      unawaited(loadActivityProgress());
     }
   }
 
