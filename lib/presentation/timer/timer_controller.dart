@@ -10,6 +10,7 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:help_out/core/domain/use_cases/log_activity_use_case.dart";
+import "package:help_out/core/services/activity_history/activity_history_service.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:help_out/core/services/focus/focus_feedback_service.dart";
@@ -26,6 +27,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.updateSubjectPagesUseCase,
     required this.logActivityUseCase,
     required this.lastActivityService,
+    required this.activityHistoryService,
     required this.dailyProgressService,
     required this.subjectDailyHistoryService,
     required this.timerNotificationService,
@@ -45,6 +47,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
   final LogActivityUseCase logActivityUseCase;
   final LastActivityService lastActivityService;
+  final ActivityHistoryService activityHistoryService;
   final DailyProgressService dailyProgressService;
   final SubjectDailyHistoryService subjectDailyHistoryService;
   final TimerNotificationService timerNotificationService;
@@ -360,6 +363,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       dailyProgressService.addPages(sanitizedPages);
       subjectDailyHistoryService.addPages(subject.id, sanitizedPages);
       unawaited(
+        activityHistoryService.record(
+          category: subject.category,
+          subjectId: subject.id,
+          subjectName: subject.name,
+          pages: sanitizedPages,
+        ),
+      );
+      unawaited(
         logActivityUseCase(
           category: subject.category,
           subjectId: subject.id,
@@ -416,6 +427,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     _hasLoggedTime = true;
     _persistedSessionSeconds = sessionSecondsToPersist;
+    unawaited(
+      activityHistoryService.record(
+        category: subject.category,
+        subjectId: subject.id,
+        subjectName: subject.name,
+        seconds: elapsedSinceLastPersist,
+      ),
+    );
     unawaited(
       logActivityUseCase(
         category: subject.category,
