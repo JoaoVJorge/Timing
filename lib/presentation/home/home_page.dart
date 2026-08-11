@@ -158,14 +158,12 @@ class _PlanDayRows extends StatelessWidget {
         : context.colorTokens.surface;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDarkMode
-              ? accent.withValues(alpha: 0.18)
-              : context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
         ),
         boxShadow: [
           BoxShadow(
@@ -177,31 +175,25 @@ class _PlanDayRows extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Icon(Icons.event_note_rounded, color: accent, size: 22),
-              const Gap(12),
-              Expanded(
-                child: Text(
-                  context.l10n.homePlanDayTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.cardTitle.copyWith(fontSize: 18),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Icon(Icons.event_note_rounded, color: accent, size: 22),
+                const Gap(12),
+                Expanded(
+                  child: Text(
+                    context.l10n.homePlanDayTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.cardTitle.copyWith(fontSize: 18),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const Gap(12),
-          Container(
-            decoration: BoxDecoration(
-              color: context.colorTokens.transparent,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: context.colorTokens.borderUnfocused.withValues(
-                  alpha: isDarkMode ? 0.35 : 0.55,
-                ),
-              ),
+              ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
             child: Column(
               children: [
                 _PlanDayRow(
@@ -216,11 +208,7 @@ class _PlanDayRows extends StatelessWidget {
                   accent: accent,
                   onTap: controller.onTapDailyGoals,
                 ),
-                Divider(
-                  height: 1,
-                  indent: 64,
-                  color: context.colorTokens.divider.withValues(alpha: 0.7),
-                ),
+
                 _PlanDayRow(
                   icon: Icons.calendar_month_rounded,
                   title: _nextCommitmentTitle(context),
