@@ -142,7 +142,12 @@ class _Brand extends StatelessWidget {
             ),
           ],
         ),
-        child: const AppIcon("open_book", size: 26, color: Colors.white),
+        child: Image.asset(
+          AppConstants.appLogo,
+          width: 36,
+          height: 36,
+          color: Colors.white,
+        ),
       ),
       const Gap(10),
       Text(
