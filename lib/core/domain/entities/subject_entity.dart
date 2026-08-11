@@ -18,6 +18,7 @@ class SubjectEntity extends Equatable {
     required this.restMinutes,
     required this.focusSessionCount,
     required this.wallpaperIndex,
+    this.groupId,
   });
 
   factory SubjectEntity.fromJson(String source) =>
@@ -37,6 +38,9 @@ class SubjectEntity extends Equatable {
     restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
     focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
+    groupId: (map["groupId"] as String?)?.isEmpty ?? true
+        ? null
+        : map["groupId"] as String?,
   );
 
   static const int defaultRestMinutes = 5;
@@ -54,6 +58,15 @@ class SubjectEntity extends Equatable {
   final int restMinutes;
   final int focusSessionCount;
   final int wallpaperIndex;
+
+  /// Non-null when this subject is a copy handed out by a group. Such copies
+  /// cannot be deleted while the user is still a member (enforced by the
+  /// backend delete policy) and are removed on leaving the group.
+  final String? groupId;
+
+  /// Whether this subject belongs to a group and is therefore protected from
+  /// manual deletion.
+  bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
 
   /// Number of focus sessions, never below one.
   int get sessionCount => focusSessionCount > 0 ? focusSessionCount : 1;
@@ -76,6 +89,7 @@ class SubjectEntity extends Equatable {
     "restMinutes": restMinutes,
     "focusSessionCount": focusSessionCount,
     "wallpaperIndex": wallpaperIndex,
+    "groupId": groupId,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -92,6 +106,7 @@ class SubjectEntity extends Equatable {
     int? restMinutes,
     int? focusSessionCount,
     int? wallpaperIndex,
+    String? groupId,
   }) => SubjectEntity(
     id: id,
     name: name ?? this.name,
@@ -106,6 +121,7 @@ class SubjectEntity extends Equatable {
     restMinutes: restMinutes ?? this.restMinutes,
     focusSessionCount: focusSessionCount ?? this.focusSessionCount,
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
+    groupId: groupId ?? this.groupId,
   );
 
   @override
@@ -123,5 +139,6 @@ class SubjectEntity extends Equatable {
     restMinutes,
     focusSessionCount,
     wallpaperIndex,
+    groupId,
   ];
 }

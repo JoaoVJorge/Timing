@@ -139,6 +139,7 @@ class SubjectsDataSource {
         "restMinutes": (row["rest_minutes"] as num?)?.toInt(),
         "focusSessionCount": (row["focus_session_count"] as num?)?.toInt(),
         "wallpaperIndex": (row["wallpaper_index"] as num?)?.toInt(),
+        "groupId": row["group_id"],
       });
 
   Map<String, dynamic> _subjectToRow(SubjectEntity subject, String userId) => {
@@ -156,6 +157,7 @@ class SubjectsDataSource {
     "rest_minutes": subject.restMinutes,
     "focus_session_count": subject.focusSessionCount,
     "wallpaper_index": subject.wallpaperIndex,
+    "group_id": subject.groupId,
     "updated_at": DateTime.now().toUtc().toIso8601String(),
   };
 }
