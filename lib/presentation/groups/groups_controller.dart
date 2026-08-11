@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
@@ -12,6 +13,8 @@ import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
+import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
+import "package:help_out/core/services/local_storage/local_storage_keys.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/shared/widgets/photo_source_bottom_sheet.dart";
@@ -25,12 +28,14 @@ class GroupsController extends GetxController {
     required this._groupsRepository,
     required this._appNavigator,
     required this._supabaseService,
+    required this._localStorageService,
   });
 
   final GetGroupsUseCase _getGroupsUseCase;
   final GroupsRepository _groupsRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
+  final AppLocalStorageService _localStorageService;
   final ImagePicker _imagePicker = ImagePicker();
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
@@ -246,7 +251,16 @@ class GroupsController extends GetxController {
     }
     selectedGroup.value = newGroup;
     groups.refresh();
+    await _invalidateActivityCaches();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
+  }
+
+  /// Creating, joining, or leaving a group changes the member's group-owned
+  /// subjects and goals server-side (fan-out / cleanup trigger). Dropping the
+  /// local caches makes the next Category / Daily Goals load refetch them.
+  Future<void> _invalidateActivityCaches() async {
+    await _localStorageService.delete(LocalStorageKeys.subjects);
+    await _localStorageService.delete(LocalStorageKeys.dailyTasks);
   }
 
   /// Friends live next to Groups: both answer "how am I doing with others?".
@@ -282,6 +296,7 @@ class GroupsController extends GetxController {
       isShowingMemberManagement.value = false;
       isShowingGroupDetails.value = false;
       groups.refresh();
+      unawaited(_invalidateActivityCaches());
       _appNavigator.showSuccessSnackBar(_leftGroupMessage);
     });
   }
@@ -308,6 +323,7 @@ class GroupsController extends GetxController {
     }
     selectedGroup.value = joinedGroup;
     groups.refresh();
+    await _invalidateActivityCaches();
     onSelectGroup(joinedGroup);
     _appNavigator.showSuccessSnackBar(_joinedGroupMessage);
   }

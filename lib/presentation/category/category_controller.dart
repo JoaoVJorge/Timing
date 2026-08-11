@@ -117,6 +117,13 @@ class CategoryController extends GetxController {
   }
 
   Future<void> onDeleteSubject(SubjectEntity subject) async {
+    if (subject.isFromGroup) {
+      _appNavigator.showErrorSnackBar(
+        "Esta atividade é de um grupo. Saia do grupo para removê-la.",
+      );
+      return;
+    }
+
     final bool confirmed = await showDeleteConfirmationDialog(
       itemName: subject.name,
       itemTypeName: Get.context == null
