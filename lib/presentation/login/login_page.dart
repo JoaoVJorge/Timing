@@ -271,7 +271,7 @@ class _AuthCard extends StatelessWidget {
             const Gap(6),
             Flexible(
               child: Text(
-                _securityNote(context),
+                context.l10n.loginSecurityNote,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodySmall.copyWith(
@@ -286,13 +286,6 @@ class _AuthCard extends StatelessWidget {
     ),
   );
 }
-
-String _securityNote(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Seus dados estão protegidos e seguros.",
-  "es" => "Tus datos están protegidos y seguros.",
-  "fr" => "Vos données sont protégées et sécurisées.",
-  _ => "Your data is protected and secure.",
-};
 
 class _SignInButton extends StatelessWidget {
   const _SignInButton({

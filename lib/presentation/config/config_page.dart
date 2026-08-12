@@ -77,8 +77,8 @@ class ConfigPage extends StatelessWidget {
                   ),
                   SettingsTile.navigation(
                     icon: Icons.lock_clock_rounded,
-                    title: "Modo concentração",
-                    subtitle: "Escolha quais focos bloqueiam a saída do app.",
+                    title: context.l10n.concentrationModeTitle,
+                    subtitle: context.l10n.concentrationModeSubtitle,
                     onTap: () =>
                         _showConcentrationModeSheet(context, controller),
                     tint: const Color(0xFF7C3AED),
@@ -210,7 +210,7 @@ class ConfigPage extends StatelessWidget {
                   ),
                   const Gap(28),
                   Text(
-                    "Atividades",
+                    context.l10n.homeCategoriesSection,
                     style: context.textStyles.sectionTitle.copyWith(
                       color: context.colorTokens.primary,
                     ),
@@ -222,8 +222,8 @@ class ConfigPage extends StatelessWidget {
                       children: [
                         _ConcentrationActivityTile(
                           icon: Icons.school_rounded,
-                          title: "Estudo",
-                          subtitle: "Foco total nos seus estudos.",
+                          title: context.l10n.concentrationStudyTitle,
+                          subtitle: context.l10n.concentrationStudySubtitle,
                           color: const Color(0xFF2F80ED),
                           value: studying.value,
                           onChanged: (value) => studying.value = value,
@@ -231,8 +231,8 @@ class ConfigPage extends StatelessWidget {
                         const Gap(10),
                         _ConcentrationActivityTile(
                           icon: Icons.fitness_center_rounded,
-                          title: "Exercícios",
-                          subtitle: "Concentre-se nos seus treinos.",
+                          title: context.l10n.concentrationExercisesTitle,
+                          subtitle: context.l10n.concentrationExercisesSubtitle,
                           color: const Color(0xFF27AE60),
                           value: exercises.value,
                           onChanged: (value) => exercises.value = value,
@@ -240,8 +240,8 @@ class ConfigPage extends StatelessWidget {
                         const Gap(10),
                         _ConcentrationActivityTile(
                           icon: Icons.menu_book_rounded,
-                          title: "Leitura",
-                          subtitle: "Mergulhe nas suas leituras.",
+                          title: context.l10n.concentrationReadingTitle,
+                          subtitle: context.l10n.concentrationReadingSubtitle,
                           color: const Color(0xFFF2994A),
                           value: reading.value,
                           onChanged: (value) => reading.value = value,
@@ -249,8 +249,8 @@ class ConfigPage extends StatelessWidget {
                         const Gap(10),
                         _ConcentrationActivityTile(
                           icon: Icons.sports_esports_rounded,
-                          title: "Hobbies",
-                          subtitle: "Aproveite seus hobbies com foco.",
+                          title: context.l10n.concentrationHobbiesTitle,
+                          subtitle: context.l10n.concentrationHobbiesSubtitle,
                           color: const Color(0xFF9B51E0),
                           value: hobbies.value,
                           onChanged: (value) => hobbies.value = value,

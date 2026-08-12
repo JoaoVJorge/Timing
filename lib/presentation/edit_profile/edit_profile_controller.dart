@@ -56,8 +56,8 @@ class EditProfileController extends GetxController {
     final BuildContext context = Get.context!;
     final bool? shouldRemove = await _appNavigator.dialog<bool>(
       child: _RemoveProfilePhotoDialog(
-        title: _removePhotoTitle(context),
-        content: _removePhotoContent(context),
+        title: context.l10n.removePhotoDialogTitle,
+        content: context.l10n.removePhotoDialogContent,
         cancelLabel: context.l10n.cancelButton,
         removeLabel: context.l10n.profilePhotoRemoveLabel,
       ),
@@ -96,53 +96,13 @@ class EditProfileController extends GetxController {
     }
     return showPhotoSourceBottomSheet(
       context: context,
-      title: _photoSourceTitle(context),
-      subtitle: _photoSourceSubtitle(context),
-      cameraLabel: _cameraLabel(context),
-      galleryLabel: _galleryLabel(context),
+      title: context.l10n.profilePhotoSourceTitle,
+      subtitle: context.l10n.profilePhotoSourceSubtitle,
+      cameraLabel: context.l10n.photoCameraLabel,
+      galleryLabel: context.l10n.photoGalleryLabel,
       cancelLabel: context.l10n.cancelButton,
     );
   }
-
-  String _photoSourceTitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "pt" => "Foto de perfil",
-        "es" => "Foto de perfil",
-        _ => "Profile photo",
-      };
-
-  String _photoSourceSubtitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "pt" => "Escolha como deseja atualizar sua foto",
-        "es" => "Elige como deseas actualizar tu foto",
-        _ => "Choose how you want to update your photo",
-      };
-
-  String _cameraLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Tirar foto",
-    "es" => "Tomar foto",
-    _ => "Take photo",
-  };
-
-  String _galleryLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Escolher da galeria",
-    "es" => "Elegir de la galeria",
-    _ => "Choose from gallery",
-  };
-
-  String _removePhotoTitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Quitar foto?",
-        "pt" => "Remover foto?",
-        _ => "Remove photo?",
-      };
-
-  String _removePhotoContent(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Tu avatar volverá a aparecer en el perfil.",
-        "pt" => "Seu avatar voltará a aparecer no perfil.",
-        _ => "Your avatar will show on the profile again.",
-      };
 
   Future<void> onTapSave() async {
     isSaving.value = true;

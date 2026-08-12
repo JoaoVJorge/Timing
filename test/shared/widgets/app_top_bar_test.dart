@@ -21,7 +21,12 @@ void main() {
       ),
     );
 
-    final Finder backButton = find.byType(GestureDetector);
+    final Finder backButton = find.byWidgetPredicate(
+      (widget) =>
+          widget is GestureDetector &&
+          widget.onTap != null &&
+          widget.behavior == HitTestBehavior.opaque,
+    );
     expect(
       tester.getSize(backButton),
       const Size(AppSpacing.minTapTarget, AppSpacing.minTapTarget),

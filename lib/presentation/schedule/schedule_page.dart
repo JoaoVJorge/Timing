@@ -225,7 +225,7 @@ class _DayEventsHeader extends StatelessWidget {
             ),
             const Gap(2),
             Text(
-              _dayEventsTitle(context),
+              context.l10n.scheduleDayEventsTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.caption.copyWith(
@@ -310,14 +310,6 @@ String _selectedDateLabel(String locale, DateTime selectedDate) {
   }
   return raw.replaceFirst(raw[0], raw[0].toUpperCase());
 }
-
-String _dayEventsTitle(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Eventos do dia",
-  "es" => "Eventos del dia",
-  "fr" => "Evenements du jour",
-  "de" => "Termine des Tages",
-  _ => "Day events",
-};
 
 class _DashedBorderPainter extends CustomPainter {
   const _DashedBorderPainter(this.color);
@@ -445,14 +437,14 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
               children: [
                 Expanded(
                   child: _MonthPickerTextButton(
-                    label: _cancelLabel(context),
+                    label: context.l10n.cancelButton,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
                 const Gap(18),
                 Expanded(
                   child: _MonthPickerConfirmButton(
-                    label: _confirmLabel(context),
+                    label: context.l10n.confirmButton,
                     onPressed: () =>
                         Navigator.of(context).pop((year: _year, month: _month)),
                   ),
@@ -532,19 +524,3 @@ class _MonthPickerConfirmButton extends StatelessWidget {
     ),
   );
 }
-
-String _cancelLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Cancelar",
-  "es" => "Cancelar",
-  "fr" => "Annuler",
-  "de" => "Abbrechen",
-  _ => "Cancel",
-};
-
-String _confirmLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Confirmar",
-  "es" => "Confirmar",
-  "fr" => "Confirmer",
-  "de" => "Bestätigen",
-  _ => "Confirm",
-};

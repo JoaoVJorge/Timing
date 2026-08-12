@@ -10,6 +10,7 @@ class AppIconButton extends StatelessWidget {
     this.icon,
     this.svgName,
     required this.onTap,
+    this.accent,
     this.size = 64,
     super.key,
   }) : assert(
@@ -20,27 +21,40 @@ class AppIconButton extends StatelessWidget {
   final IconData? icon;
   final String? svgName;
   final VoidCallback onTap;
+  final Color? accent;
   final double size;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    child: Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: context.colorTokens.primaryGradient,
+  Widget build(BuildContext context) {
+    final Color buttonColor = accent ?? context.colorTokens.primary;
+
+    return BounceTap(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [
+              buttonColor,
+              Color.lerp(buttonColor, context.colorTokens.white, 0.16) ??
+                  buttonColor,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: svgName != null
+              ? AppIcon(
+                  svgName!,
+                  size: size * 0.45,
+                  color: context.colorTokens.white,
+                )
+              : Icon(icon, color: context.colorTokens.white, size: size * 0.45),
+        ),
       ),
-      child: Center(
-        child: svgName != null
-            ? AppIcon(
-                svgName!,
-                size: size * 0.45,
-                color: context.colorTokens.white,
-              )
-            : Icon(icon, color: context.colorTokens.white, size: size * 0.45),
-      ),
-    ),
-  );
+    );
+  }
 }
