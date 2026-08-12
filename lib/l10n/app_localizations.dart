@@ -5013,6 +5013,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When enabled, the app helps you stay focused during the activity until you pause or finish.'**
   String get concentrationModeSheetDescription;
+
+  /// No description provided for @timerFocusLockWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus mode is active. Finish or pause the session to leave.'**
+  String get timerFocusLockWarning;
 }
 
 class _AppLocalizationsDelegate

@@ -2741,4 +2741,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get concentrationModeSheetDescription =>
       'When enabled, the app helps you stay focused during the activity until you pause or finish.';
+
+  @override
+  String get timerFocusLockWarning =>
+      'Focus mode is active. Finish or pause the session to leave.';
 }

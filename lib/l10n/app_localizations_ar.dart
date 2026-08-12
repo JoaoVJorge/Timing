@@ -2116,23 +2116,23 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get achievementsUnlockedSuffix => ' /50 ??????';
+  String get achievementsUnlockedSuffix => ' /50 مفتوحة';
 
   @override
-  String get currentLevelLabel => '??????? ??????';
+  String get currentLevelLabel => 'المستوى الحالي';
 
   @override
-  String get allAchievementsUnlockedLabel => '?? ??? ?? ???';
+  String get allAchievementsUnlockedLabel => 'تم فتح كل شيء';
 
   @override
-  String get nextUnlockLabel => '????? ??????';
+  String get nextUnlockLabel => 'الإنجاز التالي';
 
   @override
-  String get allAchievementsUnlockedDescription => 'لقد فتحت كل شيء.';
+  String get allAchievementsUnlockedDescription => 'لقد فتحت كل الإنجازات.';
 
   @override
   String xpToGo(int xp) {
-    return 'تبقى $xp XP';
+    return 'باقي $xp XP';
   }
 
   @override
@@ -2141,28 +2141,28 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get allFilterLabel => '????';
+  String get allFilterLabel => 'الكل';
 
   @override
-  String get unlockedFilterLabel => '??????';
+  String get unlockedFilterLabel => 'مفتوحة';
 
   @override
-  String get lockedFilterLabel => '?????';
+  String get lockedFilterLabel => 'مقفلة';
 
   @override
-  String get selectCategoryTooltip => '?????? ?????';
+  String get selectCategoryTooltip => 'اختر الفئة';
 
   @override
-  String get allCategoriesLabel => '?? ??????';
+  String get allCategoriesLabel => 'كل الفئات';
 
   @override
-  String get byCategoryLabel => '??? ?????';
+  String get byCategoryLabel => 'حسب الفئة';
 
   @override
-  String get allLevelsTitle => '?? ?????????';
+  String get allLevelsTitle => 'كل المستويات';
 
   @override
-  String get allLevelsDescription => 'افتح الإنجازات للصعود في الرتب.';
+  String get allLevelsDescription => 'افتح الإنجازات للارتقاء في المستويات.';
 
   @override
   String levelPlusLabel(int level) {
@@ -2170,7 +2170,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get currentLabel => '????';
+  String get currentLabel => 'الحالي';
 
   @override
   String rankTierLearner(String tier) {
@@ -2178,392 +2178,393 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get achievementCategoryFocus => '???????';
+  String get achievementCategoryFocus => 'التركيز';
 
   @override
-  String get achievementCategoryStudy => '???????';
+  String get achievementCategoryStudy => 'الدراسة';
 
   @override
-  String get achievementCategoryReading => '???????';
+  String get achievementCategoryReading => 'القراءة';
 
   @override
-  String get achievementCategoryGoals => '???????';
+  String get achievementCategoryGoals => 'الأهداف';
 
   @override
-  String get achievementCategoryLifestyle => '??? ??????';
+  String get achievementCategoryLifestyle => 'نمط الحياة';
 
   @override
-  String get achievement1Title => '??? ?????';
+  String get achievement1Title => 'أول تركيز';
 
   @override
-  String get achievement1Description => '???? ??? ???? ?????';
+  String get achievement1Description => 'أكمل أول جلسة تركيز';
 
   @override
-  String get achievement2Title => '????? 25 ?????';
+  String get achievement2Title => 'بداية 25 دقيقة';
 
   @override
-  String get achievement2Description => '??? ???? 25 ?????';
+  String get achievement2Description => 'ركز لمدة 25 دقيقة';
 
   @override
-  String get achievement3Title => '???? ?????';
+  String get achievement3Title => 'ساعة تركيز';
 
   @override
-  String get achievement3Description => '??? ???? ???? ?????';
+  String get achievement3Description => 'ركز لمدة ساعة واحدة';
 
   @override
-  String get achievement4Title => '??? ????';
+  String get achievement4Title => 'تركيز عميق';
 
   @override
-  String get achievement4Description => '??? ?????? ?? ???????';
+  String get achievement4Description => 'صل إلى ساعتين من التركيز';
 
   @override
-  String get achievement5Title => '??? ??????';
+  String get achievement5Title => 'بلا مشتتات';
 
   @override
-  String get achievement5Description => '???? 3 ????? ?????';
+  String get achievement5Description => 'أكمل 3 جلسات تركيز';
 
   @override
-  String get achievement6Title => '??????? ???????';
+  String get achievement6Title => 'ماراثون التركيز';
 
   @override
-  String get achievement6Description => '??? 10 ????? ?? ???????';
+  String get achievement6Description => 'صل إلى 10 ساعات من التركيز';
 
   @override
-  String get achievement7Title => '?????? ?????';
+  String get achievement7Title => 'مستيقظ مبكر';
 
   @override
-  String get achievement7Description => '??? ??????? ?? 5 ????';
+  String get achievement7Description => 'سجل تركيزا في 5 أيام';
 
   @override
-  String get achievement8Title => '???? ????';
+  String get achievement8Title => 'ساهر الليل';
 
   @override
-  String get achievement8Description => '???? 10 ????? ?????';
+  String get achievement8Description => 'أكمل 10 جلسات تركيز';
 
   @override
-  String get achievement9Title => '????? ???????';
+  String get achievement9Title => 'سلسلة التركيز';
 
   @override
-  String get achievement9Description => '??? ??????? ?? 7 ????';
+  String get achievement9Description => 'سجل تركيزا في 7 أيام';
 
   @override
-  String get achievement10Title => '??? ???????';
+  String get achievement10Title => 'سيد التركيز';
 
   @override
-  String get achievement10Description => '??? 25 ???? ?? ???????';
+  String get achievement10Description => 'صل إلى 25 ساعة من التركيز';
 
   @override
-  String get achievement11Title => '???? ???????';
+  String get achievement11Title => 'بدأت الدراسة';
 
   @override
-  String get achievement11Description => '???? ??? ??? ?????';
+  String get achievement11Description => 'أنشئ أول سجل دراسة';
 
   @override
-  String get achievement12Title => '3 ?????';
+  String get achievement12Title => '3 جلسات';
 
   @override
-  String get achievement12Description => '???? 3 ?????';
+  String get achievement12Description => 'أكمل 3 جلسات';
 
   @override
-  String get achievement13Title => '5 ?????';
+  String get achievement13Title => '5 جلسات';
 
   @override
-  String get achievement13Description => '???? 5 ?????';
+  String get achievement13Description => 'أكمل 5 جلسات';
 
   @override
-  String get achievement14Title => '10 ?????';
+  String get achievement14Title => '10 جلسات';
 
   @override
-  String get achievement14Description => '???? 10 ?????';
+  String get achievement14Description => 'أكمل 10 جلسات';
 
   @override
-  String get achievement15Title => '?????? ??????';
+  String get achievement15Title => 'مستكشف المواد';
 
   @override
-  String get achievement15Description => '???? ???? ????? ??? ?????';
+  String get achievement15Description => 'ادرس مادة واحدة على الأقل';
 
   @override
-  String get achievement16Title => '??? ????????';
+  String get achievement16Title => 'بطل المراجعة';
 
   @override
-  String get achievement16Description => '??? 5 ????? ?? ???????';
+  String get achievement16Description => 'صل إلى 5 ساعات من الدراسة';
 
   @override
-  String get achievement17Title => '????? ????????';
+  String get achievement17Title => 'اختبار مكتمل';
 
   @override
-  String get achievement17Description => '???? 15 ????';
+  String get achievement17Description => 'أكمل 15 جلسة';
 
   @override
-  String get achievement18Title => '???? ???????';
+  String get achievement18Title => 'مخطط الدراسة';
 
   @override
-  String get achievement18Description => '???? ??? ?????';
+  String get achievement18Description => 'أنشئ هدف تركيز';
 
   @override
-  String get achievement19Title => '???? ????????';
+  String get achievement19Title => 'جاهز للاختبار';
 
   @override
-  String get achievement19Description => '??? 20 ???? ?? ???????';
+  String get achievement19Description => 'صل إلى 20 ساعة من الدراسة';
 
   @override
-  String get achievement20Title => '??? ??????';
+  String get achievement20Title => 'وضع الطالب';
 
   @override
-  String get achievement20Description => '??? 50 ???? ?? ???????';
+  String get achievement20Description => 'صل إلى 50 ساعة من الدراسة';
 
   @override
-  String get achievement21Title => '??? ????';
+  String get achievement21Title => 'أول صفحة';
 
   @override
-  String get achievement21Description => '???? ??? ????';
+  String get achievement21Description => 'اقرأ أول صفحة لك';
 
   @override
-  String get achievement22Title => '10 ?????';
+  String get achievement22Title => '10 صفحات';
 
   @override
-  String get achievement22Description => '???? 10 ?????';
+  String get achievement22Description => 'اقرأ 10 صفحات';
 
   @override
-  String get achievement23Title => '25 ????';
+  String get achievement23Title => '25 صفحة';
 
   @override
-  String get achievement23Description => '???? 25 ????';
+  String get achievement23Description => 'اقرأ 25 صفحة';
 
   @override
-  String get achievement24Title => '50 ????';
+  String get achievement24Title => '50 صفحة';
 
   @override
-  String get achievement24Description => '???? 50 ????';
+  String get achievement24Description => 'اقرأ 50 صفحة';
 
   @override
-  String get achievement25Title => '100 ????';
+  String get achievement25Title => '100 صفحة';
 
   @override
-  String get achievement25Description => '???? 100 ????';
+  String get achievement25Description => 'اقرأ 100 صفحة';
 
   @override
-  String get achievement26Title => '????? ???';
+  String get achievement26Title => 'فصل مكتمل';
 
   @override
-  String get achievement26Description => '???? 150 ????';
+  String get achievement26Description => 'اقرأ 150 صفحة';
 
   @override
-  String get achievement27Title => '???? ????? ???????';
+  String get achievement27Title => 'قارئ نهاية الأسبوع';
 
   @override
-  String get achievement27Description => '???? 250 ????';
+  String get achievement27Description => 'اقرأ 250 صفحة';
 
   @override
-  String get achievement28Title => '???? ????';
+  String get achievement28Title => 'قارئ يومي';
 
   @override
-  String get achievement28Description => '???? 300 ????';
+  String get achievement28Description => 'اقرأ 300 صفحة';
 
   @override
-  String get achievement29Title => '???? ????';
+  String get achievement29Title => 'قارئ مخلص';
 
   @override
-  String get achievement29Description => '???? 500 ????';
+  String get achievement29Description => 'اقرأ 500 صفحة';
 
   @override
-  String get achievement30Title => '?????? ???????';
+  String get achievement30Title => 'أسطورة المكتبة';
 
   @override
-  String get achievement30Description => '???? 1000 ????';
+  String get achievement30Description => 'اقرأ 1000 صفحة';
 
   @override
-  String get achievement31Title => '??? ???';
+  String get achievement31Title => 'أول هدف';
 
   @override
-  String get achievement31Description => '???? ??? ???';
+  String get achievement31Description => 'أنشئ أول هدف لك';
 
   @override
-  String get achievement32Title => '???? ???????';
+  String get achievement32Title => 'هدف مكتمل';
 
   @override
-  String get achievement32Description => '???? ????';
+  String get achievement32Description => 'أكمل هدفا';
 
   @override
-  String get achievement33Title => '?? ??????? ?????';
+  String get achievement33Title => 'كل الأهداف منجزة';
 
   @override
-  String get achievement33Description => '???? ?? ????? ?????';
+  String get achievement33Description => 'أنجز كل أهداف اليوم';
 
   @override
-  String get achievement34Title => '????? ??????';
+  String get achievement34Title => 'روتين الصباح';
 
   @override
-  String get achievement34Description => '???? ??????? ?? 3 ????';
+  String get achievement34Description => 'أكمل أهدافا في 3 أيام';
 
   @override
-  String get achievement35Title => '??? ??????';
+  String get achievement35Title => 'يوم متوازن';
 
   @override
-  String get achievement35Description => '???? ??????? ?? 5 ????';
+  String get achievement35Description => 'أكمل أهدافا في 5 أيام';
 
   @override
-  String get achievement36Title => '???? ??????';
+  String get achievement36Title => 'باني العادات';
 
   @override
-  String get achievement36Description => '???? ??????? ?? 10 ????';
+  String get achievement36Description => 'أكمل أهدافا في 10 أيام';
 
   @override
-  String get achievement37Title => '??? ?????';
+  String get achievement37Title => 'يوم مثالي';
 
   @override
-  String get achievement37Description => '???? ??????? ?? 15 ????';
+  String get achievement37Description => 'أكمل أهدافا في 15 يوما';
 
   @override
-  String get achievement38Title => '????';
+  String get achievement38Title => 'عودة قوية';
 
   @override
-  String get achievement38Description => '???? ??????? ?? 20 ????';
+  String get achievement38Description => 'أكمل أهدافا في 20 يوما';
 
   @override
-  String get achievement39Title => '??? ???????????';
+  String get achievement39Title => 'نجم الاستمرارية';
 
   @override
-  String get achievement39Description => '???? ??????? ?? 30 ????';
+  String get achievement39Description => 'أكمل أهدافا في 30 يوما';
 
   @override
-  String get achievement40Title => '?? ???? ??????';
+  String get achievement40Title => 'لا يمكن إيقافك';
 
   @override
-  String get achievement40Description => '???? ??????? ?? 50 ????';
+  String get achievement40Description => 'أكمل أهدافا في 50 يوما';
 
   @override
-  String get achievement41Title => '??? ??????';
+  String get achievement41Title => 'أول مجموعة';
 
   @override
-  String get achievement41Description => '???? ??? ?????? ?????';
+  String get achievement41Description => 'انضم إلى مجموعة دراسة';
 
   @override
-  String get achievement42Title => '???? ????';
+  String get achievement42Title => 'لاعب جماعي';
 
   @override
-  String get achievement42Description => '????? ?? ????????';
+  String get achievement42Description => 'نافس أصدقاءك';
 
   @override
-  String get achievement43Title => '???? ?????';
+  String get achievement43Title => 'صديق مساعد';
 
   @override
-  String get achievement43Description => '???? ????? ??? ?????????';
+  String get achievement43Description =>
+      'ساعد صديقا على الحفاظ على الاستمرارية';
 
   @override
-  String get achievement44Title => '???? ??????';
+  String get achievement44Title => 'فائز بالتحدي';
 
   @override
-  String get achievement44Description => '??? ????';
+  String get achievement44Description => 'افز بتحد';
 
   @override
-  String get achievement45Title => '????? ???????';
+  String get achievement45Title => 'بدأ التمرين';
 
   @override
-  String get achievement45Description => '??? ?????? ?? ???????';
+  String get achievement45Description => 'سجل تركيزا في التمرين';
 
   @override
-  String get achievement46Title => '????? 30 ?????';
+  String get achievement46Title => 'تمرين 30 دقيقة';
 
   @override
-  String get achievement46Description => '???? ???? 30 ?????';
+  String get achievement46Description => 'تمرن لمدة 30 دقيقة';
 
   @override
-  String get achievement47Title => '??? ???????';
+  String get achievement47Title => 'وقت الهواية';
 
   @override
-  String get achievement47Description => '??? ?????? ?? ?????';
+  String get achievement47Description => 'سجل تركيزا في هواية';
 
   @override
-  String get achievement48Title => '????? ???????';
+  String get achievement48Title => 'شرارة إبداعية';
 
   @override
-  String get achievement48Description => '??? 30 ????? ?? ????????';
+  String get achievement48Description => 'صل إلى 30 دقيقة في الهوايات';
 
   @override
-  String get achievement49Title => '????? ????? ???????';
+  String get achievement49Title => 'محارب نهاية الأسبوع';
 
   @override
-  String get achievement49Description => '??? ?????? ?? ???????';
+  String get achievement49Description => 'صل إلى ساعتين من التمارين';
 
   @override
-  String get achievement50Title => '???? ?????????';
+  String get achievement50Title => 'صائد الإنجازات';
 
   @override
-  String get achievement50Description => '???? 25 ??????';
+  String get achievement50Description => 'افتح 25 إنجازا';
 
   @override
-  String get rankTierPaper => '???';
+  String get rankTierPaper => 'ورق';
 
   @override
-  String get rankTierWood => '???';
+  String get rankTierWood => 'خشب';
 
   @override
-  String get rankTierStone => '???';
+  String get rankTierStone => 'حجر';
 
   @override
-  String get rankTierCopper => '????';
+  String get rankTierCopper => 'نحاس';
 
   @override
-  String get rankTierBronze => '?????';
+  String get rankTierBronze => 'برونز';
 
   @override
-  String get rankTierIron => '????';
+  String get rankTierIron => 'حديد';
 
   @override
-  String get rankTierSilver => '???';
+  String get rankTierSilver => 'فضة';
 
   @override
-  String get rankTierGold => '???';
+  String get rankTierGold => 'ذهب';
 
   @override
-  String get rankTierPlatinum => '??????';
+  String get rankTierPlatinum => 'بلاتين';
 
   @override
-  String get rankTierAmethyst => '????';
+  String get rankTierAmethyst => 'جمشت';
 
   @override
-  String get rankTierEmerald => '????';
+  String get rankTierEmerald => 'زمرد';
 
   @override
-  String get rankTierDiamond => '?????';
+  String get rankTierDiamond => 'ألماس';
 
   @override
-  String get rankTierObsidian => '???';
+  String get rankTierObsidian => 'سبج';
 
   @override
-  String get rankTierAdamantium => '??????????';
+  String get rankTierAdamantium => 'أدامانتيوم';
 
   @override
-  String get rankTierMithril => '??????';
+  String get rankTierMithril => 'ميثريل';
 
   @override
-  String get concentrationModeTitle => '??? ???????';
+  String get concentrationModeTitle => 'وضع التركيز';
 
   @override
   String get concentrationModeSubtitle =>
-      'اختر جلسات التركيز التي تمنع مغادرة التطبيق.';
+      'اختر الجلسات التي تمنع مغادرة التطبيق.';
 
   @override
-  String get concentrationStudyTitle => '???????';
+  String get concentrationStudyTitle => 'الدراسة';
 
   @override
   String get concentrationStudySubtitle => 'تركيز كامل على دراستك.';
 
   @override
-  String get concentrationExercisesTitle => '????????';
+  String get concentrationExercisesTitle => 'التمارين';
 
   @override
   String get concentrationExercisesSubtitle => 'ابق مركزا على تدريباتك.';
 
   @override
-  String get concentrationReadingTitle => '???????';
+  String get concentrationReadingTitle => 'القراءة';
 
   @override
   String get concentrationReadingSubtitle => 'انغمس في قراءاتك.';
 
   @override
-  String get concentrationHobbiesTitle => '????????';
+  String get concentrationHobbiesTitle => 'الهوايات';
 
   @override
   String get concentrationHobbiesSubtitle => 'استمتع بهواياتك بتركيز.';
@@ -2724,5 +2725,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get concentrationModeSheetDescription =>
-      'عند التفعيل، يساعدك التطبيق على البقاء مركزًا أثناء النشاط حتى تتوقف مؤقتًا أو تنهي.';
+      'عند التفعيل، يساعدك التطبيق على البقاء مركزا أثناء النشاط حتى توقفه مؤقتا أو تنهيه.';
+
+  @override
+  String get timerFocusLockWarning =>
+      'وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.';
 }

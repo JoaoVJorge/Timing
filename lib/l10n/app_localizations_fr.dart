@@ -2162,7 +2162,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get currentLevelLabel => 'Niveau actuel';
 
   @override
-  String get allAchievementsUnlockedLabel => 'Tout est d?bloqu?';
+  String get allAchievementsUnlockedLabel => 'Tout est débloqué';
 
   @override
   String get nextUnlockLabel => 'Prochain succès';
@@ -2332,7 +2332,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement16Description => 'Atteignez 5 heures d’étude';
 
   @override
-  String get achievement17Title => 'Quiz termin?';
+  String get achievement17Title => 'Quiz finalisé';
 
   @override
   String get achievement17Description => 'Terminez 15 sessions';
@@ -2386,7 +2386,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement25Description => 'Lisez 100 pages';
 
   @override
-  String get achievement26Title => 'Chapitre termin?';
+  String get achievement26Title => 'Chapitre terminé';
 
   @override
   String get achievement26Description => 'Lisez 150 pages';
@@ -2508,7 +2508,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement44Description => 'Gagnez un défi';
 
   @override
-  String get achievement45Title => 'Exercice commenc?';
+  String get achievement45Title => 'Exercice commencé';
 
   @override
   String get achievement45Description => 'Enregistrez du focus en exercice';
@@ -2590,11 +2590,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rankTierMithril => 'Mithril';
 
   @override
-  String get concentrationModeTitle => 'Mode concentration';
+  String get concentrationModeTitle => 'Mode de concentration';
 
   @override
   String get concentrationModeSubtitle =>
-      'Choisissez quelles sessions de focus bloquent la sortie de l’app.';
+      'Choisissez les sessions qui bloquent la sortie de l’app.';
 
   @override
   String get concentrationStudyTitle => 'Étude';
@@ -2785,5 +2785,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get concentrationModeSheetDescription =>
-      'Une fois activé, l\'application vous aide à rester concentré pendant l\'activité jusqu\'à ce que vous mettiez en pause ou terminiez.';
+      'Une fois activé, l’app vous aide à rester concentré pendant l’activité jusqu’à la pause ou la fin.';
+
+  @override
+  String get timerFocusLockWarning =>
+      'Le mode de concentration est actif. Terminez ou mettez la session en pause pour quitter.';
 }

@@ -1541,5 +1541,6 @@
   },
   "timerCurrentPagesLabel": "Current pages",
   "timerNotesLabel": "Notes",
-  "concentrationModeSheetDescription": "When enabled, the app helps you stay focused during the activity until you pause or finish."
+  "concentrationModeSheetDescription": "When enabled, the app helps you stay focused during the activity until you pause or finish.",
+  "timerFocusLockWarning": "Focus mode is active. Finish or pause the session to leave."
 }
