@@ -1795,16 +1795,16 @@ class AppLocalizationsAr extends AppLocalizations {
       'اقبل فقط الأشخاص الذين تعرفهم وتثق بهم.';
 
   @override
-  String get categoryEmptyStudyingTitle => '?? ???? ???? ???';
+  String get categoryEmptyStudyingTitle => 'لا توجد مادة بعد';
 
   @override
-  String get categoryEmptyExercisesTitle => '?? ???? ?????? ???';
+  String get categoryEmptyExercisesTitle => 'لا يوجد تمرين بعد';
 
   @override
-  String get categoryEmptyReadingTitle => '?? ???? ????? ???';
+  String get categoryEmptyReadingTitle => 'لا توجد قراءة بعد';
 
   @override
-  String get categoryEmptyHobbiesTitle => '?? ???? ????? ???';
+  String get categoryEmptyHobbiesTitle => 'لا توجد هواية بعد';
 
   @override
   String get categoryEmptyStudyingDescription =>
@@ -1823,40 +1823,40 @@ class AppLocalizationsAr extends AppLocalizations {
       'أضف هوايتك الأولى لتسجيل الممارسة والاستمرار.';
 
   @override
-  String get categorySuggestionStudyingOne => '???????';
+  String get categorySuggestionStudyingOne => 'رياضيات';
 
   @override
-  String get categorySuggestionStudyingTwo => '????????';
+  String get categorySuggestionStudyingTwo => 'فيزياء';
 
   @override
-  String get categorySuggestionStudyingThree => '?????';
+  String get categorySuggestionStudyingThree => 'لغة';
 
   @override
-  String get categorySuggestionExercisesOne => '???';
+  String get categorySuggestionExercisesOne => 'جري';
 
   @override
-  String get categorySuggestionExercisesTwo => '???';
+  String get categorySuggestionExercisesTwo => 'نادي رياضي';
 
   @override
-  String get categorySuggestionExercisesThree => '????';
+  String get categorySuggestionExercisesThree => 'تمدد';
 
   @override
-  String get categorySuggestionReadingOne => '?????';
+  String get categorySuggestionReadingOne => 'رواية';
 
   @override
-  String get categorySuggestionReadingTwo => '????';
+  String get categorySuggestionReadingTwo => 'كتاب';
 
   @override
-  String get categorySuggestionReadingThree => '??????';
+  String get categorySuggestionReadingThree => 'مقالة';
 
   @override
-  String get categorySuggestionHobbiesOne => '?????';
+  String get categorySuggestionHobbiesOne => 'رسم';
 
   @override
-  String get categorySuggestionHobbiesTwo => '???';
+  String get categorySuggestionHobbiesTwo => 'موسيقى';
 
   @override
-  String get categorySuggestionHobbiesThree => '???';
+  String get categorySuggestionHobbiesThree => 'لعبة';
 
   @override
   String get pagesAbbreviation => '?????';
