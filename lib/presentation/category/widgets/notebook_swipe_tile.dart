@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/category/widgets/group_activity_lock_badge.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 
 /// Horizontal swipe tile with two reveals: drag right for notes/statistics,
@@ -12,6 +13,7 @@ class NotebookSwipeTile extends StatefulWidget {
     required this.onTapStats,
     required this.onTapEdit,
     required this.onDelete,
+    this.isDeleteLocked = false,
     super.key,
   });
 
@@ -21,6 +23,7 @@ class NotebookSwipeTile extends StatefulWidget {
   final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
   final VoidCallback onDelete;
+  final bool isDeleteLocked;
 
   @override
   State<NotebookSwipeTile> createState() => _NotebookSwipeTileState();
@@ -142,7 +145,9 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
                       iconPath: "trash",
-                      color: context.colorTokens.error,
+                      color: context.colorTokens.surfaceInnerLayer,
+                      iconColor: context.colorTokens.textHint,
+                      showLock: widget.isDeleteLocked,
                       onTap: _onTapDelete,
                     ),
                   ],
@@ -169,6 +174,7 @@ class _RevealAction extends StatelessWidget {
     this.iconColor,
     this.color,
     this.gradient,
+    this.showLock = false,
   }) : assert(iconPath != null || iconData != null);
 
   static const double _revealWidth = 58;
@@ -180,22 +186,39 @@ class _RevealAction extends StatelessWidget {
   final VoidCallback onTap;
   final Color? color;
   final Gradient? gradient;
+  final bool showLock;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    child: Container(
-      width: _revealWidth,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      alignment: Alignment.center,
-      child: iconPath != null
-          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 25)
-          : Icon(iconData, color: iconColor ?? Colors.white, size: 25),
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: _revealWidth,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: color,
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          alignment: Alignment.center,
+          child: iconPath != null
+              ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 25)
+              : Icon(iconData, color: iconColor ?? Colors.white, size: 25),
+        ),
+        if (showLock)
+          Positioned(
+            top: -2,
+            right: -2,
+            child: GroupActivityLockBadge(
+              size: 20,
+              iconSize: 12,
+              backgroundColor: context.colorTokens.surface,
+              iconColor: context.colorTokens.borderFocused,
+            ),
+          ),
+      ],
     ),
   );
 }

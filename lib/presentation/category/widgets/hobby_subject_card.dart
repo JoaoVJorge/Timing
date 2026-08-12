@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/category/widgets/group_activity_lock_badge.dart";
 import "package:help_out/shared/functions/format_duration.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
@@ -276,7 +277,7 @@ class _HobbyOptionsSheet extends StatelessWidget {
             ),
             const Gap(14),
             _HobbyDeleteAction(
-              accent: context.colorTokens.error,
+              isLocked: subject.isFromGroup,
               label: context.l10n.hobbyDelete,
               subtitle: context.l10n.deleteActionCannotBeUndone,
               onTap: () => onAction("delete"),
@@ -355,68 +356,92 @@ class _HobbySheetAction extends StatelessWidget {
 
 class _HobbyDeleteAction extends StatelessWidget {
   const _HobbyDeleteAction({
-    required this.accent,
+    required this.isLocked,
     required this.label,
     required this.subtitle,
     required this.onTap,
   });
 
-  final Color accent;
+  final bool isLocked;
   final String label;
   final String subtitle;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onTap: onTap,
-    child: Container(
-      constraints: const BoxConstraints(minHeight: 72),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          _HobbySheetIcon(
-            color: accent.withValues(alpha: 0.14),
-            child: Icon(Icons.delete_outline_rounded, color: accent, size: 22),
-          ),
-          const Gap(12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+  Widget build(BuildContext context) {
+    final Color accent = context.colorTokens.textHint;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 72),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.44),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.colorTokens.borderUnfocused),
+        ),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(
+                _HobbySheetIcon(
+                  color: context.colorTokens.surfaceInnerLayer,
+                  child: Icon(
+                    Icons.delete_outline_rounded,
                     color: accent,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
+                    size: 22,
                   ),
                 ),
-                const Gap(2),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.dialogTextMuted,
-                    fontWeight: FontWeight.w600,
+                if (isLocked)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: GroupActivityLockBadge(
+                      size: 20,
+                      iconSize: 12,
+                      backgroundColor: context.colorTokens.surface,
+                      iconColor: context.colorTokens.borderFocused,
+                    ),
                   ),
-                ),
               ],
             ),
-          ),
-          const Gap(8),
-          Icon(Icons.chevron_right_rounded, color: accent, size: 26),
-        ],
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyLarge.copyWith(
+                      color: accent,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Gap(2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: context.colorTokens.dialogTextMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(8),
+            Icon(Icons.chevron_right_rounded, color: accent, size: 26),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
