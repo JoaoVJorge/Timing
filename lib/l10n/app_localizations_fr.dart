@@ -2675,4 +2675,115 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get timerEndActionLabel => 'Terminer';
+
+  @override
+  String get createGroupActivityStepSubtitle =>
+      'Choisissez l\'activité que tout le groupe fera.';
+
+  @override
+  String get createGroupFriendsStepSubtitle =>
+      'Invitez au moins 1 ami à participer.';
+
+  @override
+  String get createGroupSummaryStepSubtitle =>
+      'Vérifiez les informations avant de créer.';
+
+  @override
+  String get createGroupStepInformation => 'Informations';
+
+  @override
+  String get createGroupStepActivity => 'Activité';
+
+  @override
+  String get createGroupStepFriends => 'Amis';
+
+  @override
+  String get createGroupStepSummary => 'Résumé';
+
+  @override
+  String get createGroupDaysGoalHint => 'Ex : 30';
+
+  @override
+  String get createGroupPagesGoalHint => 'Ex : 10';
+
+  @override
+  String get createGroupMinutesGoalHint => 'Ex : 30';
+
+  @override
+  String get createGroupAddFriendsPromptTitle =>
+      'Vous n\'avez trouvé personne ?';
+
+  @override
+  String get createGroupAddFriendsPromptDescription =>
+      'Ajoutez plus d\'amis pour pouvoir les inviter.';
+
+  @override
+  String get createGroupContinueButton => 'Continuer';
+
+  @override
+  String get createGroupActivitySummaryDaily => 'Objectif quotidien';
+
+  @override
+  String createGroupActivitySummaryGoalDays(String days) {
+    return 'Objectif • $days jours';
+  }
+
+  @override
+  String createGroupActivitySummaryReading(String pages) {
+    return 'Lecture • $pages pages';
+  }
+
+  @override
+  String createGroupActivitySummaryTime(String category, String minutes) {
+    return '$category • $minutes min';
+  }
+
+  @override
+  String get createGroupActivityRequiredError =>
+      'Choisissez une activité pour le groupe.';
+
+  @override
+  String get createGroupActivityNameRequiredError =>
+      'Donnez un nom à l\'activité.';
+
+  @override
+  String get createGroupActivityGoalInvalidError =>
+      'Définissez un objectif valide.';
+
+  @override
+  String get createGroupActivityMissingError =>
+      'Définissez l\'activité du groupe.';
+
+  @override
+  String get timerBackTooltip => 'Retour';
+
+  @override
+  String get timerRestMessageTitle => 'Reposez-vous un peu';
+
+  @override
+  String get timerFocusLabel => 'Focus';
+
+  @override
+  String get timerReadingLabel => 'Lecture';
+
+  @override
+  String get timerPauseLabel => 'Pause';
+
+  @override
+  String get timerReadingTimeLabel => 'temps de lecture';
+
+  @override
+  String timerTotalOfLabel(String duration) {
+    return 'de $duration';
+  }
+
+  @override
+  String get timerCurrentPagesLabel => 'Pages actuelles';
+
+  @override
+  String get timerNotesLabel => 'Notes';
+
+  @override
+  String get concentrationModeSheetDescription =>
+      'Une fois activé, l\'application vous aide à rester concentré pendant l\'activité jusqu\'à ce que vous mettiez en pause ou terminiez.';
 }

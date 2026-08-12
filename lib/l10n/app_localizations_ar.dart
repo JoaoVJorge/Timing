@@ -2620,4 +2620,109 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get timerEndActionLabel => '?????';
+
+  @override
+  String get createGroupActivityStepSubtitle =>
+      'اختر النشاط الذي سيقوم به جميع أعضاء المجموعة.';
+
+  @override
+  String get createGroupFriendsStepSubtitle =>
+      'ادعُ صديقًا واحدًا على الأقل للانضمام.';
+
+  @override
+  String get createGroupSummaryStepSubtitle => 'راجع التفاصيل قبل الإنشاء.';
+
+  @override
+  String get createGroupStepInformation => 'المعلومات';
+
+  @override
+  String get createGroupStepActivity => 'النشاط';
+
+  @override
+  String get createGroupStepFriends => 'الأصدقاء';
+
+  @override
+  String get createGroupStepSummary => 'الملخص';
+
+  @override
+  String get createGroupDaysGoalHint => 'مثال: 30';
+
+  @override
+  String get createGroupPagesGoalHint => 'مثال: 10';
+
+  @override
+  String get createGroupMinutesGoalHint => 'مثال: 30';
+
+  @override
+  String get createGroupAddFriendsPromptTitle => 'لم تجد أحدًا؟';
+
+  @override
+  String get createGroupAddFriendsPromptDescription =>
+      'أضف المزيد من الأصدقاء لتتمكن من دعوتهم.';
+
+  @override
+  String get createGroupContinueButton => 'متابعة';
+
+  @override
+  String get createGroupActivitySummaryDaily => 'هدف يومي';
+
+  @override
+  String createGroupActivitySummaryGoalDays(String days) {
+    return 'الهدف • $days يوم';
+  }
+
+  @override
+  String createGroupActivitySummaryReading(String pages) {
+    return 'قراءة • $pages صفحة';
+  }
+
+  @override
+  String createGroupActivitySummaryTime(String category, String minutes) {
+    return '$category • $minutes دقيقة';
+  }
+
+  @override
+  String get createGroupActivityRequiredError => 'اختر نشاطًا للمجموعة.';
+
+  @override
+  String get createGroupActivityNameRequiredError => 'أعطِ النشاط اسمًا.';
+
+  @override
+  String get createGroupActivityGoalInvalidError => 'حدد هدفًا صالحًا.';
+
+  @override
+  String get createGroupActivityMissingError => 'حدد نشاط المجموعة.';
+
+  @override
+  String get timerBackTooltip => 'رجوع';
+
+  @override
+  String get timerRestMessageTitle => 'استرح قليلًا';
+
+  @override
+  String get timerFocusLabel => 'تركيز';
+
+  @override
+  String get timerReadingLabel => 'قراءة';
+
+  @override
+  String get timerPauseLabel => 'إيقاف مؤقت';
+
+  @override
+  String get timerReadingTimeLabel => 'وقت القراءة';
+
+  @override
+  String timerTotalOfLabel(String duration) {
+    return 'من $duration';
+  }
+
+  @override
+  String get timerCurrentPagesLabel => 'الصفحات الحالية';
+
+  @override
+  String get timerNotesLabel => 'ملاحظات';
+
+  @override
+  String get concentrationModeSheetDescription =>
+      'عند التفعيل، يساعدك التطبيق على البقاء مركزًا أثناء النشاط حتى تتوقف مؤقتًا أو تنهي.';
 }

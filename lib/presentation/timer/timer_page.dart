@@ -223,7 +223,7 @@ class _TimerHeader extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: IconButton(
             onPressed: onBackTap,
-            tooltip: "Voltar",
+            tooltip: context.l10n.timerBackTooltip,
             icon: AppIcon(
               "left_back",
               size: 22,
@@ -496,7 +496,7 @@ class _RestMessage extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       Text(
-        "Descanse um pouco",
+        context.l10n.timerRestMessageTitle,
         textAlign: TextAlign.center,
         style: TextStyle(
           color: context.colorTokens.white,
@@ -670,19 +670,22 @@ class _TimerViewData {
         TimerVisualState.resting => context.l10n.timerStateRestingTitle,
         TimerVisualState.paused => context.l10n.timerStatePausedTitle,
         TimerVisualState.finished => context.l10n.timerSessionSavedTitle,
-        TimerVisualState.focusing => isReading ? "Leitura" : "Foco",
+        TimerVisualState.focusing =>
+          isReading ? context.l10n.timerReadingLabel : context.l10n.timerFocusLabel,
       },
       mainLabel: isResting
-          ? "Pausa"
+          ? context.l10n.timerPauseLabel
           : isReading
-          ? "Leitura"
-          : "Foco",
+          ? context.l10n.timerReadingLabel
+          : context.l10n.timerFocusLabel,
       currentTime: formatDurationClock(Duration(seconds: currentSeconds)),
       totalTimeLabel: isReading
-          ? "tempo de leitura"
-          : "de ${formatDurationClock(Duration(seconds: totalIntervalSeconds))}",
+          ? context.l10n.timerReadingTimeLabel
+          : context.l10n.timerTotalOfLabel(
+              formatDurationClock(Duration(seconds: totalIntervalSeconds)),
+            ),
       nextBreakLabel: isReading
-          ? "Páginas atuais"
+          ? context.l10n.timerCurrentPagesLabel
           : _nextBreakDurationLabel(context),
       nextBreak: isReading
           ? "${controller.subject.currentPages}"
@@ -728,7 +731,9 @@ class _TimerViewData {
       trailingActionIcon: isResting
           ? Icons.skip_next_rounded
           : Icons.sticky_note_2_outlined,
-      trailingLabel: isResting ? context.l10n.timerSkipRestButton : "Notas",
+      trailingLabel: isResting
+          ? context.l10n.timerSkipRestButton
+          : context.l10n.timerNotesLabel,
       showStartDot: !isResting,
     );
   }

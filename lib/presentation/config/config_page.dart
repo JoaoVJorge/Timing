@@ -192,12 +192,12 @@ class ConfigPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Modo concentração",
+                              context.l10n.concentrationModeTitle,
                               style: context.textStyles.extraBold24,
                             ),
                             const Gap(8),
                             Text(
-                              "Quando ativado, o app ajuda você a se manter focado durante a atividade até pausar ou finalizar.",
+                              context.l10n.concentrationModeSheetDescription,
                               style: context.textStyles.bodyMedium.copyWith(
                                 color: context.colorTokens.textHint,
                                 height: 1.35,

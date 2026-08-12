@@ -1479,5 +1479,67 @@
   "createGroupActivitySummaryLabel": "Activity",
   "createGroupGuestsLabel": "Guests",
   "timerTotalTodayLabel": "Total today",
-  "timerEndActionLabel": "End"
+  "timerEndActionLabel": "End",
+  "createGroupActivityStepSubtitle": "Choose the activity everyone in the group will do.",
+  "createGroupFriendsStepSubtitle": "Invite at least 1 friend to join.",
+  "createGroupSummaryStepSubtitle": "Review the details before creating.",
+  "createGroupStepInformation": "Information",
+  "createGroupStepActivity": "Activity",
+  "createGroupStepFriends": "Friends",
+  "createGroupStepSummary": "Summary",
+  "createGroupDaysGoalHint": "Ex: 30",
+  "createGroupPagesGoalHint": "Ex: 10",
+  "createGroupMinutesGoalHint": "Ex: 30",
+  "createGroupAddFriendsPromptTitle": "Didn't find someone?",
+  "createGroupAddFriendsPromptDescription": "Add more friends to be able to invite them.",
+  "createGroupContinueButton": "Continue",
+  "createGroupActivitySummaryDaily": "Daily goal",
+  "createGroupActivitySummaryGoalDays": "Goal • {days} days",
+  "@createGroupActivitySummaryGoalDays": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "createGroupActivitySummaryReading": "Reading • {pages} pages",
+  "@createGroupActivitySummaryReading": {
+    "placeholders": {
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "createGroupActivitySummaryTime": "{category} • {minutes} min",
+  "@createGroupActivitySummaryTime": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "createGroupActivityRequiredError": "Choose an activity for the group.",
+  "createGroupActivityNameRequiredError": "Give the activity a name.",
+  "createGroupActivityGoalInvalidError": "Set a valid goal.",
+  "createGroupActivityMissingError": "Define the group's activity.",
+  "timerBackTooltip": "Go back",
+  "timerRestMessageTitle": "Rest a little",
+  "timerFocusLabel": "Focus",
+  "timerReadingLabel": "Reading",
+  "timerPauseLabel": "Pause",
+  "timerReadingTimeLabel": "reading time",
+  "timerTotalOfLabel": "of {duration}",
+  "@timerTotalOfLabel": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "timerCurrentPagesLabel": "Current pages",
+  "timerNotesLabel": "Notes",
+  "concentrationModeSheetDescription": "When enabled, the app helps you stay focused during the activity until you pause or finish."
 }

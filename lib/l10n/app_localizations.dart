@@ -4827,6 +4827,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End'**
   String get timerEndActionLabel;
+
+  /// No description provided for @createGroupActivityStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the activity everyone in the group will do.'**
+  String get createGroupActivityStepSubtitle;
+
+  /// No description provided for @createGroupFriendsStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite at least 1 friend to join.'**
+  String get createGroupFriendsStepSubtitle;
+
+  /// No description provided for @createGroupSummaryStepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the details before creating.'**
+  String get createGroupSummaryStepSubtitle;
+
+  /// No description provided for @createGroupStepInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get createGroupStepInformation;
+
+  /// No description provided for @createGroupStepActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get createGroupStepActivity;
+
+  /// No description provided for @createGroupStepFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get createGroupStepFriends;
+
+  /// No description provided for @createGroupStepSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get createGroupStepSummary;
+
+  /// No description provided for @createGroupDaysGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 30'**
+  String get createGroupDaysGoalHint;
+
+  /// No description provided for @createGroupPagesGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 10'**
+  String get createGroupPagesGoalHint;
+
+  /// No description provided for @createGroupMinutesGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: 30'**
+  String get createGroupMinutesGoalHint;
+
+  /// No description provided for @createGroupAddFriendsPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t find someone?'**
+  String get createGroupAddFriendsPromptTitle;
+
+  /// No description provided for @createGroupAddFriendsPromptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more friends to be able to invite them.'**
+  String get createGroupAddFriendsPromptDescription;
+
+  /// No description provided for @createGroupContinueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get createGroupContinueButton;
+
+  /// No description provided for @createGroupActivitySummaryDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goal'**
+  String get createGroupActivitySummaryDaily;
+
+  /// No description provided for @createGroupActivitySummaryGoalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal • {days} days'**
+  String createGroupActivitySummaryGoalDays(String days);
+
+  /// No description provided for @createGroupActivitySummaryReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading • {pages} pages'**
+  String createGroupActivitySummaryReading(String pages);
+
+  /// No description provided for @createGroupActivitySummaryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} • {minutes} min'**
+  String createGroupActivitySummaryTime(String category, String minutes);
+
+  /// No description provided for @createGroupActivityRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an activity for the group.'**
+  String get createGroupActivityRequiredError;
+
+  /// No description provided for @createGroupActivityNameRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the activity a name.'**
+  String get createGroupActivityNameRequiredError;
+
+  /// No description provided for @createGroupActivityGoalInvalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a valid goal.'**
+  String get createGroupActivityGoalInvalidError;
+
+  /// No description provided for @createGroupActivityMissingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Define the group\'s activity.'**
+  String get createGroupActivityMissingError;
+
+  /// No description provided for @timerBackTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get timerBackTooltip;
+
+  /// No description provided for @timerRestMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest a little'**
+  String get timerRestMessageTitle;
+
+  /// No description provided for @timerFocusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get timerFocusLabel;
+
+  /// No description provided for @timerReadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get timerReadingLabel;
+
+  /// No description provided for @timerPauseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get timerPauseLabel;
+
+  /// No description provided for @timerReadingTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'reading time'**
+  String get timerReadingTimeLabel;
+
+  /// No description provided for @timerTotalOfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'of {duration}'**
+  String timerTotalOfLabel(String duration);
+
+  /// No description provided for @timerCurrentPagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current pages'**
+  String get timerCurrentPagesLabel;
+
+  /// No description provided for @timerNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get timerNotesLabel;
+
+  /// No description provided for @concentrationModeSheetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, the app helps you stay focused during the activity until you pause or finish.'**
+  String get concentrationModeSheetDescription;
 }
 
 class _AppLocalizationsDelegate
