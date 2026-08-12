@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:get/get.dart";
+import "package:help_out/core/domain/entities/activity_entry_entity.dart";
 import "package:help_out/core/domain/entities/daily_progress_entity.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
@@ -18,6 +19,8 @@ class DailyProgressService {
   final Rx<DailyProgressEntity> today = const DailyProgressEntity().obs;
 
   List<DailyProgressEntity> get allProgress => _byDate.values.toList();
+
+  bool get isEmpty => _byDate.isEmpty;
 
   static String dateKey(DateTime date) =>
       "${date.year.toString().padLeft(4, "0")}-"
@@ -69,6 +72,23 @@ class DailyProgressService {
     }
     final DailyProgressEntity current = _current();
     await _update(current.copyWith(pages: current.pages + pages));
+  }
+
+  Future<void> replaceFromActivityEntries(
+    List<ActivityEntryEntity> entries,
+  ) async {
+    _byDate.clear();
+    for (final ActivityEntryEntity entry in entries) {
+      final String key = dateKey(entry.timestamp);
+      final DailyProgressEntity current =
+          _byDate[key] ?? const DailyProgressEntity();
+      _byDate[key] = current.copyWith(
+        focusSeconds: current.focusSeconds + entry.seconds,
+        pages: current.pages + entry.pages,
+      );
+    }
+    _refreshToday();
+    await _persist();
   }
 
   List<DailyProgressEntity> progressForLastDays(int days) {

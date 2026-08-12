@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:help_out/core/domain/entities/activity_entry_entity.dart";
 import "package:help_out/core/domain/entities/daily_progress_entity.dart";
 import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
@@ -15,6 +16,8 @@ class SubjectDailyHistoryService {
   final AppLocalStorageService _localStorageService;
 
   final Map<String, Map<String, DailyProgressEntity>> _bySubject = {};
+
+  bool get isEmpty => _bySubject.isEmpty;
 
   Future<void> load() async {
     try {
@@ -58,6 +61,27 @@ class SubjectDailyHistoryService {
     await _update(subjectId, current.copyWith(pages: current.pages + pages));
   }
 
+  Future<void> replaceFromActivityEntries(
+    List<ActivityEntryEntity> entries,
+  ) async {
+    _bySubject.clear();
+    for (final ActivityEntryEntity entry in entries) {
+      if (entry.subjectId.isEmpty) {
+        continue;
+      }
+      final String key = DailyProgressService.dateKey(entry.timestamp);
+      final Map<String, DailyProgressEntity> days =
+          _bySubject[entry.subjectId] ??= {};
+      final DailyProgressEntity current =
+          days[key] ?? const DailyProgressEntity();
+      days[key] = current.copyWith(
+        focusSeconds: current.focusSeconds + entry.seconds,
+        pages: current.pages + entry.pages,
+      );
+    }
+    await _persist();
+  }
+
   /// The subject's daily counters for the last [days] days, oldest first.
   List<DailyProgressEntity> historyForLastDays(String subjectId, int days) {
     final Map<String, DailyProgressEntity>? days$ = _bySubject[subjectId];
@@ -77,8 +101,9 @@ class SubjectDailyHistoryService {
 
   Future<void> _update(String subjectId, DailyProgressEntity updated) async {
     (_bySubject[subjectId] ??= {})[DailyProgressService.dateKey(
-      DateTime.now(),
-    )] = updated;
+          DateTime.now(),
+        )] =
+        updated;
     await _persist();
   }
 

@@ -23,6 +23,8 @@ class ActivityHistoryService {
 
   List<ActivityEntryEntity> get all => List.unmodifiable(_entries);
 
+  bool get isEmpty => _entries.isEmpty;
+
   Future<void> load() async {
     try {
       final String? saved = await _localStorageService.read<String?>(
@@ -69,6 +71,16 @@ class ActivityHistoryService {
       ),
     );
     _pruneOldEntries(now);
+    await _persist();
+  }
+
+  Future<void> replaceAll(List<ActivityEntryEntity> entries) async {
+    final DateTime now = DateTime.now();
+    _entries
+      ..clear()
+      ..addAll(entries);
+    _pruneOldEntries(now);
+    _entries.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     await _persist();
   }
 
