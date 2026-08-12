@@ -289,13 +289,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeNextScheduleEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No schedule today'**
+  /// **'No appointments today'**
   String get homeNextScheduleEmpty;
 
   /// No description provided for @homeNextScheduleAdd.
   ///
   /// In en, this message translates to:
-  /// **'Add schedule'**
+  /// **'Add appointment'**
   String get homeNextScheduleAdd;
 
   /// No description provided for @addTaskButton.
@@ -2179,25 +2179,25 @@ abstract class AppLocalizations {
   /// No description provided for @noScheduleYet.
   ///
   /// In en, this message translates to:
-  /// **'No schedule yet'**
+  /// **'No appointments yet'**
   String get noScheduleYet;
 
   /// No description provided for @noScheduleYetDescription.
   ///
   /// In en, this message translates to:
-  /// **'Tap the button below to add\nyour first schedule'**
+  /// **'Tap the button below to add\nyour first appointment'**
   String get noScheduleYetDescription;
 
   /// No description provided for @addScheduleEntryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Add Schedule Entry'**
+  /// **'Add Appointment'**
   String get addScheduleEntryTitle;
 
   /// No description provided for @addScheduleEntryButton.
   ///
   /// In en, this message translates to:
-  /// **'Add Entry'**
+  /// **'Add Appointment'**
   String get addScheduleEntryButton;
 
   /// No description provided for @scheduleInfoSection.
@@ -2215,7 +2215,7 @@ abstract class AppLocalizations {
   /// No description provided for @scheduleColorSection.
   ///
   /// In en, this message translates to:
-  /// **'Schedule color'**
+  /// **'Appointment color'**
   String get scheduleColorSection;
 
   /// No description provided for @schedulePreviewSection.
@@ -2551,7 +2551,7 @@ abstract class AppLocalizations {
   /// No description provided for @createScheduleEntryButton.
   ///
   /// In en, this message translates to:
-  /// **'Create entry'**
+  /// **'Create appointment'**
   String get createScheduleEntryButton;
 
   /// No description provided for @scheduleEntryMissingFields.
@@ -2911,7 +2911,7 @@ abstract class AppLocalizations {
   /// No description provided for @scheduleDayEventsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Day events'**
+  /// **'Schedule for the day'**
   String get scheduleDayEventsTitle;
 
   /// No description provided for @dailyGoalsNoGoalsYetTitle.
@@ -3007,7 +3007,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectDateHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap a day to select'**
+  /// **'Choose a day in the calendar'**
   String get selectDateHint;
 
   /// No description provided for @addFriendTitle.
@@ -3631,7 +3631,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupDescription.
   ///
   /// In en, this message translates to:
-  /// **'Sharing {metric} and beating challenges together.'**
+  /// **'Ranking by {metric}. Keep progressing with your group.'**
   String groupDescription(String metric);
 
   /// No description provided for @groupsFriendsSubtitleWithCount.
@@ -3649,13 +3649,13 @@ abstract class AppLocalizations {
   /// No description provided for @groupGoalDescription.
   ///
   /// In en, this message translates to:
-  /// **'Each member should log progress in {metric} to keep the group streak going.'**
+  /// **'Each member logs {metric} to keep the group streak active.'**
   String groupGoalDescription(String metric);
 
   /// No description provided for @groupRuleDescription.
   ///
   /// In en, this message translates to:
-  /// **'Log at least one {metric} activity per day. Keeping the streak strengthens the group.'**
+  /// **'Log at least one {metric} entry per day to strengthen the group streak.'**
   String groupRuleDescription(String metric);
 
   /// No description provided for @joinWithCodeButton.
@@ -3721,13 +3721,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeScheduleRoutineSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Upcoming times and weekly routine'**
+  /// **'Upcoming schedule and weekly routine'**
   String get homeScheduleRoutineSubtitle;
 
   /// No description provided for @homeNextCommitmentTitle.
   ///
   /// In en, this message translates to:
-  /// **'Next commitment'**
+  /// **'Up next'**
   String get homeNextCommitmentTitle;
 
   /// No description provided for @todayLabel.

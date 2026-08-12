@@ -110,10 +110,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTodayAgendaTitle => 'Today\'s agenda';
 
   @override
-  String get homeNextScheduleEmpty => 'No schedule today';
+  String get homeNextScheduleEmpty => 'No appointments today';
 
   @override
-  String get homeNextScheduleAdd => 'Add schedule';
+  String get homeNextScheduleAdd => 'Add appointment';
 
   @override
   String get addTaskButton => 'Add goal';
@@ -1163,17 +1163,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myScheduleTitle => 'My Schedule';
 
   @override
-  String get noScheduleYet => 'No schedule yet';
+  String get noScheduleYet => 'No appointments yet';
 
   @override
   String get noScheduleYetDescription =>
-      'Tap the button below to add\nyour first schedule';
+      'Tap the button below to add\nyour first appointment';
 
   @override
-  String get addScheduleEntryTitle => 'Add Schedule Entry';
+  String get addScheduleEntryTitle => 'Add Appointment';
 
   @override
-  String get addScheduleEntryButton => 'Add Entry';
+  String get addScheduleEntryButton => 'Add Appointment';
 
   @override
   String get scheduleInfoSection => 'Information';
@@ -1182,7 +1182,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scheduleWhenSection => 'When?';
 
   @override
-  String get scheduleColorSection => 'Schedule color';
+  String get scheduleColorSection => 'Appointment color';
 
   @override
   String get schedulePreviewSection => 'Preview';
@@ -1382,7 +1382,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get createScheduleEntryButton => 'Create entry';
+  String get createScheduleEntryButton => 'Create appointment';
 
   @override
   String get scheduleEntryMissingFields =>
@@ -1602,7 +1602,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinGroupError => 'Could not join this group.';
 
   @override
-  String get scheduleDayEventsTitle => 'Day events';
+  String get scheduleDayEventsTitle => 'Schedule for the day';
 
   @override
   String get dailyGoalsNoGoalsYetTitle => 'No goals yet';
@@ -1653,7 +1653,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectDateTitle => 'Select date';
 
   @override
-  String get selectDateHint => 'Tap a day to select';
+  String get selectDateHint => 'Choose a day in the calendar';
 
   @override
   String get addFriendTitle => 'Add friend';
@@ -1999,7 +1999,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String groupDescription(String metric) {
-    return 'Sharing $metric and beating challenges together.';
+    return 'Ranking by $metric. Keep progressing with your group.';
   }
 
   @override
@@ -2014,12 +2014,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String groupGoalDescription(String metric) {
-    return 'Each member should log progress in $metric to keep the group streak going.';
+    return 'Each member logs $metric to keep the group streak active.';
   }
 
   @override
   String groupRuleDescription(String metric) {
-    return 'Log at least one $metric activity per day. Keeping the streak strengthens the group.';
+    return 'Log at least one $metric entry per day to strengthen the group streak.';
   }
 
   @override
@@ -2066,10 +2066,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeScheduleRoutineSubtitle => 'Upcoming times and weekly routine';
+  String get homeScheduleRoutineSubtitle =>
+      'Upcoming schedule and weekly routine';
 
   @override
-  String get homeNextCommitmentTitle => 'Next commitment';
+  String get homeNextCommitmentTitle => 'Up next';
 
   @override
   String get todayLabel => 'Today';

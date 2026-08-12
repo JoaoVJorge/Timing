@@ -110,10 +110,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeTodayAgendaTitle => 'Agenda de hoy';
 
   @override
-  String get homeNextScheduleEmpty => 'Sin horario hoy';
+  String get homeNextScheduleEmpty => 'Sin compromisos hoy';
 
   @override
-  String get homeNextScheduleAdd => 'Agregar horario';
+  String get homeNextScheduleAdd => 'Agregar compromiso';
 
   @override
   String get addTaskButton => 'Añadir meta';
@@ -1172,17 +1172,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get myScheduleTitle => 'Tu Agenda';
 
   @override
-  String get noScheduleYet => 'Todavía no hay horarios';
+  String get noScheduleYet => 'Todavía no hay compromisos';
 
   @override
   String get noScheduleYetDescription =>
-      'Toca el botón de abajo para agregar\ntu primer horario';
+      'Toca el botón de abajo para agregar\ntu primer compromiso';
 
   @override
-  String get addScheduleEntryTitle => 'Agregar Horario';
+  String get addScheduleEntryTitle => 'Agregar compromiso';
 
   @override
-  String get addScheduleEntryButton => 'Agregar Horario';
+  String get addScheduleEntryButton => 'Agregar compromiso';
 
   @override
   String get scheduleInfoSection => 'Información';
@@ -1191,7 +1191,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scheduleWhenSection => '¿Cuándo?';
 
   @override
-  String get scheduleColorSection => 'Color del horario';
+  String get scheduleColorSection => 'Color del compromiso';
 
   @override
   String get schedulePreviewSection => 'Vista previa';
@@ -1556,20 +1556,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get profilePhotoSourceSubtitle =>
-      'Elige c?mo deseas actualizar tu foto';
+      'Elige cómo deseas actualizar tu foto';
 
   @override
   String get photoCameraLabel => 'Tomar foto';
 
   @override
-  String get photoGalleryLabel => 'Elegir de la galer?a';
+  String get photoGalleryLabel => 'Elegir de la galería';
 
   @override
   String get removePhotoDialogTitle => '?Quitar foto?';
 
   @override
   String get removePhotoDialogContent =>
-      'Tu avatar volver? a aparecer en el perfil.';
+      'Tu avatar volverá a aparecer en el perfil.';
 
   @override
   String get friendRequestsReceivedTab => 'Solicitudes';
@@ -1579,11 +1579,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String hobbyPracticeMinutes(int minutes) {
-    return '$minutes min de pr?ctica';
+    return '$minutes min de práctica';
   }
 
   @override
-  String get hobbyViewStatistics => 'Ver estad?sticas';
+  String get hobbyViewStatistics => 'Ver estadísticas';
 
   @override
   String get hobbyEdit => 'Editar hobby';
@@ -1595,16 +1595,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hobbyDelete => 'Eliminar hobby';
 
   @override
-  String get deleteActionCannotBeUndone => 'Esta acci?n no se puede deshacer.';
+  String get deleteActionCannotBeUndone => 'Esta acción no se puede deshacer.';
 
   @override
   String get joinGroupTitle => 'Unirse a un grupo';
 
   @override
-  String get joinGroupInviteCodeLabel => 'C?digo de invitaci?n';
+  String get joinGroupInviteCodeLabel => 'Código de invitación';
 
   @override
-  String get joinGroupCodeHint => 'Escribe el c?digo';
+  String get joinGroupCodeHint => 'Escribe el código';
 
   @override
   String get joinGroupButton => 'Unirme al grupo';
@@ -1613,14 +1613,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get joinGroupError => 'No fue posible unirse a este grupo.';
 
   @override
-  String get scheduleDayEventsTitle => 'Eventos del d?a';
+  String get scheduleDayEventsTitle => 'Agenda del día';
 
   @override
-  String get dailyGoalsNoGoalsYetTitle => 'Ninguna meta todav?a';
+  String get dailyGoalsNoGoalsYetTitle => 'Ninguna meta todavía';
 
   @override
   String get dailyGoalsNoGoalsYetDescription =>
-      'Agrega tu primera meta para organizar el d?a y seguir tus logros.';
+      'Agrega tu primera meta para organizar el día y seguir tus logros.';
 
   @override
   String get dailyGoalsSuggestionsTitle => 'Sugerencias para empezar';
@@ -1629,7 +1629,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dailyGoalsSuggestionStudy => 'Estudiar 30 min';
 
   @override
-  String get dailyGoalsSuggestionRead => 'Leer 10 p?ginas';
+  String get dailyGoalsSuggestionRead => 'Leer 10 páginas';
 
   @override
   String get dailyGoalsSuggestionTrain => 'Entrenar';
@@ -1652,7 +1652,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'La conclu?';
 
   @override
-  String get scheduleTitleRequiredError => 'Completa el t?tulo para continuar';
+  String get scheduleTitleRequiredError => 'Completa el título para continuar';
 
   @override
   String get scheduleActiveFromLabel => 'Comienza';
@@ -1664,20 +1664,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get selectDateTitle => 'Seleccionar fecha';
 
   @override
-  String get selectDateHint => 'Toca un d?a para seleccionar';
+  String get selectDateHint => 'Elige un día en el calendario';
 
   @override
   String get addFriendTitle => 'Agregar amigo';
 
   @override
   String get friendCodeNotFound =>
-      'No encontramos ning?n usuario con este c?digo.';
+      'No encontramos ningún usuario con este código.';
 
   @override
-  String get friendInviteCodeTitle => 'C?digo de invitaci?n';
+  String get friendInviteCodeTitle => 'Código de invitación';
 
   @override
-  String get friendInviteCodeFieldLabel => 'Escribe o pega el c?digo';
+  String get friendInviteCodeFieldLabel => 'Escribe o pega el código';
 
   @override
   String get friendInviteCodeFieldHint => 'Como ABCDE12345';
@@ -1686,35 +1686,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pasteButton => 'Pegar';
 
   @override
-  String get searchCodeButton => 'Buscar c?digo';
+  String get searchCodeButton => 'Buscar código';
 
   @override
   String get friendUserFoundTitle => 'Usuario encontrado';
 
   @override
-  String get friendFoundByCode => 'Encontrado por c?digo';
+  String get friendFoundByCode => 'Encontrado por código';
 
   @override
   String get sentLabel => 'Enviado';
 
   @override
-  String get friendHowItWorksTitle => 'C?mo funciona';
+  String get friendHowItWorksTitle => 'Cómo funciona';
 
   @override
-  String get friendHowItWorksStepOne => 'Pide el c?digo a tu amigo';
+  String get friendHowItWorksStepOne => 'Pide el código a tu amigo';
 
   @override
   String get friendHowItWorksStepTwo =>
-      'Pega el c?digo para encontrar el perfil';
+      'Pega el código para encontrar el perfil';
 
   @override
-  String get friendHowItWorksStepThree => 'Env?a la solicitud para agregar';
+  String get friendHowItWorksStepThree => 'Envía la solicitud para agregar';
 
   @override
-  String get myCodeLabel => 'Mi c?digo';
+  String get myCodeLabel => 'Mi código';
 
   @override
-  String get yourInviteCodeLabel => 'Tu c?digo de invitaci?n';
+  String get yourInviteCodeLabel => 'Tu código de invitación';
 
   @override
   String yourFriendsTitle(int count) {
@@ -1733,17 +1733,17 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get friendsEmptyTitle => 'A?n no tienes amigos';
+  String get friendsEmptyTitle => 'Aún no tienes amigos';
 
   @override
   String get friendsEmptySubtitle =>
-      'Busca personas arriba o comparte tu c?digo de invitaci?n.';
+      'Busca personas arriba o comparte tu código de invitación.';
 
   @override
-  String get shareCodeButton => 'Compartir c?digo';
+  String get shareCodeButton => 'Compartir código';
 
   @override
-  String get codeCopiedMessage => 'C?digo copiado';
+  String get codeCopiedMessage => 'Código copiado';
 
   @override
   String get friendRequestSentMessage => 'Solicitud enviada';
@@ -1756,7 +1756,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'Agr?game en HelpOut con mi c?digo: $code';
+    return 'Agrégame en HelpOut con mi código: $code';
   }
 
   @override
@@ -1795,7 +1795,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get friendMutualFriendsSample => '3 amigos en com?n';
+  String get friendMutualFriendsSample => '3 amigos en común';
 
   @override
   String get pendingLabel => 'Pendiente';
@@ -1804,31 +1804,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friendRequestsIncomingEmptyTitle => 'Ninguna solicitud recibida';
 
   @override
-  String get friendRequestsSentEmptyTitle => 'Ninguna invitaci?n enviada';
+  String get friendRequestsSentEmptyTitle => 'Ninguna invitación enviada';
 
   @override
   String get friendRequestsIncomingEmptySubtitle =>
-      'Las solicitudes aparecer?n aqu?.';
+      'Las solicitudes aparecerán aquí.';
 
   @override
   String get friendRequestsSentEmptySubtitle =>
-      'Tus invitaciones enviadas aparecer?n aqu?.';
+      'Tus invitaciones enviadas aparecerán aquí.';
 
   @override
   String get friendRequestsSafetyNotice =>
-      'Acepta solo personas que conoces y conf?as.';
+      'Acepta solo personas que conoces y confías.';
 
   @override
-  String get categoryEmptyStudyingTitle => 'Ninguna materia todav?a';
+  String get categoryEmptyStudyingTitle => 'Ninguna materia todavía';
 
   @override
-  String get categoryEmptyExercisesTitle => 'Ning?n ejercicio todav?a';
+  String get categoryEmptyExercisesTitle => 'Ningún ejercicio todavía';
 
   @override
-  String get categoryEmptyReadingTitle => 'Ninguna lectura todav?a';
+  String get categoryEmptyReadingTitle => 'Ninguna lectura todavía';
 
   @override
-  String get categoryEmptyHobbiesTitle => 'Ning?n hobby todav?a';
+  String get categoryEmptyHobbiesTitle => 'Ningún hobby todavía';
 
   @override
   String get categoryEmptyStudyingDescription =>
@@ -1840,20 +1840,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get categoryEmptyReadingDescription =>
-      'Agrega tu primera lectura para registrar p?ginas, tiempo y progreso.';
+      'Agrega tu primera lectura para registrar páginas, tiempo y progreso.';
 
   @override
   String get categoryEmptyHobbiesDescription =>
-      'Agrega tu primer hobby para registrar pr?ctica y mantener constancia.';
+      'Agrega tu primer hobby para registrar práctica y mantener constancia.';
 
   @override
-  String get categorySuggestionStudyingOne => 'Matem?ticas';
+  String get categorySuggestionStudyingOne => 'Matemáticas';
 
   @override
-  String get categorySuggestionStudyingTwo => 'Ingl?s';
+  String get categorySuggestionStudyingTwo => 'Inglés';
 
   @override
-  String get categorySuggestionStudyingThree => 'Redacci?n';
+  String get categorySuggestionStudyingThree => 'Redacción';
 
   @override
   String get categorySuggestionExercisesOne => 'Carrera';
@@ -1868,10 +1868,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categorySuggestionReadingOne => 'Novela';
 
   @override
-  String get categorySuggestionReadingTwo => 'T?cnico';
+  String get categorySuggestionReadingTwo => 'Técnico';
 
   @override
-  String get categorySuggestionReadingThree => 'Art?culos';
+  String get categorySuggestionReadingThree => 'Artículos';
 
   @override
   String get categorySuggestionHobbiesOne => 'Guitarra';
@@ -1883,22 +1883,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get categorySuggestionHobbiesThree => 'Cocina';
 
   @override
-  String get pagesAbbreviation => 'p?gs';
+  String get pagesAbbreviation => 'págs';
 
   @override
-  String get loginSecurityNote => 'Tus datos est?n protegidos y seguros.';
+  String get loginSecurityNote => 'Tus datos están protegidos y seguros.';
 
   @override
-  String get nextBreakDurationLabel => 'Duraci?n del pr?ximo descanso';
+  String get nextBreakDurationLabel => 'Duración del próximo descanso';
 
   @override
   String timerReadingExitContent(String duration, String subjectName) {
-    return 'Le?ste durante $duration. Informa cu?ntas p?ginas le?ste en $subjectName.';
+    return 'Leíste durante $duration. Informa cuántas páginas leíste en $subjectName.';
   }
 
   @override
   String get appleSignInIncompleteMessage =>
-      'Iniciar sesi?n con Apple a?n no est? completo.';
+      'Iniciar sesión con Apple aún no está completo.';
 
   @override
   String get activityTypeLabel => 'Tipo de actividad';
@@ -1908,17 +1908,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get activityTypeDailyDescription =>
-      'Se renueva todos los d?as. La actividad vuelve por la ma?ana.';
+      'Se renueva todos los días. La actividad vuelve por la mañana.';
 
   @override
   String get activityTypePermanentLabel => 'Permanente';
 
   @override
   String get activityTypePermanentDescription =>
-      'Permanece activa hasta concluirla. Despu?s se marca como finalizada.';
+      'Permanece activa hasta concluirla. Después se marca como finalizada.';
 
   @override
-  String get pagesSuffix => 'p?ginas';
+  String get pagesSuffix => 'páginas';
 
   @override
   String get updatedSuccessfullyMessage => 'Actualizado correctamente';
@@ -1927,7 +1927,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get focusSessionCountLabel => 'Sesiones de enfoque';
 
   @override
-  String get groupEditingComingSoon => 'Edici?n del grupo pr?ximamente.';
+  String get groupEditingComingSoon => 'Edición del grupo próximamente.';
 
   @override
   String get leftGroupMessage => 'Saliste del grupo.';
@@ -1936,7 +1936,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupImageSourceTitle => 'Enviar imagen';
 
   @override
-  String get groupImageSourceSubtitle => 'Elige c?mo deseas enviar la imagen';
+  String get groupImageSourceSubtitle => 'Elige cómo deseas enviar la imagen';
 
   @override
   String get deleteButton => 'Eliminar';
@@ -1945,10 +1945,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get manageMembersTitle => 'Gestionar miembros';
 
   @override
-  String get groupLeaderLabel => 'L?der';
+  String get groupLeaderLabel => 'Líder';
 
   @override
-  String get groupLeaderRoleLabel => 'L?der del grupo';
+  String get groupLeaderRoleLabel => 'Líder del grupo';
 
   @override
   String get groupMemberRoleLabel => 'Miembro';
@@ -1972,7 +1972,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupMainRuleTitle => 'Regla principal';
 
   @override
-  String get groupNextMilestoneTitle => 'Pr?ximo hito';
+  String get groupNextMilestoneTitle => 'Próximo hito';
 
   @override
   String groupMembersProgressValue(int current, int total) {
@@ -1992,10 +1992,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get groupNoImagesTitle => 'A?n no hay im?genes';
+  String get groupNoImagesTitle => 'Aún no hay imágenes';
 
   @override
-  String get groupNoImagesDescription => 'Env?a la primera imagen del grupo.';
+  String get groupNoImagesDescription => 'Envía la primera imagen del grupo.';
 
   @override
   String get groupSendImageButton => 'Enviar imagen';
@@ -2011,7 +2011,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String groupDescription(String metric) {
-    return 'Compartiendo $metric y superando retos.';
+    return 'Ranking por $metric. Sigue avanzando con tu grupo.';
   }
 
   @override
@@ -2021,21 +2021,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String groupGoalKeepMetric(String metric) {
-    return 'Mantener $metric todos los d?as';
+    return 'Mantener $metric todos los días';
   }
 
   @override
   String groupGoalDescription(String metric) {
-    return 'Cada participante debe registrar progreso en $metric para mantener la racha del grupo.';
+    return 'Cada participante registra $metric para mantener activa la racha del grupo.';
   }
 
   @override
   String groupRuleDescription(String metric) {
-    return 'Registra al menos una actividad de $metric por d?a. Mantener la racha fortalece el grupo.';
+    return 'Registra al menos una entrada de $metric por día para fortalecer la racha del grupo.';
   }
 
   @override
-  String get joinWithCodeButton => 'Tengo un c?digo de invitaci?n';
+  String get joinWithCodeButton => 'Tengo un código de invitación';
 
   @override
   String get groupsBenefitsHeader => 'En un grupo puedes:';
@@ -2057,7 +2057,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get addMemberButton => 'A?adir miembro';
+  String get addMemberButton => 'Añadir miembro';
 
   @override
   String get groupCollectiveProgressTitle => 'Progreso colectivo';
@@ -2079,28 +2079,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeScheduleRoutineSubtitle =>
-      'Pr?ximos horarios y rutina semanal';
+      'Próximos horarios y rutina semanal';
 
   @override
-  String get homeNextCommitmentTitle => 'Pr?ximo compromiso';
+  String get homeNextCommitmentTitle => 'Próximo evento';
 
   @override
   String get todayLabel => 'Hoy';
 
   @override
-  String get statisticsTitle => 'Estad?sticas';
+  String get statisticsTitle => 'Estadísticas';
 
   @override
   String get studiedTimeLabel => 'Tiempo estudiado';
 
   @override
-  String get readingTimeLabel => 'Tiempo le?do';
+  String get readingTimeLabel => 'Tiempo leído';
 
   @override
-  String get totalPagesReadLabel => 'Total de p?ginas';
+  String get totalPagesReadLabel => 'Total de páginas';
 
   @override
-  String get pagesReadTodayLabel => 'P?ginas hoy';
+  String get pagesReadTodayLabel => 'Páginas hoy';
 
   @override
   String get goalLabel => 'Meta';
@@ -2115,13 +2115,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get comparativesTitle => 'Comparativos';
 
   @override
-  String get overviewTitle => 'Visi?n general';
+  String get overviewTitle => 'Visión general';
 
   @override
   String get studiedUnit => 'estudiados';
 
   @override
-  String get readPagesUnit => 'le?das';
+  String get readPagesUnit => 'leídas';
 
   @override
   String get versusLastMonth => 'vs mes pasado';
@@ -2130,7 +2130,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get versusLastWeek => 'vs semana pasada';
 
   @override
-  String get noPreviousPeriodComparison => 'Sin per?odo anterior para comparar';
+  String get noPreviousPeriodComparison => 'Sin período anterior para comparar';
 
   @override
   String get noTimeLabel => 'Sin horario';
@@ -2150,7 +2150,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get allAchievementsUnlockedLabel => 'Todo desbloqueado';
 
   @override
-  String get nextUnlockLabel => 'Pr?ximo logro';
+  String get nextUnlockLabel => 'Próximo logro';
 
   @override
   String get allAchievementsUnlockedDescription => 'Desbloqueaste todo.';
@@ -2175,13 +2175,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lockedFilterLabel => 'Bloqueados';
 
   @override
-  String get selectCategoryTooltip => 'Seleccionar categor?a';
+  String get selectCategoryTooltip => 'Seleccionar categoría';
 
   @override
-  String get allCategoriesLabel => 'Todas las categor?as';
+  String get allCategoriesLabel => 'Todas las categorías';
 
   @override
-  String get byCategoryLabel => 'Por categor?a';
+  String get byCategoryLabel => 'Por categoría';
 
   @override
   String get allLevelsTitle => 'Todos los niveles';
@@ -2563,11 +2563,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rankTierMithril => 'Mithril';
 
   @override
-  String get concentrationModeTitle => 'Modo concentraci?n';
+  String get concentrationModeTitle => 'Modo concentración';
 
   @override
   String get concentrationModeSubtitle =>
-      'Elige qu? sesiones de enfoque bloquean la salida de la app.';
+      'Elige qué sesiones de enfoque bloquean la salida de la app.';
 
   @override
   String get concentrationStudyTitle => 'Estudio';
@@ -2580,13 +2580,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get concentrationExercisesSubtitle =>
-      'Conc?ntrate en tus entrenamientos.';
+      'Concéntrate en tus entrenamientos.';
 
   @override
   String get concentrationReadingTitle => 'Lectura';
 
   @override
-  String get concentrationReadingSubtitle => 'Sum?rgete en tus lecturas.';
+  String get concentrationReadingSubtitle => 'Sumérgete en tus lecturas.';
 
   @override
   String get concentrationHobbiesTitle => 'Hobbies';
@@ -2596,15 +2596,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Disfruta tus hobbies con enfoque.';
 
   @override
-  String get createGroupDescriptionLabel => 'Descripci?n';
+  String get createGroupDescriptionLabel => 'Descripción';
 
   @override
   String get createGroupDescriptionHint =>
-      'Describe el grupo y cu?l es su objetivo.';
+      'Describe el grupo y cuál es su objetivo.';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'Este tema define la m?trica del ranking.';
+      'Este tema define la métrica del ranking.';
 
   @override
   String get createGroupActivityTypeDescription =>
@@ -2614,7 +2614,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get createGroupActivityNameLabel => 'Nombre de la actividad';
 
   @override
-  String get createGroupActivityNameHint => 'Ej: C?lculo I';
+  String get createGroupActivityNameHint => 'Ej: Cálculo I';
 
   @override
   String get createGroupGoalTypeLabel => 'Tipo de meta';
@@ -2626,10 +2626,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get createGroupGoalTypeDaily => 'Diaria';
 
   @override
-  String get createGroupDaysGoalLabel => 'Meta de d?as';
+  String get createGroupDaysGoalLabel => 'Meta de días';
 
   @override
-  String get createGroupPagesGoalLabel => 'Meta de p?ginas';
+  String get createGroupPagesGoalLabel => 'Meta de páginas';
 
   @override
   String get createGroupTimeGoalMinutesLabel => 'Meta de tiempo (min)';

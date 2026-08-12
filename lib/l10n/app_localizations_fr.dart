@@ -111,10 +111,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeTodayAgendaTitle => 'L\'ordre du jour d\'aujourd\'hui';
 
   @override
-  String get homeNextScheduleEmpty => 'Pas d\'horaire aujourd\'hui';
+  String get homeNextScheduleEmpty => 'Aucun rendez-vous aujourd\'hui';
 
   @override
-  String get homeNextScheduleAdd => 'Ajouter un horaire';
+  String get homeNextScheduleAdd => 'Ajouter un rendez-vous';
 
   @override
   String get addTaskButton => 'Ajouter un objectif';
@@ -1184,17 +1184,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get myScheduleTitle => 'Mon emploi du temps';
 
   @override
-  String get noScheduleYet => 'Pas encore d\'horaire';
+  String get noScheduleYet => 'Aucun rendez-vous pour le moment';
 
   @override
   String get noScheduleYetDescription =>
-      'Appuyez sur le bouton ci-dessous pour ajouter\nvotre premier emploi du temps';
+      'Appuyez sur le bouton ci-dessous pour ajouter\nvotre premier rendez-vous';
 
   @override
-  String get addScheduleEntryTitle => 'Ajouter une entrée de planification';
+  String get addScheduleEntryTitle => 'Ajouter un rendez-vous';
 
   @override
-  String get addScheduleEntryButton => 'Ajouter une entrée';
+  String get addScheduleEntryButton => 'Ajouter un rendez-vous';
 
   @override
   String get scheduleInfoSection => 'Informations';
@@ -1203,7 +1203,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scheduleWhenSection => 'Quand ?';
 
   @override
-  String get scheduleColorSection => 'Couleur du calendrier';
+  String get scheduleColorSection => 'Couleur du rendez-vous';
 
   @override
   String get schedulePreviewSection => 'Aperçu';
@@ -1407,7 +1407,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get createScheduleEntryButton => 'Créer le créneau';
+  String get createScheduleEntryButton => 'Créer le rendez-vous';
 
   @override
   String get scheduleEntryMissingFields =>
@@ -1570,7 +1570,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profilePhotoSourceSubtitle =>
-      'Choisissez comment mettre ? jour votre photo';
+      'Choisissez comment mettre à jour votre photo';
 
   @override
   String get photoCameraLabel => 'Prendre une photo';
@@ -1583,7 +1583,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get removePhotoDialogContent =>
-      'Votre avatar r?appara?tra sur le profil.';
+      'Votre avatar réapparaîtra sur le profil.';
 
   @override
   String get friendRequestsReceivedTab => 'Demandes';
@@ -1603,19 +1603,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hobbyEdit => 'Modifier le hobby';
 
   @override
-  String get pinToStart => '?pingler au d?but';
+  String get pinToStart => 'Épingler au début';
 
   @override
   String get hobbyDelete => 'Supprimer le hobby';
 
   @override
-  String get deleteActionCannotBeUndone => 'Cette action est irr?versible.';
+  String get deleteActionCannotBeUndone => 'Cette action est irréversible.';
 
   @override
   String get joinGroupTitle => 'Rejoindre un groupe';
 
   @override
-  String get joinGroupInviteCodeLabel => 'Code d?invitation';
+  String get joinGroupInviteCodeLabel => 'Code d’invitation';
 
   @override
   String get joinGroupCodeHint => 'Saisissez le code';
@@ -1627,26 +1627,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get joinGroupError => 'Impossible de rejoindre ce groupe.';
 
   @override
-  String get scheduleDayEventsTitle => '?v?nements du jour';
+  String get scheduleDayEventsTitle => 'Agenda du jour';
 
   @override
-  String get dailyGoalsNoGoalsYetTitle => 'Aucun objectif pour l?instant';
+  String get dailyGoalsNoGoalsYetTitle => 'Aucun objectif pour l’instant';
 
   @override
   String get dailyGoalsNoGoalsYetDescription =>
-      'Ajoutez votre premier objectif pour organiser la journ?e et suivre vos r?ussites.';
+      'Ajoutez votre premier objectif pour organiser la journée et suivre vos réussites.';
 
   @override
   String get dailyGoalsSuggestionsTitle => 'Suggestions pour commencer';
 
   @override
-  String get dailyGoalsSuggestionStudy => '?tudier 30 min';
+  String get dailyGoalsSuggestionStudy => 'Étudier 30 min';
 
   @override
   String get dailyGoalsSuggestionRead => 'Lire 10 pages';
 
   @override
-  String get dailyGoalsSuggestionTrain => 'S?entra?ner';
+  String get dailyGoalsSuggestionTrain => 'S’entraîner';
 
   @override
   String get goalTypeName => 'objectif';
@@ -1669,26 +1669,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scheduleTitleRequiredError => 'Ajoutez un titre pour continuer';
 
   @override
-  String get scheduleActiveFromLabel => 'D?bute';
+  String get scheduleActiveFromLabel => 'Débute';
 
   @override
   String get scheduleActiveUntilLabel => 'Se termine';
 
   @override
-  String get selectDateTitle => 'S?lectionner une date';
+  String get selectDateTitle => 'Sélectionner une date';
 
   @override
-  String get selectDateHint => 'Touchez un jour pour le s?lectionner';
+  String get selectDateHint => 'Choisissez un jour dans le calendrier';
 
   @override
   String get addFriendTitle => 'Ajouter un ami';
 
   @override
   String get friendCodeNotFound =>
-      'Nous n?avons trouv? aucun utilisateur avec ce code.';
+      'Nous n’avons trouvé aucun utilisateur avec ce code.';
 
   @override
-  String get friendInviteCodeTitle => 'Code d?invitation';
+  String get friendInviteCodeTitle => 'Code d’invitation';
 
   @override
   String get friendInviteCodeFieldLabel => 'Saisissez ou collez le code';
@@ -1706,28 +1706,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get friendUserFoundTitle => 'Utilisateur trouv?';
 
   @override
-  String get friendFoundByCode => 'Trouv? par code';
+  String get friendFoundByCode => 'Trouvé par code';
 
   @override
   String get sentLabel => 'Envoy?';
 
   @override
-  String get friendHowItWorksTitle => 'Comment ?a marche';
+  String get friendHowItWorksTitle => 'Comment ça marche';
 
   @override
-  String get friendHowItWorksStepOne => 'Demandez le code ? votre ami';
+  String get friendHowItWorksStepOne => 'Demandez le code à votre ami';
 
   @override
   String get friendHowItWorksStepTwo => 'Collez le code pour trouver le profil';
 
   @override
-  String get friendHowItWorksStepThree => 'Envoyez la demande pour l?ajouter';
+  String get friendHowItWorksStepThree => 'Envoyez la demande pour l’ajouter';
 
   @override
   String get myCodeLabel => 'Mon code';
 
   @override
-  String get yourInviteCodeLabel => 'Votre code d?invitation';
+  String get yourInviteCodeLabel => 'Votre code d’invitation';
 
   @override
   String yourFriendsTitle(int count) {
@@ -1746,11 +1746,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get friendsEmptyTitle => 'Vous n?avez pas encore d?amis';
+  String get friendsEmptyTitle => 'Vous n’avez pas encore d’amis';
 
   @override
   String get friendsEmptySubtitle =>
-      'Recherchez des personnes ci-dessus ou partagez votre code d?invitation.';
+      'Recherchez des personnes ci-dessus ou partagez votre code d’invitation.';
 
   @override
   String get shareCodeButton => 'Partager le code';
@@ -1759,7 +1759,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get codeCopiedMessage => 'Code copi?';
 
   @override
-  String get friendRequestSentMessage => 'Demande envoy?e';
+  String get friendRequestSentMessage => 'Demande envoyée';
 
   @override
   String get joinedGroupMessage => 'Vous avez rejoint le groupe';
@@ -1799,12 +1799,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String friendRequestsReceivedSection(int count) {
-    return 'Re?ues ($count)';
+    return 'Reçues ($count)';
   }
 
   @override
   String friendRequestsSentSection(int count) {
-    return 'Envoy?es ($count)';
+    return 'Envoyées ($count)';
   }
 
   @override
@@ -1814,59 +1814,59 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pendingLabel => 'En attente';
 
   @override
-  String get friendRequestsIncomingEmptyTitle => 'Aucune demande re?ue';
+  String get friendRequestsIncomingEmptyTitle => 'Aucune demande reçue';
 
   @override
-  String get friendRequestsSentEmptyTitle => 'Aucune invitation envoy?e';
+  String get friendRequestsSentEmptyTitle => 'Aucune invitation envoyée';
 
   @override
   String get friendRequestsIncomingEmptySubtitle =>
-      'Les demandes appara?tront ici.';
+      'Les demandes apparaîtront ici.';
 
   @override
   String get friendRequestsSentEmptySubtitle =>
-      'Vos invitations envoy?es appara?tront ici.';
+      'Vos invitations envoyées apparaîtront ici.';
 
   @override
   String get friendRequestsSafetyNotice =>
-      'N?acceptez que les personnes que vous connaissez et en qui vous avez confiance.';
+      'N’acceptez que les personnes que vous connaissez et en qui vous avez confiance.';
 
   @override
-  String get categoryEmptyStudyingTitle => 'Aucune mati?re pour l?instant';
+  String get categoryEmptyStudyingTitle => 'Aucune matière pour l’instant';
 
   @override
-  String get categoryEmptyExercisesTitle => 'Aucun exercice pour l?instant';
+  String get categoryEmptyExercisesTitle => 'Aucun exercice pour l’instant';
 
   @override
-  String get categoryEmptyReadingTitle => 'Aucune lecture pour l?instant';
+  String get categoryEmptyReadingTitle => 'Aucune lecture pour l’instant';
 
   @override
-  String get categoryEmptyHobbiesTitle => 'Aucun hobby pour l?instant';
+  String get categoryEmptyHobbiesTitle => 'Aucun hobby pour l’instant';
 
   @override
   String get categoryEmptyStudyingDescription =>
-      'Ajoutez votre premi?re mati?re pour organiser vos ?tudes et suivre votre concentration.';
+      'Ajoutez votre première matière pour organiser vos études et suivre votre concentration.';
 
   @override
   String get categoryEmptyExercisesDescription =>
-      'Ajoutez votre premier exercice pour suivre vos entra?nements, s?ances et progr?s.';
+      'Ajoutez votre premier exercice pour suivre vos entraînements, séances et progrès.';
 
   @override
   String get categoryEmptyReadingDescription =>
-      'Ajoutez votre premi?re lecture pour suivre les pages, le temps et les progr?s.';
+      'Ajoutez votre première lecture pour suivre les pages, le temps et les progrès.';
 
   @override
   String get categoryEmptyHobbiesDescription =>
       'Ajoutez votre premier hobby pour suivre votre pratique et garder le rythme.';
 
   @override
-  String get categorySuggestionStudyingOne => 'Math?matiques';
+  String get categorySuggestionStudyingOne => 'Mathématiques';
 
   @override
   String get categorySuggestionStudyingTwo => 'Anglais';
 
   @override
-  String get categorySuggestionStudyingThree => 'R?daction';
+  String get categorySuggestionStudyingThree => 'Rédaction';
 
   @override
   String get categorySuggestionExercisesOne => 'Course';
@@ -1875,7 +1875,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categorySuggestionExercisesTwo => 'Renforcement';
 
   @override
-  String get categorySuggestionExercisesThree => '?tirements';
+  String get categorySuggestionExercisesThree => 'Étirements';
 
   @override
   String get categorySuggestionReadingOne => 'Roman';
@@ -1899,10 +1899,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pagesAbbreviation => 'p.';
 
   @override
-  String get loginSecurityNote => 'Vos donn?es sont prot?g?es et s?curis?es.';
+  String get loginSecurityNote => 'Vos données sont protégées et sécurisées.';
 
   @override
-  String get nextBreakDurationLabel => 'Dur?e de la prochaine pause';
+  String get nextBreakDurationLabel => 'Durée de la prochaine pause';
 
   @override
   String timerReadingExitContent(String duration, String subjectName) {
@@ -1911,52 +1911,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get appleSignInIncompleteMessage =>
-      'La connexion avec Apple n?est pas encore termin?e.';
+      'La connexion avec Apple n’est pas encore terminée.';
 
   @override
-  String get activityTypeLabel => 'Type d?activit?';
+  String get activityTypeLabel => 'Type d’activité';
 
   @override
   String get activityTypeDailyLabel => 'Quotidienne';
 
   @override
   String get activityTypeDailyDescription =>
-      'Se renouvelle chaque jour. L?activit? redevient disponible le matin.';
+      'Se renouvelle chaque jour. L’activité redevient disponible le matin.';
 
   @override
   String get activityTypePermanentLabel => 'Permanente';
 
   @override
   String get activityTypePermanentDescription =>
-      'Reste active jusqu?? ce que vous la terminiez. Ensuite, elle est marqu?e comme termin?e.';
+      'Reste active jusqu’à ce que vous la terminiez. Ensuite, elle est marquée comme terminée.';
 
   @override
   String get pagesSuffix => 'pages';
 
   @override
-  String get updatedSuccessfullyMessage => 'Mis ? jour';
+  String get updatedSuccessfullyMessage => 'Mis à jour';
 
   @override
-  String get focusSessionCountLabel => 'S?ances de focus';
+  String get focusSessionCountLabel => 'Séances de focus';
 
   @override
   String get groupEditingComingSoon =>
-      'Modification du groupe bient?t disponible.';
+      'Modification du groupe bientôt disponible.';
 
   @override
-  String get leftGroupMessage => 'Vous avez quitt? le groupe.';
+  String get leftGroupMessage => 'Vous avez quitté le groupe.';
 
   @override
   String get groupImageSourceTitle => 'Envoyer une image';
 
   @override
-  String get groupImageSourceSubtitle => 'Choisissez comment envoyer l?image';
+  String get groupImageSourceSubtitle => 'Choisissez comment envoyer l’image';
 
   @override
   String get deleteButton => 'Supprimer';
 
   @override
-  String get manageMembersTitle => 'G?rer les membres';
+  String get manageMembersTitle => 'Gérer les membres';
 
   @override
   String get groupLeaderLabel => 'Chef';
@@ -1983,7 +1983,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get groupGoalTitle => 'Objectif du groupe';
 
   @override
-  String get groupMainRuleTitle => 'R?gle principale';
+  String get groupMainRuleTitle => 'Règle principale';
 
   @override
   String get groupNextMilestoneTitle => 'Prochain jalon';
@@ -1998,24 +1998,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'pour d?bloquer le badge ? Focus total ?';
 
   @override
-  String get groupActivityLabel => 'Activit? du groupe';
+  String get groupActivityLabel => 'Activité du groupe';
 
   @override
   String groupActivityReachedGoal(int reached, int total) {
-    return '$reached/$total ont atteint l?objectif';
+    return '$reached/$total ont atteint l’objectif';
   }
 
   @override
-  String get groupNoImagesTitle => 'Aucune image pour l?instant';
+  String get groupNoImagesTitle => 'Aucune image pour l’instant';
 
   @override
-  String get groupNoImagesDescription => 'Envoyez la premi?re image du groupe.';
+  String get groupNoImagesDescription => 'Envoyez la première image du groupe.';
 
   @override
   String get groupSendImageButton => 'Envoyer une image';
 
   @override
-  String get groupSendingImage => 'Envoi de l?image...';
+  String get groupSendingImage => 'Envoi de l’image...';
 
   @override
   String get editGroupLabel => 'Modifier le groupe';
@@ -2025,7 +2025,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String groupDescription(String metric) {
-    return 'Partager $metric et relever des d?fis ensemble.';
+    return 'Classement par $metric. Continuez à progresser avec le groupe.';
   }
 
   @override
@@ -2040,16 +2040,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String groupGoalDescription(String metric) {
-    return 'Chaque membre doit enregistrer des progr?s en $metric pour maintenir la s?rie du groupe.';
+    return 'Chaque membre enregistre $metric pour maintenir la série du groupe.';
   }
 
   @override
   String groupRuleDescription(String metric) {
-    return 'Enregistrez au moins une activit? de $metric par jour. Garder la s?rie renforce le groupe.';
+    return 'Enregistrez au moins une entrée de $metric par jour pour renforcer la série du groupe.';
   }
 
   @override
-  String get joinWithCodeButton => 'J?ai un code d?invitation';
+  String get joinWithCodeButton => 'J’ai un code d’invitation';
 
   @override
   String get groupsBenefitsHeader => 'Dans un groupe, vous pouvez :';
@@ -2067,7 +2067,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String groupMembersCompletedToday(int completed, int total) {
-    return '$completed/$total membres ont termin? aujourd?hui';
+    return '$completed/$total membres ont terminé aujourd’hui';
   }
 
   @override
@@ -2081,10 +2081,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Terminez votre premier objectif pour entrer dans le classement.';
 
   @override
-  String get currentUserRankTiedLead => '? ?galit? en t?te.';
+  String get currentUserRankTiedLead => 'À égalité en tête.';
 
   @override
-  String get currentUserRankTiedFirstLabel => '? ?galit? en 1re place';
+  String get currentUserRankTiedFirstLabel => 'À égalité en 1re place';
 
   @override
   String rankLabel(int rank) {
@@ -2093,13 +2093,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeScheduleRoutineSubtitle =>
-      'Prochains horaires et routine hebdomadaire';
+      'Prochains créneaux et routine hebdomadaire';
 
   @override
-  String get homeNextCommitmentTitle => 'Prochain engagement';
+  String get homeNextCommitmentTitle => 'À venir';
 
   @override
-  String get todayLabel => 'Aujourd?hui';
+  String get todayLabel => 'Aujourd’hui';
 
   @override
   String get statisticsTitle => 'Statistiques';
@@ -2114,7 +2114,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get totalPagesReadLabel => 'Total des pages';
 
   @override
-  String get pagesReadTodayLabel => 'Pages aujourd?hui';
+  String get pagesReadTodayLabel => 'Pages aujourd’hui';
 
   @override
   String get goalLabel => 'Objectif';
@@ -2129,10 +2129,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get comparativesTitle => 'Comparatifs';
 
   @override
-  String get overviewTitle => 'Vue d?ensemble';
+  String get overviewTitle => 'Vue d’ensemble';
 
   @override
-  String get studiedUnit => '?tudi?s';
+  String get studiedUnit => 'étudiés';
 
   @override
   String get readPagesUnit => 'lues';
@@ -2141,22 +2141,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get versusLastMonth => 'vs mois dernier';
 
   @override
-  String get versusLastWeek => 'vs semaine derni?re';
+  String get versusLastWeek => 'vs semaine dernière';
 
   @override
   String get noPreviousPeriodComparison =>
-      'Aucune p?riode pr?c?dente ? comparer';
+      'Aucune période précédente à comparer';
 
   @override
   String get noTimeLabel => 'Sans horaire';
 
   @override
   String untilTimeLabel(String time) {
-    return 'Jusqu?? $time';
+    return 'Jusqu’à $time';
   }
 
   @override
-  String get achievementsUnlockedSuffix => ' /50 d?bloqu?s';
+  String get achievementsUnlockedSuffix => ' /50 débloqués';
 
   @override
   String get currentLevelLabel => 'Niveau actuel';
@@ -2165,10 +2165,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allAchievementsUnlockedLabel => 'Tout est d?bloqu?';
 
   @override
-  String get nextUnlockLabel => 'Prochain succ?s';
+  String get nextUnlockLabel => 'Prochain succès';
 
   @override
-  String get allAchievementsUnlockedDescription => 'Vous avez tout d?bloqu?.';
+  String get allAchievementsUnlockedDescription => 'Vous avez tout débloqué.';
 
   @override
   String xpToGo(int xp) {
@@ -2184,26 +2184,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allFilterLabel => 'Tous';
 
   @override
-  String get unlockedFilterLabel => 'D?bloqu?s';
+  String get unlockedFilterLabel => 'Débloqués';
 
   @override
-  String get lockedFilterLabel => 'Verrouill?s';
+  String get lockedFilterLabel => 'Verrouillés';
 
   @override
-  String get selectCategoryTooltip => 'S?lectionner une cat?gorie';
+  String get selectCategoryTooltip => 'Sélectionner une catégorie';
 
   @override
-  String get allCategoriesLabel => 'Toutes les cat?gories';
+  String get allCategoriesLabel => 'Toutes les catégories';
 
   @override
-  String get byCategoryLabel => 'Par cat?gorie';
+  String get byCategoryLabel => 'Par catégorie';
 
   @override
   String get allLevelsTitle => 'Tous les niveaux';
 
   @override
   String get allLevelsDescription =>
-      'D?bloquez des succ?s pour gravir les rangs.';
+      'Débloquez des succès pour gravir les rangs.';
 
   @override
   String levelPlusLabel(int level) {
@@ -2222,7 +2222,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievementCategoryFocus => 'Focus';
 
   @override
-  String get achievementCategoryStudy => '?tude';
+  String get achievementCategoryStudy => 'Étude';
 
   @override
   String get achievementCategoryReading => 'Lecture';
@@ -2238,10 +2238,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get achievement1Description =>
-      'Terminez votre premi?re session de focus';
+      'Terminez votre première session de focus';
 
   @override
-  String get achievement2Title => 'D?part de 25 min';
+  String get achievement2Title => 'Départ de 25 min';
 
   @override
   String get achievement2Description => 'Concentrez-vous pendant 25 minutes';
@@ -2259,7 +2259,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement4Description => 'Atteignez 2 heures de focus';
 
   @override
-  String get achievement5Title => 'Z?ro distraction';
+  String get achievement5Title => 'Zéro distraction';
 
   @override
   String get achievement5Description => 'Terminez 3 sessions de focus';
@@ -2271,7 +2271,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement6Description => 'Atteignez 10 heures de focus';
 
   @override
-  String get achievement7Title => 'L?ve-t?t';
+  String get achievement7Title => 'Lève-tôt';
 
   @override
   String get achievement7Description => 'Enregistrez du focus pendant 5 jours';
@@ -2283,23 +2283,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement8Description => 'Terminez 10 sessions de focus';
 
   @override
-  String get achievement9Title => 'S?rie de focus';
+  String get achievement9Title => 'Série de focus';
 
   @override
   String get achievement9Description => 'Enregistrez du focus pendant 7 jours';
 
   @override
-  String get achievement10Title => 'Ma?tre du focus';
+  String get achievement10Title => 'Maître du focus';
 
   @override
   String get achievement10Description => 'Atteignez 25 heures de focus';
 
   @override
-  String get achievement11Title => '?tude commenc?e';
+  String get achievement11Title => 'Étude commencée';
 
   @override
   String get achievement11Description =>
-      'Cr?ez votre premier enregistrement d??tude';
+      'Créez votre premier enregistrement d’étude';
 
   @override
   String get achievement12Title => '3 sessions';
@@ -2320,16 +2320,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement14Description => 'Terminez 10 sessions';
 
   @override
-  String get achievement15Title => 'Explorateur de mati?res';
+  String get achievement15Title => 'Explorateur de matières';
 
   @override
-  String get achievement15Description => '?tudiez au moins une mati?re';
+  String get achievement15Description => 'Étudiez au moins une matière';
 
   @override
-  String get achievement16Title => 'H?ros de r?vision';
+  String get achievement16Title => 'Héros de révision';
 
   @override
-  String get achievement16Description => 'Atteignez 5 heures d??tude';
+  String get achievement16Description => 'Atteignez 5 heures d’étude';
 
   @override
   String get achievement17Title => 'Quiz termin?';
@@ -2338,28 +2338,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement17Description => 'Terminez 15 sessions';
 
   @override
-  String get achievement18Title => 'Planificateur d??tudes';
+  String get achievement18Title => 'Planificateur d’études';
 
   @override
-  String get achievement18Description => 'Cr?ez un objectif de focus';
+  String get achievement18Description => 'Créez un objectif de focus';
 
   @override
-  String get achievement19Title => 'Pr?t pour l?examen';
+  String get achievement19Title => 'Prêt pour l’examen';
 
   @override
-  String get achievement19Description => 'Atteignez 20 heures d??tude';
+  String get achievement19Description => 'Atteignez 20 heures d’étude';
 
   @override
-  String get achievement20Title => 'Mode ?tudiant';
+  String get achievement20Title => 'Mode étudiant';
 
   @override
-  String get achievement20Description => 'Atteignez 50 heures d??tude';
+  String get achievement20Description => 'Atteignez 50 heures d’étude';
 
   @override
-  String get achievement21Title => 'Premi?re page';
+  String get achievement21Title => 'Première page';
 
   @override
-  String get achievement21Description => 'Lisez votre premi?re page';
+  String get achievement21Description => 'Lisez votre première page';
 
   @override
   String get achievement22Title => '10 pages';
@@ -2410,7 +2410,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement29Description => 'Lisez 500 pages';
 
   @override
-  String get achievement30Title => 'L?gende de la biblioth?que';
+  String get achievement30Title => 'Légende de la bibliothèque';
 
   @override
   String get achievement30Description => 'Lisez 1000 pages';
@@ -2419,7 +2419,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement31Title => 'Premier objectif';
 
   @override
-  String get achievement31Description => 'Cr?ez votre premier objectif';
+  String get achievement31Description => 'Créez votre premier objectif';
 
   @override
   String get achievement32Title => 'Objectif atteint';
@@ -2428,11 +2428,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement32Description => 'Terminez un objectif';
 
   @override
-  String get achievement33Title => 'Tous les objectifs termin?s';
+  String get achievement33Title => 'Tous les objectifs terminés';
 
   @override
   String get achievement33Description =>
-      'Terminez tous les objectifs aujourd?hui';
+      'Terminez tous les objectifs aujourd’hui';
 
   @override
   String get achievement34Title => 'Routine du matin';
@@ -2442,21 +2442,21 @@ class AppLocalizationsFr extends AppLocalizations {
       'Terminez des objectifs pendant 3 jours';
 
   @override
-  String get achievement35Title => 'Journ?e ?quilibr?e';
+  String get achievement35Title => 'Journée équilibrée';
 
   @override
   String get achievement35Description =>
       'Terminez des objectifs pendant 5 jours';
 
   @override
-  String get achievement36Title => 'B?tisseur d?habitude';
+  String get achievement36Title => 'Bâtisseur d’habitude';
 
   @override
   String get achievement36Description =>
       'Terminez des objectifs pendant 10 jours';
 
   @override
-  String get achievement37Title => 'Journ?e parfaite';
+  String get achievement37Title => 'Journée parfaite';
 
   @override
   String get achievement37Description =>
@@ -2470,14 +2470,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Terminez des objectifs pendant 20 jours';
 
   @override
-  String get achievement39Title => '?toile de constance';
+  String get achievement39Title => 'Étoile de constance';
 
   @override
   String get achievement39Description =>
       'Terminez des objectifs pendant 30 jours';
 
   @override
-  String get achievement40Title => 'Inarr?table';
+  String get achievement40Title => 'Inarrêtable';
 
   @override
   String get achievement40Description =>
@@ -2487,10 +2487,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement41Title => 'Premier groupe';
 
   @override
-  String get achievement41Description => 'Rejoignez un groupe d??tude';
+  String get achievement41Description => 'Rejoignez un groupe d’étude';
 
   @override
-  String get achievement42Title => 'Joueur d??quipe';
+  String get achievement42Title => 'Joueur d’équipe';
 
   @override
   String get achievement42Description => 'Affrontez vos amis';
@@ -2499,13 +2499,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement43Title => 'Ami serviable';
 
   @override
-  String get achievement43Description => 'Aidez un ami ? rester constant';
+  String get achievement43Description => 'Aidez un ami à rester constant';
 
   @override
-  String get achievement44Title => 'Vainqueur du d?fi';
+  String get achievement44Title => 'Vainqueur du défi';
 
   @override
-  String get achievement44Description => 'Gagnez un d?fi';
+  String get achievement44Description => 'Gagnez un défi';
 
   @override
   String get achievement45Title => 'Exercice commenc?';
@@ -2514,11 +2514,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement45Description => 'Enregistrez du focus en exercice';
 
   @override
-  String get achievement46Title => 'Entra?nement de 30 min';
+  String get achievement46Title => 'Entraînement de 30 min';
 
   @override
   String get achievement46Description =>
-      'Faites de l?exercice pendant 30 minutes';
+      'Faites de l’exercice pendant 30 minutes';
 
   @override
   String get achievement47Title => 'Moment hobby';
@@ -2527,7 +2527,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement47Description => 'Enregistrez du focus en hobby';
 
   @override
-  String get achievement48Title => '?tincelle cr?ative';
+  String get achievement48Title => 'Étincelle créative';
 
   @override
   String get achievement48Description => 'Atteignez 30 minutes de hobbies';
@@ -2536,13 +2536,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get achievement49Title => 'Guerrier du week-end';
 
   @override
-  String get achievement49Description => 'Atteignez 2 heures d?exercice';
+  String get achievement49Description => 'Atteignez 2 heures d’exercice';
 
   @override
-  String get achievement50Title => 'Chasseur de succ?s';
+  String get achievement50Title => 'Chasseur de succès';
 
   @override
-  String get achievement50Description => 'D?bloquez 25 succ?s';
+  String get achievement50Description => 'Débloquez 25 succès';
 
   @override
   String get rankTierPaper => 'Papier';
@@ -2572,10 +2572,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rankTierPlatinum => 'Platine';
 
   @override
-  String get rankTierAmethyst => 'Am?thyste';
+  String get rankTierAmethyst => 'Améthyste';
 
   @override
-  String get rankTierEmerald => '?meraude';
+  String get rankTierEmerald => 'Émeraude';
 
   @override
   String get rankTierDiamond => 'Diamant';
@@ -2594,20 +2594,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get concentrationModeSubtitle =>
-      'Choisissez quelles sessions de focus bloquent la sortie de l?app.';
+      'Choisissez quelles sessions de focus bloquent la sortie de l’app.';
 
   @override
-  String get concentrationStudyTitle => '?tude';
+  String get concentrationStudyTitle => 'Étude';
 
   @override
-  String get concentrationStudySubtitle => 'Focus total sur vos ?tudes.';
+  String get concentrationStudySubtitle => 'Focus total sur vos études.';
 
   @override
   String get concentrationExercisesTitle => 'Exercices';
 
   @override
   String get concentrationExercisesSubtitle =>
-      'Restez concentr? sur vos entra?nements.';
+      'Restez concentré sur vos entraînements.';
 
   @override
   String get concentrationReadingTitle => 'Lecture';
@@ -2627,15 +2627,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get createGroupDescriptionHint =>
-      'D?crivez le groupe et son objectif.';
+      'Décrivez le groupe et son objectif.';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'Ce th?me d?finit la m?trique du classement.';
+      'Ce thème définit la métrique du classement.';
 
   @override
   String get createGroupActivityTypeDescription =>
-      'Chaque membre re?oit une copie ? suivre.';
+      'Chaque membre reçoit une copie à suivre.';
 
   @override
   String get createGroupActivityNameLabel => 'Nom de l?activit?';
@@ -2644,7 +2644,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createGroupActivityNameHint => 'Ex : Calcul I';
 
   @override
-  String get createGroupGoalTypeLabel => 'Type d?objectif';
+  String get createGroupGoalTypeLabel => 'Type d’objectif';
 
   @override
   String get createGroupGoalTypeTotal => 'Total';
@@ -2662,16 +2662,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createGroupTimeGoalMinutesLabel => 'Objectif de temps (min)';
 
   @override
-  String get createGroupSummaryTitle => 'R?sum? du groupe';
+  String get createGroupSummaryTitle => 'Résumé du groupe';
 
   @override
-  String get createGroupActivitySummaryLabel => 'Activit?';
+  String get createGroupActivitySummaryLabel => 'Activité';
 
   @override
-  String get createGroupGuestsLabel => 'Invit?s';
+  String get createGroupGuestsLabel => 'Invités';
 
   @override
-  String get timerTotalTodayLabel => 'Total aujourd?hui';
+  String get timerTotalTodayLabel => 'Total aujourd’hui';
 
   @override
   String get timerEndActionLabel => 'Terminer';
