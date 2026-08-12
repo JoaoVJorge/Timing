@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/theme/app_surfaces.dart";
+import "package:intl/intl.dart" hide TextDirection;
 
 /// What the bar heights represent, which drives axis and value labels.
 enum EvolutionValueUnit { minutes, pages }
@@ -46,6 +47,7 @@ class _EvolutionBarChartState extends State<EvolutionBarChart> {
       final List<int> safeValues = widget.values.isEmpty
           ? const [0]
           : widget.values;
+      final List<DateTime> dates = _datesEndingToday(safeValues.length);
       final double targetHighlightPosition =
           (_selectedIndex ?? _highlightIndex(safeValues)).toDouble();
 
@@ -86,7 +88,8 @@ class _EvolutionBarChartState extends State<EvolutionBarChart> {
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
-                dayLabels: _dayLabels(context, widget.values.length),
+                axisLabels: _axisLabels(context, dates),
+                pointLabels: _pointLabels(dates),
               ),
               child: const SizedBox.expand(),
             ),
@@ -134,7 +137,8 @@ class _EvolutionBarChartPainter extends CustomPainter {
     required this.axisColor,
     required this.axisTextStyle,
     required this.tooltipTextStyle,
-    required this.dayLabels,
+    required this.axisLabels,
+    required this.pointLabels,
   });
 
   final List<int> values;
@@ -146,7 +150,12 @@ class _EvolutionBarChartPainter extends CustomPainter {
   final Color axisColor;
   final TextStyle axisTextStyle;
   final TextStyle tooltipTextStyle;
-  final List<String> dayLabels;
+
+  /// Sparse per-bar labels for the x-axis (empty string = no label drawn).
+  final List<String> axisLabels;
+
+  /// Full per-bar labels (one per value) used by the highlight tooltip.
+  final List<String> pointLabels;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -274,10 +283,10 @@ class _EvolutionBarChartPainter extends CustomPainter {
       );
       canvas.drawRRect(roundedBar, barPaint);
 
-      if (i < dayLabels.length) {
+      if (i < axisLabels.length) {
         _paintCenteredText(
           canvas,
-          text: dayLabels[i],
+          text: axisLabels[i],
           centerX: centerX,
           y: chartBottom + 10,
           maxWidth: slotWidth.clamp(18, double.infinity).toDouble(),
@@ -319,7 +328,7 @@ class _EvolutionBarChartPainter extends CustomPainter {
       ..strokeWidth = 1;
 
     for (int i = 0; i < count; i++) {
-      if (i >= dayLabels.length || dayLabels[i].isEmpty) {
+      if (i >= axisLabels.length || axisLabels[i].isEmpty) {
         continue;
       }
       final double x = chartLeft + slotWidth * i + slotWidth / 2;
@@ -346,7 +355,10 @@ class _EvolutionBarChartPainter extends CustomPainter {
     final Paint markerInnerPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    final String label = "${bar.index + 1} - ${_formatValueLabel(bar.value)}";
+    final String dayLabel = bar.index < pointLabels.length
+        ? pointLabels[bar.index]
+        : "${bar.index + 1}";
+    final String label = "$dayLabel - ${_formatValueLabel(bar.value)}";
     final TextPainter labelPainter = TextPainter(
       text: TextSpan(text: label, style: tooltipTextStyle),
       textDirection: TextDirection.ltr,
@@ -464,7 +476,8 @@ class _EvolutionBarChartPainter extends CustomPainter {
       oldDelegate.axisColor != axisColor ||
       oldDelegate.axisTextStyle != axisTextStyle ||
       oldDelegate.tooltipTextStyle != tooltipTextStyle ||
-      oldDelegate.dayLabels != dayLabels;
+      oldDelegate.axisLabels != axisLabels ||
+      oldDelegate.pointLabels != pointLabels;
 
   String _formatChartLabel(int value) {
     if (unit == EvolutionValueUnit.pages) {
@@ -547,26 +560,44 @@ class _HighlightedBar {
   final double topY;
 }
 
-List<String> _dayLabels(BuildContext context, int count) {
-  if (count == 7) {
-    return switch (context.languageCode) {
-      "pt" => const ["S", "T", "Q", "Q", "S", "S", "D"],
-      "es" => const ["L", "M", "M", "J", "V", "S", "D"],
-      "fr" => const ["L", "M", "M", "J", "V", "S", "D"],
-      "de" => const ["M", "D", "M", "D", "F", "S", "S"],
-      _ => const ["M", "T", "W", "T", "F", "S", "S"],
-    };
-  }
+/// The calendar dates each bar represents, oldest first and ending today, so
+/// the rightmost bar is always the current day.
+List<DateTime> _datesEndingToday(int count) {
+  final DateTime now = DateTime.now();
+  final DateTime today = DateTime(now.year, now.month, now.day);
+  return [
+    for (int index = 0; index < count; index++)
+      today.subtract(Duration(days: count - 1 - index)),
+  ];
+}
 
+/// Sparse x-axis labels. Weekday initials for a 7-day window, otherwise the
+/// day-of-month at ~weekly steps anchored to today (always labels today).
+List<String> _axisLabels(BuildContext context, List<DateTime> dates) {
+  final int count = dates.length;
   if (count <= 1) {
     return const [""];
+  }
+  if (count == 7) {
+    return [for (final DateTime date in dates) _weekdayInitial(context, date)];
   }
 
   return [
     for (int index = 0; index < count; index++)
-      switch (index + 1) {
-        1 || 10 || 20 || 30 => "${index + 1}",
-        _ => "",
-      },
+      (index == count - 1 || (count - 1 - index) % 7 == 0)
+          ? "${dates[index].day}"
+          : "",
   ];
+}
+
+/// Full per-bar labels used by the tooltip, e.g. "11/8".
+List<String> _pointLabels(List<DateTime> dates) => [
+  for (final DateTime date in dates) "${date.day}/${date.month}",
+];
+
+String _weekdayInitial(BuildContext context, DateTime date) {
+  final String weekday = DateFormat.E(
+    Localizations.localeOf(context).toLanguageTag(),
+  ).format(date);
+  return weekday.characters.first.toUpperCase();
 }

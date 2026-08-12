@@ -9,9 +9,14 @@ import "package:help_out/theme/app_surfaces.dart";
 /// "Top reading" section for the Progress screen. Lists the reading subjects
 /// with the most pages logged, or a guidance empty state when there are none.
 class ProgressTopSubjectsList extends StatelessWidget {
-  const ProgressTopSubjectsList({required this.subjects, super.key});
+  const ProgressTopSubjectsList({
+    required this.subjects,
+    this.onTapSubject,
+    super.key,
+  });
 
   final List<SubjectEntity> subjects;
+  final void Function(SubjectEntity subject)? onTapSubject;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,13 @@ class ProgressTopSubjectsList extends StatelessWidget {
       children: [
         for (int index = 0; index < subjects.length; index++) ...[
           if (index > 0) const Gap(AppSpacing.betweenRelated),
-          TopThemeTile(rank: index + 1, subject: subjects[index]),
+          TopThemeTile(
+            rank: index + 1,
+            subject: subjects[index],
+            onTap: onTapSubject == null
+                ? null
+                : () => onTapSubject!(subjects[index]),
+          ),
         ],
       ],
     );

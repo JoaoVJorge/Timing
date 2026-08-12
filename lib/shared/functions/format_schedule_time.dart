@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:help_out/core/utils/extensions/context_extensions.dart";
 
 /// Formats a minutes-of-day value as a locale-aware clock time (e.g. 14:00).
 String formatMinutesOfDay(BuildContext context, int minutes) {
@@ -19,22 +20,12 @@ String formatScheduleRange(
   int? endMinutes,
 ) {
   if (startMinutes == null && endMinutes == null) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      "pt" => "Sem horario",
-      "es" => "Sin horario",
-      "fr" => "Sans horaire",
-      "de" => "Ohne Uhrzeit",
-      _ => "No time",
-    };
+    return context.l10n.noTimeLabel;
   }
   if (startMinutes == null) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      "pt" => "Ate ${formatMinutesOfDay(context, endMinutes!)}",
-      "es" => "Hasta ${formatMinutesOfDay(context, endMinutes!)}",
-      "fr" => "Jusqu'a ${formatMinutesOfDay(context, endMinutes!)}",
-      "de" => "Bis ${formatMinutesOfDay(context, endMinutes!)}",
-      _ => "Until ${formatMinutesOfDay(context, endMinutes!)}",
-    };
+    return context.l10n.untilTimeLabel(
+      formatMinutesOfDay(context, endMinutes!),
+    );
   }
   if (endMinutes == null) {
     return formatMinutesOfDay(context, startMinutes);

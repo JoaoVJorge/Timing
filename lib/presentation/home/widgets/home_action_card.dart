@@ -28,7 +28,7 @@ class HomeActionCard extends StatelessWidget {
     pressedScale: 0.98,
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -44,15 +44,6 @@ class HomeActionCard extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.primary.withValues(
-              alpha: context.isDarkMode ? 0.22 : 0.12,
-            ),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Row(
         children: [

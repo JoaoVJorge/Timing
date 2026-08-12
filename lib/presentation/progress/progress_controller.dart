@@ -5,6 +5,7 @@ import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/daily_progress_entity.dart";
 import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/entities/profile_stats_entity.dart";
+import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
@@ -42,11 +43,11 @@ class ProgressController extends GetxController {
   final Rx<ProgressPeriod> selectedPeriod = ProgressPeriod.week.obs;
 
   bool get hasGoalStarted =>
-      tasks.any((task) => task.completedDays > 0 || task.isCheckedToday);
+      tasks.any((task) => task.completedDays > 0 || task.isDoneForCurrentCycle);
 
   bool get hasValidFirstFocus => stats.value.totalFocusSeconds >= 60;
 
-  int get goalsDone => tasks.where((task) => task.isCheckedToday).length;
+  int get goalsDone => tasks.where((task) => task.isDoneForCurrentCycle).length;
 
   bool get hasAnyUnlockedAchievement {
     final ProfileStatsEntity currentStats = stats.value;
@@ -129,6 +130,9 @@ class ProgressController extends GetxController {
 
   Future<void> onTapAchievements() =>
       _navigateAndRefresh(AppRoutes.achievements);
+
+  Future<void> onTapReadingSubject(SubjectEntity subject) =>
+      _navigateAndRefresh(AppRoutes.subjectStats, arguments: subject);
 
   void onSelectPeriod(ProgressPeriod period) => selectedPeriod.value = period;
 

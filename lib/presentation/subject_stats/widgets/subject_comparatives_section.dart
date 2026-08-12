@@ -249,61 +249,16 @@ bool _isDark(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark;
 
 String comparativesTitle(BuildContext context) =>
-    switch (context.languageCode) {
-      "pt" => "Comparativos",
-      "es" => "Comparativos",
-      "fr" => "Comparatifs",
-      "de" => "Vergleiche",
-      _ => "Comparisons",
-    };
+    context.l10n.comparativesTitle;
 
-String overviewTitle(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Visao geral",
-  "es" => "Vision general",
-  "fr" => "Vue d'ensemble",
-  "de" => "Ubersicht",
-  _ => "Overview",
-};
+String overviewTitle(BuildContext context) => context.l10n.overviewTitle;
 
-String _studiedUnit(BuildContext context) => switch (context.languageCode) {
-  "pt" => "estudados",
-  "es" => "estudiados",
-  "fr" => "etudies",
-  "de" => "gelernt",
-  _ => "studied",
-};
+String _studiedUnit(BuildContext context) => context.l10n.studiedUnit;
 
-String _readPagesUnit(BuildContext context) => switch (context.languageCode) {
-  "pt" => "lidas",
-  "es" => "leidas",
-  "fr" => "lues",
-  "de" => "gelesen",
-  _ => "read",
-};
+String _readPagesUnit(BuildContext context) => context.l10n.readPagesUnit;
 
-String _versusLabel(BuildContext context, bool isMonth) {
-  if (isMonth) {
-    return switch (context.languageCode) {
-      "pt" => "vs mes passado",
-      "es" => "vs mes pasado",
-      "fr" => "vs mois dernier",
-      "de" => "vs letzten Monat",
-      _ => "vs last month",
-    };
-  }
-  return switch (context.languageCode) {
-    "pt" => "vs semana passada",
-    "es" => "vs semana pasada",
-    "fr" => "vs semaine derniere",
-    "de" => "vs letzte Woche",
-    _ => "vs last week",
-  };
-}
+String _versusLabel(BuildContext context, bool isMonth) =>
+    isMonth ? context.l10n.versusLastMonth : context.l10n.versusLastWeek;
 
-String _noComparison(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Sem periodo anterior para comparar",
-  "es" => "Sin periodo anterior para comparar",
-  "fr" => "Aucune periode precedente a comparer",
-  "de" => "Kein Vorzeitraum zum Vergleichen",
-  _ => "No previous period to compare",
-};
+String _noComparison(BuildContext context) =>
+    context.l10n.noPreviousPeriodComparison;

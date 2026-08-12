@@ -227,11 +227,7 @@ class _PlanDayRows extends StatelessWidget {
   });
 
   String _scheduleSubtitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Próximos horarios y rutina semanal",
-        "pt" => "Próximos horários e rotina semanal",
-        _ => "Upcoming times and weekly routine",
-      };
+      context.l10n.homeScheduleRoutineSubtitle;
 }
 
 class _PlanDayRow extends StatelessWidget {
@@ -304,17 +300,9 @@ class _PlanDayRow extends StatelessWidget {
 }
 
 String _nextCommitmentTitle(BuildContext context) =>
-    switch (context.languageCode) {
-      "es" => "Próximo compromiso",
-      "pt" => "Próximo compromisso",
-      _ => "Next commitment",
-    };
+    context.l10n.homeNextCommitmentTitle;
 
-String _todayLabel(BuildContext context) => switch (context.languageCode) {
-  "es" => "Hoy",
-  "pt" => "Hoje",
-  _ => "Today",
-};
+String _todayLabel(BuildContext context) => context.l10n.todayLabel;
 
 class _HomeActivitiesSection extends StatelessWidget {
   const _HomeActivitiesSection();

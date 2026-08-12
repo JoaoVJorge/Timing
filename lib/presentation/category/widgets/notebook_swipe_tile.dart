@@ -7,6 +7,7 @@ import "package:help_out/shared/widgets/app_icon.dart";
 class NotebookSwipeTile extends StatefulWidget {
   const NotebookSwipeTile({
     required this.child,
+    required this.accent,
     required this.onTapNotes,
     required this.onTapStats,
     required this.onTapEdit,
@@ -15,6 +16,7 @@ class NotebookSwipeTile extends StatefulWidget {
   });
 
   final Widget child;
+  final Color accent;
   final VoidCallback onTapNotes;
   final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
@@ -97,7 +99,19 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                   children: [
                     _RevealAction(
                       iconPath: "note",
-                      gradient: context.colorTokens.primaryGradient,
+                      gradient: LinearGradient(
+                        colors: [
+                          widget.accent,
+                          Color.lerp(
+                                widget.accent,
+                                context.colorTokens.white,
+                                0.16,
+                              ) ??
+                              widget.accent,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       iconColor: context.colorTokens.white,
                       onTap: _onTapNotes,
                     ),
@@ -105,7 +119,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     _RevealAction(
                       iconData: Icons.bar_chart_rounded,
                       color: context.colorTokens.surface,
-                      iconColor: context.colorTokens.primary,
+                      iconColor: widget.accent,
                       onTap: _onTapStats,
                     ),
                   ],
@@ -122,7 +136,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     _RevealAction(
                       iconData: Icons.edit_rounded,
                       color: context.colorTokens.surface,
-                      iconColor: context.colorTokens.primary,
+                      iconColor: widget.accent,
                       onTap: _onTapEdit,
                     ),
                     const SizedBox(width: _RevealAction.gap),

@@ -204,7 +204,9 @@ class _HobbyOptionsSheet extends StatelessWidget {
                       ),
                       const Gap(2),
                       Text(
-                        _practiceLabel(context),
+                        context.l10n.hobbyPracticeMinutes(
+                          Duration(seconds: subject.totalSeconds).inMinutes,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyLarge.copyWith(
@@ -245,21 +247,21 @@ class _HobbyOptionsSheet extends StatelessWidget {
                 children: [
                   _HobbySheetAction(
                     icon: Icons.bar_chart_rounded,
-                    label: _statsLabel(context),
+                    label: context.l10n.hobbyViewStatistics,
                     accent: accent,
                     onTap: () => onAction("stats"),
                   ),
                   Divider(height: 1, color: context.colorTokens.divider),
                   _HobbySheetAction(
                     icon: Icons.edit_rounded,
-                    label: _editLabel(context),
+                    label: context.l10n.hobbyEdit,
                     accent: accent,
                     onTap: () => onAction("edit"),
                   ),
                   Divider(height: 1, color: context.colorTokens.divider),
                   _HobbySheetAction(
                     icon: Icons.push_pin_outlined,
-                    label: _pinLabel(context),
+                    label: context.l10n.pinToStart,
                     accent: accent,
                     trailing: Switch.adaptive(
                       value: isPinned,
@@ -275,8 +277,8 @@ class _HobbyOptionsSheet extends StatelessWidget {
             const Gap(14),
             _HobbyDeleteAction(
               accent: context.colorTokens.error,
-              label: _deleteLabel(context),
-              subtitle: _deleteSubtitle(context),
+              label: context.l10n.hobbyDelete,
+              subtitle: context.l10n.deleteActionCannotBeUndone,
               onTap: () => onAction("delete"),
             ),
           ],
@@ -284,46 +286,6 @@ class _HobbyOptionsSheet extends StatelessWidget {
       ),
     );
   }
-
-  String _practiceLabel(BuildContext context) {
-    final int minutes = Duration(seconds: subject.totalSeconds).inMinutes;
-    return switch (context.languageCode) {
-      "en" => "$minutes min of practice",
-      "es" => "$minutes min de práctica",
-      _ => "$minutes min de prática",
-    };
-  }
-
-  String _statsLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "View statistics",
-    "es" => "Ver estadísticas",
-    _ => "Ver estatísticas",
-  };
-
-  String _editLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Edit hobby",
-    "es" => "Editar hobby",
-    _ => "Editar hobby",
-  };
-
-  String _pinLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Pin to start",
-    "es" => "Fijar al inicio",
-    _ => "Fixar no início",
-  };
-
-  String _deleteLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Delete hobby",
-    "es" => "Eliminar hobby",
-    _ => "Excluir hobby",
-  };
-
-  String _deleteSubtitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "en" => "This action cannot be undone.",
-        "es" => "Esta acción no se puede deshacer.",
-        _ => "Esta ação não pode ser desfeita.",
-      };
 }
 
 class _HobbySheetIcon extends StatelessWidget {
