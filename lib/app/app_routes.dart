@@ -24,6 +24,7 @@ import "package:help_out/presentation/groups/groups_bindings.dart";
 import "package:help_out/presentation/groups/groups_page.dart";
 import "package:help_out/presentation/home/home_bindings.dart";
 import "package:help_out/presentation/home/home_page.dart";
+import "package:help_out/presentation/join_group/join_group_bindings.dart";
 import "package:help_out/presentation/join_group/join_group_page.dart";
 import "package:help_out/presentation/login/login_bindings.dart";
 import "package:help_out/presentation/login/login_page.dart";
@@ -191,6 +192,7 @@ class AppRoutes {
     GetPage(
       name: joinGroup,
       page: () => const JoinGroupPage(),
+      binding: JoinGroupBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

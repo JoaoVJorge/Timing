@@ -1,40 +1,21 @@
-import "package:dartz/dartz.dart" hide State;
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/data/repositories/groups_repository.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/join_group/join_group_controller.dart";
 import "package:help_out/shared/widgets/app_scaffold.dart";
 import "package:help_out/shared/widgets/app_top_bar.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/theme/app_spacing.dart";
 import "package:help_out/theme/decoration.dart";
 
-class JoinGroupPage extends StatefulWidget {
+class JoinGroupPage extends GetView<JoinGroupController> {
   const JoinGroupPage({super.key});
 
   @override
-  State<JoinGroupPage> createState() => _JoinGroupPageState();
-}
-
-class _JoinGroupPageState extends State<JoinGroupPage> {
-  final TextEditingController _codeController = TextEditingController();
-  final GroupsRepository _groupsRepository = Get.find();
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) => AppScaffold(
-    topBar: AppTopBar(title: _title(context), showBackButton: true),
+    topBar: AppTopBar(title: context.l10n.joinGroupTitle, showBackButton: true),
     body: ListView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
@@ -51,7 +32,7 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _fieldLabel(context),
+                context.l10n.joinGroupInviteCodeLabel,
                 style: context.textStyles.bodyLarge.copyWith(
                   color: context.colorTokens.textBody,
                   fontWeight: FontWeight.w900,
@@ -59,7 +40,7 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
               ),
               const Gap(10),
               TextField(
-                controller: _codeController,
+                controller: controller.codeController,
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9]")),
@@ -68,14 +49,16 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
                 ],
                 decoration: AppInputDecoration.withBorder(
                   tokens: context.colorTokens,
-                  hintText: _hint(context),
+                  hintText: context.l10n.joinGroupCodeHint,
                 ),
               ),
               const Gap(16),
-              _JoinButton(
-                isLoading: _isLoading,
-                label: _buttonLabel(context),
-                onTap: _join,
+              Obx(
+                () => _JoinButton(
+                  isLoading: controller.isLoading.value,
+                  label: context.l10n.joinGroupButton,
+                  onTap: controller.join,
+                ),
               ),
             ],
           ),
@@ -83,54 +66,6 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
       ],
     ),
   );
-
-  Future<void> _join() async {
-    final String code = _codeController.text.trim();
-    if (code.isEmpty || _isLoading) {
-      return;
-    }
-    setState(() => _isLoading = true);
-    final Either<AppError, GroupEntity> result = await _groupsRepository
-        .joinGroupByInviteCode(code);
-    if (!mounted) {
-      return;
-    }
-    setState(() => _isLoading = false);
-    result.fold(
-      (error) => appNavigator.showErrorSnackBar(_errorMessage(context)),
-      (group) => appNavigator.back<GroupEntity>(result: group),
-    );
-  }
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Entrar em grupo",
-    "es" => "Unirse a un grupo",
-    _ => "Join group",
-  };
-
-  String _fieldLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Código de convite",
-    "es" => "Código de invitación",
-    _ => "Invite code",
-  };
-
-  String _hint(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Digite o código",
-    "es" => "Escribe el código",
-    _ => "Enter the code",
-  };
-
-  String _buttonLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Entrar no grupo",
-    "es" => "Unirme al grupo",
-    _ => "Join group",
-  };
-
-  String _errorMessage(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Não foi possível entrar nesse grupo.",
-    "es" => "No fue posible unirse a este grupo.",
-    _ => "Could not join this group.",
-  };
 }
 
 class _JoinButton extends StatelessWidget {
