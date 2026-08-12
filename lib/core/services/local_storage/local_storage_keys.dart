@@ -9,6 +9,10 @@ enum LocalStorageKeys {
   scheduleEntries(hasSensitiveData: false, isUserScoped: true),
   isDarkMode(hasSensitiveData: false, isUserScoped: false),
   languageCode(hasSensitiveData: false, isUserScoped: false),
+  focusLockStudyingEnabled(hasSensitiveData: false, isUserScoped: false),
+  focusLockExercisesEnabled(hasSensitiveData: false, isUserScoped: false),
+  focusLockReadingEnabled(hasSensitiveData: false, isUserScoped: false),
+  focusLockHobbiesEnabled(hasSensitiveData: false, isUserScoped: false),
   cachedAccentColorValue(hasSensitiveData: false, isUserScoped: false),
   accessToken(hasSensitiveData: true, isUserScoped: false),
   refreshToken(hasSensitiveData: true, isUserScoped: false);
