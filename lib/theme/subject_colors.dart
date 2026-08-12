@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:help_out/theme/accent_presets.dart";
+import "package:timing/theme/accent_presets.dart";
 
 class SubjectColors {
   const SubjectColors._();

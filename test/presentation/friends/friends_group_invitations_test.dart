@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/core/domain/entities/group_invitation_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/presentation/friends/widgets/friends_group_invitations.dart";
+import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/presentation/friends/widgets/friends_group_invitations.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 

@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/core/domain/entities/group_activity_draft.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/entities/group_activity_draft.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 void main() {
   group("GroupActivityDraft", () {

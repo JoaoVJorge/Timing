@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 
 /// The single headline result of the selected period, plus how it compares to
 /// the period before it. Comparison is what makes the number motivating.

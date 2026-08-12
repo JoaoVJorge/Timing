@@ -20,7 +20,9 @@ class AppSpacing {
   /// Smallest height a tappable element may have.
   static const double minTapTarget = 48;
 
-  static const EdgeInsets pageHorizontal = EdgeInsets.symmetric(horizontal: page);
+  static const EdgeInsets pageHorizontal = EdgeInsets.symmetric(
+    horizontal: page,
+  );
 }
 
 /// The three visual levels a surface can take. Keeping them explicit avoids the

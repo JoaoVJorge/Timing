@@ -1,16 +1,16 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_ui_constants.dart";
-import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/group_invites/group_invites_controller.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/shared/widgets/app_empty_state.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_ui_constants.dart";
+import "package:timing/core/domain/entities/group_invite_option_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/group_invites/group_invites_controller.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/shared/widgets/app_empty_state.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class GroupInvitesPage extends GetView<GroupInvitesController> {
   const GroupInvitesPage({super.key});

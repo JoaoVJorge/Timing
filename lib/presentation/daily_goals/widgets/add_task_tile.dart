@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 
 class AddTaskTile extends StatelessWidget {
   const AddTaskTile({required this.onTap, super.key});

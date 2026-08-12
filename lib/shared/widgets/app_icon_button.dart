@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 /// Circular gradient action button showing a single icon. Use [AppButton] for
 /// the full-width labelled variant.

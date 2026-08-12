@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/entities/friend_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/friends/widgets/friends_shared.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/friends/widgets/friends_shared.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 
 class FriendsSection extends StatelessWidget {
   const FriendsSection({

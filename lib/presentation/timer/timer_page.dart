@@ -3,16 +3,16 @@ import "dart:math" as math;
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/timer/timer_controller.dart";
-import "package:help_out/presentation/timer/timer_visual_state.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/theme/subject_icons.dart";
-import "package:help_out/theme/timer_wallpapers.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/timer/timer_controller.dart";
+import "package:timing/presentation/timer/timer_visual_state.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/theme/subject_icons.dart";
+import "package:timing/theme/timer_wallpapers.dart";
 
 class TimerPage extends StatelessWidget {
   const TimerPage({super.key});
@@ -671,7 +671,9 @@ class _TimerViewData {
         TimerVisualState.paused => context.l10n.timerStatePausedTitle,
         TimerVisualState.finished => context.l10n.timerSessionSavedTitle,
         TimerVisualState.focusing =>
-          isReading ? context.l10n.timerReadingLabel : context.l10n.timerFocusLabel,
+          isReading
+              ? context.l10n.timerReadingLabel
+              : context.l10n.timerFocusLabel,
       },
       mainLabel: isResting
           ? context.l10n.timerPauseLabel

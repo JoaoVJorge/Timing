@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/notes/notes_controller.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/notes/notes_controller.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
 
 class NotesPage extends StatelessWidget {
   const NotesPage({super.key});

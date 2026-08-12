@@ -1,5 +1,5 @@
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
 
 class FriendsSocialEntity extends Equatable {
   const FriendsSocialEntity({

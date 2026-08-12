@@ -3175,7 +3175,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareInviteCodeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Add me on HelpOut with my code: {code}'**
+  /// **'Add me on Timing with my code: {code}'**
   String shareInviteCodeMessage(String code);
 
   /// No description provided for @groupInvitesTitle.

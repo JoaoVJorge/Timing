@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/presentation/notes/notes_pages_codec.dart";
+import "package:timing/presentation/notes/notes_pages_codec.dart";
 
 void main() {
   group("NotesPagesCodec", () {

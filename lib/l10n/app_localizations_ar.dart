@@ -1734,7 +1734,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'أضفني على HelpOut باستخدام رمزي: $code';
+    return 'أضفني على Timing باستخدام رمزي: $code';
   }
 
   @override

@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_constants.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/login/login_controller.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/app/app_constants.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/login/login_controller.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 const Color _authBlue = Color(0xFF2F6FF2);
 const Color _authBlueLight = Color(0xFF67A2FF);

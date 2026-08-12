@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "help_out-web",
+      "name": "timing-web",
       "runtimeExecutable": "flutter",
       "runtimeArgs": ["run", "-d", "chrome", "--web-port", "5959"],
       "port": 5959

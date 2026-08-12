@@ -1,21 +1,21 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/domain/entities/group_activity_draft.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
-import "package:help_out/presentation/create_subject/subject_creation_form_controller.dart";
-import "package:help_out/theme/subject_colors.dart";
-import "package:help_out/theme/subject_icons.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
+import "package:timing/core/domain/entities/group_activity_draft.dart";
+import "package:timing/core/domain/entities/group_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/domain/use_cases/create_group_use_case.dart";
+import "package:timing/core/domain/use_cases/get_invitable_friends_use_case.dart";
+import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
+import "package:timing/theme/subject_colors.dart";
+import "package:timing/theme/subject_icons.dart";
 
 class CreateGroupController extends GetxController
     implements SubjectCreationFormController {

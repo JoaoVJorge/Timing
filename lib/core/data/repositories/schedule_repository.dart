@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/data_sources/schedule_data_source.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/data_sources/schedule_data_source.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class ScheduleRepository {
   ScheduleRepository({required this._scheduleDataSource});

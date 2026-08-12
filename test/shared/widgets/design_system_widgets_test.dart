@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/presentation/groups/widgets/groups_header.dart";
-import "package:help_out/presentation/home/widgets/home_activity_grid.dart";
-import "package:help_out/presentation/home/widgets/home_day_summary_line.dart";
-import "package:help_out/shared/widgets/app_empty_state.dart";
-import "package:help_out/shared/widgets/app_nav_row.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/presentation/groups/widgets/groups_header.dart";
+import "package:timing/presentation/home/widgets/home_activity_grid.dart";
+import "package:timing/presentation/home/widgets/home_day_summary_line.dart";
+import "package:timing/shared/widgets/app_empty_state.dart";
+import "package:timing/shared/widgets/app_nav_row.dart";
+import "package:timing/shared/widgets/app_section_header.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 

@@ -1,13 +1,13 @@
 import "package:get/get.dart";
-import "package:help_out/core/data/repositories/activity_repository.dart";
-import "package:help_out/core/data/repositories/app_config_repository.dart";
-import "package:help_out/core/data/repositories/daily_tasks_repository.dart";
-import "package:help_out/core/data/repositories/friends_repository.dart";
-import "package:help_out/core/data/repositories/groups_repository.dart";
-import "package:help_out/core/data/repositories/phone_auth_repository.dart";
-import "package:help_out/core/data/repositories/profile_sync_repository.dart";
-import "package:help_out/core/data/repositories/schedule_repository.dart";
-import "package:help_out/core/data/repositories/subjects_repository.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
+import "package:timing/core/data/repositories/app_config_repository.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
+import "package:timing/core/data/repositories/profile_sync_repository.dart";
+import "package:timing/core/data/repositories/schedule_repository.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 
 class RepositoriesBindings extends Bindings {
   @override

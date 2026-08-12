@@ -1,8 +1,8 @@
 import "package:get/get.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/app/route_arguments.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/presentation/category/category_controller.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/app/route_arguments.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/presentation/category/category_controller.dart";
 
 class CategoryBindings extends Bindings {
   @override

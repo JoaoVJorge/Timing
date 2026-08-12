@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 
 /// Groups related settings behind a single border with dividers, so a screen of
 /// options does not read as a screen of equally important cards.

@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/app_spacing.dart";
 
 /// Hero card at the top of Home carrying the single next best action:
 /// resume a subject, start the suggested one, or create the first subject.

@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/home/home_controller.dart";
+import "package:timing/presentation/home/home_controller.dart";
 
 class HomeBindings extends Bindings {
   @override

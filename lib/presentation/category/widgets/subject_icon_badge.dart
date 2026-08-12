@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/theme/subject_icons.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/theme/subject_icons.dart";
 
 class SubjectIconBadge extends StatelessWidget {
   const SubjectIconBadge({

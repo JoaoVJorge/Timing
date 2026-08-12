@@ -1743,7 +1743,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'Add me on HelpOut with my code: $code';
+    return 'Add me on Timing with my code: $code';
   }
 
   @override

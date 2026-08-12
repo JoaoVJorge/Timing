@@ -2,14 +2,14 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_constants.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/config/config_controller.dart";
-import "package:help_out/presentation/config/widgets/settings_section.dart";
-import "package:help_out/presentation/config/widgets/settings_tile.dart";
-import "package:help_out/presentation/config/widgets/settings_user_card.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/app/app_constants.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/config/config_controller.dart";
+import "package:timing/presentation/config/widgets/settings_section.dart";
+import "package:timing/presentation/config/widgets/settings_tile.dart";
+import "package:timing/presentation/config/widgets/settings_user_card.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/theme/app_spacing.dart";
 
 class ConfigPage extends StatelessWidget {
   const ConfigPage({super.key});

@@ -3,7 +3,7 @@ import Flutter
 import Foundation
 
 final class TimerLiveActivityPlugin: NSObject, FlutterPlugin {
-  private static let channelName = "com.helpout/timer_live_activity"
+  private static let channelName = "com.timing/timer_live_activity"
 
   static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(

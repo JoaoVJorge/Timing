@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/edit_profile/edit_profile_controller.dart";
+import "package:timing/presentation/edit_profile/edit_profile_controller.dart";
 
 class EditProfileBindings extends Bindings {
   @override

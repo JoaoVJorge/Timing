@@ -21,7 +21,7 @@ import UIKit
       forPlugin: "FocusGuardPlugin"
     ) {
       let channel = FlutterMethodChannel(
-        name: "help_out/focus_guard",
+        name: "timing/focus_guard",
         binaryMessenger: registrar.messenger()
       )
       channel.setMethodCallHandler { call, result in

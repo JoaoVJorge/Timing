@@ -1,7 +1,7 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
-import "package:help_out/theme/accent_presets.dart";
+import "package:timing/theme/accent_presets.dart";
 
 class AppConfigEntity extends Equatable {
   const AppConfigEntity({

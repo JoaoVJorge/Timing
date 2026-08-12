@@ -1,19 +1,19 @@
 import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
-import "package:help_out/core/services/activity_history/activity_history_service.dart";
-import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
-import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
-import "package:help_out/core/services/focus/focus_feedback_service.dart";
-import "package:help_out/core/services/focus/focus_guard_service.dart";
-import "package:help_out/core/services/http/http_client_service.dart";
-import "package:help_out/core/services/last_activity/last_activity_service.dart";
-import "package:help_out/core/services/live_activity/timer_live_activity_service.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/notifications/timer_notification_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
-import "package:help_out/env/environment_keys.dart";
+import "package:timing/core/services/activity_history/activity_history_service.dart";
+import "package:timing/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/services/focus/focus_feedback_service.dart";
+import "package:timing/core/services/focus/focus_guard_service.dart";
+import "package:timing/core/services/http/http_client_service.dart";
+import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/notifications/timer_notification_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/env/environment_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ServicesBindings extends Bindings {

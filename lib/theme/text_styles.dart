@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:help_out/theme/colors.dart";
+import "package:timing/theme/colors.dart";
 
 class AppTextStyles {
   const AppTextStyles(this._tokens);

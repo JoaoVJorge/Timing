@@ -1,5 +1,5 @@
 import "package:flutter/foundation.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class AppLoggerService {
   /// Long string values (e.g. base64 photo blobs) are trimmed to this many

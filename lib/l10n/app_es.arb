@@ -735,7 +735,7 @@
   "friendRequestSentMessage": "Solicitud enviada",
   "joinedGroupMessage": "Te uniste al grupo",
   "friendTypeName": "amigo",
-  "shareInviteCodeMessage": "Agrégame en HelpOut con mi código: {code}",
+  "shareInviteCodeMessage": "Agrégame en Timing con mi código: {code}",
   "groupInvitesTitle": "Invitaciones a grupos ({count})",
   "groupInvitedBy": "{inviter} te invit?",
   "acceptButton": "Aceptar",

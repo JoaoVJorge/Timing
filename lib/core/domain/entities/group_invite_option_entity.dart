@@ -24,7 +24,7 @@ class GroupInviteOptionEntity extends Equatable {
   factory GroupInviteOptionEntity.fromMap(Map<String, dynamic> map) =>
       GroupInviteOptionEntity(
         friendId: map["friend_id"] as String? ?? "",
-        friendName: map["friend_name"] as String? ?? "HelpOut User",
+        friendName: map["friend_name"] as String? ?? "Timing User",
         accentColorValue:
             (map["accent_color_value"] as num?)?.toInt() ?? 4294940679,
         status: GroupInviteStatus.byName(map["status"] as String? ?? ""),

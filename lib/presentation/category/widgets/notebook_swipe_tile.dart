@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/category/widgets/group_activity_lock_badge.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/category/widgets/group_activity_lock_badge.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 
 /// Horizontal swipe tile with two reveals: drag right for notes/statistics,
 /// drag left to edit/delete. The reveal stays open until tapped or swiped back.

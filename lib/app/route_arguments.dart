@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class RouteArguments {
   const RouteArguments._();

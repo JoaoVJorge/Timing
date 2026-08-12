@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/daily_goals/daily_goals_controller.dart";
+import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 
 class DailyGoalsBindings extends Bindings {
   @override

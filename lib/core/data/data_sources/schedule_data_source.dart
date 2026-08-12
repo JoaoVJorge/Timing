@@ -1,12 +1,12 @@
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 
 class ScheduleDataSource {
   ScheduleDataSource({

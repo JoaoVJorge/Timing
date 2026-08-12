@@ -1045,7 +1045,7 @@
   "friendRequestSentMessage": "?? ????? ?????",
   "joinedGroupMessage": "?????? ??? ????????",
   "friendTypeName": "????",
-  "shareInviteCodeMessage": "أضفني على HelpOut باستخدام رمزي: {code}",
+  "shareInviteCodeMessage": "أضفني على Timing باستخدام رمزي: {code}",
   "groupInvitesTitle": "دعوات المجموعات ({count})",
   "groupInvitedBy": "دعاك {inviter}",
   "acceptButton": "????",

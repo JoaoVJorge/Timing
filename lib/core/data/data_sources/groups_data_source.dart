@@ -1,18 +1,18 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/domain/entities/group_activity_draft.dart";
-import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/entities/group_image_message_entity.dart";
-import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
-import "package:help_out/core/domain/entities/group_invitation_entity.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/entities/sent_group_invitation_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
-import "package:help_out/theme/group_colors.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
+import "package:timing/core/domain/entities/group_activity_draft.dart";
+import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
+import "package:timing/core/domain/entities/group_entity.dart";
+import "package:timing/core/domain/entities/group_image_message_entity.dart";
+import "package:timing/core/domain/entities/group_invite_option_entity.dart";
+import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/theme/group_colors.dart";
 
 class GroupsDataSource {
   GroupsDataSource({required this._supabaseService, required this._logger});

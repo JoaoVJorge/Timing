@@ -1,18 +1,18 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/category/widgets/subject_icon_badge.dart";
-import "package:help_out/presentation/subject_stats/subject_stats_controller.dart";
-import "package:help_out/presentation/subject_stats/widgets/subject_comparatives_section.dart";
-import "package:help_out/shared/extensions/enum_localization_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_icon_badge.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/category/widgets/subject_icon_badge.dart";
+import "package:timing/presentation/subject_stats/subject_stats_controller.dart";
+import "package:timing/presentation/subject_stats/widgets/subject_comparatives_section.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/widgets/app_icon_badge.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 import "package:get/get.dart";
 
 class SubjectStatsPage extends GetView<SubjectStatsController> {

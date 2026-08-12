@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_name.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/functions/format_name.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class TopThemeTile extends StatelessWidget {
   const TopThemeTile({
@@ -40,40 +40,40 @@ class TopThemeTile extends StatelessWidget {
   }
 
   Widget _content(BuildContext context) => Row(
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Color(subject.colorValue).withValues(alpha: 0.18),
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            "#$rank",
-            style: context.textStyles.bodyTiny.copyWith(
-              color: Color(subject.colorValue),
-            ),
+    children: [
+      Container(
+        width: 28,
+        height: 28,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Color(subject.colorValue).withValues(alpha: 0.18),
+          shape: BoxShape.circle,
+        ),
+        child: Text(
+          "#$rank",
+          style: context.textStyles.bodyTiny.copyWith(
+            color: Color(subject.colorValue),
           ),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            capitalizeName(subject.name),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.bodyLarge,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          context.l10n.metricPagesValue(subject.currentPages),
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Text(
+          capitalizeName(subject.name),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodySmall.copyWith(
-            color: context.colorTokens.textHint,
-          ),
+          style: context.textStyles.bodyLarge,
         ),
-      ],
-    );
+      ),
+      const SizedBox(width: 8),
+      Text(
+        context.l10n.metricPagesValue(subject.currentPages),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodySmall.copyWith(
+          color: context.colorTokens.textHint,
+        ),
+      ),
+    ],
+  );
 }

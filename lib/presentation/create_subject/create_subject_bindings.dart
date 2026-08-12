@@ -1,7 +1,7 @@
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/presentation/create_subject/create_subject_controller.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/presentation/create_subject/create_subject_controller.dart";
 
 class CreateSubjectBindings extends Bindings {
   @override

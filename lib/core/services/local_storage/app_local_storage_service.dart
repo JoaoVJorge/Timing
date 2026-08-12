@@ -1,6 +1,6 @@
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class AppLocalStorageService {

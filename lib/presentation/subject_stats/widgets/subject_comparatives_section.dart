@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/progress/widgets/progress_evolution_chart.dart";
-import "package:help_out/presentation/subject_stats/subject_stats_controller.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
+import "package:timing/presentation/subject_stats/subject_stats_controller.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 
 /// The "Comparativos" card: a Week/Month bar chart of the subject's own daily
 /// history, plus the period total and how it compares to the period before.

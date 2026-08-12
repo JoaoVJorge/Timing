@@ -1,10 +1,10 @@
 import "dart:convert";
 
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/activity_entry_entity.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/domain/entities/activity_entry_entity.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 
 /// Tracks lightweight per-day activity counters (focus time, sessions, pages)
 /// so the Home screen can show honest "today" metrics. Persists a date-keyed
