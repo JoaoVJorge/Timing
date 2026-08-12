@@ -76,65 +76,26 @@ extension RankTierX on RankTier {
     RankTier.mithril => Icons.auto_awesome_rounded,
   };
 
-  String label(BuildContext context) => switch (context.languageCode) {
-    "pt" => switch (this) {
-      RankTier.paper => "Papel",
-      RankTier.wood => "Madeira",
-      RankTier.stone => "Pedra",
-      RankTier.copper => "Cobre",
-      RankTier.bronze => "Bronze",
-      RankTier.iron => "Ferro",
-      RankTier.silver => "Prata",
-      RankTier.gold => "Ouro",
-      RankTier.platinum => "Platina",
-      RankTier.amethyst => "Ametista",
-      RankTier.emerald => "Esmeralda",
-      RankTier.diamond => "Diamante",
-      RankTier.obsidian => "Obsidiana",
-      RankTier.adamantium => "Adamantium",
-      RankTier.mithril => "Mithril",
-    },
-    "es" => switch (this) {
-      RankTier.paper => "Papel",
-      RankTier.wood => "Madera",
-      RankTier.stone => "Piedra",
-      RankTier.copper => "Cobre",
-      RankTier.bronze => "Bronce",
-      RankTier.iron => "Hierro",
-      RankTier.silver => "Plata",
-      RankTier.gold => "Oro",
-      RankTier.platinum => "Platino",
-      RankTier.amethyst => "Amatista",
-      RankTier.emerald => "Esmeralda",
-      RankTier.diamond => "Diamante",
-      RankTier.obsidian => "Obsidiana",
-      RankTier.adamantium => "Adamantium",
-      RankTier.mithril => "Mithril",
-    },
-    _ => switch (this) {
-      RankTier.paper => "Paper",
-      RankTier.wood => "Wood",
-      RankTier.stone => "Stone",
-      RankTier.copper => "Copper",
-      RankTier.bronze => "Bronze",
-      RankTier.iron => "Iron",
-      RankTier.silver => "Silver",
-      RankTier.gold => "Gold",
-      RankTier.platinum => "Platinum",
-      RankTier.amethyst => "Amethyst",
-      RankTier.emerald => "Emerald",
-      RankTier.diamond => "Diamond",
-      RankTier.obsidian => "Obsidian",
-      RankTier.adamantium => "Adamantium",
-      RankTier.mithril => "Mithril",
-    },
+  String label(BuildContext context) => switch (this) {
+    RankTier.paper => context.l10n.rankTierPaper,
+    RankTier.wood => context.l10n.rankTierWood,
+    RankTier.stone => context.l10n.rankTierStone,
+    RankTier.copper => context.l10n.rankTierCopper,
+    RankTier.bronze => context.l10n.rankTierBronze,
+    RankTier.iron => context.l10n.rankTierIron,
+    RankTier.silver => context.l10n.rankTierSilver,
+    RankTier.gold => context.l10n.rankTierGold,
+    RankTier.platinum => context.l10n.rankTierPlatinum,
+    RankTier.amethyst => context.l10n.rankTierAmethyst,
+    RankTier.emerald => context.l10n.rankTierEmerald,
+    RankTier.diamond => context.l10n.rankTierDiamond,
+    RankTier.obsidian => context.l10n.rankTierObsidian,
+    RankTier.adamantium => context.l10n.rankTierAdamantium,
+    RankTier.mithril => context.l10n.rankTierMithril,
   };
 
-  String learnerLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Aprendiz ${label(context).toLowerCase()}",
-    "es" => "Aprendiz ${label(context).toLowerCase()}",
-    _ => "${label(context)} Learner",
-  };
+  String learnerLabel(BuildContext context) =>
+      context.l10n.rankTierLearner(label(context).toLowerCase());
 
   static RankTier forLevel(int level) {
     RankTier tier = RankTier.paper;
