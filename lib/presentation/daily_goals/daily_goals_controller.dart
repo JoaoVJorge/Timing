@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
@@ -29,12 +30,13 @@ class DailyGoalsController extends GetxController {
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
 
   List<DailyTaskEntity> get pendingTasks =>
-      tasks.where((task) => !task.isCheckedToday).toList();
+      tasks.where((task) => !task.isDoneForCurrentCycle).toList();
 
   List<DailyTaskEntity> get completedTasks =>
-      tasks.where((task) => task.isCheckedToday).toList();
+      tasks.where((task) => task.isDoneForCurrentCycle).toList();
 
-  int get doneTodayCount => completedTasks.length;
+  int get doneTodayCount =>
+      tasks.where((task) => task.isDoneForCurrentCycle).length;
 
   @override
   void onInit() {
@@ -45,7 +47,10 @@ class DailyGoalsController extends GetxController {
   Future<void> loadTasks() async {
     final Either<AppError, List<DailyTaskEntity>> result =
         await _getDailyTasksUseCase();
-    result.fold((error) => null, (loadedTasks) => tasks.value = loadedTasks);
+    result.fold((error) => null, (loadedTasks) {
+      tasks.value = loadedTasks;
+      _askAboutMissedYesterday();
+    });
   }
 
   Future<void> onTapAddTask() async {
@@ -53,6 +58,7 @@ class DailyGoalsController extends GetxController {
     final DailyTaskEntity? createdTask = result as DailyTaskEntity?;
     if (createdTask != null) {
       tasks.add(createdTask);
+      _askAboutMissedYesterday();
     }
   }
 
@@ -86,6 +92,46 @@ class DailyGoalsController extends GetxController {
     });
   }
 
+  Future<void> _askAboutMissedYesterday() async {
+    final BuildContext? context = Get.context;
+    if (context == null) {
+      return;
+    }
+
+    final DateTime now = DateTime.now();
+    final DailyTaskEntity? task = tasks.firstWhereOrNull(
+      (task) => task.shouldAskAboutMissedYesterday(now),
+    );
+    if (task == null) {
+      return;
+    }
+
+    final DateTime yesterday = now.subtract(const Duration(days: 1));
+    final String missedDate = DailyTaskEntity.dateKey(yesterday);
+    final bool? didComplete = await _appNavigator.dialog<bool>(
+      child: _MissedYesterdayDialog(taskName: task.name),
+      barrierDismissible: false,
+    );
+    if (didComplete == null) {
+      return;
+    }
+
+    final Either<AppError, DailyTaskEntity> result =
+        await _toggleDailyTaskCheckUseCase(
+          taskId: task.id,
+          date: didComplete ? yesterday : null,
+          resolvedMissedDate: missedDate,
+          toggleDate: didComplete,
+        );
+
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
+      final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
+      if (index != -1) {
+        tasks[index] = updatedTask;
+      }
+    });
+  }
+
   Future<void> onDeleteTask(DailyTaskEntity task) async {
     final bool confirmed = await showDeleteConfirmationDialog(
       itemName: task.name,
@@ -104,10 +150,141 @@ class DailyGoalsController extends GetxController {
     if (context == null) {
       return null;
     }
-    return switch (context.languageCode) {
-      "en" => "goal",
-      "es" => "meta",
-      _ => "meta",
-    };
+    return context.l10n.goalTypeName;
   }
+}
+
+class _MissedYesterdayDialog extends StatelessWidget {
+  const _MissedYesterdayDialog({required this.taskName});
+
+  final String taskName;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent = context.colorTokens.primary;
+
+    return Dialog(
+      elevation: 0,
+      backgroundColor: context.colorTokens.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 34),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 390),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+        decoration: BoxDecoration(
+          color: context.colorTokens.dialogSurface,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.black.withValues(alpha: 0.16),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.history_rounded, color: accent, size: 28),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.l10n.missedYesterdayDialogTitle,
+              textAlign: TextAlign.center,
+              style: context.textStyles.extraBold24.copyWith(
+                color: context.colorTokens.dialogText,
+                fontSize: 21,
+                height: 1.12,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.missedYesterdayDialogContent(taskName),
+              textAlign: TextAlign.center,
+              style: context.textStyles.bodyLarge.copyWith(
+                color: context.colorTokens.dialogTextMuted,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1.38,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _MissedDialogButton(
+                    label: context.l10n.missedYesterdayMissedButton,
+                    foreground: accent,
+                    borderColor: accent,
+                    onTap: () => _appNavigatorBack(false),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MissedDialogButton(
+                    label: context.l10n.missedYesterdayCompletedButton,
+                    foreground: context.colorTokens.white,
+                    background: accent,
+                    onTap: () => _appNavigatorBack(true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _appNavigatorBack(bool result) {
+    appNavigator.back<bool>(result: result);
+  }
+}
+
+class _MissedDialogButton extends StatelessWidget {
+  const _MissedDialogButton({
+    required this.label,
+    required this.foreground,
+    required this.onTap,
+    this.borderColor,
+    this.background,
+  });
+
+  final String label;
+  final Color foreground;
+  final VoidCallback onTap;
+  final Color? borderColor;
+  final Color? background;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: Container(
+      height: 50,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+        border: borderColor == null ? null : Border.all(color: borderColor!),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyLarge.copyWith(
+          color: foreground,
+          fontSize: 15,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    ),
+  );
 }

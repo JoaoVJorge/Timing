@@ -61,7 +61,9 @@ class CreateGroupController extends GetxController {
   final RxString groupDescription = "".obs;
   final RxString friendSearchQuery = "".obs;
 
-  final Rx<GroupActivityOption?> activityOption = Rx<GroupActivityOption?>(null);
+  final Rx<GroupActivityOption?> activityOption = Rx<GroupActivityOption?>(
+    null,
+  );
   final RxString activityName = "".obs;
   final RxString activityGoal = "".obs;
   final Rx<Color> activityColor = SubjectColors.values.first.obs;
@@ -190,6 +192,13 @@ class CreateGroupController extends GetxController {
 
   void onSelectActivityColor(Color color) => activityColor.value = color;
 
+  void onSelectActivitySequenceType(DailyTaskSequenceType type) {
+    activityGoalType.value = type == DailyTaskSequenceType.intense
+        ? DailyTaskGoalType.daily
+        : DailyTaskGoalType.total;
+    _refreshCanCreate();
+  }
+
   void onSelectActivityGoalType(DailyTaskGoalType type) {
     activityGoalType.value = type;
     _refreshCanCreate();
@@ -203,8 +212,8 @@ class CreateGroupController extends GetxController {
     currentStep.value--;
   }
 
-  void _refreshCanCreate() => canCreate.value =
-      hasName && hasTheme && hasActivity && hasFriends;
+  void _refreshCanCreate() =>
+      canCreate.value = hasName && hasTheme && hasActivity && hasFriends;
 
   void onToggleFriend(String friendId) {
     if (selectedFriendIds.contains(friendId)) {
@@ -288,12 +297,16 @@ class CreateGroupController extends GetxController {
         name: name,
         colorValue: colorValue,
         targetDays: targetDays,
+        sequenceType: activityGoalType.value == DailyTaskGoalType.daily
+            ? DailyTaskSequenceType.intense.name
+            : DailyTaskSequenceType.casual.name,
         goalType: activityGoalType.value.name,
       );
     }
 
     final TimeCategoryType category = option.category!;
-    final int goalNumber = int.tryParse(activityGoalController.text.trim()) ?? 0;
+    final int goalNumber =
+        int.tryParse(activityGoalController.text.trim()) ?? 0;
     if (goalNumber <= 0) {
       return null;
     }

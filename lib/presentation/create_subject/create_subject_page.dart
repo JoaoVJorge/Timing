@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_subject/create_subject_controller.dart";
@@ -34,6 +35,8 @@ class CreateSubjectPage extends StatelessWidget {
         _HeroHeader(controller: controller),
         const Gap(14),
         _NameField(controller: controller),
+        const Gap(12),
+        _ActivityTypeSection(controller: controller),
         const Gap(12),
         _GoalSection(controller: controller),
         if (!controller.isPageBased) ...[
@@ -99,6 +102,145 @@ class _NameField extends StatelessWidget {
           : Icon(icon, color: accent, size: 22),
     );
   });
+}
+
+class _ActivityTypeSection extends StatelessWidget {
+  const _ActivityTypeSection({required this.controller});
+
+  final CreateSubjectController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final Color accent = controller.selectedColor.value;
+
+    return CreationConfigCard(
+      accent: accent,
+      header: CreationSectionHeader(
+        icon: Icons.repeat_rounded,
+        label: context.l10n.activityTypeLabel,
+        accent: accent,
+      ),
+      child: Column(
+        children: [
+          _ActivityTypeOption(
+            title: context.l10n.activityTypeDailyLabel,
+            description: context.l10n.activityTypeDailyDescription,
+            icon: Icons.wb_sunny_outlined,
+            isSelected:
+                controller.activityType.value == SubjectActivityType.daily,
+            accent: accent,
+            onTap: () => controller.setActivityType(SubjectActivityType.daily),
+          ),
+          const Gap(10),
+          _ActivityTypeOption(
+            title: context.l10n.activityTypePermanentLabel,
+            description: context.l10n.activityTypePermanentDescription,
+            icon: Icons.done_all_rounded,
+            isSelected:
+                controller.activityType.value == SubjectActivityType.permanent,
+            accent: accent,
+            onTap: () =>
+                controller.setActivityType(SubjectActivityType.permanent),
+          ),
+        ],
+      ),
+    );
+  });
+}
+
+class _ActivityTypeOption extends StatelessWidget {
+  const _ActivityTypeOption({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.isSelected,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final bool isSelected;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? accent.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.2
+                    : 0.1,
+              )
+            : context.colorTokens.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? accent : context.colorTokens.borderUnfocused,
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? accent.withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? 0.2
+                          : 0.1,
+                    )
+                  : context.colorTokens.transparent,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected
+                    ? accent.withValues(alpha: 0.7)
+                    : context.colorTokens.borderUnfocused,
+              ),
+            ),
+            child: Icon(icon, color: accent, size: 20),
+          ),
+          const Gap(10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Gap(4),
+                Text(
+                  description,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _GoalSection extends StatelessWidget {
@@ -188,7 +330,7 @@ class _GoalInput extends StatelessWidget {
                   ? context.l10n.goalPagesHint
                   : context.l10n.estimatedHoursGoalHint,
               suffixText: controller.isPageBased
-                  ? _pagesSuffix(context)
+                  ? context.l10n.pagesSuffix
                   : context.l10n.timeUnitMinutesSuffix,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -206,15 +348,6 @@ class _GoalInput extends StatelessWidget {
       ],
     ),
   );
-
-  String _pagesSuffix(BuildContext context) => switch (context.languageCode) {
-    "en" => "pages",
-    "es" => "páginas",
-    "fr" => "pages",
-    "de" => "Seiten",
-    "ar" => "صفحات",
-    _ => "páginas",
-  };
 }
 
 class _FocusSessionCountSection extends StatelessWidget {
@@ -230,83 +363,23 @@ class _FocusSessionCountSection extends StatelessWidget {
       accent: accent,
       header: CreationSectionHeader(
         icon: Icons.repeat_rounded,
-        label: "Seções de foco",
+        label: context.l10n.focusSessionCountLabel,
         accent: accent,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PresetRow(
-            children: controller.focusSessionCountOptions
-                .map(
-                  (count) => CreationSelectableChip(
-                    label: "$count",
-                    isSelected: count == controller.focusSessionCount.value,
-                    accent: accent,
-                    onTap: () => controller.setFocusSessionCount(count),
-                  ),
-                )
-                .toList(),
-          ),
-          const Gap(12),
-          _FocusSessionCountInput(controller: controller, accent: accent),
-        ],
+      child: _PresetRow(
+        children: controller.focusSessionCountOptions
+            .map(
+              (count) => CreationSelectableChip(
+                label: context.l10n.timerSessionCounter(count, count),
+                isSelected: controller.focusSessionCount.value == count,
+                accent: accent,
+                onTap: () => controller.setFocusSessionCount(count),
+              ),
+            )
+            .toList(),
       ),
     );
   });
-}
-
-class _FocusSessionCountInput extends StatelessWidget {
-  const _FocusSessionCountInput({
-    required this.controller,
-    required this.accent,
-  });
-
-  final CreateSubjectController controller;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 48,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      color: context.colorTokens.scaffold.withValues(alpha: 0.36),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: context.colorTokens.borderUnfocused),
-    ),
-    child: Row(
-      children: [
-        Icon(Icons.repeat_one_rounded, color: accent, size: 20),
-        const Gap(12),
-        Expanded(
-          child: TextField(
-            controller: controller.focusSessionCountController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              hintText: "Quantidade de seções",
-              suffixText: "seções",
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _RestSection extends StatelessWidget {
@@ -321,81 +394,24 @@ class _RestSection extends StatelessWidget {
     return CreationConfigCard(
       accent: accent,
       header: CreationSectionHeader(
-        icon: Icons.emoji_food_beverage_rounded,
+        icon: Icons.self_improvement_rounded,
         label: context.l10n.createSubjectRestLabel,
         accent: accent,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PresetRow(
-            children: controller.restMinutesOptions
-                .map(
-                  (minutes) => CreationSelectableChip(
-                    label: context.l10n.restMinutesChip(minutes),
-                    isSelected: minutes == controller.restMinutes.value,
-                    accent: accent,
-                    onTap: () => controller.setRestMinutes(minutes),
-                  ),
-                )
-                .toList(),
-          ),
-          const Gap(12),
-          _RestMinutesInput(controller: controller, accent: accent),
-        ],
+      child: _PresetRow(
+        children: controller.restMinutesOptions
+            .map(
+              (minutes) => CreationSelectableChip(
+                label: context.l10n.restMinutesChip(minutes),
+                isSelected: controller.restMinutes.value == minutes,
+                accent: accent,
+                onTap: () => controller.setRestMinutes(minutes),
+              ),
+            )
+            .toList(),
       ),
     );
   });
-}
-
-class _RestMinutesInput extends StatelessWidget {
-  const _RestMinutesInput({required this.controller, required this.accent});
-
-  final CreateSubjectController controller;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 48,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      color: context.colorTokens.scaffold.withValues(alpha: 0.36),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: context.colorTokens.borderUnfocused),
-    ),
-    child: Row(
-      children: [
-        Icon(Icons.timer_outlined, color: accent, size: 20),
-        const Gap(12),
-        Expanded(
-          child: TextField(
-            controller: controller.restMinutesController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              hintText: context.l10n.customRestMinutesHint,
-              suffixText: context.l10n.timeUnitMinutesSuffix,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _ColorSection extends StatelessWidget {
@@ -409,6 +425,7 @@ class _ColorSection extends StatelessWidget {
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
       extraColors: [context.colorTokens.primary],
+      includePastelColors: true,
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );
@@ -579,7 +596,7 @@ class _IconChoice extends StatelessWidget {
       decoration: BoxDecoration(
         color: isSelected
             ? accent.withValues(alpha: 0.12)
-            : context.colorTokens.white,
+            : context.colorTokens.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isSelected ? accent : context.colorTokens.borderUnfocused,

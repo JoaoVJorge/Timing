@@ -220,6 +220,7 @@ class CreationColorSection extends StatelessWidget {
     required this.label,
     required this.onSelect,
     this.extraColors = const [],
+    this.includePastelColors = false,
     super.key,
   });
 
@@ -227,12 +228,14 @@ class CreationColorSection extends StatelessWidget {
   final String label;
   final ValueChanged<Color> onSelect;
   final List<Color> extraColors;
+  final bool includePastelColors;
 
   @override
   Widget build(BuildContext context) {
     final List<Color> colors = _dedupedColors([
-      ...extraColors,
+      ...extraColors.map(SubjectColors.normalize),
       ...SubjectColors.values,
+      if (includePastelColors) ...SubjectColors.darkValues,
     ]);
 
     return CreationConfigCard(

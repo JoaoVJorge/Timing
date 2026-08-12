@@ -70,7 +70,7 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   @override
   Widget build(BuildContext context) {
     final Color taskColor = Color(widget.task.colorValue);
-    final bool isCheckedToday = widget.task.isCheckedToday;
+    final bool isCheckedToday = widget.task.isDoneForCurrentCycle;
     final double progress = widget.task.currentTarget == 0
         ? 0
         : (widget.task.currentProgress / widget.task.currentTarget).clamp(
@@ -193,6 +193,8 @@ class _DailyTaskTileState extends State<DailyTaskTile>
             Text(
               widget.task.isCompleted
                   ? context.l10n.taskCompletedLabel
+                  : widget.task.hasInfiniteTarget
+                  ? "${widget.task.currentProgress} / ∞"
                   : context.l10n.taskDaysProgress(
                       widget.task.currentProgress,
                       widget.task.currentTarget,
