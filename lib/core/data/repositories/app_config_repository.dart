@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/data_sources/app_config_data_source.dart";
-import "package:help_out/core/domain/entities/app_config_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/data_sources/app_config_data_source.dart";
+import "package:timing/core/domain/entities/app_config_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class AppConfigRepository {
   AppConfigRepository({required this._appConfigDataSource});

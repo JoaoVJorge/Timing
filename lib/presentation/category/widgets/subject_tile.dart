@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/category/widgets/subject_icon_badge.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_icon_button.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/category/widgets/subject_icon_badge.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/widgets/app_icon_button.dart";
 
 class SubjectTile extends StatelessWidget {
   const SubjectTile({

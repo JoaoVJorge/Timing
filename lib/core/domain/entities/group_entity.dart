@@ -1,8 +1,8 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 
 class GroupEntity extends Equatable {
   const GroupEntity({

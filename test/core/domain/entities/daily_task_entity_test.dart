@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
 
 void main() {
   group("DailyTaskEntity", () {

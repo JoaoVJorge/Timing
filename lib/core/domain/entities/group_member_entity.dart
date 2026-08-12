@@ -1,7 +1,7 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
+import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 
 class GroupMemberEntity extends Equatable {
   const GroupMemberEntity({

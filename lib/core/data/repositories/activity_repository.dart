@@ -1,8 +1,8 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/data_sources/activity_data_source.dart";
-import "package:help_out/core/domain/entities/activity_entry_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/domain/entities/activity_entry_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class ActivityRepository {
   ActivityRepository({required this.activityDataSource});

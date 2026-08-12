@@ -1,4 +1,4 @@
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 enum GroupActivityKind { subject, goal }
 

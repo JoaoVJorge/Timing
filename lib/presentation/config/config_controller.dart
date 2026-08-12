@@ -2,13 +2,13 @@ import "dart:typed_data";
 
 import "package:get/get.dart";
 import "package:flutter/material.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/config/widgets/config_dialogs.dart";
-import "package:help_out/shared/functions/format_name.dart";
-import "package:help_out/theme/app_languages.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/config/widgets/config_dialogs.dart";
+import "package:timing/shared/functions/format_name.dart";
+import "package:timing/theme/app_languages.dart";
 
 class ConfigController extends GetxController {
   ConfigController({required this._appController, required this._appNavigator});

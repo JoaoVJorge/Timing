@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import "package:help_out/l10n/app_localizations.dart";
-import "package:help_out/theme/colors.dart";
-import "package:help_out/theme/text_styles.dart";
+import "package:timing/l10n/app_localizations.dart";
+import "package:timing/theme/colors.dart";
+import "package:timing/theme/text_styles.dart";
 
 extension AppColorTokensX on BuildContext {
   AppColorTokens get colorTokens => Theme.of(this).extension<AppColorTokens>()!;

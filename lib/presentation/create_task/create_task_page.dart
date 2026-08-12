@@ -2,11 +2,11 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/create_task/create_task_controller.dart";
-import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
-import "package:help_out/shared/widgets/creation/creation_page_scaffold.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/create_task/create_task_controller.dart";
+import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
+import "package:timing/shared/widgets/creation/creation_page_scaffold.dart";
 
 class CreateTaskPage extends StatelessWidget {
   const CreateTaskPage({super.key});

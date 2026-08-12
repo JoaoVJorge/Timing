@@ -1,5 +1,5 @@
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 
 /// A pending invitation for the current user to join a group, shown in the
 /// Friends area next to friend requests.
@@ -21,7 +21,7 @@ class GroupInvitationEntity extends Equatable {
         groupName: map["group_name"] as String? ?? "",
         theme: GroupThemeType.byName(map["group_theme"] as String?),
         inviterId: map["inviter_id"] as String? ?? "",
-        inviterName: map["inviter_name"] as String? ?? "HelpOut",
+        inviterName: map["inviter_name"] as String? ?? "Timing",
         createdAt: DateTime.tryParse(map["created_at"] as String? ?? ""),
       );
 

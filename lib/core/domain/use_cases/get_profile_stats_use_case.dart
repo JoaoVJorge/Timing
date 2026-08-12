@@ -1,8 +1,8 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/subjects_repository.dart";
-import "package:help_out/core/domain/entities/profile_stats_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
+import "package:timing/core/domain/entities/profile_stats_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class GetProfileStatsUseCase {
   GetProfileStatsUseCase({required this._subjectsRepository});

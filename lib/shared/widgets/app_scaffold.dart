@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/app/app_ui_constants.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/app/app_ui_constants.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({

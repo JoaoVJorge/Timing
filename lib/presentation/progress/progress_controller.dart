@@ -1,15 +1,15 @@
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/entities/profile_stats_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_profile_stats_use_case.dart";
-import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/entities/profile_stats_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
+import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
+import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 
 enum ProgressPeriod { day, week, month }
 

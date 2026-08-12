@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 abstract class SubjectCreationFormController {
   TimeCategoryType get category;

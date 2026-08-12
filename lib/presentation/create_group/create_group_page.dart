@@ -1,21 +1,21 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/create_group/create_group_controller.dart";
-import "package:help_out/presentation/create_subject/create_subject_page.dart";
-import "package:help_out/presentation/create_group/widgets/friend_tile.dart";
-import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/shared/extensions/enum_localization_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/decoration.dart";
-import "package:help_out/theme/group_colors.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/create_group/create_group_controller.dart";
+import "package:timing/presentation/create_subject/create_subject_page.dart";
+import "package:timing/presentation/create_group/widgets/friend_tile.dart";
+import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/decoration.dart";
+import "package:timing/theme/group_colors.dart";
 
 class CreateGroupPage extends StatelessWidget {
   const CreateGroupPage({super.key});

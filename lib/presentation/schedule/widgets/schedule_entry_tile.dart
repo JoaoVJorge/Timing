@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_schedule_time.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/functions/format_schedule_time.dart";
+import "package:timing/theme/app_spacing.dart";
 
 /// Where an entry sits relative to now, so the day reads as a timeline instead
 /// of an undifferentiated list.

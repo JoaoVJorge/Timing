@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/groups/groups_controller.dart";
+import "package:timing/presentation/groups/groups_controller.dart";
 
 class GroupsBindings extends Bindings {
   @override

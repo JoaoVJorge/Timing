@@ -5,11 +5,11 @@ import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/photo_source_bottom_sheet.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 
 class EditProfileController extends GetxController {

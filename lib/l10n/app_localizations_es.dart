@@ -1756,7 +1756,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'Agrégame en HelpOut con mi código: $code';
+    return 'Agrégame en Timing con mi código: $code';
   }
 
   @override

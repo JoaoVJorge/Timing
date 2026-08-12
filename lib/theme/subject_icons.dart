@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 class SubjectIcons {
   const SubjectIcons._();

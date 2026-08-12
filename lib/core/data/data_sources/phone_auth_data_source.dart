@@ -1,6 +1,6 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 
 class PhoneAuthDataSource {

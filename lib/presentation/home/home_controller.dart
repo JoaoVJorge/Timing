@@ -1,20 +1,20 @@
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/entities/last_activity_entity.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
-import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
-import "package:help_out/core/services/last_activity/last_activity_service.dart";
-import "package:help_out/presentation/schedule/schedule_controller.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/entities/last_activity_entity.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
+import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
+import "package:timing/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/presentation/schedule/schedule_controller.dart";
 
 class HomeController extends GetxController {
   HomeController({

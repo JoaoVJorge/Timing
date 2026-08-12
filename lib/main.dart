@@ -3,10 +3,10 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_widget.dart";
-import "package:help_out/app/bindings/app_bindings.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_widget.dart";
+import "package:timing/app/bindings/app_bindings.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 Future<void> main() async {
   await runZonedGuarded(() async {

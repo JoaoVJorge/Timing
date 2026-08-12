@@ -1,8 +1,8 @@
 import "package:dartz/dartz.dart";
 import "package:dio/dio.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/http/app_http_request.dart";
-import "package:help_out/core/services/http/http_status_code.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/http/app_http_request.dart";
+import "package:timing/core/services/http/http_status_code.dart";
 
 class HttpClientService {
   HttpClientService({required this._dio});

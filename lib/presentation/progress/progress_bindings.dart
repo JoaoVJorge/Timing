@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/progress/progress_controller.dart";
+import "package:timing/presentation/progress/progress_controller.dart";
 
 class ProgressBindings extends Bindings {
   @override

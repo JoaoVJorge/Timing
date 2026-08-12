@@ -1,6 +1,6 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/friends_repository.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class AcceptFriendRequestUseCase {
   AcceptFriendRequestUseCase({required this._friendsRepository});

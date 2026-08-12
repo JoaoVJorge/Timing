@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 class GroupActivityLockBadge extends StatelessWidget {
   const GroupActivityLockBadge({

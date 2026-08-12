@@ -1,13 +1,13 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/add_daily_task_use_case.dart";
-import "package:help_out/core/domain/use_cases/update_daily_task_use_case.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/theme/subject_colors.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
+import "package:timing/core/domain/use_cases/update_daily_task_use_case.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/theme/subject_colors.dart";
 
 class CreateTaskController extends GetxController {
   CreateTaskController({

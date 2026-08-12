@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/presentation/progress/widgets/progress_achievements_section.dart";
-import "package:help_out/presentation/progress/widgets/progress_evolution_chart.dart";
-import "package:help_out/presentation/progress/widgets/progress_hero_card.dart";
-import "package:help_out/presentation/progress/widgets/progress_stat_row.dart";
-import "package:help_out/presentation/progress/widgets/progress_top_subjects_list.dart";
+import "package:timing/presentation/progress/widgets/progress_achievements_section.dart";
+import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
+import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
+import "package:timing/presentation/progress/widgets/progress_stat_row.dart";
+import "package:timing/presentation/progress/widgets/progress_top_subjects_list.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 
@@ -120,9 +120,7 @@ void main() {
       const SizedBox(
         width: 320,
         height: 180,
-        child: EvolutionBarChart(
-          values: [600, 900, 0, 1200, 720, 1080, 300],
-        ),
+        child: EvolutionBarChart(values: [600, 900, 0, 1200, 720, 1080, 300]),
       ),
     );
     expect(tester.takeException(), isNull);

@@ -1,6 +1,6 @@
 # Timing - Documento de Referencia do Projeto
 
-> Documento atualizado do app Flutter `help_out` (`0.1.0+1`).
+> Documento atualizado do app Flutter `timing` (`0.1.0+1`).
 > Objetivo: dar uma visao clara do produto, arquitetura, dados, servicos e fluxos principais para humanos ou sistemas de IA que precisem continuar o projeto.
 > Baseado no codigo atual em `lib/`.
 
@@ -14,7 +14,7 @@ O usuario cria atividades, registra tempo de foco, acompanha leituras por pagina
 Ideia central: transformar **tempo, paginas e constancia** em metricas visiveis, com um fluxo leve de gamificacao.
 
 - **Nome de exibicao:** `Timing` (`AppConstants.appTitle`).
-- **Pacote Flutter:** `help_out`.
+- **Pacote Flutter:** `timing`.
 - **Estado de login:** atualmente `userName` vazio significa usuario deslogado; `userName` preenchido significa usuario logado.
 - **Idiomas:** ingles (`en`), portugues (`pt`) e espanhol (`es`).
 - **Plataforma principal:** Android, especialmente por causa das notificacoes persistentes do timer.

@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/config/config_controller.dart";
+import "package:timing/presentation/config/config_controller.dart";
 
 class ConfigBindings extends Bindings {
   @override

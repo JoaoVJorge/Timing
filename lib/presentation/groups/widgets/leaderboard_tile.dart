@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/theme/group_colors.dart";
+import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/theme/group_colors.dart";
 
 class LeaderboardTile extends StatelessWidget {
   const LeaderboardTile({

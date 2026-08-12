@@ -1,8 +1,8 @@
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/presentation/main_navigation/enums/bottom_nav_button_type.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/presentation/main_navigation/enums/bottom_nav_button_type.dart";
 
 class MainNavigationController extends GetxController {
   MainNavigationController({required this._appNavigator});

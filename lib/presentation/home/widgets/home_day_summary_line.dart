@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/progress/progress_category_style.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/progress/progress_category_style.dart";
+import "package:timing/theme/app_spacing.dart";
 
 /// One quiet line closing the page. Four separate metric cards fragmented the
 /// reading and repeated what Progress already shows in depth.

@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
+import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 
 class CurrentUserRankCard extends StatelessWidget {
   const CurrentUserRankCard({

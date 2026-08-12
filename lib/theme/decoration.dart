@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
-import "package:help_out/app/app_ui_constants.dart";
-import "package:help_out/theme/colors.dart";
-import "package:help_out/theme/text_styles.dart";
+import "package:timing/app/app_ui_constants.dart";
+import "package:timing/theme/colors.dart";
+import "package:timing/theme/text_styles.dart";
 
 class AppInputDecoration {
   static InputDecoration withBorder({

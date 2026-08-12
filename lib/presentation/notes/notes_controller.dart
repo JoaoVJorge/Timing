@@ -2,10 +2,10 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/use_cases/update_subject_notes_use_case.dart";
-import "package:help_out/presentation/notes/notes_pages_codec.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/use_cases/update_subject_notes_use_case.dart";
+import "package:timing/presentation/notes/notes_pages_codec.dart";
 
 enum NotesSaveState { idle, saving, saved }
 
@@ -63,7 +63,9 @@ class NotesController extends GetxController {
   }
 
   void addPage() {
-    notesControllers.add(TextEditingController()..addListener(_scheduleAutoSave));
+    notesControllers.add(
+      TextEditingController()..addListener(_scheduleAutoSave),
+    );
     currentPageIndex.value = pageCount - 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!pageController.hasClients) {

@@ -1,6 +1,6 @@
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 class ProfileStatsEntity extends Equatable {
   const ProfileStatsEntity({

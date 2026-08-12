@@ -1,4 +1,4 @@
-import "package:help_out/core/domain/enums/http_method.dart";
+import "package:timing/core/domain/enums/http_method.dart";
 
 abstract class AppHttpRequest {
   String get path;

@@ -1,5 +1,5 @@
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 /// A single logged activity: the granular, per-session record behind the
 /// aggregated daily counters. Persisted locally as an append-only trail so the

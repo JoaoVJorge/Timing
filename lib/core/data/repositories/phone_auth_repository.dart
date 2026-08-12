@@ -1,6 +1,6 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/data_sources/phone_auth_data_source.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/data_sources/phone_auth_data_source.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class PhoneAuthRepository {
   PhoneAuthRepository({required this._phoneAuthDataSource});

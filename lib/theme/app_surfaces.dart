@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/colors.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/colors.dart";
 
 /// Decorations for the three surface levels. Content cards keep a hairline
 /// border and no shadow; only the primary level carries the accent gradient.

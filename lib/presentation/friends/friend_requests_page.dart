@@ -1,14 +1,14 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/friend_entity.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/friends/friends_controller.dart";
-import "package:help_out/presentation/friends/widgets/friends_shared.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/friends/friends_controller.dart";
+import "package:timing/presentation/friends/widgets/friends_shared.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 enum FriendRequestsMode { incoming, sent }
 

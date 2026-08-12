@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/presentation/main_navigation/main_navigation_controller.dart";
-import "package:help_out/presentation/main_navigation/widgets/app_bottom_nav_bar.dart";
+import "package:timing/presentation/main_navigation/main_navigation_controller.dart";
+import "package:timing/presentation/main_navigation/widgets/app_bottom_nav_bar.dart";
 
 class MainNavigationPage extends StatelessWidget {
   const MainNavigationPage({super.key});

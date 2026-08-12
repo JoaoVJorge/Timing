@@ -1,11 +1,14 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/domain/entities/app_config_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
+import "package:timing/core/domain/entities/app_config_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 
 class ProfileSyncDataSource {
-  ProfileSyncDataSource({required this._supabaseService, required this._logger});
+  ProfileSyncDataSource({
+    required this._supabaseService,
+    required this._logger,
+  });
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;

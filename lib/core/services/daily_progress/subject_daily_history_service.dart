@@ -1,10 +1,10 @@
 import "dart:convert";
 
-import "package:help_out/core/domain/entities/activity_entry_entity.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/services/daily_progress/daily_progress_service.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/domain/entities/activity_entry_entity.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
+import "package:timing/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 
 /// Per-subject version of [DailyProgressService]: keeps a day-by-day trail of
 /// focus time and pages for each subject so the stats screen can draw an honest

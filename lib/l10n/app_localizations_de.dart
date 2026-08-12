@@ -1770,7 +1770,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'Füge mich auf HelpOut mit meinem Code hinzu: $code';
+    return 'Füge mich auf Timing mit meinem Code hinzu: $code';
   }
 
   @override
