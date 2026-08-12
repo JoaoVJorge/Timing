@@ -3541,7 +3541,7 @@ abstract class AppLocalizations {
   /// No description provided for @goalsTabLabel.
   ///
   /// In en, this message translates to:
-  /// **'Goals'**
+  /// **'Data'**
   String get goalsTabLabel;
 
   /// No description provided for @chatTabLabel.
@@ -3591,6 +3591,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{reached}/{total} reached the goal'**
   String groupActivityReachedGoal(int reached, int total);
+
+  /// No description provided for @groupActivityFocusDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get groupActivityFocusDataLabel;
+
+  /// No description provided for @groupActivityPauseDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get groupActivityPauseDataLabel;
+
+  /// No description provided for @groupActivitySessionsDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get groupActivitySessionsDataLabel;
+
+  /// No description provided for @groupActivityPendingUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending users'**
+  String get groupActivityPendingUsersTitle;
+
+  /// No description provided for @groupActivityAllCompletedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone completed the activity today.'**
+  String get groupActivityAllCompletedToday;
 
   /// No description provided for @groupNoImagesTitle.
   ///

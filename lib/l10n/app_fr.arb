@@ -1130,7 +1130,7 @@
   "groupMemberRoleLabel": "Membre",
   "groupMembersLabel": "Membres",
   "groupActionsLabel": "Actions du groupe",
-  "goalsTabLabel": "Objectifs",
+  "goalsTabLabel": "Données",
   "chatTabLabel": "Chat",
   "groupGoalTitle": "Objectif du groupe",
   "groupMainRuleTitle": "Règle principale",
@@ -1159,6 +1159,11 @@
       }
     }
   },
+  "groupActivityFocusDataLabel": "Focus",
+  "groupActivityPauseDataLabel": "Pause",
+  "groupActivitySessionsDataLabel": "Sessions",
+  "groupActivityPendingUsersTitle": "Utilisateurs en attente",
+  "groupActivityAllCompletedToday": "Tout le monde a terminé l’activité aujourd’hui.",
   "groupNoImagesTitle": "Aucune image pour l’instant",
   "groupNoImagesDescription": "Envoyez la première image du groupe.",
   "groupSendImageButton": "Envoyer une image",

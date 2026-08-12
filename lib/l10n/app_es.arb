@@ -820,7 +820,7 @@
   "groupMemberRoleLabel": "Miembro",
   "groupMembersLabel": "Miembros",
   "groupActionsLabel": "Acciones del grupo",
-  "goalsTabLabel": "Metas",
+  "goalsTabLabel": "Datos",
   "chatTabLabel": "Chat",
   "groupGoalTitle": "Meta del grupo",
   "groupMainRuleTitle": "Regla principal",
@@ -849,6 +849,11 @@
       }
     }
   },
+  "groupActivityFocusDataLabel": "Enfoque",
+  "groupActivityPauseDataLabel": "Pausa",
+  "groupActivitySessionsDataLabel": "Sesiones",
+  "groupActivityPendingUsersTitle": "Usuarios pendientes",
+  "groupActivityAllCompletedToday": "Todos completaron la actividad hoy.",
   "groupNoImagesTitle": "Aún no hay imágenes",
   "groupNoImagesDescription": "Envía la primera imagen del grupo.",
   "groupSendImageButton": "Enviar imagen",

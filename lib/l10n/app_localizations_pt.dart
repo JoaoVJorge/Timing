@@ -1955,7 +1955,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get groupActionsLabel => 'Ações do grupo';
 
   @override
-  String get goalsTabLabel => 'Metas';
+  String get goalsTabLabel => 'Dados';
 
   @override
   String get chatTabLabel => 'Chat';
@@ -1985,6 +1985,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String groupActivityReachedGoal(int reached, int total) {
     return '$reached/$total atingiram a meta';
   }
+
+  @override
+  String get groupActivityFocusDataLabel => 'Foco';
+
+  @override
+  String get groupActivityPauseDataLabel => 'Pausa';
+
+  @override
+  String get groupActivitySessionsDataLabel => 'Sessões';
+
+  @override
+  String get groupActivityPendingUsersTitle => 'Usuários pendentes';
+
+  @override
+  String get groupActivityAllCompletedToday =>
+      'Todos concluíram a atividade hoje.';
 
   @override
   String get groupNoImagesTitle => 'Nenhuma imagem ainda';

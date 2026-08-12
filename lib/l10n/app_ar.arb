@@ -1159,6 +1159,11 @@
       }
     }
   },
+  "groupActivityFocusDataLabel": "تركيز",
+  "groupActivityPauseDataLabel": "استراحة",
+  "groupActivitySessionsDataLabel": "جلسات",
+  "groupActivityPendingUsersTitle": "المستخدمون المعلقون",
+  "groupActivityAllCompletedToday": "أكمل الجميع النشاط اليوم.",
   "groupNoImagesTitle": "?? ???? ??? ???",
   "groupNoImagesDescription": "أرسل أول صورة للمجموعة.",
   "groupSendImageButton": "????? ????",

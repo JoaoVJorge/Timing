@@ -1948,7 +1948,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupActionsLabel => 'Group actions';
 
   @override
-  String get goalsTabLabel => 'Goals';
+  String get goalsTabLabel => 'Data';
 
   @override
   String get chatTabLabel => 'Chat';
@@ -1978,6 +1978,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String groupActivityReachedGoal(int reached, int total) {
     return '$reached/$total reached the goal';
   }
+
+  @override
+  String get groupActivityFocusDataLabel => 'Focus';
+
+  @override
+  String get groupActivityPauseDataLabel => 'Break';
+
+  @override
+  String get groupActivitySessionsDataLabel => 'Sessions';
+
+  @override
+  String get groupActivityPendingUsersTitle => 'Pending users';
+
+  @override
+  String get groupActivityAllCompletedToday =>
+      'Everyone completed the activity today.';
 
   @override
   String get groupNoImagesTitle => 'No images yet';

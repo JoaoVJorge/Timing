@@ -1967,6 +1967,21 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get groupActivityFocusDataLabel => 'تركيز';
+
+  @override
+  String get groupActivityPauseDataLabel => 'استراحة';
+
+  @override
+  String get groupActivitySessionsDataLabel => 'جلسات';
+
+  @override
+  String get groupActivityPendingUsersTitle => 'المستخدمون المعلقون';
+
+  @override
+  String get groupActivityAllCompletedToday => 'أكمل الجميع النشاط اليوم.';
+
+  @override
   String get groupNoImagesTitle => '?? ???? ??? ???';
 
   @override
