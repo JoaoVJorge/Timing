@@ -59,12 +59,7 @@ class _UnlockedSummary extends StatelessWidget {
           ),
         ),
         TextSpan(
-          text: _localizedText(
-            context,
-            en: " /50 unlocked",
-            pt: " /50 desbloqueadas",
-            es: " /50 desbloqueados",
-          ),
+          text: context.l10n.achievementsUnlockedSuffix,
           style: TextStyle(color: context.colorTokens.textHint),
         ),
       ],
@@ -111,12 +106,7 @@ class _LevelCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              _localizedText(
-                                context,
-                                en: "Current level",
-                                pt: "Nível atual",
-                                es: "Nivel actual",
-                              ),
+                              context.l10n.currentLevelLabel,
                               style: context.textStyles.bodySmall.copyWith(
                                 color: context.colorTokens.textHint,
                               ),
@@ -205,31 +195,15 @@ class _LevelCard extends StatelessWidget {
                     children: [
                       Text(
                         nextUnlock == null
-                            ? _localizedText(
-                                context,
-                                en: "All unlocked",
-                                pt: "Tudo desbloqueado",
-                                es: "Todo desbloqueado",
-                              )
-                            : _localizedText(
-                                context,
-                                en: "Next unlock",
-                                pt: "Próxima conquista",
-                                es: "Próximo logro",
-                              ),
+                            ? context.l10n.allAchievementsUnlockedLabel
+                            : context.l10n.nextUnlockLabel,
                         style: context.textStyles.bodyTiny.copyWith(
                           color: context.colorTokens.textHint,
                         ),
                       ),
                       const Gap(2),
                       Text(
-                        nextUnlock?.title ??
-                            _localizedText(
-                              context,
-                              en: "Achievement Hunter",
-                              pt: "Caçador de conquistas",
-                              es: "Cazador de logros",
-                            ),
+                        nextUnlock?.title ?? context.l10n.achievement50Title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyMedium.copyWith(
@@ -238,12 +212,7 @@ class _LevelCard extends StatelessWidget {
                       ),
                       Text(
                         nextUnlock?.description ??
-                            _localizedText(
-                              context,
-                              en: "You unlocked everything.",
-                              pt: "Você desbloqueou tudo.",
-                              es: "Desbloqueaste todo.",
-                            ),
+                            context.l10n.allAchievementsUnlockedDescription,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyTiny.copyWith(
@@ -266,12 +235,7 @@ class _LevelCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    _localizedText(
-                      context,
-                      en: "${800 - controller.levelXp} XP to go",
-                      pt: "Faltam ${800 - controller.levelXp} XP",
-                      es: "Faltan ${800 - controller.levelXp} XP",
-                    ),
+                    context.l10n.xpToGo(800 - controller.levelXp),
                     style: context.textStyles.bodyTiny.copyWith(
                       color: context.colorTokens.primary,
                       fontWeight: FontWeight.w900,
@@ -300,12 +264,7 @@ class _LevelPill extends StatelessWidget {
       borderRadius: BorderRadius.circular(999),
     ),
     child: Text(
-      _localizedText(
-        context,
-        en: "Level $level",
-        pt: "Nível $level",
-        es: "Nivel $level",
-      ),
+      context.l10n.levelLabel(level),
       style: context.textStyles.bodyTiny.copyWith(
         color: context.colorTokens.primary,
         fontWeight: FontWeight.w900,
@@ -325,30 +284,20 @@ class _Filters extends StatelessWidget {
     child: Row(
       children: [
         _FilterChip(
-          label: _localizedText(context, en: "All", pt: "Todas", es: "Todos"),
+          label: context.l10n.allFilterLabel,
           isSelected: controller.selectedFilter.value == AchievementFilter.all,
           onTap: () => controller.onSelectFilter(AchievementFilter.all),
         ),
         const Gap(8),
         _FilterChip(
-          label: _localizedText(
-            context,
-            en: "Unlocked",
-            pt: "Desbloqueadas",
-            es: "Desbloqueados",
-          ),
+          label: context.l10n.unlockedFilterLabel,
           isSelected:
               controller.selectedFilter.value == AchievementFilter.unlocked,
           onTap: () => controller.onSelectFilter(AchievementFilter.unlocked),
         ),
         const Gap(8),
         _FilterChip(
-          label: _localizedText(
-            context,
-            en: "Locked",
-            pt: "Bloqueadas",
-            es: "Bloqueados",
-          ),
+          label: context.l10n.lockedFilterLabel,
           isSelected:
               controller.selectedFilter.value == AchievementFilter.locked,
           onTap: () => controller.onSelectFilter(AchievementFilter.locked),
@@ -370,12 +319,7 @@ class _CategoryMenu extends StatelessWidget {
     final AchievementCategory? selected = controller.selectedCategory.value;
 
     return PopupMenuButton<AchievementCategory?>(
-      tooltip: _localizedText(
-        context,
-        en: "Select category",
-        pt: "Selecionar categoria",
-        es: "Seleccionar categoria",
-      ),
+      tooltip: context.l10n.selectCategoryTooltip,
       initialValue: selected,
       onSelected: controller.onSelectCategory,
       color: context.colorTokens.surface,
@@ -386,12 +330,7 @@ class _CategoryMenu extends StatelessWidget {
         PopupMenuItem<AchievementCategory?>(
           value: null,
           child: _CategoryOption(
-            label: _localizedText(
-              context,
-              en: "All categories",
-              pt: "Todas as categorias",
-              es: "Todas las categorias",
-            ),
+            label: context.l10n.allCategoriesLabel,
             color: context.colorTokens.primary,
             icon: Icons.apps_rounded,
             isSelected: selected == null,
@@ -410,14 +349,7 @@ class _CategoryMenu extends StatelessWidget {
         ),
       ],
       child: _FilterChip(
-        label:
-            selected?.label(context) ??
-            _localizedText(
-              context,
-              en: "By category",
-              pt: "Por categoria",
-              es: "Por categoria",
-            ),
+        label: selected?.label(context) ?? context.l10n.byCategoryLabel,
         isSelected: selected != null,
         trailing: Icons.keyboard_arrow_down_rounded,
       ),
@@ -763,24 +695,14 @@ class _RanksSheet extends StatelessWidget {
             ),
             const Gap(18),
             Text(
-              _localizedText(
-                context,
-                en: "All levels",
-                pt: "Todos os níveis",
-                es: "Todos los niveles",
-              ),
+              context.l10n.allLevelsTitle,
               style: context.textStyles.extraBold20.copyWith(
                 color: context.colorTokens.textBody,
               ),
             ),
             const Gap(4),
             Text(
-              _localizedText(
-                context,
-                en: "Unlock achievements to climb the ranks.",
-                pt: "Desbloqueie conquistas para subir de nível.",
-                es: "Desbloquea logros para subir de nivel.",
-              ),
+              context.l10n.allLevelsDescription,
               style: context.textStyles.bodySmall.copyWith(
                 color: context.colorTokens.textHint,
               ),
@@ -859,12 +781,7 @@ class _RankRow extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _localizedText(
-                    context,
-                    en: "Level ${tier.minLevel}+",
-                    pt: "Nível ${tier.minLevel}+",
-                    es: "Nivel ${tier.minLevel}+",
-                  ),
+                  context.l10n.levelPlusLabel(tier.minLevel),
                   style: context.textStyles.bodyTiny.copyWith(
                     color: context.colorTokens.textHint,
                   ),
@@ -881,12 +798,7 @@ class _RankRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                _localizedText(
-                  context,
-                  en: "Current",
-                  pt: "Atual",
-                  es: "Actual",
-                ),
+                context.l10n.currentLabel,
                 style: context.textStyles.bodyTiny.copyWith(
                   color: context.colorTokens.white,
                   fontWeight: FontWeight.w900,
@@ -906,14 +818,3 @@ class _RankRow extends StatelessWidget {
     );
   }
 }
-
-String _localizedText(
-  BuildContext context, {
-  required String en,
-  required String pt,
-  required String es,
-}) => switch (context.languageCode) {
-  "pt" => pt,
-  "es" => es,
-  _ => en,
-};
