@@ -37,14 +37,18 @@ class SchedulePage extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
-              child: Obx(
-                () => ScheduleDateStrip(
+              child: Obx(() {
+                // The strip receives callbacks that read the schedule entries
+                // during its own build, so touch the list here too to keep its
+                // day markers in sync after add/delete operations.
+                controller.entries.length;
+                return ScheduleDateStrip(
                   selectedDate: controller.selectedDate.value,
                   onSelectDate: controller.onSelectDate,
                   hasEntryForDate: controller.hasEntriesForDate,
                   eventColorsForDate: controller.entryColorsForDate,
-                ),
-              ),
+                );
+              }),
             ),
           ),
           DraggableScrollableSheet(

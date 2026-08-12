@@ -81,6 +81,11 @@ class ScheduleController extends GetxController {
     return firstAllowed.add(Duration(days: diff));
   }
 
+  DateTime _firstOccurrenceDate(List<ScheduleEntryEntity> addedEntries) =>
+      addedEntries
+          .map((entry) => _nextDateForWeekday(entry.weekday, entry.activeFrom))
+          .reduce((a, b) => a.isBefore(b) ? a : b);
+
   bool hasEntriesForDate(DateTime date) =>
       entries.any((entry) => _isEntryActiveOn(entry, date));
 
@@ -194,11 +199,8 @@ class ScheduleController extends GetxController {
       return;
     }
 
-    entries.addAll(addedEntries);
-    selectedDate.value = _nextDateForWeekday(
-      addedEntries.first.weekday,
-      addedEntries.first.activeFrom,
-    );
+    entries.value = [...entries, ...addedEntries];
+    selectedDate.value = _firstOccurrenceDate(addedEntries);
     entries.refresh();
   }
 

@@ -574,16 +574,6 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              context.l10n.selectDateTitle,
-              textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(
-                color: context.colorTokens.dialogText,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const Gap(18),
             _CalendarMonthHeader(
               label: _monthLabel(locale, _selectedDate),
               onPrevious: _onPreviousMonth,
