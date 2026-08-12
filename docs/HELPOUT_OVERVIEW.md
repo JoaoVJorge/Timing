@@ -1,4 +1,4 @@
-# HelpOut - Documento de Referencia do Projeto
+# Timing - Documento de Referencia do Projeto
 
 > Documento atualizado do app Flutter `help_out` (`0.1.0+1`).
 > Objetivo: dar uma visao clara do produto, arquitetura, dados, servicos e fluxos principais para humanos ou sistemas de IA que precisem continuar o projeto.
@@ -8,12 +8,12 @@
 
 ## 1. Visao Geral
 
-**HelpOut** e um app mobile Flutter de produtividade, estudos e acompanhamento de habitos com camada social.
+**Timing** e um app mobile Flutter de produtividade, estudos e acompanhamento de habitos com camada social.
 O usuario cria atividades, registra tempo de foco, acompanha leituras por paginas, marca metas diarias, organiza uma agenda semanal e compara desempenho em grupos.
 
 Ideia central: transformar **tempo, paginas e constancia** em metricas visiveis, com um fluxo leve de gamificacao.
 
-- **Nome de exibicao:** `HelpOut` (`AppConstants.appTitle`).
+- **Nome de exibicao:** `Timing` (`AppConstants.appTitle`).
 - **Pacote Flutter:** `help_out`.
 - **Estado de login:** atualmente `userName` vazio significa usuario deslogado; `userName` preenchido significa usuario logado.
 - **Idiomas:** ingles (`en`), portugues (`pt`) e espanhol (`es`).
@@ -816,4 +816,4 @@ MainNavigation
 
 ---
 
-*Fim do documento. Atualizado para refletir os fluxos e servicos atuais do projeto HelpOut.*
+*Fim do documento. Atualizado para refletir os fluxos e servicos atuais do projeto Timing.*
