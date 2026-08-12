@@ -175,7 +175,7 @@ class _EvolutionBarChartPainter extends CustomPainter {
     final double chartRight = size.width;
     final double chartWidth = chartRight - chartLeft;
     final double slotWidth = chartWidth / safeValues.length;
-    final double barWidth = (slotWidth * 0.30).clamp(6, 12).toDouble();
+    final double barWidth = _barWidth(slotWidth, safeValues.length);
 
     _drawGrid(canvas, size, maxValue, chartTop, chartBottom, chartLeft);
     _drawVerticalGrid(
@@ -238,6 +238,13 @@ class _EvolutionBarChartPainter extends CustomPainter {
       )..layout(maxWidth: chartLeft - 8);
       labelPainter.paint(canvas, Offset(0, y - labelPainter.height / 2));
     }
+  }
+
+  double _barWidth(double slotWidth, int valueCount) {
+    if (valueCount <= 1) {
+      return (slotWidth * 0.18).clamp(36, 56).toDouble();
+    }
+    return (slotWidth * 0.30).clamp(6, 12).toDouble();
   }
 
   void _drawBars(

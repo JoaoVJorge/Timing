@@ -74,7 +74,7 @@ class _StatTile extends StatelessWidget {
               color: isDarkMode
                   ? Color.lerp(stat.accent, Colors.white, 0.22)
                   : context.colorTokens.textBody,
-              fontSize: 24,
+              fontSize: 23,
             ),
           ),
           const Gap(4),
