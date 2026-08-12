@@ -5,6 +5,7 @@ import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
+import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
 import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
@@ -19,6 +20,26 @@ class GroupsRepository {
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() =>
       _groupsDataSource.getInvitableFriends();
+
+  Future<Either<AppError, List<GroupInviteOptionEntity>>> getGroupInviteOptions(
+    String groupId,
+  ) => _groupsDataSource.getGroupInviteOptions(groupId);
+
+  Future<Either<AppError, void>> inviteFriendToGroup({
+    required String groupId,
+    required String friendId,
+  }) => _groupsDataSource.inviteFriendToGroup(
+    groupId: groupId,
+    friendId: friendId,
+  );
+
+  Future<Either<AppError, void>> cancelGroupInvitation({
+    required String groupId,
+    required String friendId,
+  }) => _groupsDataSource.cancelGroupInvitation(
+    groupId: groupId,
+    friendId: friendId,
+  );
 
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
   getGroupActivityProgress(String groupId, {String? localDate}) =>
@@ -39,8 +60,8 @@ class GroupsRepository {
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
 
-  Future<Either<AppError, List<GroupInvitationEntity>>> getPendingInvitations() =>
-      _groupsDataSource.getPendingInvitations();
+  Future<Either<AppError, List<GroupInvitationEntity>>>
+  getPendingInvitations() => _groupsDataSource.getPendingInvitations();
 
   Future<Either<AppError, GroupEntity>> acceptInvitation(String invitationId) =>
       _groupsDataSource.acceptInvitation(invitationId);

@@ -69,9 +69,7 @@ class _ShortcutTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
                 fontWeight: FontWeight.w900,
-                fontSize: 12,
               ),
             ),
           ),

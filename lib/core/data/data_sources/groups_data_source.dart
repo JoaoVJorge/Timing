@@ -4,6 +4,7 @@ import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
+import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
 import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
@@ -175,6 +176,60 @@ class GroupsDataSource {
             )
             .toList(),
       );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, List<GroupInviteOptionEntity>>> getGroupInviteOptions(
+    String groupId,
+  ) async {
+    try {
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "group_invite_options",
+        params: {"target_group_id": groupId},
+      );
+      _logger.logResponse("rpc public.group_invite_options", response);
+      final List<dynamic> rows = response as List<dynamic>? ?? const [];
+      return Right(
+        rows
+            .map(
+              (row) => GroupInviteOptionEntity.fromMap(
+                Map<String, dynamic>.from(row as Map),
+              ),
+            )
+            .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, void>> inviteFriendToGroup({
+    required String groupId,
+    required String friendId,
+  }) async {
+    try {
+      await _supabaseService.requireClient.rpc(
+        "invite_friend_to_group",
+        params: {"target_group_id": groupId, "target_friend_id": friendId},
+      );
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, void>> cancelGroupInvitation({
+    required String groupId,
+    required String friendId,
+  }) async {
+    try {
+      await _supabaseService.requireClient.rpc(
+        "cancel_group_invitation",
+        params: {"target_group_id": groupId, "target_friend_id": friendId},
+      );
+      return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
@@ -642,7 +697,6 @@ class GroupsDataSource {
     final DateTime now = DateTime.now().toUtc();
     return DateTime.utc(now.year, now.month);
   }
-
 }
 
 class _PeriodScores {
