@@ -66,11 +66,9 @@ class LoginController extends GetxController {
 
   Future<void> onTapAppleSignIn() async {
     if (!isAppleSignInComplete) {
-      final String message = switch (Get.context?.languageCode) {
-        "pt" => "Entrar com Apple ainda não está completo.",
-        "es" => "Iniciar sesión con Apple aún no está completo.",
-        _ => "Sign in with Apple is not complete yet.",
-      };
+      final String message =
+          Get.context?.l10n.appleSignInIncompleteMessage ??
+          "Sign in with Apple is not complete yet.";
       appNavigator.showErrorSnackBar(message);
       return;
     }

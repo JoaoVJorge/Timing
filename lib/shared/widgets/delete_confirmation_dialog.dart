@@ -30,6 +30,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color danger = context.colorTokens.error;
     final Color accent = context.colorTokens.primary;
+    final String typeName =
+        itemTypeName ?? context.l10n.deleteConfirmationDefaultTypeName;
 
     return Dialog(
       elevation: 0,
@@ -69,7 +71,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
             ),
             const Gap(12),
             Text(
-              _title(context),
+              context.l10n.deleteConfirmationTitle(typeName),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -81,7 +83,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
             ),
             const Gap(20),
             Text(
-              _content(context),
+              context.l10n.deleteConfirmationContent(itemName),
               textAlign: TextAlign.center,
               style: context.textStyles.bodyLarge.copyWith(
                 color: context.colorTokens.dialogTextMuted,
@@ -105,7 +107,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
                   const Gap(12),
                   Flexible(
                     child: Text(
-                      _historyWarning(context),
+                      context.l10n.deleteConfirmationHistoryWarning(typeName),
                       textAlign: TextAlign.center,
                       style: context.textStyles.bodyMedium.copyWith(
                         color: context.colorTokens.dialogTextMuted,
@@ -132,7 +134,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 const Gap(12),
                 Expanded(
                   child: _DeleteDialogButton(
-                    label: _confirmLabel(context),
+                    label: context.l10n.deleteButton,
                     foreground: context.colorTokens.white,
                     gradient: LinearGradient(
                       colors: [
@@ -150,43 +152,6 @@ class DeleteConfirmationDialog extends StatelessWidget {
       ),
     );
   }
-
-  String _typeName(BuildContext context) =>
-      itemTypeName ??
-      switch (context.languageCode) {
-        "en" => "item",
-        "es" => "elemento",
-        _ => "item",
-      };
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "en" => "Delete ${_typeName(context)}?",
-    "es" => "¿Eliminar ${_typeName(context)}?",
-    _ => "Excluir ${_typeName(context)}?",
-  };
-
-  String _content(BuildContext context) => switch (context.languageCode) {
-    "en" =>
-      "You are about to delete \"$itemName\". This action cannot be undone.",
-    "es" =>
-      "Estás por eliminar \"$itemName\". Esta acción no se puede deshacer.",
-    _ =>
-      "Você está prestes a excluir \"$itemName\". Esta ação não poderá ser desfeita.",
-  };
-
-  String _historyWarning(BuildContext context) =>
-      switch (context.languageCode) {
-        "en" => "This ${_typeName(context)} history will also be removed.",
-        "es" =>
-          "El historial de este ${_typeName(context)} también se eliminará.",
-        _ => "O histórico deste ${_typeName(context)} também será removido.",
-      };
-
-  String _confirmLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Delete",
-    "es" => "Eliminar",
-    _ => "Excluir",
-  };
 }
 
 class _DeleteDialogButton extends StatelessWidget {

@@ -392,13 +392,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
 
   String _missingFieldsHint(BuildContext context) {
     if (_titleController.text.trim().isEmpty) {
-      return switch (context.languageCode) {
-        "pt" => "Preencha o titulo para continuar",
-        "es" => "Completa el titulo para continuar",
-        "fr" => "Ajoutez un titre pour continuer",
-        "de" => "Titel ausfuellen, um fortzufahren",
-        _ => "Fill in the title to continue",
-      };
+      return context.l10n.scheduleTitleRequiredError;
     }
     return context.l10n.endTimeBeforeStartError;
   }
@@ -417,7 +411,7 @@ class _ScheduleColorSelector extends StatelessWidget {
   Widget build(BuildContext context) => Wrap(
     spacing: 10,
     runSpacing: 10,
-    children: SubjectColors.values
+    children: [...SubjectColors.values, ...SubjectColors.darkValues]
         .map(
           (color) => CreationColorChoice(
             color: color,
@@ -451,7 +445,7 @@ class _DateRangeSelector extends StatelessWidget {
       children: [
         Expanded(
           child: _DateChip(
-            label: _startLabel(context),
+            label: context.l10n.scheduleActiveFromLabel,
             value: DateFormat.yMd(locale).format(activeFrom),
             icon: Icons.event_available_rounded,
             onTap: onPickStart,
@@ -460,9 +454,9 @@ class _DateRangeSelector extends StatelessWidget {
         const Gap(AppSpacing.betweenRelated),
         Expanded(
           child: _DateChip(
-            label: _endLabel(context),
+            label: context.l10n.scheduleActiveUntilLabel,
             value: activeUntil == null
-                ? _optionalLabel(context)
+                ? context.l10n.optionalHint
                 : DateFormat.yMd(locale).format(activeUntil!),
             icon: Icons.event_busy_rounded,
             onTap: onPickEnd,
@@ -472,24 +466,6 @@ class _DateRangeSelector extends StatelessWidget {
       ],
     );
   }
-
-  String _startLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Começa em",
-    "es" => "Comienza",
-    _ => "Starts",
-  };
-
-  String _endLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Termina em",
-    "es" => "Termina",
-    _ => "Ends",
-  };
-
-  String _optionalLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Opcional",
-    "es" => "Opcional",
-    _ => "Optional",
-  };
 }
 
 class _DateChip extends StatelessWidget {
@@ -599,7 +575,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _title(context),
+              context.l10n.selectDateTitle,
               textAlign: TextAlign.center,
               style: context.textStyles.extraBold24.copyWith(
                 color: context.colorTokens.dialogText,
@@ -639,7 +615,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
                   const Gap(8),
                   Flexible(
                     child: Text(
-                      _hint(context),
+                      context.l10n.selectDateHint,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodyMedium.copyWith(
@@ -656,7 +632,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
               children: [
                 Expanded(
                   child: _DialogSecondaryButton(
-                    label: _todayLabel(context),
+                    label: context.l10n.periodToday,
                     onTap: () => _onSelectDate(_todayDate()),
                   ),
                 ),
@@ -664,7 +640,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
                 Expanded(
                   flex: 2,
                   child: _DialogPrimaryButton(
-                    label: _confirmLabel(context),
+                    label: context.l10n.confirmButton,
                     onTap: () => Navigator.of(context).pop(_selectedDate),
                   ),
                 ),
@@ -720,30 +696,6 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
     }
     return raw.replaceFirst(raw[0], raw[0].toUpperCase());
   }
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Selecionar data",
-    "es" => "Seleccionar fecha",
-    _ => "Select date",
-  };
-
-  String _hint(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Toque em um dia para selecionar",
-    "es" => "Toca un dia para seleccionar",
-    _ => "Tap a day to select",
-  };
-
-  String _todayLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Hoje",
-    "es" => "Hoy",
-    _ => "Today",
-  };
-
-  String _confirmLabel(BuildContext context) => switch (context.languageCode) {
-    "pt" => "Confirmar",
-    "es" => "Confirmar",
-    _ => "Confirm",
-  };
 }
 
 class _CalendarMonthHeader extends StatelessWidget {
