@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'HelpOut';
+  String get appTitle => 'Timing';
 
   @override
   String get genericErrorMessage =>
@@ -618,7 +618,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEmptyDescription =>
-      'Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.';
+      'Start a session, log some reading or set a goal from Home to track your evolution in Timing.';
 
   @override
   String get profileEmptyGuidance =>
@@ -1372,7 +1372,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String groupMembersCount(int count) {
-    return '$count members';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1474,5 +1480,1156 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get daysSuffix => 'days';
+
+  @override
+  String get createTaskSubtitle =>
+      'Set a daily goal and keep track of your progress';
+
+  @override
+  String get createTaskSequenceTypeLabel => 'Sequence type';
+
+  @override
+  String get createTaskSequenceIntenseLabel => 'Intense';
+
+  @override
+  String get createTaskSequenceIntenseDescription =>
+      'No misses. If you lose one day, your sequence resets.';
+
+  @override
+  String get createTaskSequenceCasualLabel => 'Casual';
+
+  @override
+  String get createTaskSequenceCasualDescription =>
+      'More flexible. Missed days do not reset your sequence.';
+
+  @override
+  String get targetDaysInfinite => 'Infinite';
+
+  @override
+  String get deleteConfirmationDefaultTypeName => 'item';
+
+  @override
+  String deleteConfirmationTitle(String typeName) {
+    return 'Delete $typeName?';
+  }
+
+  @override
+  String deleteConfirmationContent(String itemName) {
+    return 'You are about to delete \"$itemName\". This action cannot be undone.';
+  }
+
+  @override
+  String deleteConfirmationHistoryWarning(String typeName) {
+    return 'This $typeName history will also be removed.';
+  }
+
+  @override
+  String homeDaySummaryFocusValue(String focus) {
+    return '$focus focus';
+  }
+
+  @override
+  String homeDaySummaryGoalsValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals',
+      one: '1 goal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profilePhotoSourceTitle => 'Profile photo';
+
+  @override
+  String get profilePhotoSourceSubtitle =>
+      'Choose how you want to update your photo';
+
+  @override
+  String get photoCameraLabel => 'Take photo';
+
+  @override
+  String get photoGalleryLabel => 'Choose from gallery';
+
+  @override
+  String get removePhotoDialogTitle => 'Remove photo?';
+
+  @override
+  String get removePhotoDialogContent =>
+      'Your avatar will show on the profile again.';
+
+  @override
+  String get friendRequestsReceivedTab => 'Requests';
+
+  @override
+  String get friendRequestsSentTab => 'Invites';
+
+  @override
+  String hobbyPracticeMinutes(int minutes) {
+    return '$minutes min of practice';
+  }
+
+  @override
+  String get hobbyViewStatistics => 'View statistics';
+
+  @override
+  String get hobbyEdit => 'Edit hobby';
+
+  @override
+  String get pinToStart => 'Pin to start';
+
+  @override
+  String get hobbyDelete => 'Delete hobby';
+
+  @override
+  String get deleteActionCannotBeUndone => 'This action cannot be undone.';
+
+  @override
+  String get joinGroupTitle => 'Join group';
+
+  @override
+  String get joinGroupInviteCodeLabel => 'Invite code';
+
+  @override
+  String get joinGroupCodeHint => 'Enter the code';
+
+  @override
+  String get joinGroupButton => 'Join group';
+
+  @override
+  String get joinGroupError => 'Could not join this group.';
+
+  @override
+  String get scheduleDayEventsTitle => 'Day events';
+
+  @override
+  String get dailyGoalsNoGoalsYetTitle => 'No goals yet';
+
+  @override
+  String get dailyGoalsNoGoalsYetDescription =>
+      'Add your first goal to organize the day and track your wins.';
+
+  @override
+  String get dailyGoalsSuggestionsTitle => 'Suggestions to start';
+
+  @override
+  String get dailyGoalsSuggestionStudy => 'Study 30 min';
+
+  @override
+  String get dailyGoalsSuggestionRead => 'Read 10 pages';
+
+  @override
+  String get dailyGoalsSuggestionTrain => 'Train';
+
+  @override
+  String get goalTypeName => 'goal';
+
+  @override
+  String get missedYesterdayDialogTitle => 'Did you complete it yesterday?';
+
+  @override
+  String missedYesterdayDialogContent(String taskName) {
+    return 'You did not register \"$taskName\" yesterday. Did you really miss it?';
+  }
+
+  @override
+  String get missedYesterdayMissedButton => 'Yes, I missed it';
+
+  @override
+  String get missedYesterdayCompletedButton => 'I completed it';
+
+  @override
+  String get scheduleTitleRequiredError => 'Fill in the title to continue';
+
+  @override
+  String get scheduleActiveFromLabel => 'Starts';
+
+  @override
+  String get scheduleActiveUntilLabel => 'Ends';
+
+  @override
+  String get selectDateTitle => 'Select date';
+
+  @override
+  String get selectDateHint => 'Tap a day to select';
+
+  @override
+  String get addFriendTitle => 'Add friend';
+
+  @override
+  String get friendCodeNotFound => 'We could not find a user with this code.';
+
+  @override
+  String get friendInviteCodeTitle => 'Invite code';
+
+  @override
+  String get friendInviteCodeFieldLabel => 'Type or paste the code';
+
+  @override
+  String get friendInviteCodeFieldHint => 'Like ABCDE12345';
+
+  @override
+  String get pasteButton => 'Paste';
+
+  @override
+  String get searchCodeButton => 'Search code';
+
+  @override
+  String get friendUserFoundTitle => 'User found';
+
+  @override
+  String get friendFoundByCode => 'Found by code';
+
+  @override
+  String get sentLabel => 'Sent';
+
+  @override
+  String get friendHowItWorksTitle => 'How it works';
+
+  @override
+  String get friendHowItWorksStepOne => 'Ask your friend for their code';
+
+  @override
+  String get friendHowItWorksStepTwo => 'Paste the code to find the profile';
+
+  @override
+  String get friendHowItWorksStepThree => 'Send the request to add them';
+
+  @override
+  String get myCodeLabel => 'My code';
+
+  @override
+  String get yourInviteCodeLabel => 'Your invite code';
+
+  @override
+  String yourFriendsTitle(int count) {
+    return 'Your friends ($count)';
+  }
+
+  @override
+  String get seeAllButton => 'View all';
+
+  @override
+  String get onlineLabel => 'Online';
+
+  @override
+  String minutesAgoShort(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String get friendsEmptyTitle => 'You do not have friends yet';
+
+  @override
+  String get friendsEmptySubtitle =>
+      'Search people above or share your invite code.';
+
+  @override
+  String get shareCodeButton => 'Share code';
+
+  @override
+  String get codeCopiedMessage => 'Code copied';
+
+  @override
+  String get friendRequestSentMessage => 'Request sent';
+
+  @override
+  String get joinedGroupMessage => 'You joined the group';
+
+  @override
+  String get friendTypeName => 'friend';
+
+  @override
+  String shareInviteCodeMessage(String code) {
+    return 'Add me on HelpOut with my code: $code';
+  }
+
+  @override
+  String groupInvitesTitle(int count) {
+    return 'Group invites ($count)';
+  }
+
+  @override
+  String groupInvitedBy(String inviter) {
+    return '$inviter invited you';
+  }
+
+  @override
+  String get acceptButton => 'Accept';
+
+  @override
+  String get declineButton => 'Decline';
+
+  @override
+  String get friendsTitle => 'Friends';
+
+  @override
+  String get friendRequestsReceivedPageTitle => 'Requests';
+
+  @override
+  String get friendRequestsSentPageTitle => 'Invites';
+
+  @override
+  String friendRequestsReceivedSection(int count) {
+    return 'Received ($count)';
+  }
+
+  @override
+  String friendRequestsSentSection(int count) {
+    return 'Sent ($count)';
+  }
+
+  @override
+  String get friendMutualFriendsSample => '3 mutual friends';
+
+  @override
+  String get pendingLabel => 'Pending';
+
+  @override
+  String get friendRequestsIncomingEmptyTitle => 'No received requests';
+
+  @override
+  String get friendRequestsSentEmptyTitle => 'No sent invites';
+
+  @override
+  String get friendRequestsIncomingEmptySubtitle =>
+      'Requests will appear here.';
+
+  @override
+  String get friendRequestsSentEmptySubtitle =>
+      'Your sent invites will appear here.';
+
+  @override
+  String get friendRequestsSafetyNotice =>
+      'Only accept people you know and trust.';
+
+  @override
+  String get categoryEmptyStudyingTitle => 'No subject yet';
+
+  @override
+  String get categoryEmptyExercisesTitle => 'No exercise yet';
+
+  @override
+  String get categoryEmptyReadingTitle => 'No reading yet';
+
+  @override
+  String get categoryEmptyHobbiesTitle => 'No hobby yet';
+
+  @override
+  String get categoryEmptyStudyingDescription =>
+      'Add your first subject to organize your studies and log focus.';
+
+  @override
+  String get categoryEmptyExercisesDescription =>
+      'Add your first exercise to track workouts, sessions and progress.';
+
+  @override
+  String get categoryEmptyReadingDescription =>
+      'Add your first reading item to track pages, time and progress.';
+
+  @override
+  String get categoryEmptyHobbiesDescription =>
+      'Add your first hobby to log practice and keep momentum.';
+
+  @override
+  String get categorySuggestionStudyingOne => 'Math';
+
+  @override
+  String get categorySuggestionStudyingTwo => 'English';
+
+  @override
+  String get categorySuggestionStudyingThree => 'Writing';
+
+  @override
+  String get categorySuggestionExercisesOne => 'Running';
+
+  @override
+  String get categorySuggestionExercisesTwo => 'Strength';
+
+  @override
+  String get categorySuggestionExercisesThree => 'Stretching';
+
+  @override
+  String get categorySuggestionReadingOne => 'Novel';
+
+  @override
+  String get categorySuggestionReadingTwo => 'Technical';
+
+  @override
+  String get categorySuggestionReadingThree => 'Articles';
+
+  @override
+  String get categorySuggestionHobbiesOne => 'Guitar';
+
+  @override
+  String get categorySuggestionHobbiesTwo => 'Drawing';
+
+  @override
+  String get categorySuggestionHobbiesThree => 'Cooking';
+
+  @override
+  String get pagesAbbreviation => 'pgs';
+
+  @override
+  String get loginSecurityNote => 'Your data is protected and secure.';
+
+  @override
+  String get nextBreakDurationLabel => 'Next break duration';
+
+  @override
+  String timerReadingExitContent(String duration, String subjectName) {
+    return 'You read for $duration. Enter how many pages you read in $subjectName.';
+  }
+
+  @override
+  String get appleSignInIncompleteMessage =>
+      'Sign in with Apple is not complete yet.';
+
+  @override
+  String get activityTypeLabel => 'Activity type';
+
+  @override
+  String get activityTypeDailyLabel => 'Daily';
+
+  @override
+  String get activityTypeDailyDescription =>
+      'Renews every day. The activity becomes available again in the morning.';
+
+  @override
+  String get activityTypePermanentLabel => 'Permanent';
+
+  @override
+  String get activityTypePermanentDescription =>
+      'Stays active until you finish it. After that, it is marked as done.';
+
+  @override
+  String get pagesSuffix => 'pages';
+
+  @override
+  String get updatedSuccessfullyMessage => 'Updated successfully';
+
+  @override
+  String get focusSessionCountLabel => 'Focus sessions';
+
+  @override
+  String get groupEditingComingSoon => 'Group editing is coming soon.';
+
+  @override
+  String get leftGroupMessage => 'You left the group.';
+
+  @override
+  String get groupImageSourceTitle => 'Send image';
+
+  @override
+  String get groupImageSourceSubtitle =>
+      'Choose how you want to send the image';
+
+  @override
   String get deleteButton => 'Delete';
+
+  @override
+  String get manageMembersTitle => 'Manage members';
+
+  @override
+  String get groupLeaderLabel => 'Leader';
+
+  @override
+  String get groupLeaderRoleLabel => 'Group leader';
+
+  @override
+  String get groupMemberRoleLabel => 'Member';
+
+  @override
+  String get groupMembersLabel => 'Members';
+
+  @override
+  String get groupActionsLabel => 'Group actions';
+
+  @override
+  String get goalsTabLabel => 'Goals';
+
+  @override
+  String get chatTabLabel => 'Chat';
+
+  @override
+  String get groupGoalTitle => 'Group goal';
+
+  @override
+  String get groupMainRuleTitle => 'Main rule';
+
+  @override
+  String get groupNextMilestoneTitle => 'Next milestone';
+
+  @override
+  String groupMembersProgressValue(int current, int total) {
+    return '$current/$total members';
+  }
+
+  @override
+  String get groupNextMilestoneDescription =>
+      'to unlock the \"Total Focus\" badge';
+
+  @override
+  String get groupActivityLabel => 'Group activity';
+
+  @override
+  String groupActivityReachedGoal(int reached, int total) {
+    return '$reached/$total reached the goal';
+  }
+
+  @override
+  String get groupNoImagesTitle => 'No images yet';
+
+  @override
+  String get groupNoImagesDescription => 'Send the first group image.';
+
+  @override
+  String get groupSendImageButton => 'Send image';
+
+  @override
+  String get groupSendingImage => 'Sending image...';
+
+  @override
+  String get editGroupLabel => 'Edit group';
+
+  @override
+  String get leaveGroupLabel => 'Leave group';
+
+  @override
+  String groupDescription(String metric) {
+    return 'Sharing $metric and beating challenges together.';
+  }
+
+  @override
+  String groupsFriendsSubtitleWithCount(int groupCount) {
+    return 'Requests, invites and $groupCount in groups';
+  }
+
+  @override
+  String groupGoalKeepMetric(String metric) {
+    return 'Keep $metric every day';
+  }
+
+  @override
+  String groupGoalDescription(String metric) {
+    return 'Each member should log progress in $metric to keep the group streak going.';
+  }
+
+  @override
+  String groupRuleDescription(String metric) {
+    return 'Log at least one $metric activity per day. Keeping the streak strengthens the group.';
+  }
+
+  @override
+  String get joinWithCodeButton => 'I have an invite code';
+
+  @override
+  String get groupsBenefitsHeader => 'In a group you can:';
+
+  @override
+  String groupParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupMembersCompletedToday(int completed, int total) {
+    return '$completed/$total members completed today';
+  }
+
+  @override
+  String get addMemberButton => 'Add member';
+
+  @override
+  String get groupCollectiveProgressTitle => 'Collective progress';
+
+  @override
+  String get currentUserRankCompleteFirstGoal =>
+      'Complete your first goal to enter the ranking.';
+
+  @override
+  String get currentUserRankTiedLead => 'Tied for the lead.';
+
+  @override
+  String get currentUserRankTiedFirstLabel => 'Tied for 1st';
+
+  @override
+  String rankLabel(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String get homeScheduleRoutineSubtitle => 'Upcoming times and weekly routine';
+
+  @override
+  String get homeNextCommitmentTitle => 'Next commitment';
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get statisticsTitle => 'Statistics';
+
+  @override
+  String get studiedTimeLabel => 'Studied time';
+
+  @override
+  String get readingTimeLabel => 'Reading time';
+
+  @override
+  String get totalPagesReadLabel => 'Total pages';
+
+  @override
+  String get pagesReadTodayLabel => 'Pages today';
+
+  @override
+  String get goalLabel => 'Goal';
+
+  @override
+  String get sessionsLabel => 'Sessions';
+
+  @override
+  String get restLabel => 'Rest';
+
+  @override
+  String get comparativesTitle => 'Comparisons';
+
+  @override
+  String get overviewTitle => 'Overview';
+
+  @override
+  String get studiedUnit => 'studied';
+
+  @override
+  String get readPagesUnit => 'read';
+
+  @override
+  String get versusLastMonth => 'vs last month';
+
+  @override
+  String get versusLastWeek => 'vs last week';
+
+  @override
+  String get noPreviousPeriodComparison => 'No previous period to compare';
+
+  @override
+  String get noTimeLabel => 'No time';
+
+  @override
+  String untilTimeLabel(String time) {
+    return 'Until $time';
+  }
+
+  @override
+  String get achievementsUnlockedSuffix => ' /50 unlocked';
+
+  @override
+  String get currentLevelLabel => 'Current level';
+
+  @override
+  String get allAchievementsUnlockedLabel => 'All unlocked';
+
+  @override
+  String get nextUnlockLabel => 'Next unlock';
+
+  @override
+  String get allAchievementsUnlockedDescription => 'You unlocked everything.';
+
+  @override
+  String xpToGo(int xp) {
+    return '$xp XP to go';
+  }
+
+  @override
+  String levelLabel(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String get allFilterLabel => 'All';
+
+  @override
+  String get unlockedFilterLabel => 'Unlocked';
+
+  @override
+  String get lockedFilterLabel => 'Locked';
+
+  @override
+  String get selectCategoryTooltip => 'Select category';
+
+  @override
+  String get allCategoriesLabel => 'All categories';
+
+  @override
+  String get byCategoryLabel => 'By category';
+
+  @override
+  String get allLevelsTitle => 'All levels';
+
+  @override
+  String get allLevelsDescription => 'Unlock achievements to climb the ranks.';
+
+  @override
+  String levelPlusLabel(int level) {
+    return 'Level $level+';
+  }
+
+  @override
+  String get currentLabel => 'Current';
+
+  @override
+  String rankTierLearner(String tier) {
+    return '$tier Learner';
+  }
+
+  @override
+  String get achievementCategoryFocus => 'Focus';
+
+  @override
+  String get achievementCategoryStudy => 'Study';
+
+  @override
+  String get achievementCategoryReading => 'Reading';
+
+  @override
+  String get achievementCategoryGoals => 'Goals';
+
+  @override
+  String get achievementCategoryLifestyle => 'Lifestyle';
+
+  @override
+  String get achievement1Title => 'First Focus';
+
+  @override
+  String get achievement1Description => 'Complete your first focus session';
+
+  @override
+  String get achievement2Title => '25-Min Starter';
+
+  @override
+  String get achievement2Description => 'Focus for 25 minutes';
+
+  @override
+  String get achievement3Title => '1-Hour Focus';
+
+  @override
+  String get achievement3Description => 'Focus for 1 hour';
+
+  @override
+  String get achievement4Title => 'Deep Work';
+
+  @override
+  String get achievement4Description => 'Reach 2 hours of focus';
+
+  @override
+  String get achievement5Title => 'Zero Distractions';
+
+  @override
+  String get achievement5Description => 'Complete 3 focus sessions';
+
+  @override
+  String get achievement6Title => 'Focus Marathon';
+
+  @override
+  String get achievement6Description => 'Reach 10 hours of focus';
+
+  @override
+  String get achievement7Title => 'Early Bird';
+
+  @override
+  String get achievement7Description => 'Log focus on 5 days';
+
+  @override
+  String get achievement8Title => 'Night Owl';
+
+  @override
+  String get achievement8Description => 'Complete 10 focus sessions';
+
+  @override
+  String get achievement9Title => 'Focus Streak';
+
+  @override
+  String get achievement9Description => 'Log focus on 7 days';
+
+  @override
+  String get achievement10Title => 'Focus Master';
+
+  @override
+  String get achievement10Description => 'Reach 25 hours of focus';
+
+  @override
+  String get achievement11Title => 'Study Started';
+
+  @override
+  String get achievement11Description => 'Create your first study record';
+
+  @override
+  String get achievement12Title => '3 Sessions';
+
+  @override
+  String get achievement12Description => 'Complete 3 sessions';
+
+  @override
+  String get achievement13Title => '5 Sessions';
+
+  @override
+  String get achievement13Description => 'Complete 5 sessions';
+
+  @override
+  String get achievement14Title => '10 Sessions';
+
+  @override
+  String get achievement14Description => 'Complete 10 sessions';
+
+  @override
+  String get achievement15Title => 'Subject Explorer';
+
+  @override
+  String get achievement15Description => 'Study at least one subject';
+
+  @override
+  String get achievement16Title => 'Revision Hero';
+
+  @override
+  String get achievement16Description => 'Reach 5 hours studying';
+
+  @override
+  String get achievement17Title => 'Quiz Finisher';
+
+  @override
+  String get achievement17Description => 'Complete 15 sessions';
+
+  @override
+  String get achievement18Title => 'Study Planner';
+
+  @override
+  String get achievement18Description => 'Create a focus goal';
+
+  @override
+  String get achievement19Title => 'Exam Ready';
+
+  @override
+  String get achievement19Description => 'Reach 20 hours studying';
+
+  @override
+  String get achievement20Title => 'Scholar Mode';
+
+  @override
+  String get achievement20Description => 'Reach 50 hours studying';
+
+  @override
+  String get achievement21Title => 'First Page';
+
+  @override
+  String get achievement21Description => 'Read your first page';
+
+  @override
+  String get achievement22Title => '10 Pages';
+
+  @override
+  String get achievement22Description => 'Read 10 pages';
+
+  @override
+  String get achievement23Title => '25 Pages';
+
+  @override
+  String get achievement23Description => 'Read 25 pages';
+
+  @override
+  String get achievement24Title => '50 Pages';
+
+  @override
+  String get achievement24Description => 'Read 50 pages';
+
+  @override
+  String get achievement25Title => '100 Pages';
+
+  @override
+  String get achievement25Description => 'Read 100 pages';
+
+  @override
+  String get achievement26Title => 'Chapter Complete';
+
+  @override
+  String get achievement26Description => 'Read 150 pages';
+
+  @override
+  String get achievement27Title => 'Weekend Reader';
+
+  @override
+  String get achievement27Description => 'Read 250 pages';
+
+  @override
+  String get achievement28Title => 'Daily Reader';
+
+  @override
+  String get achievement28Description => 'Read 300 pages';
+
+  @override
+  String get achievement29Title => 'Bookworm';
+
+  @override
+  String get achievement29Description => 'Read 500 pages';
+
+  @override
+  String get achievement30Title => 'Library Legend';
+
+  @override
+  String get achievement30Description => 'Read 1000 pages';
+
+  @override
+  String get achievement31Title => 'First Goal';
+
+  @override
+  String get achievement31Description => 'Create your first goal';
+
+  @override
+  String get achievement32Title => 'Goal Crusher';
+
+  @override
+  String get achievement32Description => 'Complete a goal';
+
+  @override
+  String get achievement33Title => 'All Goals Done';
+
+  @override
+  String get achievement33Description => 'Finish every goal today';
+
+  @override
+  String get achievement34Title => 'Morning Routine';
+
+  @override
+  String get achievement34Description => 'Complete goals on 3 days';
+
+  @override
+  String get achievement35Title => 'Balanced Day';
+
+  @override
+  String get achievement35Description => 'Complete goals on 5 days';
+
+  @override
+  String get achievement36Title => 'Habit Builder';
+
+  @override
+  String get achievement36Description => 'Complete goals on 10 days';
+
+  @override
+  String get achievement37Title => 'Perfect Day';
+
+  @override
+  String get achievement37Description => 'Complete goals on 15 days';
+
+  @override
+  String get achievement38Title => 'Comeback';
+
+  @override
+  String get achievement38Description => 'Complete goals on 20 days';
+
+  @override
+  String get achievement39Title => 'Consistency Star';
+
+  @override
+  String get achievement39Description => 'Complete goals on 30 days';
+
+  @override
+  String get achievement40Title => 'Unstoppable';
+
+  @override
+  String get achievement40Description => 'Complete goals on 50 days';
+
+  @override
+  String get achievement41Title => 'First Group';
+
+  @override
+  String get achievement41Description => 'Join a study group';
+
+  @override
+  String get achievement42Title => 'Team Player';
+
+  @override
+  String get achievement42Description => 'Compete with friends';
+
+  @override
+  String get achievement43Title => 'Helpful Friend';
+
+  @override
+  String get achievement43Description => 'Help a friend stay consistent';
+
+  @override
+  String get achievement44Title => 'Challenge Winner';
+
+  @override
+  String get achievement44Description => 'Win a challenge';
+
+  @override
+  String get achievement45Title => 'Exercise Start';
+
+  @override
+  String get achievement45Description => 'Log exercise focus';
+
+  @override
+  String get achievement46Title => '30-Min Workout';
+
+  @override
+  String get achievement46Description => 'Exercise for 30 minutes';
+
+  @override
+  String get achievement47Title => 'Hobby Time';
+
+  @override
+  String get achievement47Description => 'Log hobby focus';
+
+  @override
+  String get achievement48Title => 'Creative Spark';
+
+  @override
+  String get achievement48Description => 'Reach 30 minutes of hobbies';
+
+  @override
+  String get achievement49Title => 'Weekend Warrior';
+
+  @override
+  String get achievement49Description => 'Reach 2 hours exercising';
+
+  @override
+  String get achievement50Title => 'Achievement Hunter';
+
+  @override
+  String get achievement50Description => 'Unlock 25 achievements';
+
+  @override
+  String get rankTierPaper => 'Paper';
+
+  @override
+  String get rankTierWood => 'Wood';
+
+  @override
+  String get rankTierStone => 'Stone';
+
+  @override
+  String get rankTierCopper => 'Copper';
+
+  @override
+  String get rankTierBronze => 'Bronze';
+
+  @override
+  String get rankTierIron => 'Iron';
+
+  @override
+  String get rankTierSilver => 'Silver';
+
+  @override
+  String get rankTierGold => 'Gold';
+
+  @override
+  String get rankTierPlatinum => 'Platinum';
+
+  @override
+  String get rankTierAmethyst => 'Amethyst';
+
+  @override
+  String get rankTierEmerald => 'Emerald';
+
+  @override
+  String get rankTierDiamond => 'Diamond';
+
+  @override
+  String get rankTierObsidian => 'Obsidian';
+
+  @override
+  String get rankTierAdamantium => 'Adamantium';
+
+  @override
+  String get rankTierMithril => 'Mithril';
+
+  @override
+  String get concentrationModeTitle => 'Focus mode';
+
+  @override
+  String get concentrationModeSubtitle =>
+      'Choose which focus sessions block leaving the app.';
+
+  @override
+  String get concentrationStudyTitle => 'Study';
+
+  @override
+  String get concentrationStudySubtitle => 'Full focus on your studies.';
+
+  @override
+  String get concentrationExercisesTitle => 'Exercises';
+
+  @override
+  String get concentrationExercisesSubtitle => 'Stay focused on your workouts.';
+
+  @override
+  String get concentrationReadingTitle => 'Reading';
+
+  @override
+  String get concentrationReadingSubtitle => 'Dive into your reading.';
+
+  @override
+  String get concentrationHobbiesTitle => 'Hobbies';
+
+  @override
+  String get concentrationHobbiesSubtitle => 'Enjoy your hobbies with focus.';
+
+  @override
+  String get createGroupDescriptionLabel => 'Description';
+
+  @override
+  String get createGroupDescriptionHint => 'Describe the group and its goal.';
+
+  @override
+  String get createGroupThemeMetricDescription =>
+      'This theme defines the ranking metric.';
+
+  @override
+  String get createGroupActivityTypeDescription =>
+      'Each member gets a copy to track.';
+
+  @override
+  String get createGroupActivityNameLabel => 'Activity name';
+
+  @override
+  String get createGroupActivityNameHint => 'Ex: Calculus I';
+
+  @override
+  String get createGroupGoalTypeLabel => 'Goal type';
+
+  @override
+  String get createGroupGoalTypeTotal => 'Total';
+
+  @override
+  String get createGroupGoalTypeDaily => 'Daily';
+
+  @override
+  String get createGroupDaysGoalLabel => 'Days goal';
+
+  @override
+  String get createGroupPagesGoalLabel => 'Pages goal';
+
+  @override
+  String get createGroupTimeGoalMinutesLabel => 'Time goal (min)';
+
+  @override
+  String get createGroupSummaryTitle => 'Group summary';
+
+  @override
+  String get createGroupActivitySummaryLabel => 'Activity';
+
+  @override
+  String get createGroupGuestsLabel => 'Guests';
+
+  @override
+  String get timerTotalTodayLabel => 'Total today';
+
+  @override
+  String get timerEndActionLabel => 'End';
 }

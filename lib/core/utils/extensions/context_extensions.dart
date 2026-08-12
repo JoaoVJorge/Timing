@@ -34,15 +34,7 @@ extension AppLocalizationsX on BuildContext {
 
   String get languageCode => Localizations.localeOf(this).languageCode;
 
-  String get daysSuffix => switch (languageCode) {
-    "pt" => "dias",
-    "es" => "días",
-    _ => "days",
-  };
+  String get daysSuffix => l10n.daysSuffix;
 
-  String get createTaskSubtitle => switch (languageCode) {
-    "pt" => "Configure uma meta diária para acompanhar seu progresso",
-    "es" => "Configura una meta diaria para seguir tu progreso",
-    _ => "Set a daily goal and keep track of your progress",
-  };
+  String get createTaskSubtitle => l10n.createTaskSubtitle;
 }

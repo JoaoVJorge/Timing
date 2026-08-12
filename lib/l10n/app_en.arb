@@ -1,29 +1,38 @@
 {
   "@@locale": "en",
-
-  "appTitle": "HelpOut",
+  "appTitle": "Timing",
   "genericErrorMessage": "Something went wrong. Please try again later.",
-
   "loginHeadline": "Let's begin",
   "loginSubtitle": "Sign in to keep studying and organize your routine.",
   "loginNameHint": "Your name",
   "loginButton": "Let's Start",
-
   "homeGreetingDefault": "Hello",
   "homeGreetingWithName": "Hello, {userName}",
   "@homeGreetingWithName": {
-    "placeholders": { "userName": { "type": "String" } }
+    "placeholders": {
+      "userName": {
+        "type": "String"
+      }
+    }
   },
   "homeSubtitle": "What are we tackling today?",
   "homeSubtitleFocusedToday": "You've focused {duration} today",
   "@homeSubtitleFocusedToday": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "homeSubtitleNextSchedule": "Agenda: {title} at {time}",
   "@homeSubtitleNextSchedule": {
     "placeholders": {
-      "title": { "type": "String" },
-      "time": { "type": "String" }
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
     }
   },
   "homeSubtitleStart": "Start your first focus session",
@@ -44,8 +53,12 @@
   "homeGoalsProgress": "{done} of {total} done",
   "@homeGoalsProgress": {
     "placeholders": {
-      "done": { "type": "int" },
-      "total": { "type": "int" }
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "homeCategoryEmpty": "Nothing yet",
@@ -53,68 +66,94 @@
   "homeTodayAgendaTitle": "Today's agenda",
   "homeNextScheduleEmpty": "No schedule today",
   "homeNextScheduleAdd": "Add schedule",
-
   "addTaskButton": "Add goal",
   "createTaskTitle": "New goal",
   "taskNameHint": "Goal name",
   "targetDaysLabel": "Target (days)",
   "targetDaysChip": "{days} days",
   "@targetDaysChip": {
-    "placeholders": { "days": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   },
   "targetDaysHint": "Custom target",
   "taskDaysProgress": "{completed}/{target} days",
   "@taskDaysProgress": {
     "placeholders": {
-      "completed": { "type": "int" },
-      "target": { "type": "int" }
+      "completed": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
     }
   },
   "taskCompletedLabel": "Done!",
-
   "lastActivityLabel": "Last activity",
   "lastActivityNone": "Nothing yet — start something!",
   "lastActivityJustNow": "just now",
   "lastActivityMinutesAgo": "{minutes} min ago",
   "@lastActivityMinutesAgo": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "lastActivityHoursAgo": "{hours} h ago",
   "@lastActivityHoursAgo": {
-    "placeholders": { "hours": { "type": "int" } }
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "lastActivityDaysAgo": "{days} d ago",
   "@lastActivityDaysAgo": {
-    "placeholders": { "days": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   },
-
   "categoryStudying": "Studies",
   "categoryExercises": "Exercising",
   "categoryReading": "Reading",
   "categoryHobbies": "Hobbies",
-
   "itemNounStudying": "Subject",
   "itemNounExercises": "Exercise",
   "itemNounReading": "Book",
   "itemNounHobbies": "Hobby",
-
   "iconLabel": "Icon",
   "restTimeLabel": "Rest time",
   "restMinutesChip": "{minutes} min",
   "@restMinutesChip": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "timeUnitHoursSuffix": "h",
   "timeUnitMinutesSuffix": "min",
   "wallpaperLabel": "Timer wallpaper",
-
   "addItemButton": "Add {itemNoun}",
   "@addItemButton": {
-    "placeholders": { "itemNoun": { "type": "String" } }
+    "placeholders": {
+      "itemNoun": {
+        "type": "String"
+      }
+    }
   },
   "itemNameHint": "{itemNoun} name",
   "@itemNameHint": {
-    "placeholders": { "itemNoun": { "type": "String" } }
+    "placeholders": {
+      "itemNoun": {
+        "type": "String"
+      }
+    }
   },
   "colorLabel": "Color",
   "bookThemeLabel": "Book theme",
@@ -123,7 +162,6 @@
   "cancelButton": "Cancel",
   "confirmButton": "Confirm",
   "addButton": "Add",
-
   "createSubjectTitleStudying": "New subject",
   "createSubjectTitleReading": "New reading",
   "createSubjectTitleExercises": "New workout",
@@ -155,30 +193,54 @@
   "createSubjectPreviewNoGoal": "No goal set",
   "createSubjectPreviewGoal": "Goal: {goal}",
   "@createSubjectPreviewGoal": {
-    "placeholders": { "goal": { "type": "String" } }
+    "placeholders": {
+      "goal": {
+        "type": "String"
+      }
+    }
   },
   "createSubjectPreviewRest": "Break: {minutes} min",
   "@createSubjectPreviewRest": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "createSubjectHoursValue": "{hours}h",
   "@createSubjectHoursValue": {
-    "placeholders": { "hours": { "type": "int" } }
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
   "createSubjectPagesValue": "{value} pages",
   "@createSubjectPagesValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
   "@createSubjectHoursMinutesValue": {
     "placeholders": {
-      "hours": { "type": "int" },
-      "minutes": { "type": "int" }
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "createSubjectColorSemantic": "Color {index}",
   "@createSubjectColorSemantic": {
-    "placeholders": { "index": { "type": "int" } }
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
   },
   "createSubjectButtonStudying": "Create subject",
   "createSubjectButtonReading": "Create reading",
@@ -191,21 +253,27 @@
   "createSubjectSuccessReading": "Reading created successfully",
   "createSubjectSuccessExercises": "Activity created successfully",
   "createSubjectSuccessHobbies": "Hobby created successfully",
-
   "pagesProgress": "{currentPages} of {goalPages} pages",
   "@pagesProgress": {
     "placeholders": {
-      "currentPages": { "type": "int" },
-      "goalPages": { "type": "int" }
+      "currentPages": {
+        "type": "int"
+      },
+      "goalPages": {
+        "type": "int"
+      }
     }
   },
   "pagesReadOnly": "{currentPages} pages read",
   "@pagesReadOnly": {
-    "placeholders": { "currentPages": { "type": "int" } }
+    "placeholders": {
+      "currentPages": {
+        "type": "int"
+      }
+    }
   },
   "pagesReadNowHint": "Pages read now",
   "logPagesButton": "Log pages",
-
   "notesLabel": "Notes",
   "notesHint": "Write your notes here...",
   "saveNotesButton": "Save",
@@ -213,30 +281,48 @@
   "notesPageCounter": "Page {currentPage} of {pageCount}",
   "@notesPageCounter": {
     "placeholders": {
-      "currentPage": {"type": "int"},
-      "pageCount": {"type": "int"}
+      "currentPage": {
+        "type": "int"
+      },
+      "pageCount": {
+        "type": "int"
+      }
     }
   },
-
   "durationProgress": "{duration} of {goalDuration}",
   "@durationProgress": {
     "placeholders": {
-      "duration": { "type": "String" },
-      "goalDuration": { "type": "String" }
+      "duration": {
+        "type": "String"
+      },
+      "goalDuration": {
+        "type": "String"
+      }
     }
   },
-
   "timerTotalLabel": "Total: {duration}",
   "@timerTotalLabel": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "timerNextBreakLabel": "Next break in {duration}",
   "@timerNextBreakLabel": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "timerRestingLabel": "Resting — back in {duration}",
   "@timerRestingLabel": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "timerNotificationRunning": "Focus session in progress",
   "timerNotificationResting": "Resting — back soon",
@@ -254,7 +340,11 @@
   "timerSessionLabel": "Current session",
   "timerTotalInSubject": "Total in {subjectName}",
   "@timerTotalInSubject": {
-    "placeholders": { "subjectName": { "type": "String" } }
+    "placeholders": {
+      "subjectName": {
+        "type": "String"
+      }
+    }
   },
   "timerPauseButton": "Pause",
   "timerContinueButton": "Continue",
@@ -265,7 +355,11 @@
   "timerSaveReassurance": "Progress is also saved when you pause or leave.",
   "timerFocusedValue": "{duration} focused",
   "@timerFocusedValue": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "timerAccumulatedTotalLabel": "Accumulated total",
   "timerBackToSubjectsButton": "Back",
@@ -273,28 +367,28 @@
   "timerExitDialogContent": "Your {duration} progress will be saved in {subjectName}.",
   "@timerExitDialogContent": {
     "placeholders": {
-      "duration": { "type": "String" },
-      "subjectName": { "type": "String" }
+      "duration": {
+        "type": "String"
+      },
+      "subjectName": {
+        "type": "String"
+      }
     }
   },
   "timerExitDialogCancel": "Continue",
   "timerExitDialogContinueLater": "You can continue later.",
   "timerExitDialogConfirm": "End",
-
   "editButton": "Edit",
   "nicknameFallback": "user",
-
   "profileSummaryLabel": "Total summary",
   "profileSummarySinceStartLabel": "Since the beginning",
   "profileSummaryAccumulatedFocus": "{duration} of accumulated focus",
   "profileSummaryFocusLabel": "Total focus time",
   "profileSummaryFocusDescription": "Studying, exercise and hobbies",
-
   "statHoursStudied": "Studying",
   "statHoursExercised": "Exercise",
   "statPagesRead": "Pages read",
   "statTopSubject": "Most studied",
-
   "profileStatTimeEmptyTitle": "Start your first focus",
   "profileStatTimeEmptyDescription": "Your time will show up here",
   "profileStatExerciseEmptyTitle": "No exercise yet",
@@ -303,28 +397,38 @@
   "profileStatReadingEmptyDescription": "Log your first reading",
   "profileTopSubjectEmptyTitle": "None yet",
   "profileTopSubjectEmptyDescription": "Study a subject to feature it here",
-
   "profileEmptyTitle": "Your progress starts here",
-  "profileEmptyDescription": "Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.",
+  "profileEmptyDescription": "Start a session, log some reading or set a goal from Home to track your evolution in Timing.",
   "profileEmptyGuidance": "After that, your total time, top activities and reading highlights will appear here.",
   "profileEmptyStartButton": "Start now",
   "profileShortcutsTitle": "Shortcuts",
   "profileShortcutCreateSubject": "Create subject",
   "profileShortcutCreateGoal": "Create goal",
   "profileShortcutAddSchedule": "Add schedule",
-
   "profileEvolutionTitle": "Your progress",
   "profileEvolutionFocus": "You've accumulated {duration} of focus.",
   "@profileEvolutionFocus": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "profileEvolutionTopSubject": "Your most studied subject is {name}.",
   "@profileEvolutionTopSubject": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "profileEvolutionRemaining": "You're {duration} away from your goal.",
   "@profileEvolutionRemaining": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "profileEvolutionGoalReached": "You've reached your focus goal!",
   "profileProgressSectionTitle": "Your progress",
@@ -342,16 +446,13 @@
   "periodWeek": "1 week",
   "periodMonth": "1 month",
   "periodTotal": "Total",
-
   "profileAgendaTitle": "Today's schedule",
   "profileAgendaEmptyTitle": "No schedule planned",
   "profileAgendaEmptyDescription": "Add blocks to organize your routine.",
   "profileAgendaAddButton": "Add schedule",
-
   "profileTopReadingTitle": "Top reading",
   "profileTopReadingEmptyTitle": "No reading logged",
   "profileTopReadingEmptyDescription": "Log pages read to see your top themes here.",
-
   "groupsTitle": "Groups",
   "groupsSubtitle": "Compare your progress with friends",
   "noGroupSelected": "No group selected yet.",
@@ -377,8 +478,12 @@
   "groupLeaderboardDescription": "Ranking for {period} · measured in {metric}",
   "@groupLeaderboardDescription": {
     "placeholders": {
-      "period": { "type": "String" },
-      "metric": { "type": "String" }
+      "period": {
+        "type": "String"
+      },
+      "metric": {
+        "type": "String"
+      }
     }
   },
   "leaderboardTitle": "Ranking",
@@ -386,23 +491,34 @@
   "currentUserRankValue": "{rank} place · {score}",
   "@currentUserRankValue": {
     "placeholders": {
-      "rank": { "type": "String" },
-      "score": { "type": "String" }
+      "rank": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
     }
   },
   "currentUserRankNextStep": "{score} to climb one position",
   "@currentUserRankNextStep": {
-    "placeholders": { "score": { "type": "String" } }
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
   },
   "currentUserRankLeading": "You're leading this ranking.",
   "currentUserRankSubtitle": "your current position",
   "leaderboardTopPosition": "leading this ranking",
   "leaderboardDifferenceAhead": "+{value} ahead",
   "@leaderboardDifferenceAhead": {
-    "placeholders": { "value": { "type": "String" } }
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   },
   "groupCreatedSuccess": "Group created successfully",
-
   "settingsTitle": "Settings",
   "settingsSubtitle": "Adjust your account and preferences",
   "myProfileFallback": "My Profile",
@@ -424,7 +540,11 @@
   "chooseLanguageTitle": "Choose language",
   "languageChangedMessage": "Language changed to {language}",
   "@languageChangedMessage": {
-    "placeholders": { "language": { "type": "String" } }
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
   },
   "preferenceSavedMessage": "Preference saved",
   "supportSection": "Support",
@@ -438,26 +558,32 @@
   "aboutSection": "About",
   "appVersionValue": "Version {version}",
   "@appVersionValue": {
-    "placeholders": { "version": { "type": "String" } }
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   },
   "debugEnvironmentTitle": "Environment",
   "debugEnvironmentSubtitle": "Debug · sample data active",
   "appVersionLabel": "{appTitle} v{appVersion}",
   "@appVersionLabel": {
     "placeholders": {
-      "appTitle": { "type": "String" },
-      "appVersion": { "type": "String" }
+      "appTitle": {
+        "type": "String"
+      },
+      "appVersion": {
+        "type": "String"
+      }
     }
   },
   "accountSection": "Account",
   "sessionSection": "Session",
   "logOutLabel": "Log out",
   "logOutSettingsSubtitle": "End the session on this device",
-
   "logOutDialogTitle": "Log out?",
   "logOutDialogContent": "You will need to sign in again to access this account on this device. Your local study data will be kept.",
   "logOutConfirmButton": "Log out",
-
   "myProfileTitle": "My Profile",
   "avatarLabel": "Avatar",
   "nameLabel": "Name",
@@ -472,7 +598,6 @@
   "profileSavedMessage": "Profile saved",
   "profilePhotoSelectLabel": "Add photo",
   "profilePhotoRemoveLabel": "Remove photo",
-
   "faqTitle": "FAQ",
   "faqQ1": "How does the study timer work?",
   "faqA1": "Pick a subject, tap play, and the timer tracks your current session while adding it to that subject's total time. Tap pause any time to stop and save your progress.",
@@ -484,7 +609,6 @@
   "faqA4": "Groups show a scoreboard based on the group's theme: focus hours, completed goal days or pages read. Switch between Today, Week and Month to compare progress.",
   "faqQ5": "Can I change the app's color theme?",
   "faqA5": "Yes, go to Settings > My Profile and pick any theme color. Every gradient, button and highlight across the app updates to match it, including dark mode.",
-
   "createGroupTitle": "New group",
   "createGroupSubtitle": "Choose a theme and invite friends",
   "groupNameLabel": "Group name",
@@ -493,12 +617,20 @@
   "groupThemeLabel": "Theme",
   "groupThemeSelectedDescription": "This group ranks by {metric}.",
   "@groupThemeSelectedDescription": {
-    "placeholders": { "metric": { "type": "String" } }
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
   },
   "inviteFriendsLabel": "Invite friends",
   "selectedFriendsCount": "{count} selected",
   "@selectedFriendsCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "selectAtLeastOneFriend": "Select at least 1 friend",
   "searchFriendHint": "Search friend",
@@ -515,27 +647,36 @@
   "createGroupMissingFriends": "Select at least 1 friend",
   "createGroupWithFriendsButton": "Create group with {count} friends",
   "@createGroupWithFriendsButton": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "createGroupRequirementsTitle": "To create:",
   "createGroupRequirementName": "Group name",
   "createGroupRequirementTheme": "Theme chosen",
   "createGroupRequirementFriends": "At least 1 friend",
   "groupPrivacyNote": "Your friends will only see your name, avatar and progress in this theme.",
-
   "metricDaysValue": "{value} days",
   "@metricDaysValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
   "metricPagesValue": "{value} pages",
   "@metricPagesValue": {
-    "placeholders": { "value": { "type": "int" } }
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
   },
-
   "navHome": "Home",
   "navGroups": "Groups",
   "navSettings": "Settings",
-
   "myScheduleCardTitle": "My Schedule",
   "myScheduleTitle": "My Schedule",
   "noScheduleYet": "No schedule yet",
@@ -548,21 +689,37 @@
   "schedulePreviewSection": "Preview",
   "scheduleDurationLabel": "Duration: {duration}",
   "@scheduleDurationLabel": {
-    "placeholders": { "duration": { "type": "String" } }
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   },
   "scheduleDurationMinutes": "{minutes} min",
   "@scheduleDurationMinutes": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "scheduleDurationHours": "{hours}h",
   "@scheduleDurationHours": {
-    "placeholders": { "hours": { "type": "int" } }
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
   "@scheduleDurationHoursMinutes": {
     "placeholders": {
-      "hours": { "type": "int" },
-      "minutes": { "type": "int" }
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "scheduleTitleHint": "Title",
@@ -573,11 +730,9 @@
   "nameRequiredError": "Please enter a name first.",
   "groupThemeRequiredError": "Pick a theme for your group.",
   "groupNeedsFriendError": "Invite at least one friend — a group can't be created alone.",
-
   "continueWithGoogleButton": "Continue with Google",
   "continueWithAppleButton": "Continue with Apple",
   "continueWithPhoneButton": "Continue with phone number",
-
   "phoneLoginTitle": "Your number",
   "phoneLoginSubtitle": "Enter your phone number to receive an access code.",
   "sendCodeButton": "Send code",
@@ -585,27 +740,32 @@
   "selectCountryTitle": "Select your country",
   "searchCountryHint": "Search country",
   "otpCodeExpired": "Code expired. Resend to get a new one.",
-
   "otpTitle": "Verify your number",
   "otpSubtitle": "Enter the 6-digit code we sent to {phone}.",
   "@otpSubtitle": {
-    "placeholders": { "phone": { "type": "String" } }
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
   },
   "verifyCodeButton": "Verify",
   "resendCodeButton": "Resend code",
   "otpCodeValidFor": "Code valid for {time}",
   "@otpCodeValidFor": {
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "codeResentMessage": "Verification code sent",
   "invalidCodeError": "Invalid code. Please try again.",
-
   "credentialsTitle": "Create your profile",
   "credentialsSubtitle": "Tell us a bit about yourself to personalize your experience.",
   "birthDateHint": "Date of birth",
   "profileEditableLaterNote": "You can edit this later.",
   "finishButton": "Finish",
-
   "navProgress": "Progress",
   "progressTitle": "Progress",
   "progressSubtitle": "Everything you have done so far",
@@ -616,13 +776,17 @@
   "progressComparisonMore": "{value} more than the previous period",
   "@progressComparisonMore": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "progressComparisonLess": "{value} less than the previous period",
   "@progressComparisonLess": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "progressComparisonSame": "Same as the previous period",
@@ -633,19 +797,27 @@
   "homeTodayInline": "Today: {focus} focus · {pages} pages · {goals} goals",
   "@homeTodayInline": {
     "placeholders": {
-      "focus": { "type": "String" },
-      "pages": { "type": "int" },
-      "goals": { "type": "int" }
+      "focus": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "goals": {
+        "type": "int"
+      }
     }
   },
   "homePlanDayTitle": "Plan my day",
   "homePlanDaySubtitle": "Daily goals and weekly schedule",
   "groupsFriendsTitle": "Friends",
   "groupsFriendsSubtitle": "Requests, invites and your code",
-  "groupMembersCount": "{count} members",
+  "groupMembersCount": "{count, plural, =1{1 member} other{{count} members}}",
   "@groupMembersCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "createScheduleEntryButton": "Create entry",
@@ -653,8 +825,12 @@
   "timerSessionCounter": "Focus {current} of {total}",
   "@timerSessionCounter": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "timerExitBackToFocus": "Back to focus",
@@ -668,14 +844,17 @@
   "achievementProgressValue": "{current} of {total}",
   "@achievementProgressValue": {
     "placeholders": {
-      "current": { "type": "String" },
-      "total": { "type": "String" }
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "categoryEmptyTitle": "Nothing here yet",
   "categoryEmptyDescription": "Create your first item to start tracking focus time.",
   "scheduleEmptyExampleLabel": "Example",
-
   "progressAchievementsNextTitle": "Next achievement",
   "achievementFocusHourTitle": "1 hour of focus",
   "achievementSessionsTitle": "5 completed sessions",
@@ -685,36 +864,620 @@
   "unitMinutesShort": "{value} min",
   "@unitMinutesShort": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
   "unitSessions": "{value} sessions",
   "@unitSessions": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
   "unitDays": "{value} days",
   "@unitDays": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
-
   "currentUserRankNextStepNamed": "{score} to reach {name}",
   "@currentUserRankNextStepNamed": {
     "placeholders": {
-      "score": { "type": "String" },
-      "name": { "type": "String" }
+      "score": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
   "timerKeepAwakeNote": "The screen stays on during the session",
   "scheduleWeekLabel": "Week of {date}",
   "@scheduleWeekLabel": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
-
-  "deleteButton": "Delete"
+  "daysSuffix": "days",
+  "createTaskSubtitle": "Set a daily goal and keep track of your progress",
+  "createTaskSequenceTypeLabel": "Sequence type",
+  "createTaskSequenceIntenseLabel": "Intense",
+  "createTaskSequenceIntenseDescription": "No misses. If you lose one day, your sequence resets.",
+  "createTaskSequenceCasualLabel": "Casual",
+  "createTaskSequenceCasualDescription": "More flexible. Missed days do not reset your sequence.",
+  "targetDaysInfinite": "Infinite",
+  "deleteConfirmationDefaultTypeName": "item",
+  "@deleteConfirmationTitle": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConfirmationTitle": "Delete {typeName}?",
+  "@deleteConfirmationContent": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConfirmationContent": "You are about to delete \"{itemName}\". This action cannot be undone.",
+  "@deleteConfirmationHistoryWarning": {
+    "placeholders": {
+      "typeName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteConfirmationHistoryWarning": "This {typeName} history will also be removed.",
+  "@homeDaySummaryFocusValue": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeDaySummaryGoalsValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hobbyPracticeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeDaySummaryFocusValue": "{focus} focus",
+  "homeDaySummaryGoalsValue": "{count, plural, =1{1 goal} other{{count} goals}}",
+  "profilePhotoSourceTitle": "Profile photo",
+  "profilePhotoSourceSubtitle": "Choose how you want to update your photo",
+  "photoCameraLabel": "Take photo",
+  "photoGalleryLabel": "Choose from gallery",
+  "removePhotoDialogTitle": "Remove photo?",
+  "removePhotoDialogContent": "Your avatar will show on the profile again.",
+  "friendRequestsReceivedTab": "Requests",
+  "friendRequestsSentTab": "Invites",
+  "hobbyPracticeMinutes": "{minutes} min of practice",
+  "hobbyViewStatistics": "View statistics",
+  "hobbyEdit": "Edit hobby",
+  "pinToStart": "Pin to start",
+  "hobbyDelete": "Delete hobby",
+  "deleteActionCannotBeUndone": "This action cannot be undone.",
+  "joinGroupTitle": "Join group",
+  "joinGroupInviteCodeLabel": "Invite code",
+  "joinGroupCodeHint": "Enter the code",
+  "joinGroupButton": "Join group",
+  "joinGroupError": "Could not join this group.",
+  "scheduleDayEventsTitle": "Day events",
+  "dailyGoalsNoGoalsYetTitle": "No goals yet",
+  "dailyGoalsNoGoalsYetDescription": "Add your first goal to organize the day and track your wins.",
+  "dailyGoalsSuggestionsTitle": "Suggestions to start",
+  "dailyGoalsSuggestionStudy": "Study 30 min",
+  "dailyGoalsSuggestionRead": "Read 10 pages",
+  "dailyGoalsSuggestionTrain": "Train",
+  "@missedYesterdayDialogContent": {
+    "placeholders": {
+      "taskName": {
+        "type": "String"
+      }
+    }
+  },
+  "goalTypeName": "goal",
+  "missedYesterdayDialogTitle": "Did you complete it yesterday?",
+  "missedYesterdayDialogContent": "You did not register \"{taskName}\" yesterday. Did you really miss it?",
+  "missedYesterdayMissedButton": "Yes, I missed it",
+  "missedYesterdayCompletedButton": "I completed it",
+  "scheduleTitleRequiredError": "Fill in the title to continue",
+  "scheduleActiveFromLabel": "Starts",
+  "scheduleActiveUntilLabel": "Ends",
+  "selectDateTitle": "Select date",
+  "selectDateHint": "Tap a day to select",
+  "addFriendTitle": "Add friend",
+  "friendCodeNotFound": "We could not find a user with this code.",
+  "friendInviteCodeTitle": "Invite code",
+  "friendInviteCodeFieldLabel": "Type or paste the code",
+  "friendInviteCodeFieldHint": "Like ABCDE12345",
+  "pasteButton": "Paste",
+  "searchCodeButton": "Search code",
+  "friendUserFoundTitle": "User found",
+  "friendFoundByCode": "Found by code",
+  "sentLabel": "Sent",
+  "friendHowItWorksTitle": "How it works",
+  "friendHowItWorksStepOne": "Ask your friend for their code",
+  "friendHowItWorksStepTwo": "Paste the code to find the profile",
+  "friendHowItWorksStepThree": "Send the request to add them",
+  "@yourFriendsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@minutesAgoShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "myCodeLabel": "My code",
+  "yourInviteCodeLabel": "Your invite code",
+  "yourFriendsTitle": "Your friends ({count})",
+  "seeAllButton": "View all",
+  "onlineLabel": "Online",
+  "minutesAgoShort": "{minutes} min ago",
+  "friendsEmptyTitle": "You do not have friends yet",
+  "friendsEmptySubtitle": "Search people above or share your invite code.",
+  "shareCodeButton": "Share code",
+  "@shareInviteCodeMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@groupInvitesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@groupInvitedBy": {
+    "placeholders": {
+      "inviter": {
+        "type": "String"
+      }
+    }
+  },
+  "codeCopiedMessage": "Code copied",
+  "friendRequestSentMessage": "Request sent",
+  "joinedGroupMessage": "You joined the group",
+  "friendTypeName": "friend",
+  "shareInviteCodeMessage": "Add me on HelpOut with my code: {code}",
+  "groupInvitesTitle": "Group invites ({count})",
+  "groupInvitedBy": "{inviter} invited you",
+  "acceptButton": "Accept",
+  "declineButton": "Decline",
+  "friendsTitle": "Friends",
+  "@friendRequestsReceivedSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@friendRequestsSentSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "friendRequestsReceivedPageTitle": "Requests",
+  "friendRequestsSentPageTitle": "Invites",
+  "friendRequestsReceivedSection": "Received ({count})",
+  "friendRequestsSentSection": "Sent ({count})",
+  "friendMutualFriendsSample": "3 mutual friends",
+  "pendingLabel": "Pending",
+  "friendRequestsIncomingEmptyTitle": "No received requests",
+  "friendRequestsSentEmptyTitle": "No sent invites",
+  "friendRequestsIncomingEmptySubtitle": "Requests will appear here.",
+  "friendRequestsSentEmptySubtitle": "Your sent invites will appear here.",
+  "friendRequestsSafetyNotice": "Only accept people you know and trust.",
+  "categoryEmptyStudyingTitle": "No subject yet",
+  "categoryEmptyExercisesTitle": "No exercise yet",
+  "categoryEmptyReadingTitle": "No reading yet",
+  "categoryEmptyHobbiesTitle": "No hobby yet",
+  "categoryEmptyStudyingDescription": "Add your first subject to organize your studies and log focus.",
+  "categoryEmptyExercisesDescription": "Add your first exercise to track workouts, sessions and progress.",
+  "categoryEmptyReadingDescription": "Add your first reading item to track pages, time and progress.",
+  "categoryEmptyHobbiesDescription": "Add your first hobby to log practice and keep momentum.",
+  "categorySuggestionStudyingOne": "Math",
+  "categorySuggestionStudyingTwo": "English",
+  "categorySuggestionStudyingThree": "Writing",
+  "categorySuggestionExercisesOne": "Running",
+  "categorySuggestionExercisesTwo": "Strength",
+  "categorySuggestionExercisesThree": "Stretching",
+  "categorySuggestionReadingOne": "Novel",
+  "categorySuggestionReadingTwo": "Technical",
+  "categorySuggestionReadingThree": "Articles",
+  "categorySuggestionHobbiesOne": "Guitar",
+  "categorySuggestionHobbiesTwo": "Drawing",
+  "categorySuggestionHobbiesThree": "Cooking",
+  "@timerReadingExitContent": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "subjectName": {
+        "type": "String"
+      }
+    }
+  },
+  "pagesAbbreviation": "pgs",
+  "loginSecurityNote": "Your data is protected and secure.",
+  "nextBreakDurationLabel": "Next break duration",
+  "timerReadingExitContent": "You read for {duration}. Enter how many pages you read in {subjectName}.",
+  "appleSignInIncompleteMessage": "Sign in with Apple is not complete yet.",
+  "activityTypeLabel": "Activity type",
+  "activityTypeDailyLabel": "Daily",
+  "activityTypeDailyDescription": "Renews every day. The activity becomes available again in the morning.",
+  "activityTypePermanentLabel": "Permanent",
+  "activityTypePermanentDescription": "Stays active until you finish it. After that, it is marked as done.",
+  "pagesSuffix": "pages",
+  "updatedSuccessfullyMessage": "Updated successfully",
+  "focusSessionCountLabel": "Focus sessions",
+  "groupEditingComingSoon": "Group editing is coming soon.",
+  "leftGroupMessage": "You left the group.",
+  "groupImageSourceTitle": "Send image",
+  "groupImageSourceSubtitle": "Choose how you want to send the image",
+  "deleteButton": "Delete",
+  "manageMembersTitle": "Manage members",
+  "groupLeaderLabel": "Leader",
+  "groupLeaderRoleLabel": "Group leader",
+  "groupMemberRoleLabel": "Member",
+  "groupMembersLabel": "Members",
+  "groupActionsLabel": "Group actions",
+  "goalsTabLabel": "Goals",
+  "chatTabLabel": "Chat",
+  "groupGoalTitle": "Group goal",
+  "groupMainRuleTitle": "Main rule",
+  "groupNextMilestoneTitle": "Next milestone",
+  "groupMembersProgressValue": "{current}/{total} members",
+  "@groupMembersProgressValue": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNextMilestoneDescription": "to unlock the \"Total Focus\" badge",
+  "groupActivityLabel": "Group activity",
+  "groupActivityReachedGoal": "{reached}/{total} reached the goal",
+  "@groupActivityReachedGoal": {
+    "placeholders": {
+      "reached": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoImagesTitle": "No images yet",
+  "groupNoImagesDescription": "Send the first group image.",
+  "groupSendImageButton": "Send image",
+  "groupSendingImage": "Sending image...",
+  "editGroupLabel": "Edit group",
+  "leaveGroupLabel": "Leave group",
+  "groupDescription": "Sharing {metric} and beating challenges together.",
+  "@groupDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsFriendsSubtitleWithCount": "Requests, invites and {groupCount} in groups",
+  "@groupsFriendsSubtitleWithCount": {
+    "placeholders": {
+      "groupCount": {
+        "type": "int"
+      }
+    }
+  },
+  "groupGoalKeepMetric": "Keep {metric} every day",
+  "@groupGoalKeepMetric": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupGoalDescription": "Each member should log progress in {metric} to keep the group streak going.",
+  "@groupGoalDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRuleDescription": "Log at least one {metric} activity per day. Keeping the streak strengthens the group.",
+  "@groupRuleDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "joinWithCodeButton": "I have an invite code",
+  "groupsBenefitsHeader": "In a group you can:",
+  "groupParticipantsCount": "{count, plural, =1{1 participant} other{{count} participants}}",
+  "@groupParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMembersCompletedToday": "{completed}/{total} members completed today",
+  "@groupMembersCompletedToday": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addMemberButton": "Add member",
+  "groupCollectiveProgressTitle": "Collective progress",
+  "currentUserRankCompleteFirstGoal": "Complete your first goal to enter the ranking.",
+  "currentUserRankTiedLead": "Tied for the lead.",
+  "currentUserRankTiedFirstLabel": "Tied for 1st",
+  "rankLabel": "#{rank}",
+  "@rankLabel": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "homeScheduleRoutineSubtitle": "Upcoming times and weekly routine",
+  "homeNextCommitmentTitle": "Next commitment",
+  "todayLabel": "Today",
+  "statisticsTitle": "Statistics",
+  "studiedTimeLabel": "Studied time",
+  "readingTimeLabel": "Reading time",
+  "totalPagesReadLabel": "Total pages",
+  "pagesReadTodayLabel": "Pages today",
+  "goalLabel": "Goal",
+  "sessionsLabel": "Sessions",
+  "restLabel": "Rest",
+  "comparativesTitle": "Comparisons",
+  "overviewTitle": "Overview",
+  "studiedUnit": "studied",
+  "readPagesUnit": "read",
+  "versusLastMonth": "vs last month",
+  "versusLastWeek": "vs last week",
+  "noPreviousPeriodComparison": "No previous period to compare",
+  "noTimeLabel": "No time",
+  "untilTimeLabel": "Until {time}",
+  "@untilTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsUnlockedSuffix": " /50 unlocked",
+  "currentLevelLabel": "Current level",
+  "allAchievementsUnlockedLabel": "All unlocked",
+  "nextUnlockLabel": "Next unlock",
+  "allAchievementsUnlockedDescription": "You unlocked everything.",
+  "xpToGo": "{xp} XP to go",
+  "levelLabel": "Level {level}",
+  "allFilterLabel": "All",
+  "unlockedFilterLabel": "Unlocked",
+  "lockedFilterLabel": "Locked",
+  "selectCategoryTooltip": "Select category",
+  "allCategoriesLabel": "All categories",
+  "byCategoryLabel": "By category",
+  "allLevelsTitle": "All levels",
+  "allLevelsDescription": "Unlock achievements to climb the ranks.",
+  "levelPlusLabel": "Level {level}+",
+  "currentLabel": "Current",
+  "rankTierLearner": "{tier} Learner",
+  "achievementCategoryFocus": "Focus",
+  "achievementCategoryStudy": "Study",
+  "achievementCategoryReading": "Reading",
+  "achievementCategoryGoals": "Goals",
+  "achievementCategoryLifestyle": "Lifestyle",
+  "achievement1Title": "First Focus",
+  "achievement1Description": "Complete your first focus session",
+  "achievement2Title": "25-Min Starter",
+  "achievement2Description": "Focus for 25 minutes",
+  "achievement3Title": "1-Hour Focus",
+  "achievement3Description": "Focus for 1 hour",
+  "achievement4Title": "Deep Work",
+  "achievement4Description": "Reach 2 hours of focus",
+  "achievement5Title": "Zero Distractions",
+  "achievement5Description": "Complete 3 focus sessions",
+  "achievement6Title": "Focus Marathon",
+  "achievement6Description": "Reach 10 hours of focus",
+  "achievement7Title": "Early Bird",
+  "achievement7Description": "Log focus on 5 days",
+  "achievement8Title": "Night Owl",
+  "achievement8Description": "Complete 10 focus sessions",
+  "achievement9Title": "Focus Streak",
+  "achievement9Description": "Log focus on 7 days",
+  "achievement10Title": "Focus Master",
+  "achievement10Description": "Reach 25 hours of focus",
+  "achievement11Title": "Study Started",
+  "achievement11Description": "Create your first study record",
+  "achievement12Title": "3 Sessions",
+  "achievement12Description": "Complete 3 sessions",
+  "achievement13Title": "5 Sessions",
+  "achievement13Description": "Complete 5 sessions",
+  "achievement14Title": "10 Sessions",
+  "achievement14Description": "Complete 10 sessions",
+  "achievement15Title": "Subject Explorer",
+  "achievement15Description": "Study at least one subject",
+  "achievement16Title": "Revision Hero",
+  "achievement16Description": "Reach 5 hours studying",
+  "achievement17Title": "Quiz Finisher",
+  "achievement17Description": "Complete 15 sessions",
+  "achievement18Title": "Study Planner",
+  "achievement18Description": "Create a focus goal",
+  "achievement19Title": "Exam Ready",
+  "achievement19Description": "Reach 20 hours studying",
+  "achievement20Title": "Scholar Mode",
+  "achievement20Description": "Reach 50 hours studying",
+  "achievement21Title": "First Page",
+  "achievement21Description": "Read your first page",
+  "achievement22Title": "10 Pages",
+  "achievement22Description": "Read 10 pages",
+  "achievement23Title": "25 Pages",
+  "achievement23Description": "Read 25 pages",
+  "achievement24Title": "50 Pages",
+  "achievement24Description": "Read 50 pages",
+  "achievement25Title": "100 Pages",
+  "achievement25Description": "Read 100 pages",
+  "achievement26Title": "Chapter Complete",
+  "achievement26Description": "Read 150 pages",
+  "achievement27Title": "Weekend Reader",
+  "achievement27Description": "Read 250 pages",
+  "achievement28Title": "Daily Reader",
+  "achievement28Description": "Read 300 pages",
+  "achievement29Title": "Bookworm",
+  "achievement29Description": "Read 500 pages",
+  "achievement30Title": "Library Legend",
+  "achievement30Description": "Read 1000 pages",
+  "achievement31Title": "First Goal",
+  "achievement31Description": "Create your first goal",
+  "achievement32Title": "Goal Crusher",
+  "achievement32Description": "Complete a goal",
+  "achievement33Title": "All Goals Done",
+  "achievement33Description": "Finish every goal today",
+  "achievement34Title": "Morning Routine",
+  "achievement34Description": "Complete goals on 3 days",
+  "achievement35Title": "Balanced Day",
+  "achievement35Description": "Complete goals on 5 days",
+  "achievement36Title": "Habit Builder",
+  "achievement36Description": "Complete goals on 10 days",
+  "achievement37Title": "Perfect Day",
+  "achievement37Description": "Complete goals on 15 days",
+  "achievement38Title": "Comeback",
+  "achievement38Description": "Complete goals on 20 days",
+  "achievement39Title": "Consistency Star",
+  "achievement39Description": "Complete goals on 30 days",
+  "achievement40Title": "Unstoppable",
+  "achievement40Description": "Complete goals on 50 days",
+  "achievement41Title": "First Group",
+  "achievement41Description": "Join a study group",
+  "achievement42Title": "Team Player",
+  "achievement42Description": "Compete with friends",
+  "achievement43Title": "Helpful Friend",
+  "achievement43Description": "Help a friend stay consistent",
+  "achievement44Title": "Challenge Winner",
+  "achievement44Description": "Win a challenge",
+  "achievement45Title": "Exercise Start",
+  "achievement45Description": "Log exercise focus",
+  "achievement46Title": "30-Min Workout",
+  "achievement46Description": "Exercise for 30 minutes",
+  "achievement47Title": "Hobby Time",
+  "achievement47Description": "Log hobby focus",
+  "achievement48Title": "Creative Spark",
+  "achievement48Description": "Reach 30 minutes of hobbies",
+  "achievement49Title": "Weekend Warrior",
+  "achievement49Description": "Reach 2 hours exercising",
+  "achievement50Title": "Achievement Hunter",
+  "achievement50Description": "Unlock 25 achievements",
+  "rankTierPaper": "Paper",
+  "rankTierWood": "Wood",
+  "rankTierStone": "Stone",
+  "rankTierCopper": "Copper",
+  "rankTierBronze": "Bronze",
+  "rankTierIron": "Iron",
+  "rankTierSilver": "Silver",
+  "rankTierGold": "Gold",
+  "rankTierPlatinum": "Platinum",
+  "rankTierAmethyst": "Amethyst",
+  "rankTierEmerald": "Emerald",
+  "rankTierDiamond": "Diamond",
+  "rankTierObsidian": "Obsidian",
+  "rankTierAdamantium": "Adamantium",
+  "rankTierMithril": "Mithril",
+  "@xpToGo": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "@levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@levelPlusLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankTierLearner": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "concentrationModeTitle": "Focus mode",
+  "concentrationModeSubtitle": "Choose which focus sessions block leaving the app.",
+  "concentrationStudyTitle": "Study",
+  "concentrationStudySubtitle": "Full focus on your studies.",
+  "concentrationExercisesTitle": "Exercises",
+  "concentrationExercisesSubtitle": "Stay focused on your workouts.",
+  "concentrationReadingTitle": "Reading",
+  "concentrationReadingSubtitle": "Dive into your reading.",
+  "concentrationHobbiesTitle": "Hobbies",
+  "concentrationHobbiesSubtitle": "Enjoy your hobbies with focus.",
+  "createGroupDescriptionLabel": "Description",
+  "createGroupDescriptionHint": "Describe the group and its goal.",
+  "createGroupThemeMetricDescription": "This theme defines the ranking metric.",
+  "createGroupActivityTypeDescription": "Each member gets a copy to track.",
+  "createGroupActivityNameLabel": "Activity name",
+  "createGroupActivityNameHint": "Ex: Calculus I",
+  "createGroupGoalTypeLabel": "Goal type",
+  "createGroupGoalTypeTotal": "Total",
+  "createGroupGoalTypeDaily": "Daily",
+  "createGroupDaysGoalLabel": "Days goal",
+  "createGroupPagesGoalLabel": "Pages goal",
+  "createGroupTimeGoalMinutesLabel": "Time goal (min)",
+  "createGroupSummaryTitle": "Group summary",
+  "createGroupActivitySummaryLabel": "Activity",
+  "createGroupGuestsLabel": "Guests",
+  "timerTotalTodayLabel": "Total today",
+  "timerEndActionLabel": "End"
 }

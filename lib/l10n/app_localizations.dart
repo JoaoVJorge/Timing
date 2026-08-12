@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'HelpOut'**
+  /// **'Timing'**
   String get appTitle;
 
   /// No description provided for @genericErrorMessage.
@@ -1177,7 +1177,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileEmptyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Start a session, log some reading or set a goal from Home to track your evolution in HelpOut.'**
+  /// **'Start a session, log some reading or set a goal from Home to track your evolution in Timing.'**
   String get profileEmptyDescription;
 
   /// No description provided for @profileEmptyGuidance.
@@ -2545,7 +2545,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupMembersCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} members'**
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
   String groupMembersCount(int count);
 
   /// No description provided for @createScheduleEntryButton.
@@ -2710,11 +2710,2123 @@ abstract class AppLocalizations {
   /// **'Week of {date}'**
   String scheduleWeekLabel(String date);
 
+  /// No description provided for @daysSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get daysSuffix;
+
+  /// No description provided for @createTaskSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a daily goal and keep track of your progress'**
+  String get createTaskSubtitle;
+
+  /// No description provided for @createTaskSequenceTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequence type'**
+  String get createTaskSequenceTypeLabel;
+
+  /// No description provided for @createTaskSequenceIntenseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Intense'**
+  String get createTaskSequenceIntenseLabel;
+
+  /// No description provided for @createTaskSequenceIntenseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No misses. If you lose one day, your sequence resets.'**
+  String get createTaskSequenceIntenseDescription;
+
+  /// No description provided for @createTaskSequenceCasualLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual'**
+  String get createTaskSequenceCasualLabel;
+
+  /// No description provided for @createTaskSequenceCasualDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'More flexible. Missed days do not reset your sequence.'**
+  String get createTaskSequenceCasualDescription;
+
+  /// No description provided for @targetDaysInfinite.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite'**
+  String get targetDaysInfinite;
+
+  /// No description provided for @deleteConfirmationDefaultTypeName.
+  ///
+  /// In en, this message translates to:
+  /// **'item'**
+  String get deleteConfirmationDefaultTypeName;
+
+  /// No description provided for @deleteConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {typeName}?'**
+  String deleteConfirmationTitle(String typeName);
+
+  /// No description provided for @deleteConfirmationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to delete \"{itemName}\". This action cannot be undone.'**
+  String deleteConfirmationContent(String itemName);
+
+  /// No description provided for @deleteConfirmationHistoryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This {typeName} history will also be removed.'**
+  String deleteConfirmationHistoryWarning(String typeName);
+
+  /// No description provided for @homeDaySummaryFocusValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{focus} focus'**
+  String homeDaySummaryFocusValue(String focus);
+
+  /// No description provided for @homeDaySummaryGoalsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 goal} other{{count} goals}}'**
+  String homeDaySummaryGoalsValue(int count);
+
+  /// No description provided for @profilePhotoSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo'**
+  String get profilePhotoSourceTitle;
+
+  /// No description provided for @profilePhotoSourceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how you want to update your photo'**
+  String get profilePhotoSourceSubtitle;
+
+  /// No description provided for @photoCameraLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get photoCameraLabel;
+
+  /// No description provided for @photoGalleryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get photoGalleryLabel;
+
+  /// No description provided for @removePhotoDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo?'**
+  String get removePhotoDialogTitle;
+
+  /// No description provided for @removePhotoDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your avatar will show on the profile again.'**
+  String get removePhotoDialogContent;
+
+  /// No description provided for @friendRequestsReceivedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get friendRequestsReceivedTab;
+
+  /// No description provided for @friendRequestsSentTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites'**
+  String get friendRequestsSentTab;
+
+  /// No description provided for @hobbyPracticeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min of practice'**
+  String hobbyPracticeMinutes(int minutes);
+
+  /// No description provided for @hobbyViewStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'View statistics'**
+  String get hobbyViewStatistics;
+
+  /// No description provided for @hobbyEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit hobby'**
+  String get hobbyEdit;
+
+  /// No description provided for @pinToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to start'**
+  String get pinToStart;
+
+  /// No description provided for @hobbyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete hobby'**
+  String get hobbyDelete;
+
+  /// No description provided for @deleteActionCannotBeUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get deleteActionCannotBeUndone;
+
+  /// No description provided for @joinGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join group'**
+  String get joinGroupTitle;
+
+  /// No description provided for @joinGroupInviteCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get joinGroupInviteCodeLabel;
+
+  /// No description provided for @joinGroupCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code'**
+  String get joinGroupCodeHint;
+
+  /// No description provided for @joinGroupButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Join group'**
+  String get joinGroupButton;
+
+  /// No description provided for @joinGroupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join this group.'**
+  String get joinGroupError;
+
+  /// No description provided for @scheduleDayEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day events'**
+  String get scheduleDayEventsTitle;
+
+  /// No description provided for @dailyGoalsNoGoalsYetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet'**
+  String get dailyGoalsNoGoalsYetTitle;
+
+  /// No description provided for @dailyGoalsNoGoalsYetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first goal to organize the day and track your wins.'**
+  String get dailyGoalsNoGoalsYetDescription;
+
+  /// No description provided for @dailyGoalsSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions to start'**
+  String get dailyGoalsSuggestionsTitle;
+
+  /// No description provided for @dailyGoalsSuggestionStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Study 30 min'**
+  String get dailyGoalsSuggestionStudy;
+
+  /// No description provided for @dailyGoalsSuggestionRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 10 pages'**
+  String get dailyGoalsSuggestionRead;
+
+  /// No description provided for @dailyGoalsSuggestionTrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Train'**
+  String get dailyGoalsSuggestionTrain;
+
+  /// No description provided for @goalTypeName.
+  ///
+  /// In en, this message translates to:
+  /// **'goal'**
+  String get goalTypeName;
+
+  /// No description provided for @missedYesterdayDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you complete it yesterday?'**
+  String get missedYesterdayDialogTitle;
+
+  /// No description provided for @missedYesterdayDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You did not register \"{taskName}\" yesterday. Did you really miss it?'**
+  String missedYesterdayDialogContent(String taskName);
+
+  /// No description provided for @missedYesterdayMissedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I missed it'**
+  String get missedYesterdayMissedButton;
+
+  /// No description provided for @missedYesterdayCompletedButton.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed it'**
+  String get missedYesterdayCompletedButton;
+
+  /// No description provided for @scheduleTitleRequiredError.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the title to continue'**
+  String get scheduleTitleRequiredError;
+
+  /// No description provided for @scheduleActiveFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get scheduleActiveFromLabel;
+
+  /// No description provided for @scheduleActiveUntilLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get scheduleActiveUntilLabel;
+
+  /// No description provided for @selectDateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get selectDateTitle;
+
+  /// No description provided for @selectDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to select'**
+  String get selectDateHint;
+
+  /// No description provided for @addFriendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friend'**
+  String get addFriendTitle;
+
+  /// No description provided for @friendCodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find a user with this code.'**
+  String get friendCodeNotFound;
+
+  /// No description provided for @friendInviteCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get friendInviteCodeTitle;
+
+  /// No description provided for @friendInviteCodeFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type or paste the code'**
+  String get friendInviteCodeFieldLabel;
+
+  /// No description provided for @friendInviteCodeFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Like ABCDE12345'**
+  String get friendInviteCodeFieldHint;
+
+  /// No description provided for @pasteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get pasteButton;
+
+  /// No description provided for @searchCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Search code'**
+  String get searchCodeButton;
+
+  /// No description provided for @friendUserFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User found'**
+  String get friendUserFoundTitle;
+
+  /// No description provided for @friendFoundByCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Found by code'**
+  String get friendFoundByCode;
+
+  /// No description provided for @sentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get sentLabel;
+
+  /// No description provided for @friendHowItWorksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get friendHowItWorksTitle;
+
+  /// No description provided for @friendHowItWorksStepOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your friend for their code'**
+  String get friendHowItWorksStepOne;
+
+  /// No description provided for @friendHowItWorksStepTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the code to find the profile'**
+  String get friendHowItWorksStepTwo;
+
+  /// No description provided for @friendHowItWorksStepThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the request to add them'**
+  String get friendHowItWorksStepThree;
+
+  /// No description provided for @myCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My code'**
+  String get myCodeLabel;
+
+  /// No description provided for @yourInviteCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invite code'**
+  String get yourInviteCodeLabel;
+
+  /// No description provided for @yourFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your friends ({count})'**
+  String yourFriendsTitle(int count);
+
+  /// No description provided for @seeAllButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get seeAllButton;
+
+  /// No description provided for @onlineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get onlineLabel;
+
+  /// No description provided for @minutesAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String minutesAgoShort(int minutes);
+
+  /// No description provided for @friendsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have friends yet'**
+  String get friendsEmptyTitle;
+
+  /// No description provided for @friendsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people above or share your invite code.'**
+  String get friendsEmptySubtitle;
+
+  /// No description provided for @shareCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share code'**
+  String get shareCodeButton;
+
+  /// No description provided for @codeCopiedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get codeCopiedMessage;
+
+  /// No description provided for @friendRequestSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get friendRequestSentMessage;
+
+  /// No description provided for @joinedGroupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined the group'**
+  String get joinedGroupMessage;
+
+  /// No description provided for @friendTypeName.
+  ///
+  /// In en, this message translates to:
+  /// **'friend'**
+  String get friendTypeName;
+
+  /// No description provided for @shareInviteCodeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add me on HelpOut with my code: {code}'**
+  String shareInviteCodeMessage(String code);
+
+  /// No description provided for @groupInvitesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group invites ({count})'**
+  String groupInvitesTitle(int count);
+
+  /// No description provided for @groupInvitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{inviter} invited you'**
+  String groupInvitedBy(String inviter);
+
+  /// No description provided for @acceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptButton;
+
+  /// No description provided for @declineButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineButton;
+
+  /// No description provided for @friendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get friendsTitle;
+
+  /// No description provided for @friendRequestsReceivedPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get friendRequestsReceivedPageTitle;
+
+  /// No description provided for @friendRequestsSentPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites'**
+  String get friendRequestsSentPageTitle;
+
+  /// No description provided for @friendRequestsReceivedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Received ({count})'**
+  String friendRequestsReceivedSection(int count);
+
+  /// No description provided for @friendRequestsSentSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent ({count})'**
+  String friendRequestsSentSection(int count);
+
+  /// No description provided for @friendMutualFriendsSample.
+  ///
+  /// In en, this message translates to:
+  /// **'3 mutual friends'**
+  String get friendMutualFriendsSample;
+
+  /// No description provided for @pendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pendingLabel;
+
+  /// No description provided for @friendRequestsIncomingEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No received requests'**
+  String get friendRequestsIncomingEmptyTitle;
+
+  /// No description provided for @friendRequestsSentEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sent invites'**
+  String get friendRequestsSentEmptyTitle;
+
+  /// No description provided for @friendRequestsIncomingEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests will appear here.'**
+  String get friendRequestsIncomingEmptySubtitle;
+
+  /// No description provided for @friendRequestsSentEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sent invites will appear here.'**
+  String get friendRequestsSentEmptySubtitle;
+
+  /// No description provided for @friendRequestsSafetyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Only accept people you know and trust.'**
+  String get friendRequestsSafetyNotice;
+
+  /// No description provided for @categoryEmptyStudyingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No subject yet'**
+  String get categoryEmptyStudyingTitle;
+
+  /// No description provided for @categoryEmptyExercisesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No exercise yet'**
+  String get categoryEmptyExercisesTitle;
+
+  /// No description provided for @categoryEmptyReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading yet'**
+  String get categoryEmptyReadingTitle;
+
+  /// No description provided for @categoryEmptyHobbiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No hobby yet'**
+  String get categoryEmptyHobbiesTitle;
+
+  /// No description provided for @categoryEmptyStudyingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first subject to organize your studies and log focus.'**
+  String get categoryEmptyStudyingDescription;
+
+  /// No description provided for @categoryEmptyExercisesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first exercise to track workouts, sessions and progress.'**
+  String get categoryEmptyExercisesDescription;
+
+  /// No description provided for @categoryEmptyReadingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first reading item to track pages, time and progress.'**
+  String get categoryEmptyReadingDescription;
+
+  /// No description provided for @categoryEmptyHobbiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first hobby to log practice and keep momentum.'**
+  String get categoryEmptyHobbiesDescription;
+
+  /// No description provided for @categorySuggestionStudyingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Math'**
+  String get categorySuggestionStudyingOne;
+
+  /// No description provided for @categorySuggestionStudyingTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get categorySuggestionStudyingTwo;
+
+  /// No description provided for @categorySuggestionStudyingThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get categorySuggestionStudyingThree;
+
+  /// No description provided for @categorySuggestionExercisesOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get categorySuggestionExercisesOne;
+
+  /// No description provided for @categorySuggestionExercisesTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get categorySuggestionExercisesTwo;
+
+  /// No description provided for @categorySuggestionExercisesThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretching'**
+  String get categorySuggestionExercisesThree;
+
+  /// No description provided for @categorySuggestionReadingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel'**
+  String get categorySuggestionReadingOne;
+
+  /// No description provided for @categorySuggestionReadingTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical'**
+  String get categorySuggestionReadingTwo;
+
+  /// No description provided for @categorySuggestionReadingThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Articles'**
+  String get categorySuggestionReadingThree;
+
+  /// No description provided for @categorySuggestionHobbiesOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Guitar'**
+  String get categorySuggestionHobbiesOne;
+
+  /// No description provided for @categorySuggestionHobbiesTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing'**
+  String get categorySuggestionHobbiesTwo;
+
+  /// No description provided for @categorySuggestionHobbiesThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking'**
+  String get categorySuggestionHobbiesThree;
+
+  /// No description provided for @pagesAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'pgs'**
+  String get pagesAbbreviation;
+
+  /// No description provided for @loginSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data is protected and secure.'**
+  String get loginSecurityNote;
+
+  /// No description provided for @nextBreakDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next break duration'**
+  String get nextBreakDurationLabel;
+
+  /// No description provided for @timerReadingExitContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You read for {duration}. Enter how many pages you read in {subjectName}.'**
+  String timerReadingExitContent(String duration, String subjectName);
+
+  /// No description provided for @appleSignInIncompleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple is not complete yet.'**
+  String get appleSignInIncompleteMessage;
+
+  /// No description provided for @activityTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity type'**
+  String get activityTypeLabel;
+
+  /// No description provided for @activityTypeDailyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get activityTypeDailyLabel;
+
+  /// No description provided for @activityTypeDailyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews every day. The activity becomes available again in the morning.'**
+  String get activityTypeDailyDescription;
+
+  /// No description provided for @activityTypePermanentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent'**
+  String get activityTypePermanentLabel;
+
+  /// No description provided for @activityTypePermanentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays active until you finish it. After that, it is marked as done.'**
+  String get activityTypePermanentDescription;
+
+  /// No description provided for @pagesSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'pages'**
+  String get pagesSuffix;
+
+  /// No description provided for @updatedSuccessfullyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated successfully'**
+  String get updatedSuccessfullyMessage;
+
+  /// No description provided for @focusSessionCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus sessions'**
+  String get focusSessionCountLabel;
+
+  /// No description provided for @groupEditingComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Group editing is coming soon.'**
+  String get groupEditingComingSoon;
+
+  /// No description provided for @leftGroupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the group.'**
+  String get leftGroupMessage;
+
+  /// No description provided for @groupImageSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send image'**
+  String get groupImageSourceTitle;
+
+  /// No description provided for @groupImageSourceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how you want to send the image'**
+  String get groupImageSourceSubtitle;
+
   /// No description provided for @deleteButton.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
   String get deleteButton;
+
+  /// No description provided for @manageMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage members'**
+  String get manageMembersTitle;
+
+  /// No description provided for @groupLeaderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Leader'**
+  String get groupLeaderLabel;
+
+  /// No description provided for @groupLeaderRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group leader'**
+  String get groupLeaderRoleLabel;
+
+  /// No description provided for @groupMemberRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupMemberRoleLabel;
+
+  /// No description provided for @groupMembersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get groupMembersLabel;
+
+  /// No description provided for @groupActionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group actions'**
+  String get groupActionsLabel;
+
+  /// No description provided for @goalsTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get goalsTabLabel;
+
+  /// No description provided for @chatTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chatTabLabel;
+
+  /// No description provided for @groupGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group goal'**
+  String get groupGoalTitle;
+
+  /// No description provided for @groupMainRuleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Main rule'**
+  String get groupMainRuleTitle;
+
+  /// No description provided for @groupNextMilestoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next milestone'**
+  String get groupNextMilestoneTitle;
+
+  /// No description provided for @groupMembersProgressValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{total} members'**
+  String groupMembersProgressValue(int current, int total);
+
+  /// No description provided for @groupNextMilestoneDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'to unlock the \"Total Focus\" badge'**
+  String get groupNextMilestoneDescription;
+
+  /// No description provided for @groupActivityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group activity'**
+  String get groupActivityLabel;
+
+  /// No description provided for @groupActivityReachedGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'{reached}/{total} reached the goal'**
+  String groupActivityReachedGoal(int reached, int total);
+
+  /// No description provided for @groupNoImagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No images yet'**
+  String get groupNoImagesTitle;
+
+  /// No description provided for @groupNoImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the first group image.'**
+  String get groupNoImagesDescription;
+
+  /// No description provided for @groupSendImageButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send image'**
+  String get groupSendImageButton;
+
+  /// No description provided for @groupSendingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending image...'**
+  String get groupSendingImage;
+
+  /// No description provided for @editGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit group'**
+  String get editGroupLabel;
+
+  /// No description provided for @leaveGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get leaveGroupLabel;
+
+  /// No description provided for @groupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing {metric} and beating challenges together.'**
+  String groupDescription(String metric);
+
+  /// No description provided for @groupsFriendsSubtitleWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests, invites and {groupCount} in groups'**
+  String groupsFriendsSubtitleWithCount(int groupCount);
+
+  /// No description provided for @groupGoalKeepMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {metric} every day'**
+  String groupGoalKeepMetric(String metric);
+
+  /// No description provided for @groupGoalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Each member should log progress in {metric} to keep the group streak going.'**
+  String groupGoalDescription(String metric);
+
+  /// No description provided for @groupRuleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Log at least one {metric} activity per day. Keeping the streak strengthens the group.'**
+  String groupRuleDescription(String metric);
+
+  /// No description provided for @joinWithCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'I have an invite code'**
+  String get joinWithCodeButton;
+
+  /// No description provided for @groupsBenefitsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'In a group you can:'**
+  String get groupsBenefitsHeader;
+
+  /// No description provided for @groupParticipantsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String groupParticipantsCount(int count);
+
+  /// No description provided for @groupMembersCompletedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} members completed today'**
+  String groupMembersCompletedToday(int completed, int total);
+
+  /// No description provided for @addMemberButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get addMemberButton;
+
+  /// No description provided for @groupCollectiveProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collective progress'**
+  String get groupCollectiveProgressTitle;
+
+  /// No description provided for @currentUserRankCompleteFirstGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first goal to enter the ranking.'**
+  String get currentUserRankCompleteFirstGoal;
+
+  /// No description provided for @currentUserRankTiedLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Tied for the lead.'**
+  String get currentUserRankTiedLead;
+
+  /// No description provided for @currentUserRankTiedFirstLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tied for 1st'**
+  String get currentUserRankTiedFirstLabel;
+
+  /// No description provided for @rankLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank}'**
+  String rankLabel(int rank);
+
+  /// No description provided for @homeScheduleRoutineSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming times and weekly routine'**
+  String get homeScheduleRoutineSubtitle;
+
+  /// No description provided for @homeNextCommitmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next commitment'**
+  String get homeNextCommitmentTitle;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @statisticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statisticsTitle;
+
+  /// No description provided for @studiedTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Studied time'**
+  String get studiedTimeLabel;
+
+  /// No description provided for @readingTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading time'**
+  String get readingTimeLabel;
+
+  /// No description provided for @totalPagesReadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total pages'**
+  String get totalPagesReadLabel;
+
+  /// No description provided for @pagesReadTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages today'**
+  String get pagesReadTodayLabel;
+
+  /// No description provided for @goalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get goalLabel;
+
+  /// No description provided for @sessionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get sessionsLabel;
+
+  /// No description provided for @restLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest'**
+  String get restLabel;
+
+  /// No description provided for @comparativesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparisons'**
+  String get comparativesTitle;
+
+  /// No description provided for @overviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overviewTitle;
+
+  /// No description provided for @studiedUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'studied'**
+  String get studiedUnit;
+
+  /// No description provided for @readPagesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'read'**
+  String get readPagesUnit;
+
+  /// No description provided for @versusLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last month'**
+  String get versusLastMonth;
+
+  /// No description provided for @versusLastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last week'**
+  String get versusLastWeek;
+
+  /// No description provided for @noPreviousPeriodComparison.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous period to compare'**
+  String get noPreviousPeriodComparison;
+
+  /// No description provided for @noTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No time'**
+  String get noTimeLabel;
+
+  /// No description provided for @untilTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {time}'**
+  String untilTimeLabel(String time);
+
+  /// No description provided for @achievementsUnlockedSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' /50 unlocked'**
+  String get achievementsUnlockedSuffix;
+
+  /// No description provided for @currentLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current level'**
+  String get currentLevelLabel;
+
+  /// No description provided for @allAchievementsUnlockedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All unlocked'**
+  String get allAchievementsUnlockedLabel;
+
+  /// No description provided for @nextUnlockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next unlock'**
+  String get nextUnlockLabel;
+
+  /// No description provided for @allAchievementsUnlockedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You unlocked everything.'**
+  String get allAchievementsUnlockedDescription;
+
+  /// No description provided for @xpToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp} XP to go'**
+  String xpToGo(int xp);
+
+  /// No description provided for @levelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String levelLabel(int level);
+
+  /// No description provided for @allFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allFilterLabel;
+
+  /// No description provided for @unlockedFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get unlockedFilterLabel;
+
+  /// No description provided for @lockedFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get lockedFilterLabel;
+
+  /// No description provided for @selectCategoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get selectCategoryTooltip;
+
+  /// No description provided for @allCategoriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get allCategoriesLabel;
+
+  /// No description provided for @byCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get byCategoryLabel;
+
+  /// No description provided for @allLevelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All levels'**
+  String get allLevelsTitle;
+
+  /// No description provided for @allLevelsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock achievements to climb the ranks.'**
+  String get allLevelsDescription;
+
+  /// No description provided for @levelPlusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}+'**
+  String levelPlusLabel(int level);
+
+  /// No description provided for @currentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentLabel;
+
+  /// No description provided for @rankTierLearner.
+  ///
+  /// In en, this message translates to:
+  /// **'{tier} Learner'**
+  String rankTierLearner(String tier);
+
+  /// No description provided for @achievementCategoryFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus'**
+  String get achievementCategoryFocus;
+
+  /// No description provided for @achievementCategoryStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get achievementCategoryStudy;
+
+  /// No description provided for @achievementCategoryReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get achievementCategoryReading;
+
+  /// No description provided for @achievementCategoryGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get achievementCategoryGoals;
+
+  /// No description provided for @achievementCategoryLifestyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifestyle'**
+  String get achievementCategoryLifestyle;
+
+  /// No description provided for @achievement1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'First Focus'**
+  String get achievement1Title;
+
+  /// No description provided for @achievement1Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first focus session'**
+  String get achievement1Description;
+
+  /// No description provided for @achievement2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'25-Min Starter'**
+  String get achievement2Title;
+
+  /// No description provided for @achievement2Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus for 25 minutes'**
+  String get achievement2Description;
+
+  /// No description provided for @achievement3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'1-Hour Focus'**
+  String get achievement3Title;
+
+  /// No description provided for @achievement3Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus for 1 hour'**
+  String get achievement3Description;
+
+  /// No description provided for @achievement4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Work'**
+  String get achievement4Title;
+
+  /// No description provided for @achievement4Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 2 hours of focus'**
+  String get achievement4Description;
+
+  /// No description provided for @achievement5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero Distractions'**
+  String get achievement5Title;
+
+  /// No description provided for @achievement5Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 3 focus sessions'**
+  String get achievement5Description;
+
+  /// No description provided for @achievement6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Marathon'**
+  String get achievement6Title;
+
+  /// No description provided for @achievement6Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 10 hours of focus'**
+  String get achievement6Description;
+
+  /// No description provided for @achievement7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Early Bird'**
+  String get achievement7Title;
+
+  /// No description provided for @achievement7Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Log focus on 5 days'**
+  String get achievement7Description;
+
+  /// No description provided for @achievement8Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Night Owl'**
+  String get achievement8Title;
+
+  /// No description provided for @achievement8Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 10 focus sessions'**
+  String get achievement8Description;
+
+  /// No description provided for @achievement9Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Streak'**
+  String get achievement9Title;
+
+  /// No description provided for @achievement9Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Log focus on 7 days'**
+  String get achievement9Description;
+
+  /// No description provided for @achievement10Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Master'**
+  String get achievement10Title;
+
+  /// No description provided for @achievement10Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 25 hours of focus'**
+  String get achievement10Description;
+
+  /// No description provided for @achievement11Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Started'**
+  String get achievement11Title;
+
+  /// No description provided for @achievement11Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first study record'**
+  String get achievement11Description;
+
+  /// No description provided for @achievement12Title.
+  ///
+  /// In en, this message translates to:
+  /// **'3 Sessions'**
+  String get achievement12Title;
+
+  /// No description provided for @achievement12Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 3 sessions'**
+  String get achievement12Description;
+
+  /// No description provided for @achievement13Title.
+  ///
+  /// In en, this message translates to:
+  /// **'5 Sessions'**
+  String get achievement13Title;
+
+  /// No description provided for @achievement13Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 5 sessions'**
+  String get achievement13Description;
+
+  /// No description provided for @achievement14Title.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Sessions'**
+  String get achievement14Title;
+
+  /// No description provided for @achievement14Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 10 sessions'**
+  String get achievement14Description;
+
+  /// No description provided for @achievement15Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Explorer'**
+  String get achievement15Title;
+
+  /// No description provided for @achievement15Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Study at least one subject'**
+  String get achievement15Description;
+
+  /// No description provided for @achievement16Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision Hero'**
+  String get achievement16Title;
+
+  /// No description provided for @achievement16Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 5 hours studying'**
+  String get achievement16Description;
+
+  /// No description provided for @achievement17Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Finisher'**
+  String get achievement17Title;
+
+  /// No description provided for @achievement17Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 15 sessions'**
+  String get achievement17Description;
+
+  /// No description provided for @achievement18Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Planner'**
+  String get achievement18Title;
+
+  /// No description provided for @achievement18Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a focus goal'**
+  String get achievement18Description;
+
+  /// No description provided for @achievement19Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Ready'**
+  String get achievement19Title;
+
+  /// No description provided for @achievement19Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 20 hours studying'**
+  String get achievement19Description;
+
+  /// No description provided for @achievement20Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scholar Mode'**
+  String get achievement20Title;
+
+  /// No description provided for @achievement20Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 50 hours studying'**
+  String get achievement20Description;
+
+  /// No description provided for @achievement21Title.
+  ///
+  /// In en, this message translates to:
+  /// **'First Page'**
+  String get achievement21Title;
+
+  /// No description provided for @achievement21Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read your first page'**
+  String get achievement21Description;
+
+  /// No description provided for @achievement22Title.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Pages'**
+  String get achievement22Title;
+
+  /// No description provided for @achievement22Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 10 pages'**
+  String get achievement22Description;
+
+  /// No description provided for @achievement23Title.
+  ///
+  /// In en, this message translates to:
+  /// **'25 Pages'**
+  String get achievement23Title;
+
+  /// No description provided for @achievement23Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 25 pages'**
+  String get achievement23Description;
+
+  /// No description provided for @achievement24Title.
+  ///
+  /// In en, this message translates to:
+  /// **'50 Pages'**
+  String get achievement24Title;
+
+  /// No description provided for @achievement24Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 50 pages'**
+  String get achievement24Description;
+
+  /// No description provided for @achievement25Title.
+  ///
+  /// In en, this message translates to:
+  /// **'100 Pages'**
+  String get achievement25Title;
+
+  /// No description provided for @achievement25Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 100 pages'**
+  String get achievement25Description;
+
+  /// No description provided for @achievement26Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter Complete'**
+  String get achievement26Title;
+
+  /// No description provided for @achievement26Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 150 pages'**
+  String get achievement26Description;
+
+  /// No description provided for @achievement27Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend Reader'**
+  String get achievement27Title;
+
+  /// No description provided for @achievement27Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 250 pages'**
+  String get achievement27Description;
+
+  /// No description provided for @achievement28Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reader'**
+  String get achievement28Title;
+
+  /// No description provided for @achievement28Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 300 pages'**
+  String get achievement28Description;
+
+  /// No description provided for @achievement29Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookworm'**
+  String get achievement29Title;
+
+  /// No description provided for @achievement29Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 500 pages'**
+  String get achievement29Description;
+
+  /// No description provided for @achievement30Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Library Legend'**
+  String get achievement30Title;
+
+  /// No description provided for @achievement30Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 1000 pages'**
+  String get achievement30Description;
+
+  /// No description provided for @achievement31Title.
+  ///
+  /// In en, this message translates to:
+  /// **'First Goal'**
+  String get achievement31Title;
+
+  /// No description provided for @achievement31Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first goal'**
+  String get achievement31Description;
+
+  /// No description provided for @achievement32Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Crusher'**
+  String get achievement32Title;
+
+  /// No description provided for @achievement32Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a goal'**
+  String get achievement32Description;
+
+  /// No description provided for @achievement33Title.
+  ///
+  /// In en, this message translates to:
+  /// **'All Goals Done'**
+  String get achievement33Title;
+
+  /// No description provided for @achievement33Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish every goal today'**
+  String get achievement33Description;
+
+  /// No description provided for @achievement34Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Routine'**
+  String get achievement34Title;
+
+  /// No description provided for @achievement34Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 3 days'**
+  String get achievement34Description;
+
+  /// No description provided for @achievement35Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced Day'**
+  String get achievement35Title;
+
+  /// No description provided for @achievement35Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 5 days'**
+  String get achievement35Description;
+
+  /// No description provided for @achievement36Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Habit Builder'**
+  String get achievement36Title;
+
+  /// No description provided for @achievement36Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 10 days'**
+  String get achievement36Description;
+
+  /// No description provided for @achievement37Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect Day'**
+  String get achievement37Title;
+
+  /// No description provided for @achievement37Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 15 days'**
+  String get achievement37Description;
+
+  /// No description provided for @achievement38Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Comeback'**
+  String get achievement38Title;
+
+  /// No description provided for @achievement38Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 20 days'**
+  String get achievement38Description;
+
+  /// No description provided for @achievement39Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency Star'**
+  String get achievement39Title;
+
+  /// No description provided for @achievement39Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 30 days'**
+  String get achievement39Description;
+
+  /// No description provided for @achievement40Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Unstoppable'**
+  String get achievement40Title;
+
+  /// No description provided for @achievement40Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goals on 50 days'**
+  String get achievement40Description;
+
+  /// No description provided for @achievement41Title.
+  ///
+  /// In en, this message translates to:
+  /// **'First Group'**
+  String get achievement41Title;
+
+  /// No description provided for @achievement41Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a study group'**
+  String get achievement41Description;
+
+  /// No description provided for @achievement42Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Player'**
+  String get achievement42Title;
+
+  /// No description provided for @achievement42Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Compete with friends'**
+  String get achievement42Description;
+
+  /// No description provided for @achievement43Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Helpful Friend'**
+  String get achievement43Title;
+
+  /// No description provided for @achievement43Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Help a friend stay consistent'**
+  String get achievement43Description;
+
+  /// No description provided for @achievement44Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge Winner'**
+  String get achievement44Title;
+
+  /// No description provided for @achievement44Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Win a challenge'**
+  String get achievement44Description;
+
+  /// No description provided for @achievement45Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise Start'**
+  String get achievement45Title;
+
+  /// No description provided for @achievement45Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Log exercise focus'**
+  String get achievement45Description;
+
+  /// No description provided for @achievement46Title.
+  ///
+  /// In en, this message translates to:
+  /// **'30-Min Workout'**
+  String get achievement46Title;
+
+  /// No description provided for @achievement46Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise for 30 minutes'**
+  String get achievement46Description;
+
+  /// No description provided for @achievement47Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Hobby Time'**
+  String get achievement47Title;
+
+  /// No description provided for @achievement47Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Log hobby focus'**
+  String get achievement47Description;
+
+  /// No description provided for @achievement48Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative Spark'**
+  String get achievement48Title;
+
+  /// No description provided for @achievement48Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 30 minutes of hobbies'**
+  String get achievement48Description;
+
+  /// No description provided for @achievement49Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend Warrior'**
+  String get achievement49Title;
+
+  /// No description provided for @achievement49Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach 2 hours exercising'**
+  String get achievement49Description;
+
+  /// No description provided for @achievement50Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement Hunter'**
+  String get achievement50Title;
+
+  /// No description provided for @achievement50Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock 25 achievements'**
+  String get achievement50Description;
+
+  /// No description provided for @rankTierPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get rankTierPaper;
+
+  /// No description provided for @rankTierWood.
+  ///
+  /// In en, this message translates to:
+  /// **'Wood'**
+  String get rankTierWood;
+
+  /// No description provided for @rankTierStone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stone'**
+  String get rankTierStone;
+
+  /// No description provided for @rankTierCopper.
+  ///
+  /// In en, this message translates to:
+  /// **'Copper'**
+  String get rankTierCopper;
+
+  /// No description provided for @rankTierBronze.
+  ///
+  /// In en, this message translates to:
+  /// **'Bronze'**
+  String get rankTierBronze;
+
+  /// No description provided for @rankTierIron.
+  ///
+  /// In en, this message translates to:
+  /// **'Iron'**
+  String get rankTierIron;
+
+  /// No description provided for @rankTierSilver.
+  ///
+  /// In en, this message translates to:
+  /// **'Silver'**
+  String get rankTierSilver;
+
+  /// No description provided for @rankTierGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get rankTierGold;
+
+  /// No description provided for @rankTierPlatinum.
+  ///
+  /// In en, this message translates to:
+  /// **'Platinum'**
+  String get rankTierPlatinum;
+
+  /// No description provided for @rankTierAmethyst.
+  ///
+  /// In en, this message translates to:
+  /// **'Amethyst'**
+  String get rankTierAmethyst;
+
+  /// No description provided for @rankTierEmerald.
+  ///
+  /// In en, this message translates to:
+  /// **'Emerald'**
+  String get rankTierEmerald;
+
+  /// No description provided for @rankTierDiamond.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond'**
+  String get rankTierDiamond;
+
+  /// No description provided for @rankTierObsidian.
+  ///
+  /// In en, this message translates to:
+  /// **'Obsidian'**
+  String get rankTierObsidian;
+
+  /// No description provided for @rankTierAdamantium.
+  ///
+  /// In en, this message translates to:
+  /// **'Adamantium'**
+  String get rankTierAdamantium;
+
+  /// No description provided for @rankTierMithril.
+  ///
+  /// In en, this message translates to:
+  /// **'Mithril'**
+  String get rankTierMithril;
+
+  /// No description provided for @concentrationModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus mode'**
+  String get concentrationModeTitle;
+
+  /// No description provided for @concentrationModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which focus sessions block leaving the app.'**
+  String get concentrationModeSubtitle;
+
+  /// No description provided for @concentrationStudyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get concentrationStudyTitle;
+
+  /// No description provided for @concentrationStudySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full focus on your studies.'**
+  String get concentrationStudySubtitle;
+
+  /// No description provided for @concentrationExercisesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises'**
+  String get concentrationExercisesTitle;
+
+  /// No description provided for @concentrationExercisesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay focused on your workouts.'**
+  String get concentrationExercisesSubtitle;
+
+  /// No description provided for @concentrationReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get concentrationReadingTitle;
+
+  /// No description provided for @concentrationReadingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dive into your reading.'**
+  String get concentrationReadingSubtitle;
+
+  /// No description provided for @concentrationHobbiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hobbies'**
+  String get concentrationHobbiesTitle;
+
+  /// No description provided for @concentrationHobbiesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy your hobbies with focus.'**
+  String get concentrationHobbiesSubtitle;
+
+  /// No description provided for @createGroupDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get createGroupDescriptionLabel;
+
+  /// No description provided for @createGroupDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the group and its goal.'**
+  String get createGroupDescriptionHint;
+
+  /// No description provided for @createGroupThemeMetricDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This theme defines the ranking metric.'**
+  String get createGroupThemeMetricDescription;
+
+  /// No description provided for @createGroupActivityTypeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Each member gets a copy to track.'**
+  String get createGroupActivityTypeDescription;
+
+  /// No description provided for @createGroupActivityNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity name'**
+  String get createGroupActivityNameLabel;
+
+  /// No description provided for @createGroupActivityNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: Calculus I'**
+  String get createGroupActivityNameHint;
+
+  /// No description provided for @createGroupGoalTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal type'**
+  String get createGroupGoalTypeLabel;
+
+  /// No description provided for @createGroupGoalTypeTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get createGroupGoalTypeTotal;
+
+  /// No description provided for @createGroupGoalTypeDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get createGroupGoalTypeDaily;
+
+  /// No description provided for @createGroupDaysGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Days goal'**
+  String get createGroupDaysGoalLabel;
+
+  /// No description provided for @createGroupPagesGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages goal'**
+  String get createGroupPagesGoalLabel;
+
+  /// No description provided for @createGroupTimeGoalMinutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time goal (min)'**
+  String get createGroupTimeGoalMinutesLabel;
+
+  /// No description provided for @createGroupSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group summary'**
+  String get createGroupSummaryTitle;
+
+  /// No description provided for @createGroupActivitySummaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get createGroupActivitySummaryLabel;
+
+  /// No description provided for @createGroupGuestsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests'**
+  String get createGroupGuestsLabel;
+
+  /// No description provided for @timerTotalTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total today'**
+  String get timerTotalTodayLabel;
+
+  /// No description provided for @timerEndActionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get timerEndActionLabel;
 }
 
 class _AppLocalizationsDelegate
