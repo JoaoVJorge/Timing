@@ -1363,7 +1363,7 @@
   "achievement36Description": "Schließe Ziele an 10 Tagen ab",
   "achievement37Title": "Perfekter Tag",
   "achievement37Description": "Schließe Ziele an 15 Tagen ab",
-  "achievement38Title": "Comeback",
+  "achievement38Title": "Neustart",
   "achievement38Description": "Schließe Ziele an 20 Tagen ab",
   "achievement39Title": "Konstanzstern",
   "achievement39Description": "Schließe Ziele an 30 Tagen ab",
@@ -1432,8 +1432,8 @@
       }
     }
   },
-  "concentrationModeTitle": "Fokusmodus",
-  "concentrationModeSubtitle": "Wähle, welche Fokussitzungen das Verlassen der App blockieren.",
+  "concentrationModeTitle": "Konzentrationsmodus",
+  "concentrationModeSubtitle": "Wähle, welche Sitzungen das Verlassen der App blockieren.",
   "concentrationStudyTitle": "Lernen",
   "concentrationStudySubtitle": "Volle Konzentration auf dein Lernen.",
   "concentrationExercisesTitle": "Übungen",
@@ -1489,5 +1489,6 @@
   "timerTotalOfLabel": "von {duration}",
   "timerCurrentPagesLabel": "Aktuelle Seiten",
   "timerNotesLabel": "Notizen",
-  "concentrationModeSheetDescription": "Wenn aktiviert, hilft dir die App, während der Aktivität konzentriert zu bleiben, bis du pausierst oder beendest."
+  "concentrationModeSheetDescription": "Wenn aktiviert, hilft dir die App, während der Aktivität konzentriert zu bleiben, bis du pausierst oder beendest.",
+  "timerFocusLockWarning": "Der Konzentrationsmodus ist aktiv. Beende oder pausiere die Sitzung, um die App zu verlassen."
 }

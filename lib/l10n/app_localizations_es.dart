@@ -2563,11 +2563,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rankTierMithril => 'Mithril';
 
   @override
-  String get concentrationModeTitle => 'Modo concentración';
+  String get concentrationModeTitle => 'Modo de concentración';
 
   @override
   String get concentrationModeSubtitle =>
-      'Elige qué sesiones de enfoque bloquean la salida de la app.';
+      'Elige qué sesiones bloquean la salida de la app.';
 
   @override
   String get concentrationStudyTitle => 'Estudio';
@@ -2757,4 +2757,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get concentrationModeSheetDescription =>
       'Cuando está activado, la app te ayuda a mantenerte concentrado durante la actividad hasta que pauses o finalices.';
+
+  @override
+  String get timerFocusLockWarning =>
+      'El modo de concentración está activo. Termina o pausa la sesión para salir.';
 }

@@ -2457,7 +2457,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get achievement37Description => 'Schließe Ziele an 15 Tagen ab';
 
   @override
-  String get achievement38Title => 'Comeback';
+  String get achievement38Title => 'Neustart';
 
   @override
   String get achievement38Description => 'Schließe Ziele an 20 Tagen ab';
@@ -2581,11 +2581,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rankTierMithril => 'Mithril';
 
   @override
-  String get concentrationModeTitle => 'Fokusmodus';
+  String get concentrationModeTitle => 'Konzentrationsmodus';
 
   @override
   String get concentrationModeSubtitle =>
-      'Wähle, welche Fokussitzungen das Verlassen der App blockieren.';
+      'Wähle, welche Sitzungen das Verlassen der App blockieren.';
 
   @override
   String get concentrationStudyTitle => 'Lernen';
@@ -2776,4 +2776,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get concentrationModeSheetDescription =>
       'Wenn aktiviert, hilft dir die App, während der Aktivität konzentriert zu bleiben, bis du pausierst oder beendest.';
+
+  @override
+  String get timerFocusLockWarning =>
+      'Der Konzentrationsmodus ist aktiv. Beende oder pausiere die Sitzung, um die App zu verlassen.';
 }

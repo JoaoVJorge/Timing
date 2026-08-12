@@ -1268,7 +1268,7 @@
   },
   "achievementsUnlockedSuffix": " /50 débloqués",
   "currentLevelLabel": "Niveau actuel",
-  "allAchievementsUnlockedLabel": "Tout est d?bloqu?",
+  "allAchievementsUnlockedLabel": "Tout est débloqué",
   "nextUnlockLabel": "Prochain succès",
   "allAchievementsUnlockedDescription": "Vous avez tout débloqué.",
   "xpToGo": "Encore {xp} XP",
@@ -1321,7 +1321,7 @@
   "achievement15Description": "Étudiez au moins une matière",
   "achievement16Title": "Héros de révision",
   "achievement16Description": "Atteignez 5 heures d’étude",
-  "achievement17Title": "Quiz termin?",
+  "achievement17Title": "Quiz finalisé",
   "achievement17Description": "Terminez 15 sessions",
   "achievement18Title": "Planificateur d’études",
   "achievement18Description": "Créez un objectif de focus",
@@ -1339,7 +1339,7 @@
   "achievement24Description": "Lisez 50 pages",
   "achievement25Title": "100 pages",
   "achievement25Description": "Lisez 100 pages",
-  "achievement26Title": "Chapitre termin?",
+  "achievement26Title": "Chapitre terminé",
   "achievement26Description": "Lisez 150 pages",
   "achievement27Title": "Lecteur du week-end",
   "achievement27Description": "Lisez 250 pages",
@@ -1377,7 +1377,7 @@
   "achievement43Description": "Aidez un ami à rester constant",
   "achievement44Title": "Vainqueur du défi",
   "achievement44Description": "Gagnez un défi",
-  "achievement45Title": "Exercice commenc?",
+  "achievement45Title": "Exercice commencé",
   "achievement45Description": "Enregistrez du focus en exercice",
   "achievement46Title": "Entraînement de 30 min",
   "achievement46Description": "Faites de l’exercice pendant 30 minutes",
@@ -1432,8 +1432,8 @@
       }
     }
   },
-  "concentrationModeTitle": "Mode concentration",
-  "concentrationModeSubtitle": "Choisissez quelles sessions de focus bloquent la sortie de l’app.",
+  "concentrationModeTitle": "Mode de concentration",
+  "concentrationModeSubtitle": "Choisissez les sessions qui bloquent la sortie de l’app.",
   "concentrationStudyTitle": "Étude",
   "concentrationStudySubtitle": "Focus total sur vos études.",
   "concentrationExercisesTitle": "Exercices",
@@ -1489,5 +1489,6 @@
   "timerTotalOfLabel": "de {duration}",
   "timerCurrentPagesLabel": "Pages actuelles",
   "timerNotesLabel": "Notes",
-  "concentrationModeSheetDescription": "Une fois activé, l'application vous aide à rester concentré pendant l'activité jusqu'à ce que vous mettiez en pause ou terminiez."
+  "concentrationModeSheetDescription": "Une fois activé, l’app vous aide à rester concentré pendant l’activité jusqu’à la pause ou la fin.",
+  "timerFocusLockWarning": "Le mode de concentration est actif. Terminez ou mettez la session en pause pour quitter."
 }
