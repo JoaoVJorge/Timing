@@ -32,7 +32,7 @@ class CreateTaskPage extends StatelessWidget {
         const Gap(14),
         _NameField(controller: controller),
         const Gap(12),
-        _GoalTypeSection(controller: controller),
+        _SequenceTypeSection(controller: controller),
         const Gap(12),
         _TargetDaysSection(controller: controller),
         const Gap(12),
@@ -42,8 +42,8 @@ class CreateTaskPage extends StatelessWidget {
   }
 }
 
-class _GoalTypeSection extends StatelessWidget {
-  const _GoalTypeSection({required this.controller});
+class _SequenceTypeSection extends StatelessWidget {
+  const _SequenceTypeSection({required this.controller});
 
   final CreateTaskController controller;
 
@@ -54,48 +54,158 @@ class _GoalTypeSection extends StatelessWidget {
     return CreationConfigCard(
       accent: accent,
       header: CreationSectionHeader(
-        icon: Icons.repeat_rounded,
-        label: _goalTypeLabel(context),
+        icon: Icons.local_fire_department_outlined,
+        label: context.l10n.createTaskSequenceTypeLabel,
         accent: accent,
       ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+      child: Column(
         children: [
-          CreationSelectableChip(
-            label: _dailyLabel(context),
-            isSelected: controller.goalType.value == DailyTaskGoalType.daily,
-            accent: accent,
-            onTap: () => controller.onSelectGoalType(DailyTaskGoalType.daily),
+          _SequenceChoiceCard(
+            title: context.l10n.createTaskSequenceIntenseLabel,
+            description: context.l10n.createTaskSequenceIntenseDescription,
+            icon: Icons.local_fire_department_rounded,
+            optionColor: context.colorTokens.primary,
+            isSelected:
+                controller.sequenceType.value == DailyTaskSequenceType.intense,
+            onTap: () =>
+                controller.onSelectSequenceType(DailyTaskSequenceType.intense),
           ),
-          CreationSelectableChip(
-            label: _totalLabel(context),
-            isSelected: controller.goalType.value == DailyTaskGoalType.total,
-            accent: accent,
-            onTap: () => controller.onSelectGoalType(DailyTaskGoalType.total),
+          const Gap(10),
+          _SequenceChoiceCard(
+            title: context.l10n.createTaskSequenceCasualLabel,
+            description: context.l10n.createTaskSequenceCasualDescription,
+            icon: Icons.eco_rounded,
+            optionColor: const Color(0xFF31D99A),
+            isSelected:
+                controller.sequenceType.value == DailyTaskSequenceType.casual,
+            onTap: () =>
+                controller.onSelectSequenceType(DailyTaskSequenceType.casual),
           ),
         ],
       ),
     );
   });
+}
 
-  String _goalTypeLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Goal type",
-    "es" => "Tipo de meta",
-    _ => "Tipo da meta",
-  };
+class _SequenceChoiceCard extends StatelessWidget {
+  const _SequenceChoiceCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.optionColor,
+    required this.isSelected,
+    required this.onTap,
+  });
 
-  String _dailyLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Daily",
-    "es" => "Diaria",
-    _ => "Diaria",
-  };
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color optionColor;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  String _totalLabel(BuildContext context) => switch (context.languageCode) {
-    "en" => "Total",
-    "es" => "Total",
-    _ => "Total",
-  };
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color cardColor = isDark
+        ? context.colorTokens.surface.withValues(alpha: 0.82)
+        : context.colorTokens.surface;
+    final Color borderColor = isSelected
+        ? optionColor.withValues(alpha: 0.68)
+        : context.colorTokens.borderUnfocused.withValues(alpha: 0.7);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor, width: isSelected ? 1.4 : 1),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: optionColor.withValues(alpha: isDark ? 0.16 : 0.1),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: optionColor.withValues(alpha: isDark ? 0.15 : 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: optionColor.withValues(alpha: isSelected ? 0.72 : 0.2),
+                ),
+              ),
+              child: Icon(icon, color: optionColor, size: 30),
+            ),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyLarge.copyWith(
+                      color: optionColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Gap(4),
+                  Text(
+                    description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textBody,
+                      fontWeight: FontWeight.w700,
+                      height: 1.24,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(12),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: isSelected ? optionColor : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? optionColor
+                      : context.colorTokens.textHint.withValues(alpha: 0.55),
+                  width: 1.8,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check_rounded,
+                      color: context.colorTokens.white,
+                      size: 20,
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _HeroHeader extends StatelessWidget {
@@ -140,9 +250,6 @@ class _TargetDaysSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color accent = controller.selectedColor.value;
-    if (controller.goalType.value == DailyTaskGoalType.daily) {
-      return const SizedBox.shrink();
-    }
 
     return CreationConfigCard(
       accent: accent,
@@ -165,6 +272,12 @@ class _TargetDaysSection extends StatelessWidget {
                   accent: accent,
                   onTap: () => controller.onSelectTargetDays(days),
                 ),
+              CreationSelectableChip(
+                label: context.l10n.targetDaysInfinite,
+                isSelected: controller.targetDays.value == 0,
+                accent: accent,
+                onTap: () => controller.onSelectTargetDays(0),
+              ),
             ],
           ),
           const Gap(12),
@@ -236,7 +349,7 @@ class _ColorSection extends StatelessWidget {
     () => CreationColorSection(
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
-      extraColors: [context.colorTokens.primary],
+      includePastelColors: true,
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );

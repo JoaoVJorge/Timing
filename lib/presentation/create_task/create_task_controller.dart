@@ -17,7 +17,7 @@ class CreateTaskController extends GetxController {
     this.editingTask,
   });
 
-  static const List<int> targetDaysOptions = [3, 7, 14, 30];
+  static const List<int> targetDaysOptions = [5, 14, 30];
 
   final AddDailyTaskUseCase _addDailyTaskUseCase;
   final UpdateDailyTaskUseCase _updateDailyTaskUseCase;
@@ -29,7 +29,8 @@ class CreateTaskController extends GetxController {
 
   final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   final RxInt targetDays = targetDaysOptions.first.obs;
-  final Rx<DailyTaskGoalType> goalType = DailyTaskGoalType.total.obs;
+  final Rx<DailyTaskSequenceType> sequenceType =
+      DailyTaskSequenceType.casual.obs;
   final RxBool isSaving = false.obs;
   bool _hasInitializedThemeColor = false;
 
@@ -46,9 +47,8 @@ class CreateTaskController extends GetxController {
     nameController.text = task.name;
     selectedColor.value = Color(task.colorValue);
     targetDays.value = task.targetDays;
-    goalType.value = task.goalType;
-    if (!targetDaysOptions.contains(task.targetDays) &&
-        task.goalType == DailyTaskGoalType.total) {
+    sequenceType.value = task.sequenceType;
+    if (!targetDaysOptions.contains(task.targetDays) && task.targetDays > 0) {
       customDaysController.text = task.targetDays.toString();
     }
   }
@@ -61,16 +61,8 @@ class CreateTaskController extends GetxController {
     _hasInitializedThemeColor = true;
   }
 
-  void onSelectGoalType(DailyTaskGoalType type) {
-    goalType.value = type;
-    if (type == DailyTaskGoalType.daily) {
-      targetDays.value = 1;
-      customDaysController.clear();
-      return;
-    }
-    if (targetDays.value <= 1) {
-      targetDays.value = targetDaysOptions.first;
-    }
+  void onSelectSequenceType(DailyTaskSequenceType type) {
+    sequenceType.value = type;
   }
 
   void onSelectTargetDays(int days) {
@@ -95,10 +87,8 @@ class CreateTaskController extends GetxController {
       _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
       return;
     }
-    final int normalizedTargetDays = goalType.value == DailyTaskGoalType.daily
-        ? 1
-        : targetDays.value;
-    if (normalizedTargetDays <= 0) {
+    final int normalizedTargetDays = targetDays.value;
+    if (normalizedTargetDays < 0) {
       return;
     }
 
@@ -109,14 +99,14 @@ class CreateTaskController extends GetxController {
             name: name,
             colorValue: selectedColor.value.toARGB32(),
             targetDays: normalizedTargetDays,
-            goalType: goalType.value,
+            sequenceType: sequenceType.value,
           )
         : await _updateDailyTaskUseCase(
             task: task,
             name: name,
             colorValue: selectedColor.value.toARGB32(),
             targetDays: normalizedTargetDays,
-            goalType: goalType.value,
+            sequenceType: sequenceType.value,
           );
     isSaving.value = false;
 

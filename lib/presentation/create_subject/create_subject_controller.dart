@@ -45,6 +45,7 @@ class CreateSubjectController extends GetxController {
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
   final RxInt focusSessionCount = 1.obs;
   final RxInt wallpaperIndex = 0.obs;
+  final Rx<SubjectActivityType> activityType = SubjectActivityType.daily.obs;
   final RxBool isSaving = false.obs;
   final RxString name = "".obs;
   final RxString goal = "".obs;
@@ -117,14 +118,7 @@ class CreateSubjectController extends GetxController {
 
   String submitLabel(BuildContext context) {
     if (isEditing) {
-      return switch (context.languageCode) {
-        "en" => "Save changes",
-        "es" => "Guardar cambios",
-        "fr" => "Enregistrer",
-        "de" => "Änderungen speichern",
-        "ar" => "حفظ التغييرات",
-        _ => "Salvar alterações",
-      };
+      return context.l10n.saveChangesButton;
     }
 
     return switch (category) {
@@ -137,14 +131,7 @@ class CreateSubjectController extends GetxController {
 
   String successMessage(BuildContext context) {
     if (isEditing) {
-      return switch (context.languageCode) {
-        "en" => "Updated successfully",
-        "es" => "Actualizado correctamente",
-        "fr" => "Mis à jour",
-        "de" => "Erfolgreich aktualisiert",
-        "ar" => "تم التحديث بنجاح",
-        _ => "Atualizado com sucesso",
-      };
+      return context.l10n.updatedSuccessfullyMessage;
     }
 
     return switch (category) {
@@ -215,6 +202,10 @@ class CreateSubjectController extends GetxController {
     focusSessionCountController.text = count.toString();
   }
 
+  void setActivityType(SubjectActivityType type) {
+    activityType.value = type;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -230,6 +221,7 @@ class CreateSubjectController extends GetxController {
       focusSessionCount.value = subject.focusSessionCount;
       focusSessionCountController.text = subject.focusSessionCount.toString();
       wallpaperIndex.value = subject.wallpaperIndex;
+      activityType.value = subject.activityType;
       goalController.text = isPageBased
           ? subject.goalPages.toString()
           : (subject.goalSeconds ~/ 60).toString();
@@ -293,6 +285,7 @@ class CreateSubjectController extends GetxController {
             restMinutes: restMinutes.value,
             focusSessionCount: focusSessionCount.value,
             wallpaperIndex: wallpaperIndex.value,
+            activityType: activityType.value,
           )
         : await _updateSubjectUseCase(
             subjectId: subject.id,
@@ -304,6 +297,7 @@ class CreateSubjectController extends GetxController {
             restMinutes: restMinutes.value,
             focusSessionCount: focusSessionCount.value,
             wallpaperIndex: wallpaperIndex.value,
+            activityType: activityType.value,
           );
 
     isSaving.value = false;

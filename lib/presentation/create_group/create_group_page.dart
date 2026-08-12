@@ -200,7 +200,10 @@ class _InformationStep extends StatelessWidget {
               ),
             ),
             const Gap(16),
-            Text("Descrição", style: context.textStyles.bodySmall),
+            Text(
+              context.l10n.createGroupDescriptionLabel,
+              style: context.textStyles.bodySmall,
+            ),
             const Gap(8),
             TextField(
               controller: controller.descriptionController,
@@ -210,7 +213,7 @@ class _InformationStep extends StatelessWidget {
               style: context.textStyles.inputText,
               decoration: AppInputDecoration.withBorder(
                 tokens: context.colorTokens,
-                hintText: "Descreva o grupo e qual é o objetivo dele.",
+                hintText: context.l10n.createGroupDescriptionHint,
               ),
             ),
           ],
@@ -220,7 +223,7 @@ class _InformationStep extends StatelessWidget {
       Text(context.l10n.groupThemeLabel, style: context.textStyles.bodyLarge),
       const Gap(4),
       Text(
-        "Este tema define a métrica do ranking.",
+        context.l10n.createGroupThemeMetricDescription,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodySmall.copyWith(
@@ -347,10 +350,13 @@ class _ActivityStep extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tipo de atividade", style: context.textStyles.bodyLarge),
+            Text(
+              context.l10n.activityTypeLabel,
+              style: context.textStyles.bodyLarge,
+            ),
             const Gap(4),
             Text(
-              "Cada integrante recebe uma cópia para acompanhar.",
+              context.l10n.createGroupActivityTypeDescription,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
@@ -447,7 +453,7 @@ class _ActivityOptionChip extends StatelessWidget {
   }
 
   String _label(BuildContext context) =>
-      option.category?.localizedLabel(context) ?? "Meta";
+      option.category?.localizedLabel(context) ?? context.l10n.goalLabel;
 }
 
 class _ActivityDetailsCard extends StatelessWidget {
@@ -460,20 +466,23 @@ class _ActivityDetailsCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Nome da atividade", style: context.textStyles.bodySmall),
+        Text(
+          context.l10n.createGroupActivityNameLabel,
+          style: context.textStyles.bodySmall,
+        ),
         const Gap(8),
         TextField(
           controller: controller.activityNameController,
           style: context.textStyles.inputText,
           decoration: AppInputDecoration.withBorder(
             tokens: context.colorTokens,
-            hintText: "Ex: Cálculo I",
+            hintText: context.l10n.createGroupActivityNameHint,
           ),
         ),
         const Gap(16),
         Obx(() => _GoalInput(controller: controller)),
         const Gap(16),
-        Text("Cor", style: context.textStyles.bodySmall),
+        Text(context.l10n.colorLabel, style: context.textStyles.bodySmall),
         const Gap(8),
         Obx(() {
           final int selected = controller.activityColor.value.toARGB32();
@@ -481,7 +490,10 @@ class _ActivityDetailsCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final Color color in SubjectColors.values)
+              for (final Color color in [
+                ...SubjectColors.values,
+                ...SubjectColors.darkValues,
+              ])
                 _ColorSwatch(
                   color: color,
                   isSelected: color.toARGB32() == selected,
@@ -508,7 +520,10 @@ class _GoalInput extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Tipo de meta", style: context.textStyles.bodySmall),
+          Text(
+            context.l10n.createGroupGoalTypeLabel,
+            style: context.textStyles.bodySmall,
+          ),
           const Gap(8),
           Row(
             children: [
@@ -516,7 +531,7 @@ class _GoalInput extends StatelessWidget {
                 child: _GoalTypeChip(
                   controller: controller,
                   type: DailyTaskGoalType.total,
-                  label: "Total",
+                  label: context.l10n.createGroupGoalTypeTotal,
                 ),
               ),
               const Gap(8),
@@ -524,14 +539,17 @@ class _GoalInput extends StatelessWidget {
                 child: _GoalTypeChip(
                   controller: controller,
                   type: DailyTaskGoalType.daily,
-                  label: "Diária",
+                  label: context.l10n.createGroupGoalTypeDaily,
                 ),
               ),
             ],
           ),
           if (isTotal) ...[
             const Gap(12),
-            Text("Meta de dias", style: context.textStyles.bodySmall),
+            Text(
+              context.l10n.createGroupDaysGoalLabel,
+              style: context.textStyles.bodySmall,
+            ),
             const Gap(8),
             _numberField(context, "Ex: 30"),
           ],
@@ -540,14 +558,17 @@ class _GoalInput extends StatelessWidget {
     }
 
     final String label = controller.isReadingActivity
-        ? "Meta de páginas"
-        : "Meta de tempo (min)";
+        ? context.l10n.createGroupPagesGoalLabel
+        : context.l10n.createGroupTimeGoalMinutesLabel;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: context.textStyles.bodySmall),
         const Gap(8),
-        _numberField(context, controller.isReadingActivity ? "Ex: 10" : "Ex: 30"),
+        _numberField(
+          context,
+          controller.isReadingActivity ? "Ex: 10" : "Ex: 30",
+        ),
       ],
     );
   }
@@ -874,7 +895,10 @@ class _SummaryStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Resumo do grupo", style: context.textStyles.extraBold20),
+          Text(
+            context.l10n.createGroupSummaryTitle,
+            style: context.textStyles.extraBold20,
+          ),
           const Gap(16),
           _SummaryRow(
             icon: "group",
@@ -917,7 +941,7 @@ class _SummaryStep extends StatelessWidget {
             const Gap(10),
             _SummaryRow(
               icon: "group",
-              title: "Descrição",
+              title: context.l10n.createGroupDescriptionLabel,
               child: Text(
                 description,
                 maxLines: 3,
@@ -930,7 +954,7 @@ class _SummaryStep extends StatelessWidget {
             const Gap(10),
             _SummaryRow(
               icon: activityOption.category?.iconName ?? "group",
-              title: "Atividade",
+              title: context.l10n.createGroupActivitySummaryLabel,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -956,7 +980,7 @@ class _SummaryStep extends StatelessWidget {
           const Gap(10),
           _SummaryRow(
             icon: "group",
-            title: "Participantes",
+            title: context.l10n.createGroupGuestsLabel,
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
