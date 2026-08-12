@@ -575,7 +575,7 @@ class _GroupCard extends StatelessWidget {
               children: [
                 Text(
                   localizedGroupName(context, group),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.black20.copyWith(fontSize: 22),
                 ),
@@ -759,7 +759,7 @@ class _GroupDetailsHeader extends StatelessWidget {
             children: [
               Text(
                 localizedGroupName(context, group),
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.black28.copyWith(
                   color: context.colorTokens.textBody,
