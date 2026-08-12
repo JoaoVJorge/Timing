@@ -6,16 +6,19 @@ import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 
 class SubjectsDataSource {
   SubjectsDataSource({
     required this._localStorageService,
     required this._supabaseService,
+    required this._logger,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async {
     try {
@@ -82,6 +85,7 @@ class SubjectsDataSource {
           .select()
           .eq("user_id", userId)
           .order("created_at");
+      _logger.logResponse("select public.user_subjects", rows);
 
       return rows
           .map((row) => _subjectFromRow(row as Map<String, dynamic>))

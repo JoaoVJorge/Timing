@@ -3,13 +3,15 @@ import "package:help_out/core/domain/entities/friend_entity.dart";
 import "package:help_out/core/domain/entities/friend_suggestion_entity.dart";
 import "package:help_out/core/domain/entities/friends_social_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/theme/group_colors.dart";
 
 class FriendsDataSource {
-  FriendsDataSource({required this._supabaseService});
+  FriendsDataSource({required this._supabaseService, required this._logger});
 
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, FriendsSocialEntity>> getSocial() async {
     try {
@@ -24,6 +26,7 @@ class FriendsDataSource {
           .select("friend_code")
           .eq("id", userId)
           .maybeSingle();
+      _logger.logResponse("select public.profiles (friend_code)", profileRow);
       final List<Map<String, dynamic>> incomingRows = await _selectRows(
         table: "friendships",
         filters: (query) =>
@@ -202,6 +205,7 @@ class FriendsDataSource {
         "find_profile_by_friend_code",
         params: {"lookup_code": lookupCode},
       );
+      _logger.logResponse("rpc public.find_profile_by_friend_code", response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
         return const Right(null);
@@ -228,6 +232,7 @@ class FriendsDataSource {
     final dynamic response = await filters(
       _supabaseService.requireClient.from(table).select(),
     );
+    _logger.logResponse("select public.$table", response);
     return (response as List<dynamic>)
         .map((row) => Map<String, dynamic>.from(row as Map))
         .toList();

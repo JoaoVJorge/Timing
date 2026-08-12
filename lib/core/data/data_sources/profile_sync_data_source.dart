@@ -1,12 +1,14 @@
 import "package:dartz/dartz.dart";
 import "package:help_out/core/domain/entities/app_config_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 
 class ProfileSyncDataSource {
-  ProfileSyncDataSource({required this._supabaseService});
+  ProfileSyncDataSource({required this._supabaseService, required this._logger});
 
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, void>> syncProfile(AppConfigEntity config) async {
     try {
@@ -52,6 +54,7 @@ class ProfileSyncDataSource {
           .select()
           .eq("id", userId)
           .maybeSingle();
+      _logger.logResponse("select public.profiles", data);
 
       if (data == null) {
         return const Right(null);
