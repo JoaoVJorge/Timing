@@ -6,6 +6,7 @@ import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_subject/create_subject_controller.dart";
+import "package:help_out/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:help_out/shared/widgets/app_icon.dart";
 import "package:help_out/shared/widgets/bounce_tap.dart";
 import "package:help_out/shared/widgets/creation/creation_form_widgets.dart";
@@ -31,35 +32,54 @@ class CreateSubjectPage extends StatelessWidget {
           onTap: controller.onSubmit,
         ),
       ),
-      children: [
-        _HeroHeader(controller: controller),
-        const Gap(14),
-        _NameField(controller: controller),
-        const Gap(12),
-        _ActivityTypeSection(controller: controller),
-        const Gap(12),
-        _GoalSection(controller: controller),
-        if (!controller.isPageBased) ...[
-          const Gap(12),
-          _FocusSessionCountSection(controller: controller),
-          const Gap(12),
-          _RestSection(controller: controller),
-        ],
-        const Gap(12),
-        _ColorSection(controller: controller),
-        const Gap(12),
-        _IconSection(controller: controller),
-        const Gap(12),
-        _WallpaperSection(controller: controller),
-      ],
+      children: [CreateSubjectFormContent(controller: controller)],
     );
   }
+}
+
+class CreateSubjectFormContent extends StatelessWidget {
+  const CreateSubjectFormContent({
+    required this.controller,
+    this.showHero = true,
+    super.key,
+  });
+
+  final SubjectCreationFormController controller;
+  final bool showHero;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (showHero) ...[
+        _HeroHeader(controller: controller),
+        const Gap(14),
+      ],
+      _NameField(controller: controller),
+      const Gap(12),
+      _ActivityTypeSection(controller: controller),
+      const Gap(12),
+      _GoalSection(controller: controller),
+      if (!controller.isPageBased) ...[
+        const Gap(12),
+        _FocusSessionCountSection(controller: controller),
+        const Gap(12),
+        _RestSection(controller: controller),
+      ],
+      const Gap(12),
+      _ColorSection(controller: controller),
+      const Gap(12),
+      _IconSection(controller: controller),
+      const Gap(12),
+      _WallpaperSection(controller: controller),
+    ],
+  );
 }
 
 class _HeroHeader extends StatelessWidget {
   const _HeroHeader({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(
@@ -85,7 +105,7 @@ class _HeroHeader extends StatelessWidget {
 class _NameField extends StatelessWidget {
   const _NameField({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -107,7 +127,7 @@ class _NameField extends StatelessWidget {
 class _ActivityTypeSection extends StatelessWidget {
   const _ActivityTypeSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -246,7 +266,7 @@ class _ActivityTypeOption extends StatelessWidget {
 class _GoalSection extends StatelessWidget {
   const _GoalSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -293,7 +313,7 @@ class _GoalSection extends StatelessWidget {
 class _GoalInput extends StatelessWidget {
   const _GoalInput({required this.controller, required this.accent});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
   final Color accent;
 
   @override
@@ -353,7 +373,7 @@ class _GoalInput extends StatelessWidget {
 class _FocusSessionCountSection extends StatelessWidget {
   const _FocusSessionCountSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -385,7 +405,7 @@ class _FocusSessionCountSection extends StatelessWidget {
 class _RestSection extends StatelessWidget {
   const _RestSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -417,7 +437,7 @@ class _RestSection extends StatelessWidget {
 class _ColorSection extends StatelessWidget {
   const _ColorSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(
@@ -434,7 +454,7 @@ class _ColorSection extends StatelessWidget {
 class _IconSection extends StatelessWidget {
   const _IconSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -455,7 +475,7 @@ class _IconSection extends StatelessWidget {
 class _WallpaperSection extends StatelessWidget {
   const _WallpaperSection({required this.controller});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -492,7 +512,7 @@ class _PresetRow extends StatelessWidget {
 class _IconSelector extends StatelessWidget {
   const _IconSelector({required this.controller, required this.accent});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
   final Color accent;
 
   @override
@@ -517,7 +537,7 @@ class _IconSelector extends StatelessWidget {
 class _WallpaperSelector extends StatelessWidget {
   const _WallpaperSelector({required this.controller, required this.accent});
 
-  final CreateSubjectController controller;
+  final SubjectCreationFormController controller;
   final Color accent;
 
   @override

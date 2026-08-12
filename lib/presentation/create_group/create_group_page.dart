@@ -1,13 +1,11 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/create_group/create_group_controller.dart";
-import "package:help_out/theme/subject_colors.dart";
+import "package:help_out/presentation/create_subject/create_subject_page.dart";
 import "package:help_out/presentation/create_group/widgets/friend_tile.dart";
 import "package:help_out/presentation/groups/group_leaderboard_formatters.dart";
 import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
@@ -92,28 +90,42 @@ class _StepProgress extends StatelessWidget {
       context.l10n.createGroupStepSummary,
     ];
 
-    return Row(
-      children: [
-        for (int index = 0; index < labels.length; index++) ...[
-          Expanded(
-            child: _StepMarker(
-              number: index + 1,
-              label: labels[index],
-              isActive: index <= currentStep,
-            ),
-          ),
-          if (index < labels.length - 1)
-            Expanded(
-              child: Container(
-                height: 1,
-                margin: const EdgeInsets.only(bottom: 24),
-                color: index < currentStep
-                    ? context.colorTokens.primary
-                    : context.colorTokens.borderUnfocused,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double stepWidth = constraints.maxWidth / labels.length;
+
+        return SizedBox(
+          height: 62,
+          child: Stack(
+            children: [
+              for (int index = 0; index < labels.length - 1; index++)
+                Positioned(
+                  top: 16,
+                  left: stepWidth * (index + 0.5) + 22,
+                  width: stepWidth - 44,
+                  child: Container(
+                    height: 1,
+                    color: index < currentStep
+                        ? context.colorTokens.primary
+                        : context.colorTokens.borderUnfocused,
+                  ),
+                ),
+              Row(
+                children: [
+                  for (int index = 0; index < labels.length; index++)
+                    Expanded(
+                      child: _StepMarker(
+                        number: index + 1,
+                        label: labels[index],
+                        isActive: index <= currentStep,
+                      ),
+                    ),
+                ],
               ),
-            ),
-        ],
-      ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -153,7 +165,8 @@ class _StepMarker extends StatelessWidget {
         const Gap(8),
         Text(
           label,
-          maxLines: 1,
+          textAlign: TextAlign.center,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.bodySmall.copyWith(
             color: isActive
@@ -343,330 +356,10 @@ class _ActivityStep extends StatelessWidget {
   final CreateGroupController controller;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _SectionCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.activityTypeLabel,
-              style: context.textStyles.bodyLarge,
-            ),
-            const Gap(4),
-            Text(
-              context.l10n.createGroupActivityTypeDescription,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
-              ),
-            ),
-            const Gap(12),
-            Obx(() {
-              final GroupActivityOption? selected =
-                  controller.activityOption.value;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final GroupActivityOption option
-                      in GroupActivityOption.values)
-                    _ActivityOptionChip(
-                      option: option,
-                      isSelected: option == selected,
-                      onTap: () => controller.onSelectActivityOption(option),
-                    ),
-                ],
-              );
-            }),
-          ],
-        ),
-      ),
-      const Gap(16),
-      Obx(() {
-        if (controller.activityOption.value == null) {
-          return const SizedBox.shrink();
-        }
-        return _ActivityDetailsCard(controller: controller);
-      }),
-    ],
-  );
-}
-
-class _ActivityOptionChip extends StatelessWidget {
-  const _ActivityOptionChip({
-    required this.option,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final GroupActivityOption option;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.97,
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? context.colorTokens.primaryVeryLight
-            : context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected
-              ? context.colorTokens.primary
-              : context.colorTokens.borderUnfocused,
-          width: isSelected ? 1.5 : 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _icon(context),
-          const Gap(8),
-          Text(
-            _label(context),
-            style: context.textStyles.bodyMedium.copyWith(
-              color: isSelected ? context.colorTokens.primary : null,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-
-  Widget _icon(BuildContext context) {
-    final Color color = isSelected
-        ? context.colorTokens.primary
-        : context.colorTokens.textHint;
-    final TimeCategoryType? category = option.category;
-    if (category == null) {
-      return Icon(Icons.flag_rounded, size: 18, color: color);
-    }
-    return AppIcon(category.iconName, size: 18, color: color);
-  }
-
-  String _label(BuildContext context) =>
-      option.category?.localizedLabel(context) ?? context.l10n.goalLabel;
-}
-
-class _ActivityDetailsCard extends StatelessWidget {
-  const _ActivityDetailsCard({required this.controller});
-
-  final CreateGroupController controller;
-
-  @override
-  Widget build(BuildContext context) => _SectionCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.createGroupActivityNameLabel,
-          style: context.textStyles.bodySmall,
-        ),
-        const Gap(8),
-        TextField(
-          controller: controller.activityNameController,
-          style: context.textStyles.inputText,
-          decoration: AppInputDecoration.withBorder(
-            tokens: context.colorTokens,
-            hintText: context.l10n.createGroupActivityNameHint,
-          ),
-        ),
-        const Gap(16),
-        Obx(() => _GoalInput(controller: controller)),
-        const Gap(16),
-        Text(context.l10n.colorLabel, style: context.textStyles.bodySmall),
-        const Gap(8),
-        Obx(() {
-          final int selected = controller.activityColor.value.toARGB32();
-          return Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final Color color in [
-                ...SubjectColors.values,
-                ...SubjectColors.darkValues,
-              ])
-                _ColorSwatch(
-                  color: color,
-                  isSelected: color.toARGB32() == selected,
-                  onTap: () => controller.onSelectActivityColor(color),
-                ),
-            ],
-          );
-        }),
-      ],
-    ),
-  );
-}
-
-class _GoalInput extends StatelessWidget {
-  const _GoalInput({required this.controller});
-
-  final CreateGroupController controller;
-
-  @override
   Widget build(BuildContext context) {
-    if (controller.isGoalActivity) {
-      final bool isTotal =
-          controller.activityGoalType.value == DailyTaskGoalType.total;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.createGroupGoalTypeLabel,
-            style: context.textStyles.bodySmall,
-          ),
-          const Gap(8),
-          Row(
-            children: [
-              Expanded(
-                child: _GoalTypeChip(
-                  controller: controller,
-                  type: DailyTaskGoalType.total,
-                  label: context.l10n.createGroupGoalTypeTotal,
-                ),
-              ),
-              const Gap(8),
-              Expanded(
-                child: _GoalTypeChip(
-                  controller: controller,
-                  type: DailyTaskGoalType.daily,
-                  label: context.l10n.createGroupGoalTypeDaily,
-                ),
-              ),
-            ],
-          ),
-          if (isTotal) ...[
-            const Gap(12),
-            Text(
-              context.l10n.createGroupDaysGoalLabel,
-              style: context.textStyles.bodySmall,
-            ),
-            const Gap(8),
-            _numberField(context, context.l10n.createGroupDaysGoalHint),
-          ],
-        ],
-      );
-    }
-
-    final String label = controller.isReadingActivity
-        ? context.l10n.createGroupPagesGoalLabel
-        : context.l10n.createGroupTimeGoalMinutesLabel;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: context.textStyles.bodySmall),
-        const Gap(8),
-        _numberField(
-          context,
-          controller.isReadingActivity
-              ? context.l10n.createGroupPagesGoalHint
-              : context.l10n.createGroupMinutesGoalHint,
-        ),
-      ],
-    );
+    controller.initializeThemeColor(context.colorTokens.primary);
+    return CreateSubjectFormContent(controller: controller, showHero: false);
   }
-
-  Widget _numberField(BuildContext context, String hint) => TextField(
-    controller: controller.activityGoalController,
-    keyboardType: TextInputType.number,
-    style: context.textStyles.inputText,
-    decoration: AppInputDecoration.withBorder(
-      tokens: context.colorTokens,
-      hintText: hint,
-    ),
-  );
-}
-
-class _GoalTypeChip extends StatelessWidget {
-  const _GoalTypeChip({
-    required this.controller,
-    required this.type,
-    required this.label,
-  });
-
-  final CreateGroupController controller;
-  final DailyTaskGoalType type;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isSelected = controller.activityGoalType.value == type;
-    return BounceTap(
-      pressedScale: 0.98,
-      onTap: () => controller.onSelectActivityGoalType(type),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? context.colorTokens.primaryVeryLight
-              : context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? context.colorTokens.primary
-                : context.colorTokens.borderUnfocused,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: context.textStyles.bodyMedium.copyWith(
-            color: isSelected ? context.colorTokens.primary : null,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ColorSwatch extends StatelessWidget {
-  const _ColorSwatch({
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.9,
-    onTap: onTap,
-    child: Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isSelected
-              ? context.colorTokens.primary
-              : context.colorTokens.transparent,
-          width: 3,
-        ),
-      ),
-      child: isSelected
-          ? Icon(
-              Icons.check_rounded,
-              size: 18,
-              color: context.colorTokens.white,
-            )
-          : null,
-    ),
-  );
 }
 
 class _FriendsStep extends StatelessWidget {
@@ -884,13 +577,12 @@ class _SummaryStep extends StatelessWidget {
   final CreateGroupController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Obx(() {
     final GroupThemeType? theme = controller.selectedTheme.value;
     final List<FriendOption> selectedFriends = controller.availableFriends
         .where((friend) => controller.selectedFriendIds.contains(friend.id))
         .toList();
     final String description = controller.descriptionController.text.trim();
-    final GroupActivityOption? activityOption = controller.activityOption.value;
     final String activityName = controller.activityNameController.text.trim();
 
     return _SectionCard(
@@ -952,10 +644,10 @@ class _SummaryStep extends StatelessWidget {
               ),
             ),
           ],
-          if (activityOption != null) ...[
+          if (activityName.isNotEmpty) ...[
             const Gap(10),
             _SummaryRow(
-              icon: activityOption.category?.iconName ?? "group",
+              icon: controller.category.iconName,
               title: context.l10n.createGroupActivitySummaryLabel,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -968,7 +660,7 @@ class _SummaryStep extends StatelessWidget {
                   ),
                   const Gap(2),
                   Text(
-                    _activitySummary(context, activityOption),
+                    _activitySummary(context),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodySmall.copyWith(
@@ -1016,23 +708,17 @@ class _SummaryStep extends StatelessWidget {
         ],
       ),
     );
-  }
+  });
 }
 
 extension on _SummaryStep {
-  String _activitySummary(BuildContext context, GroupActivityOption option) {
+  String _activitySummary(BuildContext context) {
     final String goal = controller.activityGoalController.text.trim();
-    if (option.isGoal) {
-      if (controller.activityGoalType.value == DailyTaskGoalType.daily) {
-        return context.l10n.createGroupActivitySummaryDaily;
-      }
-      return context.l10n.createGroupActivitySummaryGoalDays(goal);
-    }
-    if (option.isReading) {
+    if (controller.isPageBased) {
       return context.l10n.createGroupActivitySummaryReading(goal);
     }
     return context.l10n.createGroupActivitySummaryTime(
-      option.category?.localizedLabel(context) ?? "",
+      controller.category.localizedLabel(context),
       goal,
     );
   }

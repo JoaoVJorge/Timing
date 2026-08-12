@@ -40,6 +40,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
       children: [
         _InviteLookupCard(
           controller: codeController,
+          isSearching: controller.isSearching,
           onPaste: _pasteCode,
           onSearch: () => controller.findByCode(codeController.text),
         ),
@@ -86,11 +87,13 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
 class _InviteLookupCard extends StatelessWidget {
   const _InviteLookupCard({
     required this.controller,
+    required this.isSearching,
     required this.onPaste,
     required this.onSearch,
   });
 
   final TextEditingController controller;
+  final RxBool isSearching;
   final VoidCallback onPaste;
   final VoidCallback onSearch;
 
@@ -203,15 +206,14 @@ class _InviteLookupCard extends StatelessWidget {
           ),
         ),
         const Gap(12),
-        Obx(() {
-          final FriendsController friendsController = Get.find();
-          return FriendWidePrimaryButton(
+        Obx(
+          () => FriendWidePrimaryButton(
             label: context.l10n.searchCodeButton,
-            isLoading: friendsController.isSearching.value,
+            isLoading: isSearching.value,
             onTap: onSearch,
             icon: Icons.search_rounded,
-          );
-        }),
+          ),
+        ),
       ],
     ),
   );

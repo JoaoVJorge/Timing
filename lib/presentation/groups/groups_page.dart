@@ -69,7 +69,7 @@ class _GroupsHomeView extends StatelessWidget {
           if (controller.groups.isEmpty) {
             return _GroupsEmptyState(
               onCreateGroup: controller.onTapCreateGroup,
-              onJoinWithCode: controller.onTapJoinWithCode,
+              onTapFriends: controller.onTapFriends,
             );
           }
 
@@ -112,7 +112,10 @@ class _GroupDetailsView extends StatelessWidget {
           group: group,
           members: members,
         ),
-        GroupDetailsTab.goals => _GoalsTab(group: group),
+        GroupDetailsTab.goals => _GoalsTab(
+          controller: controller,
+          group: group,
+        ),
         GroupDetailsTab.chat => _ChatTab(controller: controller, group: group),
       };
 
@@ -293,6 +296,8 @@ class _ManageMembersView extends StatelessWidget {
     final List<GroupMemberEntity> members = group.members
         .where((member) => member.id != leader?.id)
         .toList();
+    final bool currentUserIsLeader =
+        leader != null && leader.id == controller.currentUserId;
 
     return Column(
       children: [
@@ -318,6 +323,7 @@ class _ManageMembersView extends StatelessWidget {
                   badgeLabel: context.l10n.groupLeaderLabel,
                   isFirst: true,
                   isLast: true,
+                  showActions: false,
                 ),
                 const Gap(12),
               ],
@@ -333,6 +339,7 @@ class _ManageMembersView extends StatelessWidget {
                         roleLabel: context.l10n.groupMemberRoleLabel,
                         isFirst: index == 0,
                         isLast: index == members.length - 1,
+                        showActions: currentUserIsLeader,
                       ),
                       if (index < members.length - 1)
                         Divider(
@@ -415,6 +422,7 @@ class _MemberRow extends StatelessWidget {
     required this.isFirst,
     required this.isLast,
     this.badgeLabel,
+    this.showActions = false,
   });
 
   final GroupMemberEntity member;
@@ -422,6 +430,7 @@ class _MemberRow extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
   final String? badgeLabel;
+  final bool showActions;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -488,12 +497,14 @@ class _MemberRow extends StatelessWidget {
             ),
           ),
         ],
-        const Gap(8),
-        Icon(
-          Icons.more_vert_rounded,
-          size: 22,
-          color: context.colorTokens.textBody,
-        ),
+        if (showActions) ...[
+          const Gap(8),
+          Icon(
+            Icons.more_vert_rounded,
+            size: 22,
+            color: context.colorTokens.textBody,
+          ),
+        ],
       ],
     ),
   );
@@ -843,14 +854,15 @@ class _GroupDetailsTabs extends StatelessWidget {
 }
 
 class _GoalsTab extends StatelessWidget {
-  const _GoalsTab({required this.group});
+  const _GoalsTab({required this.controller, required this.group});
 
+  final GroupsController controller;
   final GroupEntity group;
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      _GroupActivityCard(group: group),
+      _GroupActivityCard(controller: controller, group: group),
       _GroupInfoCard(
         icon: Icons.track_changes_rounded,
         title: context.l10n.groupGoalTitle,
@@ -880,13 +892,13 @@ class _GoalsTab extends StatelessWidget {
 }
 
 class _GroupActivityCard extends StatelessWidget {
-  const _GroupActivityCard({required this.group});
+  const _GroupActivityCard({required this.controller, required this.group});
 
+  final GroupsController controller;
   final GroupEntity group;
 
   @override
   Widget build(BuildContext context) {
-    final GroupsController controller = Get.find<GroupsController>();
     return Obx(() {
       final List<GroupActivityProgressEntity> headers =
           controller.activityHeaders;
@@ -1652,27 +1664,24 @@ String _ruleDescription(BuildContext context, GroupEntity group) {
 class _GroupsEmptyState extends StatelessWidget {
   const _GroupsEmptyState({
     required this.onCreateGroup,
-    required this.onJoinWithCode,
+    required this.onTapFriends,
   });
 
   final VoidCallback onCreateGroup;
-  final VoidCallback onJoinWithCode;
+  final VoidCallback onTapFriends;
 
   @override
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
     children: [
+      _FriendsCard(groupCount: 0, onTap: onTapFriends),
+      const Gap(AppSpacing.betweenRelated),
       AppEmptyState(
         icon: Icons.groups_2_outlined,
         title: context.l10n.groupsEmptyTitle,
         description: context.l10n.groupsEmptyDescription,
         actionLabel: context.l10n.groupsEmptyButton,
         onTapAction: onCreateGroup,
-      ),
-      const Gap(AppSpacing.betweenRelated),
-      _JoinWithCodeButton(
-        label: context.l10n.joinWithCodeButton,
-        onTap: onJoinWithCode,
       ),
       const Gap(AppSpacing.betweenSections),
       Center(child: _BenefitsHeader(label: context.l10n.groupsBenefitsHeader)),
@@ -1702,38 +1711,6 @@ class _GroupsEmptyState extends StatelessWidget {
         ],
       ),
     ],
-  );
-}
-
-class _JoinWithCodeButton extends StatelessWidget {
-  const _JoinWithCodeButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    pressedScale: 0.97,
-    child: Container(
-      width: double.infinity,
-      height: AppSpacing.minTapTarget,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.95),
-          width: 1.4,
-        ),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textStyles.cardTitle,
-      ),
-    ),
   );
 }
 

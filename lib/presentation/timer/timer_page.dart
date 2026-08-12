@@ -692,8 +692,7 @@ class _TimerViewData {
           : _formatRestDuration(
               Duration(seconds: controller.restIntervalSeconds),
             ),
-      focusSectionLabel:
-          "${controller.currentFocusSection}/${controller.focusSessionCount}",
+      focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.totalSeconds),
