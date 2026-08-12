@@ -63,7 +63,7 @@ class CategoryPage extends StatelessWidget {
             itemCount: subjects.length + 1,
             itemBuilder: (context, index) {
               if (index == subjects.length) {
-                return _AddSubjectCard(
+                return _AddHobbyCard(
                   category: controller.category,
                   onTap: controller.onTapAddSubject,
                 );
@@ -88,7 +88,7 @@ class CategoryPage extends StatelessWidget {
           separatorBuilder: (context, index) => const Gap(12),
           itemBuilder: (context, index) {
             if (index == subjects.length) {
-              return _AddSubjectCard(
+              return _AddListSubjectCard(
                 category: controller.category,
                 onTap: controller.onTapAddSubject,
               );
@@ -165,8 +165,8 @@ List<String> _suggestionsFor(BuildContext context, TimeCategoryType category) =>
       ],
     };
 
-class _AddSubjectCard extends StatelessWidget {
-  const _AddSubjectCard({required this.category, required this.onTap});
+class _AddHobbyCard extends StatelessWidget {
+  const _AddHobbyCard({required this.category, required this.onTap});
 
   final TimeCategoryType category;
   final VoidCallback onTap;
@@ -175,6 +175,7 @@ class _AddSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,
@@ -182,21 +183,75 @@ class _AddSubjectCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppIcon("plus", size: 18, color: context.colorTokens.primary),
-            const Gap(8),
-            Text(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              shape: BoxShape.circle,
+            ),
+            child: AppIcon("plus", size: 18, color: context.colorTokens.primary),
+          ),
+          const Spacer(),
+          Text(
+            context.l10n.addItemButton(category.itemNoun(context)),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.textButtonMedium,
+          ),
+          const Spacer(),
+        ],
+      ),
+    ),
+  );
+}
+
+class _AddListSubjectCard extends StatelessWidget {
+  const _AddListSubjectCard({required this.category, required this.onTap});
+
+  final TimeCategoryType category;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused,
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight,
+              shape: BoxShape.circle,
+            ),
+            child: AppIcon("plus", size: 16, color: context.colorTokens.primary),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Text(
               context.l10n.addItemButton(category.itemNoun(context)),
-              textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.textButtonMedium,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );
