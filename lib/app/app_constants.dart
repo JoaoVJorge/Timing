@@ -3,7 +3,7 @@ import "package:flutter/foundation.dart";
 class AppConstants {
   const AppConstants._();
 
-  static const String appTitle = "HelpOut";
+  static const String appTitle = "Timing";
   static const String appVersion = "0.1.0";
 
   static const String appLogo = "assets/images/logo_without_background.png";
