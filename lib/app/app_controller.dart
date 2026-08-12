@@ -8,8 +8,10 @@ import "package:help_out/app/app_constants.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
 import "package:help_out/core/domain/entities/app_config_entity.dart";
+import "package:help_out/core/domain/entities/activity_entry_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/domain/use_cases/get_activity_entries_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:help_out/core/domain/use_cases/save_app_config_use_case.dart";
@@ -30,6 +32,7 @@ import "package:help_out/theme/accent_presets.dart";
 class AppController extends GetxController {
   AppController({
     required this._getAppConfigUseCase,
+    required this._getActivityEntriesUseCase,
     required this._getCurrentProfileUseCase,
     required this._saveAppConfigUseCase,
     required this._syncProfileToBackendUseCase,
@@ -43,6 +46,7 @@ class AppController extends GetxController {
        ).obs;
 
   final GetAppConfigUseCase _getAppConfigUseCase;
+  final GetActivityEntriesUseCase _getActivityEntriesUseCase;
   final GetCurrentProfileUseCase _getCurrentProfileUseCase;
   final SaveAppConfigUseCase _saveAppConfigUseCase;
   final SyncProfileToBackendUseCase _syncProfileToBackendUseCase;
@@ -117,6 +121,7 @@ class AppController extends GetxController {
   Future<void> _loadInitialConfig() async {
     await _loadAppConfig();
     await refreshProfileFromBackend();
+    await _restoreActivityHistoryFromBackendIfNeeded();
   }
 
   Future<void> _loadAppConfig() async {
@@ -210,6 +215,42 @@ class AppController extends GetxController {
     }
 
     await Future.wait(reloads);
+    await _restoreActivityHistoryFromBackendIfNeeded();
+  }
+
+  Future<bool> _restoreActivityHistoryFromBackendIfNeeded() async {
+    if (!_supabaseService.hasSignedInUser) {
+      return false;
+    }
+
+    final ActivityHistoryService activityHistoryService =
+        Get.find<ActivityHistoryService>();
+    final DailyProgressService dailyProgressService =
+        Get.find<DailyProgressService>();
+    final SubjectDailyHistoryService subjectDailyHistoryService =
+        Get.find<SubjectDailyHistoryService>();
+
+    if (!activityHistoryService.isEmpty ||
+        !dailyProgressService.isEmpty ||
+        !subjectDailyHistoryService.isEmpty) {
+      return false;
+    }
+
+    final Either<AppError, List<ActivityEntryEntity>> result =
+        await _getActivityEntriesUseCase(
+          retentionDays: ActivityHistoryService.retentionDays,
+        );
+    return await result.fold((error) async => false, (entries) async {
+      if (entries.isEmpty) {
+        return false;
+      }
+      await Future.wait([
+        activityHistoryService.replaceAll(entries),
+        dailyProgressService.replaceFromActivityEntries(entries),
+        subjectDailyHistoryService.replaceFromActivityEntries(entries),
+      ]);
+      return true;
+    });
   }
 
   Future<void> setDarkMode(bool value) async {

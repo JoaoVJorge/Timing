@@ -19,6 +19,7 @@ import "package:help_out/core/domain/use_cases/decline_group_invitation_use_case
 import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_group_invitations_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_activity_entries_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
@@ -54,6 +55,10 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<LogActivityUseCase>(
       LogActivityUseCase(activityRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<GetActivityEntriesUseCase>(
+      GetActivityEntriesUseCase(activityRepository: Get.find()),
       permanent: true,
     );
     Get.put<DeleteSubjectUseCase>(

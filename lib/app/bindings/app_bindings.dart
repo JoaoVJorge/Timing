@@ -30,6 +30,7 @@ class AppBindings extends Bindings {
     Get.put<AppController>(
       AppController(
         getAppConfigUseCase: Get.find(),
+        getActivityEntriesUseCase: Get.find(),
         getCurrentProfileUseCase: Get.find(),
         saveAppConfigUseCase: Get.find(),
         syncProfileToBackendUseCase: Get.find(),

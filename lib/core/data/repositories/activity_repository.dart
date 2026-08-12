@@ -1,5 +1,6 @@
 import "package:dartz/dartz.dart";
 import "package:help_out/core/data/data_sources/activity_data_source.dart";
+import "package:help_out/core/domain/entities/activity_entry_entity.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 
@@ -23,4 +24,8 @@ class ActivityRepository {
     pages: pages,
     completedTasks: completedTasks,
   );
+
+  Future<Either<AppError, List<ActivityEntryEntity>>> getActivityEntries({
+    int retentionDays = 400,
+  }) => activityDataSource.getActivityEntries(retentionDays: retentionDays);
 }
