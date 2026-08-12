@@ -1,6 +1,6 @@
 {
   "@@locale": "de",
-  "appTitle": "HelpOut",
+  "appTitle": "Timing",
   "@homeGreetingWithName": {
     "placeholders": {
       "userName": {
@@ -557,7 +557,7 @@
   "profileTopSubjectEmptyTitle": "Noch keine",
   "profileTopSubjectEmptyDescription": "Studieren Sie ein Thema, um es hier vorzustellen",
   "profileEmptyTitle": "Ihr Fortschritt beginnt hier",
-  "profileEmptyDescription": "Starten Sie eine Sitzung, protokollieren Sie Lesevorgänge oder legen Sie von zu Hause aus ein Ziel fest, um Ihre Entwicklung in HelpOut zu verfolgen.",
+  "profileEmptyDescription": "Starten Sie eine Sitzung, protokollieren Sie Lesevorgänge oder legen Sie von zu Hause aus ein Ziel fest, um Ihre Entwicklung in Timing zu verfolgen.",
   "profileEmptyGuidance": "Danach werden hier Ihre Gesamtzeit, Top-Aktivitäten und Lese-Highlights angezeigt.",
   "profileEmptyStartButton": "Beginnen Sie jetzt",
   "profileShortcutsTitle": "Verknüpfungen",
@@ -766,7 +766,6 @@
   "birthDateHint": "Geburtsdatum",
   "profileEditableLaterNote": "Sie können dies später bearbeiten.",
   "finishButton": "Fertig",
-
   "navProgress": "Fortschritt",
   "progressTitle": "Fortschritt",
   "progressSubtitle": "Alles, was du bisher geschafft hast",
@@ -777,13 +776,17 @@
   "progressComparisonMore": "{value} mehr als im vorherigen Zeitraum",
   "@progressComparisonMore": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "progressComparisonLess": "{value} weniger als im vorherigen Zeitraum",
   "@progressComparisonLess": {
     "placeholders": {
-      "value": { "type": "String" }
+      "value": {
+        "type": "String"
+      }
     }
   },
   "progressComparisonSame": "Genauso wie im vorherigen Zeitraum",
@@ -794,19 +797,27 @@
   "homeTodayInline": "Heute: {focus} Fokus · {pages} Seiten · {goals} Ziele",
   "@homeTodayInline": {
     "placeholders": {
-      "focus": { "type": "String" },
-      "pages": { "type": "int" },
-      "goals": { "type": "int" }
+      "focus": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "int"
+      },
+      "goals": {
+        "type": "int"
+      }
     }
   },
   "homePlanDayTitle": "Meinen Tag planen",
   "homePlanDaySubtitle": "Tagesziele und Wochenplan",
   "groupsFriendsTitle": "Freunde",
   "groupsFriendsSubtitle": "Anfragen, Einladungen und dein Code",
-  "groupMembersCount": "{count} Mitglieder",
+  "groupMembersCount": "{count, plural, =1{1 Mitglied} other{{count} Mitglieder}}",
   "@groupMembersCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "createScheduleEntryButton": "Termin erstellen",
@@ -814,8 +825,12 @@
   "timerSessionCounter": "Fokus {current} von {total}",
   "@timerSessionCounter": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "timerExitBackToFocus": "Zurück zum Fokus",
@@ -829,14 +844,17 @@
   "achievementProgressValue": "{current} von {total}",
   "@achievementProgressValue": {
     "placeholders": {
-      "current": { "type": "String" },
-      "total": { "type": "String" }
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
     }
   },
   "categoryEmptyTitle": "Hier ist noch nichts",
   "categoryEmptyDescription": "Erstelle dein erstes Element, um deine Fokuszeit zu erfassen.",
   "scheduleEmptyExampleLabel": "Beispiel",
-
   "progressAchievementsNextTitle": "Nächster Erfolg",
   "achievementFocusHourTitle": "1 Stunde Fokus",
   "achievementSessionsTitle": "5 abgeschlossene Sitzungen",
@@ -846,36 +864,599 @@
   "unitMinutesShort": "{value} Min.",
   "@unitMinutesShort": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
   "unitSessions": "{value} Sitzungen",
   "@unitSessions": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
   "unitDays": "{value} Tage",
   "@unitDays": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
-
   "currentUserRankNextStepNamed": "{score} bis zu {name}",
   "@currentUserRankNextStepNamed": {
     "placeholders": {
-      "score": { "type": "String" },
-      "name": { "type": "String" }
+      "score": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
   "timerKeepAwakeNote": "Der Bildschirm bleibt während der Sitzung an",
   "scheduleWeekLabel": "Woche vom {date}",
   "@scheduleWeekLabel": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
-
-  "deleteButton": "Löschen"
+  "daysSuffix": "Tage",
+  "createTaskSubtitle": "Richte ein Tagesziel ein, um deinen Fortschritt zu verfolgen",
+  "createTaskSequenceTypeLabel": "Sequenztyp",
+  "createTaskSequenceIntenseLabel": "Intensiv",
+  "createTaskSequenceIntenseDescription": "Keine Aussetzer. Wenn du einen Tag verpasst, wird deine Serie zurückgesetzt.",
+  "createTaskSequenceCasualLabel": "Locker",
+  "createTaskSequenceCasualDescription": "Flexibler. Verpasste Tage setzen deine Serie nicht zurück.",
+  "targetDaysInfinite": "Unbegrenzt",
+  "deleteConfirmationDefaultTypeName": "Element",
+  "deleteConfirmationTitle": "{typeName} löschen?",
+  "deleteConfirmationContent": "Du bist dabei, \"{itemName}\" zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "deleteConfirmationHistoryWarning": "Der Verlauf von {typeName} wird ebenfalls entfernt.",
+  "@homeDaySummaryFocusValue": {
+    "placeholders": {
+      "focus": {
+        "type": "String"
+      }
+    }
+  },
+  "@homeDaySummaryGoalsValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hobbyPracticeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeDaySummaryFocusValue": "{focus} Fokus",
+  "homeDaySummaryGoalsValue": "{count, plural, =1{1 Ziel} other{{count} Ziele}}",
+  "profilePhotoSourceTitle": "Profilfoto",
+  "profilePhotoSourceSubtitle": "W?hle aus, wie du dein Foto aktualisieren m?chtest",
+  "photoCameraLabel": "Foto aufnehmen",
+  "photoGalleryLabel": "Aus Galerie w?hlen",
+  "removePhotoDialogTitle": "Foto entfernen?",
+  "removePhotoDialogContent": "Dein Avatar wird wieder im Profil angezeigt.",
+  "friendRequestsReceivedTab": "Anfragen",
+  "friendRequestsSentTab": "Einladungen",
+  "hobbyPracticeMinutes": "{minutes} Min. ?bung",
+  "hobbyViewStatistics": "Statistiken anzeigen",
+  "hobbyEdit": "Hobby bearbeiten",
+  "pinToStart": "An Start anheften",
+  "hobbyDelete": "Hobby l?schen",
+  "deleteActionCannotBeUndone": "Diese Aktion kann nicht r?ckg?ngig gemacht werden.",
+  "joinGroupTitle": "Gruppe beitreten",
+  "joinGroupInviteCodeLabel": "Einladungscode",
+  "joinGroupCodeHint": "Code eingeben",
+  "joinGroupButton": "Gruppe beitreten",
+  "joinGroupError": "Dieser Gruppe konnte nicht beigetreten werden.",
+  "scheduleDayEventsTitle": "Termine des Tages",
+  "dailyGoalsNoGoalsYetTitle": "Noch kein Ziel",
+  "dailyGoalsNoGoalsYetDescription": "F?ge dein erstes Ziel hinzu, um den Tag zu organisieren und Erfolge zu verfolgen.",
+  "dailyGoalsSuggestionsTitle": "Vorschl?ge f?r den Anfang",
+  "dailyGoalsSuggestionStudy": "30 min lernen",
+  "dailyGoalsSuggestionRead": "10 Seiten lesen",
+  "dailyGoalsSuggestionTrain": "Trainieren",
+  "@missedYesterdayDialogContent": {
+    "placeholders": {
+      "taskName": {
+        "type": "String"
+      }
+    }
+  },
+  "goalTypeName": "Ziel",
+  "missedYesterdayDialogTitle": "Hast du es gestern erledigt?",
+  "missedYesterdayDialogContent": "Du hast \"{taskName}\" gestern nicht erfasst. Hast du es wirklich verpasst?",
+  "missedYesterdayMissedButton": "Ja, ich habe es verpasst",
+  "missedYesterdayCompletedButton": "Ich habe es erledigt",
+  "scheduleTitleRequiredError": "Titel ausf?llen, um fortzufahren",
+  "scheduleActiveFromLabel": "Beginnt",
+  "scheduleActiveUntilLabel": "Endet",
+  "selectDateTitle": "Datum ausw?hlen",
+  "selectDateHint": "Tippe auf einen Tag, um ihn auszuw?hlen",
+  "addFriendTitle": "Freund hinzuf?gen",
+  "friendCodeNotFound": "Wir konnten keinen Benutzer mit diesem Code finden.",
+  "friendInviteCodeTitle": "Einladungscode",
+  "friendInviteCodeFieldLabel": "Code eingeben oder einf?gen",
+  "friendInviteCodeFieldHint": "Wie ABCDE12345",
+  "pasteButton": "Einf?gen",
+  "searchCodeButton": "Code suchen",
+  "friendUserFoundTitle": "Benutzer gefunden",
+  "friendFoundByCode": "Per Code gefunden",
+  "sentLabel": "Gesendet",
+  "friendHowItWorksTitle": "So funktioniert es",
+  "friendHowItWorksStepOne": "Bitte deinen Freund um den Code",
+  "friendHowItWorksStepTwo": "F?ge den Code ein, um das Profil zu finden",
+  "friendHowItWorksStepThree": "Sende die Anfrage zum Hinzuf?gen",
+  "@yourFriendsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@minutesAgoShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "myCodeLabel": "Mein Code",
+  "yourInviteCodeLabel": "Dein Einladungscode",
+  "yourFriendsTitle": "Deine Freunde ({count})",
+  "seeAllButton": "Alle anzeigen",
+  "onlineLabel": "Online",
+  "minutesAgoShort": "Vor {minutes} Min.",
+  "friendsEmptyTitle": "Du hast noch keine Freunde",
+  "friendsEmptySubtitle": "Suche oben nach Personen oder teile deinen Einladungscode.",
+  "shareCodeButton": "Code teilen",
+  "@shareInviteCodeMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "@groupInvitesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@groupInvitedBy": {
+    "placeholders": {
+      "inviter": {
+        "type": "String"
+      }
+    }
+  },
+  "codeCopiedMessage": "Code kopiert",
+  "friendRequestSentMessage": "Anfrage gesendet",
+  "joinedGroupMessage": "Du bist der Gruppe beigetreten",
+  "friendTypeName": "Freund",
+  "shareInviteCodeMessage": "F?ge mich auf HelpOut mit meinem Code hinzu: {code}",
+  "groupInvitesTitle": "Gruppeneinladungen ({count})",
+  "groupInvitedBy": "{inviter} hat dich eingeladen",
+  "acceptButton": "Annehmen",
+  "declineButton": "Ablehnen",
+  "friendsTitle": "Freunde",
+  "@friendRequestsReceivedSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@friendRequestsSentSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "friendRequestsReceivedPageTitle": "Anfragen",
+  "friendRequestsSentPageTitle": "Einladungen",
+  "friendRequestsReceivedSection": "Erhalten ({count})",
+  "friendRequestsSentSection": "Gesendet ({count})",
+  "friendMutualFriendsSample": "3 gemeinsame Freunde",
+  "pendingLabel": "Ausstehend",
+  "friendRequestsIncomingEmptyTitle": "Keine erhaltenen Anfragen",
+  "friendRequestsSentEmptyTitle": "Keine gesendeten Einladungen",
+  "friendRequestsIncomingEmptySubtitle": "Anfragen erscheinen hier.",
+  "friendRequestsSentEmptySubtitle": "Deine gesendeten Einladungen erscheinen hier.",
+  "friendRequestsSafetyNotice": "Akzeptiere nur Personen, die du kennst und denen du vertraust.",
+  "categoryEmptyStudyingTitle": "Noch kein Fach",
+  "categoryEmptyExercisesTitle": "Noch keine ?bung",
+  "categoryEmptyReadingTitle": "Noch keine Lekt?re",
+  "categoryEmptyHobbiesTitle": "Noch kein Hobby",
+  "categoryEmptyStudyingDescription": "F?ge dein erstes Fach hinzu, um dein Lernen zu organisieren und deinen Fokus zu erfassen.",
+  "categoryEmptyExercisesDescription": "F?ge deine erste ?bung hinzu, um Training, Einheiten und Fortschritt zu verfolgen.",
+  "categoryEmptyReadingDescription": "F?ge deine erste Lekt?re hinzu, um Seiten, Zeit und Fortschritt zu erfassen.",
+  "categoryEmptyHobbiesDescription": "F?ge dein erstes Hobby hinzu, um ?bung zu erfassen und dranzubleiben.",
+  "categorySuggestionStudyingOne": "Mathematik",
+  "categorySuggestionStudyingTwo": "Englisch",
+  "categorySuggestionStudyingThree": "Schreiben",
+  "categorySuggestionExercisesOne": "Laufen",
+  "categorySuggestionExercisesTwo": "Kraft",
+  "categorySuggestionExercisesThree": "Dehnen",
+  "categorySuggestionReadingOne": "Roman",
+  "categorySuggestionReadingTwo": "Fachbuch",
+  "categorySuggestionReadingThree": "Artikel",
+  "categorySuggestionHobbiesOne": "Gitarre",
+  "categorySuggestionHobbiesTwo": "Zeichnen",
+  "categorySuggestionHobbiesThree": "Kochen",
+  "@timerReadingExitContent": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "subjectName": {
+        "type": "String"
+      }
+    }
+  },
+  "pagesAbbreviation": "S.",
+  "loginSecurityNote": "Deine Daten sind gesch?tzt und sicher.",
+  "nextBreakDurationLabel": "Dauer der n?chsten Pause",
+  "timerReadingExitContent": "Du hast {duration} gelesen. Gib ein, wie viele Seiten du in {subjectName} gelesen hast.",
+  "appleSignInIncompleteMessage": "Mit Apple anmelden ist noch nicht vollst?ndig.",
+  "activityTypeLabel": "Aktivit?tstyp",
+  "activityTypeDailyLabel": "T?glich",
+  "activityTypeDailyDescription": "Erneuert sich jeden Tag. Die Aktivit?t ist morgens wieder verf?gbar.",
+  "activityTypePermanentLabel": "Permanent",
+  "activityTypePermanentDescription": "Bleibt aktiv, bis du sie abschlie?t. Danach wird sie als erledigt markiert.",
+  "pagesSuffix": "Seiten",
+  "updatedSuccessfullyMessage": "Erfolgreich aktualisiert",
+  "focusSessionCountLabel": "Fokussitzungen",
+  "groupEditingComingSoon": "Gruppenbearbeitung kommt bald.",
+  "leftGroupMessage": "Du hast die Gruppe verlassen.",
+  "groupImageSourceTitle": "Bild senden",
+  "groupImageSourceSubtitle": "W?hle aus, wie du das Bild senden m?chtest",
+  "deleteButton": "Löschen",
+  "manageMembersTitle": "Mitglieder verwalten",
+  "groupLeaderLabel": "Leiter",
+  "groupLeaderRoleLabel": "Gruppenleiter",
+  "groupMemberRoleLabel": "Mitglied",
+  "groupMembersLabel": "Mitglieder",
+  "groupActionsLabel": "Gruppenaktionen",
+  "goalsTabLabel": "Ziele",
+  "chatTabLabel": "Chat",
+  "groupGoalTitle": "Gruppenziel",
+  "groupMainRuleTitle": "Hauptregel",
+  "groupNextMilestoneTitle": "N?chster Meilenstein",
+  "groupMembersProgressValue": "{current}/{total} Mitglieder",
+  "@groupMembersProgressValue": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNextMilestoneDescription": "um das Abzeichen \"Totaler Fokus\" freizuschalten",
+  "groupActivityLabel": "Gruppenaktivit?t",
+  "groupActivityReachedGoal": "{reached}/{total} haben das Ziel erreicht",
+  "@groupActivityReachedGoal": {
+    "placeholders": {
+      "reached": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoImagesTitle": "Noch keine Bilder",
+  "groupNoImagesDescription": "Sende das erste Gruppenbild.",
+  "groupSendImageButton": "Bild senden",
+  "groupSendingImage": "Bild wird gesendet...",
+  "editGroupLabel": "Gruppe bearbeiten",
+  "leaveGroupLabel": "Gruppe verlassen",
+  "groupDescription": "{metric} teilen und gemeinsam Herausforderungen meistern.",
+  "@groupDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupsFriendsSubtitleWithCount": "Anfragen, Einladungen und {groupCount} in Gruppen",
+  "@groupsFriendsSubtitleWithCount": {
+    "placeholders": {
+      "groupCount": {
+        "type": "int"
+      }
+    }
+  },
+  "groupGoalKeepMetric": "{metric} jeden Tag beibehalten",
+  "@groupGoalKeepMetric": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupGoalDescription": "Jedes Mitglied sollte Fortschritt in {metric} erfassen, um die Gruppenserie fortzusetzen.",
+  "@groupGoalDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "groupRuleDescription": "Erfasse mindestens eine Aktivit?t mit {metric} pro Tag. Die Serie zu halten st?rkt die Gruppe.",
+  "@groupRuleDescription": {
+    "placeholders": {
+      "metric": {
+        "type": "String"
+      }
+    }
+  },
+  "joinWithCodeButton": "Ich habe einen Einladungscode",
+  "groupsBenefitsHeader": "In einer Gruppe kannst du:",
+  "groupParticipantsCount": "{count, plural, =1{1 Teilnehmer} other{{count} Teilnehmer}}",
+  "@groupParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMembersCompletedToday": "{completed}/{total} Mitglieder haben heute abgeschlossen",
+  "@groupMembersCompletedToday": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "addMemberButton": "Mitglied hinzuf?gen",
+  "groupCollectiveProgressTitle": "Gemeinsamer Fortschritt",
+  "currentUserRankCompleteFirstGoal": "Schlie?e dein erstes Ziel ab, um in die Rangliste zu kommen.",
+  "currentUserRankTiedLead": "Gleichstand an der Spitze.",
+  "currentUserRankTiedFirstLabel": "Gleichstand auf Platz 1",
+  "rankLabel": "{rank}.",
+  "@rankLabel": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "homeScheduleRoutineSubtitle": "Kommende Zeiten und w?chentliche Routine",
+  "homeNextCommitmentTitle": "N?chster Termin",
+  "todayLabel": "Heute",
+  "statisticsTitle": "Statistiken",
+  "studiedTimeLabel": "Gelernte Zeit",
+  "readingTimeLabel": "Lesezeit",
+  "totalPagesReadLabel": "Seiten gesamt",
+  "pagesReadTodayLabel": "Seiten heute",
+  "goalLabel": "Ziel",
+  "sessionsLabel": "Sitzungen",
+  "restLabel": "Pause",
+  "comparativesTitle": "Vergleiche",
+  "overviewTitle": "?bersicht",
+  "studiedUnit": "gelernt",
+  "readPagesUnit": "gelesen",
+  "versusLastMonth": "vs letzten Monat",
+  "versusLastWeek": "vs letzte Woche",
+  "noPreviousPeriodComparison": "Kein vorheriger Zeitraum zum Vergleichen",
+  "noTimeLabel": "Ohne Uhrzeit",
+  "untilTimeLabel": "Bis {time}",
+  "@untilTimeLabel": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsUnlockedSuffix": " /50 freigeschaltet",
+  "currentLevelLabel": "Aktuelles Level",
+  "allAchievementsUnlockedLabel": "Alles freigeschaltet",
+  "nextUnlockLabel": "N?chster Erfolg",
+  "allAchievementsUnlockedDescription": "Du hast alles freigeschaltet.",
+  "xpToGo": "Noch {xp} XP",
+  "levelLabel": "Level {level}",
+  "allFilterLabel": "Alle",
+  "unlockedFilterLabel": "Freigeschaltet",
+  "lockedFilterLabel": "Gesperrt",
+  "selectCategoryTooltip": "Kategorie ausw?hlen",
+  "allCategoriesLabel": "Alle Kategorien",
+  "byCategoryLabel": "Nach Kategorie",
+  "allLevelsTitle": "Alle Level",
+  "allLevelsDescription": "Schalte Erfolge frei, um im Rang aufzusteigen.",
+  "levelPlusLabel": "Level {level}+",
+  "currentLabel": "Aktuell",
+  "rankTierLearner": "{tier}-Lernender",
+  "achievementCategoryFocus": "Fokus",
+  "achievementCategoryStudy": "Lernen",
+  "achievementCategoryReading": "Lesen",
+  "achievementCategoryGoals": "Ziele",
+  "achievementCategoryLifestyle": "Lifestyle",
+  "achievement1Title": "Erster Fokus",
+  "achievement1Description": "Schlie?e deine erste Fokussitzung ab",
+  "achievement2Title": "25-Minuten-Start",
+  "achievement2Description": "Fokussiere dich 25 Minuten lang",
+  "achievement3Title": "1 Stunde Fokus",
+  "achievement3Description": "Fokussiere dich 1 Stunde lang",
+  "achievement4Title": "Tiefe Arbeit",
+  "achievement4Description": "Erreiche 2 Stunden Fokus",
+  "achievement5Title": "Keine Ablenkungen",
+  "achievement5Description": "Schlie?e 3 Fokussitzungen ab",
+  "achievement6Title": "Fokusmarathon",
+  "achievement6Description": "Erreiche 10 Stunden Fokus",
+  "achievement7Title": "Fr?haufsteher",
+  "achievement7Description": "Erfasse Fokus an 5 Tagen",
+  "achievement8Title": "Nachteule",
+  "achievement8Description": "Schlie?e 10 Fokussitzungen ab",
+  "achievement9Title": "Fokusserie",
+  "achievement9Description": "Erfasse Fokus an 7 Tagen",
+  "achievement10Title": "Fokusmeister",
+  "achievement10Description": "Erreiche 25 Stunden Fokus",
+  "achievement11Title": "Lernen begonnen",
+  "achievement11Description": "Erstelle deinen ersten Lerneintrag",
+  "achievement12Title": "3 Sitzungen",
+  "achievement12Description": "Schlie?e 3 Sitzungen ab",
+  "achievement13Title": "5 Sitzungen",
+  "achievement13Description": "Schlie?e 5 Sitzungen ab",
+  "achievement14Title": "10 Sitzungen",
+  "achievement14Description": "Schlie?e 10 Sitzungen ab",
+  "achievement15Title": "F?cherentdecker",
+  "achievement15Description": "Lerne mindestens ein Fach",
+  "achievement16Title": "Wiederholungsheld",
+  "achievement16Description": "Erreiche 5 Stunden Lernen",
+  "achievement17Title": "Quiz beendet",
+  "achievement17Description": "Schlie?e 15 Sitzungen ab",
+  "achievement18Title": "Lernplaner",
+  "achievement18Description": "Erstelle ein Fokusziel",
+  "achievement19Title": "Pr?fungsbereit",
+  "achievement19Description": "Erreiche 20 Stunden Lernen",
+  "achievement20Title": "Studentenmodus",
+  "achievement20Description": "Erreiche 50 Stunden Lernen",
+  "achievement21Title": "Erste Seite",
+  "achievement21Description": "Lies deine erste Seite",
+  "achievement22Title": "10 Seiten",
+  "achievement22Description": "Lies 10 Seiten",
+  "achievement23Title": "25 Seiten",
+  "achievement23Description": "Lies 25 Seiten",
+  "achievement24Title": "50 Seiten",
+  "achievement24Description": "Lies 50 Seiten",
+  "achievement25Title": "100 Seiten",
+  "achievement25Description": "Lies 100 Seiten",
+  "achievement26Title": "Kapitel abgeschlossen",
+  "achievement26Description": "Lies 150 Seiten",
+  "achievement27Title": "Wochenendleser",
+  "achievement27Description": "Lies 250 Seiten",
+  "achievement28Title": "T?glicher Leser",
+  "achievement28Description": "Lies 300 Seiten",
+  "achievement29Title": "B?cherfreund",
+  "achievement29Description": "Lies 500 Seiten",
+  "achievement30Title": "Bibliothekslegende",
+  "achievement30Description": "Lies 1000 Seiten",
+  "achievement31Title": "Erstes Ziel",
+  "achievement31Description": "Erstelle dein erstes Ziel",
+  "achievement32Title": "Ziel erreicht",
+  "achievement32Description": "Schlie?e ein Ziel ab",
+  "achievement33Title": "Alle Ziele erledigt",
+  "achievement33Description": "Schlie?e heute alle Ziele ab",
+  "achievement34Title": "Morgenroutine",
+  "achievement34Description": "Schlie?e Ziele an 3 Tagen ab",
+  "achievement35Title": "Ausgeglichener Tag",
+  "achievement35Description": "Schlie?e Ziele an 5 Tagen ab",
+  "achievement36Title": "Gewohnheitsbauer",
+  "achievement36Description": "Schlie?e Ziele an 10 Tagen ab",
+  "achievement37Title": "Perfekter Tag",
+  "achievement37Description": "Schlie?e Ziele an 15 Tagen ab",
+  "achievement38Title": "Comeback",
+  "achievement38Description": "Schlie?e Ziele an 20 Tagen ab",
+  "achievement39Title": "Konstanzstern",
+  "achievement39Description": "Schlie?e Ziele an 30 Tagen ab",
+  "achievement40Title": "Unaufhaltsam",
+  "achievement40Description": "Schlie?e Ziele an 50 Tagen ab",
+  "achievement41Title": "Erste Gruppe",
+  "achievement41Description": "Tritt einer Lerngruppe bei",
+  "achievement42Title": "Teamspieler",
+  "achievement42Description": "Miss dich mit Freunden",
+  "achievement43Title": "Hilfsbereiter Freund",
+  "achievement43Description": "Hilf einem Freund, konstant zu bleiben",
+  "achievement44Title": "Herausforderung gewonnen",
+  "achievement44Description": "Gewinne eine Herausforderung",
+  "achievement45Title": "Training gestartet",
+  "achievement45Description": "Erfasse Fokus beim Training",
+  "achievement46Title": "30-Minuten-Workout",
+  "achievement46Description": "Trainiere 30 Minuten lang",
+  "achievement47Title": "Hobbyzeit",
+  "achievement47Description": "Erfasse Fokus bei einem Hobby",
+  "achievement48Title": "Kreativer Funke",
+  "achievement48Description": "Erreiche 30 Minuten Hobbys",
+  "achievement49Title": "Wochenendk?mpfer",
+  "achievement49Description": "Erreiche 2 Stunden Training",
+  "achievement50Title": "Erfolgsj?ger",
+  "achievement50Description": "Schalte 25 Erfolge frei",
+  "rankTierPaper": "Papier",
+  "rankTierWood": "Holz",
+  "rankTierStone": "Stein",
+  "rankTierCopper": "Kupfer",
+  "rankTierBronze": "Bronze",
+  "rankTierIron": "Eisen",
+  "rankTierSilver": "Silber",
+  "rankTierGold": "Gold",
+  "rankTierPlatinum": "Platin",
+  "rankTierAmethyst": "Amethyst",
+  "rankTierEmerald": "Smaragd",
+  "rankTierDiamond": "Diamant",
+  "rankTierObsidian": "Obsidian",
+  "rankTierAdamantium": "Adamantium",
+  "rankTierMithril": "Mithril",
+  "@xpToGo": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "@levelLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@levelPlusLabel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@rankTierLearner": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "concentrationModeTitle": "Fokusmodus",
+  "concentrationModeSubtitle": "W?hle, welche Fokussitzungen das Verlassen der App blockieren.",
+  "concentrationStudyTitle": "Lernen",
+  "concentrationStudySubtitle": "Volle Konzentration auf dein Lernen.",
+  "concentrationExercisesTitle": "?bungen",
+  "concentrationExercisesSubtitle": "Bleib bei deinem Training konzentriert.",
+  "concentrationReadingTitle": "Lesen",
+  "concentrationReadingSubtitle": "Tauche in deine Lekt?re ein.",
+  "concentrationHobbiesTitle": "Hobbys",
+  "concentrationHobbiesSubtitle": "Genie?e deine Hobbys mit Fokus.",
+  "createGroupDescriptionLabel": "Beschreibung",
+  "createGroupDescriptionHint": "Beschreibe die Gruppe und ihr Ziel.",
+  "createGroupThemeMetricDescription": "Dieses Thema legt die Ranglistenmetrik fest.",
+  "createGroupActivityTypeDescription": "Jedes Mitglied erh?lt eine Kopie zum Verfolgen.",
+  "createGroupActivityNameLabel": "Aktivit?tsname",
+  "createGroupActivityNameHint": "z. B. Analysis I",
+  "createGroupGoalTypeLabel": "Zieltyp",
+  "createGroupGoalTypeTotal": "Gesamt",
+  "createGroupGoalTypeDaily": "T?glich",
+  "createGroupDaysGoalLabel": "Tageziel",
+  "createGroupPagesGoalLabel": "Seitenziel",
+  "createGroupTimeGoalMinutesLabel": "Zeitziel (min)",
+  "createGroupSummaryTitle": "Gruppenzusammenfassung",
+  "createGroupActivitySummaryLabel": "Aktivit?t",
+  "createGroupGuestsLabel": "G?ste",
+  "timerTotalTodayLabel": "Heute gesamt",
+  "timerEndActionLabel": "Beenden"
 }
