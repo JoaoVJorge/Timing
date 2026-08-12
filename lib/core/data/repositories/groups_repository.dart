@@ -7,6 +7,7 @@ import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
 import "package:help_out/core/domain/entities/group_invitation_entity.dart";
+import "package:help_out/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 
@@ -62,6 +63,9 @@ class GroupsRepository {
 
   Future<Either<AppError, List<GroupInvitationEntity>>>
   getPendingInvitations() => _groupsDataSource.getPendingInvitations();
+
+  Future<Either<AppError, List<SentGroupInvitationEntity>>>
+  getSentInvitations() => _groupsDataSource.getSentInvitations();
 
   Future<Either<AppError, GroupEntity>> acceptInvitation(String invitationId) =>
       _groupsDataSource.acceptInvitation(invitationId);

@@ -33,11 +33,7 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     topBar: AppTopBar(
-      title: switch (selectedMode) {
-        FriendRequestsMode.incoming =>
-          context.l10n.friendRequestsReceivedPageTitle,
-        FriendRequestsMode.sent => context.l10n.friendRequestsSentPageTitle,
-      },
+      title: context.l10n.friendRequestsReceivedTab,
       showBackButton: true,
       onBack: () => Navigator.of(context).maybePop(),
     ),

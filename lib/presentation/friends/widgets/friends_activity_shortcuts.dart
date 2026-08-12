@@ -5,11 +5,15 @@ import "package:help_out/shared/widgets/bounce_tap.dart";
 
 class FriendsActivityShortcuts extends StatelessWidget {
   const FriendsActivityShortcuts({
+    required this.pendingCount,
+    required this.sentCount,
     required this.onPendingTap,
     required this.onSentTap,
     super.key,
   });
 
+  final int pendingCount;
+  final int sentCount;
   final VoidCallback onPendingTap;
   final VoidCallback onSentTap;
 
@@ -20,6 +24,7 @@ class FriendsActivityShortcuts extends StatelessWidget {
         child: _ShortcutTile(
           icon: Icons.download_rounded,
           title: context.l10n.friendRequestsReceivedTab,
+          count: pendingCount,
           onTap: onPendingTap,
         ),
       ),
@@ -28,6 +33,7 @@ class FriendsActivityShortcuts extends StatelessWidget {
         child: _ShortcutTile(
           icon: Icons.send_rounded,
           title: context.l10n.friendRequestsSentTab,
+          count: sentCount,
           onTap: onSentTap,
         ),
       ),
@@ -39,41 +45,87 @@ class _ShortcutTile extends StatelessWidget {
   const _ShortcutTile({
     required this.icon,
     required this.title,
+    required this.count,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
+  final int count;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => BounceTap(
     pressedScale: 0.98,
     onTap: onTap,
-    child: Container(
-      height: 42,
-      padding: const EdgeInsets.symmetric(horizontal: 9),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: context.colorTokens.borderUnfocused),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: context.colorTokens.primary, size: 17),
-          const Gap(6),
-          Flexible(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                fontWeight: FontWeight.w900,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: context.colorTokens.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: context.colorTokens.borderUnfocused),
+            boxShadow: [
+              BoxShadow(
+                color: context.colorTokens.surfaceShadow.withValues(
+                  alpha: 0.08,
+                ),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: context.colorTokens.primary, size: 18),
+              const Gap(7),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (count > 0)
+          Positioned(top: -7, right: 16, child: _ShortcutCounter(count: count)),
+      ],
+    ),
+  );
+}
+
+class _ShortcutCounter extends StatelessWidget {
+  const _ShortcutCounter({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(minWidth: 20),
+    height: 20,
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      gradient: context.colorTokens.primaryGradient,
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: context.colorTokens.scaffold, width: 1.5),
+    ),
+    child: Text(
+      count > 99 ? "99+" : count.toString(),
+      style: context.textStyles.bodySmall.copyWith(
+        color: context.colorTokens.primaryForeground,
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        height: 1,
       ),
     ),
   );

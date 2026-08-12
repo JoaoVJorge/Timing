@@ -12,45 +12,22 @@ class FriendsLoadingSkeleton extends StatelessWidget {
       const Gap(14),
       const Row(
         children: [
-          Expanded(child: _FriendsSkeletonBox(height: 42, radius: 999)),
+          Expanded(child: _FriendsSkeletonBox(height: 50, radius: 18)),
           Gap(8),
-          Expanded(child: _FriendsSkeletonBox(height: 42, radius: 999)),
+          Expanded(child: _FriendsSkeletonBox(height: 50, radius: 18)),
         ],
       ),
       const Gap(18),
       const _FriendsSkeletonBox(width: 120, height: 15, radius: 6),
       const Gap(12),
-      Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        foregroundDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: context.colorTokens.borderUnfocused),
-        ),
-        child: Column(
-          children: [
-            for (int index = 0; index < 6; index++) ...[
-              const _FriendSkeletonRow(),
-              if (index < 5)
-                Divider(
-                  height: 1,
-                  indent: 58,
-                  endIndent: 14,
-                  color: context.colorTokens.divider,
-                ),
-            ],
-          ],
-        ),
+      const Column(
+        children: [
+          _FriendSkeletonRow(),
+          Gap(10),
+          _FriendSkeletonRow(),
+          Gap(10),
+          _FriendSkeletonRow(),
+        ],
       ),
     ],
   );
@@ -61,8 +38,20 @@ class _FriendSkeletonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    color: context.colorTokens.surface,
+    height: 72,
     padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
     child: Row(
       children: [
         Container(

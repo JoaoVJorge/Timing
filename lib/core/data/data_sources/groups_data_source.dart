@@ -7,6 +7,7 @@ import "package:help_out/core/domain/entities/group_image_message_entity.dart";
 import "package:help_out/core/domain/entities/group_invite_option_entity.dart";
 import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
+import "package:help_out/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/services/log/app_logger_service.dart";
@@ -349,6 +350,73 @@ class GroupsDataSource {
               ),
             )
             .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, List<SentGroupInvitationEntity>>>
+  getSentInvitations() async {
+    try {
+      final String? userId = _supabaseService.currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+
+      final List<Map<String, dynamic>> invitationRows = await _selectRows(
+        table: "group_invitations",
+        columns: "id, group_id, invitee_id, created_at",
+        filters: (query) => query
+            .eq("inviter_id", userId)
+            .eq("status", "pending")
+            .order("created_at", ascending: false),
+      );
+      if (invitationRows.isEmpty) {
+        return const Right([]);
+      }
+
+      final List<String> groupIds = invitationRows
+          .map((row) => row["group_id"] as String)
+          .toSet()
+          .toList();
+      final List<String> inviteeIds = invitationRows
+          .map((row) => row["invitee_id"] as String)
+          .toSet()
+          .toList();
+
+      final List<Map<String, dynamic>> groupRows = await _selectRows(
+        table: "groups",
+        columns: "id, name, theme",
+        filters: (query) => query.inFilter("id", groupIds),
+      );
+      final Map<String, Map<String, dynamic>> groupsById = {
+        for (final Map<String, dynamic> row in groupRows)
+          row["id"] as String: row,
+      };
+      final Map<String, Map<String, dynamic>> profilesById =
+          await _profilesById(inviteeIds);
+
+      return Right(
+        invitationRows.map((row) {
+          final String groupId = row["group_id"] as String;
+          final String inviteeId = row["invitee_id"] as String;
+          final Map<String, dynamic>? groupRow = groupsById[groupId];
+          final Map<String, dynamic>? profileRow = profilesById[inviteeId];
+
+          return SentGroupInvitationEntity(
+            id: row["id"] as String,
+            groupId: groupId,
+            groupName: groupRow?["name"] as String? ?? "Grupo",
+            theme: GroupThemeType.byName(groupRow?["theme"] as String?),
+            inviteeId: inviteeId,
+            inviteeName: _displayName(profileRow, fallback: "Amigo"),
+            inviteeColorValue:
+                (profileRow?["accent_color_value"] as num?)?.toInt() ??
+                GroupAvatarColors.byIndex(inviteeId.hashCode.abs()),
+            createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
+          );
+        }).toList(),
       );
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

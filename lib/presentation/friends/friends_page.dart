@@ -6,7 +6,6 @@ import "package:help_out/app/app_ui_constants.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/friends/friends_controller.dart";
 import "package:help_out/presentation/friends/widgets/friends_activity_shortcuts.dart";
-import "package:help_out/presentation/friends/widgets/friends_group_invitations.dart";
 import "package:help_out/presentation/friends/widgets/friends_invite_code_disclosure.dart";
 import "package:help_out/presentation/friends/widgets/friends_loading_skeleton.dart";
 import "package:help_out/presentation/friends/widgets/friends_section.dart";
@@ -59,15 +58,14 @@ class FriendsPage extends GetView<FriendsController> {
                 children: [
                   const Gap(14),
                   FriendsActivityShortcuts(
+                    pendingCount: controller.requests.length,
+                    sentCount:
+                        controller.groupInvitations.length +
+                        controller.sentGroupInvitations.length,
                     onPendingTap: controller.openPendingRequestsPage,
-                    onSentTap: controller.openSentRequestsPage,
+                    onSentTap: controller.openGroupInvitationsPage,
                   ),
                   const Gap(18),
-                  FriendsGroupInvitations(
-                    invitations: controller.groupInvitations.toList(),
-                    onAccept: controller.acceptGroupInvitation,
-                    onDecline: controller.declineGroupInvitation,
-                  ),
                   FriendsSection(
                     friends: controller.friends,
                     onShare: controller.shareInviteCode,
