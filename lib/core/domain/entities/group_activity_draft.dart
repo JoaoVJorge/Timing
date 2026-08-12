@@ -17,14 +17,17 @@ class GroupActivityDraft {
     this.restMinutes = 5,
     this.focusSessionCount = 1,
     this.wallpaperIndex = 0,
+    this.activityType = "daily",
   }) : kind = GroupActivityKind.subject,
        targetDays = 0,
+       sequenceType = "casual",
        goalType = "total";
 
   const GroupActivityDraft.goal({
     required this.name,
     required this.colorValue,
     this.targetDays = 0,
+    this.sequenceType = "casual",
     this.goalType = "total",
   }) : kind = GroupActivityKind.goal,
        category = null,
@@ -33,7 +36,8 @@ class GroupActivityDraft {
        iconName = "",
        restMinutes = 5,
        focusSessionCount = 1,
-       wallpaperIndex = 0;
+       wallpaperIndex = 0,
+       activityType = "daily";
 
   final GroupActivityKind kind;
   final String name;
@@ -46,6 +50,8 @@ class GroupActivityDraft {
   final int focusSessionCount;
   final int wallpaperIndex;
   final int targetDays;
+  final String activityType;
+  final String sequenceType;
   final String goalType;
 
   String get kindName => kind.name;
@@ -61,11 +67,13 @@ class GroupActivityDraft {
       "rest_minutes": restMinutes,
       "focus_session_count": focusSessionCount,
       "wallpaper_index": wallpaperIndex,
+      "activity_type": activityType,
     },
     GroupActivityKind.goal => {
       "name": name,
       "color_value": colorValue,
       "target_days": targetDays,
+      "sequence_type": sequenceType,
       "goal_type": goalType,
     },
   };

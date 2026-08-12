@@ -118,6 +118,8 @@ class DailyTasksDataSource {
         "colorValue": (row["color_value"] as num?)?.toInt() ?? 0,
         "targetDays": (row["target_days"] as num?)?.toInt() ?? 0,
         "completedDates": row["completed_dates"] as List<dynamic>? ?? [],
+        "sequenceType": row["sequence_type"] ?? row["goal_type"],
+        "lastResolvedMissedDate": row["last_resolved_missed_date"],
         "goalType": row["goal_type"],
       });
 
@@ -128,6 +130,8 @@ class DailyTasksDataSource {
     "color_value": task.colorValue,
     "target_days": task.targetDays,
     "completed_dates": task.completedDates,
+    "sequence_type": task.sequenceType.name,
+    "last_resolved_missed_date": task.lastResolvedMissedDate,
     "goal_type": task.goalType.name,
     "updated_at": DateTime.now().toUtc().toIso8601String(),
   };
