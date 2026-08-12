@@ -5,6 +5,7 @@ import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
+import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 
@@ -37,6 +38,15 @@ class GroupsRepository {
 
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
+
+  Future<Either<AppError, List<GroupInvitationEntity>>> getPendingInvitations() =>
+      _groupsDataSource.getPendingInvitations();
+
+  Future<Either<AppError, GroupEntity>> acceptInvitation(String invitationId) =>
+      _groupsDataSource.acceptInvitation(invitationId);
+
+  Future<Either<AppError, void>> declineInvitation(String invitationId) =>
+      _groupsDataSource.declineInvitation(invitationId);
 
   Future<Either<AppError, GroupEntity>> joinGroupByInviteCode(
     String inviteCode,

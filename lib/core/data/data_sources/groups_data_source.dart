@@ -5,6 +5,7 @@ import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
 import "package:help_out/core/domain/entities/group_image_message_entity.dart";
+import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
@@ -270,6 +271,73 @@ class GroupsDataSource {
     }
   }
 
+  Future<Either<AppError, List<GroupInvitationEntity>>>
+  getPendingInvitations() async {
+    try {
+      final String? userId = _supabaseService.currentUserId;
+      if (userId == null) {
+        return const Right([]);
+      }
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "pending_group_invitations",
+      );
+      final List<dynamic> rows = response as List<dynamic>? ?? const [];
+      return Right(
+        rows
+            .map(
+              (row) => GroupInvitationEntity.fromMap(
+                Map<String, dynamic>.from(row as Map),
+              ),
+            )
+            .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, GroupEntity>> acceptInvitation(
+    String invitationId,
+  ) async {
+    String operation = "rpc public.accept_group_invitation";
+    try {
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "accept_group_invitation",
+        params: {"invitation_id": invitationId},
+      );
+      final List<dynamic> rows = response as List<dynamic>;
+      if (rows.isEmpty) {
+        throw StateError("accept_group_invitation returned no group row.");
+      }
+      final String groupId = (rows.first as Map)["id"] as String;
+      final Either<AppError, List<GroupEntity>> groupsResult =
+          await getGroups();
+      return groupsResult.fold(Left.new, (groups) {
+        for (final GroupEntity item in groups) {
+          if (item.id == groupId) {
+            return Right(item);
+          }
+        }
+        throw StateError("Accepted group was not returned by getGroups.");
+      });
+    } catch (error, stackTrace) {
+      _logSqlError(operation, error, stackTrace);
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, void>> declineInvitation(String invitationId) async {
+    try {
+      await _supabaseService.requireClient.rpc(
+        "decline_group_invitation",
+        params: {"invitation_id": invitationId},
+      );
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   Future<Either<AppError, GroupEntity>> joinGroupByInviteCode(
     String inviteCode,
   ) async {
@@ -352,13 +420,12 @@ class GroupsDataSource {
         rows.first as Map,
       );
       final String groupId = groupRow["id"] as String;
-      operation = "select public.profiles for group members";
+      operation = "select public.profiles for group owner";
       final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById([
-            userId,
-            ...invitedFriends.map((item) => item.id),
-          ], withPhoto: true);
+          await _profilesById([userId], withPhoto: true);
       final DateTime now = DateTime.now().toUtc();
+      // Invited friends are not members yet: they get a pending invitation and
+      // only appear once they accept. The new group starts with the owner only.
       final List<GroupMemberEntity> members = [
         _memberFromRows(
           memberRow: {
@@ -370,15 +437,6 @@ class GroupsDataSource {
           scoresByUser: const {},
           theme: theme,
         ),
-        for (int index = 0; index < invitedFriends.length; index++)
-          GroupMemberEntity(
-            id: invitedFriends[index].id,
-            name: invitedFriends[index].name,
-            avatarColorValue: GroupAvatarColors.byIndex(index),
-            todaySeconds: 0,
-            weekSeconds: 0,
-            monthSeconds: 0,
-          ),
       ];
 
       return Right(
