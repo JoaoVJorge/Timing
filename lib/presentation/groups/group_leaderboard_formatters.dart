@@ -48,20 +48,7 @@ String localizedGroupName(BuildContext context, GroupEntity group) =>
     };
 
 String formatRankLabel(BuildContext context, int rank) {
-  final String languageCode = Localizations.localeOf(context).languageCode;
-  if (languageCode == "en") {
-    final int lastTwoDigits = rank % 100;
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
-      return "${rank}th";
-    }
-    return switch (rank % 10) {
-      1 => "${rank}st",
-      2 => "${rank}nd",
-      3 => "${rank}rd",
-      _ => "${rank}th",
-    };
-  }
-  return "$rankº";
+  return context.l10n.rankLabel(rank);
 }
 
 extension LeaderboardPeriodDescriptionX on LeaderboardPeriodType {

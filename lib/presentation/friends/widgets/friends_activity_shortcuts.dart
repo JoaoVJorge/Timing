@@ -19,7 +19,7 @@ class FriendsActivityShortcuts extends StatelessWidget {
       Expanded(
         child: _ShortcutTile(
           icon: Icons.download_rounded,
-          title: _pendingLabel(context),
+          title: context.l10n.friendRequestsReceivedTab,
           onTap: onPendingTap,
         ),
       ),
@@ -27,24 +27,12 @@ class FriendsActivityShortcuts extends StatelessWidget {
       Expanded(
         child: _ShortcutTile(
           icon: Icons.send_rounded,
-          title: _sentLabel(context),
+          title: context.l10n.friendRequestsSentTab,
           onTap: onSentTap,
         ),
       ),
     ],
   );
-
-  String _pendingLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Solicitudes",
-    "pt" => "Solicitações",
-    _ => "Requests",
-  };
-
-  String _sentLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Invitaciones",
-    "pt" => "Convites",
-    _ => "Invites",
-  };
 }
 
 class _ShortcutTile extends StatelessWidget {

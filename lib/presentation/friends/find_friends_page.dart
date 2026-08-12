@@ -31,7 +31,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     topBar: AppTopBar(
-      title: _addFriendTitle(context),
+      title: context.l10n.addFriendTitle,
       showBackButton: true,
       onBack: () => Navigator.of(context).maybePop(),
     ),
@@ -61,7 +61,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
             return Column(
               children: [
                 const Gap(14),
-                _CodeNotFoundCard(text: _notFoundText(context)),
+                _CodeNotFoundCard(text: context.l10n.friendCodeNotFound),
               ],
             );
           }
@@ -81,19 +81,6 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
     }
     codeController.text = text.toUpperCase();
   }
-
-  String _addFriendTitle(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Adicionar amigo",
-        "pt" => "Adicionar amigo",
-        _ => "Add friend",
-      };
-
-  String _notFoundText(BuildContext context) => switch (context.languageCode) {
-    "es" => "No encontramos ningún usuario con este código.",
-    "pt" => "Não encontramos nenhum usuário com este código.",
-    _ => "We could not find a user with this code.",
-  };
 }
 
 class _InviteLookupCard extends StatelessWidget {
@@ -132,7 +119,7 @@ class _InviteLookupCard extends StatelessWidget {
             const Gap(12),
             Expanded(
               child: Text(
-                _title(context),
+                context.l10n.friendInviteCodeTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.extraBold24.copyWith(
@@ -145,7 +132,7 @@ class _InviteLookupCard extends StatelessWidget {
         ),
         const Gap(12),
         Text(
-          _fieldLabel(context),
+          context.l10n.friendInviteCodeFieldLabel,
           style: context.textStyles.bodyMedium.copyWith(
             color: context.colorTokens.textHint,
             fontSize: 12,
@@ -173,7 +160,7 @@ class _InviteLookupCard extends StatelessWidget {
                   ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: _fieldHint(context),
+                    hintText: context.l10n.friendInviteCodeFieldHint,
                     hintStyle: context.textStyles.bodyMedium.copyWith(
                       color: context.colorTokens.textHint,
                       fontWeight: FontWeight.w700,
@@ -202,7 +189,7 @@ class _InviteLookupCard extends StatelessWidget {
                       ),
                       const Gap(6),
                       Text(
-                        _pasteLabel(context),
+                        context.l10n.pasteButton,
                         style: context.textStyles.bodyMedium.copyWith(
                           color: context.colorTokens.primary,
                           fontWeight: FontWeight.w900,
@@ -219,7 +206,7 @@ class _InviteLookupCard extends StatelessWidget {
         Obx(() {
           final FriendsController friendsController = Get.find();
           return FriendWidePrimaryButton(
-            label: _searchLabel(context),
+            label: context.l10n.searchCodeButton,
             isLoading: friendsController.isSearching.value,
             onTap: onSearch,
             icon: Icons.search_rounded,
@@ -228,36 +215,6 @@ class _InviteLookupCard extends StatelessWidget {
       ],
     ),
   );
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Código de invitación",
-    "pt" => "Código de convite",
-    _ => "Invite code",
-  };
-
-  String _fieldLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Escribe o pega el código",
-    "pt" => "Digite ou cole o código",
-    _ => "Type or paste the code",
-  };
-
-  String _fieldHint(BuildContext context) => switch (context.languageCode) {
-    "es" => "Como ABCDE12345",
-    "pt" => "Como ABCDE12345",
-    _ => "Like ABCDE12345",
-  };
-
-  String _pasteLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Pegar",
-    "pt" => "Colar",
-    _ => "Paste",
-  };
-
-  String _searchLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Buscar código",
-    "pt" => "Buscar código",
-    _ => "Search code",
-  };
 }
 
 class _FoundUserSection extends StatelessWidget {
@@ -284,7 +241,7 @@ class _FoundUserSection extends StatelessWidget {
           ),
           const Gap(8),
           Text(
-            _title(context),
+            context.l10n.friendUserFoundTitle,
             style: context.textStyles.extraBold24.copyWith(
               color: context.colorTokens.textBody,
               fontSize: 18,
@@ -348,7 +305,7 @@ class _FoundUserSection extends StatelessWidget {
                         ),
                         const Gap(5),
                         Text(
-                          _foundByCode(context),
+                          context.l10n.friendFoundByCode,
                           style: context.textStyles.bodySmall.copyWith(
                             color: const Color(0xFF3D8B4D),
                             fontWeight: FontWeight.w900,
@@ -362,37 +319,13 @@ class _FoundUserSection extends StatelessWidget {
             ),
             const Gap(10),
             isSent
-                ? FriendSentChip(label: _sentLabel(context))
-                : FriendAddButton(label: _addLabel(context), onTap: onAdd),
+                ? FriendSentChip(label: context.l10n.sentLabel)
+                : FriendAddButton(label: context.l10n.addButton, onTap: onAdd),
           ],
         ),
       ),
     ],
   );
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Usuario encontrado",
-    "pt" => "Usuário encontrado",
-    _ => "User found",
-  };
-
-  String _foundByCode(BuildContext context) => switch (context.languageCode) {
-    "es" => "Encontrado por código",
-    "pt" => "Encontrado pelo código",
-    _ => "Found by code",
-  };
-
-  String _addLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Agregar",
-    "pt" => "Adicionar",
-    _ => "Add",
-  };
-
-  String _sentLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Enviado",
-    "pt" => "Enviado",
-    _ => "Sent",
-  };
 }
 
 class _CodeNotFoundCard extends StatelessWidget {
@@ -445,7 +378,7 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
               const Gap(10),
               Expanded(
                 child: Text(
-                  _title(context),
+                  context.l10n.friendHowItWorksTitle,
                   style: context.textStyles.bodyMedium.copyWith(
                     color: context.colorTokens.textHint,
                     fontSize: 13,
@@ -467,17 +400,17 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
             const Gap(12),
             _HowStep(
               icon: Icons.chat_bubble_outline_rounded,
-              text: _stepOne(context),
+              text: context.l10n.friendHowItWorksStepOne,
               isLast: false,
             ),
             _HowStep(
               icon: Icons.content_paste_rounded,
-              text: _stepTwo(context),
+              text: context.l10n.friendHowItWorksStepTwo,
               isLast: false,
             ),
             _HowStep(
               icon: Icons.person_add_alt_1_rounded,
-              text: _stepThree(context),
+              text: context.l10n.friendHowItWorksStepThree,
               isLast: true,
             ),
           ],
@@ -485,30 +418,6 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
       ),
     ),
   );
-
-  String _title(BuildContext context) => switch (context.languageCode) {
-    "es" => "Cómo funciona",
-    "pt" => "Como funciona",
-    _ => "How it works",
-  };
-
-  String _stepOne(BuildContext context) => switch (context.languageCode) {
-    "es" => "Pide el código a tu amigo",
-    "pt" => "Peça o código ao seu amigo",
-    _ => "Ask your friend for their code",
-  };
-
-  String _stepTwo(BuildContext context) => switch (context.languageCode) {
-    "es" => "Pega el código para encontrar el perfil",
-    "pt" => "Cole o código para encontrar o perfil",
-    _ => "Paste the code to find the profile",
-  };
-
-  String _stepThree(BuildContext context) => switch (context.languageCode) {
-    "es" => "Envía la solicitud para agregar",
-    "pt" => "Envie a solicitação para adicionar",
-    _ => "Send the request to add them",
-  };
 }
 
 class _HowStep extends StatelessWidget {

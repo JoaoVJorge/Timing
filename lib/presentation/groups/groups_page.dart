@@ -298,7 +298,7 @@ class _ManageMembersView extends StatelessWidget {
       children: [
         const Gap(10),
         AppTopBar(
-          title: "Gerenciar membros",
+          title: context.l10n.manageMembersTitle,
           showBackButton: true,
           onBack: controller.onBackToGroupDetails,
         ),
@@ -310,18 +310,18 @@ class _ManageMembersView extends StatelessWidget {
               _ManageGroupSummaryCard(group: group),
               const Gap(12),
               if (leader != null) ...[
-                _MembersSectionLabel(label: "Líder"),
+                _MembersSectionLabel(label: context.l10n.groupLeaderLabel),
                 const Gap(8),
                 _MemberRow(
                   member: leader,
-                  roleLabel: "Líder do grupo",
-                  badgeLabel: "Líder",
+                  roleLabel: context.l10n.groupLeaderRoleLabel,
+                  badgeLabel: context.l10n.groupLeaderLabel,
                   isFirst: true,
                   isLast: true,
                 ),
                 const Gap(12),
               ],
-              _MembersSectionLabel(label: "Membros"),
+              _MembersSectionLabel(label: context.l10n.groupMembersLabel),
               const Gap(8),
               Container(
                 decoration: AppSurfaces.rowGroup(context.colorTokens),
@@ -330,7 +330,7 @@ class _ManageMembersView extends StatelessWidget {
                     for (int index = 0; index < members.length; index++) ...[
                       _MemberRow(
                         member: members[index],
-                        roleLabel: "Membro",
+                        roleLabel: context.l10n.groupMemberRoleLabel,
                         isFirst: index == 0,
                         isLast: index == members.length - 1,
                       ),
@@ -379,7 +379,7 @@ class _ManageGroupSummaryCard extends StatelessWidget {
               ),
               const Gap(3),
               Text(
-                "${group.members.length} participantes",
+                context.l10n.groupParticipantsCount(group.members.length),
                 style: context.textStyles.bodyMedium.copyWith(
                   color: context.colorTokens.textHint,
                   fontWeight: FontWeight.w700,
@@ -526,7 +526,7 @@ class _AddMemberButton extends StatelessWidget {
           ),
           const Gap(8),
           Text(
-            "Adicionar membro",
+            context.l10n.addMemberButton,
             style: context.textStyles.cardTitle.copyWith(
               color: context.colorTokens.primary,
             ),
@@ -745,7 +745,7 @@ class _GroupDetailsHeader extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: _DetailIconButton(
                 icon: Icons.more_vert_rounded,
-                semanticLabel: "Ações do grupo",
+                semanticLabel: context.l10n.groupActionsLabel,
                 onTap: onActions,
               ),
             ),
@@ -773,7 +773,7 @@ class _GroupDetailsHeader extends StatelessWidget {
                         ),
                         const Gap(5),
                         Text(
-                          "${group.members.length} membros",
+                          context.l10n.groupMembersCount(group.members.length),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.textStyles.caption.copyWith(
@@ -823,17 +823,17 @@ class _GroupDetailsTabs extends StatelessWidget {
     child: Row(
       children: [
         _TabPill(
-          label: "Ranking",
+          label: context.l10n.leaderboardTitle,
           isSelected: selectedTab == GroupDetailsTab.ranking,
           onTap: () => onSelectTab(GroupDetailsTab.ranking),
         ),
         _TabPill(
-          label: "Metas",
+          label: context.l10n.goalsTabLabel,
           isSelected: selectedTab == GroupDetailsTab.goals,
           onTap: () => onSelectTab(GroupDetailsTab.goals),
         ),
         _TabPill(
-          label: "Chat",
+          label: context.l10n.chatTabLabel,
           isSelected: selectedTab == GroupDetailsTab.chat,
           onTap: () => onSelectTab(GroupDetailsTab.chat),
         ),
@@ -853,14 +853,14 @@ class _GoalsTab extends StatelessWidget {
       _GroupActivityCard(group: group),
       _GroupInfoCard(
         icon: Icons.track_changes_rounded,
-        title: "Meta do grupo",
+        title: context.l10n.groupGoalTitle,
         value: _goalTitle(context, group),
         description: _goalDescription(context, group),
       ),
       const Gap(10),
       _GroupInfoCard(
         icon: Icons.shield_outlined,
-        title: "Regra principal",
+        title: context.l10n.groupMainRuleTitle,
         description: _ruleDescription(context, group),
       ),
       const Gap(10),
@@ -868,10 +868,12 @@ class _GoalsTab extends StatelessWidget {
       const Gap(10),
       _GroupInfoCard(
         icon: Icons.flag_outlined,
-        title: "Próximo marco",
-        value:
-            "${(group.members.length * 0.7).ceil()}/${group.members.length} membros",
-        description: "para liberar o selo \"Foco Total\"",
+        title: context.l10n.groupNextMilestoneTitle,
+        value: context.l10n.groupMembersProgressValue(
+          (group.members.length * 0.7).ceil(),
+          group.members.length,
+        ),
+        description: context.l10n.groupNextMilestoneDescription,
       ),
     ],
   );
@@ -920,9 +922,7 @@ class _GroupActivityCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                header.isGoal
-                    ? Icons.flag_rounded
-                    : Icons.menu_book_rounded,
+                header.isGoal ? Icons.flag_rounded : Icons.menu_book_rounded,
                 size: 27,
                 color: context.colorTokens.primary,
               ),
@@ -932,7 +932,7 @@ class _GroupActivityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Atividade do grupo",
+                      context.l10n.groupActivityLabel,
                       style: context.textStyles.bodyMedium.copyWith(
                         fontSize: 13,
                         color: context.colorTokens.textHint,
@@ -952,7 +952,7 @@ class _GroupActivityCard extends StatelessWidget {
           ),
           const Gap(6),
           Text(
-            "$reached/$total atingiram a meta",
+            context.l10n.groupActivityReachedGoal(reached, total),
             style: context.textStyles.bodyMedium.copyWith(
               fontSize: 13,
               color: context.colorTokens.textHint,
@@ -1087,7 +1087,10 @@ class _ProgressInfoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Progresso coletivo", style: context.textStyles.cardTitle),
+                Text(
+                  context.l10n.groupCollectiveProgressTitle,
+                  style: context.textStyles.cardTitle,
+                ),
                 const Gap(5),
                 Row(
                   children: [
@@ -1112,7 +1115,10 @@ class _ProgressInfoCard extends StatelessWidget {
                 ),
                 const Gap(4),
                 Text(
-                  "$completed/$memberCount membros concluíram hoje",
+                  context.l10n.groupMembersCompletedToday(
+                    completed,
+                    memberCount,
+                  ),
                   style: context.textStyles.bodyMedium.copyWith(fontSize: 13),
                 ),
               ],
@@ -1268,9 +1274,9 @@ class _ChatEmptyImages extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: AppEmptyState(
       icon: Icons.image_outlined,
-      title: "Nenhuma imagem ainda",
-      description: "Envie a primeira imagem do grupo.",
-      actionLabel: "Enviar imagem",
+      title: context.l10n.groupNoImagesTitle,
+      description: context.l10n.groupNoImagesDescription,
+      actionLabel: context.l10n.groupSendImageButton,
       onTapAction: onTapSend,
     ),
   );
@@ -1302,7 +1308,9 @@ class _SendImageBar extends StatelessWidget {
           const Gap(10),
           Expanded(
             child: Text(
-              isSending ? "Enviando imagem..." : "Enviar imagem",
+              isSending
+                  ? context.l10n.groupSendingImage
+                  : context.l10n.groupSendImageButton,
               style: context.textStyles.cardTitle.copyWith(fontSize: 15),
             ),
           ),
@@ -1337,193 +1345,6 @@ String _messageTime(DateTime date) {
   final DateTime local = date.toLocal();
   return "${local.hour.toString().padLeft(2, "0")}:"
       "${local.minute.toString().padLeft(2, "0")}";
-}
-
-// ignore: unused_element
-class _MockChatTab extends StatelessWidget {
-  const _MockChatTab({required this.controller, required this.group});
-
-  final GroupsController controller;
-  final GroupEntity group;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<GroupMemberEntity> members = group.members.take(3).toList();
-
-    return Column(
-      children: [
-        Expanded(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: SingleChildScrollView(
-              reverse: true,
-              padding: const EdgeInsets.only(top: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _ChatBubble(
-                    member: members.isEmpty ? null : members.first,
-                    message: "Fechei 30 min hoje. Bora pra mais!",
-                    time: "09:15",
-                    isMine: false,
-                  ),
-                  const Gap(14),
-                  _ChatBubble(
-                    member: members.length < 2 ? null : members[1],
-                    message: "Boa! Vou começar agora. Foco total!",
-                    time: "09:18",
-                    isMine: true,
-                  ),
-                  const Gap(14),
-                  _ChatBubble(
-                    member: members.length < 3 ? null : members[2],
-                    message: "Bora manter a meta do grupo",
-                    time: "09:19",
-                    isMine: false,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const Gap(12),
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: context.colorTokens.surface,
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.attach_file_rounded,
-                color: context.colorTokens.textHint,
-              ),
-              const Gap(10),
-              Expanded(
-                child: Text(
-                  "Enviar mensagem...",
-                  style: context.textStyles.caption,
-                ),
-              ),
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  gradient: context.colorTokens.primaryGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.send_rounded,
-                  color: context.colorTokens.primaryForeground,
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Gap(8),
-      ],
-    );
-  }
-}
-
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({
-    required this.member,
-    required this.message,
-    required this.time,
-    required this.isMine,
-  });
-
-  final GroupMemberEntity? member;
-  final String message;
-  final String time;
-  final bool isMine;
-
-  @override
-  Widget build(BuildContext context) {
-    final GroupMemberEntity effectiveMember =
-        member ??
-        const GroupMemberEntity(
-          id: "",
-          name: "Membro",
-          avatarColorValue: 0xFF6B9528,
-          todaySeconds: 0,
-          weekSeconds: 0,
-          monthSeconds: 0,
-        );
-
-    return Row(
-      mainAxisAlignment: isMine
-          ? MainAxisAlignment.end
-          : MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (!isMine) ...[
-          GroupMemberAvatar(
-            name: effectiveMember.name,
-            colorValue: effectiveMember.avatarColorValue,
-            avatar: effectiveMember.avatar,
-            size: 42,
-          ),
-          const Gap(8),
-        ],
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 12, 14, 10),
-            decoration: BoxDecoration(
-              color: isMine
-                  ? context.colorTokens.primaryVeryLight
-                  : context.colorTokens.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.colorTokens.borderUnfocused.withValues(
-                  alpha: 0.38,
-                ),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  effectiveMember.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: isMine
-                        ? context.colorTokens.primary
-                        : const Color(0xFFE85888),
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const Gap(4),
-                Text(message, style: context.textStyles.bodyMedium),
-                const Gap(4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(time, style: context.textStyles.bodyTiny),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (isMine) ...[
-          const Gap(8),
-          GroupMemberAvatar(
-            name: effectiveMember.name,
-            colorValue: effectiveMember.avatarColorValue,
-            avatar: effectiveMember.avatar,
-            size: 42,
-          ),
-        ],
-      ],
-    );
-  }
 }
 
 class _TabPill extends StatelessWidget {
@@ -1584,6 +1405,7 @@ class _DetailIconButton extends StatelessWidget {
     child: BounceTap(
       onTap: onTap,
       pressedScale: 0.92,
+      behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: AppSpacing.minTapTarget,
         height: AppSpacing.minTapTarget,
@@ -1605,6 +1427,7 @@ class _DetailBackButton extends StatelessWidget {
     child: BounceTap(
       onTap: onTap,
       pressedScale: 0.92,
+      behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: AppSpacing.minTapTarget,
         height: AppSpacing.minTapTarget,
@@ -1678,19 +1501,19 @@ class _GroupActionsSheet extends StatelessWidget {
             const Gap(14),
             _GroupActionRow(
               icon: Icons.groups_2_outlined,
-              label: "Gerenciar membros",
+              label: context.l10n.manageMembersTitle,
               onTap: onManageMembers,
             ),
             const Gap(8),
             _GroupActionRow(
               icon: Icons.edit_outlined,
-              label: "Editar grupo",
+              label: context.l10n.editGroupLabel,
               onTap: onEditGroup,
             ),
             const Gap(8),
             _GroupActionRow(
               icon: Icons.logout_rounded,
-              label: "Sair do grupo",
+              label: context.l10n.leaveGroupLabel,
               isDestructive: true,
               onTap: onLeaveGroup,
             ),
@@ -1796,11 +1619,7 @@ class _GroupIcon extends StatelessWidget {
 
 String _groupDescription(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
-  return switch (context.languageCode) {
-    "pt" => "Compartilhando $metric e superando desafios.",
-    "es" => "Compartiendo $metric y superando retos.",
-    _ => "Sharing $metric and beating challenges together.",
-  };
+  return context.l10n.groupDescription(metric);
 }
 
 GroupMemberEntity? _leaderFor(GroupEntity group) {
@@ -1813,43 +1632,21 @@ GroupMemberEntity? _leaderFor(GroupEntity group) {
 }
 
 String _friendsCardSubtitle(BuildContext context, int groupCount) =>
-    switch (context.languageCode) {
-      "pt" => "Solicitações, convites e $groupCount em grupos",
-      "es" => "Solicitudes, invitaciones y $groupCount en grupos",
-      _ => "Requests, invites and $groupCount in groups",
-    };
+    context.l10n.groupsFriendsSubtitleWithCount(groupCount);
 
 String _goalTitle(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
-  return switch (context.languageCode) {
-    "pt" => "Manter $metric todos os dias",
-    "es" => "Mantener $metric todos los dias",
-    _ => "Keep $metric every day",
-  };
+  return context.l10n.groupGoalKeepMetric(metric);
 }
 
 String _goalDescription(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
-  return switch (context.languageCode) {
-    "pt" =>
-      "Cada participante deve registrar progresso em $metric para manter a sequência do grupo.",
-    "es" =>
-      "Cada participante debe registrar progreso en $metric para mantener la racha del grupo.",
-    _ =>
-      "Each member should log progress in $metric to keep the group streak going.",
-  };
+  return context.l10n.groupGoalDescription(metric);
 }
 
 String _ruleDescription(BuildContext context, GroupEntity group) {
   final String metric = groupMetricDescription(context, group.theme);
-  return switch (context.languageCode) {
-    "pt" =>
-      "Registre pelo menos uma atividade de $metric por dia. Manter a sequência fortalece o grupo.",
-    "es" =>
-      "Registra al menos una actividad de $metric por día. Mantener la racha fortalece el grupo.",
-    _ =>
-      "Log at least one $metric activity per day. Keeping the streak strengthens the group.",
-  };
+  return context.l10n.groupRuleDescription(metric);
 }
 
 class _GroupsEmptyState extends StatelessWidget {
@@ -1874,25 +1671,25 @@ class _GroupsEmptyState extends StatelessWidget {
       ),
       const Gap(AppSpacing.betweenRelated),
       _JoinWithCodeButton(
-        label: _joinWithCodeLabel(context),
+        label: context.l10n.joinWithCodeButton,
         onTap: onJoinWithCode,
       ),
       const Gap(AppSpacing.betweenSections),
-      Center(child: _BenefitsHeader(label: _benefitsHeader(context))),
+      Center(child: _BenefitsHeader(label: context.l10n.groupsBenefitsHeader)),
       const Gap(AppSpacing.betweenRelated),
       Row(
         children: [
           Expanded(
             child: _BenefitTile(
               icon: Icons.leaderboard_rounded,
-              label: _rankingLabel(context),
+              label: context.l10n.leaderboardTitle,
             ),
           ),
           const Gap(AppSpacing.titleToDescription),
           Expanded(
             child: _BenefitTile(
               icon: Icons.show_chart_rounded,
-              label: _progressLabel(context),
+              label: context.l10n.progressTitle,
             ),
           ),
           const Gap(AppSpacing.titleToDescription),
@@ -1906,32 +1703,6 @@ class _GroupsEmptyState extends StatelessWidget {
       ),
     ],
   );
-
-  String _joinWithCodeLabel(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Tengo un código de invitación",
-        "pt" => "Tenho um código de convite",
-        _ => "I have an invite code",
-      };
-
-  String _benefitsHeader(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "En un grupo puedes:",
-        "pt" => "Em um grupo você pode:",
-        _ => "In a group you can:",
-      };
-
-  String _rankingLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Ranking",
-    "pt" => "Ranking",
-    _ => "Ranking",
-  };
-
-  String _progressLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Progreso",
-    "pt" => "Progresso",
-    _ => "Progress",
-  };
 }
 
 class _JoinWithCodeButton extends StatelessWidget {

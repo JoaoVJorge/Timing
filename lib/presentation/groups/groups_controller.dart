@@ -327,11 +327,9 @@ class GroupsController extends GetxController {
       _appNavigator.toNamed(AppRoutes.friends) ?? Future<void>.value();
 
   void onTapEditGroup() {
-    final String message = switch (Get.context?.languageCode) {
-      "pt" => "Edição de grupo em breve.",
-      "es" => "Edición del grupo próximamente.",
-      _ => "Group editing is coming soon.",
-    };
+    final String message =
+        Get.context?.l10n.groupEditingComingSoon ??
+        "Group editing is coming soon.";
     _appNavigator.showSnackBar(text: message);
   }
 
@@ -356,15 +354,11 @@ class GroupsController extends GetxController {
       isShowingGroupDetails.value = false;
       groups.refresh();
       unawaited(_invalidateActivityCaches());
-      _appNavigator.showSuccessSnackBar(_leftGroupMessage);
+      _appNavigator.showSuccessSnackBar(
+        Get.context?.l10n.leftGroupMessage ?? "You left the group.",
+      );
     });
   }
-
-  String get _leftGroupMessage => switch (Get.context?.languageCode) {
-    "pt" => "Voce saiu do grupo.",
-    "es" => "Saliste del grupo.",
-    _ => "You left the group.",
-  };
 
   Future<void> onTapJoinWithCode() async {
     final dynamic result = await _appNavigator.toNamed(AppRoutes.joinGroup);
@@ -384,7 +378,9 @@ class GroupsController extends GetxController {
     groups.refresh();
     await _invalidateActivityCaches();
     onSelectGroup(joinedGroup);
-    _appNavigator.showSuccessSnackBar(_joinedGroupMessage);
+    _appNavigator.showSuccessSnackBar(
+      Get.context?.l10n.joinedGroupMessage ?? "You joined the group",
+    );
   }
 
   Future<ImageSource?> _pickImageSource() {
@@ -394,47 +390,11 @@ class GroupsController extends GetxController {
     }
     return showPhotoSourceBottomSheet(
       context: context,
-      title: _imageSourceTitle,
-      subtitle: _imageSourceSubtitle,
-      cameraLabel: _cameraLabel,
-      galleryLabel: _galleryLabel,
-      cancelLabel: _cancelLabel,
+      title: context.l10n.groupImageSourceTitle,
+      subtitle: context.l10n.groupImageSourceSubtitle,
+      cameraLabel: context.l10n.photoCameraLabel,
+      galleryLabel: context.l10n.photoGalleryLabel,
+      cancelLabel: context.l10n.cancelButton,
     );
   }
-
-  String get _imageSourceTitle => switch (Get.context?.languageCode) {
-    "pt" => "Enviar imagem",
-    "es" => "Enviar imagen",
-    _ => "Send image",
-  };
-
-  String get _imageSourceSubtitle => switch (Get.context?.languageCode) {
-    "pt" => "Escolha como deseja enviar a imagem",
-    "es" => "Elige como deseas enviar la imagen",
-    _ => "Choose how you want to send the image",
-  };
-
-  String get _cameraLabel => switch (Get.context?.languageCode) {
-    "pt" => "Tirar foto",
-    "es" => "Tomar foto",
-    _ => "Take photo",
-  };
-
-  String get _galleryLabel => switch (Get.context?.languageCode) {
-    "pt" => "Escolher da galeria",
-    "es" => "Elegir de la galeria",
-    _ => "Choose from gallery",
-  };
-
-  String get _cancelLabel => switch (Get.context?.languageCode) {
-    "pt" => "Cancelar",
-    "es" => "Cancelar",
-    _ => "Cancel",
-  };
-
-  String get _joinedGroupMessage => switch (Get.context?.languageCode) {
-    "pt" => "Voce entrou no grupo.",
-    "es" => "Te uniste al grupo.",
-    _ => "You joined the group.",
-  };
 }

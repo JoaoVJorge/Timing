@@ -33,7 +33,11 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     topBar: AppTopBar(
-      title: _pageTitle(context),
+      title: switch (selectedMode) {
+        FriendRequestsMode.incoming =>
+          context.l10n.friendRequestsReceivedPageTitle,
+        FriendRequestsMode.sent => context.l10n.friendRequestsSentPageTitle,
+      },
       showBackButton: true,
       onBack: () => Navigator.of(context).maybePop(),
     ),
@@ -52,7 +56,14 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _sectionTitle(context, requests.length),
+                  switch (selectedMode) {
+                    FriendRequestsMode.incoming =>
+                      context.l10n.friendRequestsReceivedSection(
+                        requests.length,
+                      ),
+                    FriendRequestsMode.sent =>
+                      context.l10n.friendRequestsSentSection(requests.length),
+                  },
                   style: context.textStyles.bodyMedium.copyWith(
                     color: context.colorTokens.textBody,
                     fontSize: 15,
@@ -93,35 +104,6 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
       ],
     ),
   );
-
-  String _pageTitle(BuildContext context) => switch (selectedMode) {
-    FriendRequestsMode.incoming => switch (context.languageCode) {
-      "es" => "Solicitudes",
-      "pt" => "Solicitações",
-      _ => "Requests",
-    },
-    FriendRequestsMode.sent => switch (context.languageCode) {
-      "es" => "Invitaciones",
-      "pt" => "Convites",
-      _ => "Invites",
-    },
-  };
-
-  String _sectionTitle(BuildContext context, int count) {
-    final String label = switch (selectedMode) {
-      FriendRequestsMode.incoming => switch (context.languageCode) {
-        "es" => "Recibidas",
-        "pt" => "Recebidas",
-        _ => "Received",
-      },
-      FriendRequestsMode.sent => switch (context.languageCode) {
-        "es" => "Enviadas",
-        "pt" => "Enviadas",
-        _ => "Sent",
-      },
-    };
-    return "$label ($count)";
-  }
 }
 
 class _RequestsModeTabs extends StatelessWidget {
@@ -136,7 +118,7 @@ class _RequestsModeTabs extends StatelessWidget {
       Expanded(
         child: _RequestModeTab(
           icon: Icons.download_rounded,
-          label: _receivedLabel(context),
+          label: context.l10n.friendRequestsReceivedTab,
           isSelected: selectedMode == FriendRequestsMode.incoming,
           onTap: () => onSelect(FriendRequestsMode.incoming),
         ),
@@ -145,25 +127,13 @@ class _RequestsModeTabs extends StatelessWidget {
       Expanded(
         child: _RequestModeTab(
           icon: Icons.send_rounded,
-          label: _sentLabel(context),
+          label: context.l10n.friendRequestsSentTab,
           isSelected: selectedMode == FriendRequestsMode.sent,
           onTap: () => onSelect(FriendRequestsMode.sent),
         ),
       ),
     ],
   );
-
-  String _receivedLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Recibidas",
-    "pt" => "Recebidas",
-    _ => "Received",
-  };
-
-  String _sentLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Enviadas",
-    "pt" => "Enviadas",
-    _ => "Sent",
-  };
 }
 
 class _RequestModeTab extends StatelessWidget {
@@ -266,8 +236,8 @@ class _RequestProfileCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           mode == FriendRequestsMode.incoming
-                              ? _mutualFriends(context)
-                              : _pendingLabel(context),
+                              ? context.l10n.friendMutualFriendsSample
+                              : context.l10n.pendingLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.textStyles.bodySmall.copyWith(
@@ -291,7 +261,7 @@ class _RequestProfileCard extends StatelessWidget {
             children: [
               Expanded(
                 child: FriendRequestActionButton(
-                  label: _declineLabel(context),
+                  label: context.l10n.declineButton,
                   isPrimary: false,
                   onTap: onDecline,
                 ),
@@ -299,7 +269,7 @@ class _RequestProfileCard extends StatelessWidget {
               const Gap(10),
               Expanded(
                 child: FriendRequestActionButton(
-                  label: _acceptLabel(context),
+                  label: context.l10n.acceptButton,
                   isPrimary: true,
                   onTap: onAccept,
                 ),
@@ -310,7 +280,7 @@ class _RequestProfileCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: FriendRequestActionButton(
-              label: _cancelLabel(context),
+              label: context.l10n.cancelButton,
               isPrimary: false,
               onTap: onCancel,
             ),
@@ -318,36 +288,6 @@ class _RequestProfileCard extends StatelessWidget {
       ],
     ),
   );
-
-  String _mutualFriends(BuildContext context) => switch (context.languageCode) {
-    "es" => "3 amigos en común",
-    "pt" => "3 amigos em comum",
-    _ => "3 mutual friends",
-  };
-
-  String _pendingLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Pendiente",
-    "pt" => "Pendente",
-    _ => "Pending",
-  };
-
-  String _acceptLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Aceptar",
-    "pt" => "Aceitar",
-    _ => "Accept",
-  };
-
-  String _declineLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Rechazar",
-    "pt" => "Recusar",
-    _ => "Decline",
-  };
-
-  String _cancelLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Cancelar",
-    "pt" => "Cancelar",
-    _ => "Cancel",
-  };
 }
 
 class _RequestEmptyState extends StatelessWidget {
@@ -373,7 +313,12 @@ class _RequestEmptyState extends StatelessWidget {
           ),
           const Gap(14),
           Text(
-            _title(context),
+            switch (mode) {
+              FriendRequestsMode.incoming =>
+                context.l10n.friendRequestsIncomingEmptyTitle,
+              FriendRequestsMode.sent =>
+                context.l10n.friendRequestsSentEmptyTitle,
+            },
             textAlign: TextAlign.center,
             style: context.textStyles.extraBold20.copyWith(
               color: context.colorTokens.textBody,
@@ -382,7 +327,12 @@ class _RequestEmptyState extends StatelessWidget {
           ),
           const Gap(6),
           Text(
-            _subtitle(context),
+            switch (mode) {
+              FriendRequestsMode.incoming =>
+                context.l10n.friendRequestsIncomingEmptySubtitle,
+              FriendRequestsMode.sent =>
+                context.l10n.friendRequestsSentEmptySubtitle,
+            },
             textAlign: TextAlign.center,
             style: context.textStyles.bodyMedium.copyWith(
               color: context.colorTokens.textHint,
@@ -395,32 +345,6 @@ class _RequestEmptyState extends StatelessWidget {
       ),
     ),
   );
-
-  String _title(BuildContext context) => switch (mode) {
-    FriendRequestsMode.incoming => switch (context.languageCode) {
-      "es" => "Ninguna solicitud recibida",
-      "pt" => "Nenhuma solicitação recebida",
-      _ => "No received requests",
-    },
-    FriendRequestsMode.sent => switch (context.languageCode) {
-      "es" => "Ninguna invitación enviada",
-      "pt" => "Nenhum convite enviado",
-      _ => "No sent invites",
-    },
-  };
-
-  String _subtitle(BuildContext context) => switch (mode) {
-    FriendRequestsMode.incoming => switch (context.languageCode) {
-      "es" => "Las solicitudes aparecerán aquí.",
-      "pt" => "As solicitações aparecerão aqui.",
-      _ => "Requests will appear here.",
-    },
-    FriendRequestsMode.sent => switch (context.languageCode) {
-      "es" => "Tus invitaciones enviadas aparecerán aquí.",
-      "pt" => "Seus convites enviados aparecerão aqui.",
-      _ => "Your sent invites will appear here.",
-    },
-  };
 }
 
 class _SafetyNotice extends StatelessWidget {
@@ -438,7 +362,7 @@ class _SafetyNotice extends StatelessWidget {
         const Gap(10),
         Expanded(
           child: Text(
-            _text(context),
+            context.l10n.friendRequestsSafetyNotice,
             style: context.textStyles.bodySmall.copyWith(
               color: context.colorTokens.textHint,
               fontWeight: FontWeight.w700,
@@ -449,10 +373,4 @@ class _SafetyNotice extends StatelessWidget {
       ],
     ),
   );
-
-  String _text(BuildContext context) => switch (context.languageCode) {
-    "es" => "Acepta solo personas que conoces y confías.",
-    "pt" => "Aceite apenas pessoas que você conhece e confia.",
-    _ => "Only accept people you know and trust.",
-  };
 }

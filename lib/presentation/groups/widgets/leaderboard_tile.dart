@@ -121,18 +121,10 @@ class LeaderboardTile extends StatelessWidget {
 
   String _subtitleText(BuildContext context, {required bool isLeader}) {
     if (isCurrentUser) {
-      return switch (context.languageCode) {
-        "es" => "Tu posición actual",
-        "pt" => "Sua posição atual",
-        _ => context.l10n.currentUserRankSubtitle,
-      };
+      return context.l10n.currentUserRankSubtitle;
     }
     if (isLeader) {
-      return switch (context.languageCode) {
-        "es" => "Líder de este ranking",
-        "pt" => "Líder deste ranking",
-        _ => context.l10n.leaderboardTopPosition,
-      };
+      return context.l10n.leaderboardTopPosition;
     }
     return _differenceText(context);
   }

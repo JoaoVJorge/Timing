@@ -6,6 +6,7 @@ import "package:help_out/app/app_ui_constants.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/presentation/friends/friends_controller.dart";
 import "package:help_out/presentation/friends/widgets/friends_activity_shortcuts.dart";
+import "package:help_out/presentation/friends/widgets/friends_group_invitations.dart";
 import "package:help_out/presentation/friends/widgets/friends_invite_code_disclosure.dart";
 import "package:help_out/presentation/friends/widgets/friends_loading_skeleton.dart";
 import "package:help_out/presentation/friends/widgets/friends_section.dart";
@@ -20,9 +21,9 @@ class FriendsPage extends GetView<FriendsController> {
     backgroundColor: context.colorTokens.scaffold,
     padding: EdgeInsets.zero,
     topBar: AppTopBar(
-      title: _friendsTitle(context),
+      title: context.l10n.friendsTitle,
       showBackButton: true,
-      onBack: () => appNavigator.back<void>(id: 1),
+      onBack: () => appNavigator.back<void>(),
       trailing: AddFriendHeaderButton(onTap: controller.openAddFriendPage),
     ),
     body: RefreshIndicator(
@@ -62,6 +63,11 @@ class FriendsPage extends GetView<FriendsController> {
                     onSentTap: controller.openSentRequestsPage,
                   ),
                   const Gap(18),
+                  FriendsGroupInvitations(
+                    invitations: controller.groupInvitations.toList(),
+                    onAccept: controller.acceptGroupInvitation,
+                    onDecline: controller.declineGroupInvitation,
+                  ),
                   FriendsSection(
                     friends: controller.friends,
                     onShare: controller.shareInviteCode,
@@ -75,10 +81,4 @@ class FriendsPage extends GetView<FriendsController> {
       ),
     ),
   );
-
-  String _friendsTitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Amigos",
-    "pt" => "Amigos",
-    _ => "Friends",
-  };
 }
