@@ -247,15 +247,21 @@ class CreateGroupController extends GetxController {
 
     if (isActivityStep) {
       if (!hasActivityType) {
-        _appNavigator.showErrorSnackBar("Escolha uma atividade para o grupo.");
+        _appNavigator.showErrorSnackBar(
+          Get.context!.l10n.createGroupActivityRequiredError,
+        );
         return;
       }
       if (activityName.value.trim().isEmpty) {
-        _appNavigator.showErrorSnackBar("Dê um nome para a atividade.");
+        _appNavigator.showErrorSnackBar(
+          Get.context!.l10n.createGroupActivityNameRequiredError,
+        );
         return;
       }
       if (!hasValidActivityGoal) {
-        _appNavigator.showErrorSnackBar("Defina uma meta válida.");
+        _appNavigator.showErrorSnackBar(
+          Get.context!.l10n.createGroupActivityGoalInvalidError,
+        );
         return;
       }
       currentStep.value = 2;
@@ -339,7 +345,9 @@ class CreateGroupController extends GetxController {
       return;
     }
     if (!hasActivity) {
-      _appNavigator.showErrorSnackBar("Defina a atividade do grupo.");
+      _appNavigator.showErrorSnackBar(
+        Get.context!.l10n.createGroupActivityMissingError,
+      );
       return;
     }
     if (selectedFriendIds.isEmpty) {

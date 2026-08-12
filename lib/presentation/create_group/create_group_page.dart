@@ -72,9 +72,9 @@ class CreateGroupPage extends StatelessWidget {
 
   String _subtitleForStep(BuildContext context, int step) => switch (step) {
     0 => context.l10n.createGroupSubtitle,
-    1 => "Escolha a atividade que todos do grupo vão fazer.",
-    2 => "Convide pelo menos 1 amigo para participar.",
-    _ => "Revise os dados antes de criar.",
+    1 => context.l10n.createGroupActivityStepSubtitle,
+    2 => context.l10n.createGroupFriendsStepSubtitle,
+    _ => context.l10n.createGroupSummaryStepSubtitle,
   };
 }
 
@@ -85,11 +85,11 @@ class _StepProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<String> labels = [
-      "Informações",
-      "Atividade",
-      "Amigos",
-      "Resumo",
+    final List<String> labels = [
+      context.l10n.createGroupStepInformation,
+      context.l10n.createGroupStepActivity,
+      context.l10n.createGroupStepFriends,
+      context.l10n.createGroupStepSummary,
     ];
 
     return Row(
@@ -551,7 +551,7 @@ class _GoalInput extends StatelessWidget {
               style: context.textStyles.bodySmall,
             ),
             const Gap(8),
-            _numberField(context, "Ex: 30"),
+            _numberField(context, context.l10n.createGroupDaysGoalHint),
           ],
         ],
       );
@@ -567,7 +567,9 @@ class _GoalInput extends StatelessWidget {
         const Gap(8),
         _numberField(
           context,
-          controller.isReadingActivity ? "Ex: 10" : "Ex: 30",
+          controller.isReadingActivity
+              ? context.l10n.createGroupPagesGoalHint
+              : context.l10n.createGroupMinutesGoalHint,
         ),
       ],
     );
@@ -781,14 +783,14 @@ class _FriendsStep extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Não encontrou alguém?",
+                      context.l10n.createGroupAddFriendsPromptTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodyLarge,
                     ),
                     const Gap(2),
                     Text(
-                      "Adicione mais amigos para poder convidar.",
+                      context.l10n.createGroupAddFriendsPromptDescription,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodySmall.copyWith(
@@ -1022,14 +1024,17 @@ extension on _SummaryStep {
     final String goal = controller.activityGoalController.text.trim();
     if (option.isGoal) {
       if (controller.activityGoalType.value == DailyTaskGoalType.daily) {
-        return "Meta diária";
+        return context.l10n.createGroupActivitySummaryDaily;
       }
-      return "Meta • $goal dias";
+      return context.l10n.createGroupActivitySummaryGoalDays(goal);
     }
     if (option.isReading) {
-      return "Leitura • $goal páginas";
+      return context.l10n.createGroupActivitySummaryReading(goal);
     }
-    return "${option.category?.localizedLabel(context) ?? ""} • $goal min";
+    return context.l10n.createGroupActivitySummaryTime(
+      option.category?.localizedLabel(context) ?? "",
+      goal,
+    );
   }
 }
 
@@ -1126,7 +1131,9 @@ class _BottomAction extends StatelessWidget {
                 ),
               )
             : Text(
-                isSummary ? context.l10n.createGroupButton : "Continuar",
+                isSummary
+                    ? context.l10n.createGroupButton
+                    : context.l10n.createGroupContinueButton,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.textPrimaryButton.copyWith(
