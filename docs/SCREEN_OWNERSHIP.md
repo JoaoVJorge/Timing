@@ -1,6 +1,6 @@
 # Screen Ownership
 
-Este documento define o papel principal de cada aba do HelpOut. Use essas regras antes de adicionar atalhos, cards ou novas features em uma tela.
+Este documento define o papel principal de cada aba do Timing. Use essas regras antes de adicionar atalhos, cards ou novas features em uma tela.
 
 ## Regra Geral
 
