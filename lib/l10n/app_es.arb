@@ -920,8 +920,8 @@
   "groupCollectiveProgressTitle": "Progreso colectivo",
   "currentUserRankCompleteFirstGoal": "Completa tu primera meta para entrar al ranking.",
   "currentUserRankTiedLead": "Empate en el liderazgo.",
-  "currentUserRankTiedFirstLabel": "Empate en 1.?",
-  "rankLabel": "{rank}.?",
+  "currentUserRankTiedFirstLabel": "Empate en 1.\u00ba",
+  "rankLabel": "{rank}.\u00ba",
   "@rankLabel": {
     "placeholders": {
       "rank": {

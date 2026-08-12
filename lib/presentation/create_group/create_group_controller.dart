@@ -3,39 +3,22 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_entity.dart";
+import "package:help_out/core/domain/entities/subject_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_invitable_friends_use_case.dart";
+import "package:help_out/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:help_out/theme/subject_icons.dart";
 
-/// The kinds of activity a group can hand out: the four subject categories plus
-/// a daily-goal ("meta"). Maps to a [TimeCategoryType] for subjects, or `null`
-/// for goals.
-enum GroupActivityOption { studying, exercises, reading, hobbies, goal }
-
-extension GroupActivityOptionX on GroupActivityOption {
-  TimeCategoryType? get category => switch (this) {
-    GroupActivityOption.studying => TimeCategoryType.studying,
-    GroupActivityOption.exercises => TimeCategoryType.exercises,
-    GroupActivityOption.reading => TimeCategoryType.reading,
-    GroupActivityOption.hobbies => TimeCategoryType.hobbies,
-    GroupActivityOption.goal => null,
-  };
-
-  bool get isGoal => this == GroupActivityOption.goal;
-
-  bool get isReading => this == GroupActivityOption.reading;
-}
-
-class CreateGroupController extends GetxController {
+class CreateGroupController extends GetxController
+    implements SubjectCreationFormController {
   CreateGroupController({
     required this._getInvitableFriendsUseCase,
     required this._createGroupUseCase,
@@ -61,19 +44,30 @@ class CreateGroupController extends GetxController {
   final RxString groupDescription = "".obs;
   final RxString friendSearchQuery = "".obs;
 
-  final Rx<GroupActivityOption?> activityOption = Rx<GroupActivityOption?>(
-    null,
-  );
   final RxString activityName = "".obs;
   final RxString activityGoal = "".obs;
-  final Rx<Color> activityColor = SubjectColors.values.first.obs;
-  final Rx<DailyTaskGoalType> activityGoalType = DailyTaskGoalType.total.obs;
+  @override
+  final Rx<Color> selectedColor = SubjectColors.values.first.obs;
+  @override
+  final RxString selectedIconName = SubjectIcons.suggestionsFor(
+    TimeCategoryType.studying,
+  ).first.obs;
+  @override
+  final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
+  @override
+  final RxInt focusSessionCount = 1.obs;
+  @override
+  final RxInt wallpaperIndex = 0.obs;
+  @override
+  final Rx<SubjectActivityType> activityType = SubjectActivityType.daily.obs;
 
   final RxBool isLoading = true.obs;
   final RxBool hasLoadError = false.obs;
   final RxBool isCreating = false.obs;
   final RxBool canCreate = false.obs;
   final RxInt currentStep = 0.obs;
+  GroupThemeType? _themeUsedForActivityDefaults;
+  bool _hasInitializedThemeColor = false;
 
   bool get hasName => groupName.value.trim().isNotEmpty;
 
@@ -89,30 +83,46 @@ class CreateGroupController extends GetxController {
 
   bool get isSummaryStep => currentStep.value == lastStep;
 
-  bool get hasActivityType => activityOption.value != null;
+  @override
+  bool get isPageBased => category == TimeCategoryType.reading;
 
-  bool get isGoalActivity => activityOption.value?.isGoal ?? false;
+  @override
+  RxString get goal => activityGoal;
 
-  bool get isReadingActivity => activityOption.value?.isReading ?? false;
+  @override
+  List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
-  bool get hasValidActivityGoal {
-    final GroupActivityOption? option = activityOption.value;
-    if (option == null) {
-      return false;
-    }
-    if (option.isGoal) {
-      if (activityGoalType.value == DailyTaskGoalType.daily) {
-        return true;
-      }
-      return (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
-    }
-    return (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
-  }
+  @override
+  List<int> get restMinutesOptions => const [5, 10, 15, 20];
+
+  @override
+  List<int> get focusSessionCountOptions => const [1, 2, 3, 4];
+
+  @override
+  List<int> get timeGoalPresets => const [15, 30, 45, 60];
+
+  @override
+  List<int> get pageGoalPresets => const [5, 10, 25, 50];
+
+  @override
+  TextEditingController get nameController => activityNameController;
+
+  @override
+  TextEditingController get goalController => activityGoalController;
+
+  @override
+  TimeCategoryType get category => switch (selectedTheme.value) {
+    GroupThemeType.exercises => TimeCategoryType.exercises,
+    GroupThemeType.reading => TimeCategoryType.reading,
+    GroupThemeType.hobbies => TimeCategoryType.hobbies,
+    _ => TimeCategoryType.studying,
+  };
+
+  bool get hasValidActivityGoal =>
+      (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
 
   bool get hasActivity =>
-      hasActivityType &&
-      activityName.value.trim().isNotEmpty &&
-      hasValidActivityGoal;
+      activityName.value.trim().isNotEmpty && hasValidActivityGoal;
 
   List<FriendOption> get filteredFriends {
     final String query = friendSearchQuery.value.trim().toLowerCase();
@@ -174,34 +184,78 @@ class CreateGroupController extends GetxController {
 
   void onSelectTheme(GroupThemeType theme) {
     selectedTheme.value = theme;
+    _applyThemeActivityDefaults(forceIcon: true);
     _refreshCanCreate();
   }
 
-  void onSelectActivityOption(GroupActivityOption option) {
-    activityOption.value = option;
-    if (activityGoalController.text.trim().isEmpty) {
-      activityGoalController.text = switch (option) {
-        GroupActivityOption.goal => "7",
-        GroupActivityOption.reading => "10",
-        _ => "30",
-      };
+  void _applyThemeActivityDefaults({bool forceIcon = false}) {
+    final GroupThemeType? theme = selectedTheme.value;
+    if (theme == null) {
+      return;
     }
+    if (!forceIcon && _themeUsedForActivityDefaults == theme) {
+      return;
+    }
+    _themeUsedForActivityDefaults = theme;
+    selectedIconName.value = SubjectIcons.suggestionsFor(category).first;
+    if (activityGoalController.text.trim().isEmpty) {
+      activityGoalController.text = isPageBased ? "10" : "30";
+      activityGoal.value = activityGoalController.text;
+    }
+  }
+
+  @override
+  void initializeThemeColor(Color color) {
+    if (_hasInitializedThemeColor) {
+      return;
+    }
+    selectedColor.value = SubjectColors.fromThemeAccent(color);
+    _hasInitializedThemeColor = true;
+  }
+
+  @override
+  String title(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectTitleStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectTitleReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectTitleExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectTitleHobbies,
+  };
+
+  @override
+  String subtitle(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectSubtitleStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectSubtitleReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectSubtitleExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectSubtitleHobbies,
+  };
+
+  @override
+  String nameHint(BuildContext context) => switch (category) {
+    TimeCategoryType.studying => context.l10n.createSubjectNameHintStudying,
+    TimeCategoryType.reading => context.l10n.createSubjectNameHintReading,
+    TimeCategoryType.exercises => context.l10n.createSubjectNameHintExercises,
+    TimeCategoryType.hobbies => context.l10n.createSubjectNameHintHobbies,
+  };
+
+  @override
+  void setActivityType(SubjectActivityType type) {
+    activityType.value = type;
+  }
+
+  @override
+  void setGoalPreset(int value) {
+    activityGoalController.text = value.toString();
     activityGoal.value = activityGoalController.text;
-    _refreshCanCreate();
   }
 
-  void onSelectActivityColor(Color color) => activityColor.value = color;
-
-  void onSelectActivitySequenceType(DailyTaskSequenceType type) {
-    activityGoalType.value = type == DailyTaskSequenceType.intense
-        ? DailyTaskGoalType.daily
-        : DailyTaskGoalType.total;
-    _refreshCanCreate();
+  @override
+  void setRestMinutes(int minutes) {
+    restMinutes.value = minutes;
   }
 
-  void onSelectActivityGoalType(DailyTaskGoalType type) {
-    activityGoalType.value = type;
-    _refreshCanCreate();
+  @override
+  void setFocusSessionCount(int count) {
+    focusSessionCount.value = count;
   }
 
   void onTapBack() {
@@ -241,17 +295,12 @@ class CreateGroupController extends GetxController {
         );
         return;
       }
+      _applyThemeActivityDefaults();
       currentStep.value = 1;
       return;
     }
 
     if (isActivityStep) {
-      if (!hasActivityType) {
-        _appNavigator.showErrorSnackBar(
-          Get.context!.l10n.createGroupActivityRequiredError,
-        );
-        return;
-      }
       if (activityName.value.trim().isEmpty) {
         _appNavigator.showErrorSnackBar(
           Get.context!.l10n.createGroupActivityNameRequiredError,
@@ -281,36 +330,11 @@ class CreateGroupController extends GetxController {
   }
 
   GroupActivityDraft? buildActivityDraft() {
-    final GroupActivityOption? option = activityOption.value;
-    if (option == null) {
-      return null;
-    }
     final String name = activityNameController.text.trim();
     if (name.isEmpty) {
       return null;
     }
-    final int colorValue = activityColor.value.toARGB32();
-
-    if (option.isGoal) {
-      final bool isDaily = activityGoalType.value == DailyTaskGoalType.daily;
-      final int targetDays = isDaily
-          ? 1
-          : (int.tryParse(activityGoalController.text.trim()) ?? 0);
-      if (targetDays <= 0) {
-        return null;
-      }
-      return GroupActivityDraft.goal(
-        name: name,
-        colorValue: colorValue,
-        targetDays: targetDays,
-        sequenceType: activityGoalType.value == DailyTaskGoalType.daily
-            ? DailyTaskSequenceType.intense.name
-            : DailyTaskSequenceType.casual.name,
-        goalType: activityGoalType.value.name,
-      );
-    }
-
-    final TimeCategoryType category = option.category!;
+    final int colorValue = selectedColor.value.toARGB32();
     final int goalNumber =
         int.tryParse(activityGoalController.text.trim()) ?? 0;
     if (goalNumber <= 0) {
@@ -323,7 +347,11 @@ class CreateGroupController extends GetxController {
       colorValue: colorValue,
       goalSeconds: isReading ? 0 : goalNumber * 60,
       goalPages: isReading ? goalNumber : 0,
-      iconName: SubjectIcons.suggestionsFor(category).first,
+      iconName: selectedIconName.value,
+      restMinutes: restMinutes.value,
+      focusSessionCount: focusSessionCount.value,
+      wallpaperIndex: wallpaperIndex.value,
+      activityType: activityType.value.name,
     );
   }
 

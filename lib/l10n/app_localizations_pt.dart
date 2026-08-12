@@ -2065,11 +2065,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get currentUserRankTiedLead => 'Empate na liderança.';
 
   @override
-  String get currentUserRankTiedFirstLabel => 'Empate em 1?';
+  String get currentUserRankTiedFirstLabel => 'Empate em 1º';
 
   @override
   String rankLabel(int rank) {
-    return '$rank?';
+    return '$rankº';
   }
 
   @override

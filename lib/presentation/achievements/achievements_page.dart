@@ -21,23 +21,22 @@ class AchievementsPage extends StatelessWidget {
         showBackButton: true,
         onBack: controller.onBack,
       ),
-      body: Obx(() {
-        final List<AchievementDefinition> achievements =
-            controller.filteredAchievements;
-
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 16),
-          children: [
-            _UnlockedSummary(controller: controller),
-            const Gap(12),
-            _LevelCard(controller: controller),
-            const Gap(14),
-            _Filters(controller: controller),
-            const Gap(12),
-            _AchievementsGrid(achievements: achievements),
-          ],
-        );
-      }),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 16),
+        children: [
+          _UnlockedSummary(controller: controller),
+          const Gap(12),
+          _LevelCard(controller: controller),
+          const Gap(14),
+          _Filters(controller: controller),
+          const Gap(12),
+          Obx(
+            () => _AchievementsGrid(
+              achievements: controller.filteredAchievements,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -48,23 +47,25 @@ class _UnlockedSummary extends StatelessWidget {
   final AchievementsController controller;
 
   @override
-  Widget build(BuildContext context) => Text.rich(
-    TextSpan(
-      children: [
-        TextSpan(
-          text: "${controller.unlockedCount}",
-          style: TextStyle(
-            color: context.colorTokens.primary,
-            fontWeight: FontWeight.w900,
+  Widget build(BuildContext context) => Obx(
+    () => Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: "${controller.unlockedCount}",
+            style: TextStyle(
+              color: context.colorTokens.primary,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-        ),
-        TextSpan(
-          text: context.l10n.achievementsUnlockedSuffix,
-          style: TextStyle(color: context.colorTokens.textHint),
-        ),
-      ],
+          TextSpan(
+            text: context.l10n.achievementsUnlockedSuffix,
+            style: TextStyle(color: context.colorTokens.textHint),
+          ),
+        ],
+      ),
+      style: context.textStyles.bodyMedium.copyWith(fontSize: 15),
     ),
-    style: context.textStyles.bodyMedium.copyWith(fontSize: 15),
   );
 }
 
@@ -74,7 +75,7 @@ class _LevelCard extends StatelessWidget {
   final AchievementsController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Obx(() {
     final AchievementDefinition? nextUnlock = controller.nextUnlock;
     final RankTier tier = controller.currentTier;
 
@@ -248,7 +249,7 @@ class _LevelCard extends StatelessWidget {
         ),
       ),
     );
-  }
+  });
 }
 
 class _LevelPill extends StatelessWidget {
@@ -279,15 +280,17 @@ class _Filters extends StatelessWidget {
   final AchievementsController controller;
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [
-        _FilterChip(
-          label: context.l10n.allFilterLabel,
-          isSelected: controller.selectedFilter.value == AchievementFilter.all,
-          onTap: () => controller.onSelectFilter(AchievementFilter.all),
-        ),
+  Widget build(BuildContext context) => Obx(
+    () => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _FilterChip(
+            label: context.l10n.allFilterLabel,
+            isSelected:
+                controller.selectedFilter.value == AchievementFilter.all,
+            onTap: () => controller.onSelectFilter(AchievementFilter.all),
+          ),
         const Gap(8),
         _FilterChip(
           label: context.l10n.unlockedFilterLabel,
@@ -303,8 +306,9 @@ class _Filters extends StatelessWidget {
           onTap: () => controller.onSelectFilter(AchievementFilter.locked),
         ),
         const Gap(8),
-        _CategoryMenu(controller: controller),
-      ],
+          _CategoryMenu(controller: controller),
+        ],
+      ),
     ),
   );
 }
@@ -315,7 +319,7 @@ class _CategoryMenu extends StatelessWidget {
   final AchievementsController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => Obx(() {
     final AchievementCategory? selected = controller.selectedCategory.value;
 
     return PopupMenuButton<AchievementCategory?>(
@@ -354,7 +358,7 @@ class _CategoryMenu extends StatelessWidget {
         trailing: Icons.keyboard_arrow_down_rounded,
       ),
     );
-  }
+  });
 }
 
 class _CategoryOption extends StatelessWidget {

@@ -2070,11 +2070,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get currentUserRankTiedLead => 'Empate en el liderazgo.';
 
   @override
-  String get currentUserRankTiedFirstLabel => 'Empate en 1.?';
+  String get currentUserRankTiedFirstLabel => 'Empate en 1.º';
 
   @override
   String rankLabel(int rank) {
-    return '$rank.?';
+    return '$rank.º';
   }
 
   @override

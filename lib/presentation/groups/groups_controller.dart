@@ -56,17 +56,29 @@ class GroupsController extends GetxController {
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
 
+  /// Sorting the members is cheap on its own, but the ranking tab reads this
+  /// getter (directly and through `rankOf`/`differenceToPrevious`) dozens of
+  /// times per rebuild, so the sorted list is cached until the selected group
+  /// or period changes. `selectedGroup.value` is always reassigned on a change,
+  /// so an identity check is enough to invalidate.
+  GroupEntity? _rankedCacheGroup;
+  LeaderboardPeriodType? _rankedCachePeriod;
+  List<GroupMemberEntity> _rankedCache = const [];
+
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
+    final LeaderboardPeriodType period = selectedPeriod.value;
     if (group == null) {
       return const [];
     }
+    if (identical(group, _rankedCacheGroup) && period == _rankedCachePeriod) {
+      return _rankedCache;
+    }
     final List<GroupMemberEntity> members = List.of(group.members)
-      ..sort(
-        (a, b) => b
-            .secondsFor(selectedPeriod.value)
-            .compareTo(a.secondsFor(selectedPeriod.value)),
-      );
+      ..sort((a, b) => b.secondsFor(period).compareTo(a.secondsFor(period)));
+    _rankedCacheGroup = group;
+    _rankedCachePeriod = period;
+    _rankedCache = members;
     return members;
   }
 
@@ -227,9 +239,7 @@ class GroupsController extends GetxController {
   void onBackToGroupList() {
     isShowingMemberManagement.value = false;
     isShowingGroupDetails.value = false;
-    if (Get.currentRoute == AppRoutes.groupDetails) {
-      _appNavigator.back<void>();
-    }
+    _closeGroupDetailsRoute();
   }
 
   void onManageMembers() => isShowingMemberManagement.value = true;
@@ -354,6 +364,7 @@ class GroupsController extends GetxController {
       isShowingGroupDetails.value = false;
       groups.refresh();
       unawaited(_invalidateActivityCaches());
+      _closeGroupDetailsRoute();
       _appNavigator.showSuccessSnackBar(
         Get.context?.l10n.leftGroupMessage ?? "You left the group.",
       );
@@ -396,5 +407,11 @@ class GroupsController extends GetxController {
       galleryLabel: context.l10n.photoGalleryLabel,
       cancelLabel: context.l10n.cancelButton,
     );
+  }
+
+  void _closeGroupDetailsRoute() {
+    if (Get.currentRoute == AppRoutes.groupDetails) {
+      _appNavigator.back<void>();
+    }
   }
 }

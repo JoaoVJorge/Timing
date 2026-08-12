@@ -8,10 +8,12 @@ import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
 import "package:help_out/core/domain/use_cases/update_subject_use_case.dart";
 import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:help_out/theme/subject_colors.dart";
 import "package:help_out/theme/subject_icons.dart";
 
-class CreateSubjectController extends GetxController {
+class CreateSubjectController extends GetxController
+    implements SubjectCreationFormController {
   CreateSubjectController({
     required this._addSubjectUseCase,
     required this._updateSubjectUseCase,
@@ -24,10 +26,13 @@ class CreateSubjectController extends GetxController {
   final UpdateSubjectUseCase _updateSubjectUseCase;
   final AppNavigator _appNavigator;
 
+  @override
   final TimeCategoryType category;
   final SubjectEntity? editingSubject;
 
+  @override
   final TextEditingController nameController = TextEditingController();
+  @override
   final TextEditingController goalController = TextEditingController();
   final TextEditingController restMinutesController = TextEditingController(
     text: SubjectEntity.defaultRestMinutes.toString(),
@@ -35,29 +40,42 @@ class CreateSubjectController extends GetxController {
   final TextEditingController focusSessionCountController =
       TextEditingController(text: "1");
 
+  @override
   late final Rx<Color> selectedColor = SubjectColors.values.first.obs;
+  @override
   late final RxString selectedIconName = SubjectIcons.suggestionsFor(
     category,
   ).first.obs;
 
   bool _hasInitializedThemeColor = false;
 
+  @override
   final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
+  @override
   final RxInt focusSessionCount = 1.obs;
+  @override
   final RxInt wallpaperIndex = 0.obs;
+  @override
   final Rx<SubjectActivityType> activityType = SubjectActivityType.daily.obs;
   final RxBool isSaving = false.obs;
   final RxString name = "".obs;
+  @override
   final RxString goal = "".obs;
 
+  @override
   final List<int> restMinutesOptions = [5, 10, 15, 20];
+  @override
   final List<int> focusSessionCountOptions = [1, 2, 3, 4];
+  @override
   final List<int> timeGoalPresets = [15, 30, 45, 60];
+  @override
   final List<int> pageGoalPresets = [5, 10, 25, 50];
 
+  @override
   bool get isPageBased => category == TimeCategoryType.reading;
   bool get isEditing => editingSubject != null;
 
+  @override
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
   bool get hasValidGoal {
@@ -75,6 +93,7 @@ class CreateSubjectController extends GetxController {
 
   bool get canSubmit => name.value.trim().isNotEmpty && hasValidGoal;
 
+  @override
   void initializeThemeColor(Color color) {
     if (_hasInitializedThemeColor) {
       return;
@@ -88,6 +107,7 @@ class CreateSubjectController extends GetxController {
     _hasInitializedThemeColor = true;
   }
 
+  @override
   String title(BuildContext context) => switch (category) {
     TimeCategoryType.studying => context.l10n.createSubjectTitleStudying,
     TimeCategoryType.reading => context.l10n.createSubjectTitleReading,
@@ -95,6 +115,7 @@ class CreateSubjectController extends GetxController {
     TimeCategoryType.hobbies => context.l10n.createSubjectTitleHobbies,
   };
 
+  @override
   String subtitle(BuildContext context) => switch (category) {
     TimeCategoryType.studying => context.l10n.createSubjectSubtitleStudying,
     TimeCategoryType.reading => context.l10n.createSubjectSubtitleReading,
@@ -109,6 +130,7 @@ class CreateSubjectController extends GetxController {
     TimeCategoryType.hobbies => context.l10n.createSubjectNameLabelHobbies,
   };
 
+  @override
   String nameHint(BuildContext context) => switch (category) {
     TimeCategoryType.studying => context.l10n.createSubjectNameHintStudying,
     TimeCategoryType.reading => context.l10n.createSubjectNameHintReading,
@@ -187,21 +209,25 @@ class CreateSubjectController extends GetxController {
     );
   }
 
+  @override
   void setGoalPreset(int value) {
     goalController.text = value.toString();
     goal.value = goalController.text;
   }
 
+  @override
   void setRestMinutes(int minutes) {
     restMinutes.value = minutes;
     restMinutesController.text = minutes.toString();
   }
 
+  @override
   void setFocusSessionCount(int count) {
     focusSessionCount.value = count;
     focusSessionCountController.text = count.toString();
   }
 
+  @override
   void setActivityType(SubjectActivityType type) {
     activityType.value = type;
   }
