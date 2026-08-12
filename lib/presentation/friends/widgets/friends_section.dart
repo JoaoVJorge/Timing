@@ -29,43 +29,17 @@ class FriendsSection extends StatelessWidget {
       if (friends.isEmpty)
         _EmptyFriendsCard(onShare: onShare)
       else
-        Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: context.colorTokens.surface,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: context.colorTokens.surfaceShadow.withValues(
-                  alpha: 0.08,
-                ),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+        Column(
+          children: [
+            for (int index = 0; index < friends.length; index++) ...[
+              _FriendRow(
+                profile: friends[index],
+                index: index,
+                onRemove: () => onRemove(friends[index]),
               ),
+              if (index < friends.length - 1) const Gap(10),
             ],
-          ),
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: context.colorTokens.borderUnfocused),
-          ),
-          child: Column(
-            children: [
-              for (int index = 0; index < friends.length; index++) ...[
-                _FriendRow(
-                  profile: friends[index],
-                  index: index,
-                  onRemove: () => onRemove(friends[index]),
-                ),
-                if (index < friends.length - 1)
-                  Divider(
-                    height: 1,
-                    indent: 58,
-                    endIndent: 14,
-                    color: context.colorTokens.divider,
-                  ),
-              ],
-            ],
-          ),
+          ],
         ),
     ],
   );
@@ -162,8 +136,9 @@ class _FriendRowState extends State<_FriendRow>
       ],
     ),
     child: Container(
-      color: context.colorTokens.surface,
-      padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+      height: 72,
+      decoration: friendsSurfaceDecoration(context, radius: 16),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Row(
         children: [
           GroupMemberAvatar(

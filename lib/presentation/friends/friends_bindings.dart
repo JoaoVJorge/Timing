@@ -16,6 +16,7 @@ class FriendsBindings extends Bindings {
         getGroupInvitationsUseCase: Get.find(),
         acceptGroupInvitationUseCase: Get.find(),
         declineGroupInvitationUseCase: Get.find(),
+        groupsRepository: Get.find(),
         appNavigator: Get.find(),
       ),
     );

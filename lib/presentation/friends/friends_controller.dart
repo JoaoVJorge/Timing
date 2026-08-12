@@ -2,10 +2,12 @@ import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
+import "package:help_out/core/data/repositories/groups_repository.dart";
 import "package:help_out/core/domain/entities/friend_entity.dart";
 import "package:help_out/core/domain/entities/friend_suggestion_entity.dart";
 import "package:help_out/core/domain/entities/friends_social_entity.dart";
 import "package:help_out/core/domain/entities/group_invitation_entity.dart";
+import "package:help_out/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:help_out/core/domain/use_cases/accept_friend_request_use_case.dart";
 import "package:help_out/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:help_out/core/domain/use_cases/cancel_friend_request_use_case.dart";
@@ -19,6 +21,7 @@ import "package:help_out/core/domain/use_cases/send_friend_request_use_case.dart
 import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/presentation/friends/find_friends_page.dart";
 import "package:help_out/presentation/friends/friend_requests_page.dart";
+import "package:help_out/presentation/friends/group_invitations_page.dart";
 import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -34,6 +37,7 @@ class FriendsController extends GetxController {
     required this._getGroupInvitationsUseCase,
     required this._acceptGroupInvitationUseCase,
     required this._declineGroupInvitationUseCase,
+    required this._groupsRepository,
     required this._appNavigator,
   });
 
@@ -47,6 +51,7 @@ class FriendsController extends GetxController {
   final GetGroupInvitationsUseCase _getGroupInvitationsUseCase;
   final AcceptGroupInvitationUseCase _acceptGroupInvitationUseCase;
   final DeclineGroupInvitationUseCase _declineGroupInvitationUseCase;
+  final GroupsRepository _groupsRepository;
   final AppNavigator _appNavigator;
 
   final RxList<FriendEntity> requests = <FriendEntity>[].obs;
@@ -54,6 +59,8 @@ class FriendsController extends GetxController {
   final RxList<FriendEntity> friends = <FriendEntity>[].obs;
   final RxList<GroupInvitationEntity> groupInvitations =
       <GroupInvitationEntity>[].obs;
+  final RxList<SentGroupInvitationEntity> sentGroupInvitations =
+      <SentGroupInvitationEntity>[].obs;
   final RxString inviteCode = "".obs;
   final RxBool isLoading = true.obs;
 
@@ -89,6 +96,7 @@ class FriendsController extends GetxController {
       },
     );
     await _loadGroupInvitations();
+    await _loadSentGroupInvitations();
   }
 
   Future<void> _loadGroupInvitations() async {
@@ -96,6 +104,14 @@ class FriendsController extends GetxController {
     result.fold(
       (error) => groupInvitations.clear(),
       groupInvitations.assignAll,
+    );
+  }
+
+  Future<void> _loadSentGroupInvitations() async {
+    final result = await _groupsRepository.getSentInvitations();
+    result.fold(
+      (error) => sentGroupInvitations.clear(),
+      sentGroupInvitations.assignAll,
     );
   }
 
@@ -114,6 +130,20 @@ class FriendsController extends GetxController {
     result.fold(
       (error) => _appNavigator.showErrorSnackBar(),
       (_) => groupInvitations.removeWhere((item) => item.id == invitation.id),
+    );
+  }
+
+  Future<void> cancelGroupInvitation(
+    SentGroupInvitationEntity invitation,
+  ) async {
+    final result = await _groupsRepository.cancelGroupInvitation(
+      groupId: invitation.groupId,
+      friendId: invitation.inviteeId,
+    );
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(),
+      (_) =>
+          sentGroupInvitations.removeWhere((item) => item.id == invitation.id),
     );
   }
 
@@ -246,10 +276,8 @@ class FriendsController extends GetxController {
     );
   }
 
-  void openSentRequestsPage() {
-    Get.to<void>(
-      () => const FriendRequestsPage(initialMode: FriendRequestsMode.sent),
-    );
+  void openGroupInvitationsPage() {
+    Get.to<void>(() => const GroupInvitationsPage());
   }
 
   AppLocalizations? get _l10n {
