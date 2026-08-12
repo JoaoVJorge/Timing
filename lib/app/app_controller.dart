@@ -160,18 +160,17 @@ class AppController extends GetxController {
       if (config == null) {
         return false;
       }
-      final AppConfigEntity mergedConfig = _withLocalConcentrationSettings(
-        config,
-      );
+      final AppConfigEntity mergedConfig = _withLocalDevicePreferences(config);
       _applyConfig(mergedConfig);
       await _saveAppConfigUseCase(_currentConfig);
       return config.userName.isNotEmpty;
     });
   }
 
-  AppConfigEntity _withLocalConcentrationSettings(AppConfigEntity config) =>
+  AppConfigEntity _withLocalDevicePreferences(AppConfigEntity config) =>
       config.copyWith(
         isDarkMode: isDarkMode.value,
+        languageCode: languageCode.value,
         focusLockStudyingEnabled: focusLockStudyingEnabled.value,
         focusLockExercisesEnabled: focusLockExercisesEnabled.value,
         focusLockReadingEnabled: focusLockReadingEnabled.value,
