@@ -45,7 +45,7 @@ class SubjectTile extends StatelessWidget {
                 ),
                 Text(
                   hasGoal
-                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.totalGoalSeconds)))} · ${(progress * 100).round()}%"
+                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.totalGoalSeconds)))} - ${(progress * 100).round()}%"
                       : formatDurationLong(
                           Duration(seconds: subject.totalSeconds),
                         ),

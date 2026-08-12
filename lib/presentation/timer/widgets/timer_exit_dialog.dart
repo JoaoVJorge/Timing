@@ -38,6 +38,16 @@ Future<int?> showReadingExitDialog({
   ),
 );
 
+Future<void> showTimerSessionEndedDialog({
+  required Color accentColor,
+  required String subjectName,
+}) => appNavigator.dialog<void>(
+  child: _TimerSessionEndedDialog(
+    accentColor: accentColor,
+    subjectName: subjectName,
+  ),
+);
+
 class _TimerExitDialog extends StatelessWidget {
   const _TimerExitDialog({
     required this.accentColor,
@@ -276,6 +286,76 @@ class _ReadingExitDialogState extends State<_ReadingExitDialog> {
             ),
           ],
         ),
+      ),
+    ),
+  );
+}
+
+class _TimerSessionEndedDialog extends StatelessWidget {
+  const _TimerSessionEndedDialog({
+    required this.accentColor,
+    required this.subjectName,
+  });
+
+  final Color accentColor;
+  final String subjectName;
+
+  @override
+  Widget build(BuildContext context) => Dialog(
+    elevation: 0,
+    backgroundColor: context.colorTokens.transparent,
+    insetPadding: const EdgeInsets.symmetric(horizontal: 30),
+    child: Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 390),
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      decoration: BoxDecoration(
+        color: context.colorTokens.dialogSurface,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 76,
+            height: 76,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accentColor.withValues(alpha: 0.14),
+              border: Border.all(color: accentColor.withValues(alpha: 0.18)),
+            ),
+            child: Icon(Icons.check_rounded, color: accentColor, size: 42),
+          ),
+          const Gap(22),
+          Text(
+            "Sessão encerrada",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: context.colorTokens.dialogText,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              height: 1.08,
+            ),
+          ),
+          const Gap(12),
+          Text(
+            "Seu foco em $subjectName foi salvo com sucesso.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: context.colorTokens.dialogTextMuted,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+          const Gap(24),
+          _TimerExitDialogButton(
+            label: "Tudo certo",
+            textColor: context.colorTokens.white,
+            backgroundColor: accentColor,
+            onTap: () => appNavigator.back<void>(),
+          ),
+        ],
       ),
     ),
   );

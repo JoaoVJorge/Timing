@@ -75,6 +75,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isAppInForeground = true;
   bool _isCatchingUpAfterBackground = false;
   bool _isPersistingTime = false;
+  bool _isFinishingSession = false;
   bool _shouldPersistAgain = false;
   bool _isRequestingFocusLockReturn = false;
   DateTime? _lastFocusLockWarningAt;
@@ -329,8 +330,21 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> confirmFinishSession() async {
+    if (_isFinishingSession || isSessionFinished.value) {
+      return false;
+    }
+    _isFinishingSession = true;
     if (!isReading) {
+      unawaited(HapticFeedback.selectionClick());
+      await Future<void>.delayed(const Duration(milliseconds: 140));
       finishSession();
+      if (Get.context != null) {
+        await showTimerSessionEndedDialog(
+          accentColor: Color(subject.colorValue),
+          subjectName: subject.name,
+        );
+      }
+      _isFinishingSession = false;
       return true;
     }
 
@@ -345,9 +359,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
 
     if (pagesRead == null) {
+      _isFinishingSession = false;
       return false;
     }
     finishReadingSession(pagesRead);
+    _isFinishingSession = false;
     return true;
   }
 
