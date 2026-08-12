@@ -175,7 +175,6 @@ class _AddHobbyCard extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,
@@ -183,29 +182,21 @@ class _AddHobbyCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight,
-              shape: BoxShape.circle,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon("plus", size: 18, color: context.colorTokens.primary),
+            const Gap(8),
+            Text(
+              context.l10n.addItemButton(category.itemNoun(context)),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.textButtonMedium,
             ),
-            child: AppIcon("plus", size: 18, color: context.colorTokens.primary),
-          ),
-          const Spacer(),
-          Text(
-            context.l10n.addItemButton(category.itemNoun(context)),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.textButtonMedium,
-          ),
-          const Spacer(),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -221,8 +212,6 @@ class _AddListSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,
@@ -230,28 +219,21 @@ class _AddListSubjectCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight,
-              shape: BoxShape.circle,
-            ),
-            child: AppIcon("plus", size: 16, color: context.colorTokens.primary),
-          ),
-          const Gap(12),
-          Expanded(
-            child: Text(
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIcon("plus", size: 18, color: context.colorTokens.primary),
+            const Gap(8),
+            Text(
               context.l10n.addItemButton(category.itemNoun(context)),
-              maxLines: 1,
+              textAlign: TextAlign.center,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.textButtonMedium,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
