@@ -1,6 +1,6 @@
 {
-    "name": "help_out",
-    "short_name": "help_out",
+    "name": "Timing",
+    "short_name": "Timing",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
