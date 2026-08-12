@@ -185,7 +185,7 @@ class _PhotoSourceAction extends StatelessWidget {
               style: context.textStyles.bodyLarge.copyWith(
                 color: context.colorTokens.dialogText,
                 fontSize: isCompact ? 16 : 19,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
