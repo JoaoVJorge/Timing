@@ -351,8 +351,10 @@ class _ManageMembersView extends StatelessWidget {
                   ],
                 ),
               ),
-              const Gap(14),
-              _AddMemberButton(onTap: controller.onTapFriends),
+              if (currentUserIsLeader) ...[
+                const Gap(14),
+                _AddMemberButton(onTap: controller.onTapInviteMembers),
+              ],
             ],
           ),
         ),
@@ -742,65 +744,49 @@ class _GroupDetailsHeader extends StatelessWidget {
   final VoidCallback onActions;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      SizedBox(
-        height: 84,
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: _DetailBackButton(onTap: onBack),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: _DetailIconButton(
-                icon: Icons.more_vert_rounded,
-                semanticLabel: context.l10n.groupActionsLabel,
-                onTap: onActions,
+  Widget build(BuildContext context) => SizedBox(
+    height: 72,
+    child: Row(
+      children: [
+        _DetailBackButton(onTap: onBack),
+        const Gap(8),
+        _GroupIcon(theme: group.theme, size: 56, iconSize: 27),
+        const Gap(12),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                localizedGroupName(context, group),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.black28.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 24,
+                  height: 1,
+                ),
               ),
-            ),
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _GroupIcon(theme: group.theme, size: 68, iconSize: 32),
-                  const Gap(14),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 174),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          localizedGroupName(context, group),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.black28.copyWith(
-                            color: context.colorTokens.textBody,
-                            fontSize: 28,
-                            height: 1,
-                          ),
-                        ),
-                        const Gap(5),
-                        Text(
-                          context.l10n.groupMembersCount(group.members.length),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.caption.copyWith(
-                            color: context.colorTokens.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              const Gap(4),
+              Text(
+                context.l10n.groupMembersCount(group.members.length),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.caption.copyWith(
+                  color: context.colorTokens.primary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    ],
+        const Gap(8),
+        _DetailIconButton(
+          icon: Icons.more_vert_rounded,
+          semanticLabel: context.l10n.groupActionsLabel,
+          onTap: onActions,
+        ),
+      ],
+    ),
   );
 }
 

@@ -20,6 +20,8 @@ import "package:help_out/presentation/faq/faq_bindings.dart";
 import "package:help_out/presentation/faq/faq_page.dart";
 import "package:help_out/presentation/friends/friends_bindings.dart";
 import "package:help_out/presentation/friends/friends_page.dart";
+import "package:help_out/presentation/group_invites/group_invites_bindings.dart";
+import "package:help_out/presentation/group_invites/group_invites_page.dart";
 import "package:help_out/presentation/groups/groups_bindings.dart";
 import "package:help_out/presentation/groups/groups_page.dart";
 import "package:help_out/presentation/home/home_bindings.dart";
@@ -63,6 +65,7 @@ class AppRoutes {
   static const String editProfile = "/editProfile";
   static const String faq = "/faq";
   static const String createGroup = "/createGroup";
+  static const String groupInvites = "/groupInvites";
   static const String joinGroup = "/joinGroup";
   static const String schedule = "/schedule";
   static const String addScheduleEntry = "/addScheduleEntry";
@@ -185,6 +188,14 @@ class AppRoutes {
       name: groupDetails,
       page: () => const GroupsPage(showGroupFlowOnly: true),
       binding: GroupsBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: groupInvites,
+      page: () => const GroupInvitesPage(),
+      binding: GroupInvitesBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

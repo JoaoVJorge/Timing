@@ -54,7 +54,7 @@ class _FriendsInviteCodeDisclosureState
                         context.l10n.myCodeLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.cardTitle.copyWith(),
+                        style: context.textStyles.cardTitle,
                       ),
                     ),
                     AnimatedRotation(

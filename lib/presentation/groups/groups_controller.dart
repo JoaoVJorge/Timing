@@ -336,6 +336,14 @@ class GroupsController extends GetxController {
   Future<void> onTapFriends() =>
       _appNavigator.toNamed(AppRoutes.friends) ?? Future<void>.value();
 
+  Future<void> onTapInviteMembers() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null) {
+      return;
+    }
+    await _appNavigator.toNamed<void>(AppRoutes.groupInvites, arguments: group);
+  }
+
   void onTapEditGroup() {
     final String message =
         Get.context?.l10n.groupEditingComingSoon ??
@@ -406,6 +414,7 @@ class GroupsController extends GetxController {
       cameraLabel: context.l10n.photoCameraLabel,
       galleryLabel: context.l10n.photoGalleryLabel,
       cancelLabel: context.l10n.cancelButton,
+      isCompact: true,
     );
   }
 
