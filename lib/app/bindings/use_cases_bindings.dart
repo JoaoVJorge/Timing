@@ -1,4 +1,5 @@
 import "package:get/get.dart";
+import "package:help_out/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:help_out/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:help_out/core/domain/use_cases/add_subject_use_case.dart";
@@ -14,7 +15,9 @@ import "package:help_out/core/domain/use_cases/send_friend_request_use_case.dart
 import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:help_out/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:help_out/core/domain/use_cases/create_group_use_case.dart";
+import "package:help_out/core/domain/use_cases/decline_group_invitation_use_case.dart";
 import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_group_invitations_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_app_config_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_groups_use_case.dart";
@@ -115,6 +118,18 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<CreateGroupUseCase>(
       CreateGroupUseCase(groupsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<GetGroupInvitationsUseCase>(
+      GetGroupInvitationsUseCase(groupsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<AcceptGroupInvitationUseCase>(
+      AcceptGroupInvitationUseCase(groupsRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<DeclineGroupInvitationUseCase>(
+      DeclineGroupInvitationUseCase(groupsRepository: Get.find()),
       permanent: true,
     );
     Get.put<GetFriendsSocialUseCase>(
