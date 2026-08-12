@@ -94,7 +94,7 @@ class HomeController extends GetxController {
   }
 
   int get goalsDoneToday =>
-      dailyTasks.where((task) => task.isCheckedToday).length;
+      dailyTasks.where((task) => task.isDoneForCurrentCycle).length;
 
   int get goalsTotal => dailyTasks.length;
 

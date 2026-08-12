@@ -230,70 +230,20 @@ class _StatItem {
   final String label;
 }
 
-String _title(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Estatisticas",
-  "es" => "Estadisticas",
-  "fr" => "Statistiques",
-  "de" => "Statistiken",
-  _ => "Statistics",
-};
+String _title(BuildContext context) => context.l10n.statisticsTitle;
 
-String _studiedTimeLabel(BuildContext context) =>
-    switch (context.languageCode) {
-      "pt" => "Tempo estudado",
-      "es" => "Tiempo estudiado",
-      "fr" => "Temps etudie",
-      "de" => "Gelernte Zeit",
-      _ => "Studied time",
-    };
+String _studiedTimeLabel(BuildContext context) => context.l10n.studiedTimeLabel;
 
-String _readingTimeLabel(BuildContext context) =>
-    switch (context.languageCode) {
-      "pt" => "Tempo lido",
-      "es" => "Tiempo leido",
-      "fr" => "Temps lu",
-      "de" => "Lesezeit",
-      _ => "Reading time",
-    };
+String _readingTimeLabel(BuildContext context) => context.l10n.readingTimeLabel;
 
 String _totalPagesReadLabel(BuildContext context) =>
-    switch (context.languageCode) {
-      "pt" => "Total de paginas",
-      "es" => "Total de paginas",
-      "fr" => "Total des pages",
-      "de" => "Seiten gesamt",
-      _ => "Total pages",
-    };
+    context.l10n.totalPagesReadLabel;
 
 String _pagesReadTodayLabel(BuildContext context) =>
-    switch (context.languageCode) {
-      "pt" => "Paginas hoje",
-      "es" => "Paginas hoy",
-      "fr" => "Pages aujourd'hui",
-      "de" => "Seiten heute",
-      _ => "Pages today",
-    };
+    context.l10n.pagesReadTodayLabel;
 
-String _goalLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Meta",
-  "es" => "Meta",
-  "fr" => "Objectif",
-  "de" => "Ziel",
-  _ => "Goal",
-};
+String _goalLabel(BuildContext context) => context.l10n.goalLabel;
 
-String _sessionsLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Sessoes",
-  "es" => "Sesiones",
-  "fr" => "Sessions",
-  "de" => "Sitzungen",
-  _ => "Sessions",
-};
+String _sessionsLabel(BuildContext context) => context.l10n.sessionsLabel;
 
-String _restLabel(BuildContext context) => switch (context.languageCode) {
-  "pt" => "Descanso",
-  "es" => "Descanso",
-  "fr" => "Pause",
-  "de" => "Pause",
-  _ => "Rest",
-};
+String _restLabel(BuildContext context) => context.l10n.restLabel;

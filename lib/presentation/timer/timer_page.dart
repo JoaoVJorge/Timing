@@ -154,7 +154,7 @@ class _TimerScaffold extends StatelessWidget {
                                     const Gap(10),
                                     _TimerInfoRow(
                                       icon: Icons.repeat_rounded,
-                                      label: "Seção atual",
+                                      label: context.l10n.timerSessionLabel,
                                       value: data.focusSectionLabel,
                                       accentColor: data.accentColor,
                                     ),
@@ -162,7 +162,7 @@ class _TimerScaffold extends StatelessWidget {
                                   const Gap(10),
                                   _TimerInfoRow(
                                     icon: Icons.bar_chart_rounded,
-                                    label: "Total hoje",
+                                    label: context.l10n.timerTotalTodayLabel,
                                     value: data.totalSubjectTimeLabel,
                                     accentColor: data.accentColor,
                                   ),
@@ -175,7 +175,7 @@ class _TimerScaffold extends StatelessWidget {
                               children: [
                                 _TimerActionButton(
                                   iconPath: "stop",
-                                  label: "Encerrar",
+                                  label: context.l10n.timerEndActionLabel,
                                   onTap: onEndTap,
                                 ),
                                 _TimerMainActionButton(
@@ -742,13 +742,7 @@ class _TimerViewData {
       };
 
   static String _nextBreakDurationLabel(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Duracion de la proxima pausa",
-        "pt" => "Duração da próxima pausa",
-        "fr" => "Duree de la prochaine pause",
-        "de" => "Dauer der nachsten Pause",
-        _ => "Next break duration",
-      };
+      context.l10n.nextBreakDurationLabel;
 
   static String _formatRestDuration(Duration duration) =>
       formatDurationLong(duration);

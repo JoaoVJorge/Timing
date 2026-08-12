@@ -479,14 +479,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   String _readingExitContent(BuildContext context) {
     final String duration = _formatMinutesForDialog(sessionSeconds.value);
-    return switch (context.languageCode) {
-      "es" =>
-        "Leíste durante $duration. Informa cuántas páginas leíste en ${subject.name}.",
-      "pt" =>
-        "Você leu por $duration. Informe quantas páginas foram lidas em ${subject.name}.",
-      _ =>
-        "You read for $duration. Enter how many pages you read in ${subject.name}.",
-    };
+    return context.l10n.timerReadingExitContent(duration, subject.name);
   }
 
   void _updateNotification() {

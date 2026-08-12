@@ -62,7 +62,7 @@ class ReadingSubjectTile extends StatelessWidget {
                       ),
                     ),
                     const Gap(8),
-                    _ReadingPlayButton(onTap: onTapPlay),
+                    _ReadingPlayButton(onTap: onTapPlay, color: color),
                   ],
                 ),
                 const Gap(12),
@@ -73,16 +73,19 @@ class ReadingSubjectTile extends StatelessWidget {
                   children: [
                     _ReadingMetric(
                       icon: Icons.schedule_rounded,
+                      color: color,
                       label: _durationLabel(context),
                     ),
                     _ReadingMetricDivider(color: context.colorTokens.divider),
                     _ReadingMetric(
                       icon: Icons.article_outlined,
+                      color: color,
                       label: _pagesLabel(context, hasGoal: hasGoal),
                     ),
                     _ReadingMetricDivider(color: context.colorTokens.divider),
                     _ReadingMetric(
                       icon: Icons.track_changes_rounded,
+                      color: color,
                       label: "$percent%",
                     ),
                   ],
@@ -114,14 +117,7 @@ class ReadingSubjectTile extends StatelessWidget {
   }
 
   String _pagesLabel(BuildContext context, {required bool hasGoal}) {
-    final String suffix = switch (context.languageCode) {
-      "en" => "pgs",
-      "es" => "págs",
-      "fr" => "p.",
-      "de" => "S.",
-      "ar" => "صفحات",
-      _ => "págs",
-    };
+    final String suffix = context.l10n.pagesAbbreviation;
 
     if (!hasGoal) {
       return "${subject.currentPages} $suffix";
@@ -167,9 +163,10 @@ class _ReadingCover extends StatelessWidget {
 }
 
 class _ReadingPlayButton extends StatelessWidget {
-  const _ReadingPlayButton({required this.onTap});
+  const _ReadingPlayButton({required this.onTap, required this.color});
 
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => BounceTap(
@@ -179,7 +176,14 @@ class _ReadingPlayButton extends StatelessWidget {
       height: 46,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: context.colorTokens.primaryGradient,
+        gradient: LinearGradient(
+          colors: [
+            color,
+            Color.lerp(color, context.colorTokens.white, 0.16) ?? color,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Center(
         child: AppIcon("play", size: 20, color: context.colorTokens.white),
@@ -189,16 +193,21 @@ class _ReadingPlayButton extends StatelessWidget {
 }
 
 class _ReadingMetric extends StatelessWidget {
-  const _ReadingMetric({required this.icon, required this.label});
+  const _ReadingMetric({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
 
   final IconData icon;
+  final Color color;
   final String label;
 
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 18, color: context.colorTokens.primary),
+      Icon(icon, size: 18, color: color),
       const Gap(4),
       Text(
         label,

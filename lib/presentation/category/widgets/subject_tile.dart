@@ -69,7 +69,12 @@ class SubjectTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          AppIconButton(svgName: "play", onTap: onTapPlay, size: 44),
+          AppIconButton(
+            svgName: "play",
+            onTap: onTapPlay,
+            accent: color,
+            size: 44,
+          ),
         ],
       ),
     );

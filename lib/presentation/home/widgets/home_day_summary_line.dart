@@ -46,7 +46,7 @@ class HomeDaySummaryLine extends StatelessWidget {
         ),
         const Gap(AppSpacing.titleToDescription),
         Text(
-          _todayLabel(context),
+          context.l10n.periodToday,
           style: context.textStyles.caption.copyWith(
             color: context.colorTokens.textBody,
             fontWeight: FontWeight.w900,
@@ -61,17 +61,17 @@ class HomeDaySummaryLine extends StatelessWidget {
             children: [
               _MetricDot(color: TimeCategoryType.studying.accentColor),
               Text(
-                _focusLabel(context),
+                context.l10n.homeDaySummaryFocusValue(focus),
                 style: context.textStyles.caption.copyWith(fontSize: 12),
               ),
               _MetricDot(color: TimeCategoryType.reading.accentColor),
               Text(
-                _pagesLabel(context),
+                context.l10n.createSubjectPagesValue(pages),
                 style: context.textStyles.caption.copyWith(fontSize: 12),
               ),
               _MetricDot(color: context.colorTokens.primary),
               Text(
-                _goalsLabel(context),
+                context.l10n.homeDaySummaryGoalsValue(goals),
                 style: context.textStyles.caption.copyWith(fontSize: 12),
               ),
             ],
@@ -80,46 +80,6 @@ class HomeDaySummaryLine extends StatelessWidget {
       ],
     ),
   );
-
-  String _todayLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Hoy",
-    "pt" => "Hoje",
-    "fr" => "Aujourd'hui",
-    "de" => "Heute",
-    _ => "Today",
-  };
-
-  String _focusLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "$focus enfoque",
-    "pt" => "$focus foco",
-    "fr" => "$focus focus",
-    "de" => "$focus Fokus",
-    _ => "$focus focus",
-  };
-
-  String _pagesLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "$pages páginas",
-    "pt" => "$pages páginas",
-    "fr" => "$pages pages",
-    "de" => "$pages Seiten",
-    _ => "$pages pages",
-  };
-
-  String _goalsLabel(BuildContext context) {
-    if (context.languageCode == "pt") {
-      return goals == 1 ? "1 meta" : "$goals metas";
-    }
-    if (context.languageCode == "es") {
-      return goals == 1 ? "1 meta" : "$goals metas";
-    }
-    if (context.languageCode == "fr") {
-      return goals == 1 ? "1 objectif" : "$goals objectifs";
-    }
-    if (context.languageCode == "de") {
-      return goals == 1 ? "1 Ziel" : "$goals Ziele";
-    }
-    return goals == 1 ? "1 goal" : "$goals goals";
-  }
 }
 
 class _MetricDot extends StatelessWidget {

@@ -64,7 +64,7 @@ class ProgressPage extends StatelessWidget {
                     value: formatDurationLong(
                       Duration(seconds: controller.selectedPeriodFocusSeconds),
                     ),
-                    label: _totalFocusTimeLabel(context),
+                    label: context.l10n.profileSummaryFocusLabel,
                     accent: TimeCategoryType.studying.accentColor,
                   ),
                   (
@@ -110,7 +110,10 @@ class ProgressPage extends StatelessWidget {
               const Gap(AppSpacing.betweenSections),
               AppSectionHeader(title: context.l10n.profileTopReadingTitle),
               const Gap(AppSpacing.betweenRelated),
-              ProgressTopSubjectsList(subjects: stats.topReadingSubjects),
+              ProgressTopSubjectsList(
+                subjects: stats.topReadingSubjects,
+                onTapSubject: controller.onTapReadingSubject,
+              ),
             ],
           );
         }),
@@ -118,15 +121,6 @@ class ProgressPage extends StatelessWidget {
     );
   }
 }
-
-String _totalFocusTimeLabel(BuildContext context) =>
-    switch (context.languageCode) {
-      "es" => "Tiempo total de enfoque",
-      "pt" => "Tempo total de foco",
-      "fr" => "Temps total de focus",
-      "de" => "Gesamte Fokuszeit",
-      _ => "Total focus time",
-    };
 
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader();
