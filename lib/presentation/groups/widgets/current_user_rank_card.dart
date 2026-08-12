@@ -140,18 +140,10 @@ class CurrentUserRankCard extends StatelessWidget {
 
   String _nextStepText(BuildContext context, int? difference) {
     if (value <= 0) {
-      return switch (context.languageCode) {
-        "es" => "Completa tu primera meta para entrar al ranking.",
-        "pt" => "Conclua sua primeira meta para entrar no ranking.",
-        _ => "Complete your first goal to enter the ranking.",
-      };
+      return context.l10n.currentUserRankCompleteFirstGoal;
     }
     if (isTiedForFirst) {
-      return switch (context.languageCode) {
-        "es" => "Empate en el liderazgo.",
-        "pt" => "Empate na liderança.",
-        _ => "Tied for the lead.",
-      };
+      return context.l10n.currentUserRankTiedLead;
     }
     if (difference == null || difference <= 0) {
       return context.l10n.currentUserRankLeading;
@@ -165,9 +157,5 @@ class CurrentUserRankCard extends StatelessWidget {
   }
 
   String _tiedFirstLabel(BuildContext context) =>
-      switch (context.languageCode) {
-        "es" => "Empate en 1er",
-        "pt" => "Empate em 1º",
-        _ => "Tied for 1st",
-      };
+      context.l10n.currentUserRankTiedFirstLabel;
 }

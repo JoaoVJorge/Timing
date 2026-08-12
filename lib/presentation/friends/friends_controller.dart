@@ -1,17 +1,22 @@
 import "package:flutter/services.dart";
+import "package:flutter/widgets.dart";
 import "package:get/get.dart";
 import "package:help_out/app/app_navigator.dart";
 import "package:help_out/core/domain/entities/friend_entity.dart";
 import "package:help_out/core/domain/entities/friend_suggestion_entity.dart";
 import "package:help_out/core/domain/entities/friends_social_entity.dart";
+import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/use_cases/accept_friend_request_use_case.dart";
+import "package:help_out/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:help_out/core/domain/use_cases/cancel_friend_request_use_case.dart";
 import "package:help_out/core/domain/use_cases/decline_friend_request_use_case.dart";
+import "package:help_out/core/domain/use_cases/decline_group_invitation_use_case.dart";
 import "package:help_out/core/domain/use_cases/find_profile_by_code_use_case.dart";
 import "package:help_out/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:help_out/core/domain/use_cases/get_group_invitations_use_case.dart";
 import "package:help_out/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:help_out/core/domain/use_cases/send_friend_request_use_case.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:help_out/l10n/app_localizations.dart";
 import "package:help_out/presentation/friends/find_friends_page.dart";
 import "package:help_out/presentation/friends/friend_requests_page.dart";
 import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
@@ -26,6 +31,9 @@ class FriendsController extends GetxController {
     required this._cancelFriendRequestUseCase,
     required this._removeFriendUseCase,
     required this._findProfileByCodeUseCase,
+    required this._getGroupInvitationsUseCase,
+    required this._acceptGroupInvitationUseCase,
+    required this._declineGroupInvitationUseCase,
     required this._appNavigator,
   });
 
@@ -36,11 +44,16 @@ class FriendsController extends GetxController {
   final CancelFriendRequestUseCase _cancelFriendRequestUseCase;
   final RemoveFriendUseCase _removeFriendUseCase;
   final FindProfileByCodeUseCase _findProfileByCodeUseCase;
+  final GetGroupInvitationsUseCase _getGroupInvitationsUseCase;
+  final AcceptGroupInvitationUseCase _acceptGroupInvitationUseCase;
+  final DeclineGroupInvitationUseCase _declineGroupInvitationUseCase;
   final AppNavigator _appNavigator;
 
   final RxList<FriendEntity> requests = <FriendEntity>[].obs;
   final RxList<FriendEntity> sentRequests = <FriendEntity>[].obs;
   final RxList<FriendEntity> friends = <FriendEntity>[].obs;
+  final RxList<GroupInvitationEntity> groupInvitations =
+      <GroupInvitationEntity>[].obs;
   final RxString inviteCode = "".obs;
   final RxBool isLoading = true.obs;
 
@@ -75,6 +88,33 @@ class FriendsController extends GetxController {
         isLoading.value = false;
       },
     );
+    await _loadGroupInvitations();
+  }
+
+  Future<void> _loadGroupInvitations() async {
+    final result = await _getGroupInvitationsUseCase();
+    result.fold(
+      (error) => groupInvitations.clear(),
+      groupInvitations.assignAll,
+    );
+  }
+
+  Future<void> acceptGroupInvitation(GroupInvitationEntity invitation) async {
+    final result = await _acceptGroupInvitationUseCase(invitation.id);
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+      groupInvitations.removeWhere((item) => item.id == invitation.id);
+      _appNavigator.showSuccessSnackBar(
+        _l10n?.joinedGroupMessage ?? "You joined the group",
+      );
+    });
+  }
+
+  Future<void> declineGroupInvitation(GroupInvitationEntity invitation) async {
+    final result = await _declineGroupInvitationUseCase(invitation.id);
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(),
+      (_) => groupInvitations.removeWhere((item) => item.id == invitation.id),
+    );
   }
 
   Future<void> sendFriendRequest(FriendSuggestionEntity profile) async {
@@ -92,7 +132,9 @@ class FriendsController extends GetxController {
           colorValue: profile.colorValue,
         ),
       );
-      _appNavigator.showSuccessSnackBar(_requestSentMessage);
+      _appNavigator.showSuccessSnackBar(
+        _l10n?.friendRequestSentMessage ?? "Request sent",
+      );
     });
   }
 
@@ -128,7 +170,7 @@ class FriendsController extends GetxController {
   Future<void> removeFriend(FriendEntity profile) async {
     final bool confirmed = await showDeleteConfirmationDialog(
       itemName: profile.name,
-      itemTypeName: _friendTypeName,
+      itemTypeName: _l10n?.friendTypeName ?? "friend",
     );
     if (!confirmed) {
       return;
@@ -174,14 +216,22 @@ class FriendsController extends GetxController {
       return;
     }
     await Clipboard.setData(ClipboardData(text: inviteCode.value));
-    _appNavigator.showSuccessSnackBar(_copiedMessage);
+    _appNavigator.showSuccessSnackBar(
+      _l10n?.codeCopiedMessage ?? "Code copied",
+    );
   }
 
   Future<void> shareInviteCode() async {
     if (inviteCode.value.isEmpty) {
       return;
     }
-    await SharePlus.instance.share(ShareParams(text: _shareText));
+    await SharePlus.instance.share(
+      ShareParams(
+        text:
+            _l10n?.shareInviteCodeMessage(inviteCode.value) ??
+            "Add me on HelpOut with my code: ${inviteCode.value}",
+      ),
+    );
   }
 
   Future<void> openAddFriendPage() async {
@@ -202,29 +252,8 @@ class FriendsController extends GetxController {
     );
   }
 
-  String? get _languageCode => Get.context?.languageCode;
-
-  String get _copiedMessage => switch (_languageCode) {
-    "es" => "Código copiado",
-    "pt" => "Código copiado",
-    _ => "Code copied",
-  };
-
-  String get _requestSentMessage => switch (_languageCode) {
-    "es" => "Solicitud enviada",
-    "pt" => "Solicitação enviada",
-    _ => "Request sent",
-  };
-
-  String get _friendTypeName => switch (_languageCode) {
-    "es" => "amigo",
-    "pt" => "amigo",
-    _ => "friend",
-  };
-
-  String get _shareText => switch (_languageCode) {
-    "es" => "Agrégame en HelpOut con mi código: ${inviteCode.value}",
-    "pt" => "Me adicione no HelpOut com meu código: ${inviteCode.value}",
-    _ => "Add me on HelpOut with my code: ${inviteCode.value}",
-  };
+  AppLocalizations? get _l10n {
+    final BuildContext? context = Get.context;
+    return context == null ? null : AppLocalizations.of(context);
+  }
 }

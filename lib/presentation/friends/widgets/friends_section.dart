@@ -22,8 +22,8 @@ class FriendsSection extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _SectionHeader(
-        title: _title(context, friends.length),
-        action: friends.length > 5 ? _seeAll(context) : null,
+        title: context.l10n.yourFriendsTitle(friends.length),
+        action: friends.length > 5 ? context.l10n.seeAllButton : null,
       ),
       const Gap(12),
       if (friends.isEmpty)
@@ -69,19 +69,6 @@ class FriendsSection extends StatelessWidget {
         ),
     ],
   );
-
-  String _title(BuildContext context, int count) =>
-      switch (context.languageCode) {
-        "es" => "Tus amigos ($count)",
-        "pt" => "Seus amigos ($count)",
-        _ => "Your friends ($count)",
-      };
-
-  String _seeAll(BuildContext context) => switch (context.languageCode) {
-    "es" => "Ver todos",
-    "pt" => "Ver todos",
-    _ => "View all",
-  };
 }
 
 class _FriendRow extends StatefulWidget {
@@ -193,24 +180,15 @@ class _FriendRowState extends State<_FriendRow>
           ),
           const Gap(10),
           _FriendStatusChip(
-            label: _statusLabel(context, widget.index),
+            label: widget.index < 2
+                ? context.l10n.onlineLabel
+                : context.l10n.minutesAgoShort(widget.index + 1),
             index: widget.index,
           ),
         ],
       ),
     ),
   );
-
-  String _statusLabel(BuildContext context, int index) {
-    if (index < 2) {
-      return "Online";
-    }
-    return switch (context.languageCode) {
-      "es" => "Hace ${index + 1} min",
-      "pt" => "Há ${index + 1} min",
-      _ => "${index + 1} min ago",
-    };
-  }
 }
 
 class _FriendStatusChip extends StatelessWidget {
@@ -273,7 +251,7 @@ class _EmptyFriendsCard extends StatelessWidget {
         ),
         const Gap(14),
         Text(
-          _emptyTitle(context),
+          context.l10n.friendsEmptyTitle,
           textAlign: TextAlign.center,
           style: context.textStyles.extraBold20.copyWith(
             color: context.colorTokens.textBody,
@@ -282,7 +260,7 @@ class _EmptyFriendsCard extends StatelessWidget {
         ),
         const Gap(6),
         Text(
-          _emptySubtitle(context),
+          context.l10n.friendsEmptySubtitle,
           textAlign: TextAlign.center,
           style: context.textStyles.bodyMedium.copyWith(
             color: context.colorTokens.textHint,
@@ -290,28 +268,10 @@ class _EmptyFriendsCard extends StatelessWidget {
           ),
         ),
         const Gap(18),
-        FriendShareButton(onTap: onShare, label: _shareLabel(context)),
+        FriendShareButton(onTap: onShare, label: context.l10n.shareCodeButton),
       ],
     ),
   );
-
-  String _emptyTitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Aún no tienes amigos",
-    "pt" => "Você ainda não tem amigos",
-    _ => "You do not have friends yet",
-  };
-
-  String _emptySubtitle(BuildContext context) => switch (context.languageCode) {
-    "es" => "Busca personas arriba o comparte tu código de invitación.",
-    "pt" => "Busque pessoas acima ou compartilhe seu código de convite.",
-    _ => "Search people above or share your invite code.",
-  };
-
-  String _shareLabel(BuildContext context) => switch (context.languageCode) {
-    "es" => "Compartir código",
-    "pt" => "Compartilhar código",
-    _ => "Share code",
-  };
 }
 
 class _SectionHeader extends StatelessWidget {

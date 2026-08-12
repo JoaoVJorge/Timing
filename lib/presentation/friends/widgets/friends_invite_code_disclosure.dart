@@ -51,7 +51,7 @@ class _FriendsInviteCodeDisclosureState
                     const Gap(10),
                     Expanded(
                       child: Text(
-                        _label(context),
+                        context.l10n.myCodeLabel,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.cardTitle.copyWith(),
@@ -98,12 +98,6 @@ class _FriendsInviteCodeDisclosureState
       ),
     ),
   );
-
-  String _label(BuildContext context) => switch (context.languageCode) {
-    "es" => "Mi código",
-    "pt" => "Meu código",
-    _ => "My code",
-  };
 }
 
 class _InviteCodeCard extends StatelessWidget {
@@ -133,7 +127,7 @@ class _InviteCodeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _label(context),
+                context.l10n.yourInviteCodeLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodySmall.copyWith(
@@ -169,12 +163,6 @@ class _InviteCodeCard extends StatelessWidget {
       ],
     ),
   );
-
-  String _label(BuildContext context) => switch (context.languageCode) {
-    "es" => "Tu código de invitación",
-    "pt" => "Seu código de convite",
-    _ => "Your invite code",
-  };
 }
 
 class _InviteIconButton extends StatelessWidget {

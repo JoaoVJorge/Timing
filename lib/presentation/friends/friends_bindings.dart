@@ -13,6 +13,9 @@ class FriendsBindings extends Bindings {
         cancelFriendRequestUseCase: Get.find(),
         removeFriendUseCase: Get.find(),
         findProfileByCodeUseCase: Get.find(),
+        getGroupInvitationsUseCase: Get.find(),
+        acceptGroupInvitationUseCase: Get.find(),
+        declineGroupInvitationUseCase: Get.find(),
         appNavigator: Get.find(),
       ),
     );
