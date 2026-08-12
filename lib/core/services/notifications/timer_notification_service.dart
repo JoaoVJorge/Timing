@@ -17,7 +17,7 @@ class TimerNotificationService {
   static const String _finishChannelDescription =
       "Alerts when a focus section ends";
   static const String _finishSound = "finish_focus_alarm";
-  static const String _notificationIcon = "@drawable/ic_notification";
+  static const String _notificationIcon = "ic_notification";
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();

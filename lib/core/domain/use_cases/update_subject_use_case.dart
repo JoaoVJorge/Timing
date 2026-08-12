@@ -18,6 +18,7 @@ class UpdateSubjectUseCase {
     required int restMinutes,
     required int focusSessionCount,
     required int wallpaperIndex,
+    required SubjectActivityType activityType,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await subjectsRepository.getSubjects();
@@ -38,6 +39,7 @@ class UpdateSubjectUseCase {
           restMinutes: restMinutes,
           focusSessionCount: focusSessionCount,
           wallpaperIndex: wallpaperIndex,
+          activityType: activityType,
         );
         return updatedSubject!;
       }).toList();

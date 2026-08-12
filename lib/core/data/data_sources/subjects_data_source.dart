@@ -139,6 +139,7 @@ class SubjectsDataSource {
         "restMinutes": (row["rest_minutes"] as num?)?.toInt(),
         "focusSessionCount": (row["focus_session_count"] as num?)?.toInt(),
         "wallpaperIndex": (row["wallpaper_index"] as num?)?.toInt(),
+        "activityType": row["activity_type"],
         "groupId": row["group_id"],
       });
 
@@ -157,6 +158,7 @@ class SubjectsDataSource {
     "rest_minutes": subject.restMinutes,
     "focus_session_count": subject.focusSessionCount,
     "wallpaper_index": subject.wallpaperIndex,
+    "activity_type": subject.activityType.name,
     "group_id": subject.groupId,
     "updated_at": DateTime.now().toUtc().toIso8601String(),
   };

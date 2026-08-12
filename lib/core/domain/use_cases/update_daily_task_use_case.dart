@@ -13,7 +13,7 @@ class UpdateDailyTaskUseCase {
     required String name,
     required int colorValue,
     required int targetDays,
-    required DailyTaskGoalType goalType,
+    required DailyTaskSequenceType sequenceType,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await dailyTasksRepository.getTasks();
@@ -33,7 +33,10 @@ class UpdateDailyTaskUseCase {
         name: name,
         colorValue: colorValue,
         targetDays: targetDays,
-        goalType: goalType,
+        sequenceType: sequenceType,
+        goalType: sequenceType == DailyTaskSequenceType.intense
+            ? DailyTaskGoalType.daily
+            : DailyTaskGoalType.total,
       );
       final List<DailyTaskEntity> updatedTasks = [...tasks]
         ..[index] = updatedTask;

@@ -28,6 +28,7 @@ void main() {
         "rest_minutes": 5,
         "focus_session_count": 2,
         "wallpaper_index": 3,
+        "activity_type": "daily",
       });
     });
 
@@ -44,6 +45,7 @@ void main() {
         "name": "Ler todo dia",
         "color_value": 123,
         "target_days": 30,
+        "sequence_type": "casual",
         "goal_type": "daily",
       });
     });

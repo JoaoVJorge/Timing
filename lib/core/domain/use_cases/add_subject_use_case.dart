@@ -19,6 +19,7 @@ class AddSubjectUseCase {
     int restMinutes = SubjectEntity.defaultRestMinutes,
     int focusSessionCount = 1,
     int wallpaperIndex = 0,
+    SubjectActivityType activityType = SubjectActivityType.daily,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
@@ -38,6 +39,7 @@ class AddSubjectUseCase {
         restMinutes: restMinutes,
         focusSessionCount: focusSessionCount,
         wallpaperIndex: wallpaperIndex,
+        activityType: activityType,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

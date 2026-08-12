@@ -3,6 +3,17 @@ import "dart:convert";
 import "package:equatable/equatable.dart";
 import "package:help_out/core/domain/enums/time_category_type.dart";
 
+enum SubjectActivityType {
+  daily,
+  permanent;
+
+  factory SubjectActivityType.fromName(String? name) =>
+      SubjectActivityType.values.firstWhere(
+        (type) => type.name == name,
+        orElse: () => SubjectActivityType.daily,
+      );
+}
+
 class SubjectEntity extends Equatable {
   const SubjectEntity({
     required this.id,
@@ -18,6 +29,7 @@ class SubjectEntity extends Equatable {
     required this.restMinutes,
     required this.focusSessionCount,
     required this.wallpaperIndex,
+    this.activityType = SubjectActivityType.daily,
     this.groupId,
   });
 
@@ -38,6 +50,7 @@ class SubjectEntity extends Equatable {
     restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
     focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
+    activityType: SubjectActivityType.fromName(map["activityType"] as String?),
     groupId: (map["groupId"] as String?)?.isEmpty ?? true
         ? null
         : map["groupId"] as String?,
@@ -58,6 +71,7 @@ class SubjectEntity extends Equatable {
   final int restMinutes;
   final int focusSessionCount;
   final int wallpaperIndex;
+  final SubjectActivityType activityType;
 
   /// Non-null when this subject is a copy handed out by a group. Such copies
   /// cannot be deleted while the user is still a member (enforced by the
@@ -89,6 +103,7 @@ class SubjectEntity extends Equatable {
     "restMinutes": restMinutes,
     "focusSessionCount": focusSessionCount,
     "wallpaperIndex": wallpaperIndex,
+    "activityType": activityType.name,
     "groupId": groupId,
   };
 
@@ -106,6 +121,7 @@ class SubjectEntity extends Equatable {
     int? restMinutes,
     int? focusSessionCount,
     int? wallpaperIndex,
+    SubjectActivityType? activityType,
     String? groupId,
   }) => SubjectEntity(
     id: id,
@@ -121,6 +137,7 @@ class SubjectEntity extends Equatable {
     restMinutes: restMinutes ?? this.restMinutes,
     focusSessionCount: focusSessionCount ?? this.focusSessionCount,
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
+    activityType: activityType ?? this.activityType,
     groupId: groupId ?? this.groupId,
   );
 
@@ -139,6 +156,7 @@ class SubjectEntity extends Equatable {
     restMinutes,
     focusSessionCount,
     wallpaperIndex,
+    activityType,
     groupId,
   ];
 }

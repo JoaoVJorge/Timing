@@ -10,6 +10,9 @@ class ToggleDailyTaskCheckUseCase {
 
   Future<Either<AppError, DailyTaskEntity>> call({
     required String taskId,
+    DateTime? date,
+    String? resolvedMissedDate,
+    bool toggleDate = true,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
@@ -26,13 +29,16 @@ class ToggleDailyTaskCheckUseCase {
       }
 
       final DailyTaskEntity task = tasks[index];
-      final String today = DailyTaskEntity.dateKey(DateTime.now());
-      final List<String> completedDates = task.completedDates.contains(today)
-          ? task.completedDates.where((date) => date != today).toList()
-          : [...task.completedDates, today];
+      final String selectedDate = DailyTaskEntity.dateKey(
+        date ?? DateTime.now(),
+      );
+      final List<String> completedDates = toggleDate
+          ? _toggleCompletedDate(task, selectedDate)
+          : task.completedDates;
 
       final DailyTaskEntity updatedTask = task.copyWith(
         completedDates: completedDates,
+        lastResolvedMissedDate: resolvedMissedDate,
       );
       final List<DailyTaskEntity> updatedTasks = [...tasks]
         ..[index] = updatedTask;
@@ -42,5 +48,12 @@ class ToggleDailyTaskCheckUseCase {
 
       return saveResult.fold(Left.new, (_) => Right(updatedTask));
     });
+  }
+
+  List<String> _toggleCompletedDate(DailyTaskEntity task, String selectedDate) {
+    if (task.completedDates.contains(selectedDate)) {
+      return task.completedDates.where((date) => date != selectedDate).toList();
+    }
+    return [...task.completedDates, selectedDate];
   }
 }
