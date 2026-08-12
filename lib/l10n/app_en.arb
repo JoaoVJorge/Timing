@@ -64,8 +64,8 @@
   "homeCategoryEmpty": "Nothing yet",
   "homeNextScheduleTitle": "Agenda",
   "homeTodayAgendaTitle": "Today's agenda",
-  "homeNextScheduleEmpty": "No schedule today",
-  "homeNextScheduleAdd": "Add schedule",
+  "homeNextScheduleEmpty": "No appointments today",
+  "homeNextScheduleAdd": "Add appointment",
   "addTaskButton": "Add goal",
   "createTaskTitle": "New goal",
   "taskNameHint": "Goal name",
@@ -679,13 +679,13 @@
   "navSettings": "Settings",
   "myScheduleCardTitle": "My Schedule",
   "myScheduleTitle": "My Schedule",
-  "noScheduleYet": "No schedule yet",
-  "noScheduleYetDescription": "Tap the button below to add\nyour first schedule",
-  "addScheduleEntryTitle": "Add Schedule Entry",
-  "addScheduleEntryButton": "Add Entry",
+  "noScheduleYet": "No appointments yet",
+  "noScheduleYetDescription": "Tap the button below to add\nyour first appointment",
+  "addScheduleEntryTitle": "Add Appointment",
+  "addScheduleEntryButton": "Add Appointment",
   "scheduleInfoSection": "Information",
   "scheduleWhenSection": "When?",
-  "scheduleColorSection": "Schedule color",
+  "scheduleColorSection": "Appointment color",
   "schedulePreviewSection": "Preview",
   "scheduleDurationLabel": "Duration: {duration}",
   "@scheduleDurationLabel": {
@@ -820,7 +820,7 @@
       }
     }
   },
-  "createScheduleEntryButton": "Create entry",
+  "createScheduleEntryButton": "Create appointment",
   "scheduleEntryMissingFields": "Fill in the title, start and end time to continue",
   "timerSessionCounter": "Focus {current} of {total}",
   "@timerSessionCounter": {
@@ -980,7 +980,7 @@
   "joinGroupCodeHint": "Enter the code",
   "joinGroupButton": "Join group",
   "joinGroupError": "Could not join this group.",
-  "scheduleDayEventsTitle": "Day events",
+  "scheduleDayEventsTitle": "Schedule for the day",
   "dailyGoalsNoGoalsYetTitle": "No goals yet",
   "dailyGoalsNoGoalsYetDescription": "Add your first goal to organize the day and track your wins.",
   "dailyGoalsSuggestionsTitle": "Suggestions to start",
@@ -1003,7 +1003,7 @@
   "scheduleActiveFromLabel": "Starts",
   "scheduleActiveUntilLabel": "Ends",
   "selectDateTitle": "Select date",
-  "selectDateHint": "Tap a day to select",
+  "selectDateHint": "Choose a day in the calendar",
   "addFriendTitle": "Add friend",
   "friendCodeNotFound": "We could not find a user with this code.",
   "friendInviteCodeTitle": "Invite code",
@@ -1186,7 +1186,7 @@
   "groupSendingImage": "Sending image...",
   "editGroupLabel": "Edit group",
   "leaveGroupLabel": "Leave group",
-  "groupDescription": "Sharing {metric} and beating challenges together.",
+  "groupDescription": "Ranking by {metric}. Keep progressing with your group.",
   "@groupDescription": {
     "placeholders": {
       "metric": {
@@ -1210,7 +1210,7 @@
       }
     }
   },
-  "groupGoalDescription": "Each member should log progress in {metric} to keep the group streak going.",
+  "groupGoalDescription": "Each member logs {metric} to keep the group streak active.",
   "@groupGoalDescription": {
     "placeholders": {
       "metric": {
@@ -1218,7 +1218,7 @@
       }
     }
   },
-  "groupRuleDescription": "Log at least one {metric} activity per day. Keeping the streak strengthens the group.",
+  "groupRuleDescription": "Log at least one {metric} entry per day to strengthen the group streak.",
   "@groupRuleDescription": {
     "placeholders": {
       "metric": {
@@ -1260,8 +1260,8 @@
       }
     }
   },
-  "homeScheduleRoutineSubtitle": "Upcoming times and weekly routine",
-  "homeNextCommitmentTitle": "Next commitment",
+  "homeScheduleRoutineSubtitle": "Upcoming schedule and weekly routine",
+  "homeNextCommitmentTitle": "Up next",
   "todayLabel": "Today",
   "statisticsTitle": "Statistics",
   "studiedTimeLabel": "Studied time",
