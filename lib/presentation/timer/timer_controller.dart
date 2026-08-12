@@ -283,9 +283,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (context == null) {
       return;
     }
-    appNavigator.showSuccessSnackBar(
-      "Modo concentração ativo. Termine ou pause o foco para sair.",
-    );
+    appNavigator.showSuccessSnackBar(context.l10n.timerFocusLockWarning);
   }
 
   Future<bool> confirmExitIfNeeded() async {

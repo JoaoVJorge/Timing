@@ -24,6 +24,7 @@ class DataSourcesBindings extends Bindings {
       SubjectsDataSource(
         localStorageService: Get.find(),
         supabaseService: Get.find(),
+        logger: Get.find(),
       ),
       permanent: true,
     );
@@ -31,19 +32,20 @@ class DataSourcesBindings extends Bindings {
       DailyTasksDataSource(
         localStorageService: Get.find(),
         supabaseService: Get.find(),
+        logger: Get.find(),
       ),
       permanent: true,
     );
     Get.put<GroupsDataSource>(
-      GroupsDataSource(supabaseService: Get.find()),
+      GroupsDataSource(supabaseService: Get.find(), logger: Get.find()),
       permanent: true,
     );
     Get.put<FriendsDataSource>(
-      FriendsDataSource(supabaseService: Get.find()),
+      FriendsDataSource(supabaseService: Get.find(), logger: Get.find()),
       permanent: true,
     );
     Get.put<ProfileSyncDataSource>(
-      ProfileSyncDataSource(supabaseService: Get.find()),
+      ProfileSyncDataSource(supabaseService: Get.find(), logger: Get.find()),
       permanent: true,
     );
     Get.put<PhoneAuthDataSource>(
@@ -54,6 +56,7 @@ class DataSourcesBindings extends Bindings {
       ScheduleDataSource(
         localStorageService: Get.find(),
         supabaseService: Get.find(),
+        logger: Get.find(),
       ),
       permanent: true,
     );

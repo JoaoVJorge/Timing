@@ -5,16 +5,19 @@ import "package:help_out/core/domain/entities/daily_task_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 
 class DailyTasksDataSource {
   DailyTasksDataSource({
     required this._localStorageService,
     required this._supabaseService,
+    required this._logger,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
     try {
@@ -75,6 +78,7 @@ class DailyTasksDataSource {
           .select()
           .eq("user_id", userId)
           .order("created_at");
+      _logger.logResponse("select public.daily_goals", rows);
 
       return rows
           .map((row) => _taskFromRow(row as Map<String, dynamic>))

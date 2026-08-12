@@ -1,5 +1,4 @@
 import "package:dartz/dartz.dart";
-import "package:flutter/foundation.dart";
 import "package:help_out/core/domain/entities/friend_option.dart";
 import "package:help_out/core/domain/entities/group_activity_draft.dart";
 import "package:help_out/core/domain/entities/group_activity_progress_entity.dart";
@@ -9,13 +8,15 @@ import "package:help_out/core/domain/entities/group_invitation_entity.dart";
 import "package:help_out/core/domain/entities/group_member_entity.dart";
 import "package:help_out/core/domain/enums/group_theme_type.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 import "package:help_out/theme/group_colors.dart";
 
 class GroupsDataSource {
-  GroupsDataSource({required this._supabaseService});
+  GroupsDataSource({required this._supabaseService, required this._logger});
 
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     try {
@@ -123,6 +124,7 @@ class GroupsDataSource {
         "group_activity_progress",
         params: {"target_group_id": groupId, "local_date": localDate},
       );
+      _logger.logResponse("rpc public.group_activity_progress", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
       return Right(
         rows
@@ -239,6 +241,7 @@ class GroupsDataSource {
           })
           .select("id, group_id, sender_id, image_base64, created_at")
           .single();
+      _logger.logResponse("insert public.group_image_messages", row);
       final Map<String, Map<String, dynamic>> profilesById =
           await _profilesById([userId], withPhoto: true);
 
@@ -281,6 +284,7 @@ class GroupsDataSource {
       final dynamic response = await _supabaseService.requireClient.rpc(
         "pending_group_invitations",
       );
+      _logger.logResponse("rpc public.pending_group_invitations", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
       return Right(
         rows
@@ -305,6 +309,7 @@ class GroupsDataSource {
         "accept_group_invitation",
         params: {"invitation_id": invitationId},
       );
+      _logger.logResponse("rpc public.accept_group_invitation", response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
         throw StateError("accept_group_invitation returned no group row.");
@@ -321,7 +326,11 @@ class GroupsDataSource {
         throw StateError("Accepted group was not returned by getGroups.");
       });
     } catch (error, stackTrace) {
-      _logSqlError(operation, error, stackTrace);
+      _logger.logError(
+        "Supabase $operation failed",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
@@ -351,6 +360,7 @@ class GroupsDataSource {
         "join_group_by_invite_code",
         params: {"lookup_code": code},
       );
+      _logger.logResponse("rpc public.join_group_by_invite_code", response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
         throw StateError("join_group_by_invite_code returned no group row.");
@@ -372,7 +382,11 @@ class GroupsDataSource {
         return Right(group);
       });
     } catch (error, stackTrace) {
-      _logSqlError(operation, error, stackTrace);
+      _logger.logError(
+        "Supabase $operation failed",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
@@ -407,11 +421,12 @@ class GroupsDataSource {
         "activity_kind": activity?.kindName,
         "activity_payload": activity?.toPayload(),
       };
-      _logSqlStep(operation, createGroupPayload);
+      _logger.logRequest(operation, createGroupPayload);
       final dynamic response = await _supabaseService.requireClient.rpc(
         "create_group_with_members",
         params: createGroupPayload,
       );
+      _logger.logResponse(operation, response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
         throw StateError("create_group_with_members returned no group row.");
@@ -453,7 +468,11 @@ class GroupsDataSource {
         ),
       );
     } catch (error, stackTrace) {
-      _logSqlError(operation, error, stackTrace);
+      _logger.logError(
+        "Supabase $operation failed",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
       return Left(
         SqlOperationAppError(
           operation: operation,
@@ -472,6 +491,7 @@ class GroupsDataSource {
     final dynamic response = await filters(
       _supabaseService.requireClient.from(table).select(columns),
     );
+    _logger.logResponse("select public.$table", response);
     return (response as List<dynamic>)
         .map((row) => Map<String, dynamic>.from(row as Map))
         .toList();
@@ -623,17 +643,6 @@ class GroupsDataSource {
     return DateTime.utc(now.year, now.month);
   }
 
-  void _logSqlStep(String operation, Object payload) {
-    debugPrint("[HelpOut][Supabase][$operation] payload: $payload");
-  }
-
-  void _logSqlError(String operation, Object error, StackTrace stackTrace) {
-    debugPrint(
-      "[HelpOut][Supabase][$operation] failed: "
-      "${SqlOperationAppError.describe(error)}",
-    );
-    debugPrint("[HelpOut][Supabase][$operation] stack: $stackTrace");
-  }
 }
 
 class _PeriodScores {

@@ -5,16 +5,19 @@ import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
 import "package:help_out/core/domain/errors/app_error.dart";
 import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
 import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:help_out/core/services/log/app_logger_service.dart";
 import "package:help_out/core/services/supabase/supabase_service.dart";
 
 class ScheduleDataSource {
   ScheduleDataSource({
     required this._localStorageService,
     required this._supabaseService,
+    required this._logger,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
+  final AppLoggerService _logger;
 
   Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() async {
     try {
@@ -84,6 +87,7 @@ class ScheduleDataSource {
           .order("active_from")
           .order("weekday")
           .order("start_minutes");
+      _logger.logResponse("select public.schedule_entries", rows);
 
       return rows
           .map((row) => _entryFromRow(row as Map<String, dynamic>))
