@@ -1,16 +1,16 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/delete_daily_task_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:help_out/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
-import "package:help_out/core/services/last_activity/last_activity_service.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
+import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
+import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
+import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
   DailyGoalsController({

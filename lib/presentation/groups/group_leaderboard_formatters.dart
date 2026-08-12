@@ -1,10 +1,10 @@
 import "package:flutter/widgets.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/entities/group_member_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/enums/leaderboard_period_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/functions/format_duration.dart";
+import "package:timing/core/domain/entities/group_entity.dart";
+import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/enums/leaderboard_period_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/functions/format_duration.dart";
 
 String formatGroupScore(
   BuildContext context,

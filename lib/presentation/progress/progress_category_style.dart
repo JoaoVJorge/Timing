@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/theme/accent_presets.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/theme/accent_presets.dart";
 
 /// Per-category accent colors used to differentiate the progress stat cards.
 /// Kept local to the progress feature so the global theme stays primary-based;

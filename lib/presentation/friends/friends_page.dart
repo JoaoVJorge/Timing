@@ -1,16 +1,16 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_ui_constants.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/friends/friends_controller.dart";
-import "package:help_out/presentation/friends/widgets/friends_activity_shortcuts.dart";
-import "package:help_out/presentation/friends/widgets/friends_invite_code_disclosure.dart";
-import "package:help_out/presentation/friends/widgets/friends_loading_skeleton.dart";
-import "package:help_out/presentation/friends/widgets/friends_section.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_ui_constants.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/friends/friends_controller.dart";
+import "package:timing/presentation/friends/widgets/friends_activity_shortcuts.dart";
+import "package:timing/presentation/friends/widgets/friends_invite_code_disclosure.dart";
+import "package:timing/presentation/friends/widgets/friends_loading_skeleton.dart";
+import "package:timing/presentation/friends/widgets/friends_section.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
 
 class FriendsPage extends GetView<FriendsController> {
   const FriendsPage({super.key});

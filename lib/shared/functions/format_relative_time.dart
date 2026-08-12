@@ -1,5 +1,5 @@
 import "package:flutter/widgets.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 /// Localised "time ago" label for a past [timestamp] (e.g. "2 h ago").
 String formatRelativeTime(BuildContext context, DateTime timestamp) {

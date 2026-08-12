@@ -1,8 +1,8 @@
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/daily_progress_entity.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 
 typedef SubjectComparatives = ({
   List<int> values,

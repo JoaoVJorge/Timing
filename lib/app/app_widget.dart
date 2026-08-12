@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_constants.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/l10n/app_localizations.dart";
-import "package:help_out/theme/theme.dart";
+import "package:timing/app/app_constants.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/l10n/app_localizations.dart";
+import "package:timing/theme/theme.dart";
 
 class AppWidget extends StatelessWidget {
   const AppWidget({super.key});

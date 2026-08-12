@@ -1,7 +1,7 @@
 import "package:get/get.dart";
-import "package:help_out/app/route_arguments.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/presentation/create_task/create_task_controller.dart";
+import "package:timing/app/route_arguments.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/presentation/create_task/create_task_controller.dart";
 
 class CreateTaskBindings extends Bindings {
   @override

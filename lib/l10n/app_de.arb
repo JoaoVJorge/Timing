@@ -1045,7 +1045,7 @@
   "friendRequestSentMessage": "Anfrage gesendet",
   "joinedGroupMessage": "Du bist der Gruppe beigetreten",
   "friendTypeName": "Freund",
-  "shareInviteCodeMessage": "Füge mich auf HelpOut mit meinem Code hinzu: {code}",
+  "shareInviteCodeMessage": "Füge mich auf Timing mit meinem Code hinzu: {code}",
   "groupInvitesTitle": "Gruppeneinladungen ({count})",
   "groupInvitedBy": "{inviter} hat dich eingeladen",
   "acceptButton": "Annehmen",

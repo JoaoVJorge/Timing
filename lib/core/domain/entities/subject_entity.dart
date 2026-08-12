@@ -1,7 +1,7 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 
 enum SubjectActivityType {
   daily,

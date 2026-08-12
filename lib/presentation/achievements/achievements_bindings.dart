@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/achievements/achievements_controller.dart";
+import "package:timing/presentation/achievements/achievements_controller.dart";
 
 class AchievementsBindings extends Bindings {
   @override

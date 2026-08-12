@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon_badge.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon_badge.dart";
+import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 
 /// A milestone the user is working towards. Locked ones expose how far along
 /// they are, which motivates far more than a padlock.

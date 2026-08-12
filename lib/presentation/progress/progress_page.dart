@@ -1,24 +1,24 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_ui_constants.dart";
-import "package:help_out/core/domain/entities/profile_stats_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/progress/progress_category_style.dart";
-import "package:help_out/presentation/progress/progress_controller.dart";
-import "package:help_out/presentation/progress/widgets/progress_achievements_section.dart";
-import "package:help_out/presentation/progress/widgets/progress_evolution_chart.dart";
-import "package:help_out/presentation/progress/widgets/progress_hero_card.dart";
-import "package:help_out/presentation/progress/widgets/progress_period_tabs.dart";
-import "package:help_out/presentation/progress/widgets/progress_stat_row.dart";
-import "package:help_out/presentation/progress/widgets/progress_top_subjects_list.dart";
-import "package:help_out/shared/functions/format_duration.dart";
-import "package:help_out/shared/widgets/app_icon_badge.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_section_header.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/app/app_ui_constants.dart";
+import "package:timing/core/domain/entities/profile_stats_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/progress/progress_category_style.dart";
+import "package:timing/presentation/progress/progress_controller.dart";
+import "package:timing/presentation/progress/widgets/progress_achievements_section.dart";
+import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
+import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
+import "package:timing/presentation/progress/widgets/progress_period_tabs.dart";
+import "package:timing/presentation/progress/widgets/progress_stat_row.dart";
+import "package:timing/presentation/progress/widgets/progress_top_subjects_list.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/widgets/app_icon_badge.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/app_surfaces.dart";
 
 /// Answers a single question: "what have I already done?". Planning lives on
 /// Home and social lives in Groups, so nothing else competes for attention.

@@ -1,15 +1,15 @@
 import "package:flutter/foundation.dart";
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/bindings/data_sources_bindings.dart";
-import "package:help_out/app/bindings/repositories_bindings.dart";
-import "package:help_out/app/bindings/services_bindings.dart";
-import "package:help_out/app/bindings/use_cases_bindings.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
-import "package:help_out/presentation/schedule/schedule_controller.dart";
-import "package:help_out/theme/accent_presets.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/bindings/data_sources_bindings.dart";
+import "package:timing/app/bindings/repositories_bindings.dart";
+import "package:timing/app/bindings/services_bindings.dart";
+import "package:timing/app/bindings/use_cases_bindings.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/presentation/schedule/schedule_controller.dart";
+import "package:timing/theme/accent_presets.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class AppBindings extends Bindings {

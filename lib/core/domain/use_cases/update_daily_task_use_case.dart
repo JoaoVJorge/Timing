@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/daily_tasks_repository.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class UpdateDailyTaskUseCase {
   UpdateDailyTaskUseCase({required this.dailyTasksRepository});

@@ -1751,7 +1751,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String shareInviteCodeMessage(String code) {
-    return 'Me adicione no HelpOut com meu código: $code';
+    return 'Me adicione no Timing com meu código: $code';
   }
 
   @override

@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/faq/faq_controller.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/faq/faq_controller.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
 
 class FaqPage extends StatelessWidget {
   const FaqPage({super.key});

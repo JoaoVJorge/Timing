@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/groups/widgets/group_member_avatar.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/theme/group_colors.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/group_colors.dart";
 
 class FriendTile extends StatelessWidget {
   const FriendTile({

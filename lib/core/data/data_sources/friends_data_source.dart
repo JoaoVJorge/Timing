@@ -1,11 +1,11 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/domain/entities/friend_entity.dart";
-import "package:help_out/core/domain/entities/friend_suggestion_entity.dart";
-import "package:help_out/core/domain/entities/friends_social_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
-import "package:help_out/theme/group_colors.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
+import "package:timing/core/domain/entities/friends_social_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/theme/group_colors.dart";
 
 class FriendsDataSource {
   FriendsDataSource({required this._supabaseService, required this._logger});
@@ -284,7 +284,7 @@ class FriendsDataSource {
     if (nickName.isNotEmpty) {
       return nickName;
     }
-    return "HelpOut User";
+    return "Timing User";
   }
 
   String _handleFor(String userId, Map<String, dynamic>? row) {

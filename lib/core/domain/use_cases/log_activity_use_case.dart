@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/activity_repository.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class LogActivityUseCase {
   LogActivityUseCase({required this.activityRepository});

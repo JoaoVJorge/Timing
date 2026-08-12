@@ -1,11 +1,11 @@
 import "package:flutter/foundation.dart";
-import "package:help_out/env/environment_keys.dart";
+import "package:timing/env/environment_keys.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 
 class SupabaseService {
   SupabaseService._({required this.isConfigured, this.client});
 
-  static const String oauthRedirectUrl = "helpout://login-callback";
+  static const String oauthRedirectUrl = "timing://login-callback";
 
   final bool isConfigured;
   final SupabaseClient? client;

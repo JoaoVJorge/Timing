@@ -1,4 +1,4 @@
-import "package:help_out/core/services/http/http_status_code.dart";
+import "package:timing/core/services/http/http_status_code.dart";
 
 abstract class AppError {
   const AppError(this.message);

@@ -1,5 +1,5 @@
 import "package:equatable/equatable.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 
 class SentGroupInvitationEntity extends Equatable {
   const SentGroupInvitationEntity({

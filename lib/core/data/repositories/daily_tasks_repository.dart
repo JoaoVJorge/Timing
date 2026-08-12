@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/data_sources/daily_tasks_data_source.dart";
-import "package:help_out/core/domain/entities/daily_task_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class DailyTasksRepository {
   DailyTasksRepository({required this._dailyTasksDataSource});

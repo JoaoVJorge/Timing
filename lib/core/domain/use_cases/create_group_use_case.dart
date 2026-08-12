@@ -1,10 +1,10 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/groups_repository.dart";
-import "package:help_out/core/domain/entities/friend_option.dart";
-import "package:help_out/core/domain/entities/group_activity_draft.dart";
-import "package:help_out/core/domain/entities/group_entity.dart";
-import "package:help_out/core/domain/enums/group_theme_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
+import "package:timing/core/domain/entities/group_activity_draft.dart";
+import "package:timing/core/domain/entities/group_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class CreateGroupUseCase {
   CreateGroupUseCase({required this._groupsRepository});

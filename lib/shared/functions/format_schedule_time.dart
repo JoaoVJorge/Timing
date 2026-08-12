@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 /// Formats a minutes-of-day value as a locale-aware clock time (e.g. 14:00).
 String formatMinutesOfDay(BuildContext context, int minutes) {

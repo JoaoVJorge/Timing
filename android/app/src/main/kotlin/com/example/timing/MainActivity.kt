@@ -1,4 +1,4 @@
-package com.example.help_out
+package com.example.timing
 
 import android.content.Intent
 import android.view.WindowManager
@@ -12,7 +12,7 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "help_out/focus_guard"
+            "timing/focus_guard"
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "setKeepScreenOn" -> {

@@ -1,6 +1,6 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/phone_auth_repository.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class SignInWithGoogleUseCase {
   SignInWithGoogleUseCase({required this.phoneAuthRepository});

@@ -1,7 +1,7 @@
 import "package:get/get.dart";
-import "package:help_out/core/domain/entities/last_activity_entity.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/domain/entities/last_activity_entity.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 
 class LastActivityService {
   LastActivityService({required this._localStorageService});

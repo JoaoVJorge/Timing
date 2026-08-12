@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon_badge.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon_badge.dart";
+import "package:timing/theme/app_spacing.dart";
 
 typedef ProgressStat = ({
   IconData icon,

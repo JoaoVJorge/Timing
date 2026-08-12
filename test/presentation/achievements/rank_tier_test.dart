@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/presentation/achievements/achievements_models.dart";
+import "package:timing/presentation/achievements/achievements_models.dart";
 
 void main() {
   test("maps levels to tiers and clamps beyond the last one", () {

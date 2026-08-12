@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/theme/app_surfaces.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/theme/app_surfaces.dart";
 import "package:intl/intl.dart" hide TextDirection;
 
 /// What the bar heights represent, which drives axis and value labels.

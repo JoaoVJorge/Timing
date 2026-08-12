@@ -21,7 +21,7 @@ struct TimerActivityAttributes: ActivityAttributes {
 }
 
 enum TimerActivitySharedStore {
-  static let suiteName = "group.com.example.helpOut"
+  static let suiteName = "group.com.example.timing"
   static let pendingActionKey = "timerLiveActivity.pendingAction"
   static let pushTokenKey = "timerLiveActivity.pushToken"
   static let pushToStartTokenKey = "timerLiveActivity.pushToStartToken"

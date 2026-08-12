@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/achievements/achievements_controller.dart";
-import "package:help_out/presentation/achievements/achievements_models.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/achievements/achievements_controller.dart";
+import "package:timing/presentation/achievements/achievements_models.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class AchievementsPage extends StatelessWidget {
   const AchievementsPage({super.key});
@@ -291,21 +291,21 @@ class _Filters extends StatelessWidget {
                 controller.selectedFilter.value == AchievementFilter.all,
             onTap: () => controller.onSelectFilter(AchievementFilter.all),
           ),
-        const Gap(8),
-        _FilterChip(
-          label: context.l10n.unlockedFilterLabel,
-          isSelected:
-              controller.selectedFilter.value == AchievementFilter.unlocked,
-          onTap: () => controller.onSelectFilter(AchievementFilter.unlocked),
-        ),
-        const Gap(8),
-        _FilterChip(
-          label: context.l10n.lockedFilterLabel,
-          isSelected:
-              controller.selectedFilter.value == AchievementFilter.locked,
-          onTap: () => controller.onSelectFilter(AchievementFilter.locked),
-        ),
-        const Gap(8),
+          const Gap(8),
+          _FilterChip(
+            label: context.l10n.unlockedFilterLabel,
+            isSelected:
+                controller.selectedFilter.value == AchievementFilter.unlocked,
+            onTap: () => controller.onSelectFilter(AchievementFilter.unlocked),
+          ),
+          const Gap(8),
+          _FilterChip(
+            label: context.l10n.lockedFilterLabel,
+            isSelected:
+                controller.selectedFilter.value == AchievementFilter.locked,
+            onTap: () => controller.onSelectFilter(AchievementFilter.locked),
+          ),
+          const Gap(8),
           _CategoryMenu(controller: controller),
         ],
       ),

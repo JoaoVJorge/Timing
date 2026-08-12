@@ -2,14 +2,14 @@ import "dart:async";
 
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_controller.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/sign_in_with_google_use_case.dart";
-import "package:help_out/core/services/log/app_logger_service.dart";
-import "package:help_out/core/services/supabase/supabase_service.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/app/app_controller.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 
 class LoginController extends GetxController {

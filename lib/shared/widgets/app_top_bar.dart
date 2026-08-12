@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/theme/app_spacing.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/theme/app_spacing.dart";
 
 class AppTopBar extends StatelessWidget {
   const AppTopBar({

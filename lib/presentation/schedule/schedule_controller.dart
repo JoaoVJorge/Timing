@@ -1,15 +1,15 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/add_schedule_entry_use_case.dart";
-import "package:help_out/core/domain/use_cases/delete_schedule_entry_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_schedule_entries_use_case.dart";
-import "package:help_out/presentation/schedule/add_schedule_entry_page.dart";
-import "package:help_out/presentation/schedule/widgets/schedule_entry_tile.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
+import "package:timing/core/domain/use_cases/delete_schedule_entry_use_case.dart";
+import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
+import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
+import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 
 class ScheduleController extends GetxController {
   ScheduleController({

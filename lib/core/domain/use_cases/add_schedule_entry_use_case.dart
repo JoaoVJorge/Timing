@@ -1,7 +1,7 @@
 import "package:dartz/dartz.dart";
-import "package:help_out/core/data/repositories/schedule_repository.dart";
-import "package:help_out/core/domain/entities/schedule_entry_entity.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
+import "package:timing/core/data/repositories/schedule_repository.dart";
+import "package:timing/core/domain/entities/schedule_entry_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 
 class AddScheduleEntryUseCase {
   AddScheduleEntryUseCase({required this._scheduleRepository});

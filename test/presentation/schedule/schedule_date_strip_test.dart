@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/presentation/schedule/widgets/schedule_date_strip.dart";
+import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 

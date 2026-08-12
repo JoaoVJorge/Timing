@@ -1,9 +1,9 @@
 import "dart:convert";
 
-import "package:help_out/core/domain/entities/activity_entry_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/services/local_storage/app_local_storage_service.dart";
-import "package:help_out/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/domain/entities/activity_entry_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 
 /// Append-only local trail of every logged activity, kept so the app can answer
 /// time-and-category scoped questions ("studied yesterday", "pages read this

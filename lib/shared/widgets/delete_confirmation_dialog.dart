@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 Future<bool> showDeleteConfirmationDialog({
   required String itemName,

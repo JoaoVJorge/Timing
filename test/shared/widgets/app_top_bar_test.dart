@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/theme/app_spacing.dart";
-import "package:help_out/theme/theme.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/theme/app_spacing.dart";
+import "package:timing/theme/theme.dart";
 
 void main() {
   testWidgets("back button meets the minimum tap target", (tester) async {

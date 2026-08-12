@@ -22,7 +22,7 @@ class TimerLiveActivityAction {
 /// never interrupt the focus session itself.
 class TimerLiveActivityService {
   static const MethodChannel _channel = MethodChannel(
-    "com.helpout/timer_live_activity",
+    "com.timing/timer_live_activity",
   );
 
   bool get _isSupported => Platform.isIOS;

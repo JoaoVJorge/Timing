@@ -35,7 +35,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>helpout</string>
+				<string>timing</string>
 			</array>
 		</dict>
 	</array>

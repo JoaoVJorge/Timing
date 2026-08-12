@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:help_out/l10n/app_localizations.dart";
-import "package:help_out/theme/theme.dart";
+import "package:timing/l10n/app_localizations.dart";
+import "package:timing/theme/theme.dart";
 
 /// Renders [child] in the same unbounded-height context the pages use:
 /// a scroll view wrapping a Column. Widgets that force infinite constraints

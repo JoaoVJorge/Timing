@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 
 class FriendsLoadingSkeleton extends StatelessWidget {
   const FriendsLoadingSkeleton({super.key});

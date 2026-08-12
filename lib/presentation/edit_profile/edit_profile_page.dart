@@ -3,16 +3,16 @@ import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/presentation/edit_profile/edit_profile_controller.dart";
-import "package:help_out/shared/widgets/app_icon.dart";
-import "package:help_out/shared/widgets/app_scaffold.dart";
-import "package:help_out/shared/widgets/app_top_bar.dart";
-import "package:help_out/shared/widgets/bounce_tap.dart";
-import "package:help_out/shared/widgets/centered_wrap_grid.dart";
-import "package:help_out/theme/accent_presets.dart";
-import "package:help_out/theme/avatar_presets.dart";
-import "package:help_out/theme/decoration.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/edit_profile/edit_profile_controller.dart";
+import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/shared/widgets/centered_wrap_grid.dart";
+import "package:timing/theme/accent_presets.dart";
+import "package:timing/theme/avatar_presets.dart";
+import "package:timing/theme/decoration.dart";
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});

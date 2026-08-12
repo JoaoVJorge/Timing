@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/utils/extensions/context_extensions.dart";
-import "package:help_out/theme/app_languages.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/theme/app_languages.dart";
 
 class LanguagePickerDialog extends StatelessWidget {
   const LanguagePickerDialog({required this.currentCode, super.key});

@@ -1,15 +1,15 @@
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/app/app_routes.dart";
-import "package:help_out/core/domain/entities/subject_entity.dart";
-import "package:help_out/core/domain/enums/time_category_type.dart";
-import "package:help_out/core/domain/errors/app_error.dart";
-import "package:help_out/core/domain/use_cases/delete_subject_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_subjects_use_case.dart";
-import "package:help_out/core/domain/use_cases/pin_subject_to_start_use_case.dart";
-import "package:help_out/shared/extensions/enum_localization_extensions.dart";
-import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
+import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
+import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
+import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class CategoryController extends GetxController {
   CategoryController({

@@ -1,5 +1,5 @@
 import "package:get/get.dart";
-import "package:help_out/presentation/friends/friends_controller.dart";
+import "package:timing/presentation/friends/friends_controller.dart";
 
 class FriendsBindings extends Bindings {
   @override

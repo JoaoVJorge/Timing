@@ -1,28 +1,28 @@
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
-import "package:help_out/app/app_navigator.dart";
-import "package:help_out/core/data/repositories/groups_repository.dart";
-import "package:help_out/core/domain/entities/friend_entity.dart";
-import "package:help_out/core/domain/entities/friend_suggestion_entity.dart";
-import "package:help_out/core/domain/entities/friends_social_entity.dart";
-import "package:help_out/core/domain/entities/group_invitation_entity.dart";
-import "package:help_out/core/domain/entities/sent_group_invitation_entity.dart";
-import "package:help_out/core/domain/use_cases/accept_friend_request_use_case.dart";
-import "package:help_out/core/domain/use_cases/accept_group_invitation_use_case.dart";
-import "package:help_out/core/domain/use_cases/cancel_friend_request_use_case.dart";
-import "package:help_out/core/domain/use_cases/decline_friend_request_use_case.dart";
-import "package:help_out/core/domain/use_cases/decline_group_invitation_use_case.dart";
-import "package:help_out/core/domain/use_cases/find_profile_by_code_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_friends_social_use_case.dart";
-import "package:help_out/core/domain/use_cases/get_group_invitations_use_case.dart";
-import "package:help_out/core/domain/use_cases/remove_friend_use_case.dart";
-import "package:help_out/core/domain/use_cases/send_friend_request_use_case.dart";
-import "package:help_out/l10n/app_localizations.dart";
-import "package:help_out/presentation/friends/find_friends_page.dart";
-import "package:help_out/presentation/friends/friend_requests_page.dart";
-import "package:help_out/presentation/friends/group_invitations_page.dart";
-import "package:help_out/shared/widgets/delete_confirmation_dialog.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
+import "package:timing/core/domain/entities/friends_social_entity.dart";
+import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
+import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.dart";
+import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/decline_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/decline_group_invitation_use_case.dart";
+import "package:timing/core/domain/use_cases/find_profile_by_code_use_case.dart";
+import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:timing/core/domain/use_cases/get_group_invitations_use_case.dart";
+import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
+import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
+import "package:timing/l10n/app_localizations.dart";
+import "package:timing/presentation/friends/find_friends_page.dart";
+import "package:timing/presentation/friends/friend_requests_page.dart";
+import "package:timing/presentation/friends/group_invitations_page.dart";
+import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 import "package:share_plus/share_plus.dart";
 
 class FriendsController extends GetxController {
@@ -259,7 +259,7 @@ class FriendsController extends GetxController {
       ShareParams(
         text:
             _l10n?.shareInviteCodeMessage(inviteCode.value) ??
-            "Add me on HelpOut with my code: ${inviteCode.value}",
+            "Add me on Timing with my code: ${inviteCode.value}",
       ),
     );
   }
