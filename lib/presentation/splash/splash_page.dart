@@ -24,7 +24,7 @@ class SplashPage extends StatelessWidget {
             Center(
               child: Transform.scale(
                 scale: 1.3,
-                child: Image.asset(AppConstants.appLogo, height: 110),
+                child: Image.asset(AppConstants.appLogoFull, height: 110),
               ),
             ),
             Text(
