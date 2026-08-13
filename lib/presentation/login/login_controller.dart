@@ -22,6 +22,7 @@ class LoginController extends GetxController {
   });
 
   static const bool isAppleSignInComplete = false;
+  static const Duration _googleSignInTimeout = Duration(seconds: 20);
 
   final SignInWithGoogleUseCase signInWithGoogleUseCase;
   final AppController appController;
@@ -55,13 +56,27 @@ class LoginController extends GetxController {
     }
 
     isGoogleSubmitting.value = true;
-    final Either<AppError, void> result = await signInWithGoogleUseCase();
-    isGoogleSubmitting.value = false;
+    try {
+      final Either<AppError, void>
+      result = await signInWithGoogleUseCase().timeout(
+        _googleSignInTimeout,
+        onTimeout: () => Left(
+          GenericAppError(
+            error: TimeoutException(
+              "Google sign in did not complete after $_googleSignInTimeout.",
+            ),
+            stackTrace: StackTrace.current,
+          ),
+        ),
+      );
 
-    result.fold((error) {
-      logger.logAppError("Failed to start Google sign in", error);
-      appNavigator.showErrorSnackBar();
-    }, (_) => null);
+      result.fold((error) {
+        logger.logAppError("Failed to start Google sign in", error);
+        appNavigator.showErrorSnackBar();
+      }, (_) => null);
+    } finally {
+      isGoogleSubmitting.value = false;
+    }
   }
 
   Future<void> onTapAppleSignIn() async {

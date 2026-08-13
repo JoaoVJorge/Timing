@@ -1,8 +1,9 @@
 flutter_launcher_icons:
-  image_path: "assets/images/app_icon.png"
+  image_path: "assets/images/logo_launcher.png"
   android: true
   ios: true
-  remove_alpha_ios: false
+  remove_alpha_ios: true
+  background_color_ios: "#0c1b32"
   web:
     generate: true
   windows:

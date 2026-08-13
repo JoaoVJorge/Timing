@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_constants.dart";
@@ -71,6 +72,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const Gap(8),
                   _AuthCard(controller: controller),
+                  Gap(12),
                 ],
               ),
             ),
@@ -127,28 +129,7 @@ class _Brand extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Container(
-        width: 44,
-        height: 44,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: _authBlueGradient,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(
-              color: _authCardShadow,
-              blurRadius: 14,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Image.asset(
-          AppConstants.appLogo,
-          width: 36,
-          height: 36,
-          color: Colors.white,
-        ),
-      ),
+      SvgPicture.asset(AppConstants.appLogoFull, width: 44, height: 44),
       const Gap(10),
       Text(
         AppConstants.appTitle,
@@ -246,23 +227,25 @@ class _AuthCard extends StatelessWidget {
             isPrimary: true,
           ),
         ),
-        const Gap(10),
-        _SignInButton(
-          leading: Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFE8ECF3)),
+        if (!GetPlatform.isAndroid) ...[
+          const Gap(10),
+          _SignInButton(
+            leading: Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE8ECF3)),
+              ),
+              child: const Icon(Icons.apple, size: 28, color: Colors.black),
             ),
-            child: const Icon(Icons.apple, size: 28, color: Colors.black),
+            label: context.l10n.continueWithAppleButton,
+            onTap: controller.onTapAppleSignIn,
+            isPrimary: false,
           ),
-          label: context.l10n.continueWithAppleButton,
-          onTap: controller.onTapAppleSignIn,
-          isPrimary: false,
-        ),
+        ],
         const Gap(12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -304,69 +287,75 @@ class _SignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool canTap = !isLoading;
     final Color foreground = isPrimary ? Colors.white : _authNavy;
 
-    return BounceTap(
-      pressedScale: 0.98,
-      onTap: isLoading ? () {} : onTap,
-      child: Container(
-        width: double.infinity,
-        height: 52,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          gradient: isPrimary ? _authBlueGradient : null,
-          color: isPrimary ? null : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: isPrimary ? null : Border.all(color: const Color(0xFFE8ECF3)),
-          boxShadow: isPrimary
-              ? const [
-                  BoxShadow(
-                    color: _authCardShadow,
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
+    return IgnorePointer(
+      ignoring: !canTap,
+      child: BounceTap(
+        pressedScale: 0.98,
+        onTap: canTap ? onTap : () {},
+        child: Container(
+          width: double.infinity,
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            gradient: isPrimary ? _authBlueGradient : null,
+            color: isPrimary ? null : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: isPrimary
+                ? null
+                : Border.all(color: const Color(0xFFE8ECF3)),
+            boxShadow: isPrimary
+                ? const [
+                    BoxShadow(
+                      color: _authCardShadow,
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
+                    ),
+                  ]
+                : const [
+                    BoxShadow(
+                      color: Color(0x0F082A5F),
+                      blurRadius: 16,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+          ),
+          child: Row(
+            children: [
+              leading,
+              const Gap(10),
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.textPrimaryButton.copyWith(
+                    color: foreground,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
                   ),
-                ]
-              : const [
-                  BoxShadow(
-                    color: Color(0x0F082A5F),
-                    blurRadius: 16,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            leading,
-            const Gap(10),
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.textPrimaryButton.copyWith(
-                  color: foreground,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
                 ),
               ),
-            ),
-            if (isLoading)
-              SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.3,
-                  color: foreground,
+              if (isLoading)
+                SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.3,
+                    color: foreground,
+                  ),
+                )
+              else
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 26,
+                  color: isPrimary ? foreground : const Color(0xFF717B8D),
                 ),
-              )
-            else
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 26,
-                color: isPrimary ? foreground : const Color(0xFF717B8D),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

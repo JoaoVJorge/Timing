@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
+import "package:gap/gap.dart";
 import "package:timing/app/app_constants.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
@@ -22,15 +24,20 @@ class SplashPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Transform.scale(
-                scale: 1.3,
-                child: Image.asset(AppConstants.appLogoFull, height: 110),
+              child: SvgPicture.asset(
+                AppConstants.appLogo,
+                height: 98,
+                colorFilter: ColorFilter.mode(
+                  context.colorTokens.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
+            Gap(12),
             Text(
               AppConstants.appTitle,
               style: context.textStyles.textPrimaryButton.copyWith(
-                fontSize: 32,
+                fontSize: 38,
                 fontWeight: FontWeight.w900,
               ),
             ),
