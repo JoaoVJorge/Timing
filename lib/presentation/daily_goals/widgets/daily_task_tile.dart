@@ -71,12 +71,7 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   Widget build(BuildContext context) {
     final Color taskColor = Color(widget.task.colorValue);
     final bool isCheckedToday = widget.task.isDoneForCurrentCycle;
-    final double progress = widget.task.currentTarget == 0
-        ? 0
-        : (widget.task.currentProgress / widget.task.currentTarget).clamp(
-            0.0,
-            1.0,
-          );
+    final double progress = isCheckedToday ? 1.0 : 0.0;
 
     return AnimatedBuilder(
       animation: _controller,
@@ -190,25 +185,56 @@ class _DailyTaskTileState extends State<DailyTaskTile>
               ),
             ),
             const Gap(12),
-            Text(
-              widget.task.isCompleted
-                  ? context.l10n.taskCompletedLabel
-                  : widget.task.hasInfiniteTarget
-                  ? "${widget.task.currentProgress} / ∞"
-                  : context.l10n.taskDaysProgress(
-                      widget.task.currentProgress,
-                      widget.task.currentTarget,
+            widget.task.hasInfiniteTarget
+                ? _InfiniteProgressBadge(
+                    value: widget.task.currentProgress,
+                    color: taskColor,
+                  )
+                : Text(
+                    widget.task.isCompleted
+                        ? context.l10n.taskCompletedLabel
+                        : context.l10n.taskDaysProgress(
+                            widget.task.currentProgress,
+                            widget.task.currentTarget,
+                          ),
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: widget.task.isCompleted
+                          ? context.colorTokens.success
+                          : context.colorTokens.textHint,
+                      fontWeight: FontWeight.w700,
                     ),
-              style: context.textStyles.bodySmall.copyWith(
-                color: widget.task.isCompleted
-                    ? context.colorTokens.success
-                    : context.colorTokens.textHint,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+                  ),
           ],
         ),
       ),
     );
   }
+}
+
+class _InfiniteProgressBadge extends StatelessWidget {
+  const _InfiniteProgressBadge({required this.value, required this.color});
+
+  final int value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 36,
+    height: 36,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      shape: BoxShape.circle,
+      border: Border.all(color: color, width: 1.5),
+    ),
+    child: Text(
+      "$value",
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textStyles.bodySmall.copyWith(
+        color: color,
+        fontWeight: FontWeight.w900,
+      ),
+    ),
+  );
 }
