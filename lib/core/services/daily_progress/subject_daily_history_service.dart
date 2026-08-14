@@ -95,6 +95,8 @@ class SubjectDailyHistoryService {
     });
   }
 
+  DailyProgressEntity todayForSubject(String subjectId) => _current(subjectId);
+
   DailyProgressEntity _current(String subjectId) =>
       _bySubject[subjectId]?[DailyProgressService.dateKey(DateTime.now())] ??
       const DailyProgressEntity();

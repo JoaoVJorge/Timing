@@ -16,6 +16,7 @@ class CategoryBindings extends Bindings {
         getSubjectsUseCase: Get.find(),
         deleteSubjectUseCase: Get.find(),
         pinSubjectToStartUseCase: Get.find(),
+        subjectDailyHistoryService: Get.find(),
         appNavigator: Get.find(),
         category: category,
       ),

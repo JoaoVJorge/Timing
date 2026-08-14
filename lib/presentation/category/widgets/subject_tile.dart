@@ -8,11 +8,13 @@ import "package:timing/shared/widgets/app_icon_button.dart";
 class SubjectTile extends StatelessWidget {
   const SubjectTile({
     required this.subject,
+    required this.currentSeconds,
     required this.onTapPlay,
     super.key,
   });
 
   final SubjectEntity subject;
+  final int currentSeconds;
   final VoidCallback onTapPlay;
 
   @override
@@ -20,7 +22,7 @@ class SubjectTile extends StatelessWidget {
     final Color color = Color(subject.colorValue);
     final bool hasGoal = subject.goalSeconds > 0;
     final double progress = hasGoal
-        ? (subject.totalSeconds / subject.totalGoalSeconds).clamp(0, 1)
+        ? (currentSeconds / subject.totalGoalSeconds).clamp(0, 1)
         : 0;
 
     return Container(
@@ -45,10 +47,8 @@ class SubjectTile extends StatelessWidget {
                 ),
                 Text(
                   hasGoal
-                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: subject.totalSeconds)), formatDurationLong(Duration(seconds: subject.totalGoalSeconds)))} - ${(progress * 100).round()}%"
-                      : formatDurationLong(
-                          Duration(seconds: subject.totalSeconds),
-                        ),
+                      ? "${context.l10n.durationProgress(formatDurationLong(Duration(seconds: currentSeconds)), formatDurationLong(Duration(seconds: subject.totalGoalSeconds)))} - ${(progress * 100).round()}%"
+                      : formatDurationLong(Duration(seconds: currentSeconds)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.caption.copyWith(fontSize: 12),

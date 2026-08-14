@@ -85,6 +85,17 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
+  int get currentActivitySeconds =>
+      subject.activityType == SubjectActivityType.daily
+      ? subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds +
+            sessionSeconds.value
+      : totalSeconds;
+
+  int get currentActivityPages =>
+      subject.activityType == SubjectActivityType.daily
+      ? subjectDailyHistoryService.todayForSubject(subject.id).pages
+      : subject.currentPages;
+
   bool get isReading => subject.category == TimeCategoryType.reading;
 
   int get focusIntervalSeconds => subject.goalSeconds > 0
@@ -122,7 +133,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (isReading || focusIntervalSeconds <= 0) {
       return focusIntervalSeconds;
     }
-    final int elapsedInSection = subject.totalSeconds % focusIntervalSeconds;
+    final int elapsedInSection =
+        (subject.activityType == SubjectActivityType.daily
+            ? subjectDailyHistoryService
+                  .todayForSubject(subject.id)
+                  .focusSeconds
+            : subject.totalSeconds) %
+        focusIntervalSeconds;
     if (elapsedInSection == 0) {
       return focusIntervalSeconds;
     }

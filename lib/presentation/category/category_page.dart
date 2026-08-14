@@ -106,10 +106,12 @@ class CategoryPage extends StatelessWidget {
               child: switch (controller.category) {
                 TimeCategoryType.reading => ReadingSubjectTile(
                   subject: subject,
+                  currentPages: controller.progressPagesFor(subject),
                   onTapPlay: () => controller.onTapSubject(subject),
                 ),
                 _ => SubjectTile(
                   subject: subject,
+                  currentSeconds: controller.progressSecondsFor(subject),
                   onTapPlay: () => controller.onTapSubject(subject),
                 ),
               },

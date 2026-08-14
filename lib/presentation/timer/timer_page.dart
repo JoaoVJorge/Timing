@@ -690,14 +690,14 @@ class _TimerViewData {
           ? context.l10n.timerCurrentPagesLabel
           : _nextBreakDurationLabel(context),
       nextBreak: isReading
-          ? "${controller.subject.currentPages}"
+          ? "${controller.currentActivityPages}"
           : _formatRestDuration(
               Duration(seconds: controller.restIntervalSeconds),
             ),
       focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
       totalSubjectTimeLabel: formatDurationLong(
-        Duration(seconds: controller.totalSeconds),
+        Duration(seconds: controller.currentActivitySeconds),
       ),
       accentColor: accent,
       headerIconColor: accent.withValues(alpha: 0.82),

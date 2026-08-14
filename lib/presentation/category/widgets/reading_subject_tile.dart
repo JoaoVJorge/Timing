@@ -10,11 +10,13 @@ import "package:timing/theme/subject_icons.dart";
 class ReadingSubjectTile extends StatelessWidget {
   const ReadingSubjectTile({
     required this.subject,
+    required this.currentPages,
     required this.onTapPlay,
     super.key,
   });
 
   final SubjectEntity subject;
+  final int currentPages;
   final VoidCallback onTapPlay;
 
   @override
@@ -22,7 +24,7 @@ class ReadingSubjectTile extends StatelessWidget {
     final Color color = Color(subject.colorValue);
     final bool hasGoal = subject.goalPages > 0;
     final double progress = hasGoal
-        ? (subject.currentPages / subject.goalPages).clamp(0, 1)
+        ? (currentPages / subject.goalPages).clamp(0, 1)
         : 0;
     final int percent = (progress * 100).round();
 
@@ -120,9 +122,9 @@ class ReadingSubjectTile extends StatelessWidget {
     final String suffix = context.l10n.pagesAbbreviation;
 
     if (!hasGoal) {
-      return "${subject.currentPages} $suffix";
+      return "$currentPages $suffix";
     }
-    return "${subject.currentPages}/${subject.goalPages} $suffix";
+    return "$currentPages/${subject.goalPages} $suffix";
   }
 }
 

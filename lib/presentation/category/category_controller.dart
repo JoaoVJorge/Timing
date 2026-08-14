@@ -8,6 +8,7 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
+import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
@@ -16,6 +17,7 @@ class CategoryController extends GetxController {
     required this._getSubjectsUseCase,
     required this._deleteSubjectUseCase,
     required this._pinSubjectToStartUseCase,
+    required this._subjectDailyHistoryService,
     required this._appNavigator,
     required this.category,
   });
@@ -23,6 +25,7 @@ class CategoryController extends GetxController {
   final GetSubjectsUseCase _getSubjectsUseCase;
   final DeleteSubjectUseCase _deleteSubjectUseCase;
   final PinSubjectToStartUseCase _pinSubjectToStartUseCase;
+  final SubjectDailyHistoryService _subjectDailyHistoryService;
   final AppNavigator _appNavigator;
 
   final TimeCategoryType category;
@@ -30,6 +33,16 @@ class CategoryController extends GetxController {
   final RxBool isLoading = true.obs;
 
   bool get isPageBased => category == TimeCategoryType.reading;
+
+  int progressSecondsFor(SubjectEntity subject) =>
+      subject.activityType == SubjectActivityType.daily
+      ? _subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds
+      : subject.totalSeconds;
+
+  int progressPagesFor(SubjectEntity subject) =>
+      subject.activityType == SubjectActivityType.daily
+      ? _subjectDailyHistoryService.todayForSubject(subject.id).pages
+      : subject.currentPages;
 
   @override
   void onInit() {

@@ -13,6 +13,7 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 
@@ -22,6 +23,7 @@ class HomeController extends GetxController {
     required this._appNavigator,
     required this._lastActivityService,
     required this._dailyProgressService,
+    required this._subjectDailyHistoryService,
     required this._getSubjectsUseCase,
     required this._getDailyTasksUseCase,
     required this._scheduleController,
@@ -31,6 +33,7 @@ class HomeController extends GetxController {
   final AppNavigator _appNavigator;
   final LastActivityService _lastActivityService;
   final DailyProgressService _dailyProgressService;
+  final SubjectDailyHistoryService _subjectDailyHistoryService;
   final GetSubjectsUseCase _getSubjectsUseCase;
   final GetDailyTasksUseCase _getDailyTasksUseCase;
   final ScheduleController _scheduleController;
@@ -100,11 +103,11 @@ class HomeController extends GetxController {
 
   int focusSecondsIn(TimeCategoryType category) => subjects
       .where((s) => s.category == category)
-      .fold(0, (sum, s) => sum + s.totalSeconds);
+      .fold(0, (sum, s) => sum + _focusSecondsForTodayCard(s));
 
   int pagesIn(TimeCategoryType category) => subjects
       .where((s) => s.category == category)
-      .fold(0, (sum, s) => sum + s.currentPages);
+      .fold(0, (sum, s) => sum + _pagesForTodayCard(s));
 
   bool hasSubjectsIn(TimeCategoryType category) =>
       subjects.any((s) => s.category == category);
@@ -123,6 +126,16 @@ class HomeController extends GetxController {
           current.totalSeconds > best.totalSeconds ? current : best,
     );
   }
+
+  int _focusSecondsForTodayCard(SubjectEntity subject) =>
+      subject.activityType == SubjectActivityType.daily
+      ? _subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds
+      : subject.totalSeconds;
+
+  int _pagesForTodayCard(SubjectEntity subject) =>
+      subject.activityType == SubjectActivityType.daily
+      ? _subjectDailyHistoryService.todayForSubject(subject.id).pages
+      : subject.currentPages;
 
   List<ScheduleEntryEntity> get todayScheduleEntries =>
       _scheduleController.todayEntries;
