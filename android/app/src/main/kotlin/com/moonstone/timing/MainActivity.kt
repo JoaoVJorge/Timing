@@ -1,4 +1,4 @@
-package com.example.timing
+package com.moonstone.timing
 
 import android.content.Intent
 import android.view.WindowManager
