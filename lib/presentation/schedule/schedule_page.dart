@@ -1,5 +1,3 @@
-import "dart:ui";
-
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -8,6 +6,7 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
@@ -251,32 +250,31 @@ class _InlineAddScheduleButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.98,
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    child: CustomPaint(
-      painter: _DashedBorderPainter(context.colorTokens.divider),
-      child: Container(
-        width: double.infinity,
-        height: 68,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_rounded, color: context.colorTokens.textBody),
-            const Gap(6),
-            Text(
-              context.l10n.addScheduleEntryButton,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textBody,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused,
+          width: 1.5,
         ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AppIcon("plus", size: 16, color: context.colorTokens.primary),
+          const Gap(8),
+          Flexible(
+            child: Text(
+              context.l10n.addScheduleEntryButton,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.textButtonMedium,
+            ),
+          ),
+        ],
       ),
     ),
   );
@@ -313,40 +311,6 @@ String _selectedDateLabel(String locale, DateTime selectedDate) {
     return raw;
   }
   return raw.replaceFirst(raw[0], raw[0].toUpperCase());
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final RRect rect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(16),
-    );
-    final Path path = Path()..addRRect(rect);
-    final Paint paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-    for (final PathMetric metric in path.computeMetrics()) {
-      double distance = 0;
-      while (distance < metric.length) {
-        final Path extractPath = metric.extractPath(
-          distance,
-          (distance + 7).clamp(0, metric.length),
-        );
-        canvas.drawPath(extractPath, paint);
-        distance += 13;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 class _MonthYearPickerDialog extends StatefulWidget {

@@ -176,6 +176,126 @@ class CreationSelectableChip extends StatelessWidget {
   );
 }
 
+class CreationOptionCard extends StatelessWidget {
+  const CreationOptionCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.optionColor,
+    required this.isSelected,
+    required this.onTap,
+    super.key,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color optionColor;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color cardColor = isDark
+        ? context.colorTokens.surface.withValues(alpha: 0.82)
+        : context.colorTokens.surface;
+    final Color borderColor = isSelected
+        ? optionColor.withValues(alpha: 0.68)
+        : context.colorTokens.borderUnfocused.withValues(alpha: 0.7);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor, width: isSelected ? 1.4 : 1),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: optionColor.withValues(alpha: isDark ? 0.16 : 0.1),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: optionColor.withValues(alpha: isDark ? 0.15 : 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: optionColor.withValues(alpha: isSelected ? 0.72 : 0.2),
+                ),
+              ),
+              child: Icon(icon, color: optionColor, size: 30),
+            ),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyLarge.copyWith(
+                      color: optionColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Gap(4),
+                  Text(
+                    description,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textBody,
+                      fontWeight: FontWeight.w700,
+                      height: 1.24,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(12),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: isSelected ? optionColor : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? optionColor
+                      : context.colorTokens.textHint.withValues(alpha: 0.55),
+                  width: 1.8,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check_rounded,
+                      color: context.colorTokens.white,
+                      size: 20,
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class CreationColorChoice extends StatelessWidget {
   const CreationColorChoice({
     required this.color,

@@ -493,8 +493,14 @@ abstract class AppLocalizations {
   /// No description provided for @estimatedHoursGoalHint.
   ///
   /// In en, this message translates to:
-  /// **'Goal in minutes'**
+  /// **'Duration in minutes'**
   String get estimatedHoursGoalHint;
+
+  /// No description provided for @createSubjectTotalHoursGoalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Total time in hours'**
+  String get createSubjectTotalHoursGoalHint;
 
   /// No description provided for @goalPagesHint.
   ///
@@ -643,8 +649,32 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectTimeGoalLabel.
   ///
   /// In en, this message translates to:
-  /// **'Focus goal'**
+  /// **'Duration of each section'**
   String get createSubjectTimeGoalLabel;
+
+  /// No description provided for @createSubjectTotalTimeGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you want to study in total?'**
+  String get createSubjectTotalTimeGoalLabel;
+
+  /// No description provided for @createSubjectTotalTimeGoalLabelStudying.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you want to study in total?'**
+  String get createSubjectTotalTimeGoalLabelStudying;
+
+  /// No description provided for @createSubjectTotalTimeGoalLabelExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you want to exercise in total?'**
+  String get createSubjectTotalTimeGoalLabelExercises;
+
+  /// No description provided for @createSubjectTotalTimeGoalLabelHobbies.
+  ///
+  /// In en, this message translates to:
+  /// **'How long do you want to practice in total?'**
+  String get createSubjectTotalTimeGoalLabelHobbies;
 
   /// No description provided for @createSubjectPagesGoalLabel.
   ///
@@ -667,7 +697,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectRestLabel.
   ///
   /// In en, this message translates to:
-  /// **'Break after each focus'**
+  /// **'Break duration'**
   String get createSubjectRestLabel;
 
   /// No description provided for @createSubjectRestHelp.
@@ -2500,6 +2530,18 @@ abstract class AppLocalizations {
   /// **'Exercises'**
   String get progressStatExercises;
 
+  /// No description provided for @progressStatLongestGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest goal'**
+  String get progressStatLongestGoal;
+
+  /// No description provided for @progressStatMainReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Main reading'**
+  String get progressStatMainReading;
+
   /// No description provided for @progressStatGoalsDone.
   ///
   /// In en, this message translates to:
@@ -3439,8 +3481,26 @@ abstract class AppLocalizations {
   /// No description provided for @activityTypeDailyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Renews every day. The activity becomes available again in the morning.'**
+  /// **'Use focus sections with breaks and set how many sessions you want to complete each day.'**
   String get activityTypeDailyDescription;
+
+  /// No description provided for @activityTypeDailyDescriptionStudying.
+  ///
+  /// In en, this message translates to:
+  /// **'Use study sections with breaks and set how many sessions you want to complete each day.'**
+  String get activityTypeDailyDescriptionStudying;
+
+  /// No description provided for @activityTypeDailyDescriptionExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Use exercise sections with breaks and set how many sessions you want to complete each day.'**
+  String get activityTypeDailyDescriptionExercises;
+
+  /// No description provided for @activityTypeDailyDescriptionHobbies.
+  ///
+  /// In en, this message translates to:
+  /// **'Use practice sections with breaks and set how many sessions you want to complete each day.'**
+  String get activityTypeDailyDescriptionHobbies;
 
   /// No description provided for @activityTypePermanentLabel.
   ///
@@ -3451,8 +3511,26 @@ abstract class AppLocalizations {
   /// No description provided for @activityTypePermanentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Stays active until you finish it. After that, it is marked as done.'**
+  /// **'Set the total study time. The activity stays active until you complete it.'**
   String get activityTypePermanentDescription;
+
+  /// No description provided for @activityTypePermanentDescriptionStudying.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the total study time. The activity stays active until you complete it.'**
+  String get activityTypePermanentDescriptionStudying;
+
+  /// No description provided for @activityTypePermanentDescriptionExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the total exercise time. The activity stays active until you complete it.'**
+  String get activityTypePermanentDescriptionExercises;
+
+  /// No description provided for @activityTypePermanentDescriptionHobbies.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the total practice time. The activity stays active until you complete it.'**
+  String get activityTypePermanentDescriptionHobbies;
 
   /// No description provided for @pagesSuffix.
   ///
@@ -3469,7 +3547,7 @@ abstract class AppLocalizations {
   /// No description provided for @focusSessionCountLabel.
   ///
   /// In en, this message translates to:
-  /// **'Focus sessions'**
+  /// **'Number of sessions'**
   String get focusSessionCountLabel;
 
   /// No description provided for @groupEditingComingSoon.
@@ -3723,6 +3801,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collective progress'**
   String get groupCollectiveProgressTitle;
+
+  /// No description provided for @dailyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get dailyLabel;
+
+  /// No description provided for @completedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completedLabel;
+
+  /// No description provided for @groupActivityCompletedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} completed'**
+  String groupActivityCompletedCount(int completed, int total);
+
+  /// No description provided for @groupMissingParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Everyone completed the goal} =1{1 participant left to complete the goal} other{{count} participants left to complete the goal}}'**
+  String groupMissingParticipants(int count);
+
+  /// No description provided for @groupParticipantsDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Participants (1)} other{Participants ({count})}}'**
+  String groupParticipantsDataTitle(int count);
+
+  /// No description provided for @groupCompletedMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed ({count})'**
+  String groupCompletedMembersTitle(int count);
+
+  /// No description provided for @groupPendingMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending ({count})'**
+  String groupPendingMembersTitle(int count);
+
+  /// No description provided for @groupNoCompletedMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No one completed yet'**
+  String get groupNoCompletedMembersTitle;
+
+  /// No description provided for @groupNoCompletedMembersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Be the first to complete the goal!'**
+  String get groupNoCompletedMembersSubtitle;
+
+  /// No description provided for @groupStatisticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group statistics'**
+  String get groupStatisticsTitle;
+
+  /// No description provided for @groupStreakStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group streak'**
+  String get groupStreakStatLabel;
+
+  /// No description provided for @groupTodayTotalStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total time today'**
+  String get groupTodayTotalStatLabel;
+
+  /// No description provided for @groupPeriodTotalStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period total'**
+  String get groupPeriodTotalStatLabel;
+
+  /// No description provided for @groupCompletedSessionsStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed sessions'**
+  String get groupCompletedSessionsStatLabel;
+
+  /// No description provided for @groupParticipantsStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant in group'**
+  String get groupParticipantsStatLabel;
 
   /// No description provided for @currentUserRankCompleteFirstGoal.
   ///

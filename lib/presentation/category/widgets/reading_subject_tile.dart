@@ -10,12 +10,14 @@ import "package:timing/theme/subject_icons.dart";
 class ReadingSubjectTile extends StatelessWidget {
   const ReadingSubjectTile({
     required this.subject,
+    required this.currentSeconds,
     required this.currentPages,
     required this.onTapPlay,
     super.key,
   });
 
   final SubjectEntity subject;
+  final int currentSeconds;
   final int currentPages;
   final VoidCallback onTapPlay;
 
@@ -111,7 +113,7 @@ class ReadingSubjectTile extends StatelessWidget {
   }
 
   String _durationLabel(BuildContext context) {
-    final Duration duration = Duration(seconds: subject.totalSeconds);
+    final Duration duration = Duration(seconds: currentSeconds);
     if (duration.inHours == 0) {
       return context.l10n.restMinutesChip(duration.inMinutes);
     }

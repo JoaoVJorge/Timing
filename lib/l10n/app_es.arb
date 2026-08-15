@@ -64,7 +64,8 @@
   "itemNameHint": "Nombre de {itemNoun}",
   "colorLabel": "Color",
   "bookThemeLabel": "Tema del libro",
-  "estimatedHoursGoalHint": "Meta en minutos",
+  "estimatedHoursGoalHint": "Duración en minutos",
+  "createSubjectTotalHoursGoalHint": "Tiempo total en horas",
   "goalPagesHint": "Meta (páginas)",
   "cancelButton": "Cancelar",
   "confirmButton": "Confirmar",
@@ -89,11 +90,15 @@
   "createSubjectNameHintReading": "Ej.: Libro de Historia, Dom Casmurro",
   "createSubjectNameHintExercises": "Ej.: Gimnasio, Carrera, Estiramiento",
   "createSubjectNameHintHobbies": "Ej.: Guitarra, Dibujo, Programación",
-  "createSubjectTimeGoalLabel": "Meta de enfoque",
+  "createSubjectTimeGoalLabel": "Duración de cada sección",
+  "createSubjectTotalTimeGoalLabel": "¿Cuánto tiempo quieres estudiar en total?",
+  "createSubjectTotalTimeGoalLabelStudying": "¿Cuánto tiempo quieres estudiar en total?",
+  "createSubjectTotalTimeGoalLabelExercises": "¿Cuánto tiempo quieres ejercitarte en total?",
+  "createSubjectTotalTimeGoalLabelHobbies": "¿Cuánto tiempo quieres practicar en total?",
   "createSubjectPagesGoalLabel": "Meta de páginas",
   "createSubjectTimeGoalHelp": "¿Cuántos minutos quieres enfocarte?",
   "createSubjectPagesGoalHelp": "¿Cuántas páginas quieres registrar en total?",
-  "createSubjectRestLabel": "Pausa después de cada enfoque",
+  "createSubjectRestLabel": "Duración de las pausas",
   "createSubjectRestHelp": "El timer sugiere una pausa después de 30 min de enfoque.",
   "customRestMinutesHint": "Pausa personalizada (min)",
   "createSubjectPreviewTitle": "Vista previa",
@@ -482,6 +487,8 @@
   "progressComparisonSame": "Igual que el período anterior",
   "progressComparisonFirst": "Tus primeros datos en este período",
   "progressStatExercises": "Ejercicios",
+  "progressStatLongestGoal": "Meta más larga",
+  "progressStatMainReading": "Lectura principal",
   "progressStatGoalsDone": "Metas cumplidas",
   "progressDistributionTitle": "Por actividad",
   "homeTodayInline": "Hoy: {focus} de enfoque · {pages} páginas · {goals} metas",
@@ -803,12 +810,18 @@
   "appleSignInIncompleteMessage": "Iniciar sesión con Apple aún no está completo.",
   "activityTypeLabel": "Tipo de actividad",
   "activityTypeDailyLabel": "Diaria",
-  "activityTypeDailyDescription": "Se renueva todos los días. La actividad vuelve por la mañana.",
+  "activityTypeDailyDescription": "Usa secciones de enfoque con pausas y define cuántas sesiones quieres completar por día.",
+  "activityTypeDailyDescriptionStudying": "Usa secciones de estudio con pausas y define cuántas sesiones quieres completar por día.",
+  "activityTypeDailyDescriptionExercises": "Usa secciones de ejercicio con pausas y define cuántas sesiones quieres completar por día.",
+  "activityTypeDailyDescriptionHobbies": "Usa secciones de práctica con pausas y define cuántas sesiones quieres completar por día.",
   "activityTypePermanentLabel": "Permanente",
-  "activityTypePermanentDescription": "Permanece activa hasta concluirla. Después se marca como finalizada.",
+  "activityTypePermanentDescription": "Define el tiempo total de estudio. La actividad permanece activa hasta completarla.",
+  "activityTypePermanentDescriptionStudying": "Define el tiempo total de estudio. La actividad permanece activa hasta completarla.",
+  "activityTypePermanentDescriptionExercises": "Define el tiempo total de ejercicio. La actividad permanece activa hasta completarla.",
+  "activityTypePermanentDescriptionHobbies": "Define el tiempo total de práctica. La actividad permanece activa hasta completarla.",
   "pagesSuffix": "páginas",
   "updatedSuccessfullyMessage": "Actualizado correctamente",
-  "focusSessionCountLabel": "Sesiones de enfoque",
+  "focusSessionCountLabel": "Cantidad de sesiones",
   "groupEditingComingSoon": "Edición del grupo próximamente.",
   "leftGroupMessage": "Saliste del grupo.",
   "groupImageSourceTitle": "Enviar imagen",
@@ -923,6 +936,59 @@
   },
   "addMemberButton": "Añadir miembro",
   "groupCollectiveProgressTitle": "Progreso colectivo",
+  "dailyLabel": "Diaria",
+  "completedLabel": "Completado",
+  "groupActivityCompletedCount": "{completed} de {total} completaron",
+  "@groupActivityCompletedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMissingParticipants": "{count, plural, =0{Todos completaron la meta} =1{Falta 1 participante para completar la meta} other{Faltan {count} participantes para completar la meta}}",
+  "@groupMissingParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupParticipantsDataTitle": "{count, plural, =1{Participantes (1)} other{Participantes ({count})}}",
+  "@groupParticipantsDataTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCompletedMembersTitle": "Completaron ({count})",
+  "@groupCompletedMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupPendingMembersTitle": "Pendientes ({count})",
+  "@groupPendingMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoCompletedMembersTitle": "Nadie completó aún",
+  "groupNoCompletedMembersSubtitle": "¡Sé el primero en completar la meta!",
+  "groupStatisticsTitle": "Estadísticas del grupo",
+  "groupStreakStatLabel": "Racha del grupo",
+  "groupTodayTotalStatLabel": "Tiempo total hoy",
+  "groupPeriodTotalStatLabel": "Total del período",
+  "groupCompletedSessionsStatLabel": "Sesiones completadas",
+  "groupParticipantsStatLabel": "Participante en el grupo",
   "currentUserRankCompleteFirstGoal": "Completa tu primera meta para entrar al ranking.",
   "currentUserRankTiedLead": "Empate en el liderazgo.",
   "currentUserRankTiedFirstLabel": "Empate en 1.\u00ba",

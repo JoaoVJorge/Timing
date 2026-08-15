@@ -230,7 +230,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bookThemeLabel => 'Thème du livre';
 
   @override
-  String get estimatedHoursGoalHint => 'Objectif en minutes';
+  String get estimatedHoursGoalHint => 'Durée en minutes';
+
+  @override
+  String get createSubjectTotalHoursGoalHint => 'Temps total en heures';
 
   @override
   String get goalPagesHint => 'Objectif (pages)';
@@ -313,7 +316,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ex. : Guitare, Dessin, Programmation';
 
   @override
-  String get createSubjectTimeGoalLabel => 'Objectif de concentration';
+  String get createSubjectTimeGoalLabel => 'Durée de chaque section';
+
+  @override
+  String get createSubjectTotalTimeGoalLabel =>
+      'Combien de temps voulez-vous étudier au total ?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelStudying =>
+      'Combien de temps voulez-vous étudier au total ?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelExercises =>
+      'Combien de temps voulez-vous faire de l\'exercice au total ?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelHobbies =>
+      'Combien de temps voulez-vous pratiquer au total ?';
 
   @override
   String get createSubjectPagesGoalLabel => 'Objectif de la page';
@@ -327,7 +346,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Combien de pages souhaitez-vous connecter au total ?';
 
   @override
-  String get createSubjectRestLabel => 'Pause après chaque focus';
+  String get createSubjectRestLabel => 'Durée des pauses';
 
   @override
   String get createSubjectRestHelp =>
@@ -1372,6 +1391,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get progressStatExercises => 'Exercices';
 
   @override
+  String get progressStatLongestGoal => 'Objectif le plus long';
+
+  @override
+  String get progressStatMainReading => 'Lecture principale';
+
+  @override
   String get progressStatGoalsDone => 'Objectifs atteints';
 
   @override
@@ -1921,14 +1946,38 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get activityTypeDailyDescription =>
-      'Se renouvelle chaque jour. L’activité redevient disponible le matin.';
+      'Utilisez des sections de focus avec des pauses et définissez combien de séances terminer chaque jour.';
+
+  @override
+  String get activityTypeDailyDescriptionStudying =>
+      'Utilisez des sections d\'étude avec des pauses et définissez combien de séances terminer chaque jour.';
+
+  @override
+  String get activityTypeDailyDescriptionExercises =>
+      'Utilisez des sections d\'exercice avec des pauses et définissez combien de séances terminer chaque jour.';
+
+  @override
+  String get activityTypeDailyDescriptionHobbies =>
+      'Utilisez des sections de pratique avec des pauses et définissez combien de séances terminer chaque jour.';
 
   @override
   String get activityTypePermanentLabel => 'Permanente';
 
   @override
   String get activityTypePermanentDescription =>
-      'Reste active jusqu’à ce que vous la terminiez. Ensuite, elle est marquée comme terminée.';
+      'Définissez le temps total d\'étude. L’activité reste active jusqu’à ce qu’elle soit terminée.';
+
+  @override
+  String get activityTypePermanentDescriptionStudying =>
+      'Définissez le temps total d\'étude. L’activité reste active jusqu’à ce qu’elle soit terminée.';
+
+  @override
+  String get activityTypePermanentDescriptionExercises =>
+      'Définissez le temps total d\'exercice. L’activité reste active jusqu’à ce qu’elle soit terminée.';
+
+  @override
+  String get activityTypePermanentDescriptionHobbies =>
+      'Définissez le temps total de pratique. L’activité reste active jusqu’à ce qu’elle soit terminée.';
 
   @override
   String get pagesSuffix => 'pages';
@@ -1937,7 +1986,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get updatedSuccessfullyMessage => 'Mis à jour';
 
   @override
-  String get focusSessionCountLabel => 'Séances de focus';
+  String get focusSessionCountLabel => 'Nombre de séances';
 
   @override
   String get groupEditingComingSoon =>
@@ -2091,6 +2140,75 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get groupCollectiveProgressTitle => 'Progression collective';
+
+  @override
+  String get dailyLabel => 'Quotidienne';
+
+  @override
+  String get completedLabel => 'Terminé';
+
+  @override
+  String groupActivityCompletedCount(int completed, int total) {
+    return '$completed sur $total ont terminé';
+  }
+
+  @override
+  String groupMissingParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Il manque $count participants pour terminer l’objectif',
+      one: 'Il manque 1 participant pour terminer l’objectif',
+      zero: 'Tout le monde a terminé l’objectif',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupParticipantsDataTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Participants ($count)',
+      one: 'Participants (1)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupCompletedMembersTitle(int count) {
+    return 'Ont terminé ($count)';
+  }
+
+  @override
+  String groupPendingMembersTitle(int count) {
+    return 'En attente ($count)';
+  }
+
+  @override
+  String get groupNoCompletedMembersTitle => 'Personne n’a encore terminé';
+
+  @override
+  String get groupNoCompletedMembersSubtitle =>
+      'Soyez le premier à terminer l’objectif !';
+
+  @override
+  String get groupStatisticsTitle => 'Statistiques du groupe';
+
+  @override
+  String get groupStreakStatLabel => 'Série du groupe';
+
+  @override
+  String get groupTodayTotalStatLabel => 'Temps total aujourd’hui';
+
+  @override
+  String get groupPeriodTotalStatLabel => 'Total de la période';
+
+  @override
+  String get groupCompletedSessionsStatLabel => 'Sessions terminées';
+
+  @override
+  String get groupParticipantsStatLabel => 'Participant dans le groupe';
 
   @override
   String get currentUserRankCompleteFirstGoal =>

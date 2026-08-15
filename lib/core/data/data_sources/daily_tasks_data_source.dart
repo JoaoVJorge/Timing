@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
@@ -52,7 +53,7 @@ class DailyTasksDataSource {
         tasks.map((task) => task.toMap()).toList(),
       );
       await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
-      await _syncRemoteTasks(tasks);
+      unawaited(_syncRemoteTasks(tasks));
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

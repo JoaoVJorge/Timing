@@ -12,7 +12,6 @@ import "package:timing/presentation/progress/widgets/progress_evolution_chart.da
 import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
 import "package:timing/presentation/progress/widgets/progress_period_tabs.dart";
 import "package:timing/presentation/progress/widgets/progress_stat_row.dart";
-import "package:timing/presentation/progress/widgets/progress_top_subjects_list.dart";
 import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/widgets/app_icon_badge.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
@@ -68,18 +67,16 @@ class ProgressPage extends StatelessWidget {
                     accent: TimeCategoryType.studying.accentColor,
                   ),
                   (
-                    icon: Icons.auto_stories_rounded,
-                    value: "${controller.selectedPeriodPages}",
-                    label: context.l10n.statPagesRead,
-                    accent: TimeCategoryType.reading.accentColor,
+                    icon: Icons.flag_rounded,
+                    value: controller.longestGoal?.name ?? "-",
+                    label: context.l10n.progressStatLongestGoal,
+                    accent: ProgressAccentColors.pink,
                   ),
                   (
-                    icon: Icons.fitness_center_rounded,
-                    value: formatDurationLong(
-                      Duration(seconds: stats.exercisesTotalSeconds),
-                    ),
-                    label: context.l10n.progressStatExercises,
-                    accent: TimeCategoryType.exercises.accentColor,
+                    icon: Icons.auto_stories_rounded,
+                    value: controller.mainReadingSubject?.name ?? "-",
+                    label: context.l10n.progressStatMainReading,
+                    accent: TimeCategoryType.reading.accentColor,
                   ),
                   (
                     icon: Icons.assignment_rounded,
@@ -96,7 +93,7 @@ class ProgressPage extends StatelessWidget {
               const Gap(AppSpacing.betweenSections),
               AppSectionHeader(title: context.l10n.progressDistributionTitle),
               const Gap(AppSpacing.betweenRelated),
-              _DistributionCard(stats: stats),
+              _DistributionCard(controller: controller),
               const Gap(AppSpacing.betweenSections),
               ProgressAchievementsSection(
                 hasGoalStarted: controller.hasGoalStarted,
@@ -106,13 +103,6 @@ class ProgressPage extends StatelessWidget {
                 readingPages: stats.readingTotalPages,
                 focusSeconds: stats.totalFocusSeconds,
                 onTap: controller.onTapAchievements,
-              ),
-              const Gap(AppSpacing.betweenSections),
-              AppSectionHeader(title: context.l10n.profileTopReadingTitle),
-              const Gap(AppSpacing.betweenRelated),
-              ProgressTopSubjectsList(
-                subjects: stats.topReadingSubjects,
-                onTapSubject: controller.onTapReadingSubject,
               ),
             ],
           );
@@ -142,60 +132,74 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _DistributionCard extends StatelessWidget {
-  const _DistributionCard({required this.stats});
+  const _DistributionCard({required this.controller});
 
-  final ProfileStatsEntity stats;
+  final ProgressController controller;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: AppSurfaces.content(context.colorTokens),
-    child: Column(
-      children: [
-        _DistributionRow(
-          icon: Icons.school_rounded,
-          label: context.l10n.statHoursStudied,
-          value: formatDurationLong(
-            Duration(seconds: stats.studyingTotalSeconds),
+  Widget build(BuildContext context) {
+    final int studyingSeconds = controller.selectedPeriodSecondsFor(
+      TimeCategoryType.studying,
+    );
+    final int exerciseSeconds = controller.selectedPeriodSecondsFor(
+      TimeCategoryType.exercises,
+    );
+    final int readingPages = controller.selectedPeriodReadingPages;
+    final int hobbySeconds = controller.selectedPeriodSecondsFor(
+      TimeCategoryType.hobbies,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Column(
+        children: [
+          _DistributionRow(
+            icon: Icons.school_rounded,
+            label: context.l10n.statHoursStudied,
+            value: formatDurationLong(Duration(seconds: studyingSeconds)),
+            progress: _ratio(
+              studyingSeconds,
+              controller.selectedPeriodGoalSecondsFor(
+                TimeCategoryType.studying,
+              ),
+            ),
+            color: TimeCategoryType.studying.accentColor,
           ),
-          progress: _ratio(
-            stats.studyingTotalSeconds,
-            stats.studyingGoalSeconds,
+          _DistributionRow(
+            icon: Icons.fitness_center_rounded,
+            label: context.l10n.statHoursExercised,
+            value: formatDurationLong(Duration(seconds: exerciseSeconds)),
+            progress: _ratio(
+              exerciseSeconds,
+              controller.selectedPeriodGoalSecondsFor(
+                TimeCategoryType.exercises,
+              ),
+            ),
+            color: TimeCategoryType.exercises.accentColor,
           ),
-          color: TimeCategoryType.studying.accentColor,
-        ),
-        _DistributionRow(
-          icon: Icons.fitness_center_rounded,
-          label: context.l10n.statHoursExercised,
-          value: formatDurationLong(
-            Duration(seconds: stats.exercisesTotalSeconds),
+          _DistributionRow(
+            icon: Icons.auto_stories_rounded,
+            label: context.l10n.statPagesRead,
+            value: context.l10n.metricPagesValue(readingPages),
+            progress: _ratio(
+              readingPages,
+              controller.selectedPeriodReadingGoalPages,
+            ),
+            color: TimeCategoryType.reading.accentColor,
           ),
-          progress: _ratio(
-            stats.exercisesTotalSeconds,
-            stats.exercisesGoalSeconds,
+          _DistributionRow(
+            icon: Icons.palette_rounded,
+            label: context.l10n.categoryHobbies,
+            value: formatDurationLong(Duration(seconds: hobbySeconds)),
+            progress: hobbySeconds > 0 ? 1 : 0,
+            color: TimeCategoryType.hobbies.accentColor,
+            isLast: true,
           ),
-          color: TimeCategoryType.exercises.accentColor,
-        ),
-        _DistributionRow(
-          icon: Icons.auto_stories_rounded,
-          label: context.l10n.statPagesRead,
-          value: context.l10n.metricPagesValue(stats.readingTotalPages),
-          progress: _ratio(stats.readingTotalPages, stats.readingGoalPages),
-          color: TimeCategoryType.reading.accentColor,
-        ),
-        _DistributionRow(
-          icon: Icons.palette_rounded,
-          label: context.l10n.categoryHobbies,
-          value: formatDurationLong(
-            Duration(seconds: stats.hobbiesTotalSeconds),
-          ),
-          progress: stats.hobbiesTotalSeconds > 0 ? 1 : 0,
-          color: TimeCategoryType.hobbies.accentColor,
-          isLast: true,
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   double _ratio(int current, int goal) =>
       goal <= 0 ? 0 : (current / goal).clamp(0, 1);

@@ -25,13 +25,13 @@ class DailyTaskTile extends StatefulWidget {
 
 class _DailyTaskTileState extends State<DailyTaskTile>
     with SingleTickerProviderStateMixin {
-  static const double _revealWidth = 66;
+  static const double _trailingRevealWidth = 132;
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 220),
-    lowerBound: -_revealWidth,
-    upperBound: _revealWidth,
+    lowerBound: -_trailingRevealWidth,
+    upperBound: 0,
     value: 0,
   );
 
@@ -43,16 +43,14 @@ class _DailyTaskTileState extends State<DailyTaskTile>
 
   void _onDragUpdate(DragUpdateDetails details) {
     _controller.value = (_controller.value + details.delta.dx).clamp(
-      -_revealWidth,
-      _revealWidth,
+      -_trailingRevealWidth,
+      0,
     );
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final double target = _controller.value > _revealWidth / 2
-        ? _revealWidth
-        : _controller.value < -_revealWidth / 2
-        ? -_revealWidth
+    final double target = _controller.value < -_trailingRevealWidth / 2
+        ? -_trailingRevealWidth
         : 0;
     _controller.animateTo(target, curve: Curves.easeOut);
   }
@@ -71,55 +69,32 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   Widget build(BuildContext context) {
     final Color taskColor = Color(widget.task.colorValue);
     final bool isCheckedToday = widget.task.isDoneForCurrentCycle;
-    final double progress = isCheckedToday ? 1.0 : 0.0;
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => Stack(
         children: [
-          if (_controller.value > 0)
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  onTap: _onTapEdit,
-                  child: Container(
-                    width: _revealWidth - 8,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: context.colorTokens.surface,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.edit_rounded,
-                      color: context.colorTokens.primary,
-                      size: 25,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           if (_controller.value < 0)
             Positioned.fill(
               child: Align(
                 alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: _onTapDelete,
-                  child: Container(
-                    width: _revealWidth - 8,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: context.colorTokens.error,
-                      borderRadius: BorderRadius.circular(14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _RevealAction(
+                      iconData: Icons.edit_rounded,
+                      color: context.colorTokens.surface,
+                      iconColor: taskColor,
+                      onTap: _onTapEdit,
                     ),
-                    alignment: Alignment.center,
-                    child: const AppIcon(
-                      "trash",
-                      color: Colors.white,
-                      size: 25,
+                    const SizedBox(width: _RevealAction.gap),
+                    _RevealAction(
+                      iconPath: "trash",
+                      color: context.colorTokens.surfaceInnerLayer,
+                      iconColor: context.colorTokens.textHint,
+                      onTap: _onTapDelete,
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -160,48 +135,31 @@ class _DailyTaskTileState extends State<DailyTaskTile>
             ),
             const Gap(12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.task.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const Gap(8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 6,
-                      backgroundColor: context.colorTokens.surfaceInnerLayer,
-                      valueColor: AlwaysStoppedAnimation<Color>(taskColor),
-                    ),
-                  ),
-                ],
+              child: Text(
+                widget.task.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
             const Gap(12),
             widget.task.hasInfiniteTarget
-                ? _InfiniteProgressBadge(
-                    value: widget.task.currentProgress,
-                    color: taskColor,
+                ? Text(
+                    "${widget.task.currentProgress} ${context.l10n.daysSuffix}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: taskColor,
+                      fontWeight: FontWeight.w900,
+                    ),
                   )
                 : Text(
-                    widget.task.isCompleted
-                        ? context.l10n.taskCompletedLabel
-                        : context.l10n.taskDaysProgress(
-                            widget.task.currentProgress,
-                            widget.task.currentTarget,
-                          ),
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: widget.task.isCompleted
-                          ? context.colorTokens.success
-                          : context.colorTokens.textHint,
-                      fontWeight: FontWeight.w700,
+                    "${widget.task.currentProgress}/${widget.task.currentTarget} ${context.l10n.daysSuffix}",
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: taskColor,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
           ],
@@ -211,30 +169,38 @@ class _DailyTaskTileState extends State<DailyTaskTile>
   }
 }
 
-class _InfiniteProgressBadge extends StatelessWidget {
-  const _InfiniteProgressBadge({required this.value, required this.color});
+class _RevealAction extends StatelessWidget {
+  const _RevealAction({
+    required this.onTap,
+    this.iconPath,
+    this.iconData,
+    this.iconColor,
+    this.color,
+  }) : assert(iconPath != null || iconData != null);
 
-  final int value;
-  final Color color;
+  static const double _revealWidth = 58;
+  static const double gap = 8;
+
+  final String? iconPath;
+  final IconData? iconData;
+  final Color? iconColor;
+  final VoidCallback onTap;
+  final Color? color;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: 36,
-    height: 36,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
-      shape: BoxShape.circle,
-      border: Border.all(color: color, width: 1.5),
-    ),
-    child: Text(
-      "$value",
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.bodySmall.copyWith(
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: _revealWidth,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
         color: color,
-        fontWeight: FontWeight.w900,
+        borderRadius: BorderRadius.circular(14),
       ),
+      alignment: Alignment.center,
+      child: iconPath != null
+          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 25)
+          : Icon(iconData, color: iconColor ?? Colors.white, size: 25),
     ),
   );
 }

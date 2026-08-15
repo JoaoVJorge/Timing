@@ -144,26 +144,34 @@ class SubjectsDataSource {
         "focusSessionCount": (row["focus_session_count"] as num?)?.toInt(),
         "wallpaperIndex": (row["wallpaper_index"] as num?)?.toInt(),
         "activityType": row["activity_type"],
+        "createdAt": row["created_at"],
         "groupId": row["group_id"],
       });
 
-  Map<String, dynamic> _subjectToRow(SubjectEntity subject, String userId) => {
-    "id": subject.id,
-    "user_id": userId,
-    "name": subject.name,
-    "category": subject.category.name,
-    "color_value": subject.colorValue,
-    "total_seconds": subject.totalSeconds,
-    "goal_seconds": subject.goalSeconds,
-    "current_pages": subject.currentPages,
-    "goal_pages": subject.goalPages,
-    "notes": subject.notes,
-    "icon_name": subject.iconName,
-    "rest_minutes": subject.restMinutes,
-    "focus_session_count": subject.focusSessionCount,
-    "wallpaper_index": subject.wallpaperIndex,
-    "activity_type": subject.activityType.name,
-    "group_id": subject.groupId,
-    "updated_at": DateTime.now().toUtc().toIso8601String(),
-  };
+  Map<String, dynamic> _subjectToRow(SubjectEntity subject, String userId) {
+    final Map<String, dynamic> row = {
+      "id": subject.id,
+      "user_id": userId,
+      "name": subject.name,
+      "category": subject.category.name,
+      "color_value": subject.colorValue,
+      "total_seconds": subject.totalSeconds,
+      "goal_seconds": subject.goalSeconds,
+      "current_pages": subject.currentPages,
+      "goal_pages": subject.goalPages,
+      "notes": subject.notes,
+      "icon_name": subject.iconName,
+      "rest_minutes": subject.restMinutes,
+      "focus_session_count": subject.focusSessionCount,
+      "wallpaper_index": subject.wallpaperIndex,
+      "activity_type": subject.activityType.name,
+      "group_id": subject.groupId,
+      "updated_at": DateTime.now().toUtc().toIso8601String(),
+    };
+    final DateTime? createdAt = subject.createdAt;
+    if (createdAt != null) {
+      row["created_at"] = createdAt.toUtc().toIso8601String();
+    }
+    return row;
+  }
 }

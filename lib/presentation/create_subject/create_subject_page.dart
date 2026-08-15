@@ -57,12 +57,7 @@ class CreateSubjectFormContent extends StatelessWidget {
       _ActivityTypeSection(controller: controller),
       const Gap(12),
       _GoalSection(controller: controller),
-      if (!controller.isPageBased) ...[
-        const Gap(12),
-        _FocusSessionCountSection(controller: controller),
-        const Gap(12),
-        _RestSection(controller: controller),
-      ],
+      _FocusRoutineSections(controller: controller),
       const Gap(12),
       _ColorSection(controller: controller),
       const Gap(12),
@@ -139,23 +134,23 @@ class _ActivityTypeSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _ActivityTypeOption(
+          CreationOptionCard(
             title: context.l10n.activityTypeDailyLabel,
-            description: context.l10n.activityTypeDailyDescription,
+            description: _dailyDescription(context),
             icon: Icons.wb_sunny_outlined,
+            optionColor: accent,
             isSelected:
                 controller.activityType.value == SubjectActivityType.daily,
-            accent: accent,
             onTap: () => controller.setActivityType(SubjectActivityType.daily),
           ),
           const Gap(10),
-          _ActivityTypeOption(
+          CreationOptionCard(
             title: context.l10n.activityTypePermanentLabel,
-            description: context.l10n.activityTypePermanentDescription,
+            description: _permanentDescription(context),
             icon: Icons.done_all_rounded,
+            optionColor: accent,
             isSelected:
                 controller.activityType.value == SubjectActivityType.permanent,
-            accent: accent,
             onTap: () =>
                 controller.setActivityType(SubjectActivityType.permanent),
           ),
@@ -163,101 +158,24 @@ class _ActivityTypeSection extends StatelessWidget {
       ),
     );
   });
-}
 
-class _ActivityTypeOption extends StatelessWidget {
-  const _ActivityTypeOption({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.isSelected,
-    required this.accent,
-    required this.onTap,
-  });
+  String _dailyDescription(BuildContext context) =>
+      switch (controller.category) {
+        TimeCategoryType.exercises =>
+          context.l10n.activityTypeDailyDescriptionExercises,
+        TimeCategoryType.hobbies =>
+          context.l10n.activityTypeDailyDescriptionHobbies,
+        _ => context.l10n.activityTypeDailyDescriptionStudying,
+      };
 
-  final String title;
-  final String description;
-  final IconData icon;
-  final bool isSelected;
-  final Color accent;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? accent.withValues(
-                alpha: Theme.of(context).brightness == Brightness.dark
-                    ? 0.2
-                    : 0.1,
-              )
-            : context.colorTokens.transparent,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? accent : context.colorTokens.borderUnfocused,
-          width: isSelected ? 1.5 : 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? accent.withValues(
-                      alpha: Theme.of(context).brightness == Brightness.dark
-                          ? 0.2
-                          : 0.1,
-                    )
-                  : context.colorTokens.transparent,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isSelected
-                    ? accent.withValues(alpha: 0.7)
-                    : context.colorTokens.borderUnfocused,
-              ),
-            ),
-            child: Icon(icon, color: accent, size: 20),
-          ),
-          const Gap(10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.textBody,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+  String _permanentDescription(BuildContext context) =>
+      switch (controller.category) {
+        TimeCategoryType.exercises =>
+          context.l10n.activityTypePermanentDescriptionExercises,
+        TimeCategoryType.hobbies =>
+          context.l10n.activityTypePermanentDescriptionHobbies,
+        _ => context.l10n.activityTypePermanentDescriptionStudying,
+      };
 }
 
 class _GoalSection extends StatelessWidget {
@@ -268,6 +186,13 @@ class _GoalSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color accent = controller.selectedColor.value;
+    final SubjectActivityType activityType = controller.activityType.value;
+    final bool isPermanent = activityType == SubjectActivityType.permanent;
+    final List<int> presets = controller.isPageBased
+        ? controller.pageGoalPresets
+        : isPermanent
+        ? controller.totalTimeGoalPresets
+        : controller.timeGoalPresets;
 
     return CreationConfigCard(
       accent: accent,
@@ -275,6 +200,8 @@ class _GoalSection extends StatelessWidget {
         icon: Icons.track_changes_rounded,
         label: controller.isPageBased
             ? context.l10n.createSubjectPagesGoalLabel
+            : isPermanent
+            ? _totalTimeGoalLabel(context)
             : context.l10n.createSubjectTimeGoalLabel,
         accent: accent,
       ),
@@ -282,22 +209,21 @@ class _GoalSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _PresetRow(
-            children:
-                (controller.isPageBased
-                        ? controller.pageGoalPresets
-                        : controller.timeGoalPresets)
-                    .map(
-                      (value) => CreationSelectableChip(
-                        label: controller.isPageBased
-                            ? value.toString()
-                            : context.l10n.restMinutesChip(value),
-                        isSelected:
-                            controller.goal.value.trim() == value.toString(),
-                        accent: accent,
-                        onTap: () => controller.setGoalPreset(value),
-                      ),
-                    )
-                    .toList(),
+            children: presets
+                .map(
+                  (value) => CreationSelectableChip(
+                    label: controller.isPageBased
+                        ? value.toString()
+                        : isPermanent
+                        ? context.l10n.createSubjectHoursValue(value)
+                        : context.l10n.restMinutesChip(value),
+                    isSelected:
+                        controller.goal.value.trim() == value.toString(),
+                    accent: accent,
+                    onTap: () => controller.setGoalPreset(value),
+                  ),
+                )
+                .toList(),
           ),
           const Gap(12),
           _GoalInput(controller: controller, accent: accent),
@@ -305,6 +231,15 @@ class _GoalSection extends StatelessWidget {
       ),
     );
   });
+
+  String _totalTimeGoalLabel(BuildContext context) =>
+      switch (controller.category) {
+        TimeCategoryType.exercises =>
+          context.l10n.createSubjectTotalTimeGoalLabelExercises,
+        TimeCategoryType.hobbies =>
+          context.l10n.createSubjectTotalTimeGoalLabelHobbies,
+        _ => context.l10n.createSubjectTotalTimeGoalLabelStudying,
+      };
 }
 
 class _GoalInput extends StatelessWidget {
@@ -314,57 +249,90 @@ class _GoalInput extends StatelessWidget {
   final Color accent;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 52,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      color: context.colorTokens.scaffold.withValues(alpha: 0.36),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: context.colorTokens.borderUnfocused),
-    ),
-    child: Row(
-      children: [
-        Icon(
-          controller.isPageBased
-              ? Icons.menu_book_rounded
-              : Icons.access_time_rounded,
-          color: accent,
-          size: 20,
-        ),
-        const Gap(12),
-        Expanded(
-          child: TextField(
-            controller: controller.goalController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              hintText: controller.isPageBased
-                  ? context.l10n.goalPagesHint
-                  : context.l10n.estimatedHoursGoalHint,
-              suffixText: controller.isPageBased
-                  ? context.l10n.pagesSuffix
-                  : context.l10n.timeUnitMinutesSuffix,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
+  Widget build(BuildContext context) => Obx(() {
+    final bool isPermanent =
+        controller.activityType.value == SubjectActivityType.permanent;
+
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: context.colorTokens.scaffold.withValues(alpha: 0.36),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.colorTokens.borderUnfocused),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            controller.isPageBased
+                ? Icons.menu_book_rounded
+                : Icons.access_time_rounded,
+            color: accent,
+            size: 20,
+          ),
+          const Gap(12),
+          Expanded(
+            child: TextField(
+              controller: controller.goalController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: TextStyle(
+                color: context.colorTokens.textBody,
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+              ),
+              decoration: InputDecoration(
+                hintText: controller.isPageBased
+                    ? context.l10n.goalPagesHint
+                    : isPermanent
+                    ? context.l10n.createSubjectTotalHoursGoalHint
+                    : context.l10n.estimatedHoursGoalHint,
+                suffixText: controller.isPageBased
+                    ? context.l10n.pagesSuffix
+                    : isPermanent
+                    ? context.l10n.timeUnitHoursSuffix
+                    : context.l10n.timeUnitMinutesSuffix,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
+                hintStyle: TextStyle(
+                  color: context.colorTokens.textHint.withValues(alpha: 0.62),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  });
+}
+
+class _FocusRoutineSections extends StatelessWidget {
+  const _FocusRoutineSections({required this.controller});
+
+  final SubjectCreationFormController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final SubjectActivityType activityType = controller.activityType.value;
+    if (controller.isPageBased ||
+        activityType == SubjectActivityType.permanent) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        const Gap(12),
+        _FocusSessionCountSection(controller: controller),
+        const Gap(12),
+        _RestSection(controller: controller),
       ],
-    ),
-  );
+    );
+  });
 }
 
 class _FocusSessionCountSection extends StatelessWidget {
@@ -387,7 +355,7 @@ class _FocusSessionCountSection extends StatelessWidget {
         children: controller.focusSessionCountOptions
             .map(
               (count) => CreationSelectableChip(
-                label: context.l10n.timerSessionCounter(count, count),
+                label: count.toString(),
                 isSelected: controller.focusSessionCount.value == count,
                 accent: accent,
                 onTap: () => controller.setFocusSessionCount(count),

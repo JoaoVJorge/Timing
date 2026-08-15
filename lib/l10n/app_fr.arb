@@ -443,7 +443,8 @@
   "itemNameHint": "Nom {itemNoun}",
   "colorLabel": "Couleur",
   "bookThemeLabel": "Thème du livre",
-  "estimatedHoursGoalHint": "Objectif en minutes",
+  "estimatedHoursGoalHint": "Durée en minutes",
+  "createSubjectTotalHoursGoalHint": "Temps total en heures",
   "goalPagesHint": "Objectif (pages)",
   "cancelButton": "Annuler",
   "confirmButton": "Confirmer",
@@ -468,11 +469,15 @@
   "createSubjectNameHintReading": "Ex. : Livre d'histoire, Dom Casmurro",
   "createSubjectNameHintExercises": "Ex. : Gym, course à pied, étirements",
   "createSubjectNameHintHobbies": "Ex. : Guitare, Dessin, Programmation",
-  "createSubjectTimeGoalLabel": "Objectif de concentration",
+  "createSubjectTimeGoalLabel": "Durée de chaque section",
+  "createSubjectTotalTimeGoalLabel": "Combien de temps voulez-vous étudier au total ?",
+  "createSubjectTotalTimeGoalLabelStudying": "Combien de temps voulez-vous étudier au total ?",
+  "createSubjectTotalTimeGoalLabelExercises": "Combien de temps voulez-vous faire de l'exercice au total ?",
+  "createSubjectTotalTimeGoalLabelHobbies": "Combien de temps voulez-vous pratiquer au total ?",
   "createSubjectPagesGoalLabel": "Objectif de la page",
   "createSubjectTimeGoalHelp": "Combien de minutes souhaitez-vous vous concentrer ?",
   "createSubjectPagesGoalHelp": "Combien de pages souhaitez-vous connecter au total ?",
-  "createSubjectRestLabel": "Pause après chaque focus",
+  "createSubjectRestLabel": "Durée des pauses",
   "createSubjectRestHelp": "Le timer propose une pause après 30 min de concentration.",
   "customRestMinutesHint": "Pause personnalisée (min)",
   "createSubjectPreviewTitle": "Aperçu",
@@ -792,6 +797,8 @@
   "progressComparisonSame": "Identique à la période précédente",
   "progressComparisonFirst": "Vos premières données sur cette période",
   "progressStatExercises": "Exercices",
+  "progressStatLongestGoal": "Objectif le plus long",
+  "progressStatMainReading": "Lecture principale",
   "progressStatGoalsDone": "Objectifs atteints",
   "progressDistributionTitle": "Par activité",
   "homeTodayInline": "Aujourd'hui : {focus} de focus · {pages} pages · {goals} objectifs",
@@ -1113,12 +1120,18 @@
   "appleSignInIncompleteMessage": "La connexion avec Apple n’est pas encore terminée.",
   "activityTypeLabel": "Type d’activité",
   "activityTypeDailyLabel": "Quotidienne",
-  "activityTypeDailyDescription": "Se renouvelle chaque jour. L’activité redevient disponible le matin.",
+  "activityTypeDailyDescription": "Utilisez des sections de focus avec des pauses et définissez combien de séances terminer chaque jour.",
+  "activityTypeDailyDescriptionStudying": "Utilisez des sections d'étude avec des pauses et définissez combien de séances terminer chaque jour.",
+  "activityTypeDailyDescriptionExercises": "Utilisez des sections d'exercice avec des pauses et définissez combien de séances terminer chaque jour.",
+  "activityTypeDailyDescriptionHobbies": "Utilisez des sections de pratique avec des pauses et définissez combien de séances terminer chaque jour.",
   "activityTypePermanentLabel": "Permanente",
-  "activityTypePermanentDescription": "Reste active jusqu’à ce que vous la terminiez. Ensuite, elle est marquée comme terminée.",
+  "activityTypePermanentDescription": "Définissez le temps total d'étude. L’activité reste active jusqu’à ce qu’elle soit terminée.",
+  "activityTypePermanentDescriptionStudying": "Définissez le temps total d'étude. L’activité reste active jusqu’à ce qu’elle soit terminée.",
+  "activityTypePermanentDescriptionExercises": "Définissez le temps total d'exercice. L’activité reste active jusqu’à ce qu’elle soit terminée.",
+  "activityTypePermanentDescriptionHobbies": "Définissez le temps total de pratique. L’activité reste active jusqu’à ce qu’elle soit terminée.",
   "pagesSuffix": "pages",
   "updatedSuccessfullyMessage": "Mis à jour",
-  "focusSessionCountLabel": "Séances de focus",
+  "focusSessionCountLabel": "Nombre de séances",
   "groupEditingComingSoon": "Modification du groupe bientôt disponible.",
   "leftGroupMessage": "Vous avez quitté le groupe.",
   "groupImageSourceTitle": "Envoyer une image",
@@ -1233,6 +1246,59 @@
   },
   "addMemberButton": "Ajouter un membre",
   "groupCollectiveProgressTitle": "Progression collective",
+  "dailyLabel": "Quotidienne",
+  "completedLabel": "Terminé",
+  "groupActivityCompletedCount": "{completed} sur {total} ont terminé",
+  "@groupActivityCompletedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMissingParticipants": "{count, plural, =0{Tout le monde a terminé l’objectif} =1{Il manque 1 participant pour terminer l’objectif} other{Il manque {count} participants pour terminer l’objectif}}",
+  "@groupMissingParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupParticipantsDataTitle": "{count, plural, =1{Participants (1)} other{Participants ({count})}}",
+  "@groupParticipantsDataTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCompletedMembersTitle": "Ont terminé ({count})",
+  "@groupCompletedMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupPendingMembersTitle": "En attente ({count})",
+  "@groupPendingMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoCompletedMembersTitle": "Personne n’a encore terminé",
+  "groupNoCompletedMembersSubtitle": "Soyez le premier à terminer l’objectif !",
+  "groupStatisticsTitle": "Statistiques du groupe",
+  "groupStreakStatLabel": "Série du groupe",
+  "groupTodayTotalStatLabel": "Temps total aujourd’hui",
+  "groupPeriodTotalStatLabel": "Total de la période",
+  "groupCompletedSessionsStatLabel": "Sessions terminées",
+  "groupParticipantsStatLabel": "Participant dans le groupe",
   "currentUserRankCompleteFirstGoal": "Terminez votre premier objectif pour entrer dans le classement.",
   "currentUserRankTiedLead": "À égalité en tête.",
   "currentUserRankTiedFirstLabel": "À égalité en 1re place",

@@ -225,7 +225,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookThemeLabel => 'موضوع الكتاب';
 
   @override
-  String get estimatedHoursGoalHint => 'الهدف في دقائق';
+  String get estimatedHoursGoalHint => 'المدة بالدقائق';
+
+  @override
+  String get createSubjectTotalHoursGoalHint => 'الوقت الإجمالي بالساعات';
 
   @override
   String get goalPagesHint => 'الهدف (صفحات)';
@@ -306,7 +309,23 @@ class AppLocalizationsAr extends AppLocalizations {
       'على سبيل المثال: الجيتار، الرسم، البرمجة';
 
   @override
-  String get createSubjectTimeGoalLabel => 'هدف التركيز';
+  String get createSubjectTimeGoalLabel => 'مدة كل قسم';
+
+  @override
+  String get createSubjectTotalTimeGoalLabel =>
+      'كم من الوقت تريد الدراسة إجمالا؟';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelStudying =>
+      'كم من الوقت تريد الدراسة إجمالا؟';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelExercises =>
+      'كم من الوقت تريد التمرن إجمالا؟';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelHobbies =>
+      'كم من الوقت تريد الممارسة إجمالا؟';
 
   @override
   String get createSubjectPagesGoalLabel => 'هدف الصفحة';
@@ -319,7 +338,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'كم عدد الصفحات التي تريد تسجيل الدخول بها إجمالاً؟';
 
   @override
-  String get createSubjectRestLabel => 'استراحة بعد كل تركيز';
+  String get createSubjectRestLabel => 'مدة فترات الراحة';
 
   @override
   String get createSubjectRestHelp =>
@@ -1343,6 +1362,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get progressStatExercises => 'التمارين';
 
   @override
+  String get progressStatLongestGoal => 'أطول هدف';
+
+  @override
+  String get progressStatMainReading => 'القراءة الرئيسية';
+
+  @override
   String get progressStatGoalsDone => 'الأهداف المنجزة';
 
   @override
@@ -1884,14 +1909,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get activityTypeDailyDescription =>
-      'يتجدد كل يوم. يعود النشاط متاحا في الصباح.';
+      'استخدم أقسام تركيز مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.';
+
+  @override
+  String get activityTypeDailyDescriptionStudying =>
+      'استخدم أقسام دراسة مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.';
+
+  @override
+  String get activityTypeDailyDescriptionExercises =>
+      'استخدم أقسام تمرين مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.';
+
+  @override
+  String get activityTypeDailyDescriptionHobbies =>
+      'استخدم أقسام ممارسة مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.';
 
   @override
   String get activityTypePermanentLabel => 'دائم';
 
   @override
   String get activityTypePermanentDescription =>
-      'يبقى نشطا حتى تنهيه. بعد ذلك يتم تعليمه كمنته.';
+      'حدد وقت الدراسة الإجمالي. يبقى النشاط فعالا حتى تكمله.';
+
+  @override
+  String get activityTypePermanentDescriptionStudying =>
+      'حدد وقت الدراسة الإجمالي. يبقى النشاط فعالا حتى تكمله.';
+
+  @override
+  String get activityTypePermanentDescriptionExercises =>
+      'حدد وقت التمرين الإجمالي. يبقى النشاط فعالا حتى تكمله.';
+
+  @override
+  String get activityTypePermanentDescriptionHobbies =>
+      'حدد وقت الممارسة الإجمالي. يبقى النشاط فعالا حتى تكمله.';
 
   @override
   String get pagesSuffix => '?????';
@@ -1900,7 +1949,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updatedSuccessfullyMessage => '?? ??????? ?????';
 
   @override
-  String get focusSessionCountLabel => '????? ???????';
+  String get focusSessionCountLabel => 'عدد الجلسات';
 
   @override
   String get groupEditingComingSoon => 'تعديل المجموعة قريبا.';
@@ -2051,6 +2100,74 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupCollectiveProgressTitle => '?????? ???????';
+
+  @override
+  String get dailyLabel => 'يومي';
+
+  @override
+  String get completedLabel => 'مكتمل';
+
+  @override
+  String groupActivityCompletedCount(int completed, int total) {
+    return 'أكمل $completed من $total';
+  }
+
+  @override
+  String groupMissingParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'بقي $count مشاركين لإكمال الهدف',
+      one: 'بقي مشارك واحد لإكمال الهدف',
+      zero: 'أكمل الجميع الهدف',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupParticipantsDataTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'المشاركون ($count)',
+      one: 'المشاركون (1)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupCompletedMembersTitle(int count) {
+    return 'أكملوا ($count)';
+  }
+
+  @override
+  String groupPendingMembersTitle(int count) {
+    return 'قيد الانتظار ($count)';
+  }
+
+  @override
+  String get groupNoCompletedMembersTitle => 'لم يكمل أحد بعد';
+
+  @override
+  String get groupNoCompletedMembersSubtitle => 'كن أول من يكمل الهدف!';
+
+  @override
+  String get groupStatisticsTitle => 'إحصاءات المجموعة';
+
+  @override
+  String get groupStreakStatLabel => 'سلسلة المجموعة';
+
+  @override
+  String get groupTodayTotalStatLabel => 'إجمالي الوقت اليوم';
+
+  @override
+  String get groupPeriodTotalStatLabel => 'إجمالي الفترة';
+
+  @override
+  String get groupCompletedSessionsStatLabel => 'الجلسات المكتملة';
+
+  @override
+  String get groupParticipantsStatLabel => 'مشارك في المجموعة';
 
   @override
   String get currentUserRankCompleteFirstGoal =>

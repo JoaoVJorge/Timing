@@ -157,7 +157,8 @@
   },
   "colorLabel": "Color",
   "bookThemeLabel": "Book theme",
-  "estimatedHoursGoalHint": "Goal in minutes",
+  "estimatedHoursGoalHint": "Duration in minutes",
+  "createSubjectTotalHoursGoalHint": "Total time in hours",
   "goalPagesHint": "Goal (pages)",
   "cancelButton": "Cancel",
   "confirmButton": "Confirm",
@@ -182,11 +183,15 @@
   "createSubjectNameHintReading": "Ex.: History book, Dom Casmurro",
   "createSubjectNameHintExercises": "Ex.: Gym, Running, Stretching",
   "createSubjectNameHintHobbies": "Ex.: Guitar, Drawing, Programming",
-  "createSubjectTimeGoalLabel": "Focus goal",
+  "createSubjectTimeGoalLabel": "Duration of each section",
+  "createSubjectTotalTimeGoalLabel": "How long do you want to study in total?",
+  "createSubjectTotalTimeGoalLabelStudying": "How long do you want to study in total?",
+  "createSubjectTotalTimeGoalLabelExercises": "How long do you want to exercise in total?",
+  "createSubjectTotalTimeGoalLabelHobbies": "How long do you want to practice in total?",
   "createSubjectPagesGoalLabel": "Page goal",
   "createSubjectTimeGoalHelp": "How many minutes do you want to focus?",
   "createSubjectPagesGoalHelp": "How many pages do you want to log in total?",
-  "createSubjectRestLabel": "Break after each focus",
+  "createSubjectRestLabel": "Break duration",
   "createSubjectRestHelp": "The timer suggests a break after 30 min of focus.",
   "customRestMinutesHint": "Custom break (min)",
   "createSubjectPreviewTitle": "Preview",
@@ -792,6 +797,8 @@
   "progressComparisonSame": "Same as the previous period",
   "progressComparisonFirst": "Your first data for this period",
   "progressStatExercises": "Exercises",
+  "progressStatLongestGoal": "Longest goal",
+  "progressStatMainReading": "Main reading",
   "progressStatGoalsDone": "Goals done",
   "progressDistributionTitle": "By activity",
   "homeTodayInline": "Today: {focus} focus · {pages} pages · {goals} goals",
@@ -1134,12 +1141,18 @@
   "appleSignInIncompleteMessage": "Sign in with Apple is not complete yet.",
   "activityTypeLabel": "Activity type",
   "activityTypeDailyLabel": "Daily",
-  "activityTypeDailyDescription": "Renews every day. The activity becomes available again in the morning.",
+  "activityTypeDailyDescription": "Use focus sections with breaks and set how many sessions you want to complete each day.",
+  "activityTypeDailyDescriptionStudying": "Use study sections with breaks and set how many sessions you want to complete each day.",
+  "activityTypeDailyDescriptionExercises": "Use exercise sections with breaks and set how many sessions you want to complete each day.",
+  "activityTypeDailyDescriptionHobbies": "Use practice sections with breaks and set how many sessions you want to complete each day.",
   "activityTypePermanentLabel": "Permanent",
-  "activityTypePermanentDescription": "Stays active until you finish it. After that, it is marked as done.",
+  "activityTypePermanentDescription": "Set the total study time. The activity stays active until you complete it.",
+  "activityTypePermanentDescriptionStudying": "Set the total study time. The activity stays active until you complete it.",
+  "activityTypePermanentDescriptionExercises": "Set the total exercise time. The activity stays active until you complete it.",
+  "activityTypePermanentDescriptionHobbies": "Set the total practice time. The activity stays active until you complete it.",
   "pagesSuffix": "pages",
   "updatedSuccessfullyMessage": "Updated successfully",
-  "focusSessionCountLabel": "Focus sessions",
+  "focusSessionCountLabel": "Number of sessions",
   "groupEditingComingSoon": "Group editing is coming soon.",
   "leftGroupMessage": "You left the group.",
   "groupImageSourceTitle": "Send image",
@@ -1254,6 +1267,59 @@
   },
   "addMemberButton": "Add member",
   "groupCollectiveProgressTitle": "Collective progress",
+  "dailyLabel": "Daily",
+  "completedLabel": "Completed",
+  "groupActivityCompletedCount": "{completed} of {total} completed",
+  "@groupActivityCompletedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMissingParticipants": "{count, plural, =0{Everyone completed the goal} =1{1 participant left to complete the goal} other{{count} participants left to complete the goal}}",
+  "@groupMissingParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupParticipantsDataTitle": "{count, plural, =1{Participants (1)} other{Participants ({count})}}",
+  "@groupParticipantsDataTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCompletedMembersTitle": "Completed ({count})",
+  "@groupCompletedMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupPendingMembersTitle": "Pending ({count})",
+  "@groupPendingMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoCompletedMembersTitle": "No one completed yet",
+  "groupNoCompletedMembersSubtitle": "Be the first to complete the goal!",
+  "groupStatisticsTitle": "Group statistics",
+  "groupStreakStatLabel": "Group streak",
+  "groupTodayTotalStatLabel": "Total time today",
+  "groupPeriodTotalStatLabel": "Period total",
+  "groupCompletedSessionsStatLabel": "Completed sessions",
+  "groupParticipantsStatLabel": "Participant in group",
   "currentUserRankCompleteFirstGoal": "Complete your first goal to enter the ranking.",
   "currentUserRankTiedLead": "Tied for the lead.",
   "currentUserRankTiedFirstLabel": "Tied for 1st",

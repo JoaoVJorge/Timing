@@ -96,10 +96,13 @@ class CreateGroupController extends GetxController
   List<int> get restMinutesOptions => const [5, 10, 15, 20];
 
   @override
-  List<int> get focusSessionCountOptions => const [1, 2, 3, 4];
+  List<int> get focusSessionCountOptions => const [1, 2, 3];
 
   @override
   List<int> get timeGoalPresets => const [15, 30, 45, 60];
+
+  @override
+  List<int> get totalTimeGoalPresets => const [1, 2, 3, 4];
 
   @override
   List<int> get pageGoalPresets => const [5, 10, 25, 50];
@@ -240,6 +243,12 @@ class CreateGroupController extends GetxController
   @override
   void setActivityType(SubjectActivityType type) {
     activityType.value = type;
+    if (type == SubjectActivityType.permanent) {
+      setFocusSessionCount(1);
+      setGoalPreset(1);
+    } else if (!isPageBased) {
+      setGoalPreset(30);
+    }
   }
 
   @override
@@ -341,15 +350,17 @@ class CreateGroupController extends GetxController
       return null;
     }
     final bool isReading = category == TimeCategoryType.reading;
+    final bool isPermanent =
+        activityType.value == SubjectActivityType.permanent;
     return GroupActivityDraft.subject(
       name: name,
       category: category,
       colorValue: colorValue,
-      goalSeconds: isReading ? 0 : goalNumber * 60,
+      goalSeconds: isReading ? 0 : goalNumber * (isPermanent ? 3600 : 60),
       goalPages: isReading ? goalNumber : 0,
       iconName: selectedIconName.value,
       restMinutes: restMinutes.value,
-      focusSessionCount: focusSessionCount.value,
+      focusSessionCount: isReading || isPermanent ? 1 : focusSessionCount.value,
       wallpaperIndex: wallpaperIndex.value,
       activityType: activityType.value.name,
     );

@@ -30,6 +30,7 @@ class SubjectEntity extends Equatable {
     required this.focusSessionCount,
     required this.wallpaperIndex,
     this.activityType = SubjectActivityType.daily,
+    this.createdAt,
     this.groupId,
   });
 
@@ -51,6 +52,7 @@ class SubjectEntity extends Equatable {
     focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
     activityType: SubjectActivityType.fromName(map["activityType"] as String?),
+    createdAt: DateTime.tryParse(map["createdAt"] as String? ?? ""),
     groupId: (map["groupId"] as String?)?.isEmpty ?? true
         ? null
         : map["groupId"] as String?,
@@ -72,6 +74,7 @@ class SubjectEntity extends Equatable {
   final int focusSessionCount;
   final int wallpaperIndex;
   final SubjectActivityType activityType;
+  final DateTime? createdAt;
 
   /// Non-null when this subject is a copy handed out by a group. Such copies
   /// cannot be deleted while the user is still a member (enforced by the
@@ -104,6 +107,7 @@ class SubjectEntity extends Equatable {
     "focusSessionCount": focusSessionCount,
     "wallpaperIndex": wallpaperIndex,
     "activityType": activityType.name,
+    "createdAt": createdAt?.toIso8601String(),
     "groupId": groupId,
   };
 
@@ -122,6 +126,7 @@ class SubjectEntity extends Equatable {
     int? focusSessionCount,
     int? wallpaperIndex,
     SubjectActivityType? activityType,
+    DateTime? createdAt,
     String? groupId,
   }) => SubjectEntity(
     id: id,
@@ -138,6 +143,7 @@ class SubjectEntity extends Equatable {
     focusSessionCount: focusSessionCount ?? this.focusSessionCount,
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
     activityType: activityType ?? this.activityType,
+    createdAt: createdAt ?? this.createdAt,
     groupId: groupId ?? this.groupId,
   );
 
@@ -157,6 +163,7 @@ class SubjectEntity extends Equatable {
     focusSessionCount,
     wallpaperIndex,
     activityType,
+    createdAt,
     groupId,
   ];
 }

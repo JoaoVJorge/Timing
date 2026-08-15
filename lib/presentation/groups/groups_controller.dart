@@ -246,6 +246,16 @@ class GroupsController extends GetxController {
 
   void onBackToGroupDetails() => isShowingMemberManagement.value = false;
 
+  void onSelectPeriod(LeaderboardPeriodType period) {
+    if (selectedPeriod.value == period) {
+      return;
+    }
+    selectedPeriod.value = period;
+    if (selectedDetailsTab.value == GroupDetailsTab.goals) {
+      unawaited(loadActivityProgress());
+    }
+  }
+
   void onSelectDetailsTab(GroupDetailsTab tab) {
     selectedDetailsTab.value = tab;
     if (tab == GroupDetailsTab.chat) {

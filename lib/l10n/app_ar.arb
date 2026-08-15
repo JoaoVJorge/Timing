@@ -443,7 +443,8 @@
   "itemNameHint": "الاسم {itemNoun}",
   "colorLabel": "اللون",
   "bookThemeLabel": "موضوع الكتاب",
-  "estimatedHoursGoalHint": "الهدف في دقائق",
+  "estimatedHoursGoalHint": "المدة بالدقائق",
+  "createSubjectTotalHoursGoalHint": "الوقت الإجمالي بالساعات",
   "goalPagesHint": "الهدف (صفحات)",
   "cancelButton": "إلغاء",
   "confirmButton": "تأكيد",
@@ -468,11 +469,15 @@
   "createSubjectNameHintReading": "على سبيل المثال: كتاب التاريخ، دوم كاسمورو",
   "createSubjectNameHintExercises": "على سبيل المثال: صالة الألعاب الرياضية، الجري، التمدد",
   "createSubjectNameHintHobbies": "على سبيل المثال: الجيتار، الرسم، البرمجة",
-  "createSubjectTimeGoalLabel": "هدف التركيز",
+  "createSubjectTimeGoalLabel": "مدة كل قسم",
+  "createSubjectTotalTimeGoalLabel": "كم من الوقت تريد الدراسة إجمالا؟",
+  "createSubjectTotalTimeGoalLabelStudying": "كم من الوقت تريد الدراسة إجمالا؟",
+  "createSubjectTotalTimeGoalLabelExercises": "كم من الوقت تريد التمرن إجمالا؟",
+  "createSubjectTotalTimeGoalLabelHobbies": "كم من الوقت تريد الممارسة إجمالا؟",
   "createSubjectPagesGoalLabel": "هدف الصفحة",
   "createSubjectTimeGoalHelp": "كم دقيقة تريد التركيز؟",
   "createSubjectPagesGoalHelp": "كم عدد الصفحات التي تريد تسجيل الدخول بها إجمالاً؟",
-  "createSubjectRestLabel": "استراحة بعد كل تركيز",
+  "createSubjectRestLabel": "مدة فترات الراحة",
   "createSubjectRestHelp": "يقترح الموقت استراحة بعد 30 دقيقة من التركيز.",
   "customRestMinutesHint": "فاصل مخصص (دقيقة)",
   "createSubjectPreviewTitle": "معاينة",
@@ -792,6 +797,8 @@
   "progressComparisonSame": "مثل الفترة السابقة",
   "progressComparisonFirst": "أول بياناتك في هذه الفترة",
   "progressStatExercises": "التمارين",
+  "progressStatLongestGoal": "أطول هدف",
+  "progressStatMainReading": "القراءة الرئيسية",
   "progressStatGoalsDone": "الأهداف المنجزة",
   "progressDistributionTitle": "حسب النشاط",
   "homeTodayInline": "اليوم: {focus} تركيز · {pages} صفحة · {goals} هدف",
@@ -1113,12 +1120,18 @@
   "appleSignInIncompleteMessage": "تسجيل الدخول باستخدام Apple لم يكتمل بعد.",
   "activityTypeLabel": "نوع النشاط",
   "activityTypeDailyLabel": "يومي",
-  "activityTypeDailyDescription": "يتجدد كل يوم. يعود النشاط متاحا في الصباح.",
+  "activityTypeDailyDescription": "استخدم أقسام تركيز مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.",
+  "activityTypeDailyDescriptionStudying": "استخدم أقسام دراسة مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.",
+  "activityTypeDailyDescriptionExercises": "استخدم أقسام تمرين مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.",
+  "activityTypeDailyDescriptionHobbies": "استخدم أقسام ممارسة مع فترات راحة وحدد عدد الجلسات التي تريد إكمالها كل يوم.",
   "activityTypePermanentLabel": "دائم",
-  "activityTypePermanentDescription": "يبقى نشطا حتى تنهيه. بعد ذلك يتم تعليمه كمنته.",
+  "activityTypePermanentDescription": "حدد وقت الدراسة الإجمالي. يبقى النشاط فعالا حتى تكمله.",
+  "activityTypePermanentDescriptionStudying": "حدد وقت الدراسة الإجمالي. يبقى النشاط فعالا حتى تكمله.",
+  "activityTypePermanentDescriptionExercises": "حدد وقت التمرين الإجمالي. يبقى النشاط فعالا حتى تكمله.",
+  "activityTypePermanentDescriptionHobbies": "حدد وقت الممارسة الإجمالي. يبقى النشاط فعالا حتى تكمله.",
   "pagesSuffix": "?????",
   "updatedSuccessfullyMessage": "?? ??????? ?????",
-  "focusSessionCountLabel": "????? ???????",
+  "focusSessionCountLabel": "عدد الجلسات",
   "groupEditingComingSoon": "تعديل المجموعة قريبا.",
   "leftGroupMessage": "غادرت المجموعة.",
   "groupImageSourceTitle": "????? ????",
@@ -1233,6 +1246,59 @@
   },
   "addMemberButton": "????? ???",
   "groupCollectiveProgressTitle": "?????? ???????",
+  "dailyLabel": "يومي",
+  "completedLabel": "مكتمل",
+  "groupActivityCompletedCount": "أكمل {completed} من {total}",
+  "@groupActivityCompletedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMissingParticipants": "{count, plural, =0{أكمل الجميع الهدف} =1{بقي مشارك واحد لإكمال الهدف} other{بقي {count} مشاركين لإكمال الهدف}}",
+  "@groupMissingParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupParticipantsDataTitle": "{count, plural, =1{المشاركون (1)} other{المشاركون ({count})}}",
+  "@groupParticipantsDataTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCompletedMembersTitle": "أكملوا ({count})",
+  "@groupCompletedMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupPendingMembersTitle": "قيد الانتظار ({count})",
+  "@groupPendingMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoCompletedMembersTitle": "لم يكمل أحد بعد",
+  "groupNoCompletedMembersSubtitle": "كن أول من يكمل الهدف!",
+  "groupStatisticsTitle": "إحصاءات المجموعة",
+  "groupStreakStatLabel": "سلسلة المجموعة",
+  "groupTodayTotalStatLabel": "إجمالي الوقت اليوم",
+  "groupPeriodTotalStatLabel": "إجمالي الفترة",
+  "groupCompletedSessionsStatLabel": "الجلسات المكتملة",
+  "groupParticipantsStatLabel": "مشارك في المجموعة",
   "currentUserRankCompleteFirstGoal": "أكمل هدفك الأول للدخول إلى الترتيب.",
   "currentUserRankTiedLead": "تعادل على الصدارة.",
   "currentUserRankTiedFirstLabel": "????? ??? ?????? ?????",

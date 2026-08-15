@@ -17,6 +17,7 @@ abstract class SubjectCreationFormController {
   List<int> get restMinutesOptions;
   List<int> get focusSessionCountOptions;
   List<int> get timeGoalPresets;
+  List<int> get totalTimeGoalPresets;
   List<int> get pageGoalPresets;
   bool get isPageBased;
   List<String> get iconSuggestions;

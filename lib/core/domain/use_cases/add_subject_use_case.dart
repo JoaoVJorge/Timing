@@ -40,6 +40,7 @@ class AddSubjectUseCase {
         focusSessionCount: focusSessionCount,
         wallpaperIndex: wallpaperIndex,
         activityType: activityType,
+        createdAt: DateTime.now(),
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

@@ -65,9 +65,11 @@ class CreateSubjectController extends GetxController
   @override
   final List<int> restMinutesOptions = [5, 10, 15, 20];
   @override
-  final List<int> focusSessionCountOptions = [1, 2, 3, 4];
+  final List<int> focusSessionCountOptions = [1, 2, 3];
   @override
   final List<int> timeGoalPresets = [15, 30, 45, 60];
+  @override
+  final List<int> totalTimeGoalPresets = [1, 2, 3, 4];
   @override
   final List<int> pageGoalPresets = [5, 10, 25, 50];
 
@@ -193,20 +195,11 @@ class CreateSubjectController extends GetxController
       return context.l10n.createSubjectPagesValue(int.parse(goal.value.trim()));
     }
 
-    final int minutes = int.parse(goal.value.trim());
-    final int seconds = minutes * 60;
-    final int wholeHours = seconds ~/ 3600;
-    final int remainingMinutes = (seconds % 3600) ~/ 60;
-    if (remainingMinutes == 0 && wholeHours > 0) {
-      return context.l10n.createSubjectHoursValue(wholeHours);
+    final int value = int.parse(goal.value.trim());
+    if (activityType.value == SubjectActivityType.permanent) {
+      return context.l10n.createSubjectHoursValue(value);
     }
-    if (wholeHours == 0) {
-      return context.l10n.restMinutesChip(minutes);
-    }
-    return context.l10n.createSubjectHoursMinutesValue(
-      wholeHours,
-      remainingMinutes,
-    );
+    return context.l10n.restMinutesChip(value);
   }
 
   @override
@@ -230,6 +223,12 @@ class CreateSubjectController extends GetxController
   @override
   void setActivityType(SubjectActivityType type) {
     activityType.value = type;
+    if (type == SubjectActivityType.permanent) {
+      setFocusSessionCount(1);
+      setGoalPreset(1);
+    } else if (!isPageBased) {
+      setGoalPreset(30);
+    }
   }
 
   @override
@@ -250,6 +249,8 @@ class CreateSubjectController extends GetxController
       activityType.value = subject.activityType;
       goalController.text = isPageBased
           ? subject.goalPages.toString()
+          : subject.activityType == SubjectActivityType.permanent
+          ? (subject.goalSeconds ~/ 3600).toString()
           : (subject.goalSeconds ~/ 60).toString();
       goal.value = goalController.text;
       name.value = nameController.text;
@@ -295,10 +296,16 @@ class CreateSubjectController extends GetxController
     if (isPageBased) {
       goalPages = int.tryParse(goalController.text.trim()) ?? 0;
     } else {
-      final int goalMinutes = int.tryParse(goalController.text.trim()) ?? 0;
-      goalSeconds = goalMinutes * 60;
+      final int goalValue = int.tryParse(goalController.text.trim()) ?? 0;
+      goalSeconds = activityType.value == SubjectActivityType.permanent
+          ? goalValue * 3600
+          : goalValue * 60;
     }
 
+    final int normalizedFocusSessionCount =
+        isPageBased || activityType.value == SubjectActivityType.permanent
+        ? 1
+        : focusSessionCount.value;
     final SubjectEntity? subject = editingSubject;
     final Either<AppError, SubjectEntity> result = subject == null
         ? await _addSubjectUseCase(
@@ -309,7 +316,7 @@ class CreateSubjectController extends GetxController
             goalPages: goalPages,
             iconName: selectedIconName.value,
             restMinutes: restMinutes.value,
-            focusSessionCount: focusSessionCount.value,
+            focusSessionCount: normalizedFocusSessionCount,
             wallpaperIndex: wallpaperIndex.value,
             activityType: activityType.value,
           )
@@ -321,7 +328,7 @@ class CreateSubjectController extends GetxController
             goalPages: goalPages,
             iconName: selectedIconName.value,
             restMinutes: restMinutes.value,
-            focusSessionCount: focusSessionCount.value,
+            focusSessionCount: normalizedFocusSessionCount,
             wallpaperIndex: wallpaperIndex.value,
             activityType: activityType.value,
           );

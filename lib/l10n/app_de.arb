@@ -443,7 +443,8 @@
   "itemNameHint": "{itemNoun}-Name",
   "colorLabel": "Farbe",
   "bookThemeLabel": "Buchthema",
-  "estimatedHoursGoalHint": "Ziel in wenigen Minuten",
+  "estimatedHoursGoalHint": "Dauer in Minuten",
+  "createSubjectTotalHoursGoalHint": "Gesamtzeit in Stunden",
   "goalPagesHint": "Ziel (Seiten)",
   "cancelButton": "Abbrechen",
   "confirmButton": "Bestätigen",
@@ -468,11 +469,15 @@
   "createSubjectNameHintReading": "Bsp.: Geschichtsbuch, Dom Casmurro",
   "createSubjectNameHintExercises": "Bsp.: Fitnessstudio, Laufen, Stretching",
   "createSubjectNameHintHobbies": "Bsp.: Gitarre, Zeichnen, Programmieren",
-  "createSubjectTimeGoalLabel": "Fokusziel",
+  "createSubjectTimeGoalLabel": "Dauer jedes Abschnitts",
+  "createSubjectTotalTimeGoalLabel": "Wie lange möchtest du insgesamt lernen?",
+  "createSubjectTotalTimeGoalLabelStudying": "Wie lange möchtest du insgesamt lernen?",
+  "createSubjectTotalTimeGoalLabelExercises": "Wie lange möchtest du insgesamt trainieren?",
+  "createSubjectTotalTimeGoalLabelHobbies": "Wie lange möchtest du insgesamt üben?",
   "createSubjectPagesGoalLabel": "Seitenziel",
   "createSubjectTimeGoalHelp": "Auf wie viele Minuten möchten Sie sich konzentrieren?",
   "createSubjectPagesGoalHelp": "Wie viele Seiten möchten Sie insgesamt anmelden?",
-  "createSubjectRestLabel": "Machen Sie nach jedem Fokus eine Pause",
+  "createSubjectRestLabel": "Pausendauer",
   "createSubjectRestHelp": "Der Timer schlägt nach 30 Minuten Fokus eine Pause vor.",
   "customRestMinutesHint": "Benutzerdefinierte Pause (Min.)",
   "createSubjectPreviewTitle": "Vorschau",
@@ -792,6 +797,8 @@
   "progressComparisonSame": "Genauso wie im vorherigen Zeitraum",
   "progressComparisonFirst": "Deine ersten Daten in diesem Zeitraum",
   "progressStatExercises": "Übungen",
+  "progressStatLongestGoal": "Längstes Ziel",
+  "progressStatMainReading": "Wichtigste Lektüre",
   "progressStatGoalsDone": "Erledigte Ziele",
   "progressDistributionTitle": "Nach Aktivität",
   "homeTodayInline": "Heute: {focus} Fokus · {pages} Seiten · {goals} Ziele",
@@ -1113,12 +1120,18 @@
   "appleSignInIncompleteMessage": "Mit Apple anmelden ist noch nicht vollständig.",
   "activityTypeLabel": "Aktivitätstyp",
   "activityTypeDailyLabel": "Täglich",
-  "activityTypeDailyDescription": "Erneuert sich jeden Tag. Die Aktivität ist morgens wieder verfügbar.",
+  "activityTypeDailyDescription": "Nutze Fokusabschnitte mit Pausen und lege fest, wie viele Sitzungen du pro Tag schaffen willst.",
+  "activityTypeDailyDescriptionStudying": "Nutze Lernabschnitte mit Pausen und lege fest, wie viele Sitzungen du pro Tag schaffen willst.",
+  "activityTypeDailyDescriptionExercises": "Nutze Trainingsabschnitte mit Pausen und lege fest, wie viele Sitzungen du pro Tag schaffen willst.",
+  "activityTypeDailyDescriptionHobbies": "Nutze Übungsabschnitte mit Pausen und lege fest, wie viele Sitzungen du pro Tag schaffen willst.",
   "activityTypePermanentLabel": "Permanent",
-  "activityTypePermanentDescription": "Bleibt aktiv, bis du sie abschließt. Danach wird sie als erledigt markiert.",
+  "activityTypePermanentDescription": "Lege die gesamte Lernzeit fest. Die Aktivität bleibt aktiv, bis du sie abschließt.",
+  "activityTypePermanentDescriptionStudying": "Lege die gesamte Lernzeit fest. Die Aktivität bleibt aktiv, bis du sie abschließt.",
+  "activityTypePermanentDescriptionExercises": "Lege die gesamte Trainingszeit fest. Die Aktivität bleibt aktiv, bis du sie abschließt.",
+  "activityTypePermanentDescriptionHobbies": "Lege die gesamte Übungszeit fest. Die Aktivität bleibt aktiv, bis du sie abschließt.",
   "pagesSuffix": "Seiten",
   "updatedSuccessfullyMessage": "Erfolgreich aktualisiert",
-  "focusSessionCountLabel": "Fokussitzungen",
+  "focusSessionCountLabel": "Anzahl der Sitzungen",
   "groupEditingComingSoon": "Gruppenbearbeitung kommt bald.",
   "leftGroupMessage": "Du hast die Gruppe verlassen.",
   "groupImageSourceTitle": "Bild senden",
@@ -1233,6 +1246,59 @@
   },
   "addMemberButton": "Mitglied hinzufügen",
   "groupCollectiveProgressTitle": "Gemeinsamer Fortschritt",
+  "dailyLabel": "Täglich",
+  "completedLabel": "Abgeschlossen",
+  "groupActivityCompletedCount": "{completed} von {total} abgeschlossen",
+  "@groupActivityCompletedCount": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMissingParticipants": "{count, plural, =0{Alle haben das Ziel abgeschlossen} =1{1 Teilnehmer fehlt noch, um das Ziel abzuschließen} other{{count} Teilnehmer fehlen noch, um das Ziel abzuschließen}}",
+  "@groupMissingParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupParticipantsDataTitle": "{count, plural, =1{Teilnehmer (1)} other{Teilnehmer ({count})}}",
+  "@groupParticipantsDataTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupCompletedMembersTitle": "Abgeschlossen ({count})",
+  "@groupCompletedMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupPendingMembersTitle": "Ausstehend ({count})",
+  "@groupPendingMembersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNoCompletedMembersTitle": "Noch niemand abgeschlossen",
+  "groupNoCompletedMembersSubtitle": "Sei der Erste, der das Ziel abschließt!",
+  "groupStatisticsTitle": "Gruppenstatistiken",
+  "groupStreakStatLabel": "Gruppenserie",
+  "groupTodayTotalStatLabel": "Gesamtzeit heute",
+  "groupPeriodTotalStatLabel": "Summe im Zeitraum",
+  "groupCompletedSessionsStatLabel": "Abgeschlossene Sitzungen",
+  "groupParticipantsStatLabel": "Teilnehmer in der Gruppe",
   "currentUserRankCompleteFirstGoal": "Schließe dein erstes Ziel ab, um in die Rangliste zu kommen.",
   "currentUserRankTiedLead": "Gleichstand an der Spitze.",
   "currentUserRankTiedFirstLabel": "Gleichstand auf Platz 1",

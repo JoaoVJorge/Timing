@@ -228,7 +228,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookThemeLabel => 'Tema del libro';
 
   @override
-  String get estimatedHoursGoalHint => 'Meta en minutos';
+  String get estimatedHoursGoalHint => 'Duración en minutos';
+
+  @override
+  String get createSubjectTotalHoursGoalHint => 'Tiempo total en horas';
 
   @override
   String get goalPagesHint => 'Meta (páginas)';
@@ -311,7 +314,23 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ej.: Guitarra, Dibujo, Programación';
 
   @override
-  String get createSubjectTimeGoalLabel => 'Meta de enfoque';
+  String get createSubjectTimeGoalLabel => 'Duración de cada sección';
+
+  @override
+  String get createSubjectTotalTimeGoalLabel =>
+      '¿Cuánto tiempo quieres estudiar en total?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelStudying =>
+      '¿Cuánto tiempo quieres estudiar en total?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelExercises =>
+      '¿Cuánto tiempo quieres ejercitarte en total?';
+
+  @override
+  String get createSubjectTotalTimeGoalLabelHobbies =>
+      '¿Cuánto tiempo quieres practicar en total?';
 
   @override
   String get createSubjectPagesGoalLabel => 'Meta de páginas';
@@ -324,7 +343,7 @@ class AppLocalizationsEs extends AppLocalizations {
       '¿Cuántas páginas quieres registrar en total?';
 
   @override
-  String get createSubjectRestLabel => 'Pausa después de cada enfoque';
+  String get createSubjectRestLabel => 'Duración de las pausas';
 
   @override
   String get createSubjectRestHelp =>
@@ -1358,6 +1377,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get progressStatExercises => 'Ejercicios';
 
   @override
+  String get progressStatLongestGoal => 'Meta más larga';
+
+  @override
+  String get progressStatMainReading => 'Lectura principal';
+
+  @override
   String get progressStatGoalsDone => 'Metas cumplidas';
 
   @override
@@ -1908,14 +1933,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get activityTypeDailyDescription =>
-      'Se renueva todos los días. La actividad vuelve por la mañana.';
+      'Usa secciones de enfoque con pausas y define cuántas sesiones quieres completar por día.';
+
+  @override
+  String get activityTypeDailyDescriptionStudying =>
+      'Usa secciones de estudio con pausas y define cuántas sesiones quieres completar por día.';
+
+  @override
+  String get activityTypeDailyDescriptionExercises =>
+      'Usa secciones de ejercicio con pausas y define cuántas sesiones quieres completar por día.';
+
+  @override
+  String get activityTypeDailyDescriptionHobbies =>
+      'Usa secciones de práctica con pausas y define cuántas sesiones quieres completar por día.';
 
   @override
   String get activityTypePermanentLabel => 'Permanente';
 
   @override
   String get activityTypePermanentDescription =>
-      'Permanece activa hasta concluirla. Después se marca como finalizada.';
+      'Define el tiempo total de estudio. La actividad permanece activa hasta completarla.';
+
+  @override
+  String get activityTypePermanentDescriptionStudying =>
+      'Define el tiempo total de estudio. La actividad permanece activa hasta completarla.';
+
+  @override
+  String get activityTypePermanentDescriptionExercises =>
+      'Define el tiempo total de ejercicio. La actividad permanece activa hasta completarla.';
+
+  @override
+  String get activityTypePermanentDescriptionHobbies =>
+      'Define el tiempo total de práctica. La actividad permanece activa hasta completarla.';
 
   @override
   String get pagesSuffix => 'páginas';
@@ -1924,7 +1973,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updatedSuccessfullyMessage => 'Actualizado correctamente';
 
   @override
-  String get focusSessionCountLabel => 'Sesiones de enfoque';
+  String get focusSessionCountLabel => 'Cantidad de sesiones';
 
   @override
   String get groupEditingComingSoon => 'Edición del grupo próximamente.';
@@ -2077,6 +2126,75 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get groupCollectiveProgressTitle => 'Progreso colectivo';
+
+  @override
+  String get dailyLabel => 'Diaria';
+
+  @override
+  String get completedLabel => 'Completado';
+
+  @override
+  String groupActivityCompletedCount(int completed, int total) {
+    return '$completed de $total completaron';
+  }
+
+  @override
+  String groupMissingParticipants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Faltan $count participantes para completar la meta',
+      one: 'Falta 1 participante para completar la meta',
+      zero: 'Todos completaron la meta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupParticipantsDataTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Participantes ($count)',
+      one: 'Participantes (1)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupCompletedMembersTitle(int count) {
+    return 'Completaron ($count)';
+  }
+
+  @override
+  String groupPendingMembersTitle(int count) {
+    return 'Pendientes ($count)';
+  }
+
+  @override
+  String get groupNoCompletedMembersTitle => 'Nadie completó aún';
+
+  @override
+  String get groupNoCompletedMembersSubtitle =>
+      '¡Sé el primero en completar la meta!';
+
+  @override
+  String get groupStatisticsTitle => 'Estadísticas del grupo';
+
+  @override
+  String get groupStreakStatLabel => 'Racha del grupo';
+
+  @override
+  String get groupTodayTotalStatLabel => 'Tiempo total hoy';
+
+  @override
+  String get groupPeriodTotalStatLabel => 'Total del período';
+
+  @override
+  String get groupCompletedSessionsStatLabel => 'Sesiones completadas';
+
+  @override
+  String get groupParticipantsStatLabel => 'Participante en el grupo';
 
   @override
   String get currentUserRankCompleteFirstGoal =>

@@ -369,7 +369,7 @@ class _HobbyDeleteAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = context.colorTokens.textHint;
+    final Color accent = context.colorTokens.error;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -378,9 +378,9 @@ class _HobbyDeleteAction extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 72),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.44),
+          color: accent.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.colorTokens.borderUnfocused),
+          border: Border.all(color: accent.withValues(alpha: 0.26)),
         ),
         child: Row(
           children: [
@@ -388,7 +388,7 @@ class _HobbyDeleteAction extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 _HobbySheetIcon(
-                  color: context.colorTokens.surfaceInnerLayer,
+                  color: accent.withValues(alpha: 0.12),
                   child: Icon(
                     Icons.delete_outline_rounded,
                     color: accent,
@@ -403,7 +403,7 @@ class _HobbyDeleteAction extends StatelessWidget {
                       size: 20,
                       iconSize: 12,
                       backgroundColor: context.colorTokens.surface,
-                      iconColor: context.colorTokens.borderFocused,
+                      iconColor: accent,
                     ),
                   ),
               ],
@@ -430,7 +430,7 @@ class _HobbyDeleteAction extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodyMedium.copyWith(
-                      color: context.colorTokens.dialogTextMuted,
+                      color: accent.withValues(alpha: 0.72),
                       fontWeight: FontWeight.w600,
                     ),
                   ),

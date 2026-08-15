@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
+import "package:get/get.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/category/widgets/subject_icon_badge.dart";
@@ -13,7 +14,6 @@ import "package:timing/shared/widgets/app_section_header.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
-import "package:get/get.dart";
 
 class SubjectStatsPage extends GetView<SubjectStatsController> {
   const SubjectStatsPage({super.key});
@@ -31,6 +31,7 @@ class SubjectStatsPage extends GetView<SubjectStatsController> {
             subject: controller.subject,
             accent: accent,
             progress: controller.progress,
+            progressLabel: context.l10n.periodTotal,
           ),
           const Gap(AppSpacing.betweenSections),
           AppSectionHeader(title: overviewTitle(context)),
@@ -51,11 +52,13 @@ class _SubjectStatsHero extends StatelessWidget {
     required this.subject,
     required this.accent,
     required this.progress,
+    required this.progressLabel,
   });
 
   final SubjectEntity subject;
   final Color accent;
   final double progress;
+  final String progressLabel;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -83,12 +86,37 @@ class _SubjectStatsHero extends StatelessWidget {
                 style: context.textStyles.caption,
               ),
               const Gap(12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      progressLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.caption.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const Gap(8),
+                  Text(
+                    "${(progress * 100).round()}%",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.caption.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(6),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 8,
-                  backgroundColor: accent.withValues(alpha: 0.12),
+                  minHeight: 6,
+                  backgroundColor: context.colorTokens.surfaceInnerLayer,
                   valueColor: AlwaysStoppedAnimation<Color>(accent),
                 ),
               ),
