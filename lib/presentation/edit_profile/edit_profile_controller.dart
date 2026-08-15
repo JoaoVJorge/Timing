@@ -110,9 +110,7 @@ class EditProfileController extends GetxController {
     final Either<AppError, void> result = await _appController.updateProfile(
       userName: nameController.text.trim(),
       nickName: nickNameController.text.trim(),
-      email: emailController.text.trim().isEmpty
-          ? null
-          : emailController.text.trim(),
+      email: _appController.email.value,
       phoneNumber: phoneController.text.trim().isEmpty
           ? null
           : phoneController.text.trim(),

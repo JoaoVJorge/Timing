@@ -109,6 +109,8 @@ class EditProfilePage extends StatelessWidget {
             TextField(
               controller: controller.emailController,
               keyboardType: TextInputType.emailAddress,
+              readOnly: true,
+              canRequestFocus: false,
               decoration: AppInputDecoration.withBorder(
                 tokens: context.colorTokens,
                 hintText: context.l10n.optionalHint,
