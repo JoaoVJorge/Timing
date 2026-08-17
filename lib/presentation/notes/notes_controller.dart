@@ -1,5 +1,3 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
@@ -16,10 +14,6 @@ class NotesController extends GetxController {
     required this.subject,
   });
 
-  /// Long enough to avoid a write per keystroke, short enough that leaving the
-  /// page never loses more than a moment of typing.
-  static const Duration autoSaveDelay = Duration(milliseconds: 900);
-
   final UpdateSubjectNotesUseCase _updateSubjectNotesUseCase;
   final AppNavigator _appNavigator;
 
@@ -32,8 +26,8 @@ class NotesController extends GetxController {
   final RxInt currentPageIndex = 0.obs;
   final Rx<NotesSaveState> saveState = NotesSaveState.idle.obs;
 
-  Timer? _autoSaveTimer;
   String? _lastSavedNotes;
+  bool _isClosing = false;
 
   int get pageCount => notesControllers.length;
 
@@ -41,9 +35,6 @@ class NotesController extends GetxController {
   void onInit() {
     super.onInit();
     _lastSavedNotes = _currentNotes;
-    for (final TextEditingController controller in notesControllers) {
-      controller.addListener(_scheduleAutoSave);
-    }
   }
 
   void onPageChanged(int index) => currentPageIndex.value = index;
@@ -63,9 +54,7 @@ class NotesController extends GetxController {
   }
 
   void addPage() {
-    notesControllers.add(
-      TextEditingController()..addListener(_scheduleAutoSave),
-    );
+    notesControllers.add(TextEditingController());
     currentPageIndex.value = pageCount - 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!pageController.hasClients) {
@@ -79,11 +68,17 @@ class NotesController extends GetxController {
     });
   }
 
-  /// Flushes anything still pending before handing the result back to the
-  /// caller, so leaving the page never drops the last edit.
   Future<void> onBack() async {
-    _autoSaveTimer?.cancel();
-    await _save();
+    if (_isClosing) {
+      return;
+    }
+
+    _isClosing = true;
+    final bool didSave = await _save();
+    if (!didSave) {
+      _isClosing = false;
+      return;
+    }
     _appNavigator.back<String>(result: _currentNotes);
   }
 
@@ -95,18 +90,10 @@ class NotesController extends GetxController {
     );
   }
 
-  void _scheduleAutoSave() {
-    if (_currentNotes == _lastSavedNotes) {
-      return;
-    }
-    _autoSaveTimer?.cancel();
-    _autoSaveTimer = Timer(autoSaveDelay, _save);
-  }
-
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final String notes = _currentNotes;
     if (notes == _lastSavedNotes || saveState.value == NotesSaveState.saving) {
-      return;
+      return true;
     }
 
     saveState.value = NotesSaveState.saving;
@@ -115,14 +102,16 @@ class NotesController extends GetxController {
       notes: notes,
     );
 
-    result.fold(
+    return result.fold(
       (error) {
         saveState.value = NotesSaveState.idle;
         _appNavigator.showErrorSnackBar(error.message);
+        return false;
       },
       (_) {
         _lastSavedNotes = notes;
         saveState.value = NotesSaveState.saved;
+        return true;
       },
     );
   }
@@ -133,12 +122,9 @@ class NotesController extends GetxController {
 
   @override
   void onClose() {
-    _autoSaveTimer?.cancel();
     pageController.dispose();
     for (final TextEditingController controller in notesControllers) {
-      controller
-        ..removeListener(_scheduleAutoSave)
-        ..dispose();
+      controller.dispose();
     }
     super.onClose();
   }

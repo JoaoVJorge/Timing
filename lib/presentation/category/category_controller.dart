@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/app/route_arguments.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -173,10 +174,20 @@ class CategoryController extends GetxController {
     }, (_) => loadSubjects());
   }
 
-  Future<void> onTapAddSubject() {
+  Future<void> onTapAddSubject() => _openCreateSubject();
+
+  Future<void> onTapSuggestion(String suggestion) =>
+      _openCreateSubject(initialName: suggestion);
+
+  Future<void> _openCreateSubject({String? initialName}) {
     final Future<dynamic>? route = _appNavigator.toNamed(
       AppRoutes.createSubject,
-      arguments: category,
+      arguments: initialName == null
+          ? category
+          : CreateSubjectRouteArguments(
+              category: category,
+              initialName: initialName,
+            ),
     );
 
     return route?.then((result) async {

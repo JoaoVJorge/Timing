@@ -47,6 +47,7 @@ class CategoryPage extends StatelessWidget {
                 onTapAction: controller.onTapAddSubject,
                 suggestionsTitle: _suggestionsTitle(context),
                 suggestions: _suggestionsFor(context, controller.category),
+                onTapSuggestion: controller.onTapSuggestion,
               ),
             ),
           );

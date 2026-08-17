@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
-import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/theme/subject_icons.dart";
@@ -27,7 +26,7 @@ class SubjectIconBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color badgeColor = color ?? Color(subject.colorValue);
     final String iconName = subject.iconName.isEmpty
-        ? _fallbackIconName(subject.category)
+        ? subject.category.iconName
         : subject.iconName;
     final IconData? icon = SubjectIcons.byName(iconName);
 
@@ -49,11 +48,4 @@ class SubjectIconBadge extends StatelessWidget {
       ),
     );
   }
-
-  String _fallbackIconName(TimeCategoryType category) => switch (category) {
-    TimeCategoryType.studying => "school",
-    TimeCategoryType.reading => "book",
-    TimeCategoryType.exercises => "fitness",
-    TimeCategoryType.hobbies => "music",
-  };
 }

@@ -369,7 +369,9 @@ class _HobbyDeleteAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = context.colorTokens.error;
+    final Color accent = isLocked
+        ? context.colorTokens.textHint
+        : context.colorTokens.error;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -388,10 +390,10 @@ class _HobbyDeleteAction extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 _HobbySheetIcon(
-                  color: accent.withValues(alpha: 0.12),
+                  color: isLocked ? accent.withValues(alpha: 0.12) : accent,
                   child: Icon(
                     Icons.delete_outline_rounded,
-                    color: accent,
+                    color: isLocked ? accent : context.colorTokens.white,
                     size: 22,
                   ),
                 ),

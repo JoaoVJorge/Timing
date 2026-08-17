@@ -145,8 +145,12 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
                       iconPath: "trash",
-                      color: context.colorTokens.surfaceInnerLayer,
-                      iconColor: context.colorTokens.textHint,
+                      color: widget.isDeleteLocked
+                          ? context.colorTokens.surfaceInnerLayer
+                          : context.colorTokens.error,
+                      iconColor: widget.isDeleteLocked
+                          ? context.colorTokens.textHint
+                          : context.colorTokens.white,
                       showLock: widget.isDeleteLocked,
                       onTap: _onTapDelete,
                     ),
@@ -215,7 +219,7 @@ class _RevealAction extends StatelessWidget {
               size: 20,
               iconSize: 12,
               backgroundColor: context.colorTokens.surface,
-              iconColor: context.colorTokens.borderFocused,
+              iconColor: context.colorTokens.textHint,
             ),
           ),
       ],
