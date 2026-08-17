@@ -2,6 +2,8 @@ import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
+import "package:timing/core/services/analytics/analytics_service.dart";
+import "package:timing/core/services/analytics/logging_analytics_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
@@ -27,6 +29,10 @@ class ServicesBindings extends Bindings {
       permanent: true,
     );
     Get.put<AppLoggerService>(AppLoggerService(), permanent: true);
+    Get.put<AnalyticsService>(
+      LoggingAnalyticsService(logger: Get.find()),
+      permanent: true,
+    );
     Get.put<TimerNotificationService>(
       TimerNotificationService(),
       permanent: true,

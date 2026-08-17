@@ -24,6 +24,7 @@ class CreateSubjectBindings extends Bindings {
         updateSubjectUseCase: Get.find(),
         appNavigator: Get.find(),
         achievementUnlockService: Get.find(),
+        analyticsService: Get.find(),
         category: category,
         editingSubject: subject,
         initialName: createArguments?.initialName,

@@ -8,6 +8,7 @@ import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart"
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
+import "package:timing/core/services/analytics/analytics_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
@@ -55,6 +56,8 @@ class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {}
 
 class _FakeFocusGuardService extends _Noop implements FocusGuardService {}
 
+class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
+
 class _FakeAppController extends _Noop implements AppController {}
 
 class _FakeAppNavigator extends _Noop implements AppNavigator {}
@@ -99,6 +102,7 @@ TimerController _controller(SubjectEntity subject) => TimerController(
   timerLiveActivityService: _FakeTimerLiveActivityService(),
   focusFeedbackService: _FakeFocusFeedbackService(),
   focusGuardService: _FakeFocusGuardService(),
+  analyticsService: _FakeAnalyticsService(),
   appController: _FakeAppController(),
   appNavigator: _FakeAppNavigator(),
   subject: subject,

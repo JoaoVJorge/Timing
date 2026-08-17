@@ -12,6 +12,8 @@ import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
+import "package:timing/core/services/analytics/analytics_event.dart";
+import "package:timing/core/services/analytics/analytics_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
@@ -36,6 +38,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.timerLiveActivityService,
     required this.focusFeedbackService,
     required this.focusGuardService,
+    required this.analyticsService,
     required this.appController,
     required this.appNavigator,
     required this.subject,
@@ -60,6 +63,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final TimerLiveActivityService timerLiveActivityService;
   final FocusFeedbackService focusFeedbackService;
   final FocusGuardService focusGuardService;
+  final AnalyticsService analyticsService;
   final AppController appController;
   final AppNavigator appNavigator;
 
@@ -174,6 +178,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
     _updateNotification();
     _syncFocusGuard();
+    analyticsService.track(
+      AnalyticsEvent.focusSessionStarted(category: subject.category),
+    );
   }
 
   Future<void> _tick() async {
@@ -304,6 +311,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void finishSession() {
+    final bool alreadyFinished = isSessionFinished.value;
     _persistAccumulatedTime();
     _recordLastActivityIfNeeded();
     isRunning.value = false;
@@ -313,6 +321,20 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     timerNotificationService.cancel();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
+    if (!alreadyFinished) {
+      _trackSessionCompleted();
+    }
+  }
+
+  void _trackSessionCompleted() {
+    analyticsService.track(
+      AnalyticsEvent.focusSessionCompleted(
+        category: subject.category,
+        seconds: sessionSeconds.value,
+        completedAllSections:
+            completedFocusSections.value >= focusSessionCount,
+      ),
+    );
   }
 
   void warnFocusLock() {
@@ -442,12 +464,16 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       );
     }
     _recordLastActivityIfNeeded();
+    final bool alreadyFinished = isSessionFinished.value;
     isRunning.value = false;
     isSessionFinished.value = true;
     _ticker?.cancel();
     timerNotificationService.cancel();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
+    if (!alreadyFinished) {
+      _trackSessionCompleted();
+    }
   }
 
   void _persistAccumulatedTime() {

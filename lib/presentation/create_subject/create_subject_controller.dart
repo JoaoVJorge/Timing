@@ -8,6 +8,8 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
+import "package:timing/core/services/analytics/analytics_event.dart";
+import "package:timing/core/services/analytics/analytics_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:timing/theme/subject_colors.dart";
@@ -20,6 +22,7 @@ class CreateSubjectController extends GetxController
     required this._updateSubjectUseCase,
     required this._appNavigator,
     required this._achievementUnlockService,
+    required this._analyticsService,
     required this.category,
     this.editingSubject,
     this.initialName,
@@ -29,6 +32,7 @@ class CreateSubjectController extends GetxController
   final UpdateSubjectUseCase _updateSubjectUseCase;
   final AppNavigator _appNavigator;
   final AchievementUnlockService _achievementUnlockService;
+  final AnalyticsService _analyticsService;
 
   @override
   final TimeCategoryType category;
@@ -348,6 +352,11 @@ class CreateSubjectController extends GetxController
     isSaving.value = false;
     result.fold((error) => _appNavigator.showErrorSnackBar(), (subject) {
       final String message = successMessage(Get.context!);
+      if (!isEditing) {
+        _analyticsService.track(
+          AnalyticsEvent.subjectCreated(category: category),
+        );
+      }
       _achievementUnlockService.checkForNewUnlocks();
       _appNavigator.back<SubjectEntity>(result: subject);
       Future<void>.delayed(const Duration(milliseconds: 220), () {
