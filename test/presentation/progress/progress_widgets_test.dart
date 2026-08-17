@@ -89,7 +89,7 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    expect(find.text("15m"), findsOneWidget);
+    expect(find.text("15 min"), findsOneWidget);
   });
 
   testWidgets("ProgressHeroCard handles a missing previous period", (
