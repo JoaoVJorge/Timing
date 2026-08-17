@@ -146,6 +146,15 @@ class ScheduleController extends GetxController {
     selectedDate.value = DateTime(year, month, clampedDay);
   }
 
+  void onChangeMonth(int monthDelta) {
+    final DateTime current = selectedDate.value;
+    final DateTime monthStart = DateTime(
+      current.year,
+      current.month + monthDelta,
+    );
+    onSelectMonth(monthStart.year, monthStart.month);
+  }
+
   Future<void> loadEntries() async {
     isLoading.value = true;
     final Either<AppError, List<ScheduleEntryEntity>> result =

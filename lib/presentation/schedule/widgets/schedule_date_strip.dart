@@ -12,6 +12,7 @@ class ScheduleDateStrip extends StatelessWidget {
     required this.onSelectDate,
     required this.hasEntryForDate,
     required this.eventColorsForDate,
+    this.onMonthChanged,
     super.key,
   });
 
@@ -19,80 +20,100 @@ class ScheduleDateStrip extends StatelessWidget {
   final ValueChanged<DateTime> onSelectDate;
   final bool Function(DateTime date) hasEntryForDate;
   final List<Color> Function(DateTime date) eventColorsForDate;
+  final ValueChanged<int>? onMonthChanged;
 
   @override
   Widget build(BuildContext context) {
     final String locale = Localizations.localeOf(context).toString();
     final DateTime monthStart = DateTime(selectedDate.year, selectedDate.month);
-    final DateTime gridStart = monthStart.subtract(
-      Duration(days: monthStart.weekday - DateTime.monday),
-    );
-    final DateTime nextMonthStart = DateTime(
+    final int leadingEmptyDays = monthStart.weekday - DateTime.monday;
+    final int daysInMonth = DateUtils.getDaysInMonth(
       selectedDate.year,
-      selectedDate.month + 1,
+      selectedDate.month,
     );
     final int gridDayCount =
-        ((nextMonthStart.difference(gridStart).inDays + 6) / 7).ceil() * 7;
-    final List<DateTime> dates = [
+        ((leadingEmptyDays + daysInMonth + 6) / 7).floor() * 7;
+    final List<DateTime?> dates = [
       for (int index = 0; index < gridDayCount; index++)
-        gridStart.add(Duration(days: index)),
+        if (index < leadingEmptyDays || index >= leadingEmptyDays + daysInMonth)
+          null
+        else
+          DateTime(
+            selectedDate.year,
+            selectedDate.month,
+            index - leadingEmptyDays + 1,
+          ),
     ];
     final DateTime weekdaySeed = DateTime(2024, 1);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            for (
-              int weekday = DateTime.monday;
-              weekday <= DateTime.sunday;
-              weekday++
-            )
-              Expanded(
-                child: Text(
-                  DateFormat.E(locale)
-                      .format(weekdaySeed.add(Duration(days: weekday - 1)))
-                      .characters
-                      .take(3)
-                      .toString()
-                      .toUpperCase(),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragEnd: _handleHorizontalDragEnd,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              for (
+                int weekday = DateTime.monday;
+                weekday <= DateTime.sunday;
+                weekday++
+              )
+                Expanded(
+                  child: Text(
+                    DateFormat.E(locale)
+                        .format(weekdaySeed.add(Duration(days: weekday - 1)))
+                        .characters
+                        .take(3)
+                        .toString()
+                        .toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textHint,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        const Gap(10),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
-            mainAxisExtent: 40,
-            mainAxisSpacing: 8,
+            ],
           ),
-          itemCount: dates.length,
-          itemBuilder: (context, index) {
-            final DateTime date = dates[index];
-            return _CalendarDay(
-              date: date,
-              isInSelectedMonth: date.month == selectedDate.month,
-              isSelected: _isSameDate(date, selectedDate),
-              hasEntry: hasEntryForDate(date),
-              eventColors: eventColorsForDate(date),
-              onTap: () => onSelectDate(date),
-            );
-          },
-        ),
-      ],
+          const Gap(10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisExtent: 40,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: dates.length,
+            itemBuilder: (context, index) {
+              final DateTime? date = dates[index];
+              if (date == null) {
+                return const SizedBox.shrink();
+              }
+              return _CalendarDay(
+                date: date,
+                isSelected: _isSameDate(date, selectedDate),
+                hasEntry: hasEntryForDate(date),
+                eventColors: eventColorsForDate(date),
+                onTap: () => onSelectDate(date),
+              );
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  void _handleHorizontalDragEnd(DragEndDetails details) {
+    final double? velocity = details.primaryVelocity;
+    if (velocity == null || velocity.abs() < 180) {
+      return;
+    }
+    onMonthChanged?.call(velocity < 0 ? 1 : -1);
   }
 
   bool _isSameDate(DateTime a, DateTime b) =>
@@ -102,7 +123,6 @@ class ScheduleDateStrip extends StatelessWidget {
 class _CalendarDay extends StatelessWidget {
   const _CalendarDay({
     required this.date,
-    required this.isInSelectedMonth,
     required this.isSelected,
     required this.hasEntry,
     required this.eventColors,
@@ -110,7 +130,6 @@ class _CalendarDay extends StatelessWidget {
   });
 
   final DateTime date;
-  final bool isInSelectedMonth;
   final bool isSelected;
   final bool hasEntry;
   final List<Color> eventColors;
@@ -130,9 +149,7 @@ class _CalendarDay extends StatelessWidget {
         eventAccent;
     final Color textColor = isSelected
         ? context.colorTokens.primaryForeground
-        : isInSelectedMonth
-        ? context.colorTokens.textBody
-        : context.colorTokens.textHint.withValues(alpha: 0.55);
+        : context.colorTokens.textBody;
 
     return BounceTap(
       onTap: onTap,
@@ -153,9 +170,7 @@ class _CalendarDay extends StatelessWidget {
                   color: isSelected
                       ? context.colorTokens.primary
                       : hasEntry
-                      ? eventFill.withValues(
-                          alpha: isInSelectedMonth ? 0.72 : 0.45,
-                        )
+                      ? eventFill.withValues(alpha: 0.72)
                       : Colors.transparent,
                 ),
                 child: Text(
@@ -169,12 +184,7 @@ class _CalendarDay extends StatelessWidget {
               ),
               if (hasEntry)
                 Positioned.fill(
-                  child: IgnorePointer(
-                    child: _EventDots(
-                      colors: eventColors,
-                      isInSelectedMonth: isInSelectedMonth,
-                    ),
-                  ),
+                  child: IgnorePointer(child: _EventDots(colors: eventColors)),
                 ),
             ],
           ),
@@ -185,10 +195,9 @@ class _CalendarDay extends StatelessWidget {
 }
 
 class _EventDots extends StatelessWidget {
-  const _EventDots({required this.colors, required this.isInSelectedMonth});
+  const _EventDots({required this.colors});
 
   final List<Color> colors;
-  final bool isInSelectedMonth;
 
   @override
   Widget build(BuildContext context) {
@@ -229,9 +238,7 @@ class _EventDots extends StatelessWidget {
                   height: 5,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: visibleColors[index].withValues(
-                      alpha: isInSelectedMonth ? 0.9 : 0.55,
-                    ),
+                    color: visibleColors[index].withValues(alpha: 0.9),
                   ),
                 ),
               ),

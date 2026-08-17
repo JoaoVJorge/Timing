@@ -3,11 +3,13 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/app/route_arguments.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
@@ -19,6 +21,7 @@ class DailyGoalsController extends GetxController {
     required this._toggleDailyTaskCheckUseCase,
     required this._deleteDailyTaskUseCase,
     required this._lastActivityService,
+    required this._achievementUnlockService,
   });
 
   final AppNavigator _appNavigator;
@@ -26,6 +29,7 @@ class DailyGoalsController extends GetxController {
   final ToggleDailyTaskCheckUseCase _toggleDailyTaskCheckUseCase;
   final DeleteDailyTaskUseCase _deleteDailyTaskUseCase;
   final LastActivityService _lastActivityService;
+  final AchievementUnlockService _achievementUnlockService;
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
 
@@ -53,8 +57,18 @@ class DailyGoalsController extends GetxController {
     });
   }
 
-  Future<void> onTapAddTask() async {
-    final dynamic result = await _appNavigator.toNamed(AppRoutes.createTask);
+  Future<void> onTapAddTask() => _openCreateTask();
+
+  Future<void> onTapSuggestion(String suggestion) =>
+      _openCreateTask(initialName: suggestion);
+
+  Future<void> _openCreateTask({String? initialName}) async {
+    final dynamic result = await _appNavigator.toNamed(
+      AppRoutes.createTask,
+      arguments: initialName == null
+          ? null
+          : CreateTaskRouteArguments(initialName: initialName),
+    );
     final DailyTaskEntity? createdTask = result as DailyTaskEntity?;
     if (createdTask != null) {
       tasks.add(createdTask);
@@ -89,6 +103,7 @@ class DailyGoalsController extends GetxController {
       if (updatedTask.isCheckedToday) {
         _lastActivityService.record(updatedTask.name);
       }
+      _achievementUnlockService.checkForNewUnlocks();
     });
   }
 
@@ -129,6 +144,7 @@ class DailyGoalsController extends GetxController {
       if (index != -1) {
         tasks[index] = updatedTask;
       }
+      _achievementUnlockService.checkForNewUnlocks();
     });
   }
 

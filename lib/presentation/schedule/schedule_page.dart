@@ -44,6 +44,7 @@ class SchedulePage extends StatelessWidget {
                 return ScheduleDateStrip(
                   selectedDate: controller.selectedDate.value,
                   onSelectDate: controller.onSelectDate,
+                  onMonthChanged: controller.onChangeMonth,
                   hasEntryForDate: controller.hasEntriesForDate,
                   eventColorsForDate: controller.entryColorsForDate,
                 );

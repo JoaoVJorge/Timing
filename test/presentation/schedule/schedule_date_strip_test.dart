@@ -29,19 +29,8 @@ void main() {
     expect(tapped, today);
   });
 
-  testWidgets("shows leading and trailing dates around the month", (
-    tester,
-  ) async {
-    final DateTime now = DateTime.now();
-    final DateTime selected = DateTime(now.year, now.month, 15);
-    final DateTime monthStart = DateTime(selected.year, selected.month);
-    final DateTime gridStart = monthStart.subtract(
-      Duration(days: monthStart.weekday - DateTime.monday),
-    );
-    final DateTime nextMonthStart = DateTime(selected.year, selected.month + 1);
-    final int gridDayCount =
-        ((nextMonthStart.difference(gridStart).inDays + 6) / 7).ceil() * 7;
-    final DateTime gridEnd = gridStart.add(Duration(days: gridDayCount - 1));
+  testWidgets("shows only dates from the selected month", (tester) async {
+    final DateTime selected = DateTime(2026, 8, 15);
 
     await pumpInScrollView(
       tester,
@@ -53,7 +42,39 @@ void main() {
       ),
     );
 
-    expect(find.text("${gridStart.day}"), findsWidgets);
-    expect(find.text("${gridEnd.day}"), findsWidgets);
+    expect(find.text("1"), findsOneWidget);
+    expect(find.text("31"), findsOneWidget);
+    expect(find.text("15"), findsOneWidget);
+  });
+
+  testWidgets("swiping horizontally requests month changes", (tester) async {
+    final DateTime selected = DateTime(2026, 8, 15);
+    final List<int> changes = [];
+
+    await pumpInScrollView(
+      tester,
+      ScheduleDateStrip(
+        selectedDate: selected,
+        onSelectDate: (_) {},
+        onMonthChanged: changes.add,
+        hasEntryForDate: (_) => false,
+        eventColorsForDate: (_) => const [],
+      ),
+    );
+
+    await tester.fling(
+      find.byType(ScheduleDateStrip),
+      const Offset(-300, 0),
+      1000,
+    );
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byType(ScheduleDateStrip),
+      const Offset(300, 0),
+      1000,
+    );
+    await tester.pumpAndSettle();
+
+    expect(changes, [1, -1]);
   });
 }

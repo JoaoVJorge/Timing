@@ -583,6 +583,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
             ScheduleDateStrip(
               selectedDate: _selectedDate,
               onSelectDate: _onSelectDate,
+              onMonthChanged: _onChangeMonth,
               hasEntryForDate: (_) => false,
               eventColorsForDate: (_) => const [],
             ),
@@ -653,6 +654,15 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
 
   void _onNextMonth() =>
       setState(() => _selectedDate = _clampedMonth(_selectedDate, 1));
+
+  void _onChangeMonth(int monthDelta) {
+    final DateTime next = _clampedMonth(_selectedDate, monthDelta);
+    if (next.isBefore(_dateOnly(widget.firstDate))) {
+      setState(() => _selectedDate = _dateOnly(widget.firstDate));
+      return;
+    }
+    setState(() => _selectedDate = next);
+  }
 
   void _onSelectDate(DateTime date) {
     final DateTime normalized = _dateOnly(date);
