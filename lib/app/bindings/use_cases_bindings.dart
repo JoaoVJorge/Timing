@@ -1,4 +1,5 @@
 import "package:get/get.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
@@ -23,10 +24,12 @@ import "package:timing/core/domain/use_cases/get_activity_entries_use_case.dart"
 import "package:timing/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
 import "package:timing/core/domain/use_cases/get_invitable_friends_use_case.dart";
+import "package:timing/core/domain/use_cases/get_linked_auth_providers_use_case.dart";
 import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
+import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
 import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
 import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
@@ -181,8 +184,25 @@ class UseCasesBindings extends Bindings {
       SignInWithGoogleUseCase(phoneAuthRepository: Get.find()),
       permanent: true,
     );
+    Get.put<GetLinkedAuthProvidersUseCase>(
+      GetLinkedAuthProvidersUseCase(phoneAuthRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<LinkAuthProviderUseCase>(
+      LinkAuthProviderUseCase(phoneAuthRepository: Get.find()),
+      permanent: true,
+    );
     Get.put<GetScheduleEntriesUseCase>(
       GetScheduleEntriesUseCase(scheduleRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<AchievementUnlockService>(
+      AchievementUnlockService(
+        getProfileStatsUseCase: Get.find(),
+        getDailyTasksUseCase: Get.find(),
+        dailyProgressService: Get.find(),
+        localStorageService: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<AddScheduleEntryUseCase>(

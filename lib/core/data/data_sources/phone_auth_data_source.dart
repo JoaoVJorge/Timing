@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:timing/core/domain/enums/auth_identity_provider.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
@@ -65,4 +66,39 @@ class PhoneAuthDataSource {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
+
+  Future<Either<AppError, Set<String>>> getLinkedAuthProviders() async {
+    try {
+      final client = _supabaseService.requireClient;
+      final identities = await client.auth.getUserIdentities();
+      final Set<String> providers = {
+        for (final identity in identities) identity.provider,
+      };
+      return Right(providers);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, bool>> linkAuthProvider(
+    AuthIdentityProvider provider,
+  ) async {
+    try {
+      final bool launched = await _supabaseService.requireClient.auth
+          .linkIdentity(
+            _oauthProvider(provider),
+            redirectTo: SupabaseService.oauthRedirectUrl,
+            authScreenLaunchMode: LaunchMode.externalApplication,
+          );
+      return Right(launched);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  OAuthProvider _oauthProvider(AuthIdentityProvider provider) =>
+      switch (provider) {
+        AuthIdentityProvider.google => OAuthProvider.google,
+        AuthIdentityProvider.apple => OAuthProvider.apple,
+      };
 }

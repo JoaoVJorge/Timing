@@ -1,5 +1,6 @@
 import "package:dartz/dartz.dart";
 import "package:timing/core/data/data_sources/phone_auth_data_source.dart";
+import "package:timing/core/domain/enums/auth_identity_provider.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 
 class PhoneAuthRepository {
@@ -19,4 +20,11 @@ class PhoneAuthRepository {
 
   Future<Either<AppError, void>> signInWithGoogle() =>
       _phoneAuthDataSource.signInWithGoogle();
+
+  Future<Either<AppError, Set<String>>> getLinkedAuthProviders() =>
+      _phoneAuthDataSource.getLinkedAuthProviders();
+
+  Future<Either<AppError, bool>> linkAuthProvider(
+    AuthIdentityProvider provider,
+  ) => _phoneAuthDataSource.linkAuthProvider(provider);
 }

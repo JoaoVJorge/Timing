@@ -47,6 +47,38 @@ class ConfigPage extends StatelessWidget {
             const Gap(AppSpacing.betweenSections + 4),
             Obx(
               () => SettingsSection(
+                title: context.l10n.linkedAccountsSection,
+                children: [
+                  SettingsTile.navigationIconName(
+                    iconName: "google",
+                    title: context.l10n.linkGoogleAccountTitle,
+                    subtitle: controller.isGoogleLinked.value
+                        ? context.l10n.linkedAccountsSubtitle
+                        : context.l10n.linkGoogleAccountSubtitle,
+                    trailingText: controller.isGoogleLinked.value
+                        ? context.l10n.authProviderConnected
+                        : null,
+                    onTap: controller.onTapLinkGoogle,
+                    tint: const Color(0xFF4285F4),
+                  ),
+                  SettingsTile.navigation(
+                    icon: Icons.apple_rounded,
+                    title: context.l10n.linkAppleAccountTitle,
+                    subtitle: controller.isAppleLinked.value
+                        ? context.l10n.linkedAccountsSubtitle
+                        : context.l10n.linkAppleAccountSubtitle,
+                    trailingText: controller.isAppleLinked.value
+                        ? context.l10n.authProviderConnected
+                        : null,
+                    onTap: controller.onTapLinkApple,
+                    tint: context.colorTokens.textBody,
+                  ),
+                ],
+              ),
+            ),
+            const Gap(AppSpacing.betweenSections + 4),
+            Obx(
+              () => SettingsSection(
                 title: context.l10n.preferencesSection,
                 children: [
                   SettingsTile.toggle(
@@ -76,7 +108,7 @@ class ConfigPage extends StatelessWidget {
                     tint: const Color(0xFF2684D5),
                   ),
                   SettingsTile.navigation(
-                    icon: Icons.lock_clock_rounded,
+                    icon: Icons.shield_moon_rounded,
                     title: context.l10n.concentrationModeTitle,
                     subtitle: context.l10n.concentrationModeSubtitle,
                     onTap: () =>
