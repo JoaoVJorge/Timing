@@ -506,32 +506,35 @@ class _AchievementsGrid extends StatelessWidget {
   );
 }
 
-class _AchievementCard extends StatefulWidget {
+class _AchievementCard extends StatelessWidget {
   const _AchievementCard({required this.achievement, super.key});
+
+  static const double _height = 130;
 
   final AchievementDefinition achievement;
 
   @override
-  State<_AchievementCard> createState() => _AchievementCardState();
-}
-
-class _AchievementCardState extends State<_AchievementCard> {
-  bool _isExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
-    final AchievementDefinition achievement = widget.achievement;
     final Color effectiveColor = achievement.isUnlocked
         ? achievement.color
         : context.colorTokens.iconDisabled;
 
+    final TextStyle titleStyle = context.textStyles.bodyTiny.copyWith(
+      color: context.colorTokens.textBody,
+      fontSize: 11,
+      fontWeight: FontWeight.w900,
+      height: 1.08,
+    );
+    final TextStyle descriptionStyle = context.textStyles.bodyTiny.copyWith(
+      color: context.colorTokens.textHint,
+      height: 1.1,
+    );
+
     return BounceTap(
-      onTap: () => setState(() => _isExpanded = !_isExpanded),
+      onTap: () => _showAchievementDetailsDialog(context, achievement),
       pressedScale: 0.97,
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOutCubic,
-        alignment: Alignment.topCenter,
+      child: SizedBox(
+        height: _height,
         child: Container(
           padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
           decoration: _cardDecoration(context, radius: 12),
@@ -542,8 +545,8 @@ class _AchievementCardState extends State<_AchievementCard> {
                 icon: achievement.icon,
                 color: effectiveColor,
                 isUnlocked: achievement.isUnlocked,
-                size: _isExpanded ? 38 : 34,
-                iconSize: _isExpanded ? 20 : 18,
+                size: 34,
+                iconSize: 18,
               ),
               const Gap(6),
               Text(
@@ -551,27 +554,17 @@ class _AchievementCardState extends State<_AchievementCard> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: context.textStyles.bodyTiny.copyWith(
-                  color: context.colorTokens.textBody,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  height: 1.08,
-                ),
+                style: titleStyle,
               ),
               const Gap(3),
               Text(
                 achievement.description,
-                maxLines: _isExpanded ? null : 2,
-                overflow: _isExpanded
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: context.textStyles.bodyTiny.copyWith(
-                  color: context.colorTokens.textHint,
-                  height: 1.1,
-                ),
+                style: descriptionStyle,
               ),
-              const Gap(5),
+              const Spacer(),
               _StatusBadge(isUnlocked: achievement.isUnlocked),
             ],
           ),
@@ -588,6 +581,120 @@ IconData _categoryIcon(AchievementCategory category) => switch (category) {
   AchievementCategory.goals => Icons.track_changes_rounded,
   AchievementCategory.social => Icons.groups_rounded,
 };
+
+Future<void> _showAchievementDetailsDialog(
+  BuildContext context,
+  AchievementDefinition achievement,
+) {
+  final Color effectiveColor = achievement.isUnlocked
+      ? achievement.color
+      : context.colorTokens.iconDisabled;
+
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 14),
+          decoration: _cardDecoration(context, radius: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _SmallBadge(
+                  icon: achievement.icon,
+                  color: effectiveColor,
+                  isUnlocked: achievement.isUnlocked,
+                  size: 64,
+                  iconSize: 32,
+                ),
+                const Gap(12),
+                Text(
+                  achievement.title,
+                  textAlign: TextAlign.center,
+                  style: context.textStyles.extraBold20.copyWith(
+                    color: context.colorTokens.textBody,
+                    height: 1.12,
+                  ),
+                ),
+                const Gap(8),
+                Text(
+                  achievement.description,
+                  textAlign: TextAlign.center,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textHint,
+                    height: 1.24,
+                  ),
+                ),
+                const Gap(14),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _AchievementInfoPill(
+                      label: achievement.category.label(context),
+                    ),
+                    _AchievementInfoPill(
+                      label: achievement.isUnlocked
+                          ? context.l10n.unlockedFilterLabel
+                          : context.l10n.lockedFilterLabel,
+                    ),
+                    _AchievementInfoPill(label: "#${achievement.id}"),
+                  ],
+                ),
+                const Gap(20),
+                _StatusBadge(
+                  isUnlocked: achievement.isUnlocked,
+                  size: 34,
+                  iconSize: 20,
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    MaterialLocalizations.of(context).closeButtonLabel,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: effectiveColor,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _AchievementInfoPill extends StatelessWidget {
+  const _AchievementInfoPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surfaceInnerLayer,
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+    ),
+    child: Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.textStyles.bodyTiny.copyWith(
+        color: context.colorTokens.textHint,
+        fontWeight: FontWeight.w900,
+      ),
+    ),
+  );
+}
 
 class _SmallBadge extends StatelessWidget {
   const _SmallBadge({
@@ -618,14 +725,20 @@ class _SmallBadge extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.isUnlocked});
+  const _StatusBadge({
+    required this.isUnlocked,
+    this.size = 18,
+    this.iconSize = 12,
+  });
 
   final bool isUnlocked;
+  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 18,
-    height: 18,
+    width: size,
+    height: size,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: isUnlocked
@@ -635,7 +748,7 @@ class _StatusBadge extends StatelessWidget {
     child: Icon(
       isUnlocked ? Icons.check_rounded : Icons.lock_rounded,
       color: context.colorTokens.white,
-      size: 12,
+      size: iconSize,
     ),
   );
 }
@@ -660,9 +773,10 @@ Future<void> _showRanksSheet(
 ) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
+  useSafeArea: true,
   backgroundColor: context.colorTokens.surface,
   shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
   ),
   builder: (_) => FractionallySizedBox(
     heightFactor: 0.82,
@@ -681,50 +795,106 @@ class _RanksSheet extends StatelessWidget {
     final RankTier currentTier = controller.currentTier;
 
     return SafeArea(
-      top: false,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Container(
-                width: 44,
-                height: 5,
+                width: 54,
+                height: 6,
                 decoration: BoxDecoration(
                   color: context.colorTokens.borderUnfocused,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ),
-            const Gap(18),
+            const Gap(26),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _RanksHeroBadge(tier: currentTier),
+                const Gap(18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.allLevelsTitle,
+                        style: context.textStyles.extraBold24.copyWith(
+                          color: context.colorTokens.textBody,
+                        ),
+                      ),
+                      const Gap(8),
+                      Text(
+                        context.l10n.allLevelsDescription,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: context.colorTokens.textHint,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Gap(28),
             Text(
-              context.l10n.allLevelsTitle,
-              style: context.textStyles.extraBold20.copyWith(
-                color: context.colorTokens.textBody,
+              context.l10n.currentLevelLabel,
+              style: context.textStyles.sectionTitle.copyWith(
+                color: context.colorTokens.primary,
               ),
             ),
-            const Gap(4),
-            Text(
-              context.l10n.allLevelsDescription,
-              style: context.textStyles.bodySmall.copyWith(
-                color: context.colorTokens.textHint,
+            const Gap(12),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  for (final RankTier tier in RankTier.values) ...[
+                    _RankRow(
+                      tier: tier,
+                      isCurrent: tier == currentTier,
+                      isUnlocked: level >= tier.minLevel,
+                    ),
+                    if (tier != RankTier.values.last) const Gap(10),
+                  ],
+                ],
               ),
             ),
-            const Gap(16),
-            for (final RankTier tier in RankTier.values) ...[
-              _RankRow(
-                tier: tier,
-                isCurrent: tier == currentTier,
-                isUnlocked: level >= tier.minLevel,
-              ),
-              if (tier != RankTier.values.last) const Gap(10),
-            ],
           ],
         ),
       ),
     );
   }
+}
+
+class _RanksHeroBadge extends StatelessWidget {
+  const _RanksHeroBadge({required this.tier});
+
+  final RankTier tier;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 92,
+    height: 92,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: tier.color.withValues(alpha: 0.12),
+      border: Border.all(color: tier.color.withValues(alpha: 0.16)),
+    ),
+    child: Center(
+      child: Container(
+        width: 70,
+        height: 70,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: tier.color.withValues(alpha: 0.12),
+        ),
+        child: Icon(tier.icon, color: tier.color, size: 38),
+      ),
+    ),
+  );
 }
 
 class _RankRow extends StatelessWidget {

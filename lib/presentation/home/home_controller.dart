@@ -14,6 +14,7 @@ import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 
@@ -27,6 +28,7 @@ class HomeController extends GetxController {
     required this._getSubjectsUseCase,
     required this._getDailyTasksUseCase,
     required this._scheduleController,
+    required this._achievementUnlockService,
   });
 
   final AppController _appController;
@@ -37,6 +39,7 @@ class HomeController extends GetxController {
   final GetSubjectsUseCase _getSubjectsUseCase;
   final GetDailyTasksUseCase _getDailyTasksUseCase;
   final ScheduleController _scheduleController;
+  final AchievementUnlockService _achievementUnlockService;
 
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxList<DailyTaskEntity> dailyTasks = <DailyTaskEntity>[].obs;
@@ -71,6 +74,7 @@ class HomeController extends GetxController {
     if (reloadSchedule) {
       await _scheduleController.loadEntries();
     }
+    await _achievementUnlockService.initializeBaselineIfNeeded();
   }
 
   bool get hasSubjects => subjects.isNotEmpty;

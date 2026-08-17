@@ -1,4 +1,5 @@
 import "package:get/get.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 
 class RouteArguments {
@@ -20,4 +21,17 @@ class RouteArguments {
     final Object? arguments = Get.arguments;
     return arguments is T ? arguments : null;
   }
+}
+
+class CreateSubjectRouteArguments {
+  const CreateSubjectRouteArguments({required this.category, this.initialName});
+
+  final TimeCategoryType category;
+  final String? initialName;
+}
+
+class CreateTaskRouteArguments {
+  const CreateTaskRouteArguments({this.initialName});
+
+  final String? initialName;
 }

@@ -500,14 +500,14 @@ class AchievementsController extends GetxController {
       category: category,
       icon: icon,
       color: category.color,
-      title: _localizedTitle(l10n, id),
+      title: achievementTitleForId(l10n, id),
       description: _localizedDescription(l10n, id),
       isUnlocked: isUnlocked,
     );
   }
 }
 
-String _localizedTitle(AppLocalizations l10n, int id) => switch (id) {
+String achievementTitleForId(AppLocalizations l10n, int id) => switch (id) {
   1 => l10n.achievement1Title,
   2 => l10n.achievement2Title,
   3 => l10n.achievement3Title,

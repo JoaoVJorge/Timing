@@ -16,6 +16,7 @@ class CreateTaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CreateTaskController controller = Get.find();
+    final GlobalKey nameKey = GlobalKey();
     controller.initializeThemeColor(context.colorTokens.primary);
 
     return CreationPageScaffold(
@@ -26,13 +27,22 @@ class CreateTaskPage extends StatelessWidget {
               : context.l10n.addButton,
           isLoading: controller.isSaving.value,
           accent: controller.selectedColor.value,
-          onTap: controller.onSubmit,
+          onTap: () async {
+            await _scrollToFirstInvalidSection(
+              controller: controller,
+              nameKey: nameKey,
+            );
+            await controller.onSubmit();
+          },
         ),
       ),
       children: [
         _HeroHeader(controller: controller),
         const Gap(14),
-        _NameField(controller: controller),
+        KeyedSubtree(
+          key: nameKey,
+          child: _NameField(controller: controller),
+        ),
         const Gap(12),
         _SequenceTypeSection(controller: controller),
         const Gap(12),
@@ -40,6 +50,28 @@ class CreateTaskPage extends StatelessWidget {
         const Gap(12),
         _ColorSection(controller: controller),
       ],
+    );
+  }
+
+  Future<void> _scrollToFirstInvalidSection({
+    required CreateTaskController controller,
+    required GlobalKey nameKey,
+  }) async {
+    if (controller.nameController.text.trim().isNotEmpty) {
+      return;
+    }
+
+    final BuildContext? targetContext = nameKey.currentContext;
+    if (targetContext == null) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
+      alignment: 0.08,
     );
   }
 }
@@ -142,6 +174,8 @@ class _TargetDaysSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _CustomDaysInput(controller: controller, accent: accent),
+          const Gap(12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -161,8 +195,6 @@ class _TargetDaysSection extends StatelessWidget {
               ),
             ],
           ),
-          const Gap(12),
-          _CustomDaysInput(controller: controller, accent: accent),
         ],
       ),
     );

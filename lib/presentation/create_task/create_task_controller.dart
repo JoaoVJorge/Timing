@@ -6,6 +6,7 @@ import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/update_daily_task_use_case.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/theme/subject_colors.dart";
 
@@ -14,7 +15,9 @@ class CreateTaskController extends GetxController {
     required this._addDailyTaskUseCase,
     required this._updateDailyTaskUseCase,
     required this._appNavigator,
+    required this._achievementUnlockService,
     this.editingTask,
+    this.initialName,
   });
 
   static const List<int> targetDaysOptions = [5, 14, 30];
@@ -22,7 +25,9 @@ class CreateTaskController extends GetxController {
   final AddDailyTaskUseCase _addDailyTaskUseCase;
   final UpdateDailyTaskUseCase _updateDailyTaskUseCase;
   final AppNavigator _appNavigator;
+  final AchievementUnlockService _achievementUnlockService;
   final DailyTaskEntity? editingTask;
+  final String? initialName;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController customDaysController = TextEditingController();
@@ -41,6 +46,10 @@ class CreateTaskController extends GetxController {
     super.onInit();
     final DailyTaskEntity? task = editingTask;
     if (task == null) {
+      final String normalizedInitialName = initialName?.trim() ?? "";
+      if (normalizedInitialName.isNotEmpty) {
+        nameController.text = normalizedInitialName;
+      }
       return;
     }
 
@@ -110,10 +119,10 @@ class CreateTaskController extends GetxController {
           );
     isSaving.value = false;
 
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (task) => _appNavigator.back<DailyTaskEntity>(result: task),
-    );
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (task) {
+      _achievementUnlockService.checkForNewUnlocks();
+      _appNavigator.back<DailyTaskEntity>(result: task);
+    });
   }
 
   @override

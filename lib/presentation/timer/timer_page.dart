@@ -657,7 +657,7 @@ class _TimerViewData {
                   controller.restIntervalSeconds)
         : controller.focusProgress;
     final String iconName = controller.subject.iconName.isEmpty
-        ? _fallbackIconName(controller.subject.category)
+        ? controller.subject.category.iconName
         : controller.subject.iconName;
     final IconData? subjectIcon = SubjectIcons.byName(iconName);
     final String? subjectSvgIconName =
@@ -738,14 +738,6 @@ class _TimerViewData {
       showStartDot: !isResting,
     );
   }
-
-  static String _fallbackIconName(TimeCategoryType category) =>
-      switch (category) {
-        TimeCategoryType.studying => "school",
-        TimeCategoryType.reading => "book",
-        TimeCategoryType.exercises => "fitness",
-        TimeCategoryType.hobbies => "music",
-      };
 
   static String _nextBreakDurationLabel(BuildContext context) =>
       context.l10n.nextBreakDurationLabel;

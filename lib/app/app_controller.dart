@@ -18,11 +18,13 @@ import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
 import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
@@ -39,6 +41,7 @@ class AppController extends GetxController {
     required this._signOutUseCase,
     required this._appNavigator,
     required this._supabaseService,
+    required this._timerNotificationService,
     required this.localStorageService,
     int? initialAccentColorValue,
   }) : accentColor = Color(
@@ -53,6 +56,7 @@ class AppController extends GetxController {
   final SignOutUseCase _signOutUseCase;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
+  final TimerNotificationService _timerNotificationService;
   final AppLocalStorageService localStorageService;
 
   final RxBool isDarkMode = false.obs;
@@ -128,6 +132,7 @@ class AppController extends GetxController {
     final Either<AppError, AppConfigEntity> result =
         await _getAppConfigUseCase();
     result.fold((error) => null, _applyConfig);
+    await refreshNotificationsEnabledFromSystem();
   }
 
   void _applyConfig(AppConfigEntity config) {
@@ -142,6 +147,9 @@ class AppController extends GetxController {
     profilePhotoBase64.value = config.profilePhotoBase64;
     avatarIconIndex.value = config.avatarIconIndex;
     notificationsEnabled.value = config.notificationsEnabled;
+    Get.find<AchievementUnlockService>().setNotificationsEnabled(
+      config.notificationsEnabled,
+    );
     languageCode.value = config.languageCode;
     friendCode.value = config.friendCode;
     focusLockStudyingEnabled.value = config.focusLockStudyingEnabled;
@@ -280,7 +288,29 @@ class AppController extends GetxController {
   }
 
   Future<void> setNotificationsEnabled(bool value) async {
-    notificationsEnabled.value = value;
+    if (!value) {
+      await _timerNotificationService.disableNotifications();
+      notificationsEnabled.value = false;
+      Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
+      await _saveAppConfigUseCase(_currentConfig);
+      return;
+    }
+
+    final bool allowed = await _timerNotificationService
+        .requestNotificationsEnabled();
+    notificationsEnabled.value = allowed;
+    Get.find<AchievementUnlockService>().setNotificationsEnabled(allowed);
+    await _saveAppConfigUseCase(_currentConfig);
+  }
+
+  Future<void> refreshNotificationsEnabledFromSystem() async {
+    final bool allowed = await _timerNotificationService
+        .areNotificationsEnabled();
+    if (!notificationsEnabled.value || allowed) {
+      return;
+    }
+    notificationsEnabled.value = false;
+    Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
     await _saveAppConfigUseCase(_currentConfig);
   }
 

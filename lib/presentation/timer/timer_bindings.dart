@@ -20,6 +20,7 @@ class TimerBindings extends Bindings {
         activityHistoryService: Get.find(),
         dailyProgressService: Get.find(),
         subjectDailyHistoryService: Get.find(),
+        achievementUnlockService: Get.find(),
         timerNotificationService: Get.find(),
         timerLiveActivityService: Get.find(),
         focusFeedbackService: Get.find(),

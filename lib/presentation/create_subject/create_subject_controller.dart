@@ -7,6 +7,7 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_use_case.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:timing/theme/subject_colors.dart";
@@ -18,17 +19,21 @@ class CreateSubjectController extends GetxController
     required this._addSubjectUseCase,
     required this._updateSubjectUseCase,
     required this._appNavigator,
+    required this._achievementUnlockService,
     required this.category,
     this.editingSubject,
+    this.initialName,
   });
 
   final AddSubjectUseCase _addSubjectUseCase;
   final UpdateSubjectUseCase _updateSubjectUseCase;
   final AppNavigator _appNavigator;
+  final AchievementUnlockService _achievementUnlockService;
 
   @override
   final TimeCategoryType category;
   final SubjectEntity? editingSubject;
+  final String? initialName;
 
   @override
   final TextEditingController nameController = TextEditingController();
@@ -67,7 +72,7 @@ class CreateSubjectController extends GetxController
   @override
   final List<int> focusSessionCountOptions = [1, 2, 3];
   @override
-  final List<int> timeGoalPresets = [15, 30, 45, 60];
+  final List<int> timeGoalPresets = [15, 30, 60];
   @override
   final List<int> totalTimeGoalPresets = [1, 2, 3, 4];
   @override
@@ -254,9 +259,16 @@ class CreateSubjectController extends GetxController
           : (subject.goalSeconds ~/ 60).toString();
       goal.value = goalController.text;
       name.value = nameController.text;
-    } else if (!isPageBased && goalController.text.trim().isEmpty) {
-      goalController.text = "30";
-      goal.value = goalController.text;
+    } else {
+      final String normalizedInitialName = initialName?.trim() ?? "";
+      if (normalizedInitialName.isNotEmpty) {
+        nameController.text = normalizedInitialName;
+        name.value = normalizedInitialName;
+      }
+      if (!isPageBased && goalController.text.trim().isEmpty) {
+        goalController.text = "30";
+        goal.value = goalController.text;
+      }
     }
     nameController.addListener(() => name.value = nameController.text);
     goalController.addListener(() => goal.value = goalController.text);
@@ -336,6 +348,7 @@ class CreateSubjectController extends GetxController
     isSaving.value = false;
     result.fold((error) => _appNavigator.showErrorSnackBar(), (subject) {
       final String message = successMessage(Get.context!);
+      _achievementUnlockService.checkForNewUnlocks();
       _appNavigator.back<SubjectEntity>(result: subject);
       Future<void>.delayed(const Duration(milliseconds: 220), () {
         if (Get.context != null) {

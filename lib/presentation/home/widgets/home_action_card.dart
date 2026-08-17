@@ -55,15 +55,20 @@ class HomeActionCard extends StatelessWidget {
                   eyebrow,
                   style: context.textStyles.bodySmall.copyWith(
                     color: Colors.white.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 const Gap(8),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.school_rounded,
-                      size: 17,
-                      color: Colors.white.withValues(alpha: 0.88),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Icon(
+                        Icons.school_rounded,
+                        size: 17,
+                        color: Colors.white.withValues(alpha: 0.88),
+                      ),
                     ),
                     const Gap(AppSpacing.titleToDescription),
                     Expanded(
@@ -73,7 +78,7 @@ class HomeActionCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.extraBold24.copyWith(
                           color: Colors.white,
-                          fontSize: 23,
+                          fontSize: 20,
                         ),
                       ),
                     ),
@@ -102,26 +107,16 @@ class HomeActionCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: actionIconName == "plus"
-                  ? Text(
-                      "+",
-                      style: context.textStyles.extraBold24.copyWith(
-                        color: context.colorTokens.primary,
-                        fontSize: 32,
-                        height: 0.92,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    )
-                  : SizedBox.square(
-                      dimension: 20,
-                      child: ClipRect(
-                        child: AppIcon(
-                          actionIconName,
-                          size: 20,
-                          color: context.colorTokens.primary,
-                        ),
-                      ),
-                    ),
+              child: SizedBox.square(
+                dimension: actionIconName == "plus" ? 22 : 20,
+                child: ClipRect(
+                  child: AppIcon(
+                    actionIconName,
+                    size: actionIconName == "plus" ? 22 : 20,
+                    color: context.colorTokens.primary,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

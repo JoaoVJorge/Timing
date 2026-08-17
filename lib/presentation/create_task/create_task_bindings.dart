@@ -8,12 +8,16 @@ class CreateTaskBindings extends Bindings {
   void dependencies() {
     final DailyTaskEntity? editingTask =
         RouteArguments.maybeOf<DailyTaskEntity>();
+    final CreateTaskRouteArguments? createArguments =
+        RouteArguments.maybeOf<CreateTaskRouteArguments>();
     Get.put<CreateTaskController>(
       CreateTaskController(
         addDailyTaskUseCase: Get.find(),
         updateDailyTaskUseCase: Get.find(),
         appNavigator: Get.find(),
+        achievementUnlockService: Get.find(),
         editingTask: editingTask,
+        initialName: createArguments?.initialName,
       ),
     );
   }

@@ -35,13 +35,59 @@ class TimerNotificationService {
     );
     tz.initializeTimeZones();
     await _plugin.initialize(settings: settings);
-    final AndroidFlutterLocalNotificationsPlugin? androidPlugin = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    await androidPlugin?.requestNotificationsPermission();
-    await androidPlugin?.requestExactAlarmsPermission();
     _initialized = true;
+  }
+
+  AndroidFlutterLocalNotificationsPlugin? get _androidPlugin => _plugin
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >();
+
+  Future<bool> areNotificationsEnabled() async {
+    if (!_isSupported) {
+      return false;
+    }
+
+    try {
+      await _ensureInitialized();
+      return await _androidPlugin?.areNotificationsEnabled() ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> requestNotificationsEnabled() async {
+    if (!_isSupported) {
+      return false;
+    }
+
+    try {
+      await _ensureInitialized();
+      final bool allowed =
+          await _androidPlugin?.requestNotificationsPermission() ?? false;
+      if (allowed) {
+        await _androidPlugin?.requestExactAlarmsPermission();
+      }
+      return allowed;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> disableNotifications() async {
+    if (!_isSupported) {
+      return;
+    }
+
+    try {
+      await _ensureInitialized();
+      await Future.wait([
+        _plugin.cancelAll(),
+        _plugin.cancelAllPendingNotifications(),
+      ]);
+    } catch (_) {
+      // Nothing to do if the platform notification backend is unavailable.
+    }
   }
 
   Future<void> showRunning({
@@ -55,6 +101,9 @@ class TimerNotificationService {
 
     try {
       await _ensureInitialized();
+      if (!await areNotificationsEnabled()) {
+        return;
+      }
       final AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
             _channelId,
@@ -92,6 +141,9 @@ class TimerNotificationService {
 
     try {
       await _ensureInitialized();
+      if (!await areNotificationsEnabled()) {
+        return;
+      }
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
             _channelId,
@@ -131,6 +183,9 @@ class TimerNotificationService {
 
     try {
       await _ensureInitialized();
+      if (!await areNotificationsEnabled()) {
+        return;
+      }
       await _plugin.cancel(id: _finishNotificationId);
       const AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(

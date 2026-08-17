@@ -9,6 +9,7 @@ import "package:timing/presentation/create_subject/create_subject_controller.dar
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/shared/widgets/centered_wrap_grid.dart";
 import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/shared/widgets/creation/creation_page_scaffold.dart";
 import "package:timing/theme/subject_icons.dart";
@@ -20,6 +21,8 @@ class CreateSubjectPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CreateSubjectController controller = Get.find();
+    final GlobalKey nameKey = GlobalKey();
+    final GlobalKey goalKey = GlobalKey();
     controller.initializeThemeColor(context.colorTokens.primary);
 
     return CreationPageScaffold(
@@ -29,10 +32,48 @@ class CreateSubjectPage extends StatelessWidget {
           isLoading: controller.isSaving.value,
           isEnabled: !controller.isSaving.value,
           accent: controller.selectedColor.value,
-          onTap: controller.onSubmit,
+          onTap: () async {
+            await _scrollToFirstInvalidSection(
+              controller: controller,
+              nameKey: nameKey,
+              goalKey: goalKey,
+            );
+            await controller.onSubmit();
+          },
         ),
       ),
-      children: [CreateSubjectFormContent(controller: controller)],
+      children: [
+        CreateSubjectFormContent(
+          controller: controller,
+          nameKey: nameKey,
+          goalKey: goalKey,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _scrollToFirstInvalidSection({
+    required CreateSubjectController controller,
+    required GlobalKey nameKey,
+    required GlobalKey goalKey,
+  }) async {
+    final GlobalKey? targetKey = controller.name.value.trim().isEmpty
+        ? nameKey
+        : !controller.hasValidGoal
+        ? goalKey
+        : null;
+
+    final BuildContext? targetContext = targetKey?.currentContext;
+    if (targetContext == null) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
+      alignment: 0.08,
     );
   }
 }
@@ -41,22 +82,32 @@ class CreateSubjectFormContent extends StatelessWidget {
   const CreateSubjectFormContent({
     required this.controller,
     this.showHero = true,
+    this.nameKey,
+    this.goalKey,
     super.key,
   });
 
   final SubjectCreationFormController controller;
   final bool showHero;
+  final Key? nameKey;
+  final Key? goalKey;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       if (showHero) ...[_HeroHeader(controller: controller), const Gap(14)],
-      _NameField(controller: controller),
+      KeyedSubtree(
+        key: nameKey,
+        child: _NameField(controller: controller),
+      ),
       const Gap(12),
       _ActivityTypeSection(controller: controller),
       const Gap(12),
-      _GoalSection(controller: controller),
+      KeyedSubtree(
+        key: goalKey,
+        child: _GoalSection(controller: controller),
+      ),
       _FocusRoutineSections(controller: controller),
       const Gap(12),
       _ColorSection(controller: controller),
@@ -142,6 +193,8 @@ class _ActivityTypeSection extends StatelessWidget {
             isSelected:
                 controller.activityType.value == SubjectActivityType.daily,
             onTap: () => controller.setActivityType(SubjectActivityType.daily),
+            iconSize: 24,
+            iconBoxSize: 42,
           ),
           const Gap(10),
           CreationOptionCard(
@@ -153,6 +206,8 @@ class _ActivityTypeSection extends StatelessWidget {
                 controller.activityType.value == SubjectActivityType.permanent,
             onTap: () =>
                 controller.setActivityType(SubjectActivityType.permanent),
+            iconSize: 24,
+            iconBoxSize: 42,
           ),
         ],
       ),
@@ -203,11 +258,16 @@ class _GoalSection extends StatelessWidget {
             : isPermanent
             ? _totalTimeGoalLabel(context)
             : context.l10n.createSubjectTimeGoalLabel,
+        description: controller.isPageBased || isPermanent
+            ? null
+            : context.l10n.subjectSectionDurationDescription,
         accent: accent,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _GoalInput(controller: controller, accent: accent),
+          const Gap(12),
           _PresetRow(
             children: presets
                 .map(
@@ -225,8 +285,6 @@ class _GoalSection extends StatelessWidget {
                 )
                 .toList(),
           ),
-          const Gap(12),
-          _GoalInput(controller: controller, accent: accent),
         ],
       ),
     );
@@ -263,13 +321,9 @@ class _GoalInput extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            controller.isPageBased
-                ? Icons.menu_book_rounded
-                : Icons.access_time_rounded,
-            color: accent,
-            size: 20,
-          ),
+          controller.isPageBased
+              ? AppIcon("book", color: accent, size: 20)
+              : Icon(Icons.access_time_rounded, color: accent, size: 20),
           const Gap(12),
           Expanded(
             child: TextField(
@@ -349,6 +403,7 @@ class _FocusSessionCountSection extends StatelessWidget {
       header: CreationSectionHeader(
         icon: Icons.repeat_rounded,
         label: context.l10n.focusSessionCountLabel,
+        description: context.l10n.subjectSessionCountDescription,
         accent: accent,
       ),
       child: _PresetRow(
@@ -381,6 +436,7 @@ class _RestSection extends StatelessWidget {
       header: CreationSectionHeader(
         icon: Icons.self_improvement_rounded,
         label: context.l10n.createSubjectRestLabel,
+        description: context.l10n.subjectRestDurationDescription,
         accent: accent,
       ),
       child: _PresetRow(
@@ -482,7 +538,7 @@ class _IconSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Obx(
-    () => Wrap(
+    () => CenteredBalancedRows(
       spacing: 8,
       runSpacing: 8,
       children: [
