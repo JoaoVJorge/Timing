@@ -92,7 +92,12 @@ class ScheduleDataSource {
       return rows
           .map((row) => _entryFromRow(row as Map<String, dynamic>))
           .toList();
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to fetch remote schedule_entries",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return const [];
     }
   }
@@ -124,7 +129,12 @@ class ScheduleDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to sync remote schedule_entries",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return;
     }
   }

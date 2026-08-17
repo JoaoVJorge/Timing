@@ -94,7 +94,12 @@ class SubjectsDataSource {
                 TimeCategoryType.tryByName(subject.category.name) != null,
           )
           .toList();
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to fetch remote user_subjects",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return const [];
     }
   }
@@ -123,7 +128,12 @@ class SubjectsDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to sync remote user_subjects",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return;
     }
   }

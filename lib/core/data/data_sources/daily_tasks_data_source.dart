@@ -84,7 +84,12 @@ class DailyTasksDataSource {
       return rows
           .map((row) => _taskFromRow(row as Map<String, dynamic>))
           .toList();
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to fetch remote daily_goals",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return const [];
     }
   }
@@ -111,7 +116,12 @@ class DailyTasksDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to sync remote daily_goals",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return;
     }
   }
