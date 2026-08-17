@@ -375,7 +375,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -973,6 +973,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accountSection => 'Cuenta';
+
+  @override
+  String get linkedAccountsSection => 'Inicios conectados';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'Usa Google y Apple para acceder a esta misma cuenta.';
+
+  @override
+  String get linkGoogleAccountTitle => 'Asociar Google';
+
+  @override
+  String get linkGoogleAccountSubtitle => 'Entrar con Google en esta cuenta';
+
+  @override
+  String get linkAppleAccountTitle => 'Asociar Apple';
+
+  @override
+  String get linkAppleAccountSubtitle => 'Entrar con Apple en esta cuenta';
+
+  @override
+  String get authProviderConnected => 'Conectado';
+
+  @override
+  String get linkAuthProviderStarted =>
+      'Finaliza el inicio de sesión para asociar la cuenta.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'No se pudo iniciar la asociación. Revisa el proveedor y el vínculo manual en Supabase.';
 
   @override
   String get sessionSection => 'Sesión';
@@ -1976,6 +2006,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get focusSessionCountLabel => 'Cantidad de sesiones';
 
   @override
+  String get subjectSectionDurationDescription =>
+      'Cuánto dura cada sección de enfoque antes de una pausa o finalización.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'Cuántas secciones de enfoque quieres completar por día.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'Cuánto dura cada pausa entre secciones de enfoque.';
+
+  @override
   String get groupEditingComingSoon => 'Edición del grupo próximamente.';
 
   @override
@@ -2650,6 +2692,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get achievement50Description => 'Desbloquea 25 logros';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'Logro desbloqueado';
 
   @override
   String get rankTierPaper => 'Papel';

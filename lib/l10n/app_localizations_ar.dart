@@ -370,7 +370,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -962,6 +962,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get accountSection => 'الحساب';
+
+  @override
+  String get linkedAccountsSection => 'تسجيلات الدخول المرتبطة';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'استخدم Google و Apple للوصول إلى نفس الحساب.';
+
+  @override
+  String get linkGoogleAccountTitle => 'ربط Google';
+
+  @override
+  String get linkGoogleAccountSubtitle =>
+      'تسجيل الدخول باستخدام Google لهذا الحساب';
+
+  @override
+  String get linkAppleAccountTitle => 'ربط Apple';
+
+  @override
+  String get linkAppleAccountSubtitle =>
+      'تسجيل الدخول باستخدام Apple لهذا الحساب';
+
+  @override
+  String get authProviderConnected => 'متصل';
+
+  @override
+  String get linkAuthProviderStarted => 'أكمل تسجيل الدخول لربط الحساب.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'تعذر بدء ربط الحساب. تحقق من المزود والربط اليدوي في Supabase.';
 
   @override
   String get sessionSection => 'جلسة';
@@ -1952,6 +1983,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get focusSessionCountLabel => 'عدد الجلسات';
 
   @override
+  String get subjectSectionDurationDescription =>
+      'مدة كل جلسة تركيز قبل الاستراحة أو الإكمال.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'عدد جلسات التركيز التي تريد إكمالها يوميًا.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'مدة كل استراحة بين جلسات التركيز.';
+
+  @override
   String get groupEditingComingSoon => 'تعديل المجموعة قريبا.';
 
   @override
@@ -2624,6 +2667,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get achievement50Description => 'افتح 25 إنجازا';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'تم فتح إنجاز';
 
   @override
   String get rankTierPaper => 'ورق';

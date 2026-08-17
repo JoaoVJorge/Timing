@@ -220,7 +220,7 @@
       }
     }
   },
-  "createSubjectHoursMinutesValue": "{hours}h {minutes}m",
+  "createSubjectHoursMinutesValue": "{hours}h {minutes} min",
   "createSubjectPagesValue": "{value} pages",
   "@createSubjectPagesValue": {
     "placeholders": {
@@ -583,6 +583,15 @@
     }
   },
   "accountSection": "Account",
+  "linkedAccountsSection": "Connected sign-ins",
+  "linkedAccountsSubtitle": "Use Google and Apple to access this same account.",
+  "linkGoogleAccountTitle": "Link Google",
+  "linkGoogleAccountSubtitle": "Sign in with Google on this account",
+  "linkAppleAccountTitle": "Link Apple",
+  "linkAppleAccountSubtitle": "Sign in with Apple on this account",
+  "authProviderConnected": "Connected",
+  "linkAuthProviderStarted": "Finish sign-in to link the account.",
+  "linkAuthProviderFailure": "Could not start account linking. Check the provider and manual linking in Supabase.",
   "sessionSection": "Session",
   "logOutLabel": "Log out",
   "logOutSettingsSubtitle": "End the session on this device",
@@ -1153,6 +1162,9 @@
   "pagesSuffix": "pages",
   "updatedSuccessfullyMessage": "Updated successfully",
   "focusSessionCountLabel": "Number of sessions",
+  "subjectSectionDurationDescription": "How long each focus section lasts before a break or completion.",
+  "subjectSessionCountDescription": "How many focus sections you want to complete in a day.",
+  "subjectRestDurationDescription": "How long each pause lasts between focus sections.",
   "groupEditingComingSoon": "Group editing is coming soon.",
   "leftGroupMessage": "You left the group.",
   "groupImageSourceTitle": "Send image",
@@ -1481,6 +1493,7 @@
   "achievement49Description": "Reach 2 hours exercising",
   "achievement50Title": "Achievement Hunter",
   "achievement50Description": "Unlock 25 achievements",
+  "achievementUnlockedNotificationTitle": "Achievement unlocked",
   "rankTierPaper": "Paper",
   "rankTierWood": "Wood",
   "rankTierStone": "Stone",

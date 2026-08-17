@@ -375,7 +375,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -971,6 +971,36 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get accountSection => 'Conta';
+
+  @override
+  String get linkedAccountsSection => 'Login conectado';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'Use Google e Apple para acessar esta mesma conta.';
+
+  @override
+  String get linkGoogleAccountTitle => 'Associar Google';
+
+  @override
+  String get linkGoogleAccountSubtitle => 'Entrar com Google nesta conta';
+
+  @override
+  String get linkAppleAccountTitle => 'Associar Apple';
+
+  @override
+  String get linkAppleAccountSubtitle => 'Entrar com Apple nesta conta';
+
+  @override
+  String get authProviderConnected => 'Conectado';
+
+  @override
+  String get linkAuthProviderStarted =>
+      'Finalize o login para associar a conta.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'Não foi possível iniciar a associação. Verifique o provedor e o vínculo manual no Supabase.';
 
   @override
   String get sessionSection => 'Sessão';
@@ -1659,18 +1689,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get goalTypeName => 'meta';
 
   @override
-  String get missedYesterdayDialogTitle => 'Voc? concluiu ontem?';
+  String get missedYesterdayDialogTitle => 'Você fez essa meta ontem?';
 
   @override
   String missedYesterdayDialogContent(String taskName) {
-    return 'Voc? n?o registrou \"$taskName\" ontem. Voc? realmente n?o conseguiu conclu?-la?';
+    return 'Você não marcou \"$taskName\" ontem. Se tiver feito, podemos registrar agora.';
   }
 
   @override
-  String get missedYesterdayMissedButton => 'Sim, n?o conclu?';
+  String get missedYesterdayMissedButton => 'Não fiz';
 
   @override
-  String get missedYesterdayCompletedButton => 'Eu conclu?';
+  String get missedYesterdayCompletedButton => 'Fiz ontem';
 
   @override
   String get scheduleTitleRequiredError => 'Preencha o título para continuar';
@@ -1921,7 +1951,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Entrar com Apple ainda não está completo.';
 
   @override
-  String get activityTypeLabel => 'Tipo da atividade';
+  String get activityTypeLabel => 'Frequência da atividade';
 
   @override
   String get activityTypeDailyLabel => 'Diária';
@@ -1969,6 +1999,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get focusSessionCountLabel => 'Quantidade de sessões';
+
+  @override
+  String get subjectSectionDurationDescription =>
+      'Quanto tempo dura cada seção de foco antes de uma pausa ou conclusão.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'Quantas seções de foco você quer cumprir por dia.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'Quanto tempo dura cada pausa entre as seções de foco.';
 
   @override
   String get groupEditingComingSoon => 'Edição de grupo em breve.';
@@ -2646,6 +2688,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get achievement50Description => 'Desbloqueie 25 conquistas';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'Conquista desbloqueada';
 
   @override
   String get rankTierPaper => 'Papel';

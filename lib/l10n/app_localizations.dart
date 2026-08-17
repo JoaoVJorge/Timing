@@ -745,7 +745,7 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectHoursMinutesValue.
   ///
   /// In en, this message translates to:
-  /// **'{hours}h {minutes}m'**
+  /// **'{hours}h {minutes} min'**
   String createSubjectHoursMinutesValue(int hours, int minutes);
 
   /// No description provided for @createSubjectPagesValue.
@@ -1809,6 +1809,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get accountSection;
+
+  /// No description provided for @linkedAccountsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected sign-ins'**
+  String get linkedAccountsSection;
+
+  /// No description provided for @linkedAccountsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Google and Apple to access this same account.'**
+  String get linkedAccountsSubtitle;
+
+  /// No description provided for @linkGoogleAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Google'**
+  String get linkGoogleAccountTitle;
+
+  /// No description provided for @linkGoogleAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google on this account'**
+  String get linkGoogleAccountSubtitle;
+
+  /// No description provided for @linkAppleAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Apple'**
+  String get linkAppleAccountTitle;
+
+  /// No description provided for @linkAppleAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple on this account'**
+  String get linkAppleAccountSubtitle;
+
+  /// No description provided for @authProviderConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get authProviderConnected;
+
+  /// No description provided for @linkAuthProviderStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish sign-in to link the account.'**
+  String get linkAuthProviderStarted;
+
+  /// No description provided for @linkAuthProviderFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start account linking. Check the provider and manual linking in Supabase.'**
+  String get linkAuthProviderFailure;
 
   /// No description provided for @sessionSection.
   ///
@@ -3550,6 +3604,24 @@ abstract class AppLocalizations {
   /// **'Number of sessions'**
   String get focusSessionCountLabel;
 
+  /// No description provided for @subjectSectionDurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How long each focus section lasts before a break or completion.'**
+  String get subjectSectionDurationDescription;
+
+  /// No description provided for @subjectSessionCountDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How many focus sections you want to complete in a day.'**
+  String get subjectSessionCountDescription;
+
+  /// No description provided for @subjectRestDurationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How long each pause lasts between focus sections.'**
+  String get subjectRestDurationDescription;
+
   /// No description provided for @groupEditingComingSoon.
   ///
   /// In en, this message translates to:
@@ -4773,6 +4845,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlock 25 achievements'**
   String get achievement50Description;
+
+  /// No description provided for @achievementUnlockedNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked'**
+  String get achievementUnlockedNotificationTitle;
 
   /// No description provided for @rankTierPaper.
   ///

@@ -376,7 +376,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -981,6 +981,37 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get accountSection => 'Konto';
+
+  @override
+  String get linkedAccountsSection => 'Verknüpfte Anmeldungen';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'Nutzen Sie Google und Apple für dasselbe Konto.';
+
+  @override
+  String get linkGoogleAccountTitle => 'Google verknüpfen';
+
+  @override
+  String get linkGoogleAccountSubtitle =>
+      'Mit Google bei diesem Konto anmelden';
+
+  @override
+  String get linkAppleAccountTitle => 'Apple verknüpfen';
+
+  @override
+  String get linkAppleAccountSubtitle => 'Mit Apple bei diesem Konto anmelden';
+
+  @override
+  String get authProviderConnected => 'Verbunden';
+
+  @override
+  String get linkAuthProviderStarted =>
+      'Schließen Sie die Anmeldung ab, um das Konto zu verknüpfen.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'Die Verknüpfung konnte nicht gestartet werden. Prüfen Sie den Anbieter und manuelle Verknüpfung in Supabase.';
 
   @override
   String get sessionSection => 'Sitzung';
@@ -1989,6 +2020,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get focusSessionCountLabel => 'Anzahl der Sitzungen';
 
   @override
+  String get subjectSectionDurationDescription =>
+      'Wie lange jede Fokusphase vor einer Pause oder dem Abschluss dauert.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'Wie viele Fokusphasen du pro Tag abschließen möchtest.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'Wie lange jede Pause zwischen den Fokusphasen dauert.';
+
+  @override
   String get groupEditingComingSoon => 'Gruppenbearbeitung kommt bald.';
 
   @override
@@ -2668,6 +2711,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get achievement50Description => 'Schalte 25 Erfolge frei';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'Erfolg freigeschaltet';
 
   @override
   String get rankTierPaper => 'Papier';

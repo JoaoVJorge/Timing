@@ -373,7 +373,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -964,6 +964,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSection => 'Account';
+
+  @override
+  String get linkedAccountsSection => 'Connected sign-ins';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'Use Google and Apple to access this same account.';
+
+  @override
+  String get linkGoogleAccountTitle => 'Link Google';
+
+  @override
+  String get linkGoogleAccountSubtitle => 'Sign in with Google on this account';
+
+  @override
+  String get linkAppleAccountTitle => 'Link Apple';
+
+  @override
+  String get linkAppleAccountSubtitle => 'Sign in with Apple on this account';
+
+  @override
+  String get authProviderConnected => 'Connected';
+
+  @override
+  String get linkAuthProviderStarted => 'Finish sign-in to link the account.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'Could not start account linking. Check the provider and manual linking in Supabase.';
 
   @override
   String get sessionSection => 'Session';
@@ -1963,6 +1992,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get focusSessionCountLabel => 'Number of sessions';
 
   @override
+  String get subjectSectionDurationDescription =>
+      'How long each focus section lasts before a break or completion.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'How many focus sections you want to complete in a day.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'How long each pause lasts between focus sections.';
+
+  @override
   String get groupEditingComingSoon => 'Group editing is coming soon.';
 
   @override
@@ -2638,6 +2679,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get achievement50Description => 'Unlock 25 achievements';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'Achievement unlocked';
 
   @override
   String get rankTierPaper => 'Paper';

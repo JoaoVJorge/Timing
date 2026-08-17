@@ -378,7 +378,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String createSubjectHoursMinutesValue(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '${hours}h $minutes min';
   }
 
   @override
@@ -983,6 +983,38 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accountSection => 'Compte';
+
+  @override
+  String get linkedAccountsSection => 'Connexions liées';
+
+  @override
+  String get linkedAccountsSubtitle =>
+      'Utilisez Google et Apple pour accéder à ce même compte.';
+
+  @override
+  String get linkGoogleAccountTitle => 'Associer Google';
+
+  @override
+  String get linkGoogleAccountSubtitle =>
+      'Se connecter avec Google sur ce compte';
+
+  @override
+  String get linkAppleAccountTitle => 'Associer Apple';
+
+  @override
+  String get linkAppleAccountSubtitle =>
+      'Se connecter avec Apple sur ce compte';
+
+  @override
+  String get authProviderConnected => 'Connecté';
+
+  @override
+  String get linkAuthProviderStarted =>
+      'Terminez la connexion pour associer le compte.';
+
+  @override
+  String get linkAuthProviderFailure =>
+      'Impossible de démarrer l\'association. Vérifiez le fournisseur et l\'association manuelle dans Supabase.';
 
   @override
   String get sessionSection => 'Séance';
@@ -1989,6 +2021,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get focusSessionCountLabel => 'Nombre de séances';
 
   @override
+  String get subjectSectionDurationDescription =>
+      'Durée de chaque séance de concentration avant une pause ou la fin.';
+
+  @override
+  String get subjectSessionCountDescription =>
+      'Nombre de séances de concentration à terminer par jour.';
+
+  @override
+  String get subjectRestDurationDescription =>
+      'Durée de chaque pause entre les séances de concentration.';
+
+  @override
   String get groupEditingComingSoon =>
       'Modification du groupe bientôt disponible.';
 
@@ -2677,6 +2721,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get achievement50Description => 'Débloquez 25 succès';
+
+  @override
+  String get achievementUnlockedNotificationTitle => 'Succès débloqué';
 
   @override
   String get rankTierPaper => 'Papier';
