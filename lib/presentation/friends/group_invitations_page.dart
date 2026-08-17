@@ -76,7 +76,7 @@ class _GroupInvitationTabs extends StatelessWidget {
     children: [
       Expanded(
         child: _GroupInvitationTab(
-          icon: Icons.download_rounded,
+          icon: Icons.inbox_rounded,
           label: "Recebidos",
           isSelected: selectedMode == GroupInvitationsMode.incoming,
           onTap: () => onSelect(GroupInvitationsMode.incoming),

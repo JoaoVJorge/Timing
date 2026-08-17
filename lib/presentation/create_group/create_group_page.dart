@@ -17,8 +17,19 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/decoration.dart";
 import "package:timing/theme/group_colors.dart";
 
-class CreateGroupPage extends StatelessWidget {
+class CreateGroupPage extends StatefulWidget {
   const CreateGroupPage({super.key});
+
+  @override
+  State<CreateGroupPage> createState() => _CreateGroupPageState();
+}
+
+class _CreateGroupPageState extends State<CreateGroupPage> {
+  final GlobalKey _groupNameKey = GlobalKey();
+  final GlobalKey _themeKey = GlobalKey();
+  final GlobalKey _activityNameKey = GlobalKey();
+  final GlobalKey _activityGoalKey = GlobalKey();
+  final GlobalKey _friendsKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +63,29 @@ class CreateGroupPage extends StatelessWidget {
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: switch (step) {
-                  0 => _InformationStep(controller: controller),
-                  1 => _ActivityStep(controller: controller),
-                  2 => _FriendsStep(controller: controller),
+                  0 => _InformationStep(
+                    controller: controller,
+                    groupNameKey: _groupNameKey,
+                    themeKey: _themeKey,
+                  ),
+                  1 => _ActivityStep(
+                    controller: controller,
+                    activityNameKey: _activityNameKey,
+                    activityGoalKey: _activityGoalKey,
+                  ),
+                  2 => _FriendsStep(
+                    controller: controller,
+                    friendsKey: _friendsKey,
+                  ),
                   _ => _SummaryStep(controller: controller),
                 },
               ),
             ),
             const Gap(12),
-            _BottomAction(controller: controller),
+            _BottomAction(
+              controller: controller,
+              onTap: () => _onTapBottomAction(controller),
+            ),
             const Gap(16),
           ],
         );
@@ -74,6 +99,88 @@ class CreateGroupPage extends StatelessWidget {
     2 => context.l10n.createGroupFriendsStepSubtitle,
     _ => context.l10n.createGroupSummaryStepSubtitle,
   };
+
+  Future<void> _onTapBottomAction(CreateGroupController controller) async {
+    if (controller.isSummaryStep) {
+      await _scrollToCreateError(controller);
+      await controller.onTapCreate();
+      return;
+    }
+
+    await _scrollToContinueError(controller);
+    controller.onTapContinue();
+  }
+
+  Future<void> _scrollToContinueError(CreateGroupController controller) async {
+    GlobalKey? targetKey;
+
+    if (controller.isInformationStep) {
+      targetKey = !controller.hasName
+          ? _groupNameKey
+          : !controller.hasTheme
+          ? _themeKey
+          : null;
+    } else if (controller.isActivityStep) {
+      targetKey = controller.activityName.value.trim().isEmpty
+          ? _activityNameKey
+          : !controller.hasValidActivityGoal
+          ? _activityGoalKey
+          : null;
+    } else if (controller.isFriendsStep && !controller.hasFriends) {
+      targetKey = _friendsKey;
+    }
+
+    await _scrollToKey(targetKey);
+  }
+
+  Future<void> _scrollToCreateError(CreateGroupController controller) async {
+    if (!controller.hasName) {
+      controller.currentStep.value = 0;
+      await _scrollToKey(_groupNameKey);
+      return;
+    }
+    if (!controller.hasTheme) {
+      controller.currentStep.value = 0;
+      await _scrollToKey(_themeKey);
+      return;
+    }
+    if (!controller.hasActivity) {
+      controller.currentStep.value = 1;
+      await _scrollToKey(
+        controller.activityName.value.trim().isEmpty
+            ? _activityNameKey
+            : _activityGoalKey,
+      );
+      return;
+    }
+    if (!controller.hasFriends) {
+      controller.currentStep.value = 2;
+      await _scrollToKey(_friendsKey);
+    }
+  }
+
+  Future<void> _scrollToKey(GlobalKey? targetKey) async {
+    if (targetKey == null) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) {
+      return;
+    }
+    final BuildContext? targetContext = targetKey.currentContext;
+    if (targetContext == null || !targetContext.mounted) {
+      return;
+    }
+
+    await Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
+      alignment: 0.08,
+    );
+  }
 }
 
 class _StepProgress extends StatelessWidget {
@@ -181,15 +288,22 @@ class _StepMarker extends StatelessWidget {
 }
 
 class _InformationStep extends StatelessWidget {
-  const _InformationStep({required this.controller});
+  const _InformationStep({
+    required this.controller,
+    required this.groupNameKey,
+    required this.themeKey,
+  });
 
   final CreateGroupController controller;
+  final Key groupNameKey;
+  final Key themeKey;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _SectionCard(
+        key: groupNameKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -233,7 +347,11 @@ class _InformationStep extends StatelessWidget {
         ),
       ),
       const Gap(18),
-      Text(context.l10n.groupThemeLabel, style: context.textStyles.bodyLarge),
+      Text(
+        context.l10n.groupThemeLabel,
+        key: themeKey,
+        style: context.textStyles.bodyLarge,
+      ),
       const Gap(4),
       Text(
         context.l10n.createGroupThemeMetricDescription,
@@ -351,26 +469,39 @@ class _ThemeRow extends StatelessWidget {
 }
 
 class _ActivityStep extends StatelessWidget {
-  const _ActivityStep({required this.controller});
+  const _ActivityStep({
+    required this.controller,
+    required this.activityNameKey,
+    required this.activityGoalKey,
+  });
 
   final CreateGroupController controller;
+  final Key activityNameKey;
+  final Key activityGoalKey;
 
   @override
   Widget build(BuildContext context) {
     controller.initializeThemeColor(context.colorTokens.primary);
-    return CreateSubjectFormContent(controller: controller, showHero: false);
+    return CreateSubjectFormContent(
+      controller: controller,
+      showHero: false,
+      nameKey: activityNameKey,
+      goalKey: activityGoalKey,
+    );
   }
 }
 
 class _FriendsStep extends StatelessWidget {
-  const _FriendsStep({required this.controller});
+  const _FriendsStep({required this.controller, required this.friendsKey});
 
   final CreateGroupController controller;
+  final Key friendsKey;
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
       _SectionCard(
+        key: friendsKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -781,9 +912,10 @@ class _SummaryRow extends StatelessWidget {
 }
 
 class _BottomAction extends StatelessWidget {
-  const _BottomAction({required this.controller});
+  const _BottomAction({required this.controller, required this.onTap});
 
   final CreateGroupController controller;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -797,7 +929,7 @@ class _BottomAction extends StatelessWidget {
 
     return BounceTap(
       pressedScale: 0.97,
-      onTap: isSummary ? controller.onTapCreate : controller.onTapContinue,
+      onTap: onTap,
       child: Container(
         width: double.infinity,
         height: 52,
@@ -808,12 +940,13 @@ class _BottomAction extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: controller.isCreating.value
-            ? const SizedBox(
-                width: 20,
-                height: 20,
+            ? SizedBox(
+                width: 30,
+                height: 30,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+                  strokeWidth: 3.2,
+                  strokeCap: StrokeCap.round,
+                  color: context.colorTokens.primaryForeground,
                 ),
               )
             : Text(
@@ -834,7 +967,7 @@ class _BottomAction extends StatelessWidget {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.child});
+  const _SectionCard({required this.child, super.key});
 
   final Widget child;
 

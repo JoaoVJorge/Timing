@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
@@ -19,11 +21,15 @@ class FindFriendsPage extends StatefulWidget {
 }
 
 class _FindFriendsPageState extends State<FindFriendsPage> {
+  static const Duration _searchDebounceDuration = Duration(milliseconds: 550);
+
   final TextEditingController codeController = TextEditingController();
   final FriendsController controller = Get.find();
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     codeController.dispose();
     super.dispose();
   }
@@ -42,7 +48,8 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
           controller: codeController,
           isSearching: controller.isSearching,
           onPaste: _pasteCode,
-          onSearch: () => controller.findByCode(codeController.text),
+          onChanged: _scheduleSearch,
+          onSearch: _searchNow,
         ),
         Obx(() {
           final FriendSuggestionEntity? found = controller.foundUser.value;
@@ -81,6 +88,24 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
       return;
     }
     codeController.text = text.toUpperCase();
+    _scheduleSearch(codeController.text);
+  }
+
+  void _scheduleSearch(String code) {
+    _searchDebounce?.cancel();
+    if (code.trim().replaceAll("@", "").isEmpty) {
+      controller.resetSearch();
+      return;
+    }
+    _searchDebounce = Timer(
+      _searchDebounceDuration,
+      () => controller.findByCode(code),
+    );
+  }
+
+  void _searchNow() {
+    _searchDebounce?.cancel();
+    controller.findByCode(codeController.text);
   }
 }
 
@@ -89,12 +114,14 @@ class _InviteLookupCard extends StatelessWidget {
     required this.controller,
     required this.isSearching,
     required this.onPaste,
+    required this.onChanged,
     required this.onSearch,
   });
 
   final TextEditingController controller;
   final RxBool isSearching;
   final VoidCallback onPaste;
+  final ValueChanged<String> onChanged;
   final VoidCallback onSearch;
 
   @override
@@ -156,6 +183,7 @@ class _InviteLookupCard extends StatelessWidget {
                 child: TextField(
                   controller: controller,
                   textCapitalization: TextCapitalization.characters,
+                  onChanged: onChanged,
                   style: context.textStyles.black32.copyWith(
                     color: context.colorTokens.textBody,
                     fontSize: 17,
@@ -231,99 +259,132 @@ class _FoundUserSection extends StatelessWidget {
   final VoidCallback onAdd;
 
   @override
+  Widget build(BuildContext context) {
+    final Widget action = isSent
+        ? FriendSentChip(label: context.l10n.sentLabel)
+        : FriendAddButton(label: context.l10n.addButton, onTap: onAdd);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF44A75A),
+              size: 28,
+            ),
+            const Gap(8),
+            Expanded(
+              child: Text(
+                context.l10n.friendUserFoundTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.extraBold24.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const Gap(8),
+        Container(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          decoration: friendsSurfaceDecoration(context, radius: 18),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isCompact = constraints.maxWidth < 330;
+
+              return Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GroupMemberAvatar(
+                        name: profile.name,
+                        colorValue: profile.colorValue,
+                        size: 52,
+                      ),
+                      const Gap(12),
+                      Expanded(child: _FoundUserInfo(profile: profile)),
+                      if (!isCompact) ...[const Gap(10), action],
+                    ],
+                  ),
+                  if (isCompact) ...[
+                    const Gap(12),
+                    Align(alignment: Alignment.centerRight, child: action),
+                  ],
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FoundUserInfo extends StatelessWidget {
+  const _FoundUserInfo({required this.profile});
+
+  final FriendSuggestionEntity profile;
+
+  @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Row(
-        children: [
-          const Icon(
-            Icons.check_circle_rounded,
-            color: Color(0xFF44A75A),
-            size: 28,
-          ),
-          const Gap(8),
-          Text(
-            context.l10n.friendUserFoundTitle,
-            style: context.textStyles.extraBold24.copyWith(
-              color: context.colorTokens.textBody,
-              fontSize: 18,
-            ),
-          ),
-        ],
+      Text(
+        profile.name,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.extraBold24.copyWith(
+          color: context.colorTokens.textBody,
+          fontSize: 18,
+        ),
       ),
-      const Gap(8),
-      Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        decoration: friendsSurfaceDecoration(context, radius: 18),
-        child: Row(
-          children: [
-            GroupMemberAvatar(
-              name: profile.name,
-              colorValue: profile.colorValue,
-              size: 52,
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    profile.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.extraBold24.copyWith(
-                      color: context.colorTokens.textBody,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const Gap(2),
-                  Text(
-                    profile.handle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodyMedium.copyWith(
-                      color: context.colorTokens.textHint,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Gap(6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5F4E8),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.check_circle_outline_rounded,
-                          color: Color(0xFF3D8B4D),
-                          size: 16,
-                        ),
-                        const Gap(5),
-                        Text(
-                          context.l10n.friendFoundByCode,
-                          style: context.textStyles.bodySmall.copyWith(
-                            color: const Color(0xFF3D8B4D),
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+      const Gap(2),
+      Text(
+        profile.handle,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyMedium.copyWith(
+          color: context.colorTokens.textHint,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      const Gap(6),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5F4E8),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle_outline_rounded,
+                color: Color(0xFF3D8B4D),
+                size: 16,
               ),
-            ),
-            const Gap(10),
-            isSent
-                ? FriendSentChip(label: context.l10n.sentLabel)
-                : FriendAddButton(label: context.l10n.addButton, onTap: onAdd),
-          ],
+              const Gap(5),
+              Flexible(
+                child: Text(
+                  context.l10n.friendFoundByCode,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: const Color(0xFF3D8B4D),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ],

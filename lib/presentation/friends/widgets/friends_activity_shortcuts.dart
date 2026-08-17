@@ -22,7 +22,7 @@ class FriendsActivityShortcuts extends StatelessWidget {
     children: [
       Expanded(
         child: _ShortcutTile(
-          icon: Icons.download_rounded,
+          icon: Icons.person_add_alt_1_rounded,
           title: context.l10n.friendRequestsReceivedTab,
           count: pendingCount,
           onTap: onPendingTap,

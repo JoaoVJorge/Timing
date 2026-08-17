@@ -47,6 +47,7 @@ class GroupsController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxBool isShowingGroupDetails = false.obs;
   final RxBool isShowingMemberManagement = false.obs;
+  final RxBool isLoadingActivityProgress = false.obs;
   final RxBool isLoadingChat = false.obs;
   final RxBool isSendingImage = false.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
@@ -64,6 +65,11 @@ class GroupsController extends GetxController {
   GroupEntity? _rankedCacheGroup;
   LeaderboardPeriodType? _rankedCachePeriod;
   List<GroupMemberEntity> _rankedCache = const [];
+  String? _activityProgressCacheKey;
+  final Set<String> _loadingActivityProgressKeys = <String>{};
+  final Map<String, List<GroupActivityProgressEntity>>
+  _activityProgressByCacheKey = <String, List<GroupActivityProgressEntity>>{};
+  final Set<String> _loadingImageMessageGroupIds = <String>{};
 
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
@@ -177,6 +183,9 @@ class GroupsController extends GetxController {
 
   void onSelectGroup(GroupEntity group) {
     selectedGroup.value = group;
+    activityProgress.clear();
+    _activityProgressCacheKey = null;
+    isLoadingActivityProgress.value = false;
     selectedDetailsTab.value = GroupDetailsTab.ranking;
     isShowingGroupDetails.value = true;
     isShowingMemberManagement.value = false;
@@ -190,17 +199,55 @@ class GroupsController extends GetxController {
     final GroupEntity? group = selectedGroup.value;
     if (group == null) {
       activityProgress.clear();
+      _activityProgressCacheKey = null;
       return;
     }
-    final Either<AppError, List<GroupActivityProgressEntity>> result =
-        await _groupsRepository.getGroupActivityProgress(
-          group.id,
-          localDate: _todayKey(),
-        );
-    result.fold(
-      (error) => activityProgress.clear(),
-      (value) => activityProgress.value = value,
-    );
+    final String cacheKey = "${group.id}:${_todayKey()}";
+    final List<GroupActivityProgressEntity>? cachedProgress =
+        _activityProgressByCacheKey[cacheKey];
+    if (cachedProgress != null) {
+      activityProgress.value = cachedProgress;
+      _activityProgressCacheKey = cacheKey;
+      return;
+    }
+    if (_activityProgressCacheKey == cacheKey ||
+        _loadingActivityProgressKeys.contains(cacheKey)) {
+      if (_loadingActivityProgressKeys.contains(cacheKey) &&
+          selectedGroup.value?.id == group.id &&
+          activityProgress.isEmpty) {
+        isLoadingActivityProgress.value = true;
+      }
+      return;
+    }
+    _loadingActivityProgressKeys.add(cacheKey);
+    isLoadingActivityProgress.value = true;
+    try {
+      final Either<AppError, List<GroupActivityProgressEntity>> result =
+          await _groupsRepository.getGroupActivityProgress(
+            group.id,
+            localDate: _todayKey(),
+          );
+      result.fold(
+        (error) {
+          if (selectedGroup.value?.id == group.id) {
+            activityProgress.clear();
+            _activityProgressCacheKey = null;
+          }
+        },
+        (value) {
+          _activityProgressByCacheKey[cacheKey] = value;
+          if (selectedGroup.value?.id == group.id) {
+            activityProgress.value = value;
+            _activityProgressCacheKey = cacheKey;
+          }
+        },
+      );
+    } finally {
+      _loadingActivityProgressKeys.remove(cacheKey);
+      if (selectedGroup.value?.id == group.id) {
+        isLoadingActivityProgress.value = false;
+      }
+    }
   }
 
   /// One entry per distinct group activity (usually just one), for the tab
@@ -257,6 +304,30 @@ class GroupsController extends GetxController {
   }
 
   void onSelectDetailsTab(GroupDetailsTab tab) {
+    _selectDetailsTab(tab);
+  }
+
+  void onSwipeDetailsTab(int direction) {
+    final List<GroupDetailsTab> tabs = GroupDetailsTab.values;
+    final int currentIndex = tabs.indexOf(selectedDetailsTab.value);
+    final int nextIndex = (currentIndex + direction)
+        .clamp(0, tabs.length - 1)
+        .toInt();
+    if (nextIndex == currentIndex) {
+      return;
+    }
+    _selectDetailsTab(tabs[nextIndex]);
+  }
+
+  void _selectDetailsTab(GroupDetailsTab tab) {
+    if (selectedDetailsTab.value == tab) {
+      if (tab == GroupDetailsTab.goals &&
+          activityProgress.isEmpty &&
+          !isLoadingActivityProgress.value) {
+        unawaited(loadActivityProgress());
+      }
+      return;
+    }
     selectedDetailsTab.value = tab;
     if (tab == GroupDetailsTab.chat) {
       final String? groupId = selectedGroup.value?.id;
@@ -273,14 +344,23 @@ class GroupsController extends GetxController {
       imageMessagesByGroup[groupId] ?? const [];
 
   Future<void> loadImageMessages(String groupId) async {
+    if (imageMessagesByGroup.containsKey(groupId) ||
+        _loadingImageMessageGroupIds.contains(groupId)) {
+      return;
+    }
+    _loadingImageMessageGroupIds.add(groupId);
     isLoadingChat.value = true;
-    final Either<AppError, List<GroupImageMessageEntity>> result =
-        await _groupsRepository.getImageMessages(groupId);
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (messages) => imageMessagesByGroup[groupId] = messages,
-    );
-    isLoadingChat.value = false;
+    try {
+      final Either<AppError, List<GroupImageMessageEntity>> result =
+          await _groupsRepository.getImageMessages(groupId);
+      result.fold(
+        (error) => _appNavigator.showErrorSnackBar(),
+        (messages) => imageMessagesByGroup[groupId] = messages,
+      );
+    } finally {
+      _loadingImageMessageGroupIds.remove(groupId);
+      isLoadingChat.value = false;
+    }
   }
 
   Future<void> onTapSendGroupImage(String groupId) async {
@@ -329,9 +409,27 @@ class GroupsController extends GetxController {
       groups.add(newGroup);
     }
     selectedGroup.value = newGroup;
+    _activityProgressCacheKey = null;
+    activityProgress.clear();
     groups.refresh();
     await _invalidateActivityCaches();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
+  }
+
+  Future<void> upsertJoinedGroup(GroupEntity joinedGroup) async {
+    final int existingIndex = groups.indexWhere(
+      (group) => group.id == joinedGroup.id,
+    );
+    if (existingIndex >= 0) {
+      groups[existingIndex] = joinedGroup;
+    } else {
+      groups.add(joinedGroup);
+    }
+    selectedGroup.value = joinedGroup;
+    _activityProgressCacheKey = null;
+    activityProgress.clear();
+    groups.refresh();
+    await _invalidateActivityCaches();
   }
 
   /// Creating, joining, or leaving a group changes the member's group-owned
@@ -377,6 +475,11 @@ class GroupsController extends GetxController {
     result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
       groups.removeWhere((item) => item.id == group.id);
       imageMessagesByGroup.remove(group.id);
+      _activityProgressByCacheKey.removeWhere(
+        (key, value) => key.startsWith("${group.id}:"),
+      );
+      _activityProgressCacheKey = null;
+      activityProgress.clear();
       selectedGroup.value = groups.isEmpty ? null : groups.first;
       isShowingMemberManagement.value = false;
       isShowingGroupDetails.value = false;
@@ -395,17 +498,7 @@ class GroupsController extends GetxController {
     if (joinedGroup == null) {
       return;
     }
-    final int existingIndex = groups.indexWhere(
-      (group) => group.id == joinedGroup.id,
-    );
-    if (existingIndex >= 0) {
-      groups[existingIndex] = joinedGroup;
-    } else {
-      groups.add(joinedGroup);
-    }
-    selectedGroup.value = joinedGroup;
-    groups.refresh();
-    await _invalidateActivityCaches();
+    await upsertJoinedGroup(joinedGroup);
     onSelectGroup(joinedGroup);
     _appNavigator.showSuccessSnackBar(
       Get.context?.l10n.joinedGroupMessage ?? "You joined the group",
@@ -423,8 +516,6 @@ class GroupsController extends GetxController {
       subtitle: context.l10n.groupImageSourceSubtitle,
       cameraLabel: context.l10n.photoCameraLabel,
       galleryLabel: context.l10n.photoGalleryLabel,
-      cancelLabel: context.l10n.cancelButton,
-      isCompact: true,
     );
   }
 

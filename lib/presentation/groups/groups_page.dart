@@ -21,6 +21,7 @@ import "package:timing/shared/widgets/app_empty_state.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/animated_segmented_tabs.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
@@ -105,21 +106,6 @@ class _GroupDetailsView extends StatelessWidget {
         );
       }
 
-      final Widget selectedContent = switch (controller
-          .selectedDetailsTab
-          .value) {
-        GroupDetailsTab.ranking => _RankingTab(
-          controller: controller,
-          group: group,
-          members: members,
-        ),
-        GroupDetailsTab.goals => _GoalsTab(
-          controller: controller,
-          group: group,
-        ),
-        GroupDetailsTab.chat => _ChatTab(controller: controller, group: group),
-      };
-
       return Column(
         children: [
           Gap(4),
@@ -129,20 +115,14 @@ class _GroupDetailsView extends StatelessWidget {
             onActions: () => _showGroupActionsSheet(context, controller),
           ),
           const Gap(8),
-          _GroupDetailsTabs(
-            selectedTab: controller.selectedDetailsTab.value,
-            onSelectTab: controller.onSelectDetailsTab,
-          ),
+          _GroupDetailsTabsScope(controller: controller),
           const Gap(10),
           Expanded(
-            child: controller.selectedDetailsTab.value == GroupDetailsTab.chat
-                ? selectedContent
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                      bottom: AppSpacing.betweenSections,
-                    ),
-                    child: selectedContent,
-                  ),
+            child: _GroupDetailsContent(
+              controller: controller,
+              group: group,
+              members: members,
+            ),
           ),
         ],
       );
@@ -795,60 +775,226 @@ class _GroupDetailsTabs extends StatelessWidget {
   const _GroupDetailsTabs({
     required this.selectedTab,
     required this.onSelectTab,
+    required this.onSwipeTab,
   });
 
   final GroupDetailsTab selectedTab;
   final ValueChanged<GroupDetailsTab> onSelectTab;
+  final ValueChanged<int> onSwipeTab;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 56,
-    padding: const EdgeInsets.all(5),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
-          blurRadius: 18,
-          offset: const Offset(0, 8),
-        ),
-      ],
+  Widget build(BuildContext context) => AnimatedSegmentedTabs(
+    labels: [
+      context.l10n.leaderboardTitle,
+      context.l10n.goalsTabLabel,
+      context.l10n.chatTabLabel,
+    ],
+    selectedIndex: selectedTab.index,
+    onSelectIndex: (index) => onSelectTab(GroupDetailsTab.values[index]),
+    onSwipe: onSwipeTab,
+  );
+}
+
+class _GroupDetailsTabsScope extends StatelessWidget {
+  const _GroupDetailsTabsScope({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(
+    () => _GroupDetailsTabs(
+      selectedTab: controller.selectedDetailsTab.value,
+      onSelectTab: controller.onSelectDetailsTab,
+      onSwipeTab: controller.onSwipeDetailsTab,
     ),
+  );
+}
+
+class _GroupDetailsContent extends StatelessWidget {
+  const _GroupDetailsContent({
+    required this.controller,
+    required this.group,
+    required this.members,
+  });
+
+  final GroupsController controller;
+  final GroupEntity group;
+  final List<GroupMemberEntity> members;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final GroupDetailsTab selectedTab = controller.selectedDetailsTab.value;
+    final bool showLoadingOverlay =
+        selectedTab == GroupDetailsTab.goals &&
+            controller.isLoadingActivityProgress.value &&
+            controller.activityHeaders.isNotEmpty ||
+        selectedTab == GroupDetailsTab.chat &&
+            controller.isLoadingChat.value &&
+            controller.imageMessagesFor(group.id).isNotEmpty;
+
+    return RepaintBoundary(
+      child: SizedBox.expand(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: IndexedStack(
+                sizing: StackFit.expand,
+                index: selectedTab.index,
+                children: [
+                  _ScrollableDetailsTab(
+                    child: _RankingTab(
+                      controller: controller,
+                      group: group,
+                      members: members,
+                    ),
+                  ),
+                  _ScrollableDetailsTab(
+                    child: _GoalsTab(controller: controller, group: group),
+                  ),
+                  _ChatTab(controller: controller, group: group),
+                ],
+              ),
+            ),
+            _LoadingOverlay(isVisible: showLoadingOverlay),
+          ],
+        ),
+      ),
+    );
+  });
+}
+
+class _ScrollableDetailsTab extends StatelessWidget {
+  const _ScrollableDetailsTab({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+    child: child,
+  );
+}
+
+class _TabLoadingIndicator extends StatelessWidget {
+  const _TabLoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: SizedBox(
+      width: 28,
+      height: 28,
+      child: CircularProgressIndicator(
+        strokeWidth: 2.6,
+        color: context.colorTokens.primary,
+      ),
+    ),
+  );
+}
+
+class _InlineLoadingIndicator extends StatelessWidget {
+  const _InlineLoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 28),
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _TabPill(
-          label: context.l10n.leaderboardTitle,
-          isSelected: selectedTab == GroupDetailsTab.ranking,
-          onTap: () => onSelectTab(GroupDetailsTab.ranking),
-        ),
-        _TabPill(
-          label: context.l10n.goalsTabLabel,
-          isSelected: selectedTab == GroupDetailsTab.goals,
-          onTap: () => onSelectTab(GroupDetailsTab.goals),
-        ),
-        _TabPill(
-          label: context.l10n.chatTabLabel,
-          isSelected: selectedTab == GroupDetailsTab.chat,
-          onTap: () => onSelectTab(GroupDetailsTab.chat),
+        SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.4,
+            color: context.colorTokens.primary,
+          ),
         ),
       ],
     ),
   );
 }
 
-class _GoalsTab extends StatelessWidget {
+class _LoadingOverlay extends StatelessWidget {
+  const _LoadingOverlay({required this.isVisible});
+
+  final bool isVisible;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    ignoring: true,
+    child: AnimatedOpacity(
+      duration: const Duration(milliseconds: 160),
+      opacity: isVisible ? 1 : 0,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.colorTokens.surface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: context.colorTokens.borderUnfocused.withValues(
+                  alpha: 0.45,
+                ),
+              ),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(8),
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2.2),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _GoalsTab extends StatefulWidget {
   const _GoalsTab({required this.controller, required this.group});
 
   final GroupsController controller;
   final GroupEntity group;
 
   @override
+  State<_GoalsTab> createState() => _GoalsTabState();
+}
+
+class _GoalsTabState extends State<_GoalsTab> {
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  @override
+  void didUpdateWidget(_GoalsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.group.id != widget.group.id) {
+      _loadProgress();
+    }
+  }
+
+  void _loadProgress() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        widget.controller.loadActivityProgress();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) => Column(
-    children: [_GroupActivityDataView(controller: controller, group: group)],
+    children: [
+      _GroupActivityDataView(
+        controller: widget.controller,
+        group: widget.group,
+      ),
+    ],
   );
 }
 
@@ -863,6 +1009,9 @@ class _GroupActivityDataView extends StatelessWidget {
     return Obx(() {
       final List<GroupActivityProgressEntity> headers =
           controller.activityHeaders;
+      if (controller.isLoadingActivityProgress.value && headers.isEmpty) {
+        return const _InlineLoadingIndicator();
+      }
       if (headers.isEmpty) {
         return const SizedBox.shrink();
       }
@@ -964,11 +1113,17 @@ class _ActivityOverviewCard extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              header.isGoal ? Icons.flag_rounded : Icons.menu_book_rounded,
-              size: 24,
-              color: context.colorTokens.primary,
-            ),
+            header.isGoal
+                ? Icon(
+                    Icons.flag_rounded,
+                    size: 24,
+                    color: context.colorTokens.primary,
+                  )
+                : AppIcon(
+                    group.theme.iconName,
+                    size: 24,
+                    color: context.colorTokens.primary,
+                  ),
             const Gap(10),
             Expanded(
               child: Column(
@@ -1662,7 +1817,7 @@ class _ChatTab extends StatelessWidget {
       children: [
         Expanded(
           child: controller.isLoadingChat.value && messages.isEmpty
-              ? const Center(child: CircularProgressIndicator())
+              ? const _TabLoadingIndicator()
               : messages.isEmpty
               ? _ChatEmptyImages(
                   onTapSend: () => controller.onTapSendGroupImage(group.id),
@@ -1809,30 +1964,43 @@ class _SendImageBar extends StatelessWidget {
     onTap: isSending ? () {} : onTap,
     pressedScale: 0.98,
     child: Container(
-      height: 54,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 56,
+      padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.image_outlined, color: context.colorTokens.primary),
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Icon(
+              Icons.image_outlined,
+              color: context.colorTokens.primary,
+              size: 22,
+            ),
+          ),
           const Gap(10),
           Expanded(
             child: Text(
               isSending
                   ? context.l10n.groupSendingImage
                   : context.l10n.groupSendImageButton,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: context.textStyles.cardTitle.copyWith(fontSize: 15),
             ),
           ),
+          const Gap(10),
           Container(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               gradient: context.colorTokens.primaryGradient,
               shape: BoxShape.circle,
@@ -1861,46 +2029,6 @@ String _messageTime(DateTime date) {
   final DateTime local = date.toLocal();
   return "${local.hour.toString().padLeft(2, "0")}:"
       "${local.minute.toString().padLeft(2, "0")}";
-}
-
-class _TabPill extends StatelessWidget {
-  const _TabPill({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-    child: BounceTap(
-      onTap: onTap,
-      pressedScale: 0.98,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: isSelected ? context.colorTokens.primaryGradient : null,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodyMedium.copyWith(
-            color: isSelected
-                ? context.colorTokens.primaryForeground
-                : context.colorTokens.textBody,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    ),
-  );
 }
 
 class _DetailIconButton extends StatelessWidget {
@@ -2080,10 +2208,14 @@ class _GroupActionRow extends StatelessWidget {
               width: 44,
               height: 38,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: isDestructive ? color : color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(11),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(
+                icon,
+                color: isDestructive ? context.colorTokens.white : color,
+                size: 22,
+              ),
             ),
             const Gap(14),
             Expanded(

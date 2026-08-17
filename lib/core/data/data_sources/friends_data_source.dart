@@ -197,7 +197,7 @@ class FriendsDataSource {
     String code,
   ) async {
     try {
-      final String lookupCode = code.trim().replaceAll("@", "");
+      final String lookupCode = _normalizeLookupCode(code);
       if (lookupCode.isEmpty) {
         return const Right(null);
       }
@@ -296,4 +296,69 @@ class FriendsDataSource {
   int _colorFor(String userId, Map<String, dynamic>? row) =>
       (row?["accent_color_value"] as num?)?.toInt() ??
       GroupAvatarColors.byIndex(userId.hashCode);
+
+  String _normalizeLookupCode(String code) =>
+      _withoutDiacritics(code.trim().replaceAll("@", "").toLowerCase());
+
+  String _withoutDiacritics(String value) {
+    const Map<String, String> replacements = {
+      "á": "a",
+      "à": "a",
+      "ã": "a",
+      "â": "a",
+      "ä": "a",
+      "å": "a",
+      "ā": "a",
+      "ă": "a",
+      "ą": "a",
+      "ç": "c",
+      "ć": "c",
+      "č": "c",
+      "ď": "d",
+      "é": "e",
+      "è": "e",
+      "ê": "e",
+      "ë": "e",
+      "ē": "e",
+      "ė": "e",
+      "ę": "e",
+      "í": "i",
+      "ì": "i",
+      "î": "i",
+      "ï": "i",
+      "ī": "i",
+      "ł": "l",
+      "ñ": "n",
+      "ń": "n",
+      "ó": "o",
+      "ò": "o",
+      "õ": "o",
+      "ô": "o",
+      "ö": "o",
+      "ø": "o",
+      "ō": "o",
+      "ř": "r",
+      "ś": "s",
+      "š": "s",
+      "ß": "ss",
+      "ť": "t",
+      "ú": "u",
+      "ù": "u",
+      "û": "u",
+      "ü": "u",
+      "ū": "u",
+      "ý": "y",
+      "ÿ": "y",
+      "ž": "z",
+      "ź": "z",
+      "ż": "z",
+    };
+
+    final StringBuffer buffer = StringBuffer();
+    for (final int codePoint in value.runes) {
+      final String character = String.fromCharCode(codePoint);
+      buffer.write(replacements[character] ?? character);
+    }
+    return buffer.toString();
+  }
 }

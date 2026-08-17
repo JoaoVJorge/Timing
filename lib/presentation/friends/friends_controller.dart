@@ -22,6 +22,7 @@ import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/friends/find_friends_page.dart";
 import "package:timing/presentation/friends/friend_requests_page.dart";
 import "package:timing/presentation/friends/group_invitations_page.dart";
+import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -117,7 +118,12 @@ class FriendsController extends GetxController {
 
   Future<void> acceptGroupInvitation(GroupInvitationEntity invitation) async {
     final result = await _acceptGroupInvitationUseCase(invitation.id);
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+    await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
+      group,
+    ) async {
+      if (Get.isRegistered<GroupsController>()) {
+        await Get.find<GroupsController>().upsertJoinedGroup(group);
+      }
       groupInvitations.removeWhere((item) => item.id == invitation.id);
       _appNavigator.showSuccessSnackBar(
         _l10n?.joinedGroupMessage ?? "You joined the group",

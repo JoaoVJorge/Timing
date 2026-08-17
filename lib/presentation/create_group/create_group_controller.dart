@@ -99,7 +99,7 @@ class CreateGroupController extends GetxController
   List<int> get focusSessionCountOptions => const [1, 2, 3];
 
   @override
-  List<int> get timeGoalPresets => const [15, 30, 45, 60];
+  List<int> get timeGoalPresets => const [15, 30, 60];
 
   @override
   List<int> get totalTimeGoalPresets => const [1, 2, 3, 4];

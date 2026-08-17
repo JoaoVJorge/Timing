@@ -428,26 +428,27 @@ class GroupsDataSource {
   ) async {
     String operation = "rpc public.accept_group_invitation";
     try {
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "accept_group_invitation",
-        params: {"invitation_id": invitationId},
-      );
-      _logger.logResponse("rpc public.accept_group_invitation", response);
-      final List<dynamic> rows = response as List<dynamic>;
-      if (rows.isEmpty) {
-        throw StateError("accept_group_invitation returned no group row.");
-      }
-      final String groupId = (rows.first as Map)["id"] as String;
-      final Either<AppError, List<GroupEntity>> groupsResult =
-          await getGroups();
-      return groupsResult.fold(Left.new, (groups) {
-        for (final GroupEntity item in groups) {
-          if (item.id == groupId) {
-            return Right(item);
-          }
+      dynamic response;
+      try {
+        response = await _supabaseService.requireClient.rpc(
+          "accept_group_invitation",
+          params: {"invitation_id": invitationId},
+        );
+      } catch (error) {
+        if (!_isRpcSignatureError(error)) {
+          rethrow;
         }
-        throw StateError("Accepted group was not returned by getGroups.");
-      });
+        response = await _supabaseService.requireClient.rpc(
+          "accept_group_invitation",
+          params: {"target_invitation_id": invitationId},
+        );
+      }
+      _logger.logResponse(operation, response);
+      final String? groupId = _groupIdFromRpcResponse(response);
+      if (groupId != null) {
+        return await _groupByIdAfterMembershipChange(groupId);
+      }
+      return await _acceptInvitationDirectly(invitationId);
     } catch (error, stackTrace) {
       _logger.logError(
         "Supabase $operation failed",
@@ -479,31 +480,27 @@ class GroupsDataSource {
       if (code.isEmpty) {
         throw ArgumentError("Invite code must not be empty.");
       }
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "join_group_by_invite_code",
-        params: {"lookup_code": code},
-      );
-      _logger.logResponse("rpc public.join_group_by_invite_code", response);
-      final List<dynamic> rows = response as List<dynamic>;
-      if (rows.isEmpty) {
+      dynamic response;
+      try {
+        response = await _supabaseService.requireClient.rpc(
+          "join_group_by_invite_code",
+          params: {"lookup_code": code},
+        );
+      } catch (error) {
+        if (!_isRpcSignatureError(error)) {
+          rethrow;
+        }
+        response = await _supabaseService.requireClient.rpc(
+          "join_group_by_invite_code",
+          params: {"invite_code": code},
+        );
+      }
+      _logger.logResponse(operation, response);
+      final String? groupId = _groupIdFromRpcResponse(response);
+      if (groupId == null) {
         throw StateError("join_group_by_invite_code returned no group row.");
       }
-      final String groupId = (rows.first as Map)["id"] as String;
-      final Either<AppError, List<GroupEntity>> groupsResult =
-          await getGroups();
-      return groupsResult.fold(Left.new, (groups) {
-        GroupEntity? group;
-        for (final GroupEntity item in groups) {
-          if (item.id == groupId) {
-            group = item;
-            break;
-          }
-        }
-        if (group == null) {
-          throw StateError("Joined group was not returned by getGroups.");
-        }
-        return Right(group);
-      });
+      return await _groupByIdAfterMembershipChange(groupId);
     } catch (error, stackTrace) {
       _logger.logError(
         "Supabase $operation failed",
@@ -512,6 +509,95 @@ class GroupsDataSource {
       );
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
+  }
+
+  Future<Either<AppError, GroupEntity>> _acceptInvitationDirectly(
+    String invitationId,
+  ) async {
+    final String? userId = _supabaseService.currentUserId;
+    if (userId == null) {
+      throw StateError("User must be signed in to accept a group invitation.");
+    }
+
+    final dynamic invitationResponse = await _supabaseService.requireClient
+        .from("group_invitations")
+        .select("id, group_id, invitee_id, status")
+        .eq("id", invitationId)
+        .eq("invitee_id", userId)
+        .maybeSingle();
+    _logger.logResponse("select public.group_invitations", invitationResponse);
+    if (invitationResponse == null) {
+      throw StateError("Group invitation was not found for current user.");
+    }
+    final Map<String, dynamic> invitationRow = Map<String, dynamic>.from(
+      invitationResponse as Map,
+    );
+    final String groupId = invitationRow["group_id"] as String;
+    final String status = invitationRow["status"] as String? ?? "";
+    if (status != "pending" && status != "accepted") {
+      throw StateError("Group invitation is not pending.");
+    }
+
+    if (status == "pending") {
+      await _supabaseService.requireClient.from("group_members").upsert({
+        "group_id": groupId,
+        "user_id": userId,
+        "role": "member",
+        "joined_at": DateTime.now().toUtc().toIso8601String(),
+      }, onConflict: "group_id,user_id");
+      await _supabaseService.requireClient
+          .from("group_invitations")
+          .update({"status": "accepted"})
+          .eq("id", invitationId)
+          .eq("invitee_id", userId);
+    }
+
+    return await _groupByIdAfterMembershipChange(groupId);
+  }
+
+  Future<Either<AppError, GroupEntity>> _groupByIdAfterMembershipChange(
+    String groupId,
+  ) async {
+    final Either<AppError, List<GroupEntity>> groupsResult = await getGroups();
+    return groupsResult.fold(Left.new, (groups) {
+      for (final GroupEntity item in groups) {
+        if (item.id == groupId) {
+          return Right(item);
+        }
+      }
+      throw StateError("Joined group was not returned by getGroups.");
+    });
+  }
+
+  String? _groupIdFromRpcResponse(dynamic response) {
+    final Map<String, dynamic>? row = _firstRpcRow(response);
+    final Object? rawId = row?["id"] ?? row?["group_id"];
+    final String? id = rawId?.toString();
+    return id == null || id.isEmpty ? null : id;
+  }
+
+  Map<String, dynamic>? _firstRpcRow(dynamic response) {
+    if (response == null) {
+      return null;
+    }
+    if (response is List) {
+      if (response.isEmpty) {
+        return null;
+      }
+      final Object? first = response.first;
+      return first is Map ? Map<String, dynamic>.from(first) : null;
+    }
+    if (response is Map) {
+      return Map<String, dynamic>.from(response);
+    }
+    return null;
+  }
+
+  bool _isRpcSignatureError(Object error) {
+    final String description = SqlOperationAppError.describe(error);
+    return description.contains("PGRST202") ||
+        description.contains("42883") ||
+        description.contains("function") && description.contains("not found");
   }
 
   Future<Either<AppError, GroupEntity>> createGroup({
