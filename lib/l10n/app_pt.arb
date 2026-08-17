@@ -1264,5 +1264,6 @@
   "timerCurrentPagesLabel": "Páginas atuais",
   "timerNotesLabel": "Notas",
   "concentrationModeSheetDescription": "Quando ativado, o app ajuda você a se manter concentrado durante a atividade até pausar ou finalizar.",
-  "timerFocusLockWarning": "Modo de concentração ativo. Termine ou pause a sessão para sair."
+  "timerFocusLockWarning": "Modo de concentração ativo. Termine ou pause a sessão para sair.",
+  "timerProgressSemanticLabel": "Progresso: {percent}%"
 }

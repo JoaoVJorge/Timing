@@ -2933,4 +2933,9 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get timerFocusLockWarning =>
       'Modo de concentração ativo. Termine ou pause a sessão para sair.';
+
+  @override
+  String timerProgressSemanticLabel(int percent) {
+    return 'Progresso: $percent%';
+  }
 }

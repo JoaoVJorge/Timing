@@ -2908,4 +2908,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get timerFocusLockWarning =>
       'وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.';
+
+  @override
+  String timerProgressSemanticLabel(int percent) {
+    return 'التقدم: $percent٪';
+  }
 }

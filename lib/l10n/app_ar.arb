@@ -1574,5 +1574,6 @@
   "timerCurrentPagesLabel": "الصفحات الحالية",
   "timerNotesLabel": "ملاحظات",
   "concentrationModeSheetDescription": "عند التفعيل، يساعدك التطبيق على البقاء مركزا أثناء النشاط حتى توقفه مؤقتا أو تنهيه.",
-  "timerFocusLockWarning": "وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج."
+  "timerFocusLockWarning": "وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.",
+  "timerProgressSemanticLabel": "التقدم: {percent}٪"
 }

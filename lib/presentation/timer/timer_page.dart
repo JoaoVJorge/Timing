@@ -297,50 +297,60 @@ class _TimerProgressRing extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: size,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        CustomPaint(
-          size: Size.square(size),
-          painter: _TimerRingPainter(data: data),
+  Widget build(BuildContext context) {
+    final int percent = (data.progress.clamp(0, 1) * 100).round();
+    return MergeSemantics(
+      child: Semantics(
+        label: context.l10n.timerProgressSemanticLabel(percent),
+        child: SizedBox.square(
+          dimension: size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              ExcludeSemantics(
+                child: CustomPaint(
+                  size: Size.square(size),
+                  painter: _TimerRingPainter(data: data),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    data.mainLabel,
+                    style: TextStyle(
+                      color: data.accentColor,
+                      fontSize: math.max(15, size * 0.055),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Gap(math.max(10, size * 0.055)),
+                  Text(
+                    data.currentTime,
+                    style: TextStyle(
+                      color: context.colorTokens.white,
+                      fontSize: math.max(44, size * 0.22),
+                      fontWeight: FontWeight.w300,
+                      height: 1,
+                    ),
+                  ),
+                  Gap(math.max(8, size * 0.045)),
+                  Text(
+                    data.totalTimeLabel,
+                    style: TextStyle(
+                      color: context.colorTokens.white.withValues(alpha: 0.52),
+                      fontSize: math.max(14, size * 0.05),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              data.mainLabel,
-              style: TextStyle(
-                color: data.accentColor,
-                fontSize: math.max(15, size * 0.055),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Gap(math.max(10, size * 0.055)),
-            Text(
-              data.currentTime,
-              style: TextStyle(
-                color: context.colorTokens.white,
-                fontSize: math.max(44, size * 0.22),
-                fontWeight: FontWeight.w300,
-                height: 1,
-              ),
-            ),
-            Gap(math.max(8, size * 0.045)),
-            Text(
-              data.totalTimeLabel,
-              style: TextStyle(
-                color: context.colorTokens.white.withValues(alpha: 0.52),
-                fontSize: math.max(14, size * 0.05),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 class _TimerInfoRow extends StatelessWidget {
@@ -409,35 +419,42 @@ class _TimerActionButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 72,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: AppIcon(
-              iconPath,
-              color: context.colorTokens.white.withValues(alpha: 0.9),
-              size: 40,
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: label,
+    onTap: onTap,
+    child: ExcludeSemantics(
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: AppIcon(
+                  iconPath,
+                  color: context.colorTokens.white.withValues(alpha: 0.9),
+                  size: 40,
+                ),
+              ),
             ),
-          ),
+            const Gap(8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: context.colorTokens.white.withValues(alpha: 0.58),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
-        const Gap(8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: context.colorTokens.white.withValues(alpha: 0.58),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+      ),
     ),
   );
 }
@@ -456,35 +473,42 @@ class _TimerMainActionButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 96,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 78,
-            height: 78,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: context.colorTokens.transparent,
-              border: Border.all(color: accentColor, width: 3),
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: label,
+    onTap: onTap,
+    child: ExcludeSemantics(
+      child: SizedBox(
+        width: 96,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                width: 78,
+                height: 78,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colorTokens.transparent,
+                  border: Border.all(color: accentColor, width: 3),
+                ),
+                child: Icon(icon, color: accentColor, size: 36),
+              ),
             ),
-            child: Icon(icon, color: accentColor, size: 36),
-          ),
+            const Gap(13),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.colorTokens.white.withValues(alpha: 0.88),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
-        const Gap(13),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: context.colorTokens.white.withValues(alpha: 0.88),
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
+      ),
     ),
   );
 }

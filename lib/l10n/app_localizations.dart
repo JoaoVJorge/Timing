@@ -5295,6 +5295,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Focus mode is active. Finish or pause the session to leave.'**
   String get timerFocusLockWarning;
+
+  /// No description provided for @timerProgressSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {percent}%'**
+  String timerProgressSemanticLabel(int percent);
 }
 
 class _AppLocalizationsDelegate
