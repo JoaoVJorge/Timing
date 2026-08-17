@@ -38,9 +38,8 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
           ),
           child: AppEmptyState(
             icon: Icons.person_add_alt_1_rounded,
-            title: "Nenhum amigo disponível",
-            description:
-                "Adicione amigos antes de convidar mais pessoas para este grupo.",
+            title: context.l10n.groupInvitesNoFriendsTitle,
+            description: context.l10n.groupInvitesNoFriendsDescription,
           ),
         );
       }

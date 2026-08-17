@@ -1642,5 +1642,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "homeCategoryEmptyValue": "Add {item} to get started",
+  "@homeCategoryEmptyValue": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "groupInvitesNoFriendsTitle": "No friends available",
+  "groupInvitesNoFriendsDescription": "Add friends before inviting more people to this group.",
+  "groupInvitationsReceivedEmptyTitle": "No invitations received",
+  "groupInvitationsReceivedEmptyDescription": "When someone invites you to a group, it shows up here.",
+  "groupInvitationsSentEmptyTitle": "No invitations sent",
+  "groupInvitationsSentEmptyDescription": "Invitations you send for someone to join a group show up here."
 }

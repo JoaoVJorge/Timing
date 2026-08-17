@@ -1576,5 +1576,12 @@
   "concentrationModeSheetDescription": "Wenn aktiviert, hilft dir die App, während der Aktivität konzentriert zu bleiben, bis du pausierst oder beendest.",
   "timerFocusLockWarning": "Der Konzentrationsmodus ist aktiv. Beende oder pausiere die Sitzung, um die App zu verlassen.",
   "timerProgressSemanticLabel": "Fortschritt: {percent}%",
-  "homeStreakLabel": "{count, plural, one{{count} Tag in Folge} other{{count} Tage in Folge}}"
+  "homeStreakLabel": "{count, plural, one{{count} Tag in Folge} other{{count} Tage in Folge}}",
+  "homeCategoryEmptyValue": "Füge {item} hinzu, um zu starten",
+  "groupInvitesNoFriendsTitle": "Keine Freunde verfügbar",
+  "groupInvitesNoFriendsDescription": "Füge Freunde hinzu, bevor du weitere Personen in diese Gruppe einlädst.",
+  "groupInvitationsReceivedEmptyTitle": "Keine Einladungen erhalten",
+  "groupInvitationsReceivedEmptyDescription": "Wenn dich jemand in eine Gruppe einlädt, erscheint es hier.",
+  "groupInvitationsSentEmptyTitle": "Keine Einladungen gesendet",
+  "groupInvitationsSentEmptyDescription": "Einladungen, die du zum Beitritt einer Gruppe sendest, erscheinen hier."
 }

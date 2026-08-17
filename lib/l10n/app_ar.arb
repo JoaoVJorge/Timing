@@ -1576,5 +1576,12 @@
   "concentrationModeSheetDescription": "عند التفعيل، يساعدك التطبيق على البقاء مركزا أثناء النشاط حتى توقفه مؤقتا أو تنهيه.",
   "timerFocusLockWarning": "وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.",
   "timerProgressSemanticLabel": "التقدم: {percent}٪",
-  "homeStreakLabel": "{count, plural, zero{{count} يوم متتالٍ} one{يوم واحد متتالٍ} two{يومان متتاليان} few{{count} أيام متتالية} many{{count} يومًا متتاليًا} other{{count} يوم متتالٍ}}"
+  "homeStreakLabel": "{count, plural, zero{{count} يوم متتالٍ} one{يوم واحد متتالٍ} two{يومان متتاليان} few{{count} أيام متتالية} many{{count} يومًا متتاليًا} other{{count} يوم متتالٍ}}",
+  "homeCategoryEmptyValue": "أضف {item} للبدء",
+  "groupInvitesNoFriendsTitle": "لا يوجد أصدقاء متاحون",
+  "groupInvitesNoFriendsDescription": "أضف أصدقاء قبل دعوة المزيد من الأشخاص إلى هذه المجموعة.",
+  "groupInvitationsReceivedEmptyTitle": "لا توجد دعوات واردة",
+  "groupInvitationsReceivedEmptyDescription": "عندما يدعوك أحد إلى مجموعة، سيظهر هنا.",
+  "groupInvitationsSentEmptyTitle": "لا توجد دعوات مُرسَلة",
+  "groupInvitationsSentEmptyDescription": "الدعوات التي ترسلها للانضمام إلى مجموعة ستظهر هنا."
 }

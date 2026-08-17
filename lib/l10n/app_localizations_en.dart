@@ -2939,4 +2939,30 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeCategoryEmptyValue(String item) {
+    return 'Add $item to get started';
+  }
+
+  @override
+  String get groupInvitesNoFriendsTitle => 'No friends available';
+
+  @override
+  String get groupInvitesNoFriendsDescription =>
+      'Add friends before inviting more people to this group.';
+
+  @override
+  String get groupInvitationsReceivedEmptyTitle => 'No invitations received';
+
+  @override
+  String get groupInvitationsReceivedEmptyDescription =>
+      'When someone invites you to a group, it shows up here.';
+
+  @override
+  String get groupInvitationsSentEmptyTitle => 'No invitations sent';
+
+  @override
+  String get groupInvitationsSentEmptyDescription =>
+      'Invitations you send for someone to join a group show up here.';
 }

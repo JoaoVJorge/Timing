@@ -2976,4 +2976,30 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeCategoryEmptyValue(String item) {
+    return 'Füge $item hinzu, um zu starten';
+  }
+
+  @override
+  String get groupInvitesNoFriendsTitle => 'Keine Freunde verfügbar';
+
+  @override
+  String get groupInvitesNoFriendsDescription =>
+      'Füge Freunde hinzu, bevor du weitere Personen in diese Gruppe einlädst.';
+
+  @override
+  String get groupInvitationsReceivedEmptyTitle => 'Keine Einladungen erhalten';
+
+  @override
+  String get groupInvitationsReceivedEmptyDescription =>
+      'Wenn dich jemand in eine Gruppe einlädt, erscheint es hier.';
+
+  @override
+  String get groupInvitationsSentEmptyTitle => 'Keine Einladungen gesendet';
+
+  @override
+  String get groupInvitationsSentEmptyDescription =>
+      'Einladungen, die du zum Beitritt einer Gruppe sendest, erscheinen hier.';
 }

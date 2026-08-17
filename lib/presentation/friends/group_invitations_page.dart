@@ -161,10 +161,10 @@ class _IncomingInvitationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (invitations.isEmpty) {
-      return const _GroupInvitationEmptyState(
+      return _GroupInvitationEmptyState(
         icon: Icons.inbox_rounded,
-        title: "Nenhum convite recebido",
-        description: "Quando alguem convidar voce para um grupo, aparece aqui.",
+        title: context.l10n.groupInvitationsReceivedEmptyTitle,
+        description: context.l10n.groupInvitationsReceivedEmptyDescription,
       );
     }
 
@@ -243,11 +243,10 @@ class _SentInvitationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (invitations.isEmpty) {
-      return const _GroupInvitationEmptyState(
+      return _GroupInvitationEmptyState(
         icon: Icons.send_rounded,
-        title: "Nenhum convite enviado",
-        description:
-            "Os convites que voce enviar para alguem entrar em um grupo aparecem aqui.",
+        title: context.l10n.groupInvitationsSentEmptyTitle,
+        description: context.l10n.groupInvitationsSentEmptyDescription,
       );
     }
 

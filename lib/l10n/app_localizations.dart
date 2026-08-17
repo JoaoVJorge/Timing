@@ -5307,6 +5307,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{{count}-day streak} other{{count}-day streak}}'**
   String homeStreakLabel(int count);
+
+  /// No description provided for @homeCategoryEmptyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {item} to get started'**
+  String homeCategoryEmptyValue(String item);
+
+  /// No description provided for @groupInvitesNoFriendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends available'**
+  String get groupInvitesNoFriendsTitle;
+
+  /// No description provided for @groupInvitesNoFriendsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friends before inviting more people to this group.'**
+  String get groupInvitesNoFriendsDescription;
+
+  /// No description provided for @groupInvitationsReceivedEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations received'**
+  String get groupInvitationsReceivedEmptyTitle;
+
+  /// No description provided for @groupInvitationsReceivedEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone invites you to a group, it shows up here.'**
+  String get groupInvitationsReceivedEmptyDescription;
+
+  /// No description provided for @groupInvitationsSentEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No invitations sent'**
+  String get groupInvitationsSentEmptyTitle;
+
+  /// No description provided for @groupInvitationsSentEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations you send for someone to join a group show up here.'**
+  String get groupInvitationsSentEmptyDescription;
 }
 
 class _AppLocalizationsDelegate

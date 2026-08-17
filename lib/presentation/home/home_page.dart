@@ -386,5 +386,5 @@ class _HomeActivitiesSection extends StatelessWidget {
 
 String _emptyCategoryValue(BuildContext context, TimeCategoryType category) {
   final String item = category.itemNoun(context).toLowerCase();
-  return "Adicione $item para começar";
+  return context.l10n.homeCategoryEmptyValue(item);
 }

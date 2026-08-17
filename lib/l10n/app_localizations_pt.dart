@@ -2949,4 +2949,30 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String homeCategoryEmptyValue(String item) {
+    return 'Adicione $item para começar';
+  }
+
+  @override
+  String get groupInvitesNoFriendsTitle => 'Nenhum amigo disponível';
+
+  @override
+  String get groupInvitesNoFriendsDescription =>
+      'Adicione amigos antes de convidar mais pessoas para este grupo.';
+
+  @override
+  String get groupInvitationsReceivedEmptyTitle => 'Nenhum convite recebido';
+
+  @override
+  String get groupInvitationsReceivedEmptyDescription =>
+      'Quando alguém convidar você para um grupo, aparece aqui.';
+
+  @override
+  String get groupInvitationsSentEmptyTitle => 'Nenhum convite enviado';
+
+  @override
+  String get groupInvitationsSentEmptyDescription =>
+      'Os convites que você enviar para alguém entrar em um grupo aparecem aqui.';
 }

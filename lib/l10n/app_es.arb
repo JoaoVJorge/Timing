@@ -1266,5 +1266,12 @@
   "concentrationModeSheetDescription": "Cuando está activado, la app te ayuda a mantenerte concentrado durante la actividad hasta que pauses o finalices.",
   "timerFocusLockWarning": "El modo de concentración está activo. Termina o pausa la sesión para salir.",
   "timerProgressSemanticLabel": "Progreso: {percent}%",
-  "homeStreakLabel": "{count, plural, one{{count} día seguido} other{{count} días seguidos}}"
+  "homeStreakLabel": "{count, plural, one{{count} día seguido} other{{count} días seguidos}}",
+  "homeCategoryEmptyValue": "Agrega {item} para empezar",
+  "groupInvitesNoFriendsTitle": "No hay amigos disponibles",
+  "groupInvitesNoFriendsDescription": "Agrega amigos antes de invitar a más personas a este grupo.",
+  "groupInvitationsReceivedEmptyTitle": "No recibiste invitaciones",
+  "groupInvitationsReceivedEmptyDescription": "Cuando alguien te invite a un grupo, aparecerá aquí.",
+  "groupInvitationsSentEmptyTitle": "No enviaste invitaciones",
+  "groupInvitationsSentEmptyDescription": "Las invitaciones que envíes para unirse a un grupo aparecerán aquí."
 }
