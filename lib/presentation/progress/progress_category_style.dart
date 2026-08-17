@@ -7,9 +7,9 @@ import "package:timing/theme/accent_presets.dart";
 /// only the small tinted icon badges use these hues, the text stays neutral.
 extension ProgressCategoryStyleX on TimeCategoryType {
   Color get accentColor => switch (this) {
-    TimeCategoryType.studying => ProgressAccentColors.purple,
-    TimeCategoryType.exercises => ProgressAccentColors.green,
-    TimeCategoryType.reading => ProgressAccentColors.orange,
+    TimeCategoryType.studying => ProgressAccentColors.green,
+    TimeCategoryType.exercises => ProgressAccentColors.orange,
+    TimeCategoryType.reading => ProgressAccentColors.purple,
     TimeCategoryType.hobbies => ProgressAccentColors.pink,
   };
 }

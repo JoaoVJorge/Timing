@@ -491,7 +491,7 @@ class _EvolutionBarChartPainter extends CustomPainter {
       return "$value";
     }
     final int minutes = (value / 60).round();
-    return "${minutes}m";
+    return "$minutes min";
   }
 
   String _formatValueLabel(int value) {
@@ -500,11 +500,11 @@ class _EvolutionBarChartPainter extends CustomPainter {
     }
     final int minutes = (value / 60).round();
     if (minutes < 60) {
-      return "${minutes}m";
+      return "$minutes min";
     }
     final int hours = minutes ~/ 60;
     final int restMinutes = minutes % 60;
-    return restMinutes == 0 ? "${hours}h" : "${hours}h ${restMinutes}m";
+    return restMinutes == 0 ? "${hours}h" : "${hours}h $restMinutes min";
   }
 
   _HighlightedBar _highlightedBarForPosition(

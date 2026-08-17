@@ -59,13 +59,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(
-                color: danger.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: danger, shape: BoxShape.circle),
               child: Icon(
                 Icons.delete_outline_rounded,
-                color: danger,
+                color: context.colorTokens.white,
                 size: 28,
               ),
             ),

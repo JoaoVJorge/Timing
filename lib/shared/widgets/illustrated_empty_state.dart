@@ -11,6 +11,7 @@ class IllustratedEmptyState extends StatelessWidget {
     required this.onTapAction,
     required this.suggestionsTitle,
     required this.suggestions,
+    this.onTapSuggestion,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class IllustratedEmptyState extends StatelessWidget {
   final VoidCallback onTapAction;
   final String suggestionsTitle;
   final List<String> suggestions;
+  final ValueChanged<String>? onTapSuggestion;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -119,7 +121,12 @@ class IllustratedEmptyState extends StatelessWidget {
           runSpacing: 10,
           children: [
             for (final String suggestion in suggestions)
-              _SuggestionChip(label: suggestion),
+              _SuggestionChip(
+                label: suggestion,
+                onTap: onTapSuggestion == null
+                    ? null
+                    : () => onTapSuggestion!(suggestion),
+              ),
           ],
         ),
       ],
@@ -184,32 +191,43 @@ class _Line extends StatelessWidget {
 }
 
 class _SuggestionChip extends StatelessWidget {
-  const _SuggestionChip({required this.label});
+  const _SuggestionChip({required this.label, this.onTap});
 
   final String label;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 38, minWidth: 88),
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(
-        color: context.colorTokens.primaryPastel.withValues(alpha: 0.42),
-        width: 1.1,
+  Widget build(BuildContext context) {
+    final Widget chip = Container(
+      constraints: const BoxConstraints(minHeight: 38, minWidth: 88),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: onTap == null
+            ? context.colorTokens.surface
+            : context.colorTokens.primaryVeryLight.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: context.colorTokens.primaryPastel.withValues(alpha: 0.42),
+          width: 1.1,
+        ),
       ),
-    ),
-    child: Text(
-      label,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.bodyMedium.copyWith(
-        color: context.colorTokens.primary,
-        fontSize: 13,
-        fontWeight: FontWeight.w800,
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyMedium.copyWith(
+          color: context.colorTokens.primary,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+        ),
       ),
-    ),
-  );
+    );
+
+    if (onTap == null) {
+      return chip;
+    }
+
+    return BounceTap(onTap: onTap!, child: chip);
+  }
 }

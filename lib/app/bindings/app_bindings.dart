@@ -37,6 +37,7 @@ class AppBindings extends Bindings {
         signOutUseCase: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),
+        timerNotificationService: Get.find(),
         localStorageService: Get.find(),
         initialAccentColorValue:
             localStorage.getInt(LocalStorageKeys.cachedAccentColorValue.name) ??

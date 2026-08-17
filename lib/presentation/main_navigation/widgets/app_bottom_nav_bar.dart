@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/main_navigation/enums/bottom_nav_button_type.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -47,6 +48,7 @@ class AppBottomNavBar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppIcon(button.iconName, size: 24, color: color),
+                      const Gap(3),
                       Text(
                         button.localizedLabel(context),
                         maxLines: 1,

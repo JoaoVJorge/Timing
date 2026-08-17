@@ -38,38 +38,7 @@ class LoginPage extends StatelessWidget {
                 children: [
                   const Gap(4),
                   const _Brand(),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const _HeroIllustration(),
-                        const Gap(10),
-                        Text(
-                          context.l10n.loginHeadline,
-                          textAlign: TextAlign.center,
-                          style: context.textStyles.black32.copyWith(
-                            color: _authNavy,
-                            fontSize: 34,
-                            height: 1.08,
-                          ),
-                        ),
-                        const Gap(8),
-                        const _PageIndicator(),
-                        const Gap(10),
-                        Text(
-                          context.l10n.loginSubtitle,
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.bodyLarge.copyWith(
-                            color: _authMuted,
-                            fontSize: 15,
-                            height: 1.32,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const Expanded(child: _LoginHeroContent()),
                   const Gap(8),
                   _AuthCard(controller: controller),
                   Gap(12),
@@ -143,17 +112,75 @@ class _Brand extends StatelessWidget {
   );
 }
 
+class _LoginHeroContent extends StatelessWidget {
+  const _LoginHeroContent();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      const Flexible(flex: 6, child: _HeroIllustration()),
+      const Gap(8),
+      Text(
+        context.l10n.loginHeadline,
+        textAlign: TextAlign.center,
+        style: context.textStyles.black32.copyWith(
+          color: _authNavy,
+          fontSize: 34,
+          height: 1.08,
+        ),
+      ),
+      const Gap(8),
+      const _PageIndicator(),
+      const Gap(10),
+      Text(
+        context.l10n.loginSubtitle,
+        textAlign: TextAlign.center,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodyLarge.copyWith(
+          color: _authMuted,
+          fontSize: 15,
+          height: 1.32,
+        ),
+      ),
+      const Spacer(flex: 2),
+    ],
+  );
+}
+
 class _HeroIllustration extends StatelessWidget {
   const _HeroIllustration();
 
+  static const double _sourceWidth = 1024;
+  static const double _sourceHeight = 1536;
+  static const double _cropTop = 320;
+  static const double _cropHeight = 680;
+
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 238,
-    width: double.infinity,
-    child: Image.asset(
-      "assets/images/login_page.png",
-      fit: BoxFit.cover,
-      alignment: Alignment.center,
+  Widget build(BuildContext context) => AspectRatio(
+    aspectRatio: _sourceWidth / _cropHeight,
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final double scale = constraints.maxWidth / _sourceWidth;
+
+        return ClipRect(
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: -_cropTop * scale,
+                width: constraints.maxWidth,
+                height: _sourceHeight * scale,
+                child: Image.asset(
+                  "assets/images/login_page.png",
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     ),
   );
 }

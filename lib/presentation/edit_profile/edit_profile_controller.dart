@@ -100,7 +100,6 @@ class EditProfileController extends GetxController {
       subtitle: context.l10n.profilePhotoSourceSubtitle,
       cameraLabel: context.l10n.photoCameraLabel,
       galleryLabel: context.l10n.photoGalleryLabel,
-      cancelLabel: context.l10n.cancelButton,
     );
   }
 

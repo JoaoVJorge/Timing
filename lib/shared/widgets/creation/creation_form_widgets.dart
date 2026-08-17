@@ -3,6 +3,7 @@ import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/shared/widgets/centered_wrap_grid.dart";
 import "package:timing/theme/subject_colors.dart";
 
 /// Rounded name field used at the top of every creation form: a tinted icon
@@ -101,22 +102,25 @@ class CreationSectionHeader extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
+    this.description,
     super.key,
   });
 
   final IconData icon;
   final String label;
   final Color accent;
+  final String? description;
 
   @override
   Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Icon(icon, size: 24, color: accent),
       const Gap(10),
       Expanded(
         child: Text(
           label,
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: context.colorTokens.textBody,
@@ -125,6 +129,44 @@ class CreationSectionHeader extends StatelessWidget {
           ),
         ),
       ),
+      if (description != null) ...[
+        const Gap(8),
+        Tooltip(
+          message: description!,
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 5),
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: context.colorTokens.dialogSurface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: context.colorTokens.divider),
+            boxShadow: [
+              BoxShadow(
+                color: context.colorTokens.surfaceShadow,
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          textStyle: context.textStyles.bodySmall.copyWith(
+            color: context.colorTokens.dialogText,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            height: 1.25,
+          ),
+          child: Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: AppIcon("info", size: 14, color: accent),
+          ),
+        ),
+      ],
     ],
   );
 }
@@ -184,6 +226,8 @@ class CreationOptionCard extends StatelessWidget {
     required this.optionColor,
     required this.isSelected,
     required this.onTap,
+    this.iconSize = 30,
+    this.iconBoxSize = 48,
     super.key,
   });
 
@@ -193,6 +237,8 @@ class CreationOptionCard extends StatelessWidget {
   final Color optionColor;
   final bool isSelected;
   final VoidCallback onTap;
+  final double iconSize;
+  final double iconBoxSize;
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +274,8 @@ class CreationOptionCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: iconBoxSize,
+              height: iconBoxSize,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: optionColor.withValues(alpha: isDark ? 0.15 : 0.12),
@@ -238,7 +284,7 @@ class CreationOptionCard extends StatelessWidget {
                   color: optionColor.withValues(alpha: isSelected ? 0.72 : 0.2),
                 ),
               ),
-              child: Icon(icon, color: optionColor, size: 30),
+              child: Icon(icon, color: optionColor, size: iconSize),
             ),
             const Gap(14),
             Expanded(
@@ -325,7 +371,7 @@ class CreationColorChoice extends StatelessWidget {
           ? DecoratedBox(
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               child: const Center(
-                child: AppIcon("check", size: 14, color: Colors.white),
+                child: AppIcon("check", size: 10, color: Colors.white),
               ),
             )
           : null,
@@ -365,7 +411,7 @@ class CreationColorSection extends StatelessWidget {
         label: label,
         accent: accent,
       ),
-      child: Wrap(
+      child: CenteredBalancedRows(
         spacing: 10,
         runSpacing: 10,
         children: colors
@@ -414,11 +460,7 @@ class CreationSubmitButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 180),
-        opacity: !isEnabled
-            ? 0.62
-            : isLoading
-            ? 0.7
-            : 1,
+        opacity: !isEnabled ? 0.62 : 1,
         child: Container(
           width: double.infinity,
           height: 60,
@@ -437,10 +479,11 @@ class CreationSubmitButton extends StatelessWidget {
           child: isLoading
               ? Center(
                   child: SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: 30,
+                    height: 30,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: 3.2,
+                      strokeCap: StrokeCap.round,
                       color: context.colorTokens.white,
                     ),
                   ),

@@ -3,9 +3,12 @@ String formatDurationLong(Duration duration) {
   final int minutes = duration.inMinutes.remainder(60);
 
   if (hours > 0) {
-    return "${hours}h ${minutes}m";
+    if (minutes == 0) {
+      return "${hours}h";
+    }
+    return "${hours}h $minutes min";
   }
-  return "${minutes}m";
+  return "$minutes min";
 }
 
 String formatDurationCompact(Duration duration) {

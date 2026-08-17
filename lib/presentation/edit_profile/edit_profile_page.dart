@@ -26,6 +26,7 @@ class EditProfilePage extends StatelessWidget {
         title: context.l10n.myProfileTitle,
         showBackButton: true,
       ),
+      bottomBar: _SaveChangesButton(controller: controller),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,52 +176,61 @@ class EditProfilePage extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            const Gap(28),
-            Obx(
-              () => BounceTap(
-                pressedScale: 0.97,
-                onTap: controller.isSaving.value ? () {} : controller.onTapSave,
-                child: Container(
-                  width: double.infinity,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: context.colorTokens.primaryGradient,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.center,
-                  child: controller.isSaving.value
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const AppIcon(
-                              "check",
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            const Gap(8),
-                            Text(
-                              context.l10n.saveChangesButton,
-                              style: context.textStyles.textPrimaryButton,
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-            ),
-            const Gap(24),
           ],
         ),
       ),
     );
   }
+}
+
+class _SaveChangesButton extends StatelessWidget {
+  const _SaveChangesButton({required this.controller});
+
+  final EditProfileController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(
+    () => BounceTap(
+      pressedScale: 0.97,
+      onTap: controller.isSaving.value ? () {} : controller.onTapSave,
+      child: Container(
+        width: double.infinity,
+        height: 52,
+        decoration: BoxDecoration(
+          gradient: context.colorTokens.primaryGradient,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.primary.withValues(alpha: 0.24),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: controller.isSaving.value
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppIcon("check", size: 16, color: Colors.white),
+                  const Gap(8),
+                  Text(
+                    context.l10n.saveChangesButton,
+                    style: context.textStyles.textPrimaryButton,
+                  ),
+                ],
+              ),
+      ),
+    ),
+  );
 }
 
 class _ProfilePhotoPreview extends StatelessWidget {

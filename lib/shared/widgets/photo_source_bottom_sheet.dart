@@ -10,20 +10,19 @@ Future<ImageSource?> showPhotoSourceBottomSheet({
   required String subtitle,
   required String cameraLabel,
   required String galleryLabel,
-  required String cancelLabel,
-  bool isCompact = false,
 }) => showModalBottomSheet<ImageSource>(
   context: context,
   isScrollControlled: true,
-  backgroundColor: context.colorTokens.transparent,
-  barrierColor: context.colorTokens.black.withValues(alpha: 0.54),
+  useSafeArea: true,
+  backgroundColor: context.colorTokens.surface,
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+  ),
   builder: (context) => _PhotoSourceBottomSheet(
     title: title,
     subtitle: subtitle,
     cameraLabel: cameraLabel,
     galleryLabel: galleryLabel,
-    cancelLabel: cancelLabel,
-    isCompact: isCompact,
   ),
 );
 
@@ -33,97 +32,68 @@ class _PhotoSourceBottomSheet extends StatelessWidget {
     required this.subtitle,
     required this.cameraLabel,
     required this.galleryLabel,
-    required this.cancelLabel,
-    required this.isCompact,
   });
 
   final String title;
   final String subtitle;
   final String cameraLabel;
   final String galleryLabel;
-  final String cancelLabel;
-  final bool isCompact;
 
   @override
   Widget build(BuildContext context) => SafeArea(
-    top: false,
-    child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, 12, 20, isCompact ? 8 : 12),
-      decoration: BoxDecoration(
-        color: context.colorTokens.dialogSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: isCompact ? 72 : 126,
-            height: isCompact ? 5 : 7,
-            decoration: BoxDecoration(
-              color: context.colorTokens.textHint.withValues(alpha: 0.28),
-              borderRadius: BorderRadius.circular(999),
+          Center(
+            child: Container(
+              width: 54,
+              height: 6,
+              decoration: BoxDecoration(
+                color: context.colorTokens.borderUnfocused,
+                borderRadius: BorderRadius.circular(999),
+              ),
             ),
           ),
-          Gap(isCompact ? 16 : 30),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: context.textStyles.extraBold24.copyWith(
-              color: context.colorTokens.dialogText,
-              fontSize: isCompact ? 21 : 25,
-              fontWeight: FontWeight.w900,
-              height: 1.08,
-            ),
+          const Gap(26),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _PhotoSourceHeroBadge(),
+              const Gap(18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: context.textStyles.extraBold24),
+                    const Gap(8),
+                    Text(
+                      subtitle,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        color: context.colorTokens.textHint,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Gap(isCompact ? 4 : 6),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            maxLines: isCompact ? 2 : null,
-            overflow: isCompact ? TextOverflow.ellipsis : null,
-            style: context.textStyles.bodyLarge.copyWith(
-              color: context.colorTokens.dialogTextMuted,
-              fontSize: isCompact ? 14 : 17,
-              fontWeight: FontWeight.w600,
-              height: 1.22,
-            ),
-          ),
-          Gap(isCompact ? 16 : 28),
+          const Gap(28),
           _PhotoSourceAction(
             icon: Icons.photo_camera_rounded,
             label: cameraLabel,
             onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            isCompact: isCompact,
           ),
-          Gap(isCompact ? 8 : 14),
+          const Gap(10),
           _PhotoSourceAction(
             icon: Icons.photo_library_rounded,
             label: galleryLabel,
             onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            isCompact: isCompact,
-          ),
-          Gap(isCompact ? 12 : 22),
-          Divider(height: 1, color: context.colorTokens.divider),
-          Gap(isCompact ? 6 : 12),
-          BounceTap(
-            onTap: () => Navigator.of(context).pop(),
-            pressedScale: 0.98,
-            child: SizedBox(
-              height: isCompact ? 38 : 48,
-              child: Center(
-                child: Text(
-                  cancelLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(
-                    color: context.colorTokens.primary,
-                    fontSize: isCompact ? 15 : 17,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -131,72 +101,102 @@ class _PhotoSourceBottomSheet extends StatelessWidget {
   );
 }
 
+class _PhotoSourceHeroBadge extends StatelessWidget {
+  const _PhotoSourceHeroBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.colorTokens;
+
+    return Container(
+      width: 92,
+      height: 92,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: tokens.primaryVeryLight,
+        border: Border.all(color: tokens.primary.withValues(alpha: 0.16)),
+      ),
+      child: Center(
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: tokens.primary.withValues(alpha: 0.10),
+          ),
+          child: Icon(
+            Icons.add_photo_alternate_rounded,
+            color: tokens.primary,
+            size: 38,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PhotoSourceAction extends StatelessWidget {
   const _PhotoSourceAction({
     required this.icon,
     required this.label,
     required this.onTap,
-    required this.isCompact,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final bool isCompact;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    pressedScale: 0.98,
-    child: Container(
-      constraints: BoxConstraints(minHeight: isCompact ? 64 : 88),
-      padding: EdgeInsets.fromLTRB(
-        14,
-        isCompact ? 9 : 14,
-        12,
-        isCompact ? 9 : 14,
-      ),
-      decoration: BoxDecoration(
-        color: context.colorTokens.dialogSurface,
-        borderRadius: BorderRadius.circular(isCompact ? 14 : 18),
-        border: Border.all(color: context.colorTokens.borderUnfocused),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: isCompact ? 44 : 66,
-            height: isCompact ? 44 : 66,
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight,
-              borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
-            ),
-            child: Icon(
-              icon,
-              color: context.colorTokens.primary,
-              size: isCompact ? 23 : 31,
-            ),
+  Widget build(BuildContext context) {
+    final Color color = context.colorTokens.primary;
+
+    return BounceTap(
+      onTap: onTap,
+      pressedScale: 0.98,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 78),
+        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        decoration: BoxDecoration(
+          color: context.colorTokens.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: context.colorTokens.borderUnfocused.withValues(alpha: 0.7),
           ),
-          Gap(isCompact ? 14 : 24),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.dialogText,
-                fontSize: isCompact ? 16 : 19,
-                fontWeight: FontWeight.w800,
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.surfaceShadow,
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.14),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const Gap(14),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.cardTitle.copyWith(
+                  color: context.colorTokens.textBody,
+                ),
               ),
             ),
-          ),
-          Gap(isCompact ? 8 : 12),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: context.colorTokens.primary,
-            size: isCompact ? 26 : 34,
-          ),
-        ],
+            const Gap(10),
+            Icon(Icons.chevron_right_rounded, color: color, size: 26),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
