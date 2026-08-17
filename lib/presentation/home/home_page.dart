@@ -79,6 +79,16 @@ class _Greeting extends StatelessWidget {
             style: context.textStyles.caption,
           ),
         ),
+        Obx(() {
+          final int streak = controller.currentStreak.value;
+          if (streak < 2) {
+            return const SizedBox.shrink();
+          }
+          return Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.betweenRelated),
+            child: _StreakChip(days: streak),
+          );
+        }),
       ],
     );
   }
@@ -98,6 +108,39 @@ class _Greeting extends StatelessWidget {
       );
     }
     return context.l10n.homeSubtitleStart;
+  }
+}
+
+class _StreakChip extends StatelessWidget {
+  const _StreakChip({required this.days});
+
+  final int days;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent = context.colorTokens.primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accent.withValues(alpha: 0.24)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_fire_department_rounded, color: accent, size: 18),
+          const Gap(6),
+          Text(
+            context.l10n.homeStreakLabel(days),
+            style: context.textStyles.caption.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

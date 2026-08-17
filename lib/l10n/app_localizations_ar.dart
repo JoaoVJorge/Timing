@@ -2913,4 +2913,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String timerProgressSemanticLabel(int percent) {
     return 'التقدم: $percent٪';
   }
+
+  @override
+  String homeStreakLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يوم متتالٍ',
+      many: '$count يومًا متتاليًا',
+      few: '$count أيام متتالية',
+      two: 'يومان متتاليان',
+      one: 'يوم واحد متتالٍ',
+      zero: '$count يوم متتالٍ',
+    );
+    return '$_temp0';
+  }
 }

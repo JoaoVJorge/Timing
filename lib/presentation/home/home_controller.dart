@@ -50,6 +50,9 @@ class HomeController extends GetxController {
 
   Rx<DailyProgressEntity> get todayProgress => _dailyProgressService.today;
 
+  /// Consecutive days of studying, surfaced as a streak on Home.
+  RxInt get currentStreak => _dailyProgressService.currentStreak;
+
   @override
   void onInit() {
     super.onInit();

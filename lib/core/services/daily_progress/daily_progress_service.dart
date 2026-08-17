@@ -18,6 +18,11 @@ class DailyProgressService {
 
   final Rx<DailyProgressEntity> today = const DailyProgressEntity().obs;
 
+  /// Number of consecutive days, ending today (or yesterday, as a one-day
+  /// grace period before the streak is considered broken), on which the user
+  /// logged at least some focus time. Derived from [_byDate]; no extra storage.
+  final RxInt currentStreak = 0.obs;
+
   List<DailyProgressEntity> get allProgress => _byDate.values.toList();
 
   bool get isEmpty => _byDate.isEmpty;
@@ -110,7 +115,29 @@ class DailyProgressService {
     await _persist();
   }
 
-  void _refreshToday() => today.value = _current();
+  void _refreshToday() {
+    today.value = _current();
+    _refreshStreak();
+  }
+
+  bool _hasFocus(DateTime date) =>
+      (_byDate[dateKey(date)]?.focusSeconds ?? 0) > 0;
+
+  void _refreshStreak() {
+    final DateTime now = DateTime.now();
+    DateTime cursor = DateTime(now.year, now.month, now.day);
+    // Today counting as "not yet studied" doesn't break a streak from
+    // yesterday, so start one day back when today has no focus time yet.
+    if (!_hasFocus(cursor)) {
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    int streak = 0;
+    while (_hasFocus(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    currentStreak.value = streak;
+  }
 
   Future<void> _persist() async {
     final Map<String, dynamic> encoded = _byDate.map(

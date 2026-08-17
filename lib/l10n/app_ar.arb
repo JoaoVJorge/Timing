@@ -1575,5 +1575,6 @@
   "timerNotesLabel": "ملاحظات",
   "concentrationModeSheetDescription": "عند التفعيل، يساعدك التطبيق على البقاء مركزا أثناء النشاط حتى توقفه مؤقتا أو تنهيه.",
   "timerFocusLockWarning": "وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.",
-  "timerProgressSemanticLabel": "التقدم: {percent}٪"
+  "timerProgressSemanticLabel": "التقدم: {percent}٪",
+  "homeStreakLabel": "{count, plural, zero{{count} يوم متتالٍ} one{يوم واحد متتالٍ} two{يومان متتاليان} few{{count} أيام متتالية} many{{count} يومًا متتاليًا} other{{count} يوم متتالٍ}}"
 }

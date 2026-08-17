@@ -1634,5 +1634,13 @@
         "type": "int"
       }
     }
+  },
+  "homeStreakLabel": "{count, plural, one{{count}-day streak} other{{count}-day streak}}",
+  "@homeStreakLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

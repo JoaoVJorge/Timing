@@ -1265,5 +1265,6 @@
   "timerNotesLabel": "Notas",
   "concentrationModeSheetDescription": "Cuando está activado, la app te ayuda a mantenerte concentrado durante la actividad hasta que pauses o finalices.",
   "timerFocusLockWarning": "El modo de concentración está activo. Termina o pausa la sesión para salir.",
-  "timerProgressSemanticLabel": "Progreso: {percent}%"
+  "timerProgressSemanticLabel": "Progreso: {percent}%",
+  "homeStreakLabel": "{count, plural, one{{count} día seguido} other{{count} días seguidos}}"
 }

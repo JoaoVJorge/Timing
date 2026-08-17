@@ -5301,6 +5301,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Progress: {percent}%'**
   String timerProgressSemanticLabel(int percent);
+
+  /// No description provided for @homeStreakLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count}-day streak} other{{count}-day streak}}'**
+  String homeStreakLabel(int count);
 }
 
 class _AppLocalizationsDelegate
