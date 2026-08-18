@@ -3,6 +3,7 @@ import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/id_generator.dart";
 
 class AddSubjectUseCase {
   AddSubjectUseCase({required this._subjectsRepository});
@@ -26,7 +27,7 @@ class AddSubjectUseCase {
 
     return getResult.fold((error) async => Left(error), (subjects) async {
       final SubjectEntity newSubject = SubjectEntity(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: generateEntityId(),
         name: name,
         category: category,
         colorValue: colorValue,

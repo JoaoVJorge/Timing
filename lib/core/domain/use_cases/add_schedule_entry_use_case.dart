@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:timing/core/data/repositories/schedule_repository.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/id_generator.dart";
 
 class AddScheduleEntryUseCase {
   AddScheduleEntryUseCase({required this._scheduleRepository});
@@ -22,7 +23,7 @@ class AddScheduleEntryUseCase {
 
     return getResult.fold((error) async => Left(error), (entries) async {
       final ScheduleEntryEntity newEntry = ScheduleEntryEntity(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: generateEntityId(),
         title: title,
         weekday: weekday,
         startMinutes: startMinutes,

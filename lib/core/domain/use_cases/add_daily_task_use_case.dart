@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/id_generator.dart";
 
 class AddDailyTaskUseCase {
   AddDailyTaskUseCase({required this._dailyTasksRepository});
@@ -19,7 +20,7 @@ class AddDailyTaskUseCase {
 
     return getResult.fold((error) async => Left(error), (tasks) async {
       final DailyTaskEntity newTask = DailyTaskEntity(
-        id: DateTime.now().microsecondsSinceEpoch.toString(),
+        id: generateEntityId(),
         name: name,
         colorValue: colorValue,
         targetDays: targetDays,
