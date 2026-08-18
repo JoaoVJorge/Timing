@@ -67,7 +67,7 @@ class AppTextStyles {
   /// Numeric readout: the figure a metric card exists to show.
   TextStyle get metricValue => TextStyle(
     fontSize: 26,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w800,
     color: _tokens.textBody,
     height: 1.05,
   );

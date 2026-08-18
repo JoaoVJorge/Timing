@@ -203,14 +203,9 @@ class _SuggestionChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: onTap == null
-            ? context.colorTokens.surface
-            : context.colorTokens.primaryVeryLight.withValues(alpha: 0.18),
+        color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: context.colorTokens.primaryPastel.withValues(alpha: 0.42),
-          width: 1.1,
-        ),
+        border: Border.all(color: context.colorTokens.primary),
       ),
       child: Text(
         label,
