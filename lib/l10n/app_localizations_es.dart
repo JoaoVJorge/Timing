@@ -912,7 +912,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get language => 'Idioma';
 
   @override
-  String get appLanguageSubtitle => 'Idioma de la app';
+  String get appLanguageSubtitle =>
+      'Elige el idioma usado en menús, mensajes y textos de la app. El cambio se aplica a toda la interfaz.';
 
   @override
   String get automaticLanguageLabel => 'Automático';

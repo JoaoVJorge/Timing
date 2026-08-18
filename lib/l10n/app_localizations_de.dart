@@ -920,7 +920,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get language => 'Sprache';
 
   @override
-  String get appLanguageSubtitle => 'App-Sprache';
+  String get appLanguageSubtitle =>
+      'Wähle die Sprache für Menüs, Hinweise und App-Texte. Die Änderung gilt für die gesamte Oberfläche.';
 
   @override
   String get automaticLanguageLabel => 'Automatisch';

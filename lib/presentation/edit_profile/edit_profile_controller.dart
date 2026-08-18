@@ -7,7 +7,10 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/enums/auth_identity_provider.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/get_linked_auth_providers_use_case.dart";
+import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
@@ -16,10 +19,14 @@ class EditProfileController extends GetxController {
   EditProfileController({
     required this._appController,
     required this._appNavigator,
+    required this._getLinkedAuthProvidersUseCase,
+    required this._linkAuthProviderUseCase,
   });
 
   final AppController _appController;
   final AppNavigator _appNavigator;
+  final GetLinkedAuthProvidersUseCase _getLinkedAuthProvidersUseCase;
+  final LinkAuthProviderUseCase _linkAuthProviderUseCase;
 
   late final TextEditingController nameController = TextEditingController(
     text: _appController.userName.value,
@@ -40,7 +47,17 @@ class EditProfileController extends GetxController {
 
   Uint8List? get profilePhotoBytes => _appController.profilePhotoBytes;
   final RxBool isSaving = false.obs;
+  final RxBool isGoogleLinked = false.obs;
+  final RxBool isAppleLinked = false.obs;
+  final RxBool isLinkingGoogle = false.obs;
+  final RxBool isLinkingApple = false.obs;
   final ImagePicker _imagePicker = ImagePicker();
+
+  @override
+  void onInit() {
+    super.onInit();
+    refreshLinkedAuthProviders();
+  }
 
   void onSelectAccentColor(Color color) => _appController.setAccentColor(color);
 
@@ -100,6 +117,63 @@ class EditProfileController extends GetxController {
       subtitle: context.l10n.profilePhotoSourceSubtitle,
       cameraLabel: context.l10n.photoCameraLabel,
       galleryLabel: context.l10n.photoGalleryLabel,
+    );
+  }
+
+  Future<void> refreshLinkedAuthProviders() async {
+    final result = await _getLinkedAuthProvidersUseCase();
+    result.fold((error) => null, (providers) {
+      isGoogleLinked.value = providers.contains(
+        AuthIdentityProvider.google.providerKey,
+      );
+      isAppleLinked.value = providers.contains(
+        AuthIdentityProvider.apple.providerKey,
+      );
+    });
+  }
+
+  Future<void> onTapLinkGoogle() => _linkProvider(AuthIdentityProvider.google);
+
+  Future<void> onTapLinkApple() => _linkProvider(AuthIdentityProvider.apple);
+
+  Future<void> _linkProvider(AuthIdentityProvider provider) async {
+    final bool alreadyLinked = switch (provider) {
+      AuthIdentityProvider.google => isGoogleLinked.value,
+      AuthIdentityProvider.apple => isAppleLinked.value,
+    };
+    if (alreadyLinked) {
+      _appNavigator.showSuccessSnackBar(
+        Get.context!.l10n.authProviderConnected,
+      );
+      return;
+    }
+
+    final RxBool loading = switch (provider) {
+      AuthIdentityProvider.google => isLinkingGoogle,
+      AuthIdentityProvider.apple => isLinkingApple,
+    };
+    if (loading.value) {
+      return;
+    }
+
+    loading.value = true;
+    final result = await _linkAuthProviderUseCase(provider);
+    loading.value = false;
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(
+        Get.context!.l10n.linkAuthProviderFailure,
+      ),
+      (launched) {
+        if (!launched) {
+          _appNavigator.showErrorSnackBar(
+            Get.context!.l10n.linkAuthProviderFailure,
+          );
+          return;
+        }
+        _appNavigator.showSuccessSnackBar(
+          Get.context!.l10n.linkAuthProviderStarted,
+        );
+      },
     );
   }
 

@@ -47,38 +47,6 @@ class ConfigPage extends StatelessWidget {
             const Gap(AppSpacing.betweenSections + 4),
             Obx(
               () => SettingsSection(
-                title: context.l10n.linkedAccountsSection,
-                children: [
-                  SettingsTile.navigationIconName(
-                    iconName: "google",
-                    title: context.l10n.linkGoogleAccountTitle,
-                    subtitle: controller.isGoogleLinked.value
-                        ? context.l10n.linkedAccountsSubtitle
-                        : context.l10n.linkGoogleAccountSubtitle,
-                    trailingText: controller.isGoogleLinked.value
-                        ? context.l10n.authProviderConnected
-                        : null,
-                    onTap: controller.onTapLinkGoogle,
-                    tint: const Color(0xFF4285F4),
-                  ),
-                  SettingsTile.navigation(
-                    icon: Icons.apple_rounded,
-                    title: context.l10n.linkAppleAccountTitle,
-                    subtitle: controller.isAppleLinked.value
-                        ? context.l10n.linkedAccountsSubtitle
-                        : context.l10n.linkAppleAccountSubtitle,
-                    trailingText: controller.isAppleLinked.value
-                        ? context.l10n.authProviderConnected
-                        : null,
-                    onTap: controller.onTapLinkApple,
-                    tint: context.colorTokens.textBody,
-                  ),
-                ],
-              ),
-            ),
-            const Gap(AppSpacing.betweenSections + 4),
-            Obx(
-              () => SettingsSection(
                 title: context.l10n.preferencesSection,
                 children: [
                   SettingsTile.toggle(
@@ -191,6 +159,7 @@ class ConfigPage extends StatelessWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: context.colorTokens.surface,
+      clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
@@ -198,7 +167,7 @@ class ConfigPage extends StatelessWidget {
         heightFactor: 0.82,
         child: SafeArea(
           child: Obx(
-            () => Padding(
+            () => SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,47 +217,40 @@ class ConfigPage extends StatelessWidget {
                     ),
                   ),
                   const Gap(12),
-                  Expanded(
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        _ConcentrationActivityTile(
-                          icon: Icons.school_rounded,
-                          title: context.l10n.concentrationStudyTitle,
-                          subtitle: context.l10n.concentrationStudySubtitle,
-                          color: const Color(0xFF2F80ED),
-                          value: studying.value,
-                          onChanged: (value) => studying.value = value,
-                        ),
-                        const Gap(10),
-                        _ConcentrationActivityTile(
-                          icon: Icons.fitness_center_rounded,
-                          title: context.l10n.concentrationExercisesTitle,
-                          subtitle: context.l10n.concentrationExercisesSubtitle,
-                          color: const Color(0xFF27AE60),
-                          value: exercises.value,
-                          onChanged: (value) => exercises.value = value,
-                        ),
-                        const Gap(10),
-                        _ConcentrationActivityTile(
-                          icon: Icons.menu_book_rounded,
-                          title: context.l10n.concentrationReadingTitle,
-                          subtitle: context.l10n.concentrationReadingSubtitle,
-                          color: const Color(0xFFF2994A),
-                          value: reading.value,
-                          onChanged: (value) => reading.value = value,
-                        ),
-                        const Gap(10),
-                        _ConcentrationActivityTile(
-                          icon: Icons.sports_esports_rounded,
-                          title: context.l10n.concentrationHobbiesTitle,
-                          subtitle: context.l10n.concentrationHobbiesSubtitle,
-                          color: const Color(0xFF9B51E0),
-                          value: hobbies.value,
-                          onChanged: (value) => hobbies.value = value,
-                        ),
-                      ],
-                    ),
+                  _ConcentrationActivityTile(
+                    icon: Icons.school_rounded,
+                    title: context.l10n.concentrationStudyTitle,
+                    subtitle: context.l10n.concentrationStudySubtitle,
+                    color: const Color(0xFF2F80ED),
+                    value: studying.value,
+                    onChanged: (value) => studying.value = value,
+                  ),
+                  const Gap(10),
+                  _ConcentrationActivityTile(
+                    icon: Icons.fitness_center_rounded,
+                    title: context.l10n.concentrationExercisesTitle,
+                    subtitle: context.l10n.concentrationExercisesSubtitle,
+                    color: const Color(0xFF27AE60),
+                    value: exercises.value,
+                    onChanged: (value) => exercises.value = value,
+                  ),
+                  const Gap(10),
+                  _ConcentrationActivityTile(
+                    icon: Icons.menu_book_rounded,
+                    title: context.l10n.concentrationReadingTitle,
+                    subtitle: context.l10n.concentrationReadingSubtitle,
+                    color: const Color(0xFFF2994A),
+                    value: reading.value,
+                    onChanged: (value) => reading.value = value,
+                  ),
+                  const Gap(10),
+                  _ConcentrationActivityTile(
+                    icon: Icons.sports_esports_rounded,
+                    title: context.l10n.concentrationHobbiesTitle,
+                    subtitle: context.l10n.concentrationHobbiesSubtitle,
+                    color: const Color(0xFF9B51E0),
+                    value: hobbies.value,
+                    onChanged: (value) => hobbies.value = value,
                   ),
                 ],
               ),

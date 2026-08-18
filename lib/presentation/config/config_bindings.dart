@@ -5,12 +5,7 @@ class ConfigBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<ConfigController>(
-      ConfigController(
-        appController: Get.find(),
-        appNavigator: Get.find(),
-        getLinkedAuthProvidersUseCase: Get.find(),
-        linkAuthProviderUseCase: Get.find(),
-      ),
+      ConfigController(appController: Get.find(), appNavigator: Get.find()),
     );
   }
 }

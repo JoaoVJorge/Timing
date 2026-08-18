@@ -644,7 +644,7 @@
   "notificationsEnabledSubtitle": "تنبيهات التركيز والاستراحة والتقدم",
   "notificationsDisabledSubtitle": "التنبيهات متوقفة على هذا الجهاز",
   "language": "اللغة",
-  "appLanguageSubtitle": "لغة التطبيق",
+  "appLanguageSubtitle": "اختر اللغة المستخدمة في القوائم والرسائل ونصوص التطبيق. سيتم تطبيق التغيير على الواجهة بالكامل.",
   "automaticLanguageLabel": "تلقائي",
   "chooseLanguageTitle": "اختر اللغة",
   "languageChangedMessage": "تم تغيير اللغة إلى {language}",

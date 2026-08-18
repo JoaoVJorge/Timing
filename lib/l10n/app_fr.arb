@@ -644,7 +644,7 @@
   "notificationsEnabledSubtitle": "Alertes de concentration, de pause et de progression",
   "notificationsDisabledSubtitle": "Les alertes sont désactivées sur cet appareil",
   "language": "Langue",
-  "appLanguageSubtitle": "Langue de l'application",
+  "appLanguageSubtitle": "Choisissez la langue utilisée dans les menus, les messages et les textes de l'application. Le changement s'applique à toute l'interface.",
   "automaticLanguageLabel": "Automatique",
   "chooseLanguageTitle": "Choisir la langue",
   "languageChangedMessage": "Langue modifiée en {language}",

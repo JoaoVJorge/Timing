@@ -282,7 +282,7 @@
   "notificationsEnabledSubtitle": "Alertas de foco, pausa e progresso",
   "notificationsDisabledSubtitle": "Alertas desligados neste dispositivo",
   "language": "Idioma",
-  "appLanguageSubtitle": "Idioma do app",
+  "appLanguageSubtitle": "Escolha o idioma usado nos menus, mensagens e textos do app. A alteração é aplicada à interface inteira.",
   "automaticLanguageLabel": "Automático",
   "chooseLanguageTitle": "Escolher idioma",
   "languageChangedMessage": "Idioma alterado para {language}",

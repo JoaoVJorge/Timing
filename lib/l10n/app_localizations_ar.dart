@@ -901,7 +901,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get language => 'اللغة';
 
   @override
-  String get appLanguageSubtitle => 'لغة التطبيق';
+  String get appLanguageSubtitle =>
+      'اختر اللغة المستخدمة في القوائم والرسائل ونصوص التطبيق. سيتم تطبيق التغيير على الواجهة بالكامل.';
 
   @override
   String get automaticLanguageLabel => 'تلقائي';

@@ -70,6 +70,7 @@ class SettingsUserCard extends StatelessWidget {
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.primary,
                     fontWeight: FontWeight.w900,
+                    fontSize: 13,
                   ),
                 ),
                 const Gap(4),
@@ -77,7 +78,7 @@ class SettingsUserCard extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.extraBold20,
+                  style: context.textStyles.extraBold20.copyWith(fontSize: 22),
                 ),
                 const Gap(4),
                 Text(
@@ -87,6 +88,7 @@ class SettingsUserCard extends StatelessWidget {
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
                 ),
               ],

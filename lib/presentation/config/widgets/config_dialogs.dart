@@ -12,6 +12,7 @@ Future<String?> showLanguagePickerDialog({required String? currentCode}) {
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: context.colorTokens.surface,
+    clipBehavior: Clip.antiAlias,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
     ),

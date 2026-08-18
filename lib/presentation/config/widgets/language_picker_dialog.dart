@@ -14,7 +14,7 @@ class LanguagePickerDialog extends StatelessWidget {
   Widget build(BuildContext context) => FractionallySizedBox(
     heightFactor: 0.82,
     child: SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,29 +64,21 @@ class LanguagePickerDialog extends StatelessWidget {
               ),
             ),
             const Gap(12),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  for (
-                    int index = 0;
-                    index < AppLanguages.values.length;
-                    index++
-                  ) ...[
-                    if (index > 0) const Gap(10),
-                    _LanguageOption(
-                      flag: AppLanguages.values[index].flag,
-                      label: AppLanguages.values[index].label,
-                      isSelected:
-                          AppLanguages.values[index].code == currentCode,
-                      onTap: () => appNavigator.back<String>(
-                        result: AppLanguages.values[index].code,
-                      ),
-                    ),
-                  ],
-                ],
+            for (
+              int index = 0;
+              index < AppLanguages.values.length;
+              index++
+            ) ...[
+              if (index > 0) const Gap(10),
+              _LanguageOption(
+                flag: AppLanguages.values[index].flag,
+                label: AppLanguages.values[index].label,
+                isSelected: AppLanguages.values[index].code == currentCode,
+                onTap: () => appNavigator.back<String>(
+                  result: AppLanguages.values[index].code,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

@@ -644,7 +644,7 @@
   "notificationsEnabledSubtitle": "Fokus-, Pausen- und Fortschrittswarnungen",
   "notificationsDisabledSubtitle": "Auf diesem Gerät sind Benachrichtigungen deaktiviert",
   "language": "Sprache",
-  "appLanguageSubtitle": "App-Sprache",
+  "appLanguageSubtitle": "Wähle die Sprache für Menüs, Hinweise und App-Texte. Die Änderung gilt für die gesamte Oberfläche.",
   "automaticLanguageLabel": "Automatisch",
   "chooseLanguageTitle": "Sprache wählen",
   "languageChangedMessage": "Die Sprache wurde in {language} geändert",

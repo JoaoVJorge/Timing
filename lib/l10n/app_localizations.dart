@@ -1699,7 +1699,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLanguageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'App language'**
+  /// **'Choose the language used in menus, messages, and app text. The change applies across the whole interface.'**
   String get appLanguageSubtitle;
 
   /// No description provided for @automaticLanguageLabel.

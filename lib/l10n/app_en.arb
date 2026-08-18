@@ -540,7 +540,7 @@
   "notificationsEnabledSubtitle": "Focus, break and progress alerts",
   "notificationsDisabledSubtitle": "Alerts are off on this device",
   "language": "Language",
-  "appLanguageSubtitle": "App language",
+  "appLanguageSubtitle": "Choose the language used in menus, messages, and app text. The change applies across the whole interface.",
   "automaticLanguageLabel": "Automatic",
   "chooseLanguageTitle": "Choose language",
   "languageChangedMessage": "Language changed to {language}",
