@@ -50,6 +50,7 @@ class GroupsController extends GetxController {
   final RxBool isLoadingActivityProgress = false.obs;
   final RxBool isLoadingChat = false.obs;
   final RxBool isSendingImage = false.obs;
+  final RxBool didFailLoadingGroups = false.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
   final RxList<GroupActivityProgressEntity> activityProgress =
@@ -70,6 +71,7 @@ class GroupsController extends GetxController {
   final Map<String, List<GroupActivityProgressEntity>>
   _activityProgressByCacheKey = <String, List<GroupActivityProgressEntity>>{};
   final Set<String> _loadingImageMessageGroupIds = <String>{};
+  static const Duration _groupsLoadTimeout = Duration(seconds: 20);
 
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
@@ -169,16 +171,30 @@ class GroupsController extends GetxController {
 
   Future<void> loadGroups() async {
     isLoading.value = true;
-    final Either<AppError, List<GroupEntity>> result =
-        await _getGroupsUseCase();
-    result.fold((error) => groups.clear(), (value) {
-      // Copy so the controller's list doesn't alias the data source's mutable
-      // store — otherwise a created group appears in both the store add and the
-      // controller add below, showing up twice.
-      groups.value = List.of(value);
-      selectedGroup.value = value.isEmpty ? null : value.first;
-    });
-    isLoading.value = false;
+    didFailLoadingGroups.value = false;
+    try {
+      final Either<AppError, List<GroupEntity>> result =
+          await _getGroupsUseCase().timeout(_groupsLoadTimeout);
+      result.fold(
+        (error) {
+          didFailLoadingGroups.value = true;
+          _appNavigator.showErrorSnackBar(error.message);
+        },
+        (value) {
+          didFailLoadingGroups.value = false;
+          // Copy so the controller's list doesn't alias the data source's mutable
+          // store — otherwise a created group appears in both the store add and the
+          // controller add below, showing up twice.
+          groups.value = List.of(value);
+          selectedGroup.value = value.isEmpty ? null : value.first;
+        },
+      );
+    } on TimeoutException {
+      didFailLoadingGroups.value = true;
+      _appNavigator.showErrorSnackBar();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void onSelectGroup(GroupEntity group) {

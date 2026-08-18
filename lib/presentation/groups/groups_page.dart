@@ -17,11 +17,11 @@ import "package:timing/presentation/groups/widgets/current_user_rank_card.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/presentation/groups/widgets/groups_header.dart";
 import "package:timing/presentation/groups/widgets/leaderboard_tile.dart";
+import "package:timing/shared/widgets/animated_segmented_tabs.dart";
 import "package:timing/shared/widgets/app_empty_state.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
-import "package:timing/shared/widgets/animated_segmented_tabs.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
@@ -66,6 +66,11 @@ class _GroupsHomeView extends StatelessWidget {
         child: Obx(() {
           if (controller.isLoading.value && controller.groups.isEmpty) {
             return const _GroupsLoadingSkeleton();
+          }
+
+          if (controller.didFailLoadingGroups.value &&
+              controller.groups.isEmpty) {
+            return _GroupsLoadErrorState(onRetry: controller.loadGroups);
           }
 
           if (controller.groups.isEmpty) {
@@ -1019,7 +1024,7 @@ class _GroupActivityDataView extends StatelessWidget {
         children: [
           for (final GroupActivityProgressEntity header in headers) ...[
             _activityData(context, controller, header),
-            const Gap(AppSpacing.betweenRelated),
+            const Gap(AppSpacing.betweenSections),
           ],
         ],
       );
@@ -1066,13 +1071,13 @@ class _GroupActivityDataView extends StatelessWidget {
           header: header,
           focusSeconds: focusSeconds,
         ),
-        const Gap(8),
+        const Gap(AppSpacing.betweenRelated),
         _CollectiveProgressCard(
           reached: reached,
           total: total,
           progress: collectiveProgress,
         ),
-        const Gap(8),
+        const Gap(AppSpacing.betweenRelated),
         _ParticipantsProgressCard(
           total: total,
           completedMembers: completedMembers,
@@ -1081,7 +1086,7 @@ class _GroupActivityDataView extends StatelessWidget {
           targetPerMember: targetPerMember,
           unit: group.theme.unit,
         ),
-        const Gap(8),
+        const Gap(AppSpacing.betweenRelated),
         _GroupStatisticsCard(
           totalPeriodValue: totalPeriodValue,
           completedSessions: reached,
@@ -1106,101 +1111,98 @@ class _ActivityOverviewCard extends StatelessWidget {
   final int focusSeconds;
 
   @override
-  Widget build(BuildContext context) => _GroupDataCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            header.isGoal
-                ? Icon(
-                    Icons.flag_rounded,
-                    size: 24,
-                    color: context.colorTokens.primary,
-                  )
-                : AppIcon(
-                    group.theme.iconName,
-                    size: 24,
-                    color: context.colorTokens.primary,
-                  ),
-            const Gap(10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.groupActivityLabel,
-                    style: context.textStyles.bodyMedium.copyWith(
-                      color: context.colorTokens.textBody,
-                    ),
-                  ),
-                  const Gap(3),
-                  Text(
-                    header.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.black20.copyWith(
-                      color: context.colorTokens.textBody,
-                      fontSize: 19,
-                    ),
-                  ),
-                  if (group.description.trim().isNotEmpty) ...[
-                    const Gap(4),
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return _GroupDataCard.compact(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header.isGoal
+                  ? Icon(Icons.flag_rounded, size: 26, color: accent)
+                  : AppIcon(group.theme.iconName, size: 26, color: accent),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      group.description.trim(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyMedium.copyWith(
-                        color: context.colorTokens.textHint,
-                        fontSize: 13,
-                        height: 1.2,
+                      context.l10n.groupActivityLabel,
+                      style: context.textStyles.cardTitle.copyWith(
+                        color: context.colorTokens.textBody,
+                        fontSize: 16,
                       ),
                     ),
+                    const Gap(6),
+                    Text(
+                      header.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.black32.copyWith(
+                        color: context.colorTokens.textBody,
+                        fontSize: 21,
+                      ),
+                    ),
+                    if (group.description.trim().isNotEmpty) ...[
+                      const Gap(4),
+                      Text(
+                        group.description.trim(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: context.colorTokens.textHint,
+                          fontSize: 14,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            const Gap(8),
-            _FrequencyBadge(label: context.l10n.dailyLabel),
-          ],
-        ),
-        const Gap(10),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            const double gap = 8;
-            final double tileWidth = constraints.maxWidth >= 430
-                ? (constraints.maxWidth - gap * 2) / 3
-                : (constraints.maxWidth - gap) / 2;
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                _ActivityDataTile(
-                  width: tileWidth,
-                  icon: Icons.timer_outlined,
-                  label: context.l10n.groupActivityFocusDataLabel,
-                  value: _formatMinutes(Duration(seconds: focusSeconds)),
-                ),
-                _ActivityDataTile(
-                  width: tileWidth,
-                  icon: Icons.coffee_outlined,
-                  label: context.l10n.groupActivityPauseDataLabel,
-                  value: "${header.restMinutes} min",
-                ),
-                _ActivityDataTile(
-                  width: tileWidth,
-                  icon: Icons.repeat_rounded,
-                  label: context.l10n.groupActivitySessionsDataLabel,
-                  value: header.focusSessionCount.toString(),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    ),
-  );
+              const Gap(8),
+              _FrequencyBadge(label: context.l10n.dailyLabel),
+            ],
+          ),
+          const Gap(16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const double gap = 10;
+              final double tileWidth = constraints.maxWidth >= 430
+                  ? (constraints.maxWidth - gap * 2) / 3
+                  : (constraints.maxWidth - gap) / 2;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  _ActivityDataTile(
+                    width: tileWidth,
+                    icon: Icons.timer_outlined,
+                    label: context.l10n.groupActivityFocusDataLabel,
+                    value: _formatMinutes(Duration(seconds: focusSeconds)),
+                  ),
+                  _ActivityDataTile(
+                    width: tileWidth,
+                    icon: Icons.coffee_outlined,
+                    label: context.l10n.groupActivityPauseDataLabel,
+                    value: "${header.restMinutes} min",
+                  ),
+                  _ActivityDataTile(
+                    width: tileWidth,
+                    icon: Icons.repeat_rounded,
+                    label: context.l10n.groupActivitySessionsDataLabel,
+                    value: header.focusSessionCount.toString(),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CollectiveProgressCard extends StatelessWidget {
@@ -1215,68 +1217,81 @@ class _CollectiveProgressCard extends StatelessWidget {
   final double progress;
 
   @override
-  Widget build(BuildContext context) => _GroupDataCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.groupCollectiveProgressTitle,
-                style: context.textStyles.black20.copyWith(
-                  color: context.colorTokens.textBody,
-                  fontSize: 18,
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return _GroupDataCard.compact(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n.groupCollectiveProgressTitle,
+                  style: context.textStyles.black20.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontSize: 18,
+                  ),
                 ),
               ),
-            ),
-            Text(
-              context.l10n.groupActivityCompletedCount(reached, total),
-              style: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textHint,
-                fontSize: 13,
+              Text(
+                context.l10n.groupActivityCompletedCount(reached, total),
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: context.colorTokens.textHint,
+                  fontSize: 13,
+                ),
               ),
-            ),
-          ],
-        ),
-        const Gap(8),
-        Text(
-          "${(progress * 100).round()}%",
-          style: context.textStyles.black32.copyWith(fontSize: 32),
-        ),
-        const Gap(8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: LinearProgressIndicator(
-            value: progress,
-            minHeight: 8,
-            color: context.colorTokens.primary,
-            backgroundColor: context.colorTokens.surfaceInnerLayer.withValues(
-              alpha: 0.62,
+            ],
+          ),
+          const Gap(10),
+          Text(
+            "${(progress * 100).round()}%",
+            style: context.textStyles.black32.copyWith(
+              color: accent,
+              fontSize: 34,
             ),
           ),
-        ),
-        const Gap(8),
-        Row(
-          children: [
-            Icon(
-              Icons.flag_outlined,
-              size: 16,
-              color: context.colorTokens.primary,
-            ),
-            const Gap(6),
-            Expanded(
-              child: Text(
-                context.l10n.groupMissingParticipants(total - reached),
-                style: context.textStyles.bodyMedium.copyWith(fontSize: 13),
+          const Gap(10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              color: accent,
+              backgroundColor: context.colorTokens.surfaceInnerLayer.withValues(
+                alpha: 0.62,
               ),
             ),
-          ],
-        ),
-      ],
-    ),
-  );
+          ),
+          const Gap(12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: context.colorTokens.primaryVeryLight.withValues(
+                alpha: 0.5,
+              ),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.flag_outlined, size: 22, color: accent),
+                const Gap(10),
+                Expanded(
+                  child: Text(
+                    context.l10n.groupMissingParticipants(total - reached),
+                    style: context.textStyles.bodyMedium.copyWith(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ParticipantsProgressCard extends StatelessWidget {
@@ -1308,13 +1323,13 @@ class _ParticipantsProgressCard extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        const Gap(10),
+        const Gap(22),
         _ParticipantsSectionLabel(
           label: context.l10n.groupCompletedMembersTitle(
             completedMembers.length,
           ),
         ),
-        const Gap(6),
+        const Gap(12),
         if (completedMembers.isEmpty)
           _ParticipantsEmptyState(
             title: context.l10n.groupNoCompletedMembersTitle,
@@ -1329,13 +1344,13 @@ class _ParticipantsProgressCard extends StatelessWidget {
               unit: unit,
               isCompleted: true,
             ),
-            const Gap(6),
+            const Gap(10),
           ],
-        const Gap(10),
+        const Gap(22),
         _ParticipantsSectionLabel(
           label: context.l10n.groupPendingMembersTitle(pendingMembers.length),
         ),
-        const Gap(6),
+        const Gap(12),
         if (pendingMembers.isEmpty)
           Text(
             context.l10n.groupActivityAllCompletedToday,
@@ -1350,7 +1365,7 @@ class _ParticipantsProgressCard extends StatelessWidget {
               unit: unit,
               isCompleted: false,
             ),
-            const Gap(6),
+            const Gap(10),
           ],
       ],
     ),
@@ -1384,12 +1399,12 @@ class _GroupStatisticsCard extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        const Gap(10),
+        const Gap(22),
         GridView.count(
           crossAxisCount: 2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
-          childAspectRatio: 1.72,
+          childAspectRatio: 1.9,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
@@ -1423,14 +1438,17 @@ class _GroupStatisticsCard extends StatelessWidget {
 }
 
 class _GroupDataCard extends StatelessWidget {
-  const _GroupDataCard({required this.child});
+  const _GroupDataCard({required this.child}) : padding = 20;
+
+  const _GroupDataCard.compact({required this.child}) : padding = 16;
 
   final Widget child;
+  final double padding;
 
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(15),
+    padding: EdgeInsets.all(padding),
     decoration: AppSurfaces.content(context.colorTokens),
     child: child,
   );
@@ -1442,20 +1460,24 @@ class _FrequencyBadge extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(
-      label,
-      style: context.textStyles.bodySmall.copyWith(
-        color: context.colorTokens.primary,
-        fontWeight: FontWeight.w900,
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: context.colorTokens.primaryVeryLight,
+        borderRadius: BorderRadius.circular(999),
       ),
-    ),
-  );
+      child: Text(
+        label,
+        style: context.textStyles.bodySmall.copyWith(
+          color: accent,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
 }
 
 class _ActivityDataTile extends StatelessWidget {
@@ -1472,51 +1494,54 @@ class _ActivityDataTile extends StatelessWidget {
   final double width;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    constraints: const BoxConstraints(minHeight: 64),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-      ),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, size: 23, color: context.colorTokens.primary),
-        const Gap(8),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 13,
-                ),
-              ),
-              const Gap(2),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(
-                  color: context.colorTokens.textBody,
-                  fontSize: 17,
-                ),
-              ),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return Container(
+      width: width,
+      constraints: const BoxConstraints(minHeight: 58),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
         ),
-      ],
-    ),
-  );
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 23, color: accent),
+          const Gap(8),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.black20.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontSize: 17,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ParticipantsSectionLabel extends StatelessWidget {
@@ -1528,7 +1553,7 @@ class _ParticipantsSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     label,
     style: context.textStyles.cardTitle.copyWith(
-      color: context.colorTokens.primary,
+      color: _groupDataAccent(context),
       fontSize: 14,
     ),
   );
@@ -1604,75 +1629,77 @@ class _ParticipantProgressRow extends StatelessWidget {
   final bool isCompleted;
 
   @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 60),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-      ),
-    ),
-    child: Row(
-      children: [
-        GroupMemberAvatar(
-          name: member.name,
-          colorValue: member.avatarColorValue,
-          avatar: member.avatar,
-          size: 38,
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return Container(
+      constraints: const BoxConstraints(minHeight: 60),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
         ),
-        const Gap(10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                member.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.cardTitle,
-              ),
-              const Gap(2),
-              Row(
-                children: [
-                  _StatusPill(
-                    label: isCompleted
-                        ? context.l10n.completedLabel
-                        : context.l10n.pendingLabel,
-                    isCompleted: isCompleted,
-                  ),
-                  const Gap(6),
-                  Expanded(
-                    child: Text(
-                      _progressLabel(context, current, target, unit),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyMedium.copyWith(
-                        color: context.colorTokens.textHint,
-                        fontSize: 13,
+      ),
+      child: Row(
+        children: [
+          GroupMemberAvatar(
+            name: member.name,
+            colorValue: member.avatarColorValue,
+            avatar: member.avatar,
+            size: 38,
+          ),
+          const Gap(10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  member.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.cardTitle,
+                ),
+                const Gap(2),
+                Row(
+                  children: [
+                    _StatusPill(
+                      label: isCompleted
+                          ? context.l10n.completedLabel
+                          : context.l10n.pendingLabel,
+                      isCompleted: isCompleted,
+                    ),
+                    const Gap(6),
+                    Expanded(
+                      child: Text(
+                        _progressLabel(context, current, target, unit),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: context.colorTokens.textHint,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        const Gap(6),
-        Icon(
-          isCompleted
-              ? Icons.check_circle_rounded
-              : Icons.radio_button_unchecked_rounded,
-          size: 22,
-          color: isCompleted
-              ? context.colorTokens.primary
-              : context.colorTokens.borderUnfocused,
-        ),
-      ],
-    ),
-  );
+          const Gap(6),
+          Icon(
+            isCompleted
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked_rounded,
+            size: 22,
+            color: isCompleted ? accent : context.colorTokens.borderUnfocused,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StatusPill extends StatelessWidget {
@@ -1682,26 +1709,28 @@ class _StatusPill extends StatelessWidget {
   final bool isCompleted;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-    decoration: BoxDecoration(
-      color: isCompleted
-          ? context.colorTokens.primaryVeryLight
-          : context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Text(
-      label,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.bodySmall.copyWith(
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
         color: isCompleted
-            ? context.colorTokens.primary
-            : context.colorTokens.textHint,
-        fontWeight: FontWeight.w800,
+            ? context.colorTokens.primaryVeryLight
+            : context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(999),
       ),
-    ),
-  );
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: context.textStyles.bodySmall.copyWith(
+          color: isCompleted ? accent : context.colorTokens.textHint,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
 }
 
 class _GroupStatItem extends StatelessWidget {
@@ -1716,49 +1745,54 @@ class _GroupStatItem extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.45),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-      ),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(icon, color: context.colorTokens.primary, size: 23),
-        const Gap(9),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(fontSize: 18),
-              ),
-              const Gap(1),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodySmall.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 13,
-                  height: 1.05,
-                ),
-              ),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final Color accent = _groupDataAccent(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
         ),
-      ],
-    ),
-  );
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, color: accent, size: 23),
+          const Gap(9),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.black20.copyWith(fontSize: 18),
+                ),
+                const Gap(1),
+                Text(
+                  label,
+                  style: context.textStyles.bodySmall.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontSize: 13,
+                    height: 1.05,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+Color _groupDataAccent(BuildContext context) =>
+    context.colorTokens.primaryPastel;
 
 String _formatMinutes(Duration duration) {
   final int minutes = duration.inMinutes;
@@ -2335,21 +2369,96 @@ class _GroupsEmptyState extends StatelessWidget {
   );
 }
 
-class _GroupsLoadingSkeleton extends StatelessWidget {
-  const _GroupsLoadingSkeleton();
+class _GroupsLoadErrorState extends StatelessWidget {
+  const _GroupsLoadErrorState({required this.onRetry});
+
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
-    children: const [
-      _SkeletonGroupCard(isFriends: true),
-      Gap(AppSpacing.betweenRelated),
-      _SkeletonGroupCard(),
-      Gap(AppSpacing.betweenRelated),
-      _SkeletonGroupCard(),
-      Gap(AppSpacing.betweenRelated),
-      _SkeletonGroupCard(),
+    children: [
+      AppEmptyState(
+        icon: Icons.cloud_off_rounded,
+        title: "Não foi possível carregar os grupos",
+        description:
+            "A conexão demorou mais do que o esperado. Seus grupos podem existir, mas não conseguimos buscar agora.",
+        actionLabel: "Tentar novamente",
+        onTapAction: onRetry,
+      ),
     ],
+  );
+}
+
+class _GroupsLoadingSkeleton extends StatefulWidget {
+  const _GroupsLoadingSkeleton();
+
+  @override
+  State<_GroupsLoadingSkeleton> createState() => _GroupsLoadingSkeletonState();
+}
+
+class _GroupsLoadingSkeletonState extends State<_GroupsLoadingSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1350),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => _SkeletonShimmer(
+    animation: _controller,
+    child: ListView(
+      padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+      children: const [
+        _SkeletonGroupCard(isFriends: true),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonGroupCard(),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonGroupCard(),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonGroupCard(),
+      ],
+    ),
+  );
+}
+
+class _SkeletonShimmer extends StatelessWidget {
+  const _SkeletonShimmer({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: animation,
+    child: child,
+    builder: (context, child) {
+      final double sweep = animation.value * 2.4 - 0.7;
+      return ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
+            context.colorTokens.white.withValues(alpha: 0.7),
+            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
+          ],
+          stops: [
+            (sweep - 0.18).clamp(0.0, 1.0),
+            sweep.clamp(0.0, 1.0),
+            (sweep + 0.18).clamp(0.0, 1.0),
+          ],
+        ).createShader(bounds),
+        child: child,
+      );
+    },
   );
 }
 

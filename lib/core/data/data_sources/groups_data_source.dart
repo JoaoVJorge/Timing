@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:dartz/dartz.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
@@ -19,6 +21,7 @@ class GroupsDataSource {
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  static const Duration _activityScoresTimeout = Duration(seconds: 8);
 
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     try {
@@ -57,16 +60,8 @@ class GroupsDataSource {
           .toList();
       final Map<String, Map<String, dynamic>> profilesById =
           await _profilesById(memberIds, withPhoto: true);
-      final List<Map<String, dynamic>> activityRows = memberIds.isEmpty
-          ? []
-          : await _selectRows(
-              table: "activity_entries",
-              columns:
-                  "user_id, category, occurred_at, seconds, pages, completed_tasks",
-              filters: (query) => query
-                  .inFilter("user_id", memberIds)
-                  .gte("occurred_at", _monthStart().toIso8601String()),
-            );
+      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme =
+          await _leaderboardScoresForMembers(memberIds);
 
       final Map<String, List<Map<String, dynamic>>> membersByGroup = {};
       for (final Map<String, dynamic> row in memberRows) {
@@ -74,19 +69,13 @@ class GroupsDataSource {
         membersByGroup.putIfAbsent(groupId, () => []).add(row);
       }
 
-      // One pass per theme, shared by every group that uses it.
-      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {};
-
       return Right(
         groupRows.map((row) {
           final GroupThemeType theme = GroupThemeType.byName(
             row["theme"] as String?,
           );
-          final Map<String, _PeriodScores> scoresByUser = scoresByTheme
-              .putIfAbsent(
-                theme,
-                () => _scoresByUser(theme: theme, activityRows: activityRows),
-              );
+          final Map<String, _PeriodScores> scoresByUser =
+              scoresByTheme[theme] ?? const {};
           final String groupId = row["id"] as String;
           final List<GroupMemberEntity> members =
               membersByGroup[groupId]
@@ -138,8 +127,87 @@ class GroupsDataSource {
             .toList(),
       );
     } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to load group_activity_progress",
+        error: error,
+        stackTrace: stackTrace,
+      );
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
+  }
+
+  Future<List<Map<String, dynamic>>> _activityRowsForMembers(
+    List<String> memberIds,
+  ) async {
+    if (memberIds.isEmpty) {
+      return const [];
+    }
+
+    try {
+      return await _selectRows(
+        table: "activity_entries",
+        columns:
+            "user_id, category, occurred_at, seconds, pages, completed_tasks",
+        filters: (query) => query
+            .inFilter("user_id", memberIds)
+            .gte("occurred_at", _monthStart().toIso8601String()),
+      ).timeout(_activityScoresTimeout);
+    } on TimeoutException catch (error, stackTrace) {
+      _logger.logError(
+        "Timed out loading group leaderboard scores",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const [];
+    }
+  }
+
+  Future<Map<GroupThemeType, Map<String, _PeriodScores>>>
+  _leaderboardScoresForMembers(List<String> memberIds) async {
+    if (memberIds.isEmpty) {
+      return const {};
+    }
+
+    try {
+      final List<List<Map<String, dynamic>>> rowsByPeriod = await Future.wait([
+        _aggregatedActivityScores(memberIds, _todayStart()),
+        _aggregatedActivityScores(memberIds, _weekStart()),
+        _aggregatedActivityScores(memberIds, _monthStart()),
+      ]);
+      return _scoresByThemeFromAggregates(
+        todayRows: rowsByPeriod[0],
+        weekRows: rowsByPeriod[1],
+        monthRows: rowsByPeriod[2],
+      );
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to load aggregated group leaderboard scores",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      final List<Map<String, dynamic>> activityRows =
+          await _activityRowsForMembers(memberIds);
+      return {
+        for (final GroupThemeType theme in GroupThemeType.values)
+          theme: _scoresByUser(theme: theme, activityRows: activityRows),
+      };
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _aggregatedActivityScores(
+    List<String> memberIds,
+    DateTime periodStart,
+  ) async {
+    return await _selectRows(
+      table: "activity_entries",
+      columns:
+          "user_id, category, total_seconds:seconds.sum(), "
+          "total_pages:pages.sum(), "
+          "total_completed_tasks:completed_tasks.sum()",
+      filters: (query) => query
+          .inFilter("user_id", memberIds)
+          .gte("occurred_at", periodStart.toIso8601String()),
+    ).timeout(_activityScoresTimeout);
   }
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async {
@@ -435,13 +503,23 @@ class GroupsDataSource {
           params: {"invitation_id": invitationId},
         );
       } catch (error) {
+        if (_isRecoverableAcceptInvitationRpcError(error)) {
+          return await _acceptInvitationDirectly(invitationId);
+        }
         if (!_isRpcSignatureError(error)) {
           rethrow;
         }
-        response = await _supabaseService.requireClient.rpc(
-          "accept_group_invitation",
-          params: {"target_invitation_id": invitationId},
-        );
+        try {
+          response = await _supabaseService.requireClient.rpc(
+            "accept_group_invitation",
+            params: {"target_invitation_id": invitationId},
+          );
+        } catch (fallbackError) {
+          if (_isRecoverableAcceptInvitationRpcError(fallbackError)) {
+            return await _acceptInvitationDirectly(invitationId);
+          }
+          rethrow;
+        }
       }
       _logger.logResponse(operation, response);
       final String? groupId = _groupIdFromRpcResponse(response);
@@ -539,12 +617,18 @@ class GroupsDataSource {
     }
 
     if (status == "pending") {
-      await _supabaseService.requireClient.from("group_members").upsert({
-        "group_id": groupId,
-        "user_id": userId,
-        "role": "member",
-        "joined_at": DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: "group_id,user_id");
+      try {
+        await _supabaseService.requireClient.from("group_members").insert({
+          "group_id": groupId,
+          "user_id": userId,
+          "role": "member",
+          "joined_at": DateTime.now().toUtc().toIso8601String(),
+        });
+      } catch (error) {
+        if (!_isUniqueViolation(error)) {
+          rethrow;
+        }
+      }
       await _supabaseService.requireClient
           .from("group_invitations")
           .update({"status": "accepted"})
@@ -598,6 +682,17 @@ class GroupsDataSource {
     return description.contains("PGRST202") ||
         description.contains("42883") ||
         description.contains("function") && description.contains("not found");
+  }
+
+  bool _isRecoverableAcceptInvitationRpcError(Object error) {
+    final String description = SqlOperationAppError.describe(error);
+    return description.contains("42702") || description.contains("ambiguous");
+  }
+
+  bool _isUniqueViolation(Object error) {
+    final String description = SqlOperationAppError.describe(error);
+    return description.contains("23505") ||
+        description.contains("duplicate key");
   }
 
   Future<Either<AppError, GroupEntity>> createGroup({
@@ -815,12 +910,91 @@ class GroupsDataSource {
     return scores;
   }
 
+  Map<GroupThemeType, Map<String, _PeriodScores>> _scoresByThemeFromAggregates({
+    required List<Map<String, dynamic>> todayRows,
+    required List<Map<String, dynamic>> weekRows,
+    required List<Map<String, dynamic>> monthRows,
+  }) {
+    final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {
+      for (final GroupThemeType theme in GroupThemeType.values)
+        theme: <String, _PeriodScores>{},
+    };
+
+    void merge(
+      List<Map<String, dynamic>> rows, {
+      required int Function(_PeriodScores current, int value) today,
+      required int Function(_PeriodScores current, int value) week,
+      required int Function(_PeriodScores current, int value) month,
+    }) {
+      for (final Map<String, dynamic> row in rows) {
+        final String? userId = row["user_id"] as String?;
+        if (userId == null) {
+          continue;
+        }
+        final GroupThemeType? theme = _themeByName(row["category"] as String?);
+        if (theme == null) {
+          continue;
+        }
+        final int value = _aggregateScoreValue(row, theme);
+        final Map<String, _PeriodScores> scoresByUser = scoresByTheme[theme] ??=
+            <String, _PeriodScores>{};
+        final _PeriodScores current =
+            scoresByUser[userId] ??
+            const _PeriodScores(today: 0, week: 0, month: 0);
+        scoresByUser[userId] = _PeriodScores(
+          today: today(current, value),
+          week: week(current, value),
+          month: month(current, value),
+        );
+      }
+    }
+
+    merge(
+      todayRows,
+      today: (_, value) => value,
+      week: (current, _) => current.week,
+      month: (current, _) => current.month,
+    );
+    merge(
+      weekRows,
+      today: (current, _) => current.today,
+      week: (_, value) => value,
+      month: (current, _) => current.month,
+    );
+    merge(
+      monthRows,
+      today: (current, _) => current.today,
+      week: (current, _) => current.week,
+      month: (_, value) => value,
+    );
+
+    return scoresByTheme;
+  }
+
   int _scoreValue(Map<String, dynamic> row, GroupThemeType theme) =>
       switch (theme.unit) {
         GroupMetricUnit.hours => (row["seconds"] as num?)?.toInt() ?? 0,
         GroupMetricUnit.pages => (row["pages"] as num?)?.toInt() ?? 0,
         GroupMetricUnit.days => (row["completed_tasks"] as num?)?.toInt() ?? 0,
       };
+
+  int _aggregateScoreValue(Map<String, dynamic> row, GroupThemeType theme) =>
+      switch (theme.unit) {
+        GroupMetricUnit.hours => _intValue(row["total_seconds"]),
+        GroupMetricUnit.pages => _intValue(row["total_pages"]),
+        GroupMetricUnit.days => _intValue(row["total_completed_tasks"]),
+      };
+
+  int _intValue(Object? value) => value is num ? value.toInt() : 0;
+
+  GroupThemeType? _themeByName(String? name) {
+    for (final GroupThemeType value in GroupThemeType.values) {
+      if (value.name == name) {
+        return value;
+      }
+    }
+    return null;
+  }
 
   String _displayName(Map<String, dynamic>? row, {required String fallback}) {
     if (row == null) {
