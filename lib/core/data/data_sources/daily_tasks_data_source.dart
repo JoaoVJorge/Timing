@@ -8,17 +8,20 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 
 class DailyTasksDataSource {
   DailyTasksDataSource({
     required this._localStorageService,
     required this._supabaseService,
     required this._logger,
+    required this._pendingSyncStore,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  final PendingSyncStore _pendingSyncStore;
 
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
     try {
@@ -116,14 +119,26 @@ class DailyTasksDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
+      await _pendingSyncStore.clear(PendingSyncDataset.dailyTasks);
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to sync remote daily_goals",
         error: error,
         stackTrace: stackTrace,
       );
+      await _pendingSyncStore.markPending(PendingSyncDataset.dailyTasks);
       return;
     }
+  }
+
+  /// Re-attempts a previously failed remote sync using the current local
+  /// state. No-op when nothing is pending for this dataset.
+  Future<void> flushPendingSync() async {
+    if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
+      return;
+    }
+    final Either<AppError, List<DailyTaskEntity>> local = await getTasks();
+    await local.fold((_) async {}, _syncRemoteTasks);
   }
 
   DailyTaskEntity _taskFromRow(Map<String, dynamic> row) =>

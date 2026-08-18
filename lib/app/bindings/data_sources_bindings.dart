@@ -8,6 +8,7 @@ import "package:timing/core/data/data_sources/phone_auth_data_source.dart";
 import "package:timing/core/data/data_sources/profile_sync_data_source.dart";
 import "package:timing/core/data/data_sources/schedule_data_source.dart";
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
+import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 
 class DataSourcesBindings extends Bindings {
   @override
@@ -25,6 +26,7 @@ class DataSourcesBindings extends Bindings {
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
+        pendingSyncStore: Get.find(),
       ),
       permanent: true,
     );
@@ -33,6 +35,7 @@ class DataSourcesBindings extends Bindings {
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
+        pendingSyncStore: Get.find(),
       ),
       permanent: true,
     );
@@ -57,6 +60,16 @@ class DataSourcesBindings extends Bindings {
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
+        pendingSyncStore: Get.find(),
+      ),
+      permanent: true,
+    );
+
+    Get.put<SyncReconciliationService>(
+      SyncReconciliationService(
+        subjectsDataSource: Get.find(),
+        scheduleDataSource: Get.find(),
+        dailyTasksDataSource: Get.find(),
       ),
       permanent: true,
     );

@@ -8,17 +8,20 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 
 class SubjectsDataSource {
   SubjectsDataSource({
     required this._localStorageService,
     required this._supabaseService,
     required this._logger,
+    required this._pendingSyncStore,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  final PendingSyncStore _pendingSyncStore;
 
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async {
     try {
@@ -128,14 +131,26 @@ class SubjectsDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
+      await _pendingSyncStore.clear(PendingSyncDataset.subjects);
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to sync remote user_subjects",
         error: error,
         stackTrace: stackTrace,
       );
+      await _pendingSyncStore.markPending(PendingSyncDataset.subjects);
       return;
     }
+  }
+
+  /// Re-attempts a previously failed remote sync using the current local
+  /// state. No-op when nothing is pending for this dataset.
+  Future<void> flushPendingSync() async {
+    if (!_pendingSyncStore.contains(PendingSyncDataset.subjects)) {
+      return;
+    }
+    final Either<AppError, List<SubjectEntity>> local = await getSubjects();
+    await local.fold((_) async {}, _syncRemoteSubjects);
   }
 
   SubjectEntity _subjectFromRow(Map<String, dynamic> row) =>

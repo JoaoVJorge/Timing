@@ -7,17 +7,20 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 
 class ScheduleDataSource {
   ScheduleDataSource({
     required this._localStorageService,
     required this._supabaseService,
     required this._logger,
+    required this._pendingSyncStore,
   });
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  final PendingSyncStore _pendingSyncStore;
 
   Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() async {
     try {
@@ -129,14 +132,27 @@ class ScheduleDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
+      await _pendingSyncStore.clear(PendingSyncDataset.schedule);
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to sync remote schedule_entries",
         error: error,
         stackTrace: stackTrace,
       );
+      await _pendingSyncStore.markPending(PendingSyncDataset.schedule);
       return;
     }
+  }
+
+  /// Re-attempts a previously failed remote sync using the current local
+  /// state. No-op when nothing is pending for this dataset.
+  Future<void> flushPendingSync() async {
+    if (!_pendingSyncStore.contains(PendingSyncDataset.schedule)) {
+      return;
+    }
+    final Either<AppError, List<ScheduleEntryEntity>> local =
+        await getEntries();
+    await local.fold((_) async {}, _syncRemoteEntries);
   }
 
   ScheduleEntryEntity _entryFromRow(Map<String, dynamic> row) =>

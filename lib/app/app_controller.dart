@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:typed_data";
 
@@ -26,6 +27,7 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
@@ -42,6 +44,7 @@ class AppController extends GetxController {
     required this._appNavigator,
     required this._supabaseService,
     required this._timerNotificationService,
+    required this._syncReconciliationService,
     required this.localStorageService,
     int? initialAccentColorValue,
   }) : accentColor = Color(
@@ -57,6 +60,7 @@ class AppController extends GetxController {
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final TimerNotificationService _timerNotificationService;
+  final SyncReconciliationService _syncReconciliationService;
   final AppLocalStorageService localStorageService;
 
   final RxBool isDarkMode = false.obs;
@@ -126,6 +130,9 @@ class AppController extends GetxController {
     await _loadAppConfig();
     await refreshProfileFromBackend();
     await _restoreActivityHistoryFromBackendIfNeeded();
+    if (_supabaseService.hasSignedInUser) {
+      unawaited(_syncReconciliationService.flushPending());
+    }
   }
 
   Future<void> _loadAppConfig() async {

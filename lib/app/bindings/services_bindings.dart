@@ -15,6 +15,7 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/env/environment_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -55,6 +56,12 @@ class ServicesBindings extends Bindings {
       ),
       permanent: true,
     );
+
+    final PendingSyncStore pendingSyncStore = PendingSyncStore(
+      localStorageService: Get.find(),
+    );
+    await pendingSyncStore.load();
+    Get.put<PendingSyncStore>(pendingSyncStore, permanent: true);
 
     final LastActivityService lastActivityService = LastActivityService(
       localStorageService: Get.find(),
