@@ -168,46 +168,12 @@ class GroupsDataSource {
       return const {};
     }
 
-    try {
-      final List<List<Map<String, dynamic>>> rowsByPeriod = await Future.wait([
-        _aggregatedActivityScores(memberIds, _todayStart()),
-        _aggregatedActivityScores(memberIds, _weekStart()),
-        _aggregatedActivityScores(memberIds, _monthStart()),
-      ]);
-      return _scoresByThemeFromAggregates(
-        todayRows: rowsByPeriod[0],
-        weekRows: rowsByPeriod[1],
-        monthRows: rowsByPeriod[2],
-      );
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to load aggregated group leaderboard scores",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      final List<Map<String, dynamic>> activityRows =
-          await _activityRowsForMembers(memberIds);
-      return {
-        for (final GroupThemeType theme in GroupThemeType.values)
-          theme: _scoresByUser(theme: theme, activityRows: activityRows),
-      };
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _aggregatedActivityScores(
-    List<String> memberIds,
-    DateTime periodStart,
-  ) async {
-    return await _selectRows(
-      table: "activity_entries",
-      columns:
-          "user_id, category, total_seconds:seconds.sum(), "
-          "total_pages:pages.sum(), "
-          "total_completed_tasks:completed_tasks.sum()",
-      filters: (query) => query
-          .inFilter("user_id", memberIds)
-          .gte("occurred_at", periodStart.toIso8601String()),
-    ).timeout(_activityScoresTimeout);
+    final List<Map<String, dynamic>> activityRows =
+        await _activityRowsForMembers(memberIds);
+    return {
+      for (final GroupThemeType theme in GroupThemeType.values)
+        theme: _scoresByUser(theme: theme, activityRows: activityRows),
+    };
   }
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async {
@@ -910,91 +876,12 @@ class GroupsDataSource {
     return scores;
   }
 
-  Map<GroupThemeType, Map<String, _PeriodScores>> _scoresByThemeFromAggregates({
-    required List<Map<String, dynamic>> todayRows,
-    required List<Map<String, dynamic>> weekRows,
-    required List<Map<String, dynamic>> monthRows,
-  }) {
-    final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {
-      for (final GroupThemeType theme in GroupThemeType.values)
-        theme: <String, _PeriodScores>{},
-    };
-
-    void merge(
-      List<Map<String, dynamic>> rows, {
-      required int Function(_PeriodScores current, int value) today,
-      required int Function(_PeriodScores current, int value) week,
-      required int Function(_PeriodScores current, int value) month,
-    }) {
-      for (final Map<String, dynamic> row in rows) {
-        final String? userId = row["user_id"] as String?;
-        if (userId == null) {
-          continue;
-        }
-        final GroupThemeType? theme = _themeByName(row["category"] as String?);
-        if (theme == null) {
-          continue;
-        }
-        final int value = _aggregateScoreValue(row, theme);
-        final Map<String, _PeriodScores> scoresByUser = scoresByTheme[theme] ??=
-            <String, _PeriodScores>{};
-        final _PeriodScores current =
-            scoresByUser[userId] ??
-            const _PeriodScores(today: 0, week: 0, month: 0);
-        scoresByUser[userId] = _PeriodScores(
-          today: today(current, value),
-          week: week(current, value),
-          month: month(current, value),
-        );
-      }
-    }
-
-    merge(
-      todayRows,
-      today: (_, value) => value,
-      week: (current, _) => current.week,
-      month: (current, _) => current.month,
-    );
-    merge(
-      weekRows,
-      today: (current, _) => current.today,
-      week: (_, value) => value,
-      month: (current, _) => current.month,
-    );
-    merge(
-      monthRows,
-      today: (current, _) => current.today,
-      week: (current, _) => current.week,
-      month: (_, value) => value,
-    );
-
-    return scoresByTheme;
-  }
-
   int _scoreValue(Map<String, dynamic> row, GroupThemeType theme) =>
       switch (theme.unit) {
         GroupMetricUnit.hours => (row["seconds"] as num?)?.toInt() ?? 0,
         GroupMetricUnit.pages => (row["pages"] as num?)?.toInt() ?? 0,
         GroupMetricUnit.days => (row["completed_tasks"] as num?)?.toInt() ?? 0,
       };
-
-  int _aggregateScoreValue(Map<String, dynamic> row, GroupThemeType theme) =>
-      switch (theme.unit) {
-        GroupMetricUnit.hours => _intValue(row["total_seconds"]),
-        GroupMetricUnit.pages => _intValue(row["total_pages"]),
-        GroupMetricUnit.days => _intValue(row["total_completed_tasks"]),
-      };
-
-  int _intValue(Object? value) => value is num ? value.toInt() : 0;
-
-  GroupThemeType? _themeByName(String? name) {
-    for (final GroupThemeType value in GroupThemeType.values) {
-      if (value.name == name) {
-        return value;
-      }
-    }
-    return null;
-  }
 
   String _displayName(Map<String, dynamic>? row, {required String fallback}) {
     if (row == null) {
