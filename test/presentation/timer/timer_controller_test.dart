@@ -1,8 +1,10 @@
+import "package:dartz/dartz.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
@@ -26,39 +28,105 @@ class _Noop {
 }
 
 class _FakeUpdateSubjectTimeUseCase extends _Noop
-    implements UpdateSubjectTimeUseCase {}
+    implements UpdateSubjectTimeUseCase {
+  @override
+  Future<Either<AppError, void>> call({
+    required String subjectId,
+    required int totalSeconds,
+  }) async => const Right(null);
+}
 
 class _FakeUpdateSubjectPagesUseCase extends _Noop
     implements UpdateSubjectPagesUseCase {}
 
-class _FakeLogActivityUseCase extends _Noop implements LogActivityUseCase {}
+class _FakeLogActivityUseCase extends _Noop implements LogActivityUseCase {
+  @override
+  Future<Either<AppError, void>> call({
+    required TimeCategoryType category,
+    required String subjectId,
+    required String subjectName,
+    int seconds = 0,
+    int pages = 0,
+    int completedTasks = 0,
+  }) async => const Right(null);
+}
 
 class _FakeLastActivityService extends _Noop implements LastActivityService {}
 
 class _FakeActivityHistoryService extends _Noop
-    implements ActivityHistoryService {}
+    implements ActivityHistoryService {
+  @override
+  Future<void> record({
+    required TimeCategoryType category,
+    required String subjectId,
+    required String subjectName,
+    int seconds = 0,
+    int pages = 0,
+    int completedTasks = 0,
+  }) async {}
+}
 
-class _FakeDailyProgressService extends _Noop implements DailyProgressService {}
+class _FakeDailyProgressService extends _Noop implements DailyProgressService {
+  @override
+  Future<void> addFocusSeconds(int seconds) async {}
+
+  @override
+  Future<void> registerSession() async {}
+}
 
 class _FakeSubjectDailyHistoryService extends _Noop
-    implements SubjectDailyHistoryService {}
+    implements SubjectDailyHistoryService {
+  @override
+  Future<void> addFocusSeconds(String subjectId, int seconds) async {}
+}
 
 class _FakeAchievementUnlockService extends _Noop
-    implements AchievementUnlockService {}
+    implements AchievementUnlockService {
+  @override
+  Future<void> checkForNewUnlocks() async {}
+}
 
 class _FakeTimerNotificationService extends _Noop
     implements TimerNotificationService {}
 
 class _FakeTimerLiveActivityService extends _Noop
-    implements TimerLiveActivityService {}
+    implements TimerLiveActivityService {
+  @override
+  Future<void> startOrUpdate({
+    required String subjectName,
+    required int colorValue,
+    required int remainingSeconds,
+    required bool isRunning,
+    required bool isResting,
+  }) async {}
 
-class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {}
+  @override
+  Future<TimerLiveActivityAction?> consumePendingAction() async => null;
 
-class _FakeFocusGuardService extends _Noop implements FocusGuardService {}
+  @override
+  Future<void> end() async {}
+}
+
+class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
+  int finishFeedbackCount = 0;
+
+  @override
+  Future<void> playFocusFinishedFeedback() async {
+    finishFeedbackCount++;
+  }
+}
+
+class _FakeFocusGuardService extends _Noop implements FocusGuardService {
+  @override
+  Future<void> setKeepScreenOn(bool enabled) async {}
+}
 
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
 
-class _FakeAppController extends _Noop implements AppController {}
+class _FakeAppController extends _Noop implements AppController {
+  @override
+  bool isFocusLockEnabledFor(TimeCategoryType category) => false;
+}
 
 class _FakeAppNavigator extends _Noop implements AppNavigator {}
 
@@ -89,7 +157,10 @@ SubjectEntity _subject({
   activityType: SubjectActivityType.permanent,
 );
 
-TimerController _controller(SubjectEntity subject) => TimerController(
+TimerController _controller(
+  SubjectEntity subject, {
+  FocusFeedbackService? focusFeedbackService,
+}) => TimerController(
   updateSubjectTimeUseCase: _FakeUpdateSubjectTimeUseCase(),
   updateSubjectPagesUseCase: _FakeUpdateSubjectPagesUseCase(),
   logActivityUseCase: _FakeLogActivityUseCase(),
@@ -100,7 +171,7 @@ TimerController _controller(SubjectEntity subject) => TimerController(
   achievementUnlockService: _FakeAchievementUnlockService(),
   timerNotificationService: _FakeTimerNotificationService(),
   timerLiveActivityService: _FakeTimerLiveActivityService(),
-  focusFeedbackService: _FakeFocusFeedbackService(),
+  focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: _FakeFocusGuardService(),
   analyticsService: _FakeAnalyticsService(),
   appController: _FakeAppController(),
@@ -109,6 +180,8 @@ TimerController _controller(SubjectEntity subject) => TimerController(
 );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group("TimerController focus interval", () {
     test("uses the subject goal when it is positive", () {
       final controller = _controller(_subject(goalSeconds: 1500));
@@ -254,6 +327,45 @@ void main() {
 
       controller.updateSubjectNotes("depois");
       expect(controller.subject.notes, "depois");
+    });
+  });
+
+  group("TimerController focus/rest cycle", () {
+    test("alarms at section end and rest end before the next section", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(goalSeconds: 10, restMinutes: 1, focusSessionCount: 2),
+        focusFeedbackService: feedback,
+      );
+
+      controller.advanceForTesting(10);
+
+      expect(feedback.finishFeedbackCount, 1);
+      expect(controller.isResting.value, isTrue);
+      expect(controller.completedFocusSections.value, 1);
+
+      controller.restCountdownSeconds.value = 1;
+      controller.advanceForTesting(1);
+
+      expect(feedback.finishFeedbackCount, 2);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.breakCountdownSeconds.value, 10);
+      expect(controller.completedFocusSections.value, 1);
+    });
+
+    test("does not alarm when the user skips rest manually", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(goalSeconds: 10, restMinutes: 1, focusSessionCount: 2),
+        focusFeedbackService: feedback,
+      );
+
+      controller.advanceForTesting(10);
+      controller.skipRest();
+
+      expect(feedback.finishFeedbackCount, 1);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.breakCountdownSeconds.value, 10);
     });
   });
 }

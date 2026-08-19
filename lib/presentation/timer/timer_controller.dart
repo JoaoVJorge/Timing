@@ -267,10 +267,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _syncFocusGuard();
   }
 
-  void _finishRestPeriod() {
+  void _finishRestPeriod({bool playFeedback = true}) {
     isResting.value = false;
     isRunning.value = true;
     breakCountdownSeconds.value = focusIntervalSeconds;
+    if (playFeedback && _isAppInForeground && !_isCatchingUpAfterBackground) {
+      unawaited(focusFeedbackService.playFocusFinishedFeedback());
+    }
     _updateNotification();
     _syncFocusGuard();
   }
@@ -294,7 +297,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       return;
     }
     restCountdownSeconds.value = restIntervalSeconds;
-    _finishRestPeriod();
+    _finishRestPeriod(playFeedback: false);
   }
 
   void continueFocus() {
@@ -305,6 +308,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _updateNotification();
     _syncFocusGuard();
   }
+
+  @visibleForTesting
+  void advanceForTesting(int seconds) => _advanceBy(seconds);
 
   void updateSubjectNotes(String notes) {
     subject = subject.copyWith(notes: notes);
@@ -331,8 +337,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       AnalyticsEvent.focusSessionCompleted(
         category: subject.category,
         seconds: sessionSeconds.value,
-        completedAllSections:
-            completedFocusSections.value >= focusSessionCount,
+        completedAllSections: completedFocusSections.value >= focusSessionCount,
       ),
     );
   }
