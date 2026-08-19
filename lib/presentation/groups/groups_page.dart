@@ -1058,7 +1058,6 @@ class _GroupActivityDataView extends StatelessWidget {
         .where((member) => (progressByMember[member.id] ?? 0) < targetPerMember)
         .toList();
     final int reached = completedMembers.length;
-    final double collectiveProgress = total == 0 ? 0 : reached / total;
     final int totalPeriodValue = group.members.fold<int>(
       0,
       (sum, member) => sum + (progressByMember[member.id] ?? 0),
@@ -1066,18 +1065,6 @@ class _GroupActivityDataView extends StatelessWidget {
 
     return Column(
       children: [
-        _ActivityOverviewCard(
-          group: group,
-          header: header,
-          focusSeconds: focusSeconds,
-        ),
-        const Gap(AppSpacing.betweenRelated),
-        _CollectiveProgressCard(
-          reached: reached,
-          total: total,
-          progress: collectiveProgress,
-        ),
-        const Gap(AppSpacing.betweenRelated),
         _ParticipantsProgressCard(
           total: total,
           completedMembers: completedMembers,
@@ -1093,6 +1080,12 @@ class _GroupActivityDataView extends StatelessWidget {
           participants: total,
           unit: group.theme.unit,
           period: period,
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        _ActivityOverviewCard(
+          group: group,
+          header: header,
+          focusSeconds: focusSeconds,
         ),
       ],
     );
@@ -1114,175 +1107,82 @@ class _ActivityOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color accent = _groupDataAccent(context);
 
-    return _GroupDataCard.compact(
+    return _GroupDataCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              header.isGoal
-                  ? Icon(Icons.flag_rounded, size: 26, color: accent)
-                  : AppIcon(group.theme.iconName, size: 26, color: accent),
+              _DataSectionIcon(
+                color: accent,
+                child: header.isGoal
+                    ? Icon(Icons.flag_rounded, size: 24, color: accent)
+                    : AppIcon(group.theme.iconName, size: 24, color: accent),
+              ),
               const Gap(12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.groupActivityLabel,
-                      style: context.textStyles.cardTitle.copyWith(
-                        color: context.colorTokens.textBody,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const Gap(6),
-                    Text(
-                      header.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.black32.copyWith(
-                        color: context.colorTokens.textBody,
-                        fontSize: 21,
-                      ),
-                    ),
-                    if (group.description.trim().isNotEmpty) ...[
-                      const Gap(4),
-                      Text(
-                        group.description.trim(),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodyMedium.copyWith(
-                          color: context.colorTokens.textHint,
-                          fontSize: 14,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const Gap(8),
-              _FrequencyBadge(label: context.l10n.dailyLabel),
-            ],
-          ),
-          const Gap(16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const double gap = 10;
-              final double tileWidth = constraints.maxWidth >= 430
-                  ? (constraints.maxWidth - gap * 2) / 3
-                  : (constraints.maxWidth - gap) / 2;
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  _ActivityDataTile(
-                    width: tileWidth,
-                    icon: Icons.timer_outlined,
-                    label: context.l10n.groupActivityFocusDataLabel,
-                    value: _formatMinutes(Duration(seconds: focusSeconds)),
-                  ),
-                  _ActivityDataTile(
-                    width: tileWidth,
-                    icon: Icons.coffee_outlined,
-                    label: context.l10n.groupActivityPauseDataLabel,
-                    value: "${header.restMinutes} min",
-                  ),
-                  _ActivityDataTile(
-                    width: tileWidth,
-                    icon: Icons.repeat_rounded,
-                    label: context.l10n.groupActivitySessionsDataLabel,
-                    value: header.focusSessionCount.toString(),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CollectiveProgressCard extends StatelessWidget {
-  const _CollectiveProgressCard({
-    required this.reached,
-    required this.total,
-    required this.progress,
-  });
-
-  final int reached;
-  final int total;
-  final double progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color accent = _groupDataAccent(context);
-
-    return _GroupDataCard.compact(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
                 child: Text(
-                  context.l10n.groupCollectiveProgressTitle,
+                  context.l10n.groupActivityLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: context.textStyles.black20.copyWith(
                     color: context.colorTokens.textBody,
                     fontSize: 18,
                   ),
                 ),
               ),
-              Text(
-                context.l10n.groupActivityCompletedCount(reached, total),
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 13,
-                ),
-              ),
+              const Gap(8),
+              _FrequencyBadge(label: context.l10n.dailyLabel),
             ],
           ),
-          const Gap(10),
+          const Gap(18),
           Text(
-            "${(progress * 100).round()}%",
-            style: context.textStyles.black32.copyWith(
-              color: accent,
-              fontSize: 34,
+            header.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.black20.copyWith(
+              color: context.colorTokens.textBody,
+              fontSize: 20,
             ),
           ),
-          const Gap(10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              color: accent,
-              backgroundColor: context.colorTokens.surfaceInnerLayer.withValues(
-                alpha: 0.62,
-              ),
+          const Gap(4),
+          Text(
+            group.description.trim().isEmpty
+                ? context.l10n.goalLabel
+                : group.description.trim(),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodyMedium.copyWith(
+              color: context.colorTokens.textHint,
+              fontSize: 15,
+              height: 1.18,
             ),
           ),
-          const Gap(12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            decoration: BoxDecoration(
-              color: context.colorTokens.primaryVeryLight.withValues(
-                alpha: 0.5,
-              ),
-              borderRadius: BorderRadius.circular(999),
-            ),
+          const Gap(24),
+          IntrinsicHeight(
             child: Row(
               children: [
-                Icon(Icons.flag_outlined, size: 22, color: accent),
-                const Gap(10),
                 Expanded(
-                  child: Text(
-                    context.l10n.groupMissingParticipants(total - reached),
-                    style: context.textStyles.bodyMedium.copyWith(fontSize: 14),
+                  child: _ActivityDataTile(
+                    icon: Icons.timer_outlined,
+                    label: context.l10n.groupActivityFocusDataLabel,
+                    value: _formatMinutes(Duration(seconds: focusSeconds)),
+                  ),
+                ),
+                _MetricDivider(),
+                Expanded(
+                  child: _ActivityDataTile(
+                    icon: Icons.coffee_outlined,
+                    label: context.l10n.groupActivityPauseDataLabel,
+                    value: "${header.restMinutes} min",
+                  ),
+                ),
+                _MetricDivider(),
+                Expanded(
+                  child: _ActivityDataTile(
+                    icon: Icons.repeat_rounded,
+                    label: context.l10n.groupActivitySessionsDataLabel,
+                    value: header.focusSessionCount.toString(),
                   ),
                 ),
               ],
@@ -1316,20 +1216,38 @@ class _ParticipantsProgressCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.groupParticipantsDataTitle(total),
-          style: context.textStyles.black20.copyWith(
-            color: context.colorTokens.textBody,
-            fontSize: 18,
-          ),
+        Row(
+          children: [
+            _DataSectionIcon(
+              color: context.colorTokens.primary,
+              child: Icon(
+                Icons.groups_2_outlined,
+                size: 24,
+                color: context.colorTokens.primary,
+              ),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Text(
+                context.l10n.groupParticipantsDataTitle(total),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.black20.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 19,
+                ),
+              ),
+            ),
+          ],
         ),
-        const Gap(22),
+        const Gap(24),
         _ParticipantsSectionLabel(
           label: context.l10n.groupCompletedMembersTitle(
             completedMembers.length,
           ),
+          color: _groupDataAccent(context),
         ),
-        const Gap(12),
+        const Gap(14),
         if (completedMembers.isEmpty)
           _ParticipantsEmptyState(
             title: context.l10n.groupNoCompletedMembersTitle,
@@ -1349,8 +1267,9 @@ class _ParticipantsProgressCard extends StatelessWidget {
         const Gap(22),
         _ParticipantsSectionLabel(
           label: context.l10n.groupPendingMembersTitle(pendingMembers.length),
+          color: context.colorTokens.primary,
         ),
-        const Gap(12),
+        const Gap(14),
         if (pendingMembers.isEmpty)
           Text(
             context.l10n.groupActivityAllCompletedToday,
@@ -1392,12 +1311,29 @@ class _GroupStatisticsCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.groupStatisticsTitle,
-          style: context.textStyles.black20.copyWith(
-            color: context.colorTokens.textBody,
-            fontSize: 18,
-          ),
+        Row(
+          children: [
+            _DataSectionIcon(
+              color: context.colorTokens.primary,
+              child: Icon(
+                Icons.trending_up_rounded,
+                size: 24,
+                color: context.colorTokens.primary,
+              ),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Text(
+                context.l10n.groupStatisticsTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.black20.copyWith(
+                  color: context.colorTokens.textBody,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
         ),
         const Gap(22),
         GridView.count(
@@ -1410,11 +1346,13 @@ class _GroupStatisticsCard extends StatelessWidget {
           children: [
             _GroupStatItem(
               icon: Icons.local_fire_department_rounded,
+              color: _groupDataAccent(context),
               value: context.l10n.unitDays(0),
               label: context.l10n.groupStreakStatLabel,
             ),
             _GroupStatItem(
               icon: Icons.access_time_rounded,
+              color: context.colorTokens.primary,
               value: _formatMetricValue(context, totalPeriodValue, unit),
               label: period == LeaderboardPeriodType.today
                   ? context.l10n.groupTodayTotalStatLabel
@@ -1422,11 +1360,13 @@ class _GroupStatisticsCard extends StatelessWidget {
             ),
             _GroupStatItem(
               icon: Icons.trending_up_rounded,
+              color: Colors.deepPurple,
               value: completedSessions.toString(),
               label: context.l10n.groupCompletedSessionsStatLabel,
             ),
             _GroupStatItem(
               icon: Icons.groups_2_outlined,
+              color: Colors.amber.shade700,
               value: participants.toString(),
               label: context.l10n.groupParticipantsStatLabel,
             ),
@@ -1439,8 +1379,6 @@ class _GroupStatisticsCard extends StatelessWidget {
 
 class _GroupDataCard extends StatelessWidget {
   const _GroupDataCard({required this.child}) : padding = 20;
-
-  const _GroupDataCard.compact({required this.child}) : padding = 16;
 
   final Widget child;
   final double padding;
@@ -1480,62 +1418,69 @@ class _FrequencyBadge extends StatelessWidget {
   }
 }
 
+class _DataSectionIcon extends StatelessWidget {
+  const _DataSectionIcon({required this.child, required this.color});
+
+  final Widget child;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 44,
+    height: 44,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    alignment: Alignment.center,
+    child: child,
+  );
+}
+
 class _ActivityDataTile extends StatelessWidget {
   const _ActivityDataTile({
     required this.icon,
     required this.label,
     required this.value,
-    required this.width,
   });
 
   final IconData icon;
   final String label;
   final String value;
-  final double width;
 
   @override
   Widget build(BuildContext context) {
     final Color accent = _groupDataAccent(context);
 
-    return Container(
-      width: width,
-      constraints: const BoxConstraints(minHeight: 58),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 23, color: accent),
+          Icon(icon, size: 30, color: accent),
           const Gap(8),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontSize: 13,
-                  ),
-                ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.black20.copyWith(
-                    color: context.colorTokens.textBody,
-                    fontSize: 17,
-                  ),
-                ),
-              ],
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: context.textStyles.bodyMedium.copyWith(
+              color: context.colorTokens.textHint,
+              fontSize: 13,
+              height: 1.1,
+            ),
+          ),
+          const Gap(2),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: context.textStyles.black20.copyWith(
+              color: context.colorTokens.textBody,
+              fontSize: 18,
+              height: 1.05,
             ),
           ),
         ],
@@ -1544,18 +1489,25 @@ class _ActivityDataTile extends StatelessWidget {
   }
 }
 
+class _MetricDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 1,
+    margin: const EdgeInsets.symmetric(horizontal: 4),
+    color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
+  );
+}
+
 class _ParticipantsSectionLabel extends StatelessWidget {
-  const _ParticipantsSectionLabel({required this.label});
+  const _ParticipantsSectionLabel({required this.label, required this.color});
 
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Text(
     label,
-    style: context.textStyles.cardTitle.copyWith(
-      color: _groupDataAccent(context),
-      fontSize: 14,
-    ),
+    style: context.textStyles.cardTitle.copyWith(color: color, fontSize: 15),
   );
 }
 
@@ -1568,13 +1520,10 @@ class _ParticipantsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     decoration: BoxDecoration(
       color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-      ),
+      borderRadius: BorderRadius.circular(18),
     ),
     child: Row(
       children: [
@@ -1633,14 +1582,11 @@ class _ParticipantProgressRow extends StatelessWidget {
     final Color accent = _groupDataAccent(context);
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 60),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      constraints: const BoxConstraints(minHeight: 70),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.5),
-        ),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
@@ -1736,31 +1682,28 @@ class _StatusPill extends StatelessWidget {
 class _GroupStatItem extends StatelessWidget {
   const _GroupStatItem({
     required this.icon,
+    required this.color,
     required this.value,
     required this.label,
   });
 
   final IconData icon;
+  final Color color;
   final String value;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = _groupDataAccent(context);
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
       decoration: BoxDecoration(
         color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.45),
-        ),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: accent, size: 23),
+          Icon(icon, color: color, size: 28),
           const Gap(9),
           Expanded(
             child: Column(
@@ -1771,7 +1714,10 @@ class _GroupStatItem extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.black20.copyWith(fontSize: 18),
+                  style: context.textStyles.black20.copyWith(
+                    color: color,
+                    fontSize: 19,
+                  ),
                 ),
                 const Gap(1),
                 Text(
