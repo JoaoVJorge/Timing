@@ -11,6 +11,7 @@ import "package:timing/core/domain/entities/group_activity_progress_entity.dart"
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
@@ -18,6 +19,7 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 
@@ -429,6 +431,10 @@ class GroupsController extends GetxController {
     activityProgress.clear();
     groups.refresh();
     await _invalidateActivityCaches();
+    if (newGroup.theme == GroupThemeType.dailyGoals &&
+        Get.isRegistered<DailyGoalsController>()) {
+      await Get.find<DailyGoalsController>().loadTasks();
+    }
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
 

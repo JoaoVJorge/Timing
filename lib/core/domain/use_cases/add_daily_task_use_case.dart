@@ -14,11 +14,23 @@ class AddDailyTaskUseCase {
     required int colorValue,
     required int targetDays,
     required DailyTaskSequenceType sequenceType,
+    bool reuseMatchingTask = false,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
 
     return getResult.fold((error) async => Left(error), (tasks) async {
+      if (reuseMatchingTask) {
+        final String normalizedName = name.trim().toLowerCase();
+        for (final DailyTaskEntity task in tasks) {
+          if (task.name.trim().toLowerCase() == normalizedName &&
+              task.targetDays == targetDays &&
+              task.sequenceType == sequenceType) {
+            return Right(task);
+          }
+        }
+      }
+
       final DailyTaskEntity newTask = DailyTaskEntity(
         id: generateEntityId(),
         name: name,

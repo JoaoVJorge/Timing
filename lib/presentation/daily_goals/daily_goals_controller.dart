@@ -32,6 +32,7 @@ class DailyGoalsController extends GetxController {
   final AchievementUnlockService _achievementUnlockService;
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
+  final RxBool isLoading = true.obs;
 
   List<DailyTaskEntity> get pendingTasks =>
       tasks.where((task) => !task.isDoneForCurrentCycle).toList();
@@ -49,12 +50,17 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> loadTasks() async {
-    final Either<AppError, List<DailyTaskEntity>> result =
-        await _getDailyTasksUseCase();
-    result.fold((error) => null, (loadedTasks) {
-      tasks.value = loadedTasks;
-      _askAboutMissedYesterday();
-    });
+    isLoading.value = true;
+    try {
+      final Either<AppError, List<DailyTaskEntity>> result =
+          await _getDailyTasksUseCase();
+      result.fold((error) => null, (loadedTasks) {
+        tasks.value = loadedTasks;
+        _askAboutMissedYesterday();
+      });
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> onTapAddTask() => _openCreateTask();

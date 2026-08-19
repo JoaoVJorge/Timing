@@ -38,13 +38,22 @@ class DailyTasksDataSource {
       }
 
       final List<dynamic> decoded = jsonDecode(savedTasks) as List<dynamic>;
-      return Right(
-        decoded
-            .map(
-              (item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>),
-            )
-            .toList(),
-      );
+      final List<DailyTaskEntity> localTasks = decoded
+          .map((item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>))
+          .toList();
+      if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
+        final List<DailyTaskEntity> remoteTasks = await _getRemoteTasks();
+        if (remoteTasks.isNotEmpty) {
+          final List<DailyTaskEntity> mergedTasks = _mergeTasks(
+            localTasks: localTasks,
+            remoteTasks: remoteTasks,
+          );
+          await _saveLocalTasks(mergedTasks);
+          return Right(mergedTasks);
+        }
+      }
+
+      return Right(localTasks);
     } catch (error, stackTrace) {
       return Left(SerializationAppError(error: error, stackTrace: stackTrace));
     }
@@ -68,6 +77,19 @@ class DailyTasksDataSource {
       tasks.map((task) => task.toMap()).toList(),
     );
     await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
+  }
+
+  List<DailyTaskEntity> _mergeTasks({
+    required List<DailyTaskEntity> localTasks,
+    required List<DailyTaskEntity> remoteTasks,
+  }) {
+    final Map<String, DailyTaskEntity> byId = {
+      for (final DailyTaskEntity task in localTasks) task.id: task,
+    };
+    for (final DailyTaskEntity task in remoteTasks) {
+      byId[task.id] = task;
+    }
+    return byId.values.toList();
   }
 
   Future<List<DailyTaskEntity>> _getRemoteTasks() async {

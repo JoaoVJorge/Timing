@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
@@ -10,6 +11,7 @@ import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/core/domain/use_cases/create_group_use_case.dart";
 import "package:timing/core/domain/use_cases/get_invitable_friends_use_case.dart";
@@ -22,13 +24,16 @@ class CreateGroupController extends GetxController
   CreateGroupController({
     required this._getInvitableFriendsUseCase,
     required this._createGroupUseCase,
+    required this._addDailyTaskUseCase,
     required this._appNavigator,
   });
 
   static const int lastStep = 3;
+  static const List<int> dailyGoalTargetDaysOptions = [5, 14, 30];
 
   final GetInvitableFriendsUseCase _getInvitableFriendsUseCase;
   final CreateGroupUseCase _createGroupUseCase;
+  final AddDailyTaskUseCase _addDailyTaskUseCase;
   final AppNavigator _appNavigator;
 
   final TextEditingController groupNameController = TextEditingController();
@@ -72,6 +77,9 @@ class CreateGroupController extends GetxController
   bool get hasName => groupName.value.trim().isNotEmpty;
 
   bool get hasTheme => selectedTheme.value != null;
+
+  bool get isDailyGoalsTheme =>
+      selectedTheme.value == GroupThemeType.dailyGoals;
 
   bool get hasFriends => selectedFriendIds.isNotEmpty;
 
@@ -202,7 +210,11 @@ class CreateGroupController extends GetxController
     _themeUsedForActivityDefaults = theme;
     selectedIconName.value = SubjectIcons.suggestionsFor(category).first;
     if (activityGoalController.text.trim().isEmpty) {
-      activityGoalController.text = isPageBased ? "10" : "30";
+      activityGoalController.text = isDailyGoalsTheme
+          ? dailyGoalTargetDaysOptions.first.toString()
+          : isPageBased
+          ? "10"
+          : "30";
       activityGoal.value = activityGoalController.text;
     }
   }
@@ -349,6 +361,14 @@ class CreateGroupController extends GetxController
     if (goalNumber <= 0) {
       return null;
     }
+    if (isDailyGoalsTheme) {
+      return GroupActivityDraft.goal(
+        name: name,
+        colorValue: colorValue,
+        targetDays: goalNumber,
+      );
+    }
+
     final bool isReading = category == TimeCategoryType.reading;
     final bool isPermanent =
         activityType.value == SubjectActivityType.permanent;
@@ -397,18 +417,37 @@ class CreateGroupController extends GetxController
     final List<FriendOption> invitedFriends = availableFriends
         .where((friend) => selectedFriendIds.contains(friend.id))
         .toList();
+    final GroupActivityDraft? activity = buildActivityDraft();
     final Either<AppError, GroupEntity> result = await _createGroupUseCase(
       name: name,
       theme: theme,
       invitedFriends: invitedFriends,
       description: descriptionController.text.trim(),
-      activity: buildActivityDraft(),
+      activity: activity,
     );
     isCreating.value = false;
 
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(error.message),
-      (group) => Get.back<GroupEntity>(result: group, closeOverlays: true),
+    await result.fold(
+      (error) async => _appNavigator.showErrorSnackBar(error.message),
+      (group) async {
+        await _ensureLocalDailyGoal(activity);
+        Get.back<GroupEntity>(result: group, closeOverlays: true);
+      },
+    );
+  }
+
+  Future<void> _ensureLocalDailyGoal(GroupActivityDraft? activity) async {
+    if (!isDailyGoalsTheme ||
+        activity == null ||
+        activity.kind != GroupActivityKind.goal) {
+      return;
+    }
+    await _addDailyTaskUseCase(
+      name: activity.name,
+      colorValue: activity.colorValue,
+      targetDays: activity.targetDays,
+      sequenceType: DailyTaskSequenceType.casual,
+      reuseMatchingTask: true,
     );
   }
 

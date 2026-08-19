@@ -28,6 +28,10 @@ class DailyGoalsPage extends StatelessWidget {
         final List<DailyTaskEntity> pending = controller.pendingTasks;
         final List<DailyTaskEntity> completed = controller.completedTasks;
 
+        if (controller.isLoading.value && controller.tasks.isEmpty) {
+          return const _DailyGoalsLoadingSkeleton();
+        }
+
         if (controller.tasks.isEmpty) {
           return Center(
             child: SingleChildScrollView(
@@ -98,6 +102,115 @@ class DailyGoalsPage extends StatelessWidget {
       }),
     );
   }
+}
+
+class _DailyGoalsLoadingSkeleton extends StatefulWidget {
+  const _DailyGoalsLoadingSkeleton();
+
+  @override
+  State<_DailyGoalsLoadingSkeleton> createState() =>
+      _DailyGoalsLoadingSkeletonState();
+}
+
+class _DailyGoalsLoadingSkeletonState extends State<_DailyGoalsLoadingSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1350),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    builder: (context, child) {
+      final double sweep = _controller.value * 2.4 - 0.7;
+      return ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
+            context.colorTokens.white.withValues(alpha: 0.7),
+            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
+          ],
+          stops: [
+            (sweep - 0.18).clamp(0.0, 1.0),
+            sweep.clamp(0.0, 1.0),
+            (sweep + 0.18).clamp(0.0, 1.0),
+          ],
+        ).createShader(bounds),
+        child: child,
+      );
+    },
+    child: ListView(
+      padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+      children: const [
+        _SkeletonBox(width: 128, height: 18, radius: 7),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonTaskTile(),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonTaskTile(),
+        Gap(AppSpacing.betweenRelated),
+        _SkeletonTaskTile(),
+      ],
+    ),
+  );
+}
+
+class _SkeletonTaskTile extends StatelessWidget {
+  const _SkeletonTaskTile();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+    ),
+    child: const Row(
+      children: [
+        _SkeletonBox(width: 42, height: 42, radius: 21),
+        Gap(12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SkeletonBox(height: 16, radius: 7),
+              Gap(8),
+              _SkeletonBox(width: 154, height: 12, radius: 6),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({required this.height, this.width, this.radius = 14});
+
+  final double? width;
+  final double height;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: context.colorTokens.surfaceInnerLayer,
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
 }
 
 class _AnimatedTaskSection extends StatefulWidget {
