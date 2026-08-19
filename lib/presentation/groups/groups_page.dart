@@ -1135,7 +1135,7 @@ class _ActivityOverviewCard extends StatelessWidget {
               _FrequencyBadge(label: context.l10n.dailyLabel),
             ],
           ),
-          const Gap(18),
+          const Gap(14),
           Text(
             header.name,
             maxLines: 1,
@@ -1158,7 +1158,7 @@ class _ActivityOverviewCard extends StatelessWidget {
               height: 1.18,
             ),
           ),
-          const Gap(24),
+          const Gap(16),
           IntrinsicHeight(
             child: Row(
               children: [
@@ -1340,13 +1340,13 @@ class _GroupStatisticsCard extends StatelessWidget {
           crossAxisCount: 2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
-          childAspectRatio: 1.9,
+          childAspectRatio: 1.65,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
             _GroupStatItem(
               icon: Icons.local_fire_department_rounded,
-              color: _groupDataAccent(context),
+              color: context.colorTokens.warning,
               value: context.l10n.unitDays(0),
               label: context.l10n.groupStreakStatLabel,
             ),
@@ -1360,13 +1360,13 @@ class _GroupStatisticsCard extends StatelessWidget {
             ),
             _GroupStatItem(
               icon: Icons.trending_up_rounded,
-              color: Colors.deepPurple,
+              color: _groupDataAccent(context),
               value: completedSessions.toString(),
               label: context.l10n.groupCompletedSessionsStatLabel,
             ),
             _GroupStatItem(
               icon: Icons.groups_2_outlined,
-              color: Colors.amber.shade700,
+              color: context.colorTokens.info,
               value: participants.toString(),
               label: context.l10n.groupParticipantsStatLabel,
             ),
@@ -1458,8 +1458,8 @@ class _ActivityDataTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 30, color: accent),
-          const Gap(8),
+          Icon(icon, size: 28, color: accent),
+          const Gap(6),
           Text(
             label,
             maxLines: 1,
@@ -1522,7 +1522,7 @@ class _ParticipantsEmptyState extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
+      color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.32),
       borderRadius: BorderRadius.circular(18),
     ),
     child: Row(
@@ -1585,7 +1585,7 @@ class _ParticipantProgressRow extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 70),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.55),
+        color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.32),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -1695,7 +1695,7 @@ class _GroupStatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
       decoration: BoxDecoration(
         color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(18),
@@ -1703,8 +1703,8 @@ class _GroupStatItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 28),
-          const Gap(9),
+          Icon(icon, color: color, size: 25),
+          const Gap(8),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1716,15 +1716,18 @@ class _GroupStatItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.black20.copyWith(
                     color: color,
-                    fontSize: 19,
+                    fontSize: 18,
+                    height: 1,
                   ),
                 ),
                 const Gap(1),
                 Text(
                   label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
-                    fontSize: 13,
+                    fontSize: 12,
                     height: 1.05,
                   ),
                 ),
