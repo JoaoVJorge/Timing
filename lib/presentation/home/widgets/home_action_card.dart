@@ -54,7 +54,7 @@ class HomeActionCard extends StatelessWidget {
                 Text(
                   eyebrow,
                   style: context.textStyles.bodySmall.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: Colors.white,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -67,7 +67,7 @@ class HomeActionCard extends StatelessWidget {
                       child: Icon(
                         Icons.school_rounded,
                         size: 17,
-                        color: Colors.white.withValues(alpha: 0.88),
+                        color: Colors.white,
                       ),
                     ),
                     const Gap(AppSpacing.titleToDescription),
@@ -91,7 +91,7 @@ class HomeActionCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodySmall.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: Colors.white,
                     ),
                   ),
                 ],

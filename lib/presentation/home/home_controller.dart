@@ -1,3 +1,4 @@
+import "package:flutter/material.dart";
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
@@ -17,6 +18,8 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
 
 class HomeController extends GetxController {
   HomeController({
@@ -59,7 +62,10 @@ class HomeController extends GetxController {
     load();
   }
 
-  Future<void> load({bool reloadSchedule = true}) async {
+  Future<void> load({
+    bool reloadSchedule = true,
+    bool reloadDailyTasks = true,
+  }) async {
     final Either<AppError, List<SubjectEntity>> subjectsResult =
         await _getSubjectsUseCase();
     subjectsResult.fold((error) {
@@ -67,12 +73,16 @@ class HomeController extends GetxController {
       _appNavigator.showErrorSnackBar(error.message);
     }, (value) => subjects.value = value);
 
-    final Either<AppError, List<DailyTaskEntity>> tasksResult =
-        await _getDailyTasksUseCase();
-    tasksResult.fold((error) {
-      dailyTasks.clear();
-      _appNavigator.showErrorSnackBar(error.message);
-    }, (value) => dailyTasks.value = value);
+    // Daily tasks only change on the Daily Goals screen, so most returns to Home
+    // keep the in-memory list instead of re-fetching it on every navigation.
+    if (reloadDailyTasks) {
+      final Either<AppError, List<DailyTaskEntity>> tasksResult =
+          await _getDailyTasksUseCase();
+      tasksResult.fold((error) {
+        dailyTasks.clear();
+        _appNavigator.showErrorSnackBar(error.message);
+      }, (value) => dailyTasks.value = value);
+    }
 
     if (reloadSchedule) {
       await _scheduleController.loadEntries();
@@ -118,6 +128,11 @@ class HomeController extends GetxController {
 
   bool hasSubjectsIn(TimeCategoryType category) =>
       subjects.any((s) => s.category == category);
+
+  String emptyCategoryValue(BuildContext context, TimeCategoryType category) {
+    final String item = category.itemNoun(context).toLowerCase();
+    return context.l10n.homeCategoryEmptyValue(item);
+  }
 
   /// Most-tracked subject of a category, used as the tile's "what you were
   /// working on" line.
@@ -167,8 +182,11 @@ class HomeController extends GetxController {
     reloadSchedule: false,
   );
 
-  Future<void> onTapDailyGoals() =>
-      _navigateAndRefresh(AppRoutes.dailyGoals, reloadSchedule: false);
+  Future<void> onTapDailyGoals() => _navigateAndRefresh(
+    AppRoutes.dailyGoals,
+    reloadSchedule: false,
+    reloadDailyTasks: true,
+  );
 
   Future<void> onContinue() {
     final SubjectEntity? subject = resumableSubject;
@@ -213,9 +231,13 @@ class HomeController extends GetxController {
     String route, {
     Object? arguments,
     bool reloadSchedule = true,
+    bool reloadDailyTasks = false,
   }) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??
         Future<void>.value());
-    await load(reloadSchedule: reloadSchedule);
+    await load(
+      reloadSchedule: reloadSchedule,
+      reloadDailyTasks: reloadDailyTasks,
+    );
   }
 }

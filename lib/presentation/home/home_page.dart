@@ -373,7 +373,7 @@ class _HomeActivitiesSection extends StatelessWidget {
     TimeCategoryType category,
   ) {
     if (!controller.hasSubjectsIn(category)) {
-      return _emptyCategoryValue(context, category);
+      return controller.emptyCategoryValue(context, category);
     }
     if (category == TimeCategoryType.reading) {
       return context.l10n.metricPagesValue(controller.pagesIn(category));
@@ -382,9 +382,4 @@ class _HomeActivitiesSection extends StatelessWidget {
       Duration(seconds: controller.focusSecondsIn(category)),
     );
   }
-}
-
-String _emptyCategoryValue(BuildContext context, TimeCategoryType category) {
-  final String item = category.itemNoun(context).toLowerCase();
-  return context.l10n.homeCategoryEmptyValue(item);
 }
