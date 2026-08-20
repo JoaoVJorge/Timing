@@ -1,35 +1,38 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 
 class FriendsLoadingSkeleton extends StatelessWidget {
   const FriendsLoadingSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Gap(14),
-      const Row(
-        children: [
-          Expanded(child: _FriendsSkeletonBox(height: 50, radius: 18)),
-          Gap(8),
-          Expanded(child: _FriendsSkeletonBox(height: 50, radius: 18)),
-        ],
-      ),
-      const Gap(18),
-      const _FriendsSkeletonBox(width: 120, height: 15, radius: 6),
-      const Gap(12),
-      const Column(
-        children: [
-          _FriendSkeletonRow(),
-          Gap(10),
-          _FriendSkeletonRow(),
-          Gap(10),
-          _FriendSkeletonRow(),
-        ],
-      ),
-    ],
+  Widget build(BuildContext context) => const AppSkeleton(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Gap(14),
+        Row(
+          children: [
+            Expanded(child: AppSkeletonBox(height: 50, radius: 18)),
+            Gap(8),
+            Expanded(child: AppSkeletonBox(height: 50, radius: 18)),
+          ],
+        ),
+        Gap(18),
+        AppSkeletonBox(width: 120, height: 15, radius: 6),
+        Gap(12),
+        Column(
+          children: [
+            _FriendSkeletonRow(),
+            Gap(10),
+            _FriendSkeletonRow(),
+            Gap(10),
+            _FriendSkeletonRow(),
+          ],
+        ),
+      ],
+    ),
   );
 }
 
@@ -52,41 +55,12 @@ class _FriendSkeletonRow extends StatelessWidget {
         ),
       ],
     ),
-    child: Row(
+    child: const Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: context.colorTokens.surfaceInnerLayer,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const Gap(10),
-        const _FriendsSkeletonBox(width: 132, height: 14, radius: 6),
+        AppSkeletonCircle(size: 40),
+        Gap(10),
+        AppSkeletonBox(width: 132, height: 14, radius: 6),
       ],
-    ),
-  );
-}
-
-class _FriendsSkeletonBox extends StatelessWidget {
-  const _FriendsSkeletonBox({
-    required this.height,
-    this.width,
-    this.radius = 8,
-  });
-
-  final double height;
-  final double? width;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
-      borderRadius: BorderRadius.circular(radius),
     ),
   );
 }
