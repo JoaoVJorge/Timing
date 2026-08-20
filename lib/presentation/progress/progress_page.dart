@@ -16,6 +16,7 @@ import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/widgets/app_icon_badge.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
 
@@ -38,6 +39,10 @@ class ProgressPage extends StatelessWidget {
           AppSpacing.betweenSections,
         ),
         child: Obx(() {
+          if (controller.isLoading.value) {
+            return const _ProgressLoadingSkeleton();
+          }
+
           final ProfileStatsEntity stats = controller.stats.value;
 
           return Column(
@@ -110,6 +115,164 @@ class ProgressPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ProgressLoadingSkeleton extends StatelessWidget {
+  const _ProgressLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) => AppSkeleton(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const AppSkeletonBox(width: 132, height: 28, radius: 9),
+        const Gap(AppSpacing.titleToDescription),
+        const AppSkeletonBox(height: 15, radius: 7),
+        const Gap(AppSpacing.betweenSections - 4),
+        const Row(
+          children: [
+            Expanded(child: AppSkeletonBox(height: 38, radius: 19)),
+            Gap(8),
+            Expanded(child: AppSkeletonBox(height: 38, radius: 19)),
+            Gap(8),
+            Expanded(child: AppSkeletonBox(height: 38, radius: 19)),
+          ],
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        AppSkeletonBox(
+          width: double.infinity,
+          height: 154,
+          radius: AppSurfaces.primaryRadius,
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        const _ProgressStatsSkeleton(),
+        const Gap(AppSpacing.betweenSections),
+        const AppSkeletonBox(width: 128, height: 18, radius: 7),
+        const Gap(AppSpacing.betweenRelated),
+        AppSkeletonBox(
+          width: double.infinity,
+          height: 190,
+          radius: AppSurfaces.contentRadius,
+        ),
+        const Gap(AppSpacing.betweenSections),
+        const AppSkeletonBox(width: 152, height: 18, radius: 7),
+        const Gap(AppSpacing.betweenRelated),
+        const _DistributionSkeleton(),
+        const Gap(AppSpacing.betweenSections),
+        const AppSkeletonBox(width: 120, height: 18, radius: 7),
+        const Gap(AppSpacing.betweenRelated),
+        AppSkeletonBox(
+          width: double.infinity,
+          height: 132,
+          radius: AppSurfaces.contentRadius,
+        ),
+      ],
+    ),
+  );
+}
+
+class _ProgressStatsSkeleton extends StatelessWidget {
+  const _ProgressStatsSkeleton();
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      const double spacing = AppSpacing.betweenRelated;
+      final double tileWidth = (constraints.maxWidth - spacing) / 2;
+
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: [
+          for (int index = 0; index < 4; index++)
+            SizedBox(
+              width: tileWidth,
+              child: const _ProgressStatSkeletonTile(),
+            ),
+        ],
+      );
+    },
+  );
+}
+
+class _ProgressStatSkeletonTile extends StatelessWidget {
+  const _ProgressStatSkeletonTile();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow,
+          blurRadius: 18,
+          offset: const Offset(0, 7),
+        ),
+      ],
+    ),
+    child: const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppSkeletonCircle(size: 38),
+        Gap(8),
+        AppSkeletonBox(height: 25, radius: 8),
+        Gap(4),
+        AppSkeletonBox(width: 88, height: 13, radius: 6),
+      ],
+    ),
+  );
+}
+
+class _DistributionSkeleton extends StatelessWidget {
+  const _DistributionSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: AppSurfaces.content(context.colorTokens),
+    child: const Column(
+      children: [
+        _DistributionRowSkeleton(),
+        Gap(AppSpacing.betweenRelated),
+        _DistributionRowSkeleton(),
+        Gap(AppSpacing.betweenRelated),
+        _DistributionRowSkeleton(),
+        Gap(AppSpacing.betweenRelated),
+        _DistributionRowSkeleton(),
+      ],
+    ),
+  );
+}
+
+class _DistributionRowSkeleton extends StatelessWidget {
+  const _DistributionRowSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Row(
+    children: [
+      AppSkeletonCircle(size: 32),
+      Gap(AppSpacing.betweenRelated),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: AppSkeletonBox(height: 14, radius: 6)),
+                Gap(20),
+                AppSkeletonBox(width: 48, height: 12, radius: 6),
+              ],
+            ),
+            Gap(AppSpacing.titleToDescription),
+            AppSkeletonBox(height: 6, radius: 999),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _ProgressHeader extends StatelessWidget {

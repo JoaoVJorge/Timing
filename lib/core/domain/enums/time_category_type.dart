@@ -1,5 +1,5 @@
 enum TimeCategoryType {
-  studying(iconName: "clock"),
+  studying(iconName: "studing"),
   exercises(iconName: "bicycle"),
   reading(iconName: "book"),
   hobbies(iconName: "guitar");
