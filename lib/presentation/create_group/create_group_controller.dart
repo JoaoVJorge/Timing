@@ -430,13 +430,16 @@ class CreateGroupController extends GetxController
     await result.fold(
       (error) async => _appNavigator.showErrorSnackBar(error.message),
       (group) async {
-        await _ensureLocalDailyGoal(activity);
+        await _ensureLocalDailyGoal(activity, group.id);
         Get.back<GroupEntity>(result: group, closeOverlays: true);
       },
     );
   }
 
-  Future<void> _ensureLocalDailyGoal(GroupActivityDraft? activity) async {
+  Future<void> _ensureLocalDailyGoal(
+    GroupActivityDraft? activity,
+    String groupId,
+  ) async {
     if (!isDailyGoalsTheme ||
         activity == null ||
         activity.kind != GroupActivityKind.goal) {
@@ -448,6 +451,7 @@ class CreateGroupController extends GetxController
       targetDays: activity.targetDays,
       sequenceType: DailyTaskSequenceType.casual,
       reuseMatchingTask: true,
+      groupId: groupId,
     );
   }
 

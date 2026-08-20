@@ -17,10 +17,13 @@ import "package:timing/presentation/groups/widgets/current_user_rank_card.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/presentation/groups/widgets/groups_header.dart";
 import "package:timing/presentation/groups/widgets/leaderboard_tile.dart";
+import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/animated_segmented_tabs.dart";
 import "package:timing/shared/widgets/app_empty_state.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
@@ -567,7 +570,7 @@ class _GroupCard extends StatelessWidget {
                 ),
                 const Gap(4),
                 Text(
-                  _groupDescription(context, group),
+                  groupDescription(context, group),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodyMedium.copyWith(height: 1.28),
@@ -628,7 +631,7 @@ class _FriendsCard extends StatelessWidget {
                 ),
                 const Gap(3),
                 Text(
-                  _friendsCardSubtitle(context, groupCount),
+                  friendsCardSubtitle(context, groupCount),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
@@ -1166,7 +1169,9 @@ class _ActivityOverviewCard extends StatelessWidget {
                   child: _ActivityDataTile(
                     icon: Icons.timer_outlined,
                     label: context.l10n.groupActivityFocusDataLabel,
-                    value: _formatMinutes(Duration(seconds: focusSeconds)),
+                    value: formatDurationTotalMinutes(
+                      Duration(seconds: focusSeconds),
+                    ),
                   ),
                 ),
                 _MetricDivider(),
@@ -1353,7 +1358,7 @@ class _GroupStatisticsCard extends StatelessWidget {
             _GroupStatItem(
               icon: Icons.access_time_rounded,
               color: context.colorTokens.primary,
-              value: _formatMetricValue(context, totalPeriodValue, unit),
+              value: formatMetricValue(context, totalPeriodValue, unit),
               label: period == LeaderboardPeriodType.today
                   ? context.l10n.groupTodayTotalStatLabel
                   : context.l10n.groupPeriodTotalStatLabel,
@@ -1620,7 +1625,7 @@ class _ParticipantProgressRow extends StatelessWidget {
                     const Gap(6),
                     Expanded(
                       child: Text(
-                        _progressLabel(context, current, target, unit),
+                        progressLabel(context, current, target, unit),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodyMedium.copyWith(
@@ -1740,35 +1745,7 @@ class _GroupStatItem extends StatelessWidget {
   }
 }
 
-Color _groupDataAccent(BuildContext context) =>
-    context.colorTokens.primaryPastel;
-
-String _formatMinutes(Duration duration) {
-  final int minutes = duration.inMinutes;
-  return "$minutes min";
-}
-
-String _progressLabel(
-  BuildContext context,
-  int current,
-  int target,
-  GroupMetricUnit unit,
-) => switch (unit) {
-  GroupMetricUnit.hours =>
-    "${_secondsToDisplayMinutes(current)}/${_secondsToDisplayMinutes(target)} min",
-  GroupMetricUnit.days => "$current/$target ${context.l10n.daysSuffix}",
-  GroupMetricUnit.pages => "$current/$target ${context.l10n.pagesSuffix}",
-};
-
-String _formatMetricValue(
-  BuildContext context,
-  int value,
-  GroupMetricUnit unit,
-) => switch (unit) {
-  GroupMetricUnit.hours => _formatMinutes(Duration(seconds: value)),
-  GroupMetricUnit.days => context.l10n.metricDaysValue(value),
-  GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
-};
+Color _groupDataAccent(BuildContext context) => context.colorTokens.primary;
 
 int _targetForPeriod(int dailyTarget, LeaderboardPeriodType period) =>
     dailyTarget * _elapsedDaysForPeriod(period);
@@ -1781,8 +1758,6 @@ int _elapsedDaysForPeriod(LeaderboardPeriodType period) {
     LeaderboardPeriodType.thisMonth => now.day,
   };
 }
-
-int _secondsToDisplayMinutes(int seconds) => (seconds / 60).ceil();
 
 class _ChatTab extends StatelessWidget {
   const _ChatTab({required this.controller, required this.group});
@@ -1897,7 +1872,7 @@ class _ImageMessageBubble extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    _messageTime(message.createdAt),
+                    formatClockTime(message.createdAt),
                     style: context.textStyles.bodyTiny,
                   ),
                 ),
@@ -2006,12 +1981,6 @@ class _SendImageBar extends StatelessWidget {
       ),
     ),
   );
-}
-
-String _messageTime(DateTime date) {
-  final DateTime local = date.toLocal();
-  return "${local.hour.toString().padLeft(2, "0")}:"
-      "${local.minute.toString().padLeft(2, "0")}";
 }
 
 class _DetailIconButton extends StatelessWidget {
@@ -2248,11 +2217,6 @@ class _GroupIcon extends StatelessWidget {
   );
 }
 
-String _groupDescription(BuildContext context, GroupEntity group) {
-  final String metric = groupMetricDescription(context, group.theme);
-  return context.l10n.groupDescription(metric);
-}
-
 GroupMemberEntity? _leaderFor(GroupEntity group) {
   for (final GroupMemberEntity member in group.members) {
     if (member.id == group.ownerId || member.role == "owner") {
@@ -2261,9 +2225,6 @@ GroupMemberEntity? _leaderFor(GroupEntity group) {
   }
   return group.members.isEmpty ? null : group.members.first;
 }
-
-String _friendsCardSubtitle(BuildContext context, int groupCount) =>
-    context.l10n.groupsFriendsSubtitleWithCount(groupCount);
 
 class _GroupsEmptyState extends StatelessWidget {
   const _GroupsEmptyState({
@@ -2339,29 +2300,11 @@ class _GroupsLoadErrorState extends StatelessWidget {
   );
 }
 
-class _GroupsLoadingSkeleton extends StatefulWidget {
+class _GroupsLoadingSkeleton extends StatelessWidget {
   const _GroupsLoadingSkeleton();
 
   @override
-  State<_GroupsLoadingSkeleton> createState() => _GroupsLoadingSkeletonState();
-}
-
-class _GroupsLoadingSkeletonState extends State<_GroupsLoadingSkeleton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1350),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => _SkeletonShimmer(
-    animation: _controller,
+  Widget build(BuildContext context) => AppSkeleton(
     child: ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
       children: const [
@@ -2374,40 +2317,6 @@ class _GroupsLoadingSkeletonState extends State<_GroupsLoadingSkeleton>
         _SkeletonGroupCard(),
       ],
     ),
-  );
-}
-
-class _SkeletonShimmer extends StatelessWidget {
-  const _SkeletonShimmer({required this.animation, required this.child});
-
-  final Animation<double> animation;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: animation,
-    child: child,
-    builder: (context, child) {
-      final double sweep = animation.value * 2.4 - 0.7;
-      return ShaderMask(
-        blendMode: BlendMode.srcATop,
-        shaderCallback: (bounds) => LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-            context.colorTokens.white.withValues(alpha: 0.7),
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-          ],
-          stops: [
-            (sweep - 0.18).clamp(0.0, 1.0),
-            sweep.clamp(0.0, 1.0),
-            (sweep + 0.18).clamp(0.0, 1.0),
-          ],
-        ).createShader(bounds),
-        child: child,
-      );
-    },
   );
 }
 
@@ -2424,22 +2333,18 @@ class _SkeletonGroupCard extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: isFriends ? 46 : 72,
-          height: isFriends ? 46 : 72,
-          decoration: BoxDecoration(
-            color: context.colorTokens.primaryVeryLight,
-            shape: BoxShape.circle,
-          ),
+        AppSkeletonCircle(
+          size: isFriends ? 46 : 72,
+          color: context.colorTokens.primaryVeryLight,
         ),
         const Gap(14),
         const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SkeletonBox(width: 96, height: 18, radius: 8),
+              AppSkeletonBox(width: 96, height: 18, radius: 8),
               Gap(8),
-              _SkeletonBox(height: 12, radius: 6),
+              AppSkeletonBox(height: 12, radius: 6),
               Gap(10),
               _SkeletonAvatarRow(),
             ],
@@ -2476,24 +2381,6 @@ class _SkeletonAvatarRow extends StatelessWidget {
             ),
           ),
       ],
-    ),
-  );
-}
-
-class _SkeletonBox extends StatelessWidget {
-  const _SkeletonBox({required this.height, this.width, this.radius = 14});
-
-  final double height;
-  final double? width;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
-      borderRadius: BorderRadius.circular(radius),
     ),
   );
 }

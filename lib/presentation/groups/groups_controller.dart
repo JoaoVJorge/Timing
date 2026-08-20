@@ -224,7 +224,11 @@ class GroupsController extends GetxController {
     final List<GroupActivityProgressEntity>? cachedProgress =
         _activityProgressByCacheKey[cacheKey];
     if (cachedProgress != null) {
-      activityProgress.value = cachedProgress;
+      // Copy so the observable's backing list never aliases the cached
+      // instance — RxList.value assigns by reference, so a later
+      // activityProgress.clear() (e.g. from onSelectGroup) would otherwise
+      // empty the cached list too and poison every future read.
+      activityProgress.value = List.of(cachedProgress);
       _activityProgressCacheKey = cacheKey;
       return;
     }
@@ -255,7 +259,9 @@ class GroupsController extends GetxController {
         (value) {
           _activityProgressByCacheKey[cacheKey] = value;
           if (selectedGroup.value?.id == group.id) {
-            activityProgress.value = value;
+            // Copy so clearing the observable later never mutates the cached
+            // list (RxList.value assigns by reference).
+            activityProgress.value = List.of(value);
             _activityProgressCacheKey = cacheKey;
           }
         },
@@ -430,7 +436,13 @@ class GroupsController extends GetxController {
     _activityProgressCacheKey = null;
     activityProgress.clear();
     groups.refresh();
-    await _invalidateActivityCaches();
+    // A created group fans out a single owner activity: a subject or a daily
+    // goal. The daily goal was already written to the daily-tasks cache during
+    // creation (CreateGroupController._ensureLocalDailyGoal), so only the
+    // subjects cache is stale here. Dropping the daily-tasks cache would discard
+    // that just-written goal and race the remote fan-out, making the goal vanish
+    // from "my goals", so refresh from the intact cache instead.
+    await _localStorageService.delete(LocalStorageKeys.subjects);
     if (newGroup.theme == GroupThemeType.dailyGoals &&
         Get.isRegistered<DailyGoalsController>()) {
       await Get.find<DailyGoalsController>().loadTasks();

@@ -16,6 +16,36 @@ String formatGroupScore(
   GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
 };
 
+String formatMetricValue(
+  BuildContext context,
+  int value,
+  GroupMetricUnit unit,
+) => switch (unit) {
+  GroupMetricUnit.hours => formatDurationTotalMinutes(Duration(seconds: value)),
+  GroupMetricUnit.days => context.l10n.metricDaysValue(value),
+  GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
+};
+
+String progressLabel(
+  BuildContext context,
+  int current,
+  int target,
+  GroupMetricUnit unit,
+) => switch (unit) {
+  GroupMetricUnit.hours =>
+    "${_secondsToDisplayMinutes(current)}/${_secondsToDisplayMinutes(target)} min",
+  GroupMetricUnit.days => "$current/$target ${context.l10n.daysSuffix}",
+  GroupMetricUnit.pages => "$current/$target ${context.l10n.pagesSuffix}",
+};
+
+int _secondsToDisplayMinutes(int seconds) => (seconds / 60).ceil();
+
+String groupDescription(BuildContext context, GroupEntity group) =>
+    context.l10n.groupDescription(groupMetricDescription(context, group.theme));
+
+String friendsCardSubtitle(BuildContext context, int groupCount) =>
+    context.l10n.groupsFriendsSubtitleWithCount(groupCount);
+
 String groupMetricDescription(BuildContext context, GroupThemeType theme) =>
     switch (theme) {
       GroupThemeType.studying => context.l10n.groupMetricStudying,

@@ -18,6 +18,10 @@ String formatDurationCompact(Duration duration) {
   return formatDurationLong(duration);
 }
 
+/// Total minutes as "N min" (e.g. 90 minutes stays "90 min", not "1h 30 min").
+String formatDurationTotalMinutes(Duration duration) =>
+    "${duration.inMinutes} min";
+
 String formatDurationClock(Duration duration) {
   final int minutes = duration.inMinutes.remainder(60);
   final int seconds = duration.inSeconds.remainder(60);
