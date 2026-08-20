@@ -155,6 +155,13 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> onDeleteTask(DailyTaskEntity task) async {
+    if (task.isFromGroup) {
+      _appNavigator.showErrorSnackBar(
+        "Esta meta é de um grupo. Saia do grupo para removê-la.",
+      );
+      return;
+    }
+
     final bool confirmed = await showDeleteConfirmationDialog(
       itemName: task.name,
       itemTypeName: _goalTypeName,

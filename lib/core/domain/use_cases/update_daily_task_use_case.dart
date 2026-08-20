@@ -37,6 +37,7 @@ class UpdateDailyTaskUseCase {
         goalType: sequenceType == DailyTaskSequenceType.intense
             ? DailyTaskGoalType.daily
             : DailyTaskGoalType.total,
+        updatedAt: DateTime.now().toUtc(),
       );
       final List<DailyTaskEntity> updatedTasks = [...tasks]
         ..[index] = updatedTask;

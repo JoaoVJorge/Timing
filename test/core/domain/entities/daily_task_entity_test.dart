@@ -42,6 +42,37 @@ void main() {
       expect(task.shouldAskAboutMissedYesterday(today), true);
     });
 
+    test("tracks group ownership and survives a map round-trip", () {
+      final DailyTaskEntity groupGoal = DailyTaskEntity(
+        id: "1",
+        name: "Estudar",
+        colorValue: 1,
+        targetDays: 5,
+        completedDates: const [],
+        groupId: "group-123",
+      );
+      final DailyTaskEntity soloGoal = groupGoal.copyWith(name: "Ler");
+
+      expect(groupGoal.isFromGroup, true);
+      expect(DailyTaskEntity.fromMap(groupGoal.toMap()).groupId, "group-123");
+      expect(DailyTaskEntity.fromMap(groupGoal.toMap()).isFromGroup, true);
+      // copyWith keeps the group link.
+      expect(soloGoal.isFromGroup, true);
+    });
+
+    test("a goal with no group is not locked", () {
+      final DailyTaskEntity goal = DailyTaskEntity(
+        id: "1",
+        name: "Estudar",
+        colorValue: 1,
+        targetDays: 5,
+        completedDates: const [],
+      );
+
+      expect(goal.isFromGroup, false);
+      expect(DailyTaskEntity.fromMap(goal.toMap()).isFromGroup, false);
+    });
+
     test("infinite targets are never auto-completed", () {
       final DailyTaskEntity task = DailyTaskEntity(
         id: "1",

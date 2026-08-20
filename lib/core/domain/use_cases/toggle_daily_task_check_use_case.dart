@@ -39,6 +39,7 @@ class ToggleDailyTaskCheckUseCase {
       final DailyTaskEntity updatedTask = task.copyWith(
         completedDates: completedDates,
         lastResolvedMissedDate: resolvedMissedDate,
+        updatedAt: DateTime.now().toUtc(),
       );
       final List<DailyTaskEntity> updatedTasks = [...tasks]
         ..[index] = updatedTask;

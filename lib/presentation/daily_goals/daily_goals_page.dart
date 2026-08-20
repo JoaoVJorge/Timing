@@ -7,6 +7,7 @@ import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/presentation/daily_goals/widgets/add_task_tile.dart";
 import "package:timing/presentation/daily_goals/widgets/daily_task_tile.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
@@ -82,10 +83,15 @@ class DailyGoalsPage extends StatelessWidget {
                 ),
               AppSectionHeader(
                 title: context.l10n.dailyGoalsCompletedSection,
-                badge: context.l10n.homeGoalsProgress(
-                  controller.doneTodayCount,
-                  controller.tasks.length,
-                ),
+                // The "done / total" count lives on the pending section while
+                // anything is still open; it only moves onto Completed once
+                // every goal is done (e.g. 2 of 2).
+                badge: pending.isEmpty
+                    ? context.l10n.homeGoalsProgress(
+                        controller.doneTodayCount,
+                        controller.tasks.length,
+                      )
+                    : null,
               ),
               const Gap(AppSpacing.betweenRelated),
               _AnimatedTaskSection(
@@ -104,55 +110,22 @@ class DailyGoalsPage extends StatelessWidget {
   }
 }
 
-class _DailyGoalsLoadingSkeleton extends StatefulWidget {
+class _DailyGoalsLoadingSkeleton extends StatelessWidget {
   const _DailyGoalsLoadingSkeleton();
 
   @override
-  State<_DailyGoalsLoadingSkeleton> createState() =>
-      _DailyGoalsLoadingSkeletonState();
-}
-
-class _DailyGoalsLoadingSkeletonState extends State<_DailyGoalsLoadingSkeleton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1350),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: _controller,
-    builder: (context, child) {
-      final double sweep = _controller.value * 2.4 - 0.7;
-      return ShaderMask(
-        blendMode: BlendMode.srcATop,
-        shaderCallback: (bounds) => LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-            context.colorTokens.white.withValues(alpha: 0.7),
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-          ],
-          stops: [
-            (sweep - 0.18).clamp(0.0, 1.0),
-            sweep.clamp(0.0, 1.0),
-            (sweep + 0.18).clamp(0.0, 1.0),
-          ],
-        ).createShader(bounds),
-        child: child,
-      );
-    },
+  Widget build(BuildContext context) => AppSkeleton(
     child: ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
       children: const [
-        _SkeletonBox(width: 128, height: 18, radius: 7),
+        // Section header: title on the left, "done / total" badge on the right.
+        Row(
+          children: [
+            AppSkeletonBox(width: 120, height: 18, radius: 7),
+            Spacer(),
+            AppSkeletonBox(width: 44, height: 13, radius: 6),
+          ],
+        ),
         Gap(AppSpacing.betweenRelated),
         _SkeletonTaskTile(),
         Gap(AppSpacing.betweenRelated),
@@ -170,45 +143,21 @@ class _SkeletonTaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(14),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: context.colorTokens.borderUnfocused),
+      borderRadius: BorderRadius.circular(20),
     ),
+    // Mirrors DailyTaskTile: check circle, the goal name, then the trailing
+    // "X days" progress — all on one row.
     child: const Row(
       children: [
-        _SkeletonBox(width: 42, height: 42, radius: 21),
+        AppSkeletonCircle(size: 32),
         Gap(12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SkeletonBox(height: 16, radius: 7),
-              Gap(8),
-              _SkeletonBox(width: 154, height: 12, radius: 6),
-            ],
-          ),
-        ),
+        Expanded(child: AppSkeletonBox(height: 16, radius: 7)),
+        Gap(12),
+        AppSkeletonBox(width: 52, height: 14, radius: 6),
       ],
-    ),
-  );
-}
-
-class _SkeletonBox extends StatelessWidget {
-  const _SkeletonBox({required this.height, this.width, this.radius = 14});
-
-  final double? width;
-  final double height;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
-      borderRadius: BorderRadius.circular(radius),
     ),
   );
 }

@@ -39,6 +39,8 @@ class DailyTaskEntity extends Equatable {
     this.sequenceType = DailyTaskSequenceType.casual,
     this.lastResolvedMissedDate,
     this.goalType = DailyTaskGoalType.total,
+    this.updatedAt,
+    this.groupId,
   });
 
   factory DailyTaskEntity.fromMap(Map<String, dynamic> map) => DailyTaskEntity(
@@ -53,7 +55,18 @@ class DailyTaskEntity extends Equatable {
     ),
     lastResolvedMissedDate: map["lastResolvedMissedDate"] as String?,
     goalType: DailyTaskGoalType.fromName(map["goalType"] as String?),
+    updatedAt: _parseUpdatedAt(map["updatedAt"]),
+    groupId: (map["groupId"] as String?)?.isEmpty ?? true
+        ? null
+        : map["groupId"] as String?,
   );
+
+  static DateTime? _parseUpdatedAt(dynamic value) {
+    if (value is String) {
+      return DateTime.tryParse(value)?.toUtc();
+    }
+    return null;
+  }
 
   final String id;
   final String name;
@@ -63,6 +76,17 @@ class DailyTaskEntity extends Equatable {
   final DailyTaskSequenceType sequenceType;
   final String? lastResolvedMissedDate;
   final DailyTaskGoalType goalType;
+
+  /// Non-null when this goal was handed out by a group. Such goals can't be
+  /// deleted directly — the user has to leave the group to remove them.
+  final String? groupId;
+
+  bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
+
+  /// When this task was last mutated. Drives last-write-wins reconciliation
+  /// between the local copy and a possibly-stale remote copy, so a change that
+  /// hasn't finished syncing yet is not clobbered on the next read.
+  final DateTime? updatedAt;
 
   static String dateKey(DateTime date) =>
       "${date.year.toString().padLeft(4, "0")}-"
@@ -111,6 +135,8 @@ class DailyTaskEntity extends Equatable {
     "sequenceType": sequenceType.name,
     "lastResolvedMissedDate": lastResolvedMissedDate,
     "goalType": goalType.name,
+    "updatedAt": updatedAt?.toUtc().toIso8601String(),
+    "groupId": groupId,
   };
 
   DailyTaskEntity copyWith({
@@ -121,6 +147,8 @@ class DailyTaskEntity extends Equatable {
     DailyTaskSequenceType? sequenceType,
     String? lastResolvedMissedDate,
     DailyTaskGoalType? goalType,
+    DateTime? updatedAt,
+    String? groupId,
   }) => DailyTaskEntity(
     id: id,
     name: name ?? this.name,
@@ -131,6 +159,8 @@ class DailyTaskEntity extends Equatable {
     lastResolvedMissedDate:
         lastResolvedMissedDate ?? this.lastResolvedMissedDate,
     goalType: goalType ?? this.goalType,
+    updatedAt: updatedAt ?? this.updatedAt,
+    groupId: groupId ?? this.groupId,
   );
 
   int _currentIntenseSequence() {
@@ -166,5 +196,7 @@ class DailyTaskEntity extends Equatable {
     sequenceType,
     lastResolvedMissedDate,
     goalType,
+    updatedAt,
+    groupId,
   ];
 }

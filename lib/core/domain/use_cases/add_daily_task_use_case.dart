@@ -15,6 +15,7 @@ class AddDailyTaskUseCase {
     required int targetDays,
     required DailyTaskSequenceType sequenceType,
     bool reuseMatchingTask = false,
+    String? groupId,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
@@ -22,12 +23,28 @@ class AddDailyTaskUseCase {
     return getResult.fold((error) async => Left(error), (tasks) async {
       if (reuseMatchingTask) {
         final String normalizedName = name.trim().toLowerCase();
-        for (final DailyTaskEntity task in tasks) {
-          if (task.name.trim().toLowerCase() == normalizedName &&
+        final int matchIndex = tasks.indexWhere(
+          (task) =>
+              task.name.trim().toLowerCase() == normalizedName &&
               task.targetDays == targetDays &&
-              task.sequenceType == sequenceType) {
-            return Right(task);
+              task.sequenceType == sequenceType,
+        );
+        if (matchIndex != -1) {
+          final DailyTaskEntity match = tasks[matchIndex];
+          // Reusing an existing goal for a group: stamp the group link so it
+          // becomes protected from direct deletion like a fresh group goal.
+          if (groupId != null && match.groupId != groupId) {
+            final DailyTaskEntity linked = match.copyWith(
+              groupId: groupId,
+              updatedAt: DateTime.now().toUtc(),
+            );
+            final List<DailyTaskEntity> updatedTasks = [...tasks]
+              ..[matchIndex] = linked;
+            final Either<AppError, void> saveResult = await _dailyTasksRepository
+                .saveTasks(updatedTasks);
+            return saveResult.fold(Left.new, (_) => Right(linked));
           }
+          return Right(match);
         }
       }
 
@@ -41,6 +58,8 @@ class AddDailyTaskUseCase {
         goalType: sequenceType == DailyTaskSequenceType.intense
             ? DailyTaskGoalType.daily
             : DailyTaskGoalType.total,
+        updatedAt: DateTime.now().toUtc(),
+        groupId: groupId,
       );
 
       final Either<AppError, void> saveResult = await _dailyTasksRepository

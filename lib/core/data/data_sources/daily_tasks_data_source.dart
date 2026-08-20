@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
+import "package:flutter/foundation.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -44,7 +45,7 @@ class DailyTasksDataSource {
       if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
         final List<DailyTaskEntity> remoteTasks = await _getRemoteTasks();
         if (remoteTasks.isNotEmpty) {
-          final List<DailyTaskEntity> mergedTasks = _mergeTasks(
+          final List<DailyTaskEntity> mergedTasks = mergeTasks(
             localTasks: localTasks,
             remoteTasks: remoteTasks,
           );
@@ -79,17 +80,35 @@ class DailyTasksDataSource {
     await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
   }
 
-  List<DailyTaskEntity> _mergeTasks({
+  @visibleForTesting
+  List<DailyTaskEntity> mergeTasks({
     required List<DailyTaskEntity> localTasks,
     required List<DailyTaskEntity> remoteTasks,
   }) {
     final Map<String, DailyTaskEntity> byId = {
       for (final DailyTaskEntity task in localTasks) task.id: task,
     };
-    for (final DailyTaskEntity task in remoteTasks) {
-      byId[task.id] = task;
+    for (final DailyTaskEntity remote in remoteTasks) {
+      final DailyTaskEntity? local = byId[remote.id];
+      // Last-write-wins: keep the more recently mutated copy so a local change
+      // that hasn't finished syncing is not clobbered by a stale remote read.
+      if (local == null || _isNewer(remote, local)) {
+        byId[remote.id] = remote;
+      }
     }
     return byId.values.toList();
+  }
+
+  bool _isNewer(DailyTaskEntity candidate, DailyTaskEntity current) {
+    final DateTime? candidateAt = candidate.updatedAt;
+    final DateTime? currentAt = current.updatedAt;
+    if (candidateAt == null) {
+      return false;
+    }
+    if (currentAt == null) {
+      return true;
+    }
+    return candidateAt.isAfter(currentAt);
   }
 
   Future<List<DailyTaskEntity>> _getRemoteTasks() async {
@@ -173,6 +192,8 @@ class DailyTasksDataSource {
         "sequenceType": row["sequence_type"] ?? row["goal_type"],
         "lastResolvedMissedDate": row["last_resolved_missed_date"],
         "goalType": row["goal_type"],
+        "updatedAt": row["updated_at"],
+        "groupId": row["group_id"],
       });
 
   Map<String, dynamic> _taskToRow(DailyTaskEntity task, String userId) => {
@@ -185,6 +206,9 @@ class DailyTasksDataSource {
     "sequence_type": task.sequenceType.name,
     "last_resolved_missed_date": task.lastResolvedMissedDate,
     "goal_type": task.goalType.name,
-    "updated_at": DateTime.now().toUtc().toIso8601String(),
+    "group_id": task.groupId,
+    "updated_at": (task.updatedAt ?? DateTime.now().toUtc())
+        .toUtc()
+        .toIso8601String(),
   };
 }
