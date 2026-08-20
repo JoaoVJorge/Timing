@@ -7,6 +7,8 @@ import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
+import "package:timing/shared/functions/format_calendar_labels.dart";
+import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
@@ -41,19 +43,84 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   final FocusNode _startTimeFocusNode = FocusNode();
   final FocusNode _endTimeFocusNode = FocusNode();
 
+  final ScheduleEntryEntity? _editingEntry =
+      RouteArguments.maybeOf<ScheduleEntryEntity>();
+
   late DateTime _activeFrom = _initialDate();
   DateTime? _activeUntil;
   late final Set<int> _selectedWeekdays = {_initialDate().weekday};
   Color _selectedColor = SubjectColors.values.first;
   bool _hasInitializedThemeColor = false;
 
+  bool get _isEditing => _editingEntry != null;
+
   @override
   void initState() {
     super.initState();
+    _prefillFromEntry();
     _titleController.addListener(_rebuildPreview);
     _startTimeController.addListener(_rebuildPreview);
     _endTimeController.addListener(_rebuildPreview);
+    _startTimeFocusNode.addListener(_onStartFocusChanged);
+    _endTimeFocusNode.addListener(_onEndFocusChanged);
   }
+
+  void _onStartFocusChanged() {
+    if (!_startTimeFocusNode.hasFocus) {
+      _completeTime(_startTimeController);
+    }
+  }
+
+  void _onEndFocusChanged() {
+    if (!_endTimeFocusNode.hasFocus) {
+      _completeTime(_endTimeController);
+    }
+  }
+
+  /// Fills in the minutes a partial time is missing, so typing just an hour
+  /// ("10") settles into a full "10:00" once the field is left or submitted.
+  void _completeTime(TextEditingController controller) {
+    final String? formatted = completePartialTime(controller.text);
+    if (formatted != null && formatted != controller.text) {
+      controller.text = formatted;
+    }
+  }
+
+  void _prefillFromEntry() {
+    final ScheduleEntryEntity? entry = _editingEntry;
+    if (entry == null) {
+      return;
+    }
+    _titleController.text = entry.title;
+    if (entry.startMinutes != null) {
+      _startTimeController.text = _formatMinutes(entry.startMinutes!);
+    }
+    if (entry.endMinutes != null) {
+      _endTimeController.text = _formatMinutes(entry.endMinutes!);
+    }
+    _selectedWeekdays
+      ..clear()
+      ..add(entry.weekday);
+    _activeFrom = DateTime(
+      entry.activeFrom.year,
+      entry.activeFrom.month,
+      entry.activeFrom.day,
+    );
+    _activeUntil = entry.activeUntil == null
+        ? null
+        : DateTime(
+            entry.activeUntil!.year,
+            entry.activeUntil!.month,
+            entry.activeUntil!.day,
+          );
+    _selectedColor = Color(entry.colorValue);
+    // Keep the entry's own color instead of overriding it with the theme accent.
+    _hasInitializedThemeColor = true;
+  }
+
+  static String _formatMinutes(int minutes) =>
+      "${(minutes ~/ 60).toString().padLeft(2, "0")}:"
+      "${(minutes % 60).toString().padLeft(2, "0")}";
 
   @override
   @override
@@ -61,6 +128,8 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     _titleController.removeListener(_rebuildPreview);
     _startTimeController.removeListener(_rebuildPreview);
     _endTimeController.removeListener(_rebuildPreview);
+    _startTimeFocusNode.removeListener(_onStartFocusChanged);
+    _endTimeFocusNode.removeListener(_onEndFocusChanged);
     _titleController.dispose();
     _startTimeController.dispose();
     _endTimeController.dispose();
@@ -93,6 +162,8 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   }
 
   void _onSubmit() {
+    _completeTime(_startTimeController);
+    _completeTime(_endTimeController);
     final String title = _titleController.text.trim();
     final ({int hour, int minute})? startTime = _parseTime(
       _startTimeController.text,
@@ -145,11 +216,16 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     topBar: AppTopBar(
-      title: context.l10n.addScheduleEntryTitle,
+      title: _isEditing
+          ? context.l10n.editButton
+          : context.l10n.addScheduleEntryTitle,
       showBackButton: true,
     ),
     bottomBar: _SubmitButton(
       isEnabled: _isComplete,
+      label: _isEditing
+          ? context.l10n.saveChangesButton
+          : context.l10n.createScheduleEntryButton,
       hint: _isComplete ? null : _missingFieldsHint(context),
       onTap: _onSubmit,
     ),
@@ -575,7 +651,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _CalendarMonthHeader(
-              label: _monthLabel(locale, _selectedDate),
+              label: formatMonthYearLabel(locale, _selectedDate),
               onPrevious: _onPreviousMonth,
               onNext: _onNextMonth,
             ),
@@ -689,13 +765,6 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
     return DateTime(now.year, now.month, now.day);
   }
 
-  String _monthLabel(String locale, DateTime date) {
-    final String raw = DateFormat.yMMMM(locale).format(date);
-    if (raw.isEmpty) {
-      return raw;
-    }
-    return raw.replaceFirst(raw[0], raw[0].toUpperCase());
-  }
 }
 
 class _CalendarMonthHeader extends StatelessWidget {
@@ -996,11 +1065,13 @@ class _PreviewFrame extends StatelessWidget {
 class _SubmitButton extends StatelessWidget {
   const _SubmitButton({
     required this.isEnabled,
+    required this.label,
     required this.hint,
     required this.onTap,
   });
 
   final bool isEnabled;
+  final String label;
   final String? hint;
   final VoidCallback onTap;
 
@@ -1042,7 +1113,7 @@ class _SubmitButton extends StatelessWidget {
                   const Gap(AppSpacing.titleToDescription),
                   Flexible(
                     child: Text(
-                      context.l10n.createScheduleEntryButton,
+                      label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.textPrimaryButton.copyWith(
@@ -1085,7 +1156,7 @@ class _TimeInputFormatter extends TextInputFormatter {
     final String digits = rawDigits.length > 4
         ? rawDigits.substring(0, 4)
         : rawDigits;
-    final String normalizedDigits = _normalizeTimeDigits(digits);
+    final String normalizedDigits = normalizeTimeDigits(digits);
     final String formatted = normalizedDigits.length <= 2
         ? normalizedDigits
         : "${normalizedDigits.substring(0, 2)}:${normalizedDigits.substring(2)}";
@@ -1096,34 +1167,6 @@ class _TimeInputFormatter extends TextInputFormatter {
     );
   }
 
-  String _normalizeTimeDigits(String digits) {
-    if (digits.length < 2) {
-      return digits;
-    }
-
-    final int hour = int.parse(digits.substring(0, 2)).clamp(0, 24).toInt();
-    final String hourDigits = hour.toString().padLeft(2, "0");
-    if (digits.length == 2) {
-      return hourDigits;
-    }
-
-    String minuteDigits = digits.substring(2);
-    if (hour == 24) {
-      minuteDigits = List.filled(minuteDigits.length, "0").join();
-      return "$hourDigits$minuteDigits";
-    }
-
-    if (minuteDigits.isNotEmpty && int.parse(minuteDigits[0]) > 5) {
-      minuteDigits =
-          "5${minuteDigits.length > 1 ? minuteDigits.substring(1) : ""}";
-    }
-    if (minuteDigits.length == 2) {
-      final int minute = int.parse(minuteDigits).clamp(0, 59).toInt();
-      minuteDigits = minute.toString().padLeft(2, "0");
-    }
-
-    return "$hourDigits$minuteDigits";
-  }
 }
 
 class _TimeTextField extends StatelessWidget {

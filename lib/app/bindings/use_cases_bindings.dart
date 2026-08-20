@@ -40,6 +40,7 @@ import "package:timing/core/domain/use_cases/update_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/domain/use_cases/update_daily_task_use_case.dart";
+import "package:timing/core/domain/use_cases/update_schedule_entry_use_case.dart";
 
 class UseCasesBindings extends Bindings {
   @override
@@ -211,6 +212,10 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<DeleteScheduleEntryUseCase>(
       DeleteScheduleEntryUseCase(scheduleRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<UpdateScheduleEntryUseCase>(
+      UpdateScheduleEntryUseCase(scheduleRepository: Get.find()),
       permanent: true,
     );
   }

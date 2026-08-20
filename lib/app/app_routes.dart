@@ -37,6 +37,7 @@ import "package:timing/presentation/notes/notes_page.dart";
 import "package:timing/presentation/progress/progress_bindings.dart";
 import "package:timing/presentation/progress/progress_page.dart";
 import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
+import "package:timing/presentation/schedule/schedule_bindings.dart";
 import "package:timing/presentation/schedule/schedule_page.dart";
 import "package:timing/presentation/splash/splash_bindings.dart";
 import "package:timing/presentation/splash/splash_page.dart";
@@ -211,6 +212,7 @@ class AppRoutes {
     GetPage(
       name: schedule,
       page: () => const SchedulePage(),
+      binding: ScheduleBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
@@ -218,6 +220,7 @@ class AppRoutes {
     GetPage(
       name: addScheduleEntry,
       page: () => const AddScheduleEntryPage(),
+      binding: ScheduleBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

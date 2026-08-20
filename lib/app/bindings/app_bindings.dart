@@ -8,7 +8,7 @@ import "package:timing/app/bindings/repositories_bindings.dart";
 import "package:timing/app/bindings/services_bindings.dart";
 import "package:timing/app/bindings/use_cases_bindings.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
-import "package:timing/presentation/schedule/schedule_controller.dart";
+import "package:timing/presentation/schedule/schedule_bindings.dart";
 import "package:timing/theme/accent_presets.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -47,15 +47,6 @@ class AppBindings extends Bindings {
       permanent: true,
     );
 
-    // Shared singleton so every screen observes the exact same schedule list — no manual refresh-on-return needed.
-    Get.put<ScheduleController>(
-      ScheduleController(
-        getScheduleEntriesUseCase: Get.find(),
-        addScheduleEntryUseCase: Get.find(),
-        deleteScheduleEntryUseCase: Get.find(),
-        appNavigator: Get.find(),
-      ),
-      permanent: true,
-    );
+    ScheduleBindings().dependencies();
   }
 }

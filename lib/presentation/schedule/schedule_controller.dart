@@ -8,6 +8,7 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
+import "package:timing/core/domain/use_cases/update_schedule_entry_use_case.dart";
 import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 
@@ -16,12 +17,14 @@ class ScheduleController extends GetxController {
     required this._getScheduleEntriesUseCase,
     required this._addScheduleEntryUseCase,
     required this._deleteScheduleEntryUseCase,
+    required this._updateScheduleEntryUseCase,
     required this._appNavigator,
   });
 
   final GetScheduleEntriesUseCase _getScheduleEntriesUseCase;
   final AddScheduleEntryUseCase _addScheduleEntryUseCase;
   final DeleteScheduleEntryUseCase _deleteScheduleEntryUseCase;
+  final UpdateScheduleEntryUseCase _updateScheduleEntryUseCase;
   final AppNavigator _appNavigator;
 
   final RxList<ScheduleEntryEntity> entries = <ScheduleEntryEntity>[].obs;
@@ -211,6 +214,37 @@ class ScheduleController extends GetxController {
     entries.value = [...entries, ...addedEntries];
     selectedDate.value = _firstOccurrenceDate(addedEntries);
     entries.refresh();
+  }
+
+  Future<void> onEditEntry(ScheduleEntryEntity entry) async {
+    final dynamic rawResult = await _appNavigator.toNamed<dynamic>(
+      AppRoutes.addScheduleEntry,
+      arguments: entry,
+    );
+    final AddScheduleEntryResult? result = rawResult as AddScheduleEntryResult?;
+    if (result == null) {
+      return;
+    }
+
+    final Either<AppError, List<ScheduleEntryEntity>> updateResult =
+        await _updateScheduleEntryUseCase(
+          entryId: entry.id,
+          title: result.title,
+          weekdays: result.weekdays,
+          startMinutes: result.startMinutes,
+          endMinutes: result.endMinutes,
+          colorValue: result.colorValue,
+          activeFrom: result.activeFrom,
+          activeUntil: result.activeUntil,
+        );
+
+    updateResult.fold(
+      (error) => _appNavigator.showErrorSnackBar(error.message),
+      (updatedEntries) {
+        entries.value = updatedEntries;
+        entries.refresh();
+      },
+    );
   }
 
   Future<void> onDeleteEntry(String entryId) async {

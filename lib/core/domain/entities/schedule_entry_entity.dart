@@ -55,6 +55,26 @@ class ScheduleEntryEntity extends Equatable {
 
   String toJson() => jsonEncode(toMap());
 
+  ScheduleEntryEntity copyWith({
+    String? title,
+    int? weekday,
+    int? startMinutes,
+    int? endMinutes,
+    int? colorValue,
+    DateTime? activeFrom,
+    DateTime? activeUntil,
+    bool clearActiveUntil = false,
+  }) => ScheduleEntryEntity(
+    id: id,
+    title: title ?? this.title,
+    weekday: weekday ?? this.weekday,
+    startMinutes: startMinutes ?? this.startMinutes,
+    endMinutes: endMinutes ?? this.endMinutes,
+    colorValue: colorValue ?? this.colorValue,
+    activeFrom: activeFrom ?? this.activeFrom,
+    activeUntil: clearActiveUntil ? null : (activeUntil ?? this.activeUntil),
+  );
+
   @override
   List<Object?> get props => [
     id,

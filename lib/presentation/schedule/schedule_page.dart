@@ -10,8 +10,9 @@ import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/shared/widgets/swipe_reveal_actions.dart";
+import "package:timing/shared/functions/format_calendar_labels.dart";
 import "package:timing/theme/app_spacing.dart";
-import "package:intl/intl.dart";
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
@@ -24,7 +25,10 @@ class SchedulePage extends StatelessWidget {
       topBar: Obx(() {
         final DateTime selectedDate = controller.selectedDate.value;
         return AppTopBar(
-          title: _monthLabel(context, selectedDate),
+          title: formatStackedMonthYearTitle(
+            Localizations.localeOf(context).toString(),
+            selectedDate,
+          ),
           showBackButton: true,
           onTitleTap: () => _showMonthYearPicker(context, controller),
         );
@@ -63,6 +67,7 @@ class SchedulePage extends StatelessWidget {
                 entries: controller.sortedEntries,
                 statusOf: controller.statusOf,
                 onDeleteEntry: controller.onDeleteEntry,
+                onEditEntry: controller.onEditEntry,
                 onAddEntry: controller.onTapAddEntry,
                 scrollController: scrollController,
               ),
@@ -72,6 +77,23 @@ class SchedulePage extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _showMonthYearPicker(
+    BuildContext context,
+    ScheduleController controller,
+  ) async {
+    final DateTime selectedDate = controller.selectedDate.value;
+    final ({int year, int month})? result =
+        await showDialog<({int year, int month})>(
+          context: context,
+          builder: (context) =>
+              _MonthYearPickerDialog(initialDate: selectedDate),
+        );
+    if (result == null) {
+      return;
+    }
+    controller.onSelectMonth(result.year, result.month);
+  }
 }
 
 class _DayEventsPanel extends StatelessWidget {
@@ -80,6 +102,7 @@ class _DayEventsPanel extends StatelessWidget {
     required this.entries,
     required this.statusOf,
     required this.onDeleteEntry,
+    required this.onEditEntry,
     required this.onAddEntry,
     required this.scrollController,
   });
@@ -88,6 +111,7 @@ class _DayEventsPanel extends StatelessWidget {
   final List<ScheduleEntryEntity> entries;
   final ScheduleEntryStatus Function(ScheduleEntryEntity entry) statusOf;
   final ValueChanged<String> onDeleteEntry;
+  final ValueChanged<ScheduleEntryEntity> onEditEntry;
   final VoidCallback onAddEntry;
   final ScrollController scrollController;
 
@@ -140,7 +164,7 @@ class _DayEventsPanel extends StatelessWidget {
                         ),
                         const Gap(20),
                         _DayEventsHeader(
-                          dateLabel: _selectedDateLabel(locale, selectedDate),
+                          dateLabel: formatFullDateLabel(locale, selectedDate),
                         ),
                         const Gap(20),
                       ],
@@ -159,22 +183,23 @@ class _DayEventsPanel extends StatelessWidget {
                       }
 
                       final ScheduleEntryEntity entry = entries[index];
-                      return Dismissible(
+                      return SwipeRevealActions(
                         key: ValueKey(entry.id),
-                        direction: DismissDirection.endToStart,
-                        onDismissed: (_) => onDeleteEntry(entry.id),
-                        background: Container(
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 20),
-                          decoration: BoxDecoration(
-                            color: context.colorTokens.error,
-                            borderRadius: BorderRadius.circular(18),
+                        actions: [
+                          SwipeRevealAction(
+                            iconData: Icons.edit_rounded,
+                            background: context.colorTokens.surface,
+                            iconColor: Color(entry.colorValue),
+                            borderColor: context.colorTokens.borderUnfocused,
+                            onTap: () => onEditEntry(entry),
                           ),
-                          child: Icon(
-                            Icons.delete_outline_rounded,
-                            color: context.colorTokens.white,
+                          SwipeRevealAction(
+                            iconPath: "trash",
+                            background: context.colorTokens.error,
+                            iconColor: context.colorTokens.white,
+                            onTap: () => onDeleteEntry(entry.id),
                           ),
-                        ),
+                        ],
                         child: ScheduleEntryTile(
                           entry: entry,
                           status: statusOf(entry),
@@ -281,39 +306,6 @@ class _InlineAddScheduleButton extends StatelessWidget {
   );
 }
 
-String _monthLabel(BuildContext context, DateTime selectedDate) {
-  final String locale = Localizations.localeOf(context).toString();
-  final String raw = DateFormat.yMMMM(locale).format(selectedDate);
-  if (raw.isEmpty) {
-    return raw;
-  }
-  return raw.replaceFirst(raw[0], raw[0].toUpperCase());
-}
-
-Future<void> _showMonthYearPicker(
-  BuildContext context,
-  ScheduleController controller,
-) async {
-  final DateTime selectedDate = controller.selectedDate.value;
-  final ({int year, int month})? result =
-      await showDialog<({int year, int month})>(
-        context: context,
-        builder: (context) => _MonthYearPickerDialog(initialDate: selectedDate),
-      );
-  if (result == null) {
-    return;
-  }
-  controller.onSelectMonth(result.year, result.month);
-}
-
-String _selectedDateLabel(String locale, DateTime selectedDate) {
-  final String raw = DateFormat.MMMMEEEEd(locale).format(selectedDate);
-  if (raw.isEmpty) {
-    return raw;
-  }
-  return raw.replaceFirst(raw[0], raw[0].toUpperCase());
-}
-
 class _MonthYearPickerDialog extends StatefulWidget {
   const _MonthYearPickerDialog({required this.initialDate});
 
@@ -387,7 +379,7 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      _shortMonthLabel(locale, month),
+                      formatShortMonthLabel(locale, _year, month),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.bodyMedium.copyWith(
@@ -426,13 +418,6 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
     );
   }
 
-  String _shortMonthLabel(String locale, int month) {
-    final String raw = DateFormat.MMM(locale).format(DateTime(_year, month));
-    if (raw.isEmpty) {
-      return raw;
-    }
-    return raw.replaceFirst(raw[0], raw[0].toUpperCase());
-  }
 }
 
 class _MonthPickerTextButton extends StatelessWidget {
