@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
@@ -16,6 +18,7 @@ import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
+import "package:timing/core/services/home_widget/home_widget_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -32,6 +35,7 @@ class HomeController extends GetxController {
     required this._getDailyTasksUseCase,
     required this._scheduleController,
     required this._achievementUnlockService,
+    required this._homeWidgetService,
   });
 
   final AppController _appController;
@@ -43,6 +47,7 @@ class HomeController extends GetxController {
   final GetDailyTasksUseCase _getDailyTasksUseCase;
   final ScheduleController _scheduleController;
   final AchievementUnlockService _achievementUnlockService;
+  final HomeWidgetService _homeWidgetService;
 
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxList<DailyTaskEntity> dailyTasks = <DailyTaskEntity>[].obs;
@@ -88,7 +93,14 @@ class HomeController extends GetxController {
       await _scheduleController.loadEntries();
     }
     await _achievementUnlockService.initializeBaselineIfNeeded();
+    unawaited(_syncHomeWidget());
   }
+
+  Future<void> _syncHomeWidget() => _homeWidgetService.updateFocusToday(
+    focusSeconds: todayProgress.value.focusSeconds,
+    goalsDone: goalsDoneToday,
+    goalsTotal: goalsTotal,
+  );
 
   bool get hasSubjects => subjects.isNotEmpty;
 
@@ -150,14 +162,10 @@ class HomeController extends GetxController {
   }
 
   int _focusSecondsForTodayCard(SubjectEntity subject) =>
-      subject.activityType == SubjectActivityType.daily
-      ? _subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds
-      : subject.totalSeconds;
+      _subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds;
 
   int _pagesForTodayCard(SubjectEntity subject) =>
-      subject.activityType == SubjectActivityType.daily
-      ? _subjectDailyHistoryService.todayForSubject(subject.id).pages
-      : subject.currentPages;
+      _subjectDailyHistoryService.todayForSubject(subject.id).pages;
 
   List<ScheduleEntryEntity> get todayScheduleEntries =>
       _scheduleController.todayEntries;

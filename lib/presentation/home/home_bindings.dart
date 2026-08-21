@@ -15,6 +15,7 @@ class HomeBindings extends Bindings {
         getDailyTasksUseCase: Get.find(),
         scheduleController: Get.find(),
         achievementUnlockService: Get.find(),
+        homeWidgetService: Get.find(),
       ),
     );
   }

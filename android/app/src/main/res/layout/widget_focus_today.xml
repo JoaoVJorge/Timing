@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/widget_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Foco de hoje"
+        android:textColor="#B9A9D9"
+        android:textSize="12sp"
+        android:letterSpacing="0.04"
+        android:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/widget_focus_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="0 min"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_goals_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="@drawable/widget_progress_pill"
+        android:text="Metas 0/0"
+        android:textColor="#C9BEF0"
+        android:textSize="13sp" />
+
+</LinearLayout>
