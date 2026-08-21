@@ -18,10 +18,12 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
+import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/timer/widgets/timer_exit_dialog.dart";
 
 class TimerController extends GetxController with WidgetsBindingObserver {
@@ -38,14 +40,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.timerLiveActivityService,
     required this.focusFeedbackService,
     required this.focusGuardService,
+    required this.focusOverlayService,
     required this.analyticsService,
     required this.appController,
     required this.appNavigator,
     required this.subject,
-  }) : _dailyFocusSecondsAtSessionStart =
-           subject.activityType == SubjectActivityType.daily
-           ? subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds
-           : 0;
+  }) : _todayFocusSecondsAtSessionStart = subjectDailyHistoryService
+           .todayForSubject(subject.id)
+           .focusSeconds;
 
   static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
@@ -63,6 +65,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final TimerLiveActivityService timerLiveActivityService;
   final FocusFeedbackService focusFeedbackService;
   final FocusGuardService focusGuardService;
+  final FocusOverlayService focusOverlayService;
   final AnalyticsService analyticsService;
   final AppController appController;
   final AppNavigator appNavigator;
@@ -88,7 +91,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isFinishingSession = false;
   bool _shouldPersistAgain = false;
   bool _isRequestingFocusLockReturn = false;
-  final int _dailyFocusSecondsAtSessionStart;
+  final int _todayFocusSecondsAtSessionStart;
   DateTime? _lastFocusLockWarningAt;
   Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
@@ -97,9 +100,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
   int get currentActivitySeconds =>
-      subject.activityType == SubjectActivityType.daily
-      ? _dailyFocusSecondsAtSessionStart + sessionSeconds.value
-      : totalSeconds;
+      _todayFocusSecondsAtSessionStart + sessionSeconds.value;
 
   int get currentActivityPages =>
       subject.activityType == SubjectActivityType.daily
@@ -166,6 +167,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     return focusIntervalSeconds - elapsedInSection;
   }
 
+  static bool _overlayPermissionRequested = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -178,6 +181,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
     _updateNotification();
     _syncFocusGuard();
+    unawaited(_ensureOverlayPermission());
     analyticsService.track(
       AnalyticsEvent.focusSessionStarted(category: subject.category),
     );
@@ -325,6 +329,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _ticker?.cancel();
     unawaited(HapticFeedback.mediumImpact());
     timerNotificationService.cancel();
+    _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
     if (!alreadyFinished) {
@@ -465,7 +470,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           subjectId: subject.id,
           subjectName: subject.name,
           pages: sanitizedPages,
-        ),
+        ).then((_) {
+          if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
+            return Get.find<GroupsController>().refreshAfterActivityChange();
+          }
+        }),
       );
     }
     _recordLastActivityIfNeeded();
@@ -474,6 +483,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     isSessionFinished.value = true;
     _ticker?.cancel();
     timerNotificationService.cancel();
+    _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
     if (!alreadyFinished) {
@@ -534,7 +544,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         subjectId: subject.id,
         subjectName: subject.name,
         seconds: elapsedSinceLastPersist,
-      ),
+      ).then((_) {
+        if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
+          return Get.find<GroupsController>().refreshAfterActivityChange();
+        }
+      }),
     );
     await dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
     await subjectDailyHistoryService.addFocusSeconds(
@@ -624,19 +638,57 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         Duration(seconds: sessionSeconds.value),
       ),
     );
-    if (!_isAppInForeground) {
-      timerNotificationService.scheduleFocusFinished(
-        title: subject.name,
-        body: isReading
-            ? "Passou 30 minutos"
-            : context.l10n.timerNotificationResting,
-        remaining: Duration(
-          seconds: isReading
-              ? readingIntervalRemainingSeconds
-              : breakCountdownSeconds.value,
-        ),
-      );
+    timerNotificationService.scheduleFocusFinished(
+      title: subject.name,
+      body: isReading
+          ? "Passou 30 minutos"
+          : context.l10n.timerNotificationResting,
+      remaining: Duration(
+        seconds: isReading
+            ? readingIntervalRemainingSeconds
+            : breakCountdownSeconds.value,
+      ),
+    );
+  }
+
+  int get _overlayRemainingSeconds {
+    if (isReading) {
+      return readingIntervalRemainingSeconds;
     }
+    if (isResting.value) {
+      return restCountdownSeconds.value;
+    }
+    return breakCountdownSeconds.value;
+  }
+
+  Future<void> _ensureOverlayPermission() async {
+    if (_overlayPermissionRequested) {
+      return;
+    }
+    _overlayPermissionRequested = true;
+    if (await focusOverlayService.hasPermission()) {
+      return;
+    }
+    await focusOverlayService.requestPermission();
+  }
+
+  void _showOverlay() {
+    if (isSessionFinished.value) {
+      return;
+    }
+    unawaited(
+      focusOverlayService.show(
+        subjectName: subject.name,
+        remainingSeconds: _overlayRemainingSeconds,
+        isRunning: isRunning.value,
+        isResting: isResting.value,
+        colorValue: subject.colorValue,
+      ),
+    );
+  }
+
+  void _hideOverlay() {
+    unawaited(focusOverlayService.hide());
   }
 
   Future<bool> _consumeLiveActivityAction() async {
@@ -702,6 +754,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _isAppInForeground = true;
       _clearFocusLockReturnRequest();
       timerNotificationService.cancelFocusFinished();
+      _hideOverlay();
       unawaited(_catchUpAfterBackground());
       _syncFocusGuard();
       return;
@@ -716,6 +769,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _updateNotification();
       if (isFocusLockActive) {
         _requestFocusLockReturn();
+      } else {
+        _showOverlay();
       }
     }
   }
@@ -757,11 +812,18 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _syncFocusGuard() {
-    unawaited(focusGuardService.setKeepScreenOn(isFocusLockActive));
+    final bool lockActive = isFocusLockActive;
+    unawaited(focusGuardService.setKeepScreenOn(lockActive));
+    if (lockActive) {
+      unawaited(focusGuardService.startScreenLock());
+    } else {
+      unawaited(focusGuardService.stopScreenLock());
+    }
   }
 
   void _disableFocusGuard() {
     unawaited(focusGuardService.setKeepScreenOn(false));
+    unawaited(focusGuardService.stopScreenLock());
   }
 
   @override
@@ -772,6 +834,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _persistAccumulatedTime();
     _recordLastActivityIfNeeded();
     timerNotificationService.cancel();
+    _hideOverlay();
     _disableFocusGuard();
     unawaited(timerLiveActivityService.end());
     super.onClose();

@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -15,6 +16,7 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
+import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
@@ -77,6 +79,10 @@ class _FakeDailyProgressService extends _Noop implements DailyProgressService {
 class _FakeSubjectDailyHistoryService extends _Noop
     implements SubjectDailyHistoryService {
   @override
+  DailyProgressEntity todayForSubject(String subjectId) =>
+      const DailyProgressEntity();
+
+  @override
   Future<void> addFocusSeconds(String subjectId, int seconds) async {}
 }
 
@@ -119,6 +125,39 @@ class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
 class _FakeFocusGuardService extends _Noop implements FocusGuardService {
   @override
   Future<void> setKeepScreenOn(bool enabled) async {}
+
+  @override
+  Future<void> startScreenLock() async {}
+
+  @override
+  Future<void> stopScreenLock() async {}
+}
+
+class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
+  @override
+  Future<bool> hasPermission() async => true;
+
+  @override
+  Future<void> requestPermission() async {}
+
+  @override
+  Future<void> show({
+    required String subjectName,
+    required int remainingSeconds,
+    required bool isRunning,
+    required bool isResting,
+    required int colorValue,
+  }) async {}
+
+  @override
+  Future<void> update({
+    required int remainingSeconds,
+    required bool isRunning,
+    required bool isResting,
+  }) async {}
+
+  @override
+  Future<void> hide() async {}
 }
 
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
@@ -173,6 +212,7 @@ TimerController _controller(
   timerLiveActivityService: _FakeTimerLiveActivityService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: _FakeFocusGuardService(),
+  focusOverlayService: _FakeFocusOverlayService(),
   analyticsService: _FakeAnalyticsService(),
   appController: _FakeAppController(),
   appNavigator: _FakeAppNavigator(),
