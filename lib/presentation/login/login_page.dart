@@ -118,7 +118,7 @@ class _LoginHeroContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      const Flexible(flex: 6, child: _HeroIllustration()),
+      const Expanded(child: Center(child: _HeroIllustration())),
       const Gap(8),
       Text(
         context.l10n.loginHeadline,
@@ -143,7 +143,6 @@ class _LoginHeroContent extends StatelessWidget {
           height: 1.32,
         ),
       ),
-      const Spacer(flex: 2),
     ],
   );
 }
