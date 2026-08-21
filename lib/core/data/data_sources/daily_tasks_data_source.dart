@@ -66,7 +66,7 @@ class DailyTasksDataSource {
         tasks.map((task) => task.toMap()).toList(),
       );
       await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
-      unawaited(_syncRemoteTasks(tasks));
+      await _syncRemoteTasks(tasks);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

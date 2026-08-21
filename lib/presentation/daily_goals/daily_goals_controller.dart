@@ -12,6 +12,7 @@ import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.da
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
@@ -109,6 +110,9 @@ class DailyGoalsController extends GetxController {
       if (updatedTask.isCheckedToday) {
         _lastActivityService.record(updatedTask.name);
       }
+      if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
+        Get.find<GroupsController>().refreshAfterActivityChange();
+      }
       _achievementUnlockService.checkForNewUnlocks();
     });
   }
@@ -149,6 +153,9 @@ class DailyGoalsController extends GetxController {
       final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
       if (index != -1) {
         tasks[index] = updatedTask;
+      }
+      if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
+        Get.find<GroupsController>().refreshAfterActivityChange();
       }
       _achievementUnlockService.checkForNewUnlocks();
     });

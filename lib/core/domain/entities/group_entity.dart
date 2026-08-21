@@ -15,6 +15,7 @@ class GroupEntity extends Equatable {
     this.createdAt,
     this.inviteCode = "",
     this.privacy = "inviteOnly",
+    this.createdActivityId,
   });
 
   factory GroupEntity.fromJson(String source) =>
@@ -32,6 +33,7 @@ class GroupEntity extends Equatable {
     createdAt: DateTime.tryParse(map["createdAt"] as String? ?? ""),
     inviteCode: map["inviteCode"] as String? ?? "",
     privacy: map["privacy"] as String? ?? "inviteOnly",
+    createdActivityId: map["createdActivityId"] as String?,
   );
 
   final String id;
@@ -43,6 +45,7 @@ class GroupEntity extends Equatable {
   final DateTime? createdAt;
   final String inviteCode;
   final String privacy;
+  final String? createdActivityId;
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -54,6 +57,7 @@ class GroupEntity extends Equatable {
     "createdAt": createdAt?.toIso8601String(),
     "inviteCode": inviteCode,
     "privacy": privacy,
+    "createdActivityId": createdActivityId,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -69,5 +73,6 @@ class GroupEntity extends Equatable {
     createdAt,
     inviteCode,
     privacy,
+    createdActivityId,
   ];
 }

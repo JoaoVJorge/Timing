@@ -21,13 +21,40 @@ class AddSubjectUseCase {
     int focusSessionCount = 1,
     int wallpaperIndex = 0,
     SubjectActivityType activityType = SubjectActivityType.daily,
+    bool reuseMatchingSubject = false,
+    String? groupId,
+    String? id,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
 
     return getResult.fold((error) async => Left(error), (subjects) async {
+      if (reuseMatchingSubject) {
+        final String normalizedName = name.trim().toLowerCase();
+        final int matchIndex = subjects.indexWhere(
+          (subject) =>
+              subject.name.trim().toLowerCase() == normalizedName &&
+              subject.category == category &&
+              subject.goalSeconds == goalSeconds &&
+              subject.goalPages == goalPages &&
+              subject.activityType == activityType,
+        );
+        if (matchIndex != -1) {
+          final SubjectEntity match = subjects[matchIndex];
+          if (groupId != null && match.groupId != groupId) {
+            final SubjectEntity linked = match.copyWith(groupId: groupId);
+            final List<SubjectEntity> updatedSubjects = [...subjects]
+              ..[matchIndex] = linked;
+            final Either<AppError, void> saveResult = await _subjectsRepository
+                .saveSubjects(updatedSubjects);
+            return saveResult.fold(Left.new, (_) => Right(linked));
+          }
+          return Right(match);
+        }
+      }
+
       final SubjectEntity newSubject = SubjectEntity(
-        id: generateEntityId(),
+        id: id ?? generateEntityId(),
         name: name,
         category: category,
         colorValue: colorValue,
@@ -42,6 +69,7 @@ class AddSubjectUseCase {
         wallpaperIndex: wallpaperIndex,
         activityType: activityType,
         createdAt: DateTime.now(),
+        groupId: groupId,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

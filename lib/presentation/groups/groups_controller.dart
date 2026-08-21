@@ -436,13 +436,9 @@ class GroupsController extends GetxController {
     _activityProgressCacheKey = null;
     activityProgress.clear();
     groups.refresh();
-    // A created group fans out a single owner activity: a subject or a daily
-    // goal. The daily goal was already written to the daily-tasks cache during
-    // creation (CreateGroupController._ensureLocalDailyGoal), so only the
-    // subjects cache is stale here. Dropping the daily-tasks cache would discard
-    // that just-written goal and race the remote fan-out, making the goal vanish
-    // from "my goals", so refresh from the intact cache instead.
-    await _localStorageService.delete(LocalStorageKeys.subjects);
+    // CreateGroupController already writes the owner's local copy of the
+    // group activity. Keep that cache intact so the activity appears in "mine"
+    // immediately instead of waiting for a remote refetch.
     if (newGroup.theme == GroupThemeType.dailyGoals &&
         Get.isRegistered<DailyGoalsController>()) {
       await Get.find<DailyGoalsController>().loadTasks();
@@ -464,6 +460,17 @@ class GroupsController extends GetxController {
     activityProgress.clear();
     groups.refresh();
     await _invalidateActivityCaches();
+  }
+
+  Future<void> refreshAfterActivityChange() async {
+    _activityProgressByCacheKey.clear();
+    _activityProgressCacheKey = null;
+    await loadGroups();
+    if (selectedGroup.value != null &&
+        selectedDetailsTab.value == GroupDetailsTab.goals) {
+      activityProgress.clear();
+      await loadActivityProgress();
+    }
   }
 
   /// Creating, joining, or leaving a group changes the member's group-owned

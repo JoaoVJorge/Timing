@@ -30,10 +30,14 @@ class TimerPage extends StatelessWidget {
       );
 
       return PopScope(
-        canPop: !controller.hasActiveSession,
+        canPop: !controller.hasActiveSession && !controller.isFocusLockActive,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) {
             controller.saveProgress();
+            return;
+          }
+          if (controller.isFocusLockActive && !controller.hasActiveSession) {
+            controller.warnFocusLock();
             return;
           }
           if (await controller.confirmExitIfNeeded()) {

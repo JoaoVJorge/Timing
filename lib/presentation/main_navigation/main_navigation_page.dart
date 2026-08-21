@@ -10,16 +10,24 @@ class MainNavigationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final MainNavigationController controller = Get.find();
 
-    return Scaffold(
-      body: Navigator(
-        key: Get.nestedKey(controller.nestedKey),
-        initialRoute: controller.initialRouteName,
-        onGenerateRoute: controller.onGenerateRoute,
-      ),
-      bottomNavigationBar: Obx(
-        () => AppBottomNavBar(
-          selectedButton: controller.selectedButton.value,
-          onTabTap: controller.onTapBottomBarButton,
+    return Obx(
+      () => PopScope(
+        canPop: controller.isOnHomeTab,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            controller.onSystemBackFromNonHomeTab();
+          }
+        },
+        child: Scaffold(
+          body: Navigator(
+            key: Get.nestedKey(controller.nestedKey),
+            initialRoute: controller.initialRouteName,
+            onGenerateRoute: controller.onGenerateRoute,
+          ),
+          bottomNavigationBar: AppBottomNavBar(
+            selectedButton: controller.selectedButton.value,
+            onTabTap: controller.onTapBottomBarButton,
+          ),
         ),
       ),
     );

@@ -40,6 +40,12 @@ class MainNavigationController extends GetxController {
     }
   }
 
+  bool get isOnHomeTab => selectedButton.value == BottomNavButtonType.home;
+
+  void onSystemBackFromNonHomeTab() {
+    onTapBottomBarButton(BottomNavButtonType.home);
+  }
+
   void _navigateToTab(String routeName) {
     if (currentRouteName == routeName) {
       return;

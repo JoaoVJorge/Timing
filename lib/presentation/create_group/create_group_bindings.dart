@@ -9,6 +9,7 @@ class CreateGroupBindings extends Bindings {
         getInvitableFriendsUseCase: Get.find(),
         createGroupUseCase: Get.find(),
         addDailyTaskUseCase: Get.find(),
+        addSubjectUseCase: Get.find(),
         appNavigator: Get.find(),
       ),
     );

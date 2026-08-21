@@ -100,6 +100,7 @@ class GroupsDataSource {
             createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
             inviteCode: row["invite_code"] as String? ?? "",
             privacy: row["privacy"] as String? ?? "inviteOnly",
+            createdActivityId: row["activity_id"] as String?,
           );
         }).toList(),
       );
@@ -735,6 +736,7 @@ class GroupsDataSource {
           createdAt: DateTime.tryParse(groupRow["created_at"] as String? ?? ""),
           inviteCode: groupRow["invite_code"] as String? ?? "",
           privacy: groupRow["privacy"] as String? ?? "inviteOnly",
+          createdActivityId: groupRow["activity_id"] as String?,
         ),
       );
     } catch (error, stackTrace) {
