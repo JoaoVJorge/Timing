@@ -72,6 +72,4 @@ class SubjectIcons {
       };
 
   static IconData? byName(String name) => _all[name];
-
-  static bool isSvgName(String name) => !_all.containsKey(name);
 }

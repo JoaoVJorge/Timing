@@ -113,8 +113,6 @@ class ConfigController extends GetxController {
     languageCode.value ?? _appController.effectiveLanguageCode,
   ).label;
 
-  void onTapAccentColor() => _appNavigator.toNamed(AppRoutes.editProfile);
-
   void onTapFeedback() =>
       _appNavigator.showSnackBar(text: Get.context!.l10n.feedbackUnavailable);
 

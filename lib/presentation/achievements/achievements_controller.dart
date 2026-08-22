@@ -86,16 +86,6 @@ class AchievementsController extends GetxController {
   void onSelectCategory(AchievementCategory? category) =>
       selectedCategory.value = category;
 
-  void toggleCategoryFilter() {
-    final List<AchievementCategory?> options = [
-      null,
-      ...AchievementCategory.values,
-    ];
-    final int nextIndex =
-        (options.indexOf(selectedCategory.value) + 1) % options.length;
-    selectedCategory.value = options[nextIndex];
-  }
-
   /// Rebuilding the 50 definitions is expensive and the page reads this getter
   /// several times per frame, so the result is kept until an input changes.
   List<AchievementDefinition> _cachedAchievements = const [];

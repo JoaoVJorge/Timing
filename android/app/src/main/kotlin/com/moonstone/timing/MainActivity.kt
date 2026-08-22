@@ -1,7 +1,5 @@
 package com.moonstone.timing
 
-import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -30,25 +28,6 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(null)
                 }
-                "bringAppToFront" -> {
-                    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-                    launchIntent?.addFlags(
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                            Intent.FLAG_ACTIVITY_NEW_TASK
-                    )
-                    if (launchIntent != null) {
-                        startActivity(launchIntent)
-                    }
-                    result.success(null)
-                }
-                "startScreenLock" -> {
-                    result.success(startScreenLock())
-                }
-                "stopScreenLock" -> {
-                    stopScreenLock()
-                    result.success(null)
-                }
                 else -> result.notImplemented()
             }
         }
@@ -73,14 +52,6 @@ class MainActivity : FlutterActivity() {
                         isRunning = call.argument<Boolean>("isRunning") ?: false,
                         isResting = call.argument<Boolean>("isResting") ?: false,
                         accentColor = parseColor(call.argument<String>("colorHex"))
-                    )
-                    result.success(null)
-                }
-                "update" -> {
-                    FocusOverlayController.update(
-                        remainingSeconds = call.argument<Int>("remainingSeconds") ?: 0,
-                        isRunning = call.argument<Boolean>("isRunning") ?: false,
-                        isResting = call.argument<Boolean>("isResting") ?: false
                     )
                     result.success(null)
                 }
@@ -120,35 +91,4 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun startScreenLock(): Boolean {
-        return try {
-            if (!isInLockTaskMode()) {
-                startLockTask()
-            }
-            true
-        } catch (error: Exception) {
-            false
-        }
-    }
-
-    private fun stopScreenLock() {
-        try {
-            if (isInLockTaskMode()) {
-                stopLockTask()
-            }
-        } catch (error: Exception) {
-            // Nothing to do if the app is not pinned.
-        }
-    }
-
-    private fun isInLockTaskMode(): Boolean {
-        val activityManager =
-            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activityManager.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE
-        } else {
-            @Suppress("DEPRECATION")
-            activityManager.isInLockTaskMode
-        }
-    }
 }

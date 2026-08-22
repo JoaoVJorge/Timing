@@ -296,10 +296,6 @@ class GroupsController extends GetxController {
     return null;
   }
 
-  int reachedCount(String activityId) => activityProgress
-      .where((item) => item.activityId == activityId && item.reached)
-      .length;
-
   String _todayKey() {
     final DateTime now = DateTime.now();
     return "${now.year.toString().padLeft(4, "0")}-"
@@ -500,10 +496,6 @@ class GroupsController extends GetxController {
     _appNavigator.showSnackBar(text: message);
   }
 
-  Future<void> onTapLeaveGroup() async {
-    await onConfirmLeaveGroup();
-  }
-
   Future<void> onConfirmLeaveGroup() async {
     final GroupEntity? group = selectedGroup.value;
     if (group == null) {
@@ -531,19 +523,6 @@ class GroupsController extends GetxController {
         Get.context?.l10n.leftGroupMessage ?? "You left the group.",
       );
     });
-  }
-
-  Future<void> onTapJoinWithCode() async {
-    final dynamic result = await _appNavigator.toNamed(AppRoutes.joinGroup);
-    final GroupEntity? joinedGroup = result as GroupEntity?;
-    if (joinedGroup == null) {
-      return;
-    }
-    await upsertJoinedGroup(joinedGroup);
-    onSelectGroup(joinedGroup);
-    _appNavigator.showSuccessSnackBar(
-      Get.context?.l10n.joinedGroupMessage ?? "You joined the group",
-    );
   }
 
   Future<ImageSource?> _pickImageSource() {

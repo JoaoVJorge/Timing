@@ -104,15 +104,6 @@ object FocusOverlayController {
         restartTicker(appContext)
     }
 
-    fun update(remainingSeconds: Int, isRunning: Boolean, isResting: Boolean) {
-        this.remainingSeconds = remainingSeconds
-        this.isRunning = isRunning
-        this.isResting = isResting
-        val context = overlayView?.context ?: return
-        applyState(null)
-        restartTicker(context)
-    }
-
     fun hide() {
         stopTicker()
         val view = overlayView

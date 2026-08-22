@@ -7,18 +7,6 @@ class FocusGuardService {
     await _invoke("setKeepScreenOn", <String, Object?>{"enabled": enabled});
   }
 
-  Future<void> bringAppToFront() async {
-    await _invoke("bringAppToFront");
-  }
-
-  Future<void> startScreenLock() async {
-    await _invoke("startScreenLock");
-  }
-
-  Future<void> stopScreenLock() async {
-    await _invoke("stopScreenLock");
-  }
-
   Future<void> _invoke(String method, [Map<String, Object?>? arguments]) async {
     try {
       await _channel.invokeMethod<void>(method, arguments);

@@ -102,8 +102,6 @@ class CreateSubjectController extends GetxController
     return (double.tryParse(rawGoal) ?? 0) > 0;
   }
 
-  bool get canSubmit => name.value.trim().isNotEmpty && hasValidGoal;
-
   @override
   void initializeThemeColor(Color color) {
     if (_hasInitializedThemeColor) {
@@ -185,30 +183,6 @@ class CreateSubjectController extends GetxController
           : context.l10n.createSubjectMissingTimeGoal;
     }
     return null;
-  }
-
-  String previewName(BuildContext context) {
-    final String value = name.value.trim();
-    if (value.isNotEmpty) {
-      return value;
-    }
-    return nameLabel(context);
-  }
-
-  String previewGoal(BuildContext context) {
-    if (!hasValidGoal) {
-      return context.l10n.createSubjectPreviewNoGoal;
-    }
-
-    if (isPageBased) {
-      return context.l10n.createSubjectPagesValue(int.parse(goal.value.trim()));
-    }
-
-    final int value = int.parse(goal.value.trim());
-    if (activityType.value == SubjectActivityType.permanent) {
-      return context.l10n.createSubjectHoursValue(value);
-    }
-    return context.l10n.restMinutesChip(value);
   }
 
   @override

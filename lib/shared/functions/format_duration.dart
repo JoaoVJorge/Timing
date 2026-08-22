@@ -11,13 +11,6 @@ String formatDurationLong(Duration duration) {
   return "$minutes min";
 }
 
-String formatDurationCompact(Duration duration) {
-  if (duration.inSeconds < 60) {
-    return "${duration.inSeconds}s";
-  }
-  return formatDurationLong(duration);
-}
-
 /// Total minutes as "N min" (e.g. 90 minutes stays "90 min", not "1h 30 min").
 String formatDurationTotalMinutes(Duration duration) =>
     "${duration.inMinutes} min";

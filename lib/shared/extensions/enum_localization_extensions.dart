@@ -4,7 +4,6 @@ import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/main_navigation/enums/bottom_nav_button_type.dart";
-import "package:timing/shared/functions/format_duration.dart";
 
 extension TimeCategoryTypeLocalizationX on TimeCategoryType {
   String localizedLabel(BuildContext context) => switch (this) {
@@ -31,13 +30,6 @@ extension GroupThemeTypeLocalizationX on GroupThemeType {
     GroupThemeType.hobbies => context.l10n.categoryHobbies,
   };
 
-  /// Formats a leaderboard [value] according to how this theme is measured.
-  /// Hours-based themes treat [value] as seconds; days/pages as a raw count.
-  String formatMetric(BuildContext context, int value) => switch (unit) {
-    GroupMetricUnit.hours => formatDurationLong(Duration(seconds: value)),
-    GroupMetricUnit.days => context.l10n.metricDaysValue(value),
-    GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
-  };
 }
 
 extension LeaderboardPeriodTypeLocalizationX on LeaderboardPeriodType {

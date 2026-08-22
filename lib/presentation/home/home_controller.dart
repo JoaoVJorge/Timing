@@ -228,11 +228,6 @@ class HomeController extends GetxController {
 
   Future<void> onTapSchedule() => _navigateAndRefresh(AppRoutes.schedule);
 
-  Future<void> onAddScheduleEntry() async {
-    await _scheduleController.onTapAddEntry();
-    await load();
-  }
-
   /// The schedule only changes on the routes that can edit it, so screens that
   /// cannot touch it skip re-reading and re-decoding the stored entries.
   Future<void> _navigateAndRefresh(

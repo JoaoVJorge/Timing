@@ -57,16 +57,6 @@ class ProgressController extends GetxController {
 
   int get goalsDone => tasks.where((task) => task.isDoneForCurrentCycle).length;
 
-  bool get hasAnyUnlockedAchievement {
-    final ProfileStatsEntity currentStats = stats.value;
-    return hasValidFirstFocus ||
-        hasGoalStarted ||
-        currentStats.studyingTotalSeconds > 0 ||
-        currentStats.exercisesTotalSeconds > 0 ||
-        currentStats.hobbiesTotalSeconds > 0 ||
-        currentStats.readingTotalPages > 0;
-  }
-
   List<int> get evolutionFocusSeconds =>
       _currentPeriod.map((progress) => progress.focusSeconds).toList();
 
@@ -217,9 +207,6 @@ class ProgressController extends GetxController {
 
   Future<void> onTapAchievements() =>
       _navigateAndRefresh(AppRoutes.achievements);
-
-  Future<void> onTapReadingSubject(SubjectEntity subject) =>
-      _navigateAndRefresh(AppRoutes.subjectStats, arguments: subject);
 
   void onSelectPeriod(ProgressPeriod period) => selectedPeriod.value = period;
 

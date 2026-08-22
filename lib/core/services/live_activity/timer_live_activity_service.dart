@@ -74,28 +74,6 @@ class TimerLiveActivityService {
     }
   }
 
-  Future<String?> get pushToken async {
-    if (!_isSupported) {
-      return null;
-    }
-    try {
-      return await _channel.invokeMethod<String>("getPushToken");
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Token used by an APNs backend to start this activity remotely (iOS 17.2+).
-  Future<String?> get pushToStartToken async {
-    if (!_isSupported) {
-      return null;
-    }
-    try {
-      return await _channel.invokeMethod<String>("getPushToStartToken");
-    } catch (_) {
-      return null;
-    }
-  }
 
   Future<void> end() async {
     if (!_isSupported) {

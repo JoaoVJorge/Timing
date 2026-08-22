@@ -31,23 +31,16 @@ class ScheduleController extends GetxController {
   final RxBool isLoading = true.obs;
   final Rx<DateTime> selectedDate = _todayDate().obs;
 
-  int get selectedWeekday => selectedDate.value.weekday;
-
   List<ScheduleEntryEntity> get sortedEntries =>
       _sortedEntriesForDate(selectedDate.value);
 
   List<ScheduleEntryEntity> get todayEntries =>
       _sortedEntriesForDate(_todayDate());
 
-  bool get isViewingToday => _isSameDate(selectedDate.value, _todayDate());
-
   static DateTime _todayDate() {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
   }
-
-  static bool _isSameDate(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
 
   ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
     final DateTime viewedDate = selectedDate.value;

@@ -1,8 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
-import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
-import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/functions/format_duration.dart";
 
@@ -55,21 +53,6 @@ String groupMetricDescription(BuildContext context, GroupThemeType theme) =>
       GroupThemeType.hobbies => context.l10n.groupMetricHobbies,
     };
 
-String leaderboardDescription(
-  BuildContext context,
-  GroupThemeType theme,
-  LeaderboardPeriodType period,
-) => context.l10n.groupLeaderboardDescription(
-  period.leaderboardDescriptionLabel(context),
-  groupMetricDescription(context, theme),
-);
-
-String displayMemberName(
-  BuildContext context,
-  GroupMemberEntity member,
-  String currentUserId,
-) => member.id == currentUserId ? context.l10n.you : member.name;
-
 String localizedGroupName(BuildContext context, GroupEntity group) =>
     switch (group.id) {
       "study-squad" => context.l10n.mockStudyGroupName,
@@ -79,12 +62,4 @@ String localizedGroupName(BuildContext context, GroupEntity group) =>
 
 String formatRankLabel(BuildContext context, int rank) {
   return context.l10n.rankLabel(rank);
-}
-
-extension LeaderboardPeriodDescriptionX on LeaderboardPeriodType {
-  String leaderboardDescriptionLabel(BuildContext context) => switch (this) {
-    LeaderboardPeriodType.today => context.l10n.periodDescriptionToday,
-    LeaderboardPeriodType.thisWeek => context.l10n.periodDescriptionThisWeek,
-    LeaderboardPeriodType.thisMonth => context.l10n.periodDescriptionThisMonth,
-  };
 }

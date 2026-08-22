@@ -47,18 +47,6 @@ class FocusOverlayService {
     });
   }
 
-  Future<void> update({
-    required int remainingSeconds,
-    required bool isRunning,
-    required bool isResting,
-  }) async {
-    await _invoke("update", <String, Object?>{
-      "remainingSeconds": remainingSeconds,
-      "isRunning": isRunning,
-      "isResting": isResting,
-    });
-  }
-
   Future<void> hide() async {
     await _invoke("hide");
   }

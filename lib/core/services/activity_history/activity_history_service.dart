@@ -125,26 +125,6 @@ class ActivityHistoryService {
     subjectId: subjectId,
   ).fold(0, (total, entry) => total + entry.pages);
 
-  /// Focus seconds logged during the calendar day that contains [day].
-  int secondsForDay(DateTime day, {TimeCategoryType? category}) {
-    final DateTime start = _startOfDay(day);
-    return secondsBetween(
-      start,
-      start.add(const Duration(days: 1)),
-      category: category,
-    );
-  }
-
-  /// Pages logged during the calendar day that contains [day].
-  int pagesForDay(DateTime day, {TimeCategoryType? category}) {
-    final DateTime start = _startOfDay(day);
-    return pagesBetween(
-      start,
-      start.add(const Duration(days: 1)),
-      category: category,
-    );
-  }
-
   static DateTime _startOfDay(DateTime date) =>
       DateTime(date.year, date.month, date.day);
 

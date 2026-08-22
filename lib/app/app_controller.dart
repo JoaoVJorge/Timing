@@ -279,11 +279,6 @@ class AppController extends GetxController {
     await _saveAppConfigUseCase(_currentConfig);
   }
 
-  Future<void> setUserName(String value) async {
-    userName.value = value;
-    await _saveAppConfigUseCase(_currentConfig);
-  }
-
   Future<void> setAvatarIconIndex(int value) async {
     avatarIconIndex.value = value;
     await _saveAppConfigUseCase(_currentConfig);
@@ -338,23 +333,6 @@ class AppController extends GetxController {
     TimeCategoryType.reading => focusLockReadingEnabled.value,
     TimeCategoryType.hobbies => focusLockHobbiesEnabled.value,
   };
-
-  Future<void> setFocusLockEnabledFor(
-    TimeCategoryType category,
-    bool value,
-  ) async {
-    switch (category) {
-      case TimeCategoryType.studying:
-        focusLockStudyingEnabled.value = value;
-      case TimeCategoryType.exercises:
-        focusLockExercisesEnabled.value = value;
-      case TimeCategoryType.reading:
-        focusLockReadingEnabled.value = value;
-      case TimeCategoryType.hobbies:
-        focusLockHobbiesEnabled.value = value;
-    }
-    await _saveAppConfigUseCase(_currentConfig);
-  }
 
   Future<void> setFocusLockPreferences({
     required bool studying,

@@ -10,10 +10,6 @@ class AppNavigator {
 
   dynamic get arguments => Get.arguments;
 
-  double get screenHeight => Get.height;
-
-  double get screenWidth => Get.width;
-
   void back<T>({
     T? result,
     bool closeOverlays = false,

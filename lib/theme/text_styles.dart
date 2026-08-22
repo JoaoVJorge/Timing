@@ -38,8 +38,6 @@ class AppTextStyles {
     height: 1.25,
   );
 
-  TextStyle get titleFont => black28;
-
   /// Page level: one per screen, sits alone at the top.
   TextStyle get pageTitle => TextStyle(
     fontSize: 28,
@@ -106,12 +104,6 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     color: _tokens.primary,
   );
-  TextStyle get textButtonMediumDestructive => TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: _tokens.error,
-  );
-
   TextStyle get textPrimaryButton => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,

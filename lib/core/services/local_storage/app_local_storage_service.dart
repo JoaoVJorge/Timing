@@ -14,10 +14,6 @@ class AppLocalStorageService {
   final FlutterSecureStorage secureStorage;
   final SupabaseService supabaseService;
 
-  Future<void> clearStorage() async {
-    await Future.wait([localStorage.clear(), secureStorage.deleteAll()]);
-  }
-
   Future<void> write<T>(LocalStorageKeys key, T value) async {
     final String storageKey = _storageKey(key);
     if (key.hasSensitiveData) {
