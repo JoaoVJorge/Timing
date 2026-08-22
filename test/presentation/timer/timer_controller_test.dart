@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:flutter/widgets.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
@@ -125,15 +126,11 @@ class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
 class _FakeFocusGuardService extends _Noop implements FocusGuardService {
   @override
   Future<void> setKeepScreenOn(bool enabled) async {}
-
-  @override
-  Future<void> startScreenLock() async {}
-
-  @override
-  Future<void> stopScreenLock() async {}
 }
 
 class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
+  int showCount = 0;
+
   @override
   Future<bool> hasPermission() async => true;
 
@@ -147,14 +144,9 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
     required bool isRunning,
     required bool isResting,
     required int colorValue,
-  }) async {}
-
-  @override
-  Future<void> update({
-    required int remainingSeconds,
-    required bool isRunning,
-    required bool isResting,
-  }) async {}
+  }) async {
+    showCount++;
+  }
 
   @override
   Future<void> hide() async {}
@@ -163,8 +155,12 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
 
 class _FakeAppController extends _Noop implements AppController {
+  _FakeAppController({this.focusLockEnabled = false});
+
+  final bool focusLockEnabled;
+
   @override
-  bool isFocusLockEnabledFor(TimeCategoryType category) => false;
+  bool isFocusLockEnabledFor(TimeCategoryType category) => focusLockEnabled;
 }
 
 class _FakeAppNavigator extends _Noop implements AppNavigator {}
@@ -199,6 +195,9 @@ SubjectEntity _subject({
 TimerController _controller(
   SubjectEntity subject, {
   FocusFeedbackService? focusFeedbackService,
+  FocusGuardService? focusGuardService,
+  FocusOverlayService? focusOverlayService,
+  AppController? appController,
 }) => TimerController(
   updateSubjectTimeUseCase: _FakeUpdateSubjectTimeUseCase(),
   updateSubjectPagesUseCase: _FakeUpdateSubjectPagesUseCase(),
@@ -211,10 +210,10 @@ TimerController _controller(
   timerNotificationService: _FakeTimerNotificationService(),
   timerLiveActivityService: _FakeTimerLiveActivityService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
-  focusGuardService: _FakeFocusGuardService(),
-  focusOverlayService: _FakeFocusOverlayService(),
+  focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
+  focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
   analyticsService: _FakeAnalyticsService(),
-  appController: _FakeAppController(),
+  appController: appController ?? _FakeAppController(),
   appNavigator: _FakeAppNavigator(),
   subject: subject,
 );
@@ -406,6 +405,21 @@ void main() {
       expect(feedback.finishFeedbackCount, 1);
       expect(controller.isResting.value, isFalse);
       expect(controller.breakCountdownSeconds.value, 10);
+    });
+  });
+
+  group("TimerController background focus indicator", () {
+    test("shows overlay when focus lock is on and app goes background", () {
+      final overlay = _FakeFocusOverlayService();
+      final controller = _controller(
+        _subject(),
+        focusOverlayService: overlay,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.showCount, 1);
     });
   });
 }
