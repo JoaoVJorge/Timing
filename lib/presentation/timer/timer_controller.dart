@@ -84,10 +84,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _hasLoggedTime = false;
   bool _hasRecordedLastActivity = false;
   bool _isConsumingLiveActivityAction = false;
-  bool _isAppInForeground = true;
-  bool _isCatchingUpAfterBackground = false;
   bool _isPersistingTime = false;
   bool _isFinishingSession = false;
+  bool _isAppInForeground = true;
+  bool _isCatchingUpAfterBackground = false;
   bool _shouldPersistAgain = false;
   final int _todayFocusSecondsAtSessionStart;
   late DateTime _lastTickAt;
@@ -134,11 +134,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       !isResting.value &&
       !isSessionFinished.value;
 
-  int get restIntervalSeconds =>
-      (subject.restMinutes > 0
-          ? subject.restMinutes
-          : SubjectEntity.defaultRestMinutes) *
-      60;
+  int get restIntervalSeconds => subject.restSeconds > 0
+      ? subject.restSeconds
+      : SubjectEntity.defaultRestSeconds;
 
   int get focusSessionCount =>
       subject.focusSessionCount > 0 ? subject.focusSessionCount : 1;
@@ -324,7 +322,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     isSessionFinished.value = true;
     _ticker?.cancel();
     unawaited(HapticFeedback.mediumImpact());
-    timerNotificationService.cancel();
+    if (_isAppInForeground) {
+      timerNotificationService.cancel();
+    } else {
+      // Keep the already scheduled final alarm alive. It is the only reliable
+      // sound/vibration source when Flutter is suspended in the background.
+      timerNotificationService.cancelOngoing();
+    }
     _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
@@ -478,7 +482,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     isRunning.value = false;
     isSessionFinished.value = true;
     _ticker?.cancel();
-    timerNotificationService.cancel();
+    if (_isAppInForeground) {
+      timerNotificationService.cancel();
+    } else {
+      timerNotificationService.cancelOngoing();
+    }
     _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
@@ -599,50 +607,75 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       ),
     );
 
-    final BuildContext? context = Get.context;
-    if (context == null) {
-      return;
-    }
-
     if (!appController.notificationsEnabled.value) {
       timerNotificationService.cancel();
       return;
     }
 
+    final BuildContext? context = Get.context;
+    final String runningBody =
+        context?.l10n.timerNotificationRunning ?? "Sessão de foco em andamento";
+    final String restingBody =
+        context?.l10n.timerNotificationResting ?? "Descansando - volta já";
+    final String pausedBody =
+        context?.l10n.timerNotificationPaused ?? "Pausado";
+
     if (!isRunning.value) {
-      timerNotificationService.cancelFocusFinished();
+      timerNotificationService.cancelScheduledAlarms();
       timerNotificationService.showStatic(
         title: subject.name,
-        body: context.l10n.timerNotificationPaused,
+        body: pausedBody,
       );
       return;
     }
 
     if (isResting.value) {
-      timerNotificationService.cancelFocusFinished();
       timerNotificationService.showStatic(
         title: subject.name,
-        body: context.l10n.timerNotificationResting,
+        body: restingBody,
       );
       return;
     }
 
+    timerNotificationService.cancelRestFinished();
     timerNotificationService.showRunning(
       title: subject.name,
-      body: context.l10n.timerNotificationRunning,
+      body: runningBody,
       startedAt: DateTime.now().subtract(
         Duration(seconds: sessionSeconds.value),
       ),
     );
-    timerNotificationService.scheduleFocusFinished(
-      title: subject.name,
-      body: isReading
-          ? "Passou 30 minutos"
-          : context.l10n.timerNotificationResting,
-      remaining: Duration(
-        seconds: isReading
-            ? readingIntervalRemainingSeconds
-            : breakCountdownSeconds.value,
+  }
+
+  void _scheduleBackgroundTimeline() {
+    if (!appController.notificationsEnabled.value ||
+        !isRunning.value ||
+        isSessionFinished.value) {
+      return;
+    }
+
+    if (isReading) {
+      timerNotificationService.scheduleFocusFinished(
+        title: subject.name,
+        body: "Passou 30 minutos",
+        remaining: Duration(seconds: readingIntervalRemainingSeconds),
+      );
+      return;
+    }
+
+    unawaited(
+      timerNotificationService.scheduleSessionTimeline(
+        title: subject.name,
+        focusFinishedBody: "Sessão concluída. Hora da pausa.",
+        restFinishedBody: "Nova sessão iniciada.",
+        sessionFinishedBody: "Atividade concluída.",
+        focusRemaining: Duration(seconds: breakCountdownSeconds.value),
+        restRemaining: Duration(seconds: restCountdownSeconds.value),
+        focusInterval: Duration(seconds: focusIntervalSeconds),
+        restInterval: Duration(seconds: restIntervalSeconds),
+        remainingFocusSections:
+            focusSessionCount - completedFocusSections.value,
+        isResting: isResting.value,
       ),
     );
   }
@@ -679,6 +712,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         isRunning: isRunning.value,
         isResting: isResting.value,
         colorValue: subject.colorValue,
+        currentFocusSection: currentFocusSection,
+        totalFocusSections: focusSessionCount,
+        focusIntervalSeconds: focusIntervalSeconds,
+        restIntervalSeconds: restIntervalSeconds,
       ),
     );
   }
@@ -748,9 +785,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
-      timerNotificationService.cancelFocusFinished();
       _hideOverlay();
-      unawaited(_catchUpAfterBackground());
+      unawaited(_resumeFromBackground());
       _syncFocusGuard();
       return;
     }
@@ -762,6 +798,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       _persistAccumulatedTime();
       _recordLastActivityIfNeeded();
       _updateNotification();
+      _scheduleBackgroundTimeline();
       _showOverlay();
     }
   }
@@ -773,6 +810,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     } finally {
       _isCatchingUpAfterBackground = false;
     }
+  }
+
+  Future<void> _resumeFromBackground() async {
+    await _catchUpAfterBackground();
+    await timerNotificationService.cancelScheduledAlarms();
   }
 
   void _syncFocusGuard() {
@@ -789,7 +831,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _ticker?.cancel();
     _persistAccumulatedTime();
     _recordLastActivityIfNeeded();
-    timerNotificationService.cancel();
+    if (_isAppInForeground) {
+      timerNotificationService.cancel();
+    } else {
+      timerNotificationService.cancelOngoing();
+    }
     _hideOverlay();
     _disableFocusGuard();
     unawaited(timerLiveActivityService.end());

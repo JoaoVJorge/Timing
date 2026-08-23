@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import "package:get/get.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
@@ -94,7 +95,85 @@ class _FakeAchievementUnlockService extends _Noop
 }
 
 class _FakeTimerNotificationService extends _Noop
-    implements TimerNotificationService {}
+    implements TimerNotificationService {
+  int cancelFocusFinishedCount = 0;
+  int cancelRestFinishedCount = 0;
+  int cancelScheduledAlarmsCount = 0;
+  int scheduleFocusFinishedCount = 0;
+  int scheduleRestFinishedCount = 0;
+  int scheduleSessionTimelineCount = 0;
+  int cancelOngoingCount = 0;
+
+  @override
+  Future<void> cancelFocusFinished() async {
+    cancelFocusFinishedCount++;
+  }
+
+  @override
+  Future<void> cancelRestFinished() async {
+    cancelRestFinishedCount++;
+  }
+
+  @override
+  Future<void> cancelScheduledAlarms() async {
+    cancelScheduledAlarmsCount++;
+  }
+
+  @override
+  Future<void> scheduleFocusFinished({
+    required String title,
+    required String body,
+    required Duration remaining,
+  }) async {
+    scheduleFocusFinishedCount++;
+  }
+
+  @override
+  Future<void> scheduleRestFinished({
+    required String title,
+    required String body,
+    required Duration remaining,
+  }) async {
+    scheduleRestFinishedCount++;
+  }
+
+  @override
+  Future<void> scheduleSessionTimeline({
+    required String title,
+    required String focusFinishedBody,
+    required String restFinishedBody,
+    required String sessionFinishedBody,
+    required Duration focusRemaining,
+    required Duration restRemaining,
+    required Duration focusInterval,
+    required Duration restInterval,
+    required int remainingFocusSections,
+    required bool isResting,
+  }) async {
+    scheduleSessionTimelineCount++;
+  }
+
+  @override
+  Future<void> cancelOngoing() async {
+    cancelOngoingCount++;
+  }
+
+  @override
+  Future<void> showRunning({
+    required String title,
+    required String body,
+    required DateTime startedAt,
+  }) async {}
+
+  @override
+  Future<void> showStatic({
+    required String title,
+    required String body,
+  }) async {}
+
+  @override
+  Future<void> cancel() async {}
+}
 
 class _FakeTimerLiveActivityService extends _Noop
     implements TimerLiveActivityService {
@@ -144,6 +223,10 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
     required bool isRunning,
     required bool isResting,
     required int colorValue,
+    required int currentFocusSection,
+    required int totalFocusSections,
+    required int focusIntervalSeconds,
+    required int restIntervalSeconds,
   }) async {
     showCount++;
   }
@@ -158,6 +241,9 @@ class _FakeAppController extends _Noop implements AppController {
   _FakeAppController({this.focusLockEnabled = false});
 
   final bool focusLockEnabled;
+
+  @override
+  final RxBool notificationsEnabled = true.obs;
 
   @override
   bool isFocusLockEnabledFor(TimeCategoryType category) => focusLockEnabled;
@@ -197,6 +283,7 @@ TimerController _controller(
   FocusFeedbackService? focusFeedbackService,
   FocusGuardService? focusGuardService,
   FocusOverlayService? focusOverlayService,
+  TimerNotificationService? timerNotificationService,
   AppController? appController,
 }) => TimerController(
   updateSubjectTimeUseCase: _FakeUpdateSubjectTimeUseCase(),
@@ -207,7 +294,8 @@ TimerController _controller(
   dailyProgressService: _FakeDailyProgressService(),
   subjectDailyHistoryService: _FakeSubjectDailyHistoryService(),
   achievementUnlockService: _FakeAchievementUnlockService(),
-  timerNotificationService: _FakeTimerNotificationService(),
+  timerNotificationService:
+      timerNotificationService ?? _FakeTimerNotificationService(),
   timerLiveActivityService: _FakeTimerLiveActivityService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
@@ -239,19 +327,22 @@ void main() {
   });
 
   group("TimerController rest interval", () {
-    test("uses the subject rest minutes when positive", () {
+    test("uses the subject rest seconds when stored as seconds", () {
+      final controller = _controller(_subject(restMinutes: 30));
+
+      expect(controller.restIntervalSeconds, 30);
+    });
+
+    test("keeps legacy minute-based rest values working", () {
       final controller = _controller(_subject(restMinutes: 8));
 
       expect(controller.restIntervalSeconds, 8 * 60);
     });
 
-    test("falls back to the default rest minutes when non-positive", () {
+    test("falls back to the default rest seconds when non-positive", () {
       final controller = _controller(_subject(restMinutes: 0));
 
-      expect(
-        controller.restIntervalSeconds,
-        SubjectEntity.defaultRestMinutes * 60,
-      );
+      expect(controller.restIntervalSeconds, SubjectEntity.defaultRestSeconds);
     });
   });
 
@@ -421,5 +512,20 @@ void main() {
 
       expect(overlay.showCount, 1);
     });
+
+    test(
+      "schedules the complete remaining timeline when sent to background",
+      () {
+        final notifications = _FakeTimerNotificationService();
+        final controller = _controller(
+          _subject(goalSeconds: 10, restMinutes: 3, focusSessionCount: 2),
+          timerNotificationService: notifications,
+        );
+
+        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+        expect(notifications.scheduleSessionTimelineCount, 1);
+      },
+    );
   });
 }
