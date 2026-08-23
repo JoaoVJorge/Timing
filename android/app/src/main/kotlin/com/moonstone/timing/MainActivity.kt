@@ -51,12 +51,34 @@ class MainActivity : FlutterActivity() {
                         remainingSeconds = call.argument<Int>("remainingSeconds") ?: 0,
                         isRunning = call.argument<Boolean>("isRunning") ?: false,
                         isResting = call.argument<Boolean>("isResting") ?: false,
+                        currentFocusSection = call.argument<Int>("currentFocusSection") ?: 1,
+                        totalFocusSections = call.argument<Int>("totalFocusSections") ?: 1,
+                        focusIntervalSeconds = call.argument<Int>("focusIntervalSeconds") ?: 1800,
+                        restIntervalSeconds = call.argument<Int>("restIntervalSeconds") ?: 60,
                         accentColor = parseColor(call.argument<String>("colorHex"))
                     )
                     result.success(null)
                 }
                 "hide" -> {
                     FocusOverlayController.hide()
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "timing/home_widget"
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "updateFocusToday" -> {
+                    FocusTodayWidgetProvider.saveData(
+                        context = this,
+                        focusToday = call.argument<String>("focus_today") ?: "0 min",
+                        goalsProgress = call.argument<String>("goals_progress") ?: "Metas 0/0"
+                    )
+                    FocusTodayWidgetProvider.updateAll(this)
                     result.success(null)
                 }
                 else -> result.notImplemented()

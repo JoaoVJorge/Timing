@@ -1,11 +1,11 @@
 import "dart:io";
 
-import "package:home_widget/home_widget.dart";
+import "package:flutter/services.dart";
 
 /// Pushes a lightweight snapshot of today's focus to the Android home-screen
 /// widget. Everything is local: no network or external API is involved.
 class HomeWidgetService {
-  static const String _androidProvider = "FocusTodayWidgetProvider";
+  static const MethodChannel _channel = MethodChannel("timing/home_widget");
   static const String _focusTodayKey = "focus_today";
   static const String _goalsProgressKey = "goals_progress";
 
@@ -21,15 +21,10 @@ class HomeWidgetService {
     }
 
     try {
-      await HomeWidget.saveWidgetData<String>(
-        _focusTodayKey,
-        _formatDuration(focusSeconds),
-      );
-      await HomeWidget.saveWidgetData<String>(
-        _goalsProgressKey,
-        "Metas $goalsDone/$goalsTotal",
-      );
-      await HomeWidget.updateWidget(androidName: _androidProvider);
+      await _channel.invokeMethod<void>("updateFocusToday", <String, String>{
+        _focusTodayKey: _formatDuration(focusSeconds),
+        _goalsProgressKey: "Metas $goalsDone/$goalsTotal",
+      });
     } catch (_) {
       // The widget is a best-effort mirror; failures must never affect the app.
     }
