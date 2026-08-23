@@ -14,7 +14,7 @@ class GroupActivityDraft {
     this.goalSeconds = 0,
     this.goalPages = 0,
     this.iconName = "",
-    this.restMinutes = 5,
+    this.restMinutes = 60,
     this.focusSessionCount = 1,
     this.wallpaperIndex = 0,
     this.activityType = "daily",
@@ -34,7 +34,7 @@ class GroupActivityDraft {
        goalSeconds = 0,
        goalPages = 0,
        iconName = "",
-       restMinutes = 5,
+       restMinutes = 60,
        focusSessionCount = 1,
        wallpaperIndex = 0,
        activityType = "daily";

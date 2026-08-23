@@ -184,7 +184,7 @@ class _StatsGrid extends StatelessWidget {
             ),
             _StatItem(
               icon: Icons.local_cafe_rounded,
-              value: "${subject.restMinutes} min",
+              value: "${subject.restSeconds}s",
               label: _restLabel(context),
             ),
           ];

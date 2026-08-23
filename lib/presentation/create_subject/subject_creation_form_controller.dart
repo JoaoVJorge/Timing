@@ -7,6 +7,7 @@ abstract class SubjectCreationFormController {
   TimeCategoryType get category;
   TextEditingController get nameController;
   TextEditingController get goalController;
+  TextEditingController get restMinutesController;
   Rx<Color> get selectedColor;
   RxString get selectedIconName;
   RxInt get restMinutes;

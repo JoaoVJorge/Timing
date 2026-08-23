@@ -43,6 +43,7 @@ class CreateSubjectController extends GetxController
   final TextEditingController nameController = TextEditingController();
   @override
   final TextEditingController goalController = TextEditingController();
+  @override
   final TextEditingController restMinutesController = TextEditingController(
     text: SubjectEntity.defaultRestMinutes.toString(),
   );
@@ -72,7 +73,7 @@ class CreateSubjectController extends GetxController
   final RxString goal = "".obs;
 
   @override
-  final List<int> restMinutesOptions = [5, 10, 15, 20];
+  final List<int> restMinutesOptions = [30, 60, 90];
   @override
   final List<int> focusSessionCountOptions = [1, 2, 3];
   @override
@@ -224,8 +225,8 @@ class CreateSubjectController extends GetxController
       selectedIconName.value = subject.iconName.isEmpty
           ? SubjectIcons.suggestionsFor(category).first
           : subject.iconName;
-      restMinutes.value = subject.restMinutes;
-      restMinutesController.text = subject.restMinutes.toString();
+      restMinutes.value = subject.restSeconds;
+      restMinutesController.text = subject.restSeconds.toString();
       focusSessionCount.value = subject.focusSessionCount;
       focusSessionCountController.text = subject.focusSessionCount.toString();
       wallpaperIndex.value = subject.wallpaperIndex;

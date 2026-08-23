@@ -439,20 +439,79 @@ class _RestSection extends StatelessWidget {
         description: context.l10n.subjectRestDurationDescription,
         accent: accent,
       ),
-      child: _PresetRow(
-        children: controller.restMinutesOptions
-            .map(
-              (minutes) => CreationSelectableChip(
-                label: context.l10n.restMinutesChip(minutes),
-                isSelected: controller.restMinutes.value == minutes,
-                accent: accent,
-                onTap: () => controller.setRestMinutes(minutes),
-              ),
-            )
-            .toList(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _RestInput(controller: controller, accent: accent),
+          const Gap(12),
+          _PresetRow(
+            children: controller.restMinutesOptions
+                .map(
+                  (seconds) => CreationSelectableChip(
+                    label: _formatRestSeconds(seconds),
+                    isSelected: controller.restMinutes.value == seconds,
+                    accent: accent,
+                    onTap: () => controller.setRestMinutes(seconds),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
       ),
     );
   });
+}
+
+String _formatRestSeconds(int seconds) => "${seconds}s";
+
+class _RestInput extends StatelessWidget {
+  const _RestInput({required this.controller, required this.accent});
+
+  final SubjectCreationFormController controller;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 52,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.scaffold.withValues(alpha: 0.36),
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.hourglass_bottom_rounded, color: accent, size: 20),
+        const Gap(12),
+        Expanded(
+          child: TextField(
+            controller: controller.restMinutesController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: TextStyle(
+              color: context.colorTokens.textBody,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+            decoration: InputDecoration(
+              hintText: "Duração da pausa",
+              suffixText: "s",
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+              hintStyle: TextStyle(
+                color: context.colorTokens.textHint.withValues(alpha: 0.62),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ColorSection extends StatelessWidget {

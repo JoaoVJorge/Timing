@@ -1179,7 +1179,7 @@ class _ActivityOverviewCard extends StatelessWidget {
                   child: _ActivityDataTile(
                     icon: Icons.coffee_outlined,
                     label: context.l10n.groupActivityPauseDataLabel,
-                    value: "${header.restMinutes} min",
+                    value: _formatRestSeconds(_restSeconds(header.restMinutes)),
                   ),
                 ),
                 _MetricDivider(),
@@ -1198,6 +1198,10 @@ class _ActivityOverviewCard extends StatelessWidget {
     );
   }
 }
+
+int _restSeconds(int value) => value <= 20 ? value * 60 : value;
+
+String _formatRestSeconds(int seconds) => "${seconds}s";
 
 class _ParticipantsProgressCard extends StatelessWidget {
   const _ParticipantsProgressCard({

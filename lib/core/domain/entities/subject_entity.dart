@@ -48,7 +48,7 @@ class SubjectEntity extends Equatable {
     goalPages: map["goalPages"] as int? ?? 0,
     notes: map["notes"] as String? ?? "",
     iconName: map["iconName"] as String? ?? "",
-    restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
+    restMinutes: map["restMinutes"] as int? ?? defaultRestSeconds,
     focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
     activityType: SubjectActivityType.fromName(map["activityType"] as String?),
@@ -58,7 +58,8 @@ class SubjectEntity extends Equatable {
         : map["groupId"] as String?,
   );
 
-  static const int defaultRestMinutes = 5;
+  static const int defaultRestSeconds = 60;
+  static const int defaultRestMinutes = defaultRestSeconds;
 
   final String id;
   final String name;
@@ -91,6 +92,10 @@ class SubjectEntity extends Equatable {
   /// The day's total study goal: each session runs [goalSeconds], so a "2x30"
   /// subject targets 60 minutes, not 30.
   int get totalGoalSeconds => goalSeconds * sessionCount;
+
+  /// Legacy data stored break duration in minutes in this field. New subjects
+  /// store seconds, so small saved values are upgraded at read/use time.
+  int get restSeconds => restMinutes <= 20 ? restMinutes * 60 : restMinutes;
 
   Map<String, dynamic> toMap() => {
     "id": id,

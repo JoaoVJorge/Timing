@@ -13,7 +13,7 @@ class GroupActivityProgressEntity extends Equatable {
     required this.target,
     required this.reached,
     this.focusSeconds = 0,
-    this.restMinutes = 5,
+    this.restMinutes = 60,
     this.focusSessionCount = 1,
   });
 
@@ -33,7 +33,7 @@ class GroupActivityProgressEntity extends Equatable {
         restMinutes:
             (map["rest_minutes"] as num?)?.toInt() ??
             (map["restMinutes"] as num?)?.toInt() ??
-            5,
+            60,
         focusSessionCount:
             (map["focus_session_count"] as num?)?.toInt() ??
             (map["focusSessionCount"] as num?)?.toInt() ??

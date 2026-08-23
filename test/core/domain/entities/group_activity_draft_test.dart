@@ -12,7 +12,7 @@ void main() {
         goalSeconds: 1800,
         goalPages: 0,
         iconName: "studing",
-        restMinutes: 5,
+        restMinutes: 60,
         focusSessionCount: 2,
         wallpaperIndex: 3,
       );
@@ -25,7 +25,7 @@ void main() {
         "goal_seconds": 1800,
         "goal_pages": 0,
         "icon_name": "studing",
-        "rest_minutes": 5,
+        "rest_minutes": 60,
         "focus_session_count": 2,
         "wallpaper_index": 3,
         "activity_type": "daily",

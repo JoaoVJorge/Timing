@@ -44,6 +44,10 @@ class CreateGroupController extends GetxController
   final TextEditingController friendSearchController = TextEditingController();
   final TextEditingController activityNameController = TextEditingController();
   final TextEditingController activityGoalController = TextEditingController();
+  @override
+  final TextEditingController restMinutesController = TextEditingController(
+    text: SubjectEntity.defaultRestSeconds.toString(),
+  );
 
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
@@ -104,7 +108,7 @@ class CreateGroupController extends GetxController
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
   @override
-  List<int> get restMinutesOptions => const [5, 10, 15, 20];
+  List<int> get restMinutesOptions => const [30, 60, 90];
 
   @override
   List<int> get focusSessionCountOptions => const [1, 2, 3];
@@ -162,6 +166,12 @@ class CreateGroupController extends GetxController
     activityGoalController.addListener(() {
       activityGoal.value = activityGoalController.text;
       _refreshCanCreate();
+    });
+    restMinutesController.addListener(() {
+      final int? seconds = int.tryParse(restMinutesController.text.trim());
+      if (seconds != null && seconds > 0) {
+        restMinutes.value = seconds;
+      }
     });
     loadFriends();
   }
@@ -275,6 +285,7 @@ class CreateGroupController extends GetxController
   @override
   void setRestMinutes(int minutes) {
     restMinutes.value = minutes;
+    restMinutesController.text = minutes.toString();
   }
 
   @override
@@ -504,6 +515,7 @@ class CreateGroupController extends GetxController
     friendSearchController.dispose();
     activityNameController.dispose();
     activityGoalController.dispose();
+    restMinutesController.dispose();
     super.onClose();
   }
 }
