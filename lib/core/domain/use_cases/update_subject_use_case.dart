@@ -19,7 +19,7 @@ class UpdateSubjectUseCase {
     required int focusSessionCount,
     required int wallpaperIndex,
     required SubjectActivityType activityType,
-  }) async {
+  }) => subjectsRepository.runSerializedMutation(() async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await subjectsRepository.getSubjects();
 
@@ -57,5 +57,5 @@ class UpdateSubjectUseCase {
           .saveSubjects(updatedSubjects);
       return saveResult.fold(Left.new, (_) => Right(updatedSubject!));
     });
-  }
+  });
 }

@@ -13,6 +13,10 @@ class _FakeSubjectsRepository implements SubjectsRepository {
   List<SubjectEntity>? savedSubjects;
 
   @override
+  Future<T> runSerializedMutation<T>(Future<T> Function() mutation) =>
+      mutation();
+
+  @override
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async =>
       Right(_subjects);
 
