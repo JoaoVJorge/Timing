@@ -159,6 +159,7 @@ class _HomeActionCardSection extends StatelessWidget {
         meta: activity == null
             ? null
             : formatRelativeTime(context, activity.timestamp),
+        leadingIconName: resumable.category.iconName,
         actionIconName: "play",
         onTap: controller.onContinue,
       );
@@ -170,6 +171,7 @@ class _HomeActionCardSection extends StatelessWidget {
         eyebrow: context.l10n.homeActionStartEyebrow,
         title: suggested.name,
         meta: context.l10n.homeActionSuggestedMeta,
+        leadingIconName: suggested.category.iconName,
         actionIconName: "play",
         onTap: controller.onStartSuggested,
       );

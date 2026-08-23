@@ -13,6 +13,7 @@ class HomeActionCard extends StatelessWidget {
     required this.title,
     required this.actionIconName,
     required this.onTap,
+    this.leadingIconName = "graduate",
     this.meta,
     super.key,
   });
@@ -20,6 +21,7 @@ class HomeActionCard extends StatelessWidget {
   final String eyebrow;
   final String title;
   final String? meta;
+  final String leadingIconName;
   final String actionIconName;
   final VoidCallback onTap;
 
@@ -64,8 +66,8 @@ class HomeActionCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
-                      child: Icon(
-                        Icons.school_rounded,
+                      child: AppIcon(
+                        leadingIconName,
                         size: 17,
                         color: Colors.white,
                       ),
