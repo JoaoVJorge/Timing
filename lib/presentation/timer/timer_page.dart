@@ -721,6 +721,7 @@ class _TimerViewData {
           ? "${controller.currentActivityPages}"
           : _formatRestDuration(
               Duration(seconds: controller.restIntervalSeconds),
+              controller.subject.category,
             ),
       focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
@@ -770,8 +771,12 @@ class _TimerViewData {
   static String _nextBreakDurationLabel(BuildContext context) =>
       context.l10n.nextBreakDurationLabel;
 
-  static String _formatRestDuration(Duration duration) =>
-      formatDurationLong(duration);
+  static String _formatRestDuration(
+    Duration duration,
+    TimeCategoryType category,
+  ) => category == TimeCategoryType.exercises
+      ? formatDurationTotalSeconds(duration)
+      : formatDurationTotalMinutes(duration);
 
   final TimerVisualState state;
   final String subjectName;

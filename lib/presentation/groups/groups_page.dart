@@ -8,6 +8,7 @@ import "package:timing/core/domain/entities/group_activity_progress_entity.dart"
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -1179,7 +1180,11 @@ class _ActivityOverviewCard extends StatelessWidget {
                   child: _ActivityDataTile(
                     icon: Icons.coffee_outlined,
                     label: context.l10n.groupActivityPauseDataLabel,
-                    value: _formatRestSeconds(_restSeconds(header.restMinutes)),
+                    value: _formatRestValue(
+                      context,
+                      group.theme,
+                      header.restMinutes,
+                    ),
                   ),
                 ),
                 _MetricDivider(),
@@ -1199,9 +1204,14 @@ class _ActivityOverviewCard extends StatelessWidget {
   }
 }
 
-int _restSeconds(int value) => value <= 20 ? value * 60 : value;
-
-String _formatRestSeconds(int seconds) => "${seconds}s";
+String _formatRestValue(BuildContext context, GroupThemeType theme, int value) {
+  if (theme == GroupThemeType.exercises) {
+    final int seconds = value <= 20 ? value * 60 : value;
+    return "${seconds}s";
+  }
+  final int minutes = value > 0 ? value : SubjectEntity.defaultRestMinutes;
+  return context.l10n.restMinutesChip(minutes);
+}
 
 class _ParticipantsProgressCard extends StatelessWidget {
   const _ParticipantsProgressCard({

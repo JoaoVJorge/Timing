@@ -44,9 +44,7 @@ class CreateSubjectController extends GetxController
   @override
   final TextEditingController goalController = TextEditingController();
   @override
-  final TextEditingController restMinutesController = TextEditingController(
-    text: SubjectEntity.defaultRestMinutes.toString(),
-  );
+  final TextEditingController restMinutesController = TextEditingController();
   final TextEditingController focusSessionCountController =
       TextEditingController(text: "1");
 
@@ -60,7 +58,7 @@ class CreateSubjectController extends GetxController
   bool _hasInitializedThemeColor = false;
 
   @override
-  final RxInt restMinutes = SubjectEntity.defaultRestMinutes.obs;
+  late final RxInt restMinutes = _defaultRestValue.obs;
   @override
   final RxInt focusSessionCount = 1.obs;
   @override
@@ -73,7 +71,8 @@ class CreateSubjectController extends GetxController
   final RxString goal = "".obs;
 
   @override
-  final List<int> restMinutesOptions = [30, 60, 90];
+  List<int> get restMinutesOptions =>
+      category == TimeCategoryType.exercises ? [30, 60, 90] : [5, 10, 15];
   @override
   final List<int> focusSessionCountOptions = [1, 2, 3];
   @override
@@ -86,6 +85,9 @@ class CreateSubjectController extends GetxController
   @override
   bool get isPageBased => category == TimeCategoryType.reading;
   bool get isEditing => editingSubject != null;
+  int get _defaultRestValue => category == TimeCategoryType.exercises
+      ? SubjectEntity.defaultRestSeconds
+      : SubjectEntity.defaultRestMinutes;
 
   @override
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
@@ -225,8 +227,12 @@ class CreateSubjectController extends GetxController
       selectedIconName.value = subject.iconName.isEmpty
           ? SubjectIcons.suggestionsFor(category).first
           : subject.iconName;
-      restMinutes.value = subject.restSeconds;
-      restMinutesController.text = subject.restSeconds.toString();
+      restMinutes.value = category == TimeCategoryType.exercises
+          ? subject.restSeconds
+          : subject.restMinutes > 0
+          ? subject.restMinutes
+          : SubjectEntity.defaultRestMinutes;
+      restMinutesController.text = restMinutes.value.toString();
       focusSessionCount.value = subject.focusSessionCount;
       focusSessionCountController.text = subject.focusSessionCount.toString();
       wallpaperIndex.value = subject.wallpaperIndex;
@@ -248,6 +254,8 @@ class CreateSubjectController extends GetxController
         goalController.text = "30";
         goal.value = goalController.text;
       }
+      restMinutes.value = _defaultRestValue;
+      restMinutesController.text = _defaultRestValue.toString();
     }
     nameController.addListener(() => name.value = nameController.text);
     goalController.addListener(() => goal.value = goalController.text);

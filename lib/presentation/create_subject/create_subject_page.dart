@@ -430,6 +430,7 @@ class _RestSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color accent = controller.selectedColor.value;
+    final bool usesSeconds = controller.category == TimeCategoryType.exercises;
 
     return CreationConfigCard(
       accent: accent,
@@ -442,16 +443,22 @@ class _RestSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _RestInput(controller: controller, accent: accent),
-          const Gap(12),
+          if (usesSeconds) ...[
+            _RestInput(controller: controller, accent: accent),
+            const Gap(12),
+          ],
           _PresetRow(
             children: controller.restMinutesOptions
                 .map(
-                  (seconds) => CreationSelectableChip(
-                    label: _formatRestSeconds(seconds),
-                    isSelected: controller.restMinutes.value == seconds,
+                  (value) => CreationSelectableChip(
+                    label: _formatRestValue(
+                      context,
+                      value,
+                      usesSeconds: usesSeconds,
+                    ),
+                    isSelected: controller.restMinutes.value == value,
                     accent: accent,
-                    onTap: () => controller.setRestMinutes(seconds),
+                    onTap: () => controller.setRestMinutes(value),
                   ),
                 )
                 .toList(),
@@ -462,7 +469,11 @@ class _RestSection extends StatelessWidget {
   });
 }
 
-String _formatRestSeconds(int seconds) => "${seconds}s";
+String _formatRestValue(
+  BuildContext context,
+  int value, {
+  required bool usesSeconds,
+}) => usesSeconds ? "${value}s" : context.l10n.restMinutesChip(value);
 
 class _RestInput extends StatelessWidget {
   const _RestInput({required this.controller, required this.accent});

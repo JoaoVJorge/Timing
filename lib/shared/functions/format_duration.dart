@@ -15,6 +15,9 @@ String formatDurationLong(Duration duration) {
 String formatDurationTotalMinutes(Duration duration) =>
     "${duration.inMinutes} min";
 
+String formatDurationTotalSeconds(Duration duration) =>
+    "${duration.inSeconds}s";
+
 String formatDurationClock(Duration duration) {
   final int minutes = duration.inMinutes.remainder(60);
   final int seconds = duration.inSeconds.remainder(60);

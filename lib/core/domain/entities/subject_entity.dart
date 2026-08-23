@@ -48,7 +48,7 @@ class SubjectEntity extends Equatable {
     goalPages: map["goalPages"] as int? ?? 0,
     notes: map["notes"] as String? ?? "",
     iconName: map["iconName"] as String? ?? "",
-    restMinutes: map["restMinutes"] as int? ?? defaultRestSeconds,
+    restMinutes: map["restMinutes"] as int? ?? defaultRestMinutes,
     focusSessionCount: map["focusSessionCount"] as int? ?? 1,
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
     activityType: SubjectActivityType.fromName(map["activityType"] as String?),
@@ -59,7 +59,7 @@ class SubjectEntity extends Equatable {
   );
 
   static const int defaultRestSeconds = 60;
-  static const int defaultRestMinutes = defaultRestSeconds;
+  static const int defaultRestMinutes = 5;
 
   final String id;
   final String name;
@@ -93,9 +93,19 @@ class SubjectEntity extends Equatable {
   /// subject targets 60 minutes, not 30.
   int get totalGoalSeconds => goalSeconds * sessionCount;
 
-  /// Legacy data stored break duration in minutes in this field. New subjects
-  /// store seconds, so small saved values are upgraded at read/use time.
-  int get restSeconds => restMinutes <= 20 ? restMinutes * 60 : restMinutes;
+  /// Exercises store break duration in seconds. Other activity categories keep
+  /// the original minute-based value.
+  int get restSeconds {
+    if (restMinutes <= 0) {
+      return category == TimeCategoryType.exercises
+          ? defaultRestSeconds
+          : defaultRestMinutes * 60;
+    }
+    if (category == TimeCategoryType.exercises) {
+      return restMinutes;
+    }
+    return restMinutes * 60;
+  }
 
   Map<String, dynamic> toMap() => {
     "id": id,

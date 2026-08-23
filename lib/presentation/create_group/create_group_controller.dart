@@ -45,9 +45,7 @@ class CreateGroupController extends GetxController
   final TextEditingController activityNameController = TextEditingController();
   final TextEditingController activityGoalController = TextEditingController();
   @override
-  final TextEditingController restMinutesController = TextEditingController(
-    text: SubjectEntity.defaultRestSeconds.toString(),
-  );
+  final TextEditingController restMinutesController = TextEditingController();
 
   final RxList<FriendOption> availableFriends = <FriendOption>[].obs;
   final RxSet<String> selectedFriendIds = <String>{}.obs;
@@ -108,7 +106,9 @@ class CreateGroupController extends GetxController
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);
 
   @override
-  List<int> get restMinutesOptions => const [30, 60, 90];
+  List<int> get restMinutesOptions => category == TimeCategoryType.exercises
+      ? const [30, 60, 90]
+      : const [5, 10, 15];
 
   @override
   List<int> get focusSessionCountOptions => const [1, 2, 3];
@@ -139,6 +139,10 @@ class CreateGroupController extends GetxController
   bool get hasValidActivityGoal =>
       (int.tryParse(activityGoal.value.trim()) ?? 0) > 0;
 
+  int get _defaultRestValue => category == TimeCategoryType.exercises
+      ? SubjectEntity.defaultRestSeconds
+      : SubjectEntity.defaultRestMinutes;
+
   bool get hasActivity =>
       activityName.value.trim().isNotEmpty && hasValidActivityGoal;
 
@@ -168,11 +172,12 @@ class CreateGroupController extends GetxController
       _refreshCanCreate();
     });
     restMinutesController.addListener(() {
-      final int? seconds = int.tryParse(restMinutesController.text.trim());
-      if (seconds != null && seconds > 0) {
-        restMinutes.value = seconds;
+      final int? value = int.tryParse(restMinutesController.text.trim());
+      if (value != null && value > 0) {
+        restMinutes.value = value;
       }
     });
+    _setDefaultRestForCategory();
     loadFriends();
   }
 
@@ -209,7 +214,13 @@ class CreateGroupController extends GetxController
   void onSelectTheme(GroupThemeType theme) {
     selectedTheme.value = theme;
     _applyThemeActivityDefaults(forceIcon: true);
+    _setDefaultRestForCategory();
     _refreshCanCreate();
+  }
+
+  void _setDefaultRestForCategory() {
+    restMinutes.value = _defaultRestValue;
+    restMinutesController.text = _defaultRestValue.toString();
   }
 
   void _applyThemeActivityDefaults({bool forceIcon = false}) {

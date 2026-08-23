@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/category/widgets/subject_icon_badge.dart";
 import "package:timing/presentation/subject_stats/subject_stats_controller.dart";
@@ -184,7 +185,7 @@ class _StatsGrid extends StatelessWidget {
             ),
             _StatItem(
               icon: Icons.local_cafe_rounded,
-              value: "${subject.restSeconds}s",
+              value: _restValue(context, subject),
               label: _restLabel(context),
             ),
           ];
@@ -208,6 +209,11 @@ class _StatsGrid extends StatelessWidget {
       },
     );
   }
+
+  String _restValue(BuildContext context, SubjectEntity subject) =>
+      subject.category == TimeCategoryType.exercises
+      ? "${subject.restSeconds}s"
+      : formatDurationTotalMinutes(Duration(seconds: subject.restSeconds));
 }
 
 class _StatTile extends StatelessWidget {

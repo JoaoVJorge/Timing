@@ -11,4 +11,10 @@ void main() {
     );
     expect(formatDurationLong(const Duration(minutes: 45)), "45 min");
   });
+
+  test("formatDurationTotalSeconds keeps rest durations in seconds", () {
+    expect(formatDurationTotalSeconds(const Duration(seconds: 30)), "30s");
+    expect(formatDurationTotalSeconds(const Duration(seconds: 60)), "60s");
+    expect(formatDurationTotalSeconds(const Duration(seconds: 90)), "90s");
+  });
 }
