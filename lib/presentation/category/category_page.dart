@@ -12,6 +12,7 @@ import "package:timing/presentation/category/widgets/subject_tile.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
 import "package:timing/theme/app_spacing.dart";
@@ -30,6 +31,10 @@ class CategoryPage extends StatelessWidget {
       ),
       body: Obx(() {
         final List<SubjectEntity> subjects = controller.subjects;
+
+        if (controller.isLoading.value && subjects.isEmpty) {
+          return const _CategoryLoadingSkeleton();
+        }
 
         if (subjects.isEmpty) {
           return Center(
@@ -123,6 +128,52 @@ class CategoryPage extends StatelessWidget {
       }),
     );
   }
+}
+
+class _CategoryLoadingSkeleton extends StatelessWidget {
+  const _CategoryLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) => AppSkeleton(
+    child: ListView.separated(
+      padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+      itemCount: 4,
+      separatorBuilder: (context, index) => const Gap(12),
+      itemBuilder: (context, index) => const _SkeletonSubjectTile(),
+    ),
+  );
+}
+
+class _SkeletonSubjectTile extends StatelessWidget {
+  const _SkeletonSubjectTile();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: const Row(
+      children: [
+        AppSkeletonCircle(size: 44),
+        Gap(12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppSkeletonBox(height: 16, radius: 7),
+              Gap(8),
+              AppSkeletonBox(width: 148, height: 13, radius: 6),
+            ],
+          ),
+        ),
+        Gap(12),
+        AppSkeletonCircle(size: 38),
+      ],
+    ),
+  );
 }
 
 String _emptyTitle(BuildContext context, TimeCategoryType category) =>
