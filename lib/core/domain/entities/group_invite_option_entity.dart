@@ -40,6 +40,18 @@ class GroupInviteOptionEntity extends Equatable {
   bool get isInvited => status == GroupInviteStatus.invited;
   bool get isMember => status == GroupInviteStatus.member;
 
+  GroupInviteOptionEntity copyWith({
+    GroupInviteStatus? status,
+    String? invitationId,
+    bool clearInvitationId = false,
+  }) => GroupInviteOptionEntity(
+    friendId: friendId,
+    friendName: friendName,
+    accentColorValue: accentColorValue,
+    status: status ?? this.status,
+    invitationId: clearInvitationId ? null : invitationId ?? this.invitationId,
+  );
+
   @override
   List<Object?> get props => [
     friendId,

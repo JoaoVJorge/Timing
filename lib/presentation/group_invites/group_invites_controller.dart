@@ -7,6 +7,8 @@ import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/presentation/friends/friends_controller.dart";
+import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 
 class GroupInvitesController extends GetxController {
   GroupInvitesController({
@@ -42,18 +44,22 @@ class GroupInvitesController extends GetxController {
     isLoading.value = false;
   }
 
-  Future<void> loadOptions() async {
+  Future<void> loadOptions({bool showLoading = true}) async {
     if (group.id.isEmpty) {
       return;
     }
-    isLoading.value = true;
+    if (showLoading) {
+      isLoading.value = true;
+    }
     final Either<AppError, List<GroupInviteOptionEntity>> result =
         await groupsRepository.getGroupInviteOptions(group.id);
     result.fold(
       (_) => appNavigator.showErrorSnackBar(),
       (value) => options.assignAll(value),
     );
-    isLoading.value = false;
+    if (showLoading) {
+      isLoading.value = false;
+    }
   }
 
   Future<void> onTapOption(GroupInviteOptionEntity option) async {
@@ -90,12 +96,39 @@ class GroupInvitesController extends GetxController {
           );
     updatingFriendIds.remove(option.friendId);
 
-    result.fold((_) => appNavigator.showErrorSnackBar(), (_) {
+    await result.fold((_) async => appNavigator.showErrorSnackBar(), (_) async {
+      _updateOptionState(
+        option,
+        option.isInvited
+            ? GroupInviteStatus.available
+            : GroupInviteStatus.invited,
+      );
       appNavigator.showSuccessSnackBar(
         option.isInvited ? "Convite cancelado." : "Convite enviado.",
       );
-      loadOptions();
+
+      await Future.wait([
+        loadOptions(showLoading: false),
+        if (Get.isRegistered<FriendsController>())
+          Get.find<FriendsController>().refreshGroupInvitations(),
+      ]);
     });
+  }
+
+  void _updateOptionState(
+    GroupInviteOptionEntity option,
+    GroupInviteStatus status,
+  ) {
+    final int index = options.indexWhere(
+      (item) => item.friendId == option.friendId,
+    );
+    if (index < 0) {
+      return;
+    }
+    options[index] = option.copyWith(
+      status: status,
+      clearInvitationId: status == GroupInviteStatus.available,
+    );
   }
 
   Future<bool> _confirm({
@@ -104,27 +137,14 @@ class GroupInvitesController extends GetxController {
     required String confirmLabel,
     required bool isDestructive,
   }) async {
-    final bool? confirmed = await appNavigator.dialog<bool>(
-      child: AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => appNavigator.back<bool>(result: false),
-            child: const Text("Voltar"),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: isDestructive
-                  ? Get.context?.theme.colorScheme.error
-                  : null,
-            ),
-            onPressed: () => appNavigator.back<bool>(result: true),
-            child: Text(confirmLabel),
-          ),
-        ],
-      ),
+    return showAppConfirmationDialog(
+      title: title,
+      message: content,
+      confirmLabel: confirmLabel,
+      icon: isDestructive
+          ? Icons.mail_outline_rounded
+          : Icons.person_add_alt_1_rounded,
+      isDestructive: isDestructive,
     );
-    return confirmed ?? false;
   }
 }

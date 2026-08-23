@@ -116,6 +116,10 @@ class FriendsController extends GetxController {
     );
   }
 
+  Future<void> refreshGroupInvitations() async {
+    await Future.wait([_loadGroupInvitations(), _loadSentGroupInvitations()]);
+  }
+
   Future<void> acceptGroupInvitation(GroupInvitationEntity invitation) async {
     final result = await _acceptGroupInvitationUseCase(invitation.id);
     await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
@@ -282,8 +286,9 @@ class FriendsController extends GetxController {
     );
   }
 
-  void openGroupInvitationsPage() {
-    Get.to<void>(() => const GroupInvitationsPage());
+  Future<void> openGroupInvitationsPage() async {
+    await refreshGroupInvitations();
+    await Get.to<void>(() => const GroupInvitationsPage());
   }
 
   AppLocalizations? get _l10n {
