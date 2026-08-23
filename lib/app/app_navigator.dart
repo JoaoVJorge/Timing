@@ -102,7 +102,12 @@ class AppNavigator {
     void show() {
       _closeCurrentSnackBar();
       Get.rawSnackbar(
-        messageText: Text(text, style: context.textStyles.textPrimaryButton),
+        messageText: Text(
+          text,
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.textPrimaryButton,
+        ),
         margin: const EdgeInsets.only(top: 12, right: 20, left: 20),
         padding: const EdgeInsets.all(16),
         borderRadius: 8,
