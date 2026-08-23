@@ -84,6 +84,13 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> onEditTask(DailyTaskEntity task) async {
+    if (task.isFromGroup) {
+      _appNavigator.showErrorSnackBar(
+        "Esta meta é de um grupo. Edite pelo grupo para alterar.",
+      );
+      return;
+    }
+
     final dynamic result = await _appNavigator.toNamed(
       AppRoutes.createTask,
       arguments: task,

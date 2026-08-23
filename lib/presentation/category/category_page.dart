@@ -104,6 +104,7 @@ class CategoryPage extends StatelessWidget {
             final Color subjectColor = Color(subject.colorValue);
             return NotebookSwipeTile(
               accent: subjectColor,
+              isEditLocked: subject.isFromGroup,
               isDeleteLocked: subject.isFromGroup,
               onTapNotes: () => controller.onTapNotes(subject),
               onTapStats: () => controller.onTapSubjectStats(subject),

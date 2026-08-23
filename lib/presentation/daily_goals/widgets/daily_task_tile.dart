@@ -60,6 +60,7 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
           iconData: Icons.edit_rounded,
           background: context.colorTokens.surface,
           iconColor: taskColor,
+          locked: widget.task.isFromGroup,
           onTap: widget.onEdit,
         ),
         SwipeRevealAction(

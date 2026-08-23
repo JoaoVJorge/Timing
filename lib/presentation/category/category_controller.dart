@@ -114,6 +114,13 @@ class CategoryController extends GetxController {
   }
 
   Future<void> onTapEditSubject(SubjectEntity subject) async {
+    if (subject.isFromGroup) {
+      _appNavigator.showErrorSnackBar(
+        "Esta atividade é de um grupo. Edite pelo grupo para alterar.",
+      );
+      return;
+    }
+
     final dynamic result = await _appNavigator.toNamed(
       AppRoutes.createSubject,
       arguments: subject,

@@ -13,6 +13,7 @@ class NotebookSwipeTile extends StatefulWidget {
     required this.onTapStats,
     required this.onTapEdit,
     required this.onDelete,
+    this.isEditLocked = false,
     this.isDeleteLocked = false,
     super.key,
   });
@@ -23,6 +24,7 @@ class NotebookSwipeTile extends StatefulWidget {
   final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
   final VoidCallback onDelete;
+  final bool isEditLocked;
   final bool isDeleteLocked;
 
   @override
@@ -138,8 +140,13 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                   children: [
                     _RevealAction(
                       iconData: Icons.edit_rounded,
-                      color: context.colorTokens.surface,
-                      iconColor: widget.accent,
+                      color: widget.isEditLocked
+                          ? context.colorTokens.surfaceInnerLayer
+                          : context.colorTokens.surface,
+                      iconColor: widget.isEditLocked
+                          ? context.colorTokens.textHint
+                          : widget.accent,
+                      showLock: widget.isEditLocked,
                       onTap: _onTapEdit,
                     ),
                     const SizedBox(width: _RevealAction.gap),

@@ -257,6 +257,7 @@ class _HobbyOptionsSheet extends StatelessWidget {
                     icon: Icons.edit_rounded,
                     label: context.l10n.hobbyEdit,
                     accent: accent,
+                    isLocked: subject.isFromGroup,
                     onTap: () => onAction("edit"),
                   ),
                   Divider(height: 1, color: context.colorTokens.divider),
@@ -310,6 +311,7 @@ class _HobbySheetAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
+    this.isLocked = false,
     this.onTap,
     this.trailing,
   });
@@ -317,41 +319,68 @@ class _HobbySheetAction extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color accent;
+  final bool isLocked;
   final VoidCallback? onTap;
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onTap: onTap,
-    child: Container(
-      height: 58,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          _HobbySheetIcon(
-            color: accent.withValues(alpha: 0.12),
-            child: Icon(icon, color: accent, size: 22),
-          ),
-          const Gap(12),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.dialogText,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final Color actionColor = isLocked ? context.colorTokens.textHint : accent;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        height: 58,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _HobbySheetIcon(
+                  color: actionColor.withValues(alpha: 0.12),
+                  child: Icon(icon, color: actionColor, size: 22),
+                ),
+                if (isLocked)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: GroupActivityLockBadge(
+                      size: 20,
+                      iconSize: 12,
+                      backgroundColor: context.colorTokens.surface,
+                      iconColor: actionColor,
+                    ),
+                  ),
+              ],
+            ),
+            const Gap(12),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge.copyWith(
+                  color: isLocked
+                      ? context.colorTokens.textHint
+                      : context.colorTokens.dialogText,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
-          ),
-          trailing ??
-              Icon(Icons.chevron_right_rounded, color: accent, size: 28),
-        ],
+            trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: actionColor,
+                  size: 28,
+                ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _HobbyDeleteAction extends StatelessWidget {
