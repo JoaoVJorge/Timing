@@ -6,6 +6,7 @@ import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/groups/groups_controller.dart";
 
 class JoinGroupController extends GetxController {
   JoinGroupController(this._groupsRepository, this._appNavigator);
@@ -28,9 +29,15 @@ class JoinGroupController extends GetxController {
         .joinGroupByInviteCode(code);
     isLoading.value = false;
 
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(context.l10n.joinGroupError),
-      (group) => _appNavigator.back<GroupEntity>(result: group),
+    await result.fold(
+      (error) async =>
+          _appNavigator.showErrorSnackBar(context.l10n.joinGroupError),
+      (group) async {
+        if (Get.isRegistered<GroupsController>()) {
+          await Get.find<GroupsController>().upsertJoinedGroup(group);
+        }
+        _appNavigator.back<GroupEntity>(result: group);
+      },
     );
   }
 

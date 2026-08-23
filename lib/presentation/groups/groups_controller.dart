@@ -19,6 +19,7 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
@@ -475,6 +476,18 @@ class GroupsController extends GetxController {
   Future<void> _invalidateActivityCaches() async {
     await _localStorageService.delete(LocalStorageKeys.subjects);
     await _localStorageService.delete(LocalStorageKeys.dailyTasks);
+    await _reloadVisibleActivityControllers();
+  }
+
+  Future<void> _reloadVisibleActivityControllers() async {
+    final List<Future<void>> reloads = [];
+    if (Get.isRegistered<CategoryController>()) {
+      reloads.add(Get.find<CategoryController>().loadSubjects());
+    }
+    if (Get.isRegistered<DailyGoalsController>()) {
+      reloads.add(Get.find<DailyGoalsController>().loadTasks());
+    }
+    await Future.wait(reloads);
   }
 
   /// Friends live next to Groups: both answer "how am I doing with others?".
