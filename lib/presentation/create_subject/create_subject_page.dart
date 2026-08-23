@@ -322,7 +322,7 @@ class _GoalInput extends StatelessWidget {
       child: Row(
         children: [
           controller.isPageBased
-              ? AppIcon("book", color: accent, size: 20)
+              ? AppIcon("open-book", color: accent, size: 20)
               : Icon(Icons.access_time_rounded, color: accent, size: 20),
           const Gap(12),
           Expanded(

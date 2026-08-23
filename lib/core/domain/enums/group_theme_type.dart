@@ -4,10 +4,10 @@ enum GroupMetricUnit { hours, days, pages }
 /// The five themes a group can be built around. Each mirrors a home category
 /// (plus daily goals) and defines how members are ranked against each other.
 enum GroupThemeType {
-  studying(iconName: "studing", unit: GroupMetricUnit.hours),
+  studying(iconName: "graduate", unit: GroupMetricUnit.hours),
   dailyGoals(iconName: "trophy", unit: GroupMetricUnit.days),
   exercises(iconName: "bicycle", unit: GroupMetricUnit.hours),
-  reading(iconName: "book", unit: GroupMetricUnit.pages),
+  reading(iconName: "open-book", unit: GroupMetricUnit.pages),
   hobbies(iconName: "guitar", unit: GroupMetricUnit.hours);
 
   const GroupThemeType({required this.iconName, required this.unit});
