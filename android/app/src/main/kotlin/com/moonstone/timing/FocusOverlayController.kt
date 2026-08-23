@@ -181,15 +181,14 @@ object FocusOverlayController {
 
     private fun advanceCycle() {
         if (isResting) {
+            if (currentFocusSection >= totalFocusSections) {
+                hide()
+                return
+            }
             isResting = false
             currentFocusSection = nextFocusSection()
             remainingSeconds = focusIntervalSeconds
             applyState(accentColor)
-            return
-        }
-
-        if (currentFocusSection >= totalFocusSections) {
-            hide()
             return
         }
 

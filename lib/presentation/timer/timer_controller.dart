@@ -173,7 +173,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       const Duration(seconds: 1),
       (timer) => unawaited(_tick()),
     );
-    _updateNotification();
+    unawaited(_ensureTimerNotifications());
     _syncFocusGuard();
     unawaited(_ensureOverlayPermission());
     analyticsService.track(
@@ -254,11 +254,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       unawaited(focusFeedbackService.playFocusFinishedFeedback());
     }
 
-    if (completedFocusSections.value >= focusSessionCount) {
-      finishSession();
-      return;
-    }
-
     isResting.value = true;
     restCountdownSeconds.value = restIntervalSeconds;
     _updateNotification();
@@ -267,11 +262,15 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void _finishRestPeriod({bool playFeedback = true}) {
     isResting.value = false;
-    isRunning.value = true;
-    breakCountdownSeconds.value = focusIntervalSeconds;
     if (playFeedback && _isAppInForeground && !_isCatchingUpAfterBackground) {
       unawaited(focusFeedbackService.playFocusFinishedFeedback());
     }
+    if (completedFocusSections.value >= focusSessionCount) {
+      finishSession();
+      return;
+    }
+    isRunning.value = true;
+    breakCountdownSeconds.value = focusIntervalSeconds;
     _updateNotification();
     _syncFocusGuard();
   }
@@ -619,6 +618,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         context?.l10n.timerNotificationResting ?? "Descansando - volta já";
     final String pausedBody =
         context?.l10n.timerNotificationPaused ?? "Pausado";
+    final String backgroundRunningBody = _isAppInForeground
+        ? runningBody
+        : "$runningBody · App em segundo plano";
+    final String backgroundRestingBody = _isAppInForeground
+        ? restingBody
+        : "$restingBody · App em segundo plano";
 
     if (!isRunning.value) {
       timerNotificationService.cancelScheduledAlarms();
@@ -632,7 +637,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (isResting.value) {
       timerNotificationService.showStatic(
         title: subject.name,
-        body: restingBody,
+        body: backgroundRestingBody,
       );
       return;
     }
@@ -640,11 +645,24 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     timerNotificationService.cancelRestFinished();
     timerNotificationService.showRunning(
       title: subject.name,
-      body: runningBody,
+      body: backgroundRunningBody,
       startedAt: DateTime.now().subtract(
         Duration(seconds: sessionSeconds.value),
       ),
     );
+  }
+
+  Future<void> _ensureTimerNotifications() async {
+    if (!appController.notificationsEnabled.value) {
+      await appController.setNotificationsEnabled(true);
+    }
+    if (isSessionFinished.value) {
+      return;
+    }
+    _updateNotification();
+    if (!_isAppInForeground) {
+      _scheduleBackgroundTimeline();
+    }
   }
 
   void _scheduleBackgroundTimeline() {
@@ -794,11 +812,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
+      final bool wasInForeground = _isAppInForeground;
       _isAppInForeground = false;
       _persistAccumulatedTime();
       _recordLastActivityIfNeeded();
       _updateNotification();
-      _scheduleBackgroundTimeline();
+      if (wasInForeground) {
+        _scheduleBackgroundTimeline();
+      }
       _showOverlay();
     }
   }

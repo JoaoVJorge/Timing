@@ -103,6 +103,8 @@ class _FakeTimerNotificationService extends _Noop
   int scheduleRestFinishedCount = 0;
   int scheduleSessionTimelineCount = 0;
   int cancelOngoingCount = 0;
+  int cancelCount = 0;
+  int showRunningCount = 0;
 
   @override
   Future<void> cancelFocusFinished() async {
@@ -163,7 +165,9 @@ class _FakeTimerNotificationService extends _Noop
     required String title,
     required String body,
     required DateTime startedAt,
-  }) async {}
+  }) async {
+    showRunningCount++;
+  }
 
   @override
   Future<void> showStatic({
@@ -172,7 +176,9 @@ class _FakeTimerNotificationService extends _Noop
   }) async {}
 
   @override
-  Future<void> cancel() async {}
+  Future<void> cancel() async {
+    cancelCount++;
+  }
 }
 
 class _FakeTimerLiveActivityService extends _Noop
@@ -238,12 +244,24 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
 
 class _FakeAppController extends _Noop implements AppController {
-  _FakeAppController({this.focusLockEnabled = false});
+  _FakeAppController({
+    this.focusLockEnabled = false,
+    bool notificationsEnabled = true,
+  }) : notificationsEnabled = notificationsEnabled.obs;
 
   final bool focusLockEnabled;
+  int enableNotificationsCount = 0;
 
   @override
-  final RxBool notificationsEnabled = true.obs;
+  final RxBool notificationsEnabled;
+
+  @override
+  Future<void> setNotificationsEnabled(bool value) async {
+    notificationsEnabled.value = value;
+    if (value) {
+      enableNotificationsCount++;
+    }
+  }
 
   @override
   bool isFocusLockEnabledFor(TimeCategoryType category) => focusLockEnabled;
@@ -327,22 +345,51 @@ void main() {
   });
 
   group("TimerController rest interval", () {
-    test("uses the subject rest seconds when stored as seconds", () {
-      final controller = _controller(_subject(restMinutes: 30));
+    test("uses rest seconds for exercises", () {
+      final controller = _controller(
+        _subject(category: TimeCategoryType.exercises, restMinutes: 30),
+      );
 
       expect(controller.restIntervalSeconds, 30);
     });
 
-    test("keeps legacy minute-based rest values working", () {
-      final controller = _controller(_subject(restMinutes: 8));
+    test("uses small exercise rest values as seconds", () {
+      final controller = _controller(
+        _subject(category: TimeCategoryType.exercises, restMinutes: 8),
+      );
 
-      expect(controller.restIntervalSeconds, 8 * 60);
+      expect(controller.restIntervalSeconds, 8);
     });
 
-    test("falls back to the default rest seconds when non-positive", () {
+    test("uses rest minutes for studying", () {
+      final controller = _controller(
+        _subject(category: TimeCategoryType.studying, restMinutes: 30),
+      );
+
+      expect(controller.restIntervalSeconds, 30 * 60);
+    });
+
+    test(
+      "falls back to the default exercise rest seconds when non-positive",
+      () {
+        final controller = _controller(
+          _subject(category: TimeCategoryType.exercises, restMinutes: 0),
+        );
+
+        expect(
+          controller.restIntervalSeconds,
+          SubjectEntity.defaultRestSeconds,
+        );
+      },
+    );
+
+    test("falls back to the default study rest minutes when non-positive", () {
       final controller = _controller(_subject(restMinutes: 0));
 
-      expect(controller.restIntervalSeconds, SubjectEntity.defaultRestSeconds);
+      expect(
+        controller.restIntervalSeconds,
+        SubjectEntity.defaultRestMinutes * 60,
+      );
     });
   });
 
@@ -497,9 +544,54 @@ void main() {
       expect(controller.isResting.value, isFalse);
       expect(controller.breakCountdownSeconds.value, 10);
     });
+
+    test("finishes a single-section activity only after its rest", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.exercises,
+          goalSeconds: 10,
+          restMinutes: 30,
+          focusSessionCount: 1,
+        ),
+        focusFeedbackService: feedback,
+      );
+
+      controller.advanceForTesting(10);
+
+      expect(controller.isResting.value, isTrue);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(controller.restCountdownSeconds.value, 30);
+      expect(feedback.finishFeedbackCount, 1);
+
+      controller.advanceForTesting(30);
+
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isSessionFinished.value, isTrue);
+      expect(feedback.finishFeedbackCount, 2);
+    });
   });
 
   group("TimerController background focus indicator", () {
+    test("enables timer alerts when a session starts", () async {
+      final notifications = _FakeTimerNotificationService();
+      final appController = _FakeAppController(notificationsEnabled: false);
+      final controller = _controller(
+        _subject(),
+        timerNotificationService: notifications,
+        appController: appController,
+      );
+
+      controller.onInit();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(appController.notificationsEnabled.value, isTrue);
+      expect(appController.enableNotificationsCount, 1);
+      expect(notifications.showRunningCount, 1);
+
+      controller.onClose();
+    });
+
     test("shows overlay when focus lock is on and app goes background", () {
       final overlay = _FakeFocusOverlayService();
       final controller = _controller(
@@ -525,7 +617,29 @@ void main() {
         controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
         expect(notifications.scheduleSessionTimelineCount, 1);
+
+        controller.didChangeAppLifecycleState(AppLifecycleState.hidden);
+        expect(notifications.scheduleSessionTimelineCount, 1);
       },
     );
+
+    test("keeps the final alarm scheduled when the background timer ends", () {
+      final notifications = _FakeTimerNotificationService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.exercises,
+          goalSeconds: 10,
+          restMinutes: 30,
+        ),
+        timerNotificationService: notifications,
+      );
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+      controller.advanceForTesting(40);
+
+      expect(controller.isSessionFinished.value, isTrue);
+      expect(notifications.cancelOngoingCount, 1);
+      expect(notifications.cancelCount, 0);
+    });
   });
 }

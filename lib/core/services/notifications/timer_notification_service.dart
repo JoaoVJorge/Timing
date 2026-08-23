@@ -225,7 +225,7 @@ class TimerNotificationService {
     required int remainingFocusSections,
     required bool isResting,
   }) async {
-    if (!_isSupported || remainingFocusSections <= 0) {
+    if (!_isSupported || (remainingFocusSections <= 0 && !isResting)) {
       return;
     }
 
@@ -248,17 +248,20 @@ class TimerNotificationService {
 
     if (isResting) {
       offset += restRemaining;
-      await addAlarm(restFinishedBody);
+      await addAlarm(
+        remainingFocusSections <= 0 ? sessionFinishedBody : restFinishedBody,
+      );
+      if (remainingFocusSections <= 0) {
+        return;
+      }
     }
 
     for (int section = 0; section < remainingFocusSections; section++) {
       offset += !isResting && section == 0 ? focusRemaining : focusInterval;
       final bool isLastSection = section == remainingFocusSections - 1;
-      await addAlarm(isLastSection ? sessionFinishedBody : focusFinishedBody);
-      if (!isLastSection) {
-        offset += restInterval;
-        await addAlarm(restFinishedBody);
-      }
+      await addAlarm(focusFinishedBody);
+      offset += restInterval;
+      await addAlarm(isLastSection ? sessionFinishedBody : restFinishedBody);
     }
   }
 
@@ -334,11 +337,12 @@ class TimerNotificationService {
   }
 
   Future<void> cancelScheduledAlarms() async {
-    if (!_isSupported || !_initialized) {
+    if (!_isSupported) {
       return;
     }
 
     try {
+      await _ensureInitialized();
       await Future.wait(<Future<void>>[
         _plugin.cancel(id: _focusFinishedNotificationId),
         _plugin.cancel(id: _restFinishedNotificationId),
@@ -354,10 +358,11 @@ class TimerNotificationService {
   }
 
   Future<void> cancelTimelineAlarms() async {
-    if (!_isSupported || !_initialized) {
+    if (!_isSupported) {
       return;
     }
     try {
+      await _ensureInitialized();
       await Future.wait(
         List<Future<void>>.generate(
           _maxTimelineAlarms,
@@ -371,10 +376,11 @@ class TimerNotificationService {
   }
 
   Future<void> cancelOngoing() async {
-    if (!_isSupported || !_initialized) {
+    if (!_isSupported) {
       return;
     }
     try {
+      await _ensureInitialized();
       await _plugin.cancel(id: _notificationId);
     } catch (_) {
       // Nothing to do if there is no ongoing notification to cancel.
@@ -382,11 +388,12 @@ class TimerNotificationService {
   }
 
   Future<void> _cancelAlarm(int id) async {
-    if (!_isSupported || !_initialized) {
+    if (!_isSupported) {
       return;
     }
 
     try {
+      await _ensureInitialized();
       await _plugin.cancel(id: id);
     } catch (_) {
       // Nothing to do if there is no scheduled notification to cancel.
@@ -394,7 +401,7 @@ class TimerNotificationService {
   }
 
   Future<void> cancel() async {
-    if (!_isSupported || !_initialized) {
+    if (!_isSupported) {
       return;
     }
 
