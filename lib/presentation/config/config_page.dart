@@ -8,6 +8,7 @@ import "package:timing/presentation/config/config_controller.dart";
 import "package:timing/presentation/config/widgets/settings_section.dart";
 import "package:timing/presentation/config/widgets/settings_tile.dart";
 import "package:timing/presentation/config/widgets/settings_user_card.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/theme/app_spacing.dart";
 
@@ -218,7 +219,7 @@ class ConfigPage extends StatelessWidget {
                   ),
                   const Gap(12),
                   _ConcentrationActivityTile(
-                    icon: Icons.school_rounded,
+                    iconName: "graduate",
                     title: context.l10n.concentrationStudyTitle,
                     subtitle: context.l10n.concentrationStudySubtitle,
                     color: const Color(0xFF2F80ED),
@@ -236,7 +237,7 @@ class ConfigPage extends StatelessWidget {
                   ),
                   const Gap(10),
                   _ConcentrationActivityTile(
-                    icon: Icons.menu_book_rounded,
+                    iconName: "open-book",
                     title: context.l10n.concentrationReadingTitle,
                     subtitle: context.l10n.concentrationReadingSubtitle,
                     color: const Color(0xFFF2994A),
@@ -305,15 +306,17 @@ class _ConcentrationHeroBadge extends StatelessWidget {
 
 class _ConcentrationActivityTile extends StatelessWidget {
   const _ConcentrationActivityTile({
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.color,
     required this.value,
     required this.onChanged,
+    this.icon,
+    this.iconName,
   });
 
-  final IconData icon;
+  final IconData? icon;
+  final String? iconName;
   final String title;
   final String subtitle;
   final Color color;
@@ -350,7 +353,11 @@ class _ConcentrationActivityTile extends StatelessWidget {
               shape: BoxShape.circle,
               color: color.withValues(alpha: 0.14),
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Center(
+              child: iconName == null
+                  ? Icon(icon, color: color, size: 28)
+                  : AppIcon(iconName!, color: color, size: 28),
+            ),
           ),
           const Gap(14),
           Expanded(
