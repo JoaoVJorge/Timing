@@ -137,44 +137,63 @@ class GroupsDataSource {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _activityRowsForMembers(
-    List<String> memberIds,
-  ) async {
-    if (memberIds.isEmpty) {
-      return const [];
-    }
-
-    try {
-      return await _selectRows(
-        table: "activity_entries",
-        columns:
-            "user_id, category, occurred_at, seconds, pages, completed_tasks",
-        filters: (query) => query
-            .inFilter("user_id", memberIds)
-            .gte("occurred_at", _monthStart().toIso8601String()),
-      ).timeout(_activityScoresTimeout);
-    } on TimeoutException catch (error, stackTrace) {
-      _logger.logError(
-        "Timed out loading group leaderboard scores",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return const [];
-    }
-  }
-
   Future<Map<GroupThemeType, Map<String, _PeriodScores>>>
   _leaderboardScoresForMembers(List<String> memberIds) async {
     if (memberIds.isEmpty) {
       return const {};
     }
 
-    final List<Map<String, dynamic>> activityRows =
-        await _activityRowsForMembers(memberIds);
-    return {
-      for (final GroupThemeType theme in GroupThemeType.values)
-        theme: _scoresByUser(theme: theme, activityRows: activityRows),
-    };
+    try {
+      final dynamic response = await _supabaseService.requireClient
+          .rpc(
+            "group_leaderboard_scores",
+            params: {
+              "target_member_ids": memberIds,
+              "today_start": _todayStart().toIso8601String(),
+              "week_start": _weekStart().toIso8601String(),
+              "month_start": _monthStart().toIso8601String(),
+            },
+          )
+          .timeout(_activityScoresTimeout);
+      _logger.logResponse("rpc public.group_leaderboard_scores", response);
+      final List<dynamic> rows = response as List<dynamic>? ?? const [];
+      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {
+        for (final GroupThemeType theme in GroupThemeType.values)
+          theme: <String, _PeriodScores>{},
+      };
+      for (final dynamic value in rows) {
+        final Map<String, dynamic> row = Map<String, dynamic>.from(
+          value as Map,
+        );
+        final String? userId = row["user_id"] as String?;
+        final GroupThemeType? theme = _themeByName(row["category"] as String?);
+        if (userId == null || theme == null) {
+          continue;
+        }
+        scoresByTheme[theme]![userId] = _PeriodScores(
+          today: _intValue(row["today_score"]),
+          week: _intValue(row["week_score"]),
+          month: _intValue(row["month_score"]),
+        );
+      }
+      return scoresByTheme;
+    } on TimeoutException catch (error, stackTrace) {
+      _logger.logError(
+        "Timed out loading group leaderboard scores",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      // The leaderboard is supplementary data. Groups and their members must
+      // still be usable if score aggregation is temporarily unavailable.
+      return const {};
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to load group leaderboard scores",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const {};
+    }
   }
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async {
@@ -246,10 +265,11 @@ class GroupsDataSource {
     required String friendId,
   }) async {
     try {
-      await _supabaseService.requireClient.rpc(
+      final dynamic response = await _supabaseService.requireClient.rpc(
         "invite_friend_to_group",
         params: {"target_group_id": groupId, "target_friend_id": friendId},
       );
+      _logger.logResponse("rpc public.invite_friend_to_group", response);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -261,10 +281,11 @@ class GroupsDataSource {
     required String friendId,
   }) async {
     try {
-      await _supabaseService.requireClient.rpc(
+      final dynamic response = await _supabaseService.requireClient.rpc(
         "cancel_group_invitation",
         params: {"target_group_id": groupId, "target_friend_id": friendId},
       );
+      _logger.logResponse("rpc public.cancel_group_invitation", response);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -838,52 +859,16 @@ class GroupsDataSource {
     );
   }
 
-  /// Walks the activity rows once and parses each timestamp once, instead of
-  /// re-scanning the whole list for every member of every group.
-  Map<String, _PeriodScores> _scoresByUser({
-    required GroupThemeType theme,
-    required List<Map<String, dynamic>> activityRows,
-  }) {
-    final DateTime todayStart = _todayStart();
-    final DateTime weekStart = _weekStart();
-    final DateTime monthStart = _monthStart();
-    final Map<String, _PeriodScores> scores = {};
+  int _intValue(Object? value) => value is num ? value.toInt() : 0;
 
-    for (final Map<String, dynamic> row in activityRows) {
-      if (row["category"] != theme.name) {
-        continue;
+  GroupThemeType? _themeByName(String? name) {
+    for (final GroupThemeType value in GroupThemeType.values) {
+      if (value.name == name) {
+        return value;
       }
-      final DateTime? occurredAt = DateTime.tryParse(
-        row["occurred_at"] as String? ?? "",
-      )?.toUtc();
-      if (occurredAt == null || occurredAt.isBefore(monthStart)) {
-        continue;
-      }
-
-      final String userId = row["user_id"] as String;
-      final _PeriodScores current =
-          scores[userId] ?? const _PeriodScores(today: 0, week: 0, month: 0);
-      final int value = _scoreValue(row, theme);
-      scores[userId] = _PeriodScores(
-        today: !occurredAt.isBefore(todayStart)
-            ? current.today + value
-            : current.today,
-        week: !occurredAt.isBefore(weekStart)
-            ? current.week + value
-            : current.week,
-        month: current.month + value,
-      );
     }
-
-    return scores;
+    return null;
   }
-
-  int _scoreValue(Map<String, dynamic> row, GroupThemeType theme) =>
-      switch (theme.unit) {
-        GroupMetricUnit.hours => (row["seconds"] as num?)?.toInt() ?? 0,
-        GroupMetricUnit.pages => (row["pages"] as num?)?.toInt() ?? 0,
-        GroupMetricUnit.days => (row["completed_tasks"] as num?)?.toInt() ?? 0,
-      };
 
   String _displayName(Map<String, dynamic>? row, {required String fallback}) {
     if (row == null) {
