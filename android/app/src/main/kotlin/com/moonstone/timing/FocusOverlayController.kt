@@ -31,6 +31,11 @@ object FocusOverlayController {
     private var isRunning = false
     private var isResting = false
     private var subjectName = ""
+    private var currentFocusSection = 1
+    private var totalFocusSections = 1
+    private var focusIntervalSeconds = 1800
+    private var restIntervalSeconds = 60
+    private var accentColor = 0
 
     fun hasPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -47,6 +52,10 @@ object FocusOverlayController {
         remainingSeconds: Int,
         isRunning: Boolean,
         isResting: Boolean,
+        currentFocusSection: Int,
+        totalFocusSections: Int,
+        focusIntervalSeconds: Int,
+        restIntervalSeconds: Int,
         accentColor: Int
     ) {
         if (!hasPermission(context)) {
@@ -56,6 +65,11 @@ object FocusOverlayController {
         this.remainingSeconds = remainingSeconds
         this.isRunning = isRunning
         this.isResting = isResting
+        this.currentFocusSection = currentFocusSection.coerceAtLeast(1)
+        this.totalFocusSections = totalFocusSections.coerceAtLeast(1)
+        this.focusIntervalSeconds = focusIntervalSeconds.coerceAtLeast(1)
+        this.restIntervalSeconds = restIntervalSeconds.coerceAtLeast(1)
+        this.accentColor = accentColor
 
         if (overlayView != null) {
             applyState(accentColor)
@@ -124,7 +138,11 @@ object FocusOverlayController {
         val view = overlayView ?: return
         val title = view.findViewById<TextView>(R.id.overlay_title)
         val time = view.findViewById<TextView>(R.id.overlay_time)
-        title.text = if (isResting) "Descanso" else subjectName.ifEmpty { "Foco" }
+        title.text = if (isResting) {
+            "Descanso · próxima ${nextFocusSection()}/$totalFocusSections"
+        } else {
+            "${subjectName.ifEmpty { "Foco" }} · $currentFocusSection/$totalFocusSections"
+        }
         time.text = formatTime(remainingSeconds)
         if (accentColor != null) {
             view.findViewById<View>(R.id.overlay_dot)
@@ -148,12 +166,40 @@ object FocusOverlayController {
                     overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
                         formatTime(remainingSeconds)
                 }
+                if (remainingSeconds <= 0) {
+                    advanceCycle()
+                    if (overlayView == null) {
+                        return
+                    }
+                }
                 handler.postDelayed(this, 1000L)
             }
         }
         ticker = runnable
         handler.postDelayed(runnable, 1000L)
     }
+
+    private fun advanceCycle() {
+        if (isResting) {
+            isResting = false
+            currentFocusSection = nextFocusSection()
+            remainingSeconds = focusIntervalSeconds
+            applyState(accentColor)
+            return
+        }
+
+        if (currentFocusSection >= totalFocusSections) {
+            hide()
+            return
+        }
+
+        isResting = true
+        remainingSeconds = restIntervalSeconds
+        applyState(accentColor)
+    }
+
+    private fun nextFocusSection(): Int =
+        (currentFocusSection + 1).coerceAtMost(totalFocusSections)
 
     private fun stopTicker() {
         ticker?.let { handler.removeCallbacks(it) }

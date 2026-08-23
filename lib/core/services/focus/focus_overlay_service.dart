@@ -37,12 +37,20 @@ class FocusOverlayService {
     required bool isRunning,
     required bool isResting,
     required int colorValue,
+    required int currentFocusSection,
+    required int totalFocusSections,
+    required int focusIntervalSeconds,
+    required int restIntervalSeconds,
   }) async {
     await _invoke("show", <String, Object?>{
       "subjectName": subjectName,
       "remainingSeconds": remainingSeconds,
       "isRunning": isRunning,
       "isResting": isResting,
+      "currentFocusSection": currentFocusSection,
+      "totalFocusSections": totalFocusSections,
+      "focusIntervalSeconds": focusIntervalSeconds,
+      "restIntervalSeconds": restIntervalSeconds,
       "colorHex": (colorValue & 0xFFFFFF).toRadixString(16).padLeft(6, "0"),
     });
   }
