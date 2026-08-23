@@ -61,6 +61,18 @@ class GroupsRepository {
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
 
+  Future<Either<AppError, GroupEntity>> updateGroup({
+    required GroupEntity group,
+    required String name,
+    required String description,
+    required Map<String, dynamic> activityPayload,
+  }) => _groupsDataSource.updateGroup(
+    group: group,
+    name: name,
+    description: description,
+    activityPayload: activityPayload,
+  );
+
   Future<Either<AppError, List<GroupInvitationEntity>>>
   getPendingInvitations() => _groupsDataSource.getPendingInvitations();
 

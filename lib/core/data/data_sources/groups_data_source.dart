@@ -776,6 +776,68 @@ class GroupsDataSource {
     }
   }
 
+  Future<Either<AppError, GroupEntity>> updateGroup({
+    required GroupEntity group,
+    required String name,
+    required String description,
+    required Map<String, dynamic> activityPayload,
+  }) async {
+    const String operation = "rpc public.update_group_with_activity";
+    try {
+      final Map<String, dynamic> payload = {
+        "target_group_id": group.id,
+        "group_name": name,
+        "group_description": description,
+        "activity_payload": activityPayload,
+      };
+      _logger.logRequest(operation, payload);
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "update_group_with_activity",
+        params: payload,
+      );
+      _logger.logResponse(operation, response);
+
+      final List<dynamic> rows = response as List<dynamic>;
+      if (rows.isEmpty) {
+        throw StateError("update_group_with_activity returned no group row.");
+      }
+      final Map<String, dynamic> row = Map<String, dynamic>.from(
+        rows.first as Map,
+      );
+
+      return Right(
+        GroupEntity(
+          id: row["id"] as String? ?? group.id,
+          name: row["name"] as String? ?? name,
+          theme: GroupThemeType.byName(row["theme"] as String?),
+          members: group.members,
+          description: row["description"] as String? ?? description,
+          ownerId: row["owner_id"] as String? ?? group.ownerId,
+          createdAt:
+              DateTime.tryParse(row["created_at"] as String? ?? "") ??
+              group.createdAt,
+          inviteCode: row["invite_code"] as String? ?? group.inviteCode,
+          privacy: row["privacy"] as String? ?? group.privacy,
+          createdActivityId:
+              row["activity_id"] as String? ?? group.createdActivityId,
+        ),
+      );
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Supabase $operation failed",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
+      return Left(
+        SqlOperationAppError(
+          operation: operation,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
   Future<List<Map<String, dynamic>>> _selectRows({
     required String table,
     required String columns,

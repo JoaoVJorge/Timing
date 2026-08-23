@@ -14,6 +14,8 @@ import "package:timing/presentation/create_task/create_task_bindings.dart";
 import "package:timing/presentation/create_task/create_task_page.dart";
 import "package:timing/presentation/daily_goals/daily_goals_bindings.dart";
 import "package:timing/presentation/daily_goals/daily_goals_page.dart";
+import "package:timing/presentation/edit_group/edit_group_bindings.dart";
+import "package:timing/presentation/edit_group/edit_group_page.dart";
 import "package:timing/presentation/edit_profile/edit_profile_bindings.dart";
 import "package:timing/presentation/edit_profile/edit_profile_page.dart";
 import "package:timing/presentation/faq/faq_bindings.dart";
@@ -64,6 +66,7 @@ class AppRoutes {
   static const String dailyGoals = "/dailyGoals";
   static const String timer = "/timer";
   static const String editProfile = "/editProfile";
+  static const String editGroup = "/editGroup";
   static const String faq = "/faq";
   static const String createGroup = "/createGroup";
   static const String groupInvites = "/groupInvites";
@@ -197,6 +200,14 @@ class AppRoutes {
       name: groupInvites,
       page: () => const GroupInvitesPage(),
       binding: GroupInvitesBindings(),
+      transition: Transition.rightToLeft,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
+    ),
+    GetPage(
+      name: editGroup,
+      page: () => const EditGroupPage(),
+      binding: EditGroupBindings(),
       transition: Transition.rightToLeft,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,

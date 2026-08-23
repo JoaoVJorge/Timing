@@ -1120,13 +1120,13 @@ class _ActivityOverviewCard extends StatelessWidget {
               _DataSectionIcon(
                 color: accent,
                 child: header.isGoal
-                    ? Icon(Icons.flag_rounded, size: 24, color: accent)
-                    : AppIcon(group.theme.iconName, size: 24, color: accent),
+                    ? Icon(Icons.flag_rounded, size: 20, color: accent)
+                    : AppIcon(group.theme.iconName, size: 20, color: accent),
               ),
               const Gap(12),
               Expanded(
                 child: Text(
-                  context.l10n.groupActivityLabel,
+                  localizedGroupName(context, group),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.black20.copyWith(
@@ -1140,16 +1140,8 @@ class _ActivityOverviewCard extends StatelessWidget {
             ],
           ),
           const Gap(14),
-          Text(
-            header.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textStyles.black20.copyWith(
-              color: context.colorTokens.textBody,
-              fontSize: 20,
-            ),
-          ),
-          const Gap(4),
+          _GroupDataDivider(),
+          const Gap(14),
           Text(
             group.description.trim().isEmpty
                 ? context.l10n.goalLabel
@@ -1162,6 +1154,8 @@ class _ActivityOverviewCard extends StatelessWidget {
               height: 1.18,
             ),
           ),
+          const Gap(16),
+          _GroupDataDivider(),
           const Gap(16),
           IntrinsicHeight(
             child: Row(
@@ -1453,6 +1447,15 @@ class _DataSectionIcon extends StatelessWidget {
     ),
     alignment: Alignment.center,
     child: child,
+  );
+}
+
+class _GroupDataDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    height: 1,
+    color: context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
   );
 }
 

@@ -502,11 +502,38 @@ class GroupsController extends GetxController {
     await _appNavigator.toNamed<void>(AppRoutes.groupInvites, arguments: group);
   }
 
-  void onTapEditGroup() {
-    final String message =
-        Get.context?.l10n.groupEditingComingSoon ??
-        "Group editing is coming soon.";
-    _appNavigator.showSnackBar(text: message);
+  Future<void> onTapEditGroup() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null) {
+      return;
+    }
+    final dynamic result = await _appNavigator.toNamed(
+      AppRoutes.editGroup,
+      arguments: group,
+    );
+    final GroupEntity? updatedGroup = result as GroupEntity?;
+    if (updatedGroup == null) {
+      return;
+    }
+
+    final int existingIndex = groups.indexWhere(
+      (item) => item.id == updatedGroup.id,
+    );
+    if (existingIndex >= 0) {
+      groups[existingIndex] = updatedGroup;
+    }
+    selectedGroup.value = updatedGroup;
+    _activityProgressByCacheKey.removeWhere(
+      (key, value) => key.startsWith("${updatedGroup.id}:"),
+    );
+    _activityProgressCacheKey = null;
+    activityProgress.clear();
+    groups.refresh();
+    await _invalidateActivityCaches();
+    if (selectedDetailsTab.value == GroupDetailsTab.goals) {
+      await loadActivityProgress();
+    }
+    _appNavigator.showSuccessSnackBar("Grupo atualizado com sucesso");
   }
 
   Future<void> onConfirmLeaveGroup() async {
