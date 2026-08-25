@@ -374,6 +374,7 @@ class _FocusRoutineSections extends StatelessWidget {
   Widget build(BuildContext context) => Obx(() {
     final SubjectActivityType activityType = controller.activityType.value;
     if (controller.isPageBased ||
+        controller.category == TimeCategoryType.hobbies ||
         activityType == SubjectActivityType.permanent) {
       return const SizedBox.shrink();
     }

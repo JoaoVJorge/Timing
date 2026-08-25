@@ -178,16 +178,18 @@ class _StatsGrid extends StatelessWidget {
                   "${controller.goalPercent(subject.totalSeconds, subject.totalGoalSeconds)}%",
               label: _goalLabel(context),
             ),
-            _StatItem(
-              icon: Icons.timer_rounded,
-              value: "${subject.focusSessionCount}",
-              label: _sessionsLabel(context),
-            ),
-            _StatItem(
-              icon: Icons.local_cafe_rounded,
-              value: _restValue(context, subject),
-              label: _restLabel(context),
-            ),
+            if (!controller.isHobby) ...[
+              _StatItem(
+                icon: Icons.timer_rounded,
+                value: "${subject.focusSessionCount}",
+                label: _sessionsLabel(context),
+              ),
+              _StatItem(
+                icon: Icons.local_cafe_rounded,
+                value: _restValue(context, subject),
+                label: _restLabel(context),
+              ),
+            ],
           ];
 
     return LayoutBuilder(

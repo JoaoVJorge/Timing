@@ -41,7 +41,10 @@ class EditGroupController extends GetxController {
 
   bool get isReadingTheme => theme == GroupThemeType.reading;
 
-  bool get showRestAndSessions => !isDailyGoalsTheme && !isReadingTheme;
+  bool get isHobbyTheme => theme == GroupThemeType.hobbies;
+
+  bool get showRestAndSessions =>
+      !isDailyGoalsTheme && !isReadingTheme && !isHobbyTheme;
 
   String get goalSuffix {
     if (isDailyGoalsTheme) {
@@ -151,10 +154,7 @@ class EditGroupController extends GetxController {
 
   Map<String, dynamic> _activityPayload(String activityName, int goal) {
     if (isDailyGoalsTheme) {
-      return {
-        "name": activityName,
-        "target_days": goal,
-      };
+      return {"name": activityName, "target_days": goal};
     }
 
     final TimeCategoryType category = switch (theme) {
@@ -170,8 +170,8 @@ class EditGroupController extends GetxController {
       "category": category.name,
       "goal_seconds": isReadingTheme ? 0 : goal * 60,
       "goal_pages": isReadingTheme ? goal : 0,
-      "rest_minutes": rest <= 0 ? 1 : rest,
-      "focus_session_count": sessions <= 0 ? 1 : sessions,
+      "rest_minutes": isHobbyTheme ? 0 : (rest <= 0 ? 1 : rest),
+      "focus_session_count": isHobbyTheme ? 1 : (sessions <= 0 ? 1 : sessions),
       "activity_type": "daily",
     };
   }

@@ -23,6 +23,8 @@ class SubjectStatsController extends GetxController {
 
   bool get isReading => subject.category == TimeCategoryType.reading;
 
+  bool get isHobby => subject.category == TimeCategoryType.hobbies;
+
   int get overviewCurrent =>
       isReading ? subject.currentPages : subject.totalSeconds;
 

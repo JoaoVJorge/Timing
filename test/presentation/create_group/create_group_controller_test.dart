@@ -5,6 +5,7 @@ import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
+import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/create_group_use_case.dart";
@@ -32,6 +33,23 @@ void main() {
         "sequence_type": "casual",
         "goal_type": "total",
       });
+    });
+
+    test("builds hobbies without rest or multiple sections", () {
+      final CreateGroupController controller = _buildController();
+      controller.onSelectTheme(GroupThemeType.hobbies);
+      controller.activityNameController.text = "Pintura";
+      controller.activityGoalController.text = "45";
+      controller.setRestMinutes(15);
+      controller.setFocusSessionCount(3);
+
+      final GroupActivityDraft? draft = controller.buildActivityDraft();
+
+      expect(draft, isNotNull);
+      expect(draft!.category, TimeCategoryType.hobbies);
+      expect(draft.restMinutes, 0);
+      expect(draft.focusSessionCount, 1);
+      expect(draft.goalSeconds, 45 * 60);
     });
   });
 }

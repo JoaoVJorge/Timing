@@ -395,6 +395,7 @@ class CreateGroupController extends GetxController
     }
 
     final bool isReading = category == TimeCategoryType.reading;
+    final bool isHobby = category == TimeCategoryType.hobbies;
     final bool isPermanent =
         activityType.value == SubjectActivityType.permanent;
     return GroupActivityDraft.subject(
@@ -404,8 +405,10 @@ class CreateGroupController extends GetxController
       goalSeconds: isReading ? 0 : goalNumber * (isPermanent ? 3600 : 60),
       goalPages: isReading ? goalNumber : 0,
       iconName: selectedIconName.value,
-      restMinutes: restMinutes.value,
-      focusSessionCount: isReading || isPermanent ? 1 : focusSessionCount.value,
+      restMinutes: isHobby ? 0 : restMinutes.value,
+      focusSessionCount: isReading || isHobby || isPermanent
+          ? 1
+          : focusSessionCount.value,
       wallpaperIndex: wallpaperIndex.value,
       activityType: activityType.value.name,
     );

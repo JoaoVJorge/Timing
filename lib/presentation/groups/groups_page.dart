@@ -1169,26 +1169,28 @@ class _ActivityOverviewCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                _MetricDivider(),
-                Expanded(
-                  child: _ActivityDataTile(
-                    icon: Icons.coffee_outlined,
-                    label: context.l10n.groupActivityPauseDataLabel,
-                    value: _formatRestValue(
-                      context,
-                      group.theme,
-                      header.restMinutes,
+                if (group.theme != GroupThemeType.hobbies) ...[
+                  _MetricDivider(),
+                  Expanded(
+                    child: _ActivityDataTile(
+                      icon: Icons.coffee_outlined,
+                      label: context.l10n.groupActivityPauseDataLabel,
+                      value: _formatRestValue(
+                        context,
+                        group.theme,
+                        header.restMinutes,
+                      ),
                     ),
                   ),
-                ),
-                _MetricDivider(),
-                Expanded(
-                  child: _ActivityDataTile(
-                    icon: Icons.repeat_rounded,
-                    label: context.l10n.groupActivitySessionsDataLabel,
-                    value: header.focusSessionCount.toString(),
+                  _MetricDivider(),
+                  Expanded(
+                    child: _ActivityDataTile(
+                      icon: Icons.repeat_rounded,
+                      label: context.l10n.groupActivitySessionsDataLabel,
+                      value: header.focusSessionCount.toString(),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),

@@ -86,8 +86,15 @@ class SubjectEntity extends Equatable {
   /// manual deletion.
   bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
 
-  /// Number of focus sessions, never below one.
-  int get sessionCount => focusSessionCount > 0 ? focusSessionCount : 1;
+  /// Number of focus sessions, never below one. Reading and hobbies are
+  /// continuous activities and never multiply their goal into sections.
+  int get sessionCount =>
+      category == TimeCategoryType.reading ||
+          category == TimeCategoryType.hobbies
+      ? 1
+      : focusSessionCount > 0
+      ? focusSessionCount
+      : 1;
 
   /// The day's total study goal: each session runs [goalSeconds], so a "2x30"
   /// subject targets 60 minutes, not 30.

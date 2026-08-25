@@ -301,10 +301,16 @@ class CreateSubjectController extends GetxController
           : goalValue * 60;
     }
 
-    final int normalizedFocusSessionCount =
-        isPageBased || activityType.value == SubjectActivityType.permanent
+    final bool hasNoFocusRoutine =
+        isPageBased ||
+        category == TimeCategoryType.hobbies ||
+        activityType.value == SubjectActivityType.permanent;
+    final int normalizedFocusSessionCount = hasNoFocusRoutine
         ? 1
         : focusSessionCount.value;
+    final int normalizedRestMinutes = category == TimeCategoryType.hobbies
+        ? 0
+        : restMinutes.value;
     final SubjectEntity? subject = editingSubject;
     final Either<AppError, SubjectEntity> result = subject == null
         ? await _addSubjectUseCase(
@@ -314,7 +320,7 @@ class CreateSubjectController extends GetxController
             goalSeconds: goalSeconds,
             goalPages: goalPages,
             iconName: selectedIconName.value,
-            restMinutes: restMinutes.value,
+            restMinutes: normalizedRestMinutes,
             focusSessionCount: normalizedFocusSessionCount,
             wallpaperIndex: wallpaperIndex.value,
             activityType: activityType.value,
@@ -326,7 +332,7 @@ class CreateSubjectController extends GetxController
             goalSeconds: goalSeconds,
             goalPages: goalPages,
             iconName: selectedIconName.value,
-            restMinutes: restMinutes.value,
+            restMinutes: normalizedRestMinutes,
             focusSessionCount: normalizedFocusSessionCount,
             wallpaperIndex: wallpaperIndex.value,
             activityType: activityType.value,
