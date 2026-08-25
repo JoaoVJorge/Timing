@@ -105,6 +105,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   bool get isReading => subject.category == TimeCategoryType.reading;
 
+  bool get isHobby => subject.category == TimeCategoryType.hobbies;
+
   int get focusIntervalSeconds => subject.goalSeconds > 0
       ? subject.goalSeconds
       : defaultFocusIntervalSeconds;
@@ -113,13 +115,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       focusIntervalSeconds - breakCountdownSeconds.value;
 
   int get readingIntervalRemainingSeconds {
-    if (!isReading || focusIntervalSeconds <= 0) {
+    if (!isReading) {
       return breakCountdownSeconds.value;
     }
-    final int elapsedInInterval = sessionSeconds.value % focusIntervalSeconds;
+    final int elapsedInInterval =
+        sessionSeconds.value % defaultFocusIntervalSeconds;
     return elapsedInInterval == 0
-        ? focusIntervalSeconds
-        : focusIntervalSeconds - elapsedInInterval;
+        ? defaultFocusIntervalSeconds
+        : defaultFocusIntervalSeconds - elapsedInInterval;
   }
 
   double get focusProgress =>
@@ -138,8 +141,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       ? subject.restSeconds
       : SubjectEntity.defaultRestSeconds;
 
-  int get focusSessionCount =>
-      subject.focusSessionCount > 0 ? subject.focusSessionCount : 1;
+  int get focusSessionCount => isHobby
+      ? 1
+      : subject.focusSessionCount > 0
+      ? subject.focusSessionCount
+      : 1;
 
   int get currentFocusSection =>
       (completedFocusSections.value + 1).clamp(1, focusSessionCount);
@@ -206,7 +212,20 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     int remaining = seconds;
     while (remaining > 0 && isRunning.value) {
       if (isReading) {
+        final int previousReminder =
+            sessionSeconds.value ~/ defaultFocusIntervalSeconds;
         sessionSeconds.value += remaining;
+        final int currentReminder =
+            sessionSeconds.value ~/ defaultFocusIntervalSeconds;
+        if (_isAppInForeground && !_isCatchingUpAfterBackground) {
+          for (
+            int reminder = previousReminder;
+            reminder < currentReminder;
+            reminder++
+          ) {
+            unawaited(focusFeedbackService.playFocusFinishedFeedback());
+          }
+        }
         remaining = 0;
         continue;
       }
@@ -252,6 +271,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
     if (_isAppInForeground && !_isCatchingUpAfterBackground) {
       unawaited(focusFeedbackService.playFocusFinishedFeedback());
+    }
+
+    if (isHobby) {
+      finishSession();
+      return;
     }
 
     isResting.value = true;
@@ -598,11 +622,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       timerLiveActivityService.startOrUpdate(
         subjectName: subject.name,
         colorValue: subject.colorValue,
-        remainingSeconds: isResting.value
+        remainingSeconds: isReading
+            ? sessionSeconds.value
+            : isResting.value
             ? restCountdownSeconds.value
             : breakCountdownSeconds.value,
         isRunning: isRunning.value,
         isResting: isResting.value,
+        isCountUp: isReading,
       ),
     );
 
@@ -673,10 +700,24 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     if (isReading) {
-      timerNotificationService.scheduleFocusFinished(
-        title: subject.name,
-        body: "Passou 30 minutos",
-        remaining: Duration(seconds: readingIntervalRemainingSeconds),
+      unawaited(
+        timerNotificationService.scheduleReadingReminders(
+          title: subject.name,
+          body: "Mais 30 minutos de leitura concluídos.",
+          firstReminder: Duration(seconds: readingIntervalRemainingSeconds),
+          interval: const Duration(seconds: defaultFocusIntervalSeconds),
+        ),
+      );
+      return;
+    }
+
+    if (isHobby) {
+      unawaited(
+        timerNotificationService.scheduleFocusFinished(
+          title: subject.name,
+          body: "Prática de hobby concluída.",
+          remaining: Duration(seconds: breakCountdownSeconds.value),
+        ),
       );
       return;
     }
@@ -700,7 +741,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   int get _overlayRemainingSeconds {
     if (isReading) {
-      return readingIntervalRemainingSeconds;
+      return sessionSeconds.value;
     }
     if (isResting.value) {
       return restCountdownSeconds.value;
@@ -729,6 +770,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         remainingSeconds: _overlayRemainingSeconds,
         isRunning: isRunning.value,
         isResting: isResting.value,
+        isCountUp: isReading,
+        usesFocusRoutine: !isReading && !isHobby,
         colorValue: subject.colorValue,
         currentFocusSection: currentFocusSection,
         totalFocusSections: focusSessionCount,
@@ -772,6 +815,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void _applyLiveActivityState(TimerLiveActivityAction value) {
     if (isReading) {
+      sessionSeconds.value = value.remainingSeconds.clamp(0, 1 << 31);
+      isResting.value = false;
+      isRunning.value = value.isRunning;
+      _syncFocusGuard();
       return;
     }
     if (!value.isResting) {

@@ -51,6 +51,8 @@ class MainActivity : FlutterActivity() {
                         remainingSeconds = call.argument<Int>("remainingSeconds") ?: 0,
                         isRunning = call.argument<Boolean>("isRunning") ?: false,
                         isResting = call.argument<Boolean>("isResting") ?: false,
+                        isCountUp = call.argument<Boolean>("isCountUp") ?: false,
+                        usesFocusRoutine = call.argument<Boolean>("usesFocusRoutine") ?: true,
                         currentFocusSection = call.argument<Int>("currentFocusSection") ?: 1,
                         totalFocusSections = call.argument<Int>("totalFocusSections") ?: 1,
                         focusIntervalSeconds = call.argument<Int>("focusIntervalSeconds") ?: 1800,

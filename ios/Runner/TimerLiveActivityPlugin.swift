@@ -29,7 +29,8 @@ final class TimerLiveActivityPlugin: NSObject, FlutterPlugin {
             let colorHex = arguments["colorHex"] as? String,
             let remainingSeconds = arguments["remainingSeconds"] as? Int,
             let isRunning = arguments["isRunning"] as? Bool,
-            let isResting = arguments["isResting"] as? Bool else {
+            let isResting = arguments["isResting"] as? Bool,
+            let isCountUp = arguments["isCountUp"] as? Bool else {
         result(FlutterError(code: "bad_arguments", message: nil, details: nil))
         return
       }
@@ -40,7 +41,8 @@ final class TimerLiveActivityPlugin: NSObject, FlutterPlugin {
           colorHex: colorHex,
           remainingSeconds: remainingSeconds,
           isRunning: isRunning,
-          isResting: isResting
+          isResting: isResting,
+          isCountUp: isCountUp
         )
         result(nil)
       }
@@ -81,18 +83,26 @@ private final class TimerLiveActivityManager {
     colorHex: String,
     remainingSeconds: Int,
     isRunning: Bool,
-    isResting: Bool
+    isResting: Bool,
+    isCountUp: Bool
   ) async {
     guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
     let safeRemaining = max(0, remainingSeconds)
+    let timerDate = isCountUp
+      ? Date().addingTimeInterval(-TimeInterval(safeRemaining))
+      : Date().addingTimeInterval(TimeInterval(safeRemaining))
     let state = TimerActivityAttributes.ContentState(
       remainingSeconds: safeRemaining,
-      endDate: Date().addingTimeInterval(TimeInterval(safeRemaining)),
+      endDate: timerDate,
       isRunning: isRunning,
-      isResting: isResting
+      isResting: isResting,
+      isCountUp: isCountUp
     )
-    let content = ActivityContent(state: state, staleDate: state.endDate)
+    let content = ActivityContent(
+      state: state,
+      staleDate: isCountUp ? nil : state.endDate
+    )
 
     if let activity = Activity<TimerActivityAttributes>.activities.first,
        activity.attributes.subjectName == subjectName,

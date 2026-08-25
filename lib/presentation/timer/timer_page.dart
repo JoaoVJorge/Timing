@@ -148,22 +148,24 @@ class _TimerScaffold extends StatelessWidget {
                             else
                               Column(
                                 children: [
-                                  _TimerInfoRow(
-                                    icon: Icons.schedule_rounded,
-                                    label: data.nextBreakLabel,
-                                    value: data.nextBreak,
-                                    accentColor: data.accentColor,
-                                  ),
-                                  if (!data.isReading) ...[
-                                    const Gap(10),
+                                  if (!data.isHobby) ...[
                                     _TimerInfoRow(
-                                      icon: Icons.repeat_rounded,
-                                      label: context.l10n.timerSessionLabel,
-                                      value: data.focusSectionLabel,
+                                      icon: Icons.schedule_rounded,
+                                      label: data.nextBreakLabel,
+                                      value: data.nextBreak,
                                       accentColor: data.accentColor,
                                     ),
+                                    if (!data.isReading) ...[
+                                      const Gap(10),
+                                      _TimerInfoRow(
+                                        icon: Icons.repeat_rounded,
+                                        label: context.l10n.timerSessionLabel,
+                                        value: data.focusSectionLabel,
+                                        accentColor: data.accentColor,
+                                      ),
+                                    ],
+                                    const Gap(10),
                                   ],
-                                  const Gap(10),
                                   _TimerInfoRow(
                                     icon: Icons.bar_chart_rounded,
                                     label: context.l10n.timerTotalTodayLabel,
@@ -640,6 +642,7 @@ class _TimerViewData {
     required this.nextBreak,
     required this.focusSectionLabel,
     required this.isReading,
+    required this.isHobby,
     required this.totalSubjectTimeLabel,
     required this.accentColor,
     required this.headerIconColor,
@@ -664,6 +667,8 @@ class _TimerViewData {
     final bool isResting = state == TimerVisualState.resting;
     final bool isReading =
         controller.subject.category == TimeCategoryType.reading;
+    final bool isHobby =
+        controller.subject.category == TimeCategoryType.hobbies;
     final Color accent = isResting
         ? TimerRestPalette.accent
         : Color(controller.subject.colorValue);
@@ -725,6 +730,7 @@ class _TimerViewData {
             ),
       focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
+      isHobby: isHobby,
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.currentActivitySeconds),
       ),
@@ -788,6 +794,7 @@ class _TimerViewData {
   final String nextBreak;
   final String focusSectionLabel;
   final bool isReading;
+  final bool isHobby;
   final String totalSubjectTimeLabel;
   final Color accentColor;
   final Color headerIconColor;

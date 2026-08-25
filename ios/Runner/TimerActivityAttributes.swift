@@ -8,9 +8,15 @@ struct TimerActivityAttributes: ActivityAttributes {
     var endDate: Date
     var isRunning: Bool
     var isResting: Bool
+    var isCountUp: Bool? = nil
+
+    var countsUp: Bool { isCountUp ?? false }
 
     var currentRemainingSeconds: Int {
       guard isRunning else { return max(0, remainingSeconds) }
+      if countsUp {
+        return max(0, Int(Date().timeIntervalSince(endDate).rounded(.down)))
+      }
       return max(0, Int(endDate.timeIntervalSinceNow.rounded(.up)))
     }
   }

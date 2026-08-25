@@ -210,6 +210,33 @@ class TimerNotificationService {
     remaining: remaining,
   );
 
+  /// Schedules a rolling set of reading reminders. Reading has no sections or
+  /// end time: these alarms are only milestones on an unbounded stopwatch.
+  Future<void> scheduleReadingReminders({
+    required String title,
+    required String body,
+    required Duration firstReminder,
+    required Duration interval,
+  }) async {
+    if (!_isSupported ||
+        firstReminder <= Duration.zero ||
+        interval <= Duration.zero) {
+      return;
+    }
+
+    await cancelTimelineAlarms();
+    Duration offset = firstReminder;
+    for (int index = 0; index < _maxTimelineAlarms; index++) {
+      await _scheduleAlarm(
+        id: _timelineNotificationIdBase + index,
+        title: title,
+        body: body,
+        remaining: offset,
+      );
+      offset += interval;
+    }
+  }
+
   /// Schedules every remaining focus/rest boundary up front. Android can then
   /// deliver the alarms even if the Flutter engine is suspended or the app
   /// process is reclaimed while it is in the background.

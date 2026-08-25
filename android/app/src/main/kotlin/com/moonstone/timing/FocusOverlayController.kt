@@ -17,8 +17,9 @@ import kotlin.math.abs
 
 /// A floating pill drawn over other apps while a focus session runs.
 ///
-/// It counts the remaining time down locally (one tick per second) so it stays
-/// accurate even when the Flutter engine is throttled in the background.
+/// It updates the time locally (one tick per second) so it stays accurate even
+/// when the Flutter engine is throttled in the background. Reading is an
+/// unbounded count-up stopwatch; focus and rest periods count down.
 object FocusOverlayController {
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
@@ -30,6 +31,8 @@ object FocusOverlayController {
     private var remainingSeconds = 0
     private var isRunning = false
     private var isResting = false
+    private var isCountUp = false
+    private var usesFocusRoutine = true
     private var subjectName = ""
     private var currentFocusSection = 1
     private var totalFocusSections = 1
@@ -52,6 +55,8 @@ object FocusOverlayController {
         remainingSeconds: Int,
         isRunning: Boolean,
         isResting: Boolean,
+        isCountUp: Boolean,
+        usesFocusRoutine: Boolean,
         currentFocusSection: Int,
         totalFocusSections: Int,
         focusIntervalSeconds: Int,
@@ -65,6 +70,8 @@ object FocusOverlayController {
         this.remainingSeconds = remainingSeconds
         this.isRunning = isRunning
         this.isResting = isResting
+        this.isCountUp = isCountUp
+        this.usesFocusRoutine = usesFocusRoutine
         this.currentFocusSection = currentFocusSection.coerceAtLeast(1)
         this.totalFocusSections = totalFocusSections.coerceAtLeast(1)
         this.focusIntervalSeconds = focusIntervalSeconds.coerceAtLeast(1)
@@ -138,7 +145,11 @@ object FocusOverlayController {
         val view = overlayView ?: return
         val title = view.findViewById<TextView>(R.id.overlay_title)
         val time = view.findViewById<TextView>(R.id.overlay_time)
-        title.text = if (isResting) {
+        title.text = if (isCountUp) {
+            subjectName.ifEmpty { "Leitura" }
+        } else if (!usesFocusRoutine) {
+            subjectName.ifEmpty { "Hobby" }
+        } else if (isResting) {
             "Descanso · próxima ${nextFocusSection()}/$totalFocusSections"
         } else {
             "${subjectName.ifEmpty { "Foco" }} · $currentFocusSection/$totalFocusSections"
@@ -161,12 +172,16 @@ object FocusOverlayController {
                 if (!isRunning) {
                     return
                 }
-                if (remainingSeconds > 0) {
+                if (isCountUp) {
+                    remainingSeconds += 1
+                    overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
+                        formatTime(remainingSeconds)
+                } else if (remainingSeconds > 0) {
                     remainingSeconds -= 1
                     overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
                         formatTime(remainingSeconds)
                 }
-                if (remainingSeconds <= 0) {
+                if (!isCountUp && remainingSeconds <= 0) {
                     advanceCycle()
                     if (overlayView == null) {
                         return
@@ -180,6 +195,10 @@ object FocusOverlayController {
     }
 
     private fun advanceCycle() {
+        if (!usesFocusRoutine) {
+            hide()
+            return
+        }
         if (isResting) {
             if (currentFocusSection >= totalFocusSections) {
                 hide()

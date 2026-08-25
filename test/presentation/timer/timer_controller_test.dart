@@ -101,10 +101,13 @@ class _FakeTimerNotificationService extends _Noop
   int cancelScheduledAlarmsCount = 0;
   int scheduleFocusFinishedCount = 0;
   int scheduleRestFinishedCount = 0;
+  int scheduleReadingRemindersCount = 0;
   int scheduleSessionTimelineCount = 0;
   int cancelOngoingCount = 0;
   int cancelCount = 0;
   int showRunningCount = 0;
+  Duration? readingFirstReminder;
+  Duration? readingReminderInterval;
 
   @override
   Future<void> cancelFocusFinished() async {
@@ -137,6 +140,18 @@ class _FakeTimerNotificationService extends _Noop
     required Duration remaining,
   }) async {
     scheduleRestFinishedCount++;
+  }
+
+  @override
+  Future<void> scheduleReadingReminders({
+    required String title,
+    required String body,
+    required Duration firstReminder,
+    required Duration interval,
+  }) async {
+    scheduleReadingRemindersCount++;
+    readingFirstReminder = firstReminder;
+    readingReminderInterval = interval;
   }
 
   @override
@@ -190,6 +205,7 @@ class _FakeTimerLiveActivityService extends _Noop
     required int remainingSeconds,
     required bool isRunning,
     required bool isResting,
+    required bool isCountUp,
   }) async {}
 
   @override
@@ -215,6 +231,9 @@ class _FakeFocusGuardService extends _Noop implements FocusGuardService {
 
 class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
   int showCount = 0;
+  int? timerSeconds;
+  bool? countsUp;
+  bool? usesRoutine;
 
   @override
   Future<bool> hasPermission() async => true;
@@ -228,6 +247,8 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
     required int remainingSeconds,
     required bool isRunning,
     required bool isResting,
+    required bool isCountUp,
+    required bool usesFocusRoutine,
     required int colorValue,
     required int currentFocusSection,
     required int totalFocusSections,
@@ -235,6 +256,9 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
     required int restIntervalSeconds,
   }) async {
     showCount++;
+    timerSeconds = remainingSeconds;
+    countsUp = isCountUp;
+    usesRoutine = usesFocusRoutine;
   }
 
   @override
@@ -408,6 +432,14 @@ void main() {
       controller.completedFocusSections.value = 5;
       expect(controller.currentFocusSection, 3);
     });
+
+    test("hobbies always use a single continuous duration", () {
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies, focusSessionCount: 3),
+      );
+
+      expect(controller.focusSessionCount, 1);
+    });
   });
 
   group("TimerController initial break countdown", () {
@@ -508,6 +540,43 @@ void main() {
   });
 
   group("TimerController focus/rest cycle", () {
+    test("reading keeps counting up without sections or an end", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.reading, goalSeconds: 0),
+        focusFeedbackService: feedback,
+      );
+
+      controller.advanceForTesting(90 * 60 + 7);
+
+      expect(controller.sessionSeconds.value, 90 * 60 + 7);
+      expect(controller.completedFocusSections.value, 0);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(feedback.finishFeedbackCount, 3);
+    });
+
+    test("hobby finishes directly without starting a rest", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 10,
+          restMinutes: 15,
+          focusSessionCount: 3,
+        ),
+        focusFeedbackService: feedback,
+      );
+
+      controller.advanceForTesting(10);
+
+      expect(controller.sessionSeconds.value, 10);
+      expect(controller.completedFocusSections.value, 1);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isSessionFinished.value, isTrue);
+      expect(feedback.finishFeedbackCount, 1);
+    });
+
     test("alarms at section end and rest end before the next section", () {
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
@@ -603,6 +672,68 @@ void main() {
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       expect(overlay.showCount, 1);
+    });
+
+    test("shows reading as a count-up stopwatch in the overlay", () {
+      final overlay = _FakeFocusOverlayService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.reading, goalSeconds: 0),
+        focusOverlayService: overlay,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+      controller.sessionSeconds.value = 42;
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.timerSeconds, 42);
+      expect(overlay.countsUp, isTrue);
+    });
+
+    test("hides sections and rest cycles from the hobby overlay", () {
+      final overlay = _FakeFocusOverlayService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies),
+        focusOverlayService: overlay,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.countsUp, isFalse);
+      expect(overlay.usesRoutine, isFalse);
+    });
+
+    test("schedules reading reminders every 30 minutes", () {
+      final notifications = _FakeTimerNotificationService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.reading, goalSeconds: 0),
+        timerNotificationService: notifications,
+      );
+      controller.sessionSeconds.value = 5 * 60;
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(notifications.scheduleReadingRemindersCount, 1);
+      expect(notifications.readingFirstReminder, const Duration(minutes: 25));
+      expect(
+        notifications.readingReminderInterval,
+        const Duration(minutes: 30),
+      );
+      expect(notifications.scheduleSessionTimelineCount, 0);
+    });
+
+    test("schedules only the hobby completion alarm", () {
+      final notifications = _FakeTimerNotificationService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies, goalSeconds: 20),
+        timerNotificationService: notifications,
+      );
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(notifications.scheduleFocusFinishedCount, 1);
+      expect(notifications.scheduleSessionTimelineCount, 0);
+      expect(notifications.scheduleRestFinishedCount, 0);
     });
 
     test(

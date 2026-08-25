@@ -27,12 +27,17 @@ struct ToggleTimerIntent: LiveActivityIntent {
       state.remainingSeconds = state.currentRemainingSeconds
       state.isRunning = false
     } else {
-      state.endDate = Date().addingTimeInterval(
-        TimeInterval(state.remainingSeconds)
-      )
+      state.endDate = state.countsUp
+        ? Date().addingTimeInterval(-TimeInterval(state.remainingSeconds))
+        : Date().addingTimeInterval(TimeInterval(state.remainingSeconds))
       state.isRunning = true
     }
-    await activity.update(ActivityContent(state: state, staleDate: state.endDate))
+    await activity.update(
+      ActivityContent(
+        state: state,
+        staleDate: state.countsUp ? nil : state.endDate
+      )
+    )
     TimerActivitySharedStore.saveAction(
       state.isRunning ? "resume" : "pause",
       state: state

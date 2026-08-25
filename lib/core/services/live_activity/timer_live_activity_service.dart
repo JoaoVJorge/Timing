@@ -33,6 +33,7 @@ class TimerLiveActivityService {
     required int remainingSeconds,
     required bool isRunning,
     required bool isResting,
+    required bool isCountUp,
   }) async {
     if (!_isSupported) {
       return;
@@ -45,6 +46,7 @@ class TimerLiveActivityService {
         "remainingSeconds": remainingSeconds,
         "isRunning": isRunning,
         "isResting": isResting,
+        "isCountUp": isCountUp,
       });
     } catch (_) {
       // iOS < 16.2, disabled activities, simulator and signing failures are
@@ -73,7 +75,6 @@ class TimerLiveActivityService {
       return null;
     }
   }
-
 
   Future<void> end() async {
     if (!_isSupported) {
