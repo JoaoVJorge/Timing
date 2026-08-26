@@ -85,9 +85,18 @@ class DailyTasksDataSource {
     required List<DailyTaskEntity> localTasks,
     required List<DailyTaskEntity> remoteTasks,
   }) {
-    final Map<String, DailyTaskEntity> byId = {
-      for (final DailyTaskEntity task in localTasks) task.id: task,
-    };
+    final Map<String, DailyTaskEntity> byId = <String, DailyTaskEntity>{};
+    for (final DailyTaskEntity local in localTasks) {
+      final DailyTaskEntity? linkedRemote = _linkedRemoteCopyOf(
+        local,
+        remoteTasks,
+      );
+      if (linkedRemote == null) {
+        byId[local.id] = local;
+        continue;
+      }
+      byId[linkedRemote.id] = _mergeGroupTaskCopy(local, linkedRemote);
+    }
     for (final DailyTaskEntity remote in remoteTasks) {
       final DailyTaskEntity? local = byId[remote.id];
       // Last-write-wins: keep the more recently mutated copy so a local change
@@ -97,6 +106,53 @@ class DailyTasksDataSource {
       }
     }
     return byId.values.toList();
+  }
+
+  DailyTaskEntity? _linkedRemoteCopyOf(
+    DailyTaskEntity local,
+    List<DailyTaskEntity> remoteTasks,
+  ) {
+    for (final DailyTaskEntity remote in remoteTasks) {
+      if (_isLinkedRemoteCopyOf(local, remote)) {
+        return remote;
+      }
+    }
+    return null;
+  }
+
+  bool _isLinkedRemoteCopyOf(DailyTaskEntity local, DailyTaskEntity remote) =>
+      local.id != remote.id &&
+      local.isFromGroup &&
+      local.groupActivityId == null &&
+      remote.groupId == local.groupId &&
+      remote.groupActivityId != null &&
+      remote.name.trim().toLowerCase() == local.name.trim().toLowerCase() &&
+      remote.targetDays == local.targetDays &&
+      remote.sequenceType == local.sequenceType &&
+      remote.goalType == local.goalType;
+
+  DailyTaskEntity _mergeGroupTaskCopy(
+    DailyTaskEntity local,
+    DailyTaskEntity linkedRemote,
+  ) {
+    final Set<String> completedDates = <String>{
+      ...linkedRemote.completedDates,
+      ...local.completedDates,
+    };
+    return linkedRemote.copyWith(
+      completedDates: completedDates.toList()..sort(),
+      updatedAt: _newerDate(linkedRemote.updatedAt, local.updatedAt),
+    );
+  }
+
+  DateTime? _newerDate(DateTime? a, DateTime? b) {
+    if (a == null) {
+      return b;
+    }
+    if (b == null) {
+      return a;
+    }
+    return a.isAfter(b) ? a : b;
   }
 
   bool _isNewer(DailyTaskEntity candidate, DailyTaskEntity current) {
@@ -194,6 +250,7 @@ class DailyTasksDataSource {
         "goalType": row["goal_type"],
         "updatedAt": row["updated_at"],
         "groupId": row["group_id"],
+        "groupActivityId": row["group_activity_id"],
       });
 
   Map<String, dynamic> _taskToRow(DailyTaskEntity task, String userId) => {
@@ -207,6 +264,7 @@ class DailyTasksDataSource {
     "last_resolved_missed_date": task.lastResolvedMissedDate,
     "goal_type": task.goalType.name,
     "group_id": task.groupId,
+    "group_activity_id": task.groupActivityId,
     "updated_at": (task.updatedAt ?? DateTime.now().toUtc())
         .toUtc()
         .toIso8601String(),

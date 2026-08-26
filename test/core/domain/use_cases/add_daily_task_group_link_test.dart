@@ -35,11 +35,16 @@ void main() {
         targetDays: 5,
         sequenceType: DailyTaskSequenceType.casual,
         groupId: "group-123",
+        groupActivityId: "activity-123",
+        id: "grp_activity-123",
       );
 
-      final DailyTaskEntity created =
-          result.getOrElse(() => throw StateError("expected task"));
+      final DailyTaskEntity created = result.getOrElse(
+        () => throw StateError("expected task"),
+      );
+      expect(created.id, "grp_activity-123");
       expect(created.groupId, "group-123");
+      expect(created.groupActivityId, "activity-123");
       expect(created.isFromGroup, true);
     });
 
@@ -62,14 +67,17 @@ void main() {
         sequenceType: DailyTaskSequenceType.casual,
         reuseMatchingTask: true,
         groupId: "group-123",
+        groupActivityId: "activity-123",
       );
 
-      final DailyTaskEntity linked =
-          result.getOrElse(() => throw StateError("expected task"));
+      final DailyTaskEntity linked = result.getOrElse(
+        () => throw StateError("expected task"),
+      );
       expect(linked.id, "existing");
       expect(linked.isFromGroup, true);
       // Persisted, not just returned.
       expect(repository.savedTasks?.single.groupId, "group-123");
+      expect(repository.savedTasks?.single.groupActivityId, "activity-123");
     });
   });
 }

@@ -32,6 +32,7 @@ class SubjectEntity extends Equatable {
     this.activityType = SubjectActivityType.daily,
     this.createdAt,
     this.groupId,
+    this.groupActivityId,
   });
 
   factory SubjectEntity.fromJson(String source) =>
@@ -56,6 +57,9 @@ class SubjectEntity extends Equatable {
     groupId: (map["groupId"] as String?)?.isEmpty ?? true
         ? null
         : map["groupId"] as String?,
+    groupActivityId: (map["groupActivityId"] as String?)?.isEmpty ?? true
+        ? null
+        : map["groupActivityId"] as String?,
   );
 
   static const int defaultRestSeconds = 60;
@@ -81,6 +85,7 @@ class SubjectEntity extends Equatable {
   /// cannot be deleted while the user is still a member (enforced by the
   /// backend delete policy) and are removed on leaving the group.
   final String? groupId;
+  final String? groupActivityId;
 
   /// Whether this subject belongs to a group and is therefore protected from
   /// manual deletion.
@@ -131,6 +136,7 @@ class SubjectEntity extends Equatable {
     "activityType": activityType.name,
     "createdAt": createdAt?.toIso8601String(),
     "groupId": groupId,
+    "groupActivityId": groupActivityId,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -150,6 +156,7 @@ class SubjectEntity extends Equatable {
     SubjectActivityType? activityType,
     DateTime? createdAt,
     String? groupId,
+    String? groupActivityId,
   }) => SubjectEntity(
     id: id,
     name: name ?? this.name,
@@ -167,6 +174,7 @@ class SubjectEntity extends Equatable {
     activityType: activityType ?? this.activityType,
     createdAt: createdAt ?? this.createdAt,
     groupId: groupId ?? this.groupId,
+    groupActivityId: groupActivityId ?? this.groupActivityId,
   );
 
   @override
@@ -187,5 +195,6 @@ class SubjectEntity extends Equatable {
     activityType,
     createdAt,
     groupId,
+    groupActivityId,
   ];
 }

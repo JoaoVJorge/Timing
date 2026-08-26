@@ -34,6 +34,7 @@ SubjectEntity _reading({
   String id = "existing",
   String name = "Bíblia",
   String? groupId,
+  String? groupActivityId,
 }) => SubjectEntity(
   id: id,
   name: name,
@@ -49,6 +50,7 @@ SubjectEntity _reading({
   focusSessionCount: 1,
   wallpaperIndex: 0,
   groupId: groupId,
+  groupActivityId: groupActivityId,
 );
 
 void main() {
@@ -64,12 +66,16 @@ void main() {
         goalSeconds: 0,
         goalPages: 10,
         groupId: "group-123",
+        groupActivityId: "activity-123",
+        id: "grp_activity-123",
       );
 
       final SubjectEntity created = result.getOrElse(
         () => throw StateError("expected subject"),
       );
+      expect(created.id, "grp_activity-123");
       expect(created.groupId, "group-123");
+      expect(created.groupActivityId, "activity-123");
       expect(created.isFromGroup, true);
     });
 
@@ -88,6 +94,7 @@ void main() {
           iconName: "book",
           reuseMatchingSubject: true,
           groupId: "group-123",
+          groupActivityId: "activity-123",
         );
 
         final SubjectEntity linked = result.getOrElse(
@@ -96,6 +103,10 @@ void main() {
         expect(linked.id, "existing");
         expect(linked.isFromGroup, true);
         expect(repository.savedSubjects?.single.groupId, "group-123");
+        expect(
+          repository.savedSubjects?.single.groupActivityId,
+          "activity-123",
+        );
       },
     );
   });

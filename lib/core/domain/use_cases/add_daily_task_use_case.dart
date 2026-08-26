@@ -16,6 +16,8 @@ class AddDailyTaskUseCase {
     required DailyTaskSequenceType sequenceType,
     bool reuseMatchingTask = false,
     String? groupId,
+    String? groupActivityId,
+    String? id,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
@@ -33,15 +35,18 @@ class AddDailyTaskUseCase {
           final DailyTaskEntity match = tasks[matchIndex];
           // Reusing an existing goal for a group: stamp the group link so it
           // becomes protected from direct deletion like a fresh group goal.
-          if (groupId != null && match.groupId != groupId) {
+          if (groupId != null &&
+              (match.groupId != groupId ||
+                  match.groupActivityId != groupActivityId)) {
             final DailyTaskEntity linked = match.copyWith(
               groupId: groupId,
+              groupActivityId: groupActivityId,
               updatedAt: DateTime.now().toUtc(),
             );
             final List<DailyTaskEntity> updatedTasks = [...tasks]
               ..[matchIndex] = linked;
-            final Either<AppError, void> saveResult = await _dailyTasksRepository
-                .saveTasks(updatedTasks);
+            final Either<AppError, void> saveResult =
+                await _dailyTasksRepository.saveTasks(updatedTasks);
             return saveResult.fold(Left.new, (_) => Right(linked));
           }
           return Right(match);
@@ -49,7 +54,7 @@ class AddDailyTaskUseCase {
       }
 
       final DailyTaskEntity newTask = DailyTaskEntity(
-        id: generateEntityId(),
+        id: id ?? generateEntityId(),
         name: name,
         colorValue: colorValue,
         targetDays: targetDays,
@@ -60,6 +65,7 @@ class AddDailyTaskUseCase {
             : DailyTaskGoalType.total,
         updatedAt: DateTime.now().toUtc(),
         groupId: groupId,
+        groupActivityId: groupActivityId,
       );
 
       final Either<AppError, void> saveResult = await _dailyTasksRepository

@@ -23,6 +23,8 @@ DailyTaskEntity _task({
   required String id,
   required List<String> completedDates,
   DateTime? updatedAt,
+  String? groupId,
+  String? groupActivityId,
 }) => DailyTaskEntity(
   id: id,
   name: "Estudar",
@@ -30,7 +32,10 @@ DailyTaskEntity _task({
   targetDays: 30,
   completedDates: completedDates,
   sequenceType: DailyTaskSequenceType.intense,
+  goalType: DailyTaskGoalType.daily,
   updatedAt: updatedAt,
+  groupId: groupId,
+  groupActivityId: groupActivityId,
 );
 
 void main() {
@@ -123,5 +128,35 @@ void main() {
 
       expect(merged.map((task) => task.id).toSet(), {"1", "2"});
     });
+
+    test(
+      "repairs old group goals that were cached without groupActivityId",
+      () {
+        final DateTime now = DateTime.now().toUtc();
+        final DailyTaskEntity legacyLocal = _task(
+          id: "local-random-id",
+          completedDates: const ["2026-08-25"],
+          updatedAt: now,
+          groupId: "group-123",
+        );
+        final DailyTaskEntity linkedRemote = _task(
+          id: "grp_activity-123",
+          completedDates: const [],
+          updatedAt: now.subtract(const Duration(minutes: 5)),
+          groupId: "group-123",
+          groupActivityId: "activity-123",
+        );
+
+        final List<DailyTaskEntity> merged = dataSource.mergeTasks(
+          localTasks: [legacyLocal],
+          remoteTasks: [linkedRemote],
+        );
+
+        expect(merged, hasLength(1));
+        expect(merged.single.id, "grp_activity-123");
+        expect(merged.single.groupActivityId, "activity-123");
+        expect(merged.single.completedDates, ["2026-08-25"]);
+      },
+    );
   });
 }

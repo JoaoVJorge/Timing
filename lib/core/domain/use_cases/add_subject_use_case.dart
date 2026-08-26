@@ -23,6 +23,7 @@ class AddSubjectUseCase {
     SubjectActivityType activityType = SubjectActivityType.daily,
     bool reuseMatchingSubject = false,
     String? groupId,
+    String? groupActivityId,
     String? id,
   }) async {
     final Either<AppError, List<SubjectEntity>> getResult =
@@ -41,8 +42,13 @@ class AddSubjectUseCase {
         );
         if (matchIndex != -1) {
           final SubjectEntity match = subjects[matchIndex];
-          if (groupId != null && match.groupId != groupId) {
-            final SubjectEntity linked = match.copyWith(groupId: groupId);
+          if (groupId != null &&
+              (match.groupId != groupId ||
+                  match.groupActivityId != groupActivityId)) {
+            final SubjectEntity linked = match.copyWith(
+              groupId: groupId,
+              groupActivityId: groupActivityId,
+            );
             final List<SubjectEntity> updatedSubjects = [...subjects]
               ..[matchIndex] = linked;
             final Either<AppError, void> saveResult = await _subjectsRepository
@@ -70,6 +76,7 @@ class AddSubjectUseCase {
         activityType: activityType,
         createdAt: DateTime.now(),
         groupId: groupId,
+        groupActivityId: groupActivityId,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

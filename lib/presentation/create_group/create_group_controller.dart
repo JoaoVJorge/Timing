@@ -475,7 +475,7 @@ class CreateGroupController extends GetxController
       await _ensureLocalSubject(activity, group);
       return;
     }
-    await _ensureLocalDailyGoal(activity, group.id);
+    await _ensureLocalDailyGoal(activity, group);
   }
 
   Future<void> _ensureLocalSubject(
@@ -500,24 +500,28 @@ class CreateGroupController extends GetxController
       activityType: SubjectActivityType.fromName(activity.activityType),
       reuseMatchingSubject: true,
       groupId: group.id,
+      groupActivityId: activityId,
       id: activityId == null || activityId.isEmpty ? null : "grp_$activityId",
     );
   }
 
   Future<void> _ensureLocalDailyGoal(
     GroupActivityDraft activity,
-    String groupId,
+    GroupEntity group,
   ) async {
     if (!isDailyGoalsTheme || activity.kind != GroupActivityKind.goal) {
       return;
     }
+    final String? activityId = group.createdActivityId;
     await _addDailyTaskUseCase(
       name: activity.name,
       colorValue: activity.colorValue,
       targetDays: activity.targetDays,
       sequenceType: DailyTaskSequenceType.casual,
       reuseMatchingTask: true,
-      groupId: groupId,
+      groupId: group.id,
+      groupActivityId: activityId,
+      id: activityId == null || activityId.isEmpty ? null : "grp_$activityId",
     );
   }
 

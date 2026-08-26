@@ -41,6 +41,7 @@ class DailyTaskEntity extends Equatable {
     this.goalType = DailyTaskGoalType.total,
     this.updatedAt,
     this.groupId,
+    this.groupActivityId,
   });
 
   factory DailyTaskEntity.fromMap(Map<String, dynamic> map) => DailyTaskEntity(
@@ -59,6 +60,9 @@ class DailyTaskEntity extends Equatable {
     groupId: (map["groupId"] as String?)?.isEmpty ?? true
         ? null
         : map["groupId"] as String?,
+    groupActivityId: (map["groupActivityId"] as String?)?.isEmpty ?? true
+        ? null
+        : map["groupActivityId"] as String?,
   );
 
   static DateTime? _parseUpdatedAt(dynamic value) {
@@ -80,6 +84,7 @@ class DailyTaskEntity extends Equatable {
   /// Non-null when this goal was handed out by a group. Such goals can't be
   /// deleted directly — the user has to leave the group to remove them.
   final String? groupId;
+  final String? groupActivityId;
 
   bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
 
@@ -137,6 +142,7 @@ class DailyTaskEntity extends Equatable {
     "goalType": goalType.name,
     "updatedAt": updatedAt?.toUtc().toIso8601String(),
     "groupId": groupId,
+    "groupActivityId": groupActivityId,
   };
 
   DailyTaskEntity copyWith({
@@ -149,6 +155,7 @@ class DailyTaskEntity extends Equatable {
     DailyTaskGoalType? goalType,
     DateTime? updatedAt,
     String? groupId,
+    String? groupActivityId,
   }) => DailyTaskEntity(
     id: id,
     name: name ?? this.name,
@@ -161,6 +168,7 @@ class DailyTaskEntity extends Equatable {
     goalType: goalType ?? this.goalType,
     updatedAt: updatedAt ?? this.updatedAt,
     groupId: groupId ?? this.groupId,
+    groupActivityId: groupActivityId ?? this.groupActivityId,
   );
 
   int _currentIntenseSequence() {
@@ -198,5 +206,6 @@ class DailyTaskEntity extends Equatable {
     goalType,
     updatedAt,
     groupId,
+    groupActivityId,
   ];
 }
