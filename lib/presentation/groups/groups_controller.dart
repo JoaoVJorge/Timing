@@ -172,7 +172,8 @@ class GroupsController extends GetxController {
     loadGroups();
   }
 
-  Future<void> loadGroups() async {
+  Future<void> loadGroups({String? preferredGroupId}) async {
+    final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
     isLoading.value = true;
     didFailLoadingGroups.value = false;
     try {
@@ -189,7 +190,7 @@ class GroupsController extends GetxController {
           // store — otherwise a created group appears in both the store add and the
           // controller add below, showing up twice.
           groups.value = List.of(value);
-          selectedGroup.value = value.isEmpty ? null : value.first;
+          selectedGroup.value = _preferredGroup(value, selectedGroupId);
         },
       );
     } on TimeoutException {
@@ -198,6 +199,17 @@ class GroupsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  GroupEntity? _preferredGroup(List<GroupEntity> value, String? groupId) {
+    if (value.isEmpty) {
+      return null;
+    }
+    if (groupId == null || groupId.isEmpty) {
+      return value.first;
+    }
+    return value.firstWhereOrNull((group) => group.id == groupId) ??
+        value.first;
   }
 
   void onSelectGroup(GroupEntity group) {
@@ -459,11 +471,12 @@ class GroupsController extends GetxController {
     await _invalidateActivityCaches();
   }
 
-  Future<void> refreshAfterActivityChange() async {
+  Future<void> refreshAfterActivityChange({String? groupId}) async {
+    final String? affectedGroupId = groupId ?? selectedGroup.value?.id;
     _activityProgressByCacheKey.clear();
     _activityProgressCacheKey = null;
-    await loadGroups();
-    if (selectedGroup.value != null &&
+    await loadGroups(preferredGroupId: affectedGroupId);
+    if (selectedGroup.value?.id == affectedGroupId &&
         selectedDetailsTab.value == GroupDetailsTab.goals) {
       activityProgress.clear();
       await loadActivityProgress();

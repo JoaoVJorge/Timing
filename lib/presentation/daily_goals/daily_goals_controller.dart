@@ -118,7 +118,9 @@ class DailyGoalsController extends GetxController {
         _lastActivityService.record(updatedTask.name);
       }
       if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
-        Get.find<GroupsController>().refreshAfterActivityChange();
+        Get.find<GroupsController>().refreshAfterActivityChange(
+          groupId: updatedTask.groupId,
+        );
       }
       _achievementUnlockService.checkForNewUnlocks();
     });
@@ -162,7 +164,9 @@ class DailyGoalsController extends GetxController {
         tasks[index] = updatedTask;
       }
       if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
-        Get.find<GroupsController>().refreshAfterActivityChange();
+        Get.find<GroupsController>().refreshAfterActivityChange(
+          groupId: updatedTask.groupId,
+        );
       }
       _achievementUnlockService.checkForNewUnlocks();
     });
