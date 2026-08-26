@@ -217,16 +217,38 @@ class _FakeTimerLiveActivityService extends _Noop
 
 class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
   int finishFeedbackCount = 0;
+  int focusLockWarningCount = 0;
 
   @override
   Future<void> playFocusFinishedFeedback() async {
     finishFeedbackCount++;
   }
+
+  @override
+  Future<void> warnFocusLock() async {
+    focusLockWarningCount++;
+  }
 }
 
 class _FakeFocusGuardService extends _Noop implements FocusGuardService {
+  final List<bool> keepScreenOnValues = <bool>[];
+  final List<bool> immersiveModeValues = <bool>[];
+  int bringAppToFrontCount = 0;
+
   @override
-  Future<void> setKeepScreenOn(bool enabled) async {}
+  Future<void> setKeepScreenOn(bool enabled) async {
+    keepScreenOnValues.add(enabled);
+  }
+
+  @override
+  Future<void> setImmersiveMode(bool enabled) async {
+    immersiveModeValues.add(enabled);
+  }
+
+  @override
+  Future<void> bringAppToFront() async {
+    bringAppToFrontCount++;
+  }
 }
 
 class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
@@ -537,6 +559,67 @@ void main() {
       controller.updateSubjectNotes("depois");
       expect(controller.subject.notes, "depois");
     });
+
+    test("focus lock blocks leaving while the session is running", () async {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(),
+        focusFeedbackService: feedback,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+      controller.sessionSeconds.value = 10;
+
+      expect(await controller.confirmExitIfNeeded(), isFalse);
+      expect(feedback.focusLockWarningCount, 1);
+      expect(controller.isSessionFinished.value, isFalse);
+    });
+
+    test("pausing focus lock allows the normal exit flow", () async {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(),
+        focusFeedbackService: feedback,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+      controller.isRunning.value = false;
+
+      expect(await controller.confirmExitIfNeeded(), isTrue);
+      expect(feedback.focusLockWarningCount, 0);
+    });
+  });
+
+  group("TimerController focus guard", () {
+    test("keeps the screen awake and hides navigation while active", () async {
+      final guard = _FakeFocusGuardService();
+      final controller = _controller(
+        _subject(),
+        focusGuardService: guard,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+
+      controller.onInit();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(guard.keepScreenOnValues, contains(true));
+      expect(guard.immersiveModeValues, contains(true));
+
+      controller.onClose();
+    });
+
+    test("restores screen navigation when the session is paused", () async {
+      final guard = _FakeFocusGuardService();
+      final controller = _controller(
+        _subject(),
+        focusGuardService: guard,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+
+      controller.togglePause();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(guard.keepScreenOnValues.last, isFalse);
+      expect(guard.immersiveModeValues.last, isFalse);
+    });
   });
 
   group("TimerController focus/rest cycle", () {
@@ -661,17 +744,22 @@ void main() {
       controller.onClose();
     });
 
-    test("shows overlay when focus lock is on and app goes background", () {
+    test("returns to the app when focus lock goes to background", () async {
       final overlay = _FakeFocusOverlayService();
+      final guard = _FakeFocusGuardService();
       final controller = _controller(
         _subject(),
         focusOverlayService: overlay,
+        focusGuardService: guard,
         appController: _FakeAppController(focusLockEnabled: true),
       );
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+      await Future<void>.delayed(Duration.zero);
 
-      expect(overlay.showCount, 1);
+      expect(guard.bringAppToFrontCount, 1);
+      expect(overlay.showCount, 0);
+      controller.onClose();
     });
 
     test("shows reading as a count-up stopwatch in the overlay", () {
@@ -679,7 +767,6 @@ void main() {
       final controller = _controller(
         _subject(category: TimeCategoryType.reading, goalSeconds: 0),
         focusOverlayService: overlay,
-        appController: _FakeAppController(focusLockEnabled: true),
       );
       controller.sessionSeconds.value = 42;
 
@@ -694,7 +781,6 @@ void main() {
       final controller = _controller(
         _subject(category: TimeCategoryType.hobbies),
         focusOverlayService: overlay,
-        appController: _FakeAppController(focusLockEnabled: true),
       );
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);

@@ -51,6 +51,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
+  static const Duration focusLockReturnCooldown = Duration(seconds: 5);
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
@@ -89,7 +90,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isAppInForeground = true;
   bool _isCatchingUpAfterBackground = false;
   bool _shouldPersistAgain = false;
+  bool _isRequestingFocusLockReturn = false;
   final int _todayFocusSecondsAtSessionStart;
+  DateTime? _lastFocusLockWarningAt;
+  Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
   late DateTime _lastAutoSaveAt;
 
@@ -380,6 +384,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> confirmExitIfNeeded() async {
+    if (isFocusLockActive) {
+      warnFocusLock();
+      return false;
+    }
+
     if (!hasActiveSession) {
       saveProgress();
       return true;
@@ -495,7 +504,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           pages: sanitizedPages,
         ).then((_) {
           if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
-            return Get.find<GroupsController>().refreshAfterActivityChange();
+            return Get.find<GroupsController>().refreshAfterActivityChange(
+              groupId: subject.groupId,
+            );
           }
         }),
       );
@@ -573,7 +584,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         seconds: elapsedSinceLastPersist,
       ).then((_) {
         if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
-          return Get.find<GroupsController>().refreshAfterActivityChange();
+          return Get.find<GroupsController>().refreshAfterActivityChange(
+            groupId: subject.groupId,
+          );
         }
       }),
     );
@@ -850,6 +863,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
+      _clearFocusLockReturnRequest();
       _hideOverlay();
       unawaited(_resumeFromBackground());
       _syncFocusGuard();
@@ -867,8 +881,39 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       if (wasInForeground) {
         _scheduleBackgroundTimeline();
       }
-      _showOverlay();
+      if (isFocusLockActive) {
+        _requestFocusLockReturn();
+      } else {
+        _showOverlay();
+      }
     }
+  }
+
+  void _requestFocusLockReturn() {
+    final DateTime now = DateTime.now();
+    if (_lastFocusLockWarningAt == null ||
+        now.difference(_lastFocusLockWarningAt!) >= focusLockReturnCooldown) {
+      _lastFocusLockWarningAt = now;
+      warnFocusLock();
+    }
+
+    if (_isRequestingFocusLockReturn) {
+      return;
+    }
+
+    _isRequestingFocusLockReturn = true;
+    _focusLockReturnResetTimer?.cancel();
+    _focusLockReturnResetTimer = Timer(
+      focusLockReturnCooldown,
+      _clearFocusLockReturnRequest,
+    );
+    unawaited(focusGuardService.bringAppToFront());
+  }
+
+  void _clearFocusLockReturnRequest() {
+    _focusLockReturnResetTimer?.cancel();
+    _focusLockReturnResetTimer = null;
+    _isRequestingFocusLockReturn = false;
   }
 
   Future<void> _catchUpAfterBackground() async {
@@ -886,17 +931,21 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _syncFocusGuard() {
-    unawaited(focusGuardService.setKeepScreenOn(isFocusLockActive));
+    final bool lockActive = isFocusLockActive;
+    unawaited(focusGuardService.setKeepScreenOn(lockActive));
+    unawaited(focusGuardService.setImmersiveMode(lockActive));
   }
 
   void _disableFocusGuard() {
     unawaited(focusGuardService.setKeepScreenOn(false));
+    unawaited(focusGuardService.setImmersiveMode(false));
   }
 
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
+    _focusLockReturnResetTimer?.cancel();
     _persistAccumulatedTime();
     _recordLastActivityIfNeeded();
     if (_isAppInForeground) {

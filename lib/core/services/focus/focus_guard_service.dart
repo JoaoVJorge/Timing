@@ -7,6 +7,14 @@ class FocusGuardService {
     await _invoke("setKeepScreenOn", <String, Object?>{"enabled": enabled});
   }
 
+  Future<void> setImmersiveMode(bool enabled) async {
+    await _invoke("setImmersiveMode", <String, Object?>{"enabled": enabled});
+  }
+
+  Future<void> bringAppToFront() async {
+    await _invoke("bringAppToFront");
+  }
+
   Future<void> _invoke(String method, [Map<String, Object?>? arguments]) async {
     try {
       await _channel.invokeMethod<void>(method, arguments);

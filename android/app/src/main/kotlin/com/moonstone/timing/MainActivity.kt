@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.view.View
+import android.view.WindowInsets
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -26,6 +28,15 @@ class MainActivity : FlutterActivity() {
                     } else {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
+                    result.success(null)
+                }
+                "setImmersiveMode" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    setImmersiveMode(enabled)
+                    result.success(null)
+                }
+                "bringAppToFront" -> {
+                    bringAppToFront()
                     result.success(null)
                 }
                 else -> result.notImplemented()
@@ -101,6 +112,51 @@ class MainActivity : FlutterActivity() {
             startActivity(intent)
         } catch (error: Exception) {
             // The settings screen may be unavailable on some devices.
+        }
+    }
+
+    private fun bringAppToFront() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        launchIntent?.addFlags(
+            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_NEW_TASK
+        )
+        if (launchIntent == null) {
+            return
+        }
+        try {
+            startActivity(launchIntent)
+        } catch (error: Exception) {
+            // Some Android variants may reject background activity launches.
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setImmersiveMode(enabled: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val controller = window.insetsController ?: return
+            if (enabled) {
+                controller.systemBarsBehavior =
+                    android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsets.Type.navigationBars())
+            } else {
+                controller.show(WindowInsets.Type.navigationBars())
+            }
+            return
+        }
+
+        val immersiveFlags =
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        if (enabled) {
+            window.decorView.systemUiVisibility =
+                window.decorView.systemUiVisibility or immersiveFlags
+        } else {
+            window.decorView.systemUiVisibility =
+                window.decorView.systemUiVisibility and immersiveFlags.inv()
         }
     }
 

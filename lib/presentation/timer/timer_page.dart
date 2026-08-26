@@ -36,10 +36,6 @@ class TimerPage extends StatelessWidget {
             controller.saveProgress();
             return;
           }
-          if (controller.isFocusLockActive && !controller.hasActiveSession) {
-            controller.warnFocusLock();
-            return;
-          }
           if (await controller.confirmExitIfNeeded()) {
             appNavigator.back(result: controller.subject);
           }
