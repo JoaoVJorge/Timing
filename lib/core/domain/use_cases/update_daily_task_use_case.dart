@@ -14,7 +14,7 @@ class UpdateDailyTaskUseCase {
     required int colorValue,
     required int targetDays,
     required DailyTaskSequenceType sequenceType,
-  }) async {
+  }) => dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await dailyTasksRepository.getTasks();
 
@@ -47,5 +47,5 @@ class UpdateDailyTaskUseCase {
 
       return saveResult.fold(Left.new, (_) => Right(updatedTask));
     });
-  }
+  });
 }

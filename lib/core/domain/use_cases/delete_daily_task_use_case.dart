@@ -8,15 +8,16 @@ class DeleteDailyTaskUseCase {
 
   final DailyTasksRepository _dailyTasksRepository;
 
-  Future<Either<AppError, void>> call({required String taskId}) async {
-    final Either<AppError, List<DailyTaskEntity>> getResult =
-        await _dailyTasksRepository.getTasks();
+  Future<Either<AppError, void>> call({required String taskId}) =>
+      _dailyTasksRepository.runSerializedMutation(() async {
+        final Either<AppError, List<DailyTaskEntity>> getResult =
+            await _dailyTasksRepository.getTasks();
 
-    return getResult.fold(
-      (error) async => Left(error),
-      (tasks) => _dailyTasksRepository.saveTasks(
-        tasks.where((task) => task.id != taskId).toList(),
-      ),
-    );
-  }
+        return getResult.fold(
+          (error) async => Left(error),
+          (tasks) => _dailyTasksRepository.saveTasks(
+            tasks.where((task) => task.id != taskId).toList(),
+          ),
+        );
+      });
 }

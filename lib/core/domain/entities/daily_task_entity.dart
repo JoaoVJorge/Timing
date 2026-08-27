@@ -98,6 +98,14 @@ class DailyTaskEntity extends Equatable {
       "${date.month.toString().padLeft(2, "0")}-"
       "${date.day.toString().padLeft(2, "0")}";
 
+  List<String> completedDatesAfterToggle(DateTime date) {
+    final String selectedDate = dateKey(date);
+    if (completedDates.contains(selectedDate)) {
+      return completedDates.where((value) => value != selectedDate).toList();
+    }
+    return [...completedDates, selectedDate];
+  }
+
   bool get isCheckedToday => completedDates.contains(dateKey(DateTime.now()));
 
   int get completedDays => completedDates.length;

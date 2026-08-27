@@ -12,6 +12,10 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
   List<DailyTaskEntity>? savedTasks;
 
   @override
+  Future<T> runSerializedMutation<T>(Future<T> Function() mutation) =>
+      mutation();
+
+  @override
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async =>
       Right(_tasks);
 
@@ -50,12 +54,12 @@ void main() {
 
     test("does not turn a personal goal into the group's goal", () async {
       final repository = _FakeDailyTasksRepository([
-        DailyTaskEntity(
+        const DailyTaskEntity(
           id: "existing",
           name: "Estudar",
           colorValue: 1,
           targetDays: 5,
-          completedDates: const [],
+          completedDates: [],
         ),
       ]);
       final useCase = AddDailyTaskUseCase(dailyTasksRepository: repository);
@@ -82,12 +86,12 @@ void main() {
     });
 
     test("reuses the canonical copy of the same group goal", () async {
-      final DailyTaskEntity canonical = DailyTaskEntity(
+      final DailyTaskEntity canonical = const DailyTaskEntity(
         id: "grp_activity-123",
         name: "Estudar",
         colorValue: 1,
         targetDays: 5,
-        completedDates: const ["2026-08-26"],
+        completedDates: ["2026-08-26"],
         groupId: "group-123",
         groupActivityId: "activity-123",
       );

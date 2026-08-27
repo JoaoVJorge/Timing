@@ -12,6 +12,7 @@ class DailyGoalsBindings extends Bindings {
         deleteDailyTaskUseCase: Get.find(),
         lastActivityService: Get.find(),
         achievementUnlockService: Get.find(),
+        activityChangeBus: Get.find(),
       ),
     );
   }

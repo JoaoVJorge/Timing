@@ -25,10 +25,9 @@ class DailyGoalsPage extends StatelessWidget {
       topBar: AppTopBar(
         title: context.l10n.homeTasksSection,
         showBackButton: true,
-        trailing: const SwipeHintButton(
-          title: "Gestos da meta",
-          message:
-              "Arraste uma meta para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.",
+        trailing: SwipeHintButton(
+          title: context.l10n.dailyGoalSwipeHintTitle,
+          message: context.l10n.dailyGoalSwipeHintMessage,
         ),
       ),
       body: Obx(() {
@@ -184,13 +183,13 @@ class _TaskSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      for (int index = 0; index < tasks.length; index++) ...[
+      for (final (int index, DailyTaskEntity task) in tasks.indexed) ...[
         DailyTaskTile(
-          key: ValueKey(tasks[index].id),
-          task: tasks[index],
-          onEdit: () => onEdit(tasks[index]),
-          onToggle: () => onToggle(tasks[index]),
-          onDelete: () => onDelete(tasks[index]),
+          key: ValueKey(task.id),
+          task: task,
+          onEdit: () => onEdit(task),
+          onToggle: () => onToggle(task),
+          onDelete: () => onDelete(task),
         ),
         if (index != tasks.length - 1) const Gap(AppSpacing.betweenRelated),
       ],

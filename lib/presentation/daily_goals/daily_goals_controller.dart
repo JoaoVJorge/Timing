@@ -13,8 +13,8 @@ import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
@@ -25,6 +25,8 @@ class DailyGoalsController extends GetxController {
     required this._deleteDailyTaskUseCase,
     required this._lastActivityService,
     required this._achievementUnlockService,
+    required this._activityChangeBus,
+    this._confirmDelete = showDeleteConfirmationDialog,
   });
 
   final AppNavigator _appNavigator;
@@ -33,6 +35,8 @@ class DailyGoalsController extends GetxController {
   final DeleteDailyTaskUseCase _deleteDailyTaskUseCase;
   final LastActivityService _lastActivityService;
   final AchievementUnlockService _achievementUnlockService;
+  final ActivityChangeBus _activityChangeBus;
+  final DeleteConfirmationCallback _confirmDelete;
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
@@ -82,14 +86,14 @@ class DailyGoalsController extends GetxController {
     final DailyTaskEntity? createdTask = result as DailyTaskEntity?;
     if (createdTask != null) {
       tasks.add(createdTask);
-      _askAboutMissedYesterday();
+      unawaited(_askAboutMissedYesterday());
     }
   }
 
   Future<void> onEditTask(DailyTaskEntity task) async {
     if (task.isFromGroup) {
       _appNavigator.showErrorSnackBar(
-        "Esta meta é de um grupo. Edite pelo grupo para alterar.",
+        Get.context?.l10n.groupGoalEditBlockedMessage,
       );
       return;
     }
@@ -113,29 +117,29 @@ class DailyGoalsController extends GetxController {
       return;
     }
 
-    final int originalIndex = tasks.indexWhere((item) => item.id == task.id);
-    if (originalIndex == -1) {
-      _togglingTaskIds.remove(task.id);
-      return;
-    }
-    final List<DailyTaskEntity> taskSnapshot = List.of(tasks);
-    final DailyTaskEntity originalTask = tasks[originalIndex];
-    final String todayKey = DailyTaskEntity.dateKey(DateTime.now());
-    final List<String> optimisticDates =
-        originalTask.completedDates.contains(todayKey)
-        ? originalTask.completedDates.where((date) => date != todayKey).toList()
-        : [...originalTask.completedDates, todayKey];
-    tasks[originalIndex] = originalTask.copyWith(
-      completedDates: optimisticDates,
-      updatedAt: DateTime.now().toUtc(),
-    );
-
     try {
-      final Either<AppError, DailyTaskEntity> result =
-          await _toggleDailyTaskCheckUseCase(
-            taskId: task.id,
-            currentTasks: taskSnapshot,
-          );
+      final int originalIndex = tasks.indexWhere((item) => item.id == task.id);
+      if (originalIndex == -1) {
+        return;
+      }
+      final DailyTaskEntity originalTask = tasks[originalIndex];
+      final DateTime toggleDate = DateTime.now();
+      tasks[originalIndex] = originalTask.copyWith(
+        completedDates: originalTask.completedDatesAfterToggle(toggleDate),
+        updatedAt: DateTime.now().toUtc(),
+      );
+
+      late final Either<AppError, DailyTaskEntity> result;
+      try {
+        result = await _toggleDailyTaskCheckUseCase(
+          taskId: task.id,
+          date: toggleDate,
+        );
+      } catch (_) {
+        _restoreTask(originalTask);
+        _appNavigator.showErrorSnackBar();
+        return;
+      }
 
       result.fold(
         (error) {
@@ -152,19 +156,14 @@ class DailyGoalsController extends GetxController {
           if (updatedTask.isCheckedToday) {
             unawaited(_lastActivityService.record(updatedTask.name));
           }
-          if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
-            unawaited(
-              Get.find<GroupsController>().refreshAfterActivityChange(
-                groupId: updatedTask.groupId,
-              ),
+          if (updatedTask.isFromGroup) {
+            _activityChangeBus.notifyGroupActivityChanged(
+              groupId: updatedTask.groupId,
             );
           }
           unawaited(_achievementUnlockService.checkForNewUnlocks());
         },
       );
-    } catch (_) {
-      _restoreTask(originalTask);
-      _appNavigator.showErrorSnackBar();
     } finally {
       _togglingTaskIds.remove(task.id);
     }
@@ -207,7 +206,6 @@ class DailyGoalsController extends GetxController {
           date: didComplete ? yesterday : null,
           resolvedMissedDate: missedDate,
           toggleDate: didComplete,
-          currentTasks: List.of(tasks),
         );
 
     result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
@@ -215,8 +213,8 @@ class DailyGoalsController extends GetxController {
       if (index != -1) {
         tasks[index] = updatedTask;
       }
-      if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
-        Get.find<GroupsController>().refreshAfterActivityChange(
+      if (updatedTask.isFromGroup) {
+        _activityChangeBus.notifyGroupActivityChanged(
           groupId: updatedTask.groupId,
         );
       }
@@ -227,12 +225,12 @@ class DailyGoalsController extends GetxController {
   Future<void> onDeleteTask(DailyTaskEntity task) async {
     if (task.isFromGroup) {
       _appNavigator.showErrorSnackBar(
-        "Esta meta é de um grupo. Saia do grupo para removê-la.",
+        Get.context?.l10n.groupGoalDeleteBlockedMessage,
       );
       return;
     }
 
-    final bool confirmed = await showDeleteConfirmationDialog(
+    final bool confirmed = await _confirmDelete(
       itemName: task.name,
       itemTypeName: _goalTypeName,
     );
@@ -240,8 +238,15 @@ class DailyGoalsController extends GetxController {
       return;
     }
 
+    final List<DailyTaskEntity> previousTasks = List.of(tasks);
     tasks.removeWhere((item) => item.id == task.id);
-    await _deleteDailyTaskUseCase(taskId: task.id);
+    final Either<AppError, void> result = await _deleteDailyTaskUseCase(
+      taskId: task.id,
+    );
+    result.fold((error) {
+      tasks.value = previousTasks;
+      _appNavigator.showErrorSnackBar(error.message);
+    }, (_) {});
   }
 
   String? get _goalTypeName {

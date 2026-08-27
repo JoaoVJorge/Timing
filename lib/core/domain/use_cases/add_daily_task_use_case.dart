@@ -18,7 +18,7 @@ class AddDailyTaskUseCase {
     String? groupId,
     String? groupActivityId,
     String? id,
-  }) async {
+  }) => _dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasks();
 
@@ -76,5 +76,5 @@ class AddDailyTaskUseCase {
 
       return saveResult.fold(Left.new, (_) => Right(newTask));
     });
-  }
+  });
 }

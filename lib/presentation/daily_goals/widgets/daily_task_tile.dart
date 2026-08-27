@@ -64,6 +64,7 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
         ),
         SwipeRevealAction(
           iconPath: "trash",
+          iconSize: 20,
           background: context.colorTokens.error,
           iconColor: context.colorTokens.white,
           locked: widget.task.isFromGroup,

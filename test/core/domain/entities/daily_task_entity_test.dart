@@ -4,20 +4,20 @@ import "package:timing/core/domain/entities/daily_task_entity.dart";
 void main() {
   group("DailyTaskEntity", () {
     test("maps legacy goal types to the new sequence types", () {
-      final DailyTaskEntity intense = DailyTaskEntity.fromMap({
+      final DailyTaskEntity intense = DailyTaskEntity.fromMap(const {
         "id": "1",
         "name": "Treinar",
         "colorValue": 123,
         "targetDays": 7,
-        "completedDates": const <String>[],
+        "completedDates": <String>[],
         "goalType": "daily",
       });
-      final DailyTaskEntity casual = DailyTaskEntity.fromMap({
+      final DailyTaskEntity casual = DailyTaskEntity.fromMap(const {
         "id": "2",
         "name": "Ler",
         "colorValue": 456,
         "targetDays": 7,
-        "completedDates": const <String>[],
+        "completedDates": <String>[],
         "goalType": "total",
       });
 
@@ -43,12 +43,12 @@ void main() {
     });
 
     test("tracks group ownership and survives a map round-trip", () {
-      final DailyTaskEntity groupGoal = DailyTaskEntity(
+      final DailyTaskEntity groupGoal = const DailyTaskEntity(
         id: "1",
         name: "Estudar",
         colorValue: 1,
         targetDays: 5,
-        completedDates: const [],
+        completedDates: [],
         groupId: "group-123",
       );
       final DailyTaskEntity soloGoal = groupGoal.copyWith(name: "Ler");
@@ -61,12 +61,12 @@ void main() {
     });
 
     test("a goal with no group is not locked", () {
-      final DailyTaskEntity goal = DailyTaskEntity(
+      final DailyTaskEntity goal = const DailyTaskEntity(
         id: "1",
         name: "Estudar",
         colorValue: 1,
         targetDays: 5,
-        completedDates: const [],
+        completedDates: [],
       );
 
       expect(goal.isFromGroup, false);

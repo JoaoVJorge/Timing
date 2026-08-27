@@ -13,6 +13,10 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
   List<DailyTaskEntity>? savedTasks;
 
   @override
+  Future<T> runSerializedMutation<T>(Future<T> Function() mutation) =>
+      mutation();
+
+  @override
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
     getTasksCalls++;
     return Right(tasks);
@@ -29,36 +33,30 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
 }
 
 void main() {
-  test(
-    "uses the in-memory snapshot without fetching before a toggle",
-    () async {
-      final DailyTaskEntity task = DailyTaskEntity(
-        id: "goal-1",
-        name: "Meta",
-        colorValue: 1,
-        targetDays: 14,
-        completedDates: const [],
-      );
-      final _FakeDailyTasksRepository repository = _FakeDailyTasksRepository([
-        task,
-      ]);
-      final ToggleDailyTaskCheckUseCase useCase = ToggleDailyTaskCheckUseCase(
-        dailyTasksRepository: repository,
-      );
+  test("reads the canonical repository state before a toggle", () async {
+    final DailyTaskEntity task = const DailyTaskEntity(
+      id: "goal-1",
+      name: "Meta",
+      colorValue: 1,
+      targetDays: 14,
+      completedDates: [],
+    );
+    final _FakeDailyTasksRepository repository = _FakeDailyTasksRepository([
+      task,
+    ]);
+    final ToggleDailyTaskCheckUseCase useCase = ToggleDailyTaskCheckUseCase(
+      dailyTasksRepository: repository,
+    );
 
-      final Either<AppError, DailyTaskEntity> result = await useCase(
-        taskId: task.id,
-        currentTasks: [task],
-      );
+    final Either<AppError, DailyTaskEntity> result = await useCase(
+      taskId: task.id,
+    );
 
-      expect(repository.getTasksCalls, 0);
-      expect(repository.savedTasks?.single.isCheckedToday, true);
-      expect(
-        result
-            .getOrElse(() => throw StateError("expected task"))
-            .isCheckedToday,
-        true,
-      );
-    },
-  );
+    expect(repository.getTasksCalls, 1);
+    expect(repository.savedTasks?.single.isCheckedToday, true);
+    expect(
+      result.getOrElse(() => throw StateError("expected task")).isCheckedToday,
+      true,
+    );
+  });
 }
