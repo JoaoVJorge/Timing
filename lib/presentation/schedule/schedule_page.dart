@@ -195,6 +195,7 @@ class _DayEventsPanel extends StatelessWidget {
                           ),
                           SwipeRevealAction(
                             iconPath: "trash",
+                            iconSize: 20,
                             background: context.colorTokens.error,
                             iconColor: context.colorTokens.white,
                             onTap: () => onDeleteEntry(entry.id),
@@ -417,7 +418,6 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
       ),
     );
   }
-
 }
 
 class _MonthPickerTextButton extends StatelessWidget {

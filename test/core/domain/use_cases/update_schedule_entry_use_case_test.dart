@@ -68,39 +68,48 @@ void main() {
       expect(edited.weekday, DateTime.wednesday);
       expect(edited.colorValue, 42);
       // The other entry is untouched.
-      expect(entries.any((e) => e.id == "b" && e.weekday == DateTime.tuesday),
-          isTrue);
-    });
-
-    test("spreads extra weekdays into new entries keeping the original id",
-        () async {
-      final repository = _FakeScheduleRepository([
-        _entry(id: "a", weekday: DateTime.monday),
-      ]);
-      final useCase = UpdateScheduleEntryUseCase(
-        scheduleRepository: repository,
-      );
-
-      final result = await useCase(
-        entryId: "a",
-        title: "Gym",
-        weekdays: const [DateTime.monday, DateTime.wednesday, DateTime.friday],
-        startMinutes: null,
-        endMinutes: null,
-        colorValue: 7,
-        activeFrom: DateTime(2026, 1, 1),
-        activeUntil: null,
-      );
-
-      final entries = result.getOrElse(() => []);
-      expect(entries.length, 3);
-      expect(entries.where((e) => e.id == "a").length, 1);
       expect(
-        entries.map((e) => e.weekday).toSet(),
-        {DateTime.monday, DateTime.wednesday, DateTime.friday},
+        entries.any((e) => e.id == "b" && e.weekday == DateTime.tuesday),
+        isTrue,
       );
-      expect(entries.every((e) => e.title == "Gym"), isTrue);
     });
+
+    test(
+      "spreads extra weekdays into new entries keeping the original id",
+      () async {
+        final repository = _FakeScheduleRepository([
+          _entry(id: "a", weekday: DateTime.monday),
+        ]);
+        final useCase = UpdateScheduleEntryUseCase(
+          scheduleRepository: repository,
+        );
+
+        final result = await useCase(
+          entryId: "a",
+          title: "Gym",
+          weekdays: const [
+            DateTime.monday,
+            DateTime.wednesday,
+            DateTime.friday,
+          ],
+          startMinutes: null,
+          endMinutes: null,
+          colorValue: 7,
+          activeFrom: DateTime(2026, 1, 1),
+          activeUntil: null,
+        );
+
+        final entries = result.getOrElse(() => []);
+        expect(entries.length, 3);
+        expect(entries.where((e) => e.id == "a").length, 1);
+        expect(entries.map((e) => e.weekday).toSet(), {
+          DateTime.monday,
+          DateTime.wednesday,
+          DateTime.friday,
+        });
+        expect(entries.every((e) => e.title == "Gym"), isTrue);
+      },
+    );
 
     test("fails when no weekday is provided", () async {
       final repository = _FakeScheduleRepository([_entry(id: "a")]);
