@@ -2069,6 +2069,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupActivitySessionsDataLabel => 'جلسات';
 
   @override
+  String get groupGoalTargetDataLabel => 'المدة المستهدفة';
+
+  @override
+  String get groupGoalCurrentDayDataLabel => 'يوم الهدف';
+
+  @override
   String get groupActivityPendingUsersTitle => 'المستخدمون المعلقون';
 
   @override

@@ -1187,6 +1187,8 @@
   "groupActivityFocusDataLabel": "Fokus",
   "groupActivityPauseDataLabel": "Pause",
   "groupActivitySessionsDataLabel": "Sitzungen",
+  "groupGoalTargetDataLabel": "Zieldauer",
+  "groupGoalCurrentDayDataLabel": "Zieltag",
   "groupActivityPendingUsersTitle": "Ausstehende Nutzer",
   "groupActivityAllCompletedToday": "Alle haben die Aktivität heute abgeschlossen.",
   "groupNoImagesTitle": "Noch keine Bilder",

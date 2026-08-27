@@ -877,6 +877,8 @@
   "groupActivityFocusDataLabel": "Enfoque",
   "groupActivityPauseDataLabel": "Pausa",
   "groupActivitySessionsDataLabel": "Sesiones",
+  "groupGoalTargetDataLabel": "Duración objetivo",
+  "groupGoalCurrentDayDataLabel": "Día de la meta",
   "groupActivityPendingUsersTitle": "Usuarios pendientes",
   "groupActivityAllCompletedToday": "Todos completaron la actividad hoy.",
   "groupNoImagesTitle": "Aún no hay imágenes",

@@ -1187,6 +1187,8 @@
   "groupActivityFocusDataLabel": "تركيز",
   "groupActivityPauseDataLabel": "استراحة",
   "groupActivitySessionsDataLabel": "جلسات",
+  "groupGoalTargetDataLabel": "المدة المستهدفة",
+  "groupGoalCurrentDayDataLabel": "يوم الهدف",
   "groupActivityPendingUsersTitle": "المستخدمون المعلقون",
   "groupActivityAllCompletedToday": "أكمل الجميع النشاط اليوم.",
   "groupNoImagesTitle": "?? ???? ??? ???",

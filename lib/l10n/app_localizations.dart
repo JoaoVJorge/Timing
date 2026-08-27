@@ -3760,6 +3760,18 @@ abstract class AppLocalizations {
   /// **'Sessions'**
   String get groupActivitySessionsDataLabel;
 
+  /// No description provided for @groupGoalTargetDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target duration'**
+  String get groupGoalTargetDataLabel;
+
+  /// No description provided for @groupGoalCurrentDayDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal day'**
+  String get groupGoalCurrentDayDataLabel;
+
   /// No description provided for @groupActivityPendingUsersTitle.
   ///
   /// In en, this message translates to:

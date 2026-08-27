@@ -2093,6 +2093,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupActivitySessionsDataLabel => 'Sesiones';
 
   @override
+  String get groupGoalTargetDataLabel => 'Duración objetivo';
+
+  @override
+  String get groupGoalCurrentDayDataLabel => 'Día de la meta';
+
+  @override
   String get groupActivityPendingUsersTitle => 'Usuarios pendientes';
 
   @override

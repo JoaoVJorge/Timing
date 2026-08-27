@@ -2108,6 +2108,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupActivitySessionsDataLabel => 'Sitzungen';
 
   @override
+  String get groupGoalTargetDataLabel => 'Zieldauer';
+
+  @override
+  String get groupGoalCurrentDayDataLabel => 'Zieltag';
+
+  @override
   String get groupActivityPendingUsersTitle => 'Ausstehende Nutzer';
 
   @override

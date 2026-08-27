@@ -2109,6 +2109,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get groupActivitySessionsDataLabel => 'Sessions';
 
   @override
+  String get groupGoalTargetDataLabel => 'Durée cible';
+
+  @override
+  String get groupGoalCurrentDayDataLabel => 'Jour de l’objectif';
+
+  @override
   String get groupActivityPendingUsersTitle => 'Utilisateurs en attente';
 
   @override
