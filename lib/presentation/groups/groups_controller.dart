@@ -10,6 +10,7 @@ import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
+import "package:timing/core/domain/entities/group_image_messages_page.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
@@ -18,6 +19,7 @@ import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
@@ -33,6 +35,7 @@ class GroupsController extends GetxController {
     required this._appNavigator,
     required this._supabaseService,
     required this._localStorageService,
+    required this._activityChangeBus,
   });
 
   final GetGroupsUseCase _getGroupsUseCase;
@@ -40,7 +43,16 @@ class GroupsController extends GetxController {
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
+  final ActivityChangeBus _activityChangeBus;
   final ImagePicker _imagePicker = ImagePicker();
+
+  /// A logged focus session auto-saves every few seconds; without a debounce
+  /// each save would trigger a full groups refetch. Coalesce bursts into one
+  /// refresh once the activity settles.
+  static const Duration _activityChangeDebounce = Duration(seconds: 3);
+  StreamSubscription<GroupActivityChange>? _activityChangeSubscription;
+  Timer? _activityChangeDebounceTimer;
+  String? _pendingActivityChangeGroupId;
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
@@ -74,6 +86,8 @@ class GroupsController extends GetxController {
   final Map<String, List<GroupActivityProgressEntity>>
   _activityProgressByCacheKey = <String, List<GroupActivityProgressEntity>>{};
   final Set<String> _loadingImageMessageGroupIds = <String>{};
+  final RxSet<String> _loadingOlderImageMessageGroupIds = <String>{}.obs;
+  final Map<String, bool> _hasMoreImageMessagesByGroup = <String, bool>{};
   static const Duration _groupsLoadTimeout = Duration(seconds: 20);
 
   List<GroupMemberEntity> get rankedMembers {
@@ -169,7 +183,28 @@ class GroupsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _activityChangeSubscription = _activityChangeBus.stream.listen(
+      _onGroupActivityChanged,
+    );
     loadGroups();
+  }
+
+  @override
+  void onClose() {
+    _activityChangeDebounceTimer?.cancel();
+    unawaited(_activityChangeSubscription?.cancel());
+    super.onClose();
+  }
+
+  void _onGroupActivityChanged(GroupActivityChange change) {
+    _pendingActivityChangeGroupId =
+        change.groupId ?? _pendingActivityChangeGroupId;
+    _activityChangeDebounceTimer?.cancel();
+    _activityChangeDebounceTimer = Timer(_activityChangeDebounce, () {
+      final String? groupId = _pendingActivityChangeGroupId;
+      _pendingActivityChangeGroupId = null;
+      unawaited(refreshAfterActivityChange(groupId: groupId));
+    });
   }
 
   Future<void> loadGroups({String? preferredGroupId}) async {
@@ -376,6 +411,9 @@ class GroupsController extends GetxController {
   List<GroupImageMessageEntity> imageMessagesFor(String groupId) =>
       imageMessagesByGroup[groupId] ?? const [];
 
+  bool isLoadingOlderImageMessagesFor(String groupId) =>
+      _loadingOlderImageMessageGroupIds.contains(groupId);
+
   Future<void> loadImageMessages(String groupId) async {
     if (imageMessagesByGroup.containsKey(groupId) ||
         _loadingImageMessageGroupIds.contains(groupId)) {
@@ -384,15 +422,46 @@ class GroupsController extends GetxController {
     _loadingImageMessageGroupIds.add(groupId);
     isLoadingChat.value = true;
     try {
-      final Either<AppError, List<GroupImageMessageEntity>> result =
+      final Either<AppError, GroupImageMessagesPage> result =
           await _groupsRepository.getImageMessages(groupId);
-      result.fold(
-        (error) => _appNavigator.showErrorSnackBar(),
-        (messages) => imageMessagesByGroup[groupId] = messages,
-      );
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (page) {
+        imageMessagesByGroup[groupId] = page.messages;
+        _hasMoreImageMessagesByGroup[groupId] = page.hasMore;
+      });
     } finally {
       _loadingImageMessageGroupIds.remove(groupId);
       isLoadingChat.value = false;
+    }
+  }
+
+  Future<void> loadOlderImageMessages(String groupId) async {
+    final List<GroupImageMessageEntity> current = imageMessagesFor(groupId);
+    if (current.isEmpty ||
+        _hasMoreImageMessagesByGroup[groupId] != true ||
+        _loadingImageMessageGroupIds.contains(groupId)) {
+      return;
+    }
+
+    _loadingImageMessageGroupIds.add(groupId);
+    _loadingOlderImageMessageGroupIds.add(groupId);
+    try {
+      final Either<AppError, GroupImageMessagesPage> result =
+          await _groupsRepository.getImageMessages(
+            groupId,
+            before: current.first,
+          );
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (page) {
+        final List<GroupImageMessageEntity> latest = imageMessagesFor(groupId);
+        final Set<String> existingIds = latest.map((item) => item.id).toSet();
+        imageMessagesByGroup[groupId] = [
+          ...page.messages.where((item) => !existingIds.contains(item.id)),
+          ...latest,
+        ];
+        _hasMoreImageMessagesByGroup[groupId] = page.hasMore;
+      });
+    } finally {
+      _loadingOlderImageMessageGroupIds.remove(groupId);
+      _loadingImageMessageGroupIds.remove(groupId);
     }
   }
 
@@ -546,7 +615,9 @@ class GroupsController extends GetxController {
     if (selectedDetailsTab.value == GroupDetailsTab.goals) {
       await loadActivityProgress();
     }
-    _appNavigator.showSuccessSnackBar("Grupo atualizado com sucesso");
+    _appNavigator.showSuccessSnackBar(
+      Get.context?.l10n.groupUpdatedSuccess ?? "Group updated successfully",
+    );
   }
 
   Future<void> onConfirmLeaveGroup() async {
@@ -561,6 +632,7 @@ class GroupsController extends GetxController {
     result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
       groups.removeWhere((item) => item.id == group.id);
       imageMessagesByGroup.remove(group.id);
+      _hasMoreImageMessagesByGroup.remove(group.id);
       _activityProgressByCacheKey.removeWhere(
         (key, value) => key.startsWith("${group.id}:"),
       );

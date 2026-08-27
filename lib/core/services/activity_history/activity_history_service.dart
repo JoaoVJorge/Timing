@@ -4,6 +4,7 @@ import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
 
 /// Append-only local trail of every logged activity, kept so the app can answer
 /// time-and-category scoped questions ("studied yesterday", "pages read this
@@ -11,9 +12,13 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 /// [DailyProgressService]; this keeps the granular, per-session detail those
 /// aggregates throw away (which category, which subject, when).
 class ActivityHistoryService {
-  ActivityHistoryService({required this._localStorageService});
+  ActivityHistoryService({
+    required this._localStorageService,
+    AppLoggerService? logger,
+  }) : _logger = logger ?? AppLoggerService();
 
   final AppLocalStorageService _localStorageService;
+  final AppLoggerService _logger;
 
   /// Entries older than this are pruned on write so the log stays bounded while
   /// still covering every period the UI can ask for (day / week / month).
@@ -40,7 +45,12 @@ class ActivityHistoryService {
           ),
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "ActivityHistoryService.load discarded a corrupt cache",
+        error: error,
+        stackTrace: stackTrace,
+      );
       _entries.clear();
     }
   }

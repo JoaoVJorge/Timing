@@ -13,6 +13,7 @@ class GroupsBindings extends Bindings {
         appNavigator: Get.find(),
         supabaseService: Get.find(),
         localStorageService: Get.find(),
+        activityChangeBus: Get.find(),
       ),
       permanent: true,
     );

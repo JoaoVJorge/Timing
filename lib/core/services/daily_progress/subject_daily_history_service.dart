@@ -5,15 +5,20 @@ import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
 
 /// Per-subject version of [DailyProgressService]: keeps a day-by-day trail of
 /// focus time and pages for each subject so the stats screen can draw an honest
 /// "Comparativos" chart. Persisted as a nested `{subjectId: {date: counters}}`
 /// map keyed the same way as the global daily progress.
 class SubjectDailyHistoryService {
-  SubjectDailyHistoryService({required this._localStorageService});
+  SubjectDailyHistoryService({
+    required this._localStorageService,
+    AppLoggerService? logger,
+  }) : _logger = logger ?? AppLoggerService();
 
   final AppLocalStorageService _localStorageService;
+  final AppLoggerService _logger;
 
   final Map<String, Map<String, DailyProgressEntity>> _bySubject = {};
 
@@ -37,7 +42,12 @@ class SubjectDailyHistoryService {
           );
         });
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "SubjectDailyHistoryService.load discarded a corrupt cache",
+        error: error,
+        stackTrace: stackTrace,
+      );
       _bySubject.clear();
     }
   }

@@ -5,14 +5,19 @@ import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
 
 /// Tracks lightweight per-day activity counters (focus time, sessions, pages)
 /// so the Home screen can show honest "today" metrics. Persists a date-keyed
 /// map locally; only the current day is exposed reactively through [today].
 class DailyProgressService {
-  DailyProgressService({required this._localStorageService});
+  DailyProgressService({
+    required this._localStorageService,
+    AppLoggerService? logger,
+  }) : _logger = logger ?? AppLoggerService();
 
   final AppLocalStorageService _localStorageService;
+  final AppLoggerService _logger;
 
   final Map<String, DailyProgressEntity> _byDate = {};
 
@@ -50,7 +55,12 @@ class DailyProgressService {
           ),
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "DailyProgressService.load discarded a corrupt cache",
+        error: error,
+        stackTrace: stackTrace,
+      );
       _byDate.clear();
     }
     _refreshToday();
