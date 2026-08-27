@@ -5361,6 +5361,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invitations you send for someone to join a group show up here.'**
   String get groupInvitationsSentEmptyDescription;
+
+  /// No description provided for @swipeHintDismissLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get swipeHintDismissLabel;
+
+  /// No description provided for @dailyGoalSwipeHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal gestures'**
+  String get dailyGoalSwipeHintTitle;
+
+  /// No description provided for @dailyGoalSwipeHintMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe a goal to edit or delete it. Some actions may be unavailable for group goals.'**
+  String get dailyGoalSwipeHintMessage;
+
+  /// No description provided for @activitySwipeHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity gestures'**
+  String get activitySwipeHintTitle;
+
+  /// No description provided for @activitySwipeHintMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe an activity to see notes, stats, edit or delete it. Some actions may be unavailable for group items.'**
+  String get activitySwipeHintMessage;
+
+  /// No description provided for @groupGoalEditBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This goal belongs to a group. Edit it from the group to make changes.'**
+  String get groupGoalEditBlockedMessage;
+
+  /// No description provided for @groupGoalDeleteBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This goal belongs to a group. Leave the group to remove it.'**
+  String get groupGoalDeleteBlockedMessage;
+
+  /// No description provided for @groupActivityEditBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This activity belongs to a group. Edit it from the group to make changes.'**
+  String get groupActivityEditBlockedMessage;
+
+  /// No description provided for @groupActivityDeleteBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This activity belongs to a group. Leave the group to remove it.'**
+  String get groupActivityDeleteBlockedMessage;
+
+  /// No description provided for @groupUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Group updated successfully'**
+  String get groupUpdatedSuccess;
+
+  /// No description provided for @groupInviteCanceledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation canceled.'**
+  String get groupInviteCanceledMessage;
+
+  /// No description provided for @groupInviteSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation sent.'**
+  String get groupInviteSentMessage;
+
+  /// No description provided for @timerReadingReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Another 30 minutes of reading completed.'**
+  String get timerReadingReminderBody;
+
+  /// No description provided for @timerHobbyFinishedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hobby practice completed.'**
+  String get timerHobbyFinishedBody;
+
+  /// No description provided for @timerFocusFinishedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Session completed. Time for a break.'**
+  String get timerFocusFinishedBody;
+
+  /// No description provided for @timerRestFinishedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A new session has started.'**
+  String get timerRestFinishedBody;
+
+  /// No description provided for @timerSessionFinishedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity completed.'**
+  String get timerSessionFinishedBody;
+
+  /// No description provided for @timerBackgroundSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'App in background'**
+  String get timerBackgroundSuffix;
+
+  /// No description provided for @timerBreakStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get timerBreakStatLabel;
+
+  /// No description provided for @timerSessionEndedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session ended'**
+  String get timerSessionEndedTitle;
+
+  /// No description provided for @timerSessionEndedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your focus on {subjectName} was saved successfully.'**
+  String timerSessionEndedMessage(String subjectName);
+
+  /// No description provided for @createSubjectPauseDurationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Break duration'**
+  String get createSubjectPauseDurationHint;
+
+  /// No description provided for @groupInvitationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get groupInvitationsTitle;
+
+  /// No description provided for @groupInvitationFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation from {inviter}'**
+  String groupInvitationFrom(String inviter);
+
+  /// No description provided for @groupsLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load groups'**
+  String get groupsLoadErrorTitle;
+
+  /// No description provided for @groupsLoadErrorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection took longer than expected. Your groups may still exist, but we could not fetch them right now.'**
+  String get groupsLoadErrorDescription;
+
+  /// No description provided for @personalInformationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal information'**
+  String get personalInformationTitle;
+
+  /// No description provided for @editGroupInfoSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Group information'**
+  String get editGroupInfoSection;
+
+  /// No description provided for @createGroupFocusGoalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus goal'**
+  String get createGroupFocusGoalLabel;
+
+  /// No description provided for @connectedAccountsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected accounts'**
+  String get connectedAccountsSection;
+
+  /// No description provided for @contactSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contactSection;
+
+  /// No description provided for @receivedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get receivedTab;
+
+  /// No description provided for @invitedPeopleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person invited} other{{count} people invited}}'**
+  String invitedPeopleCount(int count);
+
+  /// No description provided for @inviteMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite members'**
+  String get inviteMembersTitle;
+
+  /// No description provided for @invitedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get invitedLabel;
+
+  /// No description provided for @selectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get selectButton;
+
+  /// No description provided for @cancelInviteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invite?'**
+  String get cancelInviteConfirmTitle;
+
+  /// No description provided for @inviteFriendConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friend?'**
+  String get inviteFriendConfirmTitle;
+
+  /// No description provided for @cancelInviteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the invite sent to {friendName}?'**
+  String cancelInviteConfirmMessage(String friendName);
+
+  /// No description provided for @inviteFriendConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite {friendName} to {groupName}?'**
+  String inviteFriendConfirmMessage(String friendName, String groupName);
+
+  /// No description provided for @cancelInviteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel invite'**
+  String get cancelInviteButton;
+
+  /// No description provided for @inviteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite'**
+  String get inviteButton;
+
+  /// No description provided for @retryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retryButton;
+
+  /// No description provided for @timerSessionEndedConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'All good'**
+  String get timerSessionEndedConfirm;
 }
 
 class _AppLocalizationsDelegate

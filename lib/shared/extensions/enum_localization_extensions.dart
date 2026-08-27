@@ -29,7 +29,6 @@ extension GroupThemeTypeLocalizationX on GroupThemeType {
     GroupThemeType.reading => context.l10n.categoryReading,
     GroupThemeType.hobbies => context.l10n.categoryHobbies,
   };
-
 }
 
 extension LeaderboardPeriodTypeLocalizationX on LeaderboardPeriodType {

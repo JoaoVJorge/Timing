@@ -3009,4 +3009,161 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get groupInvitationsSentEmptyDescription =>
       'Einladungen, die du zum Beitritt einer Gruppe sendest, erscheinen hier.';
+
+  @override
+  String get swipeHintDismissLabel => 'Verstanden';
+
+  @override
+  String get dailyGoalSwipeHintTitle => 'Zielgesten';
+
+  @override
+  String get dailyGoalSwipeHintMessage =>
+      'Wische über ein Ziel, um es zu bearbeiten oder zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.';
+
+  @override
+  String get activitySwipeHintTitle => 'Aktivitätsgesten';
+
+  @override
+  String get activitySwipeHintMessage =>
+      'Wische über eine Aktivität, um Notizen und Daten anzuzeigen, sie zu bearbeiten oder zu löschen. Bei Gruppenelementen können einige Aktionen gesperrt sein.';
+
+  @override
+  String get groupGoalEditBlockedMessage =>
+      'Dieses Ziel gehört zu einer Gruppe. Bearbeite es in der Gruppe.';
+
+  @override
+  String get groupGoalDeleteBlockedMessage =>
+      'Dieses Ziel gehört zu einer Gruppe. Verlasse die Gruppe, um es zu entfernen.';
+
+  @override
+  String get groupActivityEditBlockedMessage =>
+      'Diese Aktivität gehört zu einer Gruppe. Bearbeite sie in der Gruppe.';
+
+  @override
+  String get groupActivityDeleteBlockedMessage =>
+      'Diese Aktivität gehört zu einer Gruppe. Verlasse die Gruppe, um sie zu entfernen.';
+
+  @override
+  String get groupUpdatedSuccess => 'Gruppe erfolgreich aktualisiert';
+
+  @override
+  String get groupInviteCanceledMessage => 'Einladung abgebrochen.';
+
+  @override
+  String get groupInviteSentMessage => 'Einladung gesendet.';
+
+  @override
+  String get timerReadingReminderBody =>
+      'Weitere 30 Minuten Lesen abgeschlossen.';
+
+  @override
+  String get timerHobbyFinishedBody => 'Hobbyübung abgeschlossen.';
+
+  @override
+  String get timerFocusFinishedBody =>
+      'Sitzung abgeschlossen. Zeit für eine Pause.';
+
+  @override
+  String get timerRestFinishedBody => 'Eine neue Sitzung hat begonnen.';
+
+  @override
+  String get timerSessionFinishedBody => 'Aktivität abgeschlossen.';
+
+  @override
+  String get timerBackgroundSuffix => 'App im Hintergrund';
+
+  @override
+  String get timerBreakStatLabel => 'Pause';
+
+  @override
+  String get timerSessionEndedTitle => 'Sitzung beendet';
+
+  @override
+  String timerSessionEndedMessage(String subjectName) {
+    return 'Dein Fokus auf $subjectName wurde erfolgreich gespeichert.';
+  }
+
+  @override
+  String get createSubjectPauseDurationHint => 'Pausendauer';
+
+  @override
+  String get groupInvitationsTitle => 'Einladungen';
+
+  @override
+  String groupInvitationFrom(String inviter) {
+    return 'Einladung von $inviter';
+  }
+
+  @override
+  String get groupsLoadErrorTitle => 'Gruppen konnten nicht geladen werden';
+
+  @override
+  String get groupsLoadErrorDescription =>
+      'Die Verbindung dauerte länger als erwartet. Deine Gruppen sind möglicherweise noch vorhanden, konnten aber gerade nicht geladen werden.';
+
+  @override
+  String get personalInformationTitle => 'Persönliche Informationen';
+
+  @override
+  String get editGroupInfoSection => 'Gruppeninformationen';
+
+  @override
+  String get createGroupFocusGoalLabel => 'Fokusziel';
+
+  @override
+  String get connectedAccountsSection => 'Verbundene Konten';
+
+  @override
+  String get contactSection => 'Kontakt';
+
+  @override
+  String get receivedTab => 'Erhalten';
+
+  @override
+  String invitedPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Personen eingeladen',
+      one: '1 Person eingeladen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inviteMembersTitle => 'Mitglieder einladen';
+
+  @override
+  String get invitedLabel => 'Eingeladen';
+
+  @override
+  String get selectButton => 'Auswählen';
+
+  @override
+  String get cancelInviteConfirmTitle => 'Einladung zurückziehen?';
+
+  @override
+  String get inviteFriendConfirmTitle => 'Freund einladen?';
+
+  @override
+  String cancelInviteConfirmMessage(String friendName) {
+    return 'Die an $friendName gesendete Einladung zurückziehen?';
+  }
+
+  @override
+  String inviteFriendConfirmMessage(String friendName, String groupName) {
+    return '$friendName zu $groupName einladen?';
+  }
+
+  @override
+  String get cancelInviteButton => 'Einladung zurückziehen';
+
+  @override
+  String get inviteButton => 'Einladen';
+
+  @override
+  String get retryButton => 'Erneut versuchen';
+
+  @override
+  String get timerSessionEndedConfirm => 'Alles klar';
 }

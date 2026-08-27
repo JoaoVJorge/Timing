@@ -2961,4 +2961,159 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get groupInvitationsSentEmptyDescription =>
       'الدعوات التي ترسلها للانضمام إلى مجموعة ستظهر هنا.';
+
+  @override
+  String get swipeHintDismissLabel => 'فهمت';
+
+  @override
+  String get dailyGoalSwipeHintTitle => 'إيماءات الهدف';
+
+  @override
+  String get dailyGoalSwipeHintMessage =>
+      'اسحب الهدف لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.';
+
+  @override
+  String get activitySwipeHintTitle => 'إيماءات النشاط';
+
+  @override
+  String get activitySwipeHintMessage =>
+      'اسحب النشاط لعرض الملاحظات والبيانات أو لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لعناصر المجموعة.';
+
+  @override
+  String get groupGoalEditBlockedMessage =>
+      'هذا الهدف تابع لمجموعة. عدّله من داخل المجموعة.';
+
+  @override
+  String get groupGoalDeleteBlockedMessage =>
+      'هذا الهدف تابع لمجموعة. غادر المجموعة لإزالته.';
+
+  @override
+  String get groupActivityEditBlockedMessage =>
+      'هذا النشاط تابع لمجموعة. عدّله من داخل المجموعة.';
+
+  @override
+  String get groupActivityDeleteBlockedMessage =>
+      'هذا النشاط تابع لمجموعة. غادر المجموعة لإزالته.';
+
+  @override
+  String get groupUpdatedSuccess => 'تم تحديث المجموعة بنجاح';
+
+  @override
+  String get groupInviteCanceledMessage => 'تم إلغاء الدعوة.';
+
+  @override
+  String get groupInviteSentMessage => 'تم إرسال الدعوة.';
+
+  @override
+  String get timerReadingReminderBody => 'اكتملت 30 دقيقة إضافية من القراءة.';
+
+  @override
+  String get timerHobbyFinishedBody => 'اكتملت ممارسة الهواية.';
+
+  @override
+  String get timerFocusFinishedBody => 'اكتملت الجلسة. حان وقت الاستراحة.';
+
+  @override
+  String get timerRestFinishedBody => 'بدأت جلسة جديدة.';
+
+  @override
+  String get timerSessionFinishedBody => 'اكتمل النشاط.';
+
+  @override
+  String get timerBackgroundSuffix => 'التطبيق في الخلفية';
+
+  @override
+  String get timerBreakStatLabel => 'استراحة';
+
+  @override
+  String get timerSessionEndedTitle => 'انتهت الجلسة';
+
+  @override
+  String timerSessionEndedMessage(String subjectName) {
+    return 'تم حفظ تركيزك على $subjectName بنجاح.';
+  }
+
+  @override
+  String get createSubjectPauseDurationHint => 'مدة الاستراحة';
+
+  @override
+  String get groupInvitationsTitle => 'الدعوات';
+
+  @override
+  String groupInvitationFrom(String inviter) {
+    return 'دعوة من $inviter';
+  }
+
+  @override
+  String get groupsLoadErrorTitle => 'تعذر تحميل المجموعات';
+
+  @override
+  String get groupsLoadErrorDescription =>
+      'استغرق الاتصال وقتًا أطول من المتوقع. قد تظل مجموعاتك موجودة، لكن تعذر جلبها الآن.';
+
+  @override
+  String get personalInformationTitle => 'المعلومات الشخصية';
+
+  @override
+  String get editGroupInfoSection => 'معلومات المجموعة';
+
+  @override
+  String get createGroupFocusGoalLabel => 'هدف التركيز';
+
+  @override
+  String get connectedAccountsSection => 'الحسابات المرتبطة';
+
+  @override
+  String get contactSection => 'جهة الاتصال';
+
+  @override
+  String get receivedTab => 'الواردة';
+
+  @override
+  String invitedPeopleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أشخاص مدعوين',
+      one: 'شخص واحد مدعو',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inviteMembersTitle => 'دعوة أعضاء';
+
+  @override
+  String get invitedLabel => 'مدعو';
+
+  @override
+  String get selectButton => 'تحديد';
+
+  @override
+  String get cancelInviteConfirmTitle => 'إلغاء الدعوة؟';
+
+  @override
+  String get inviteFriendConfirmTitle => 'دعوة صديق؟';
+
+  @override
+  String cancelInviteConfirmMessage(String friendName) {
+    return 'هل تريد إلغاء الدعوة المرسلة إلى $friendName؟';
+  }
+
+  @override
+  String inviteFriendConfirmMessage(String friendName, String groupName) {
+    return 'هل تريد دعوة $friendName إلى $groupName؟';
+  }
+
+  @override
+  String get cancelInviteButton => 'إلغاء الدعوة';
+
+  @override
+  String get inviteButton => 'دعوة';
+
+  @override
+  String get retryButton => 'إعادة المحاولة';
+
+  @override
+  String get timerSessionEndedConfirm => 'تمام';
 }

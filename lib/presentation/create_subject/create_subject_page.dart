@@ -506,7 +506,7 @@ class _RestInput extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
             decoration: InputDecoration(
-              hintText: "Duração da pausa",
+              hintText: context.l10n.createSubjectPauseDurationHint,
               suffixText: "s",
               border: InputBorder.none,
               enabledBorder: InputBorder.none,

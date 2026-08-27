@@ -1658,5 +1658,64 @@
   "groupInvitationsReceivedEmptyTitle": "No invitations received",
   "groupInvitationsReceivedEmptyDescription": "When someone invites you to a group, it shows up here.",
   "groupInvitationsSentEmptyTitle": "No invitations sent",
-  "groupInvitationsSentEmptyDescription": "Invitations you send for someone to join a group show up here."
+  "groupInvitationsSentEmptyDescription": "Invitations you send for someone to join a group show up here.",
+  "swipeHintDismissLabel": "Got it",
+  "dailyGoalSwipeHintTitle": "Goal gestures",
+  "dailyGoalSwipeHintMessage": "Swipe a goal to edit or delete it. Some actions may be unavailable for group goals.",
+  "activitySwipeHintTitle": "Activity gestures",
+  "activitySwipeHintMessage": "Swipe an activity to see notes, stats, edit or delete it. Some actions may be unavailable for group items.",
+  "groupGoalEditBlockedMessage": "This goal belongs to a group. Edit it from the group to make changes.",
+  "groupGoalDeleteBlockedMessage": "This goal belongs to a group. Leave the group to remove it.",
+  "groupActivityEditBlockedMessage": "This activity belongs to a group. Edit it from the group to make changes.",
+  "groupActivityDeleteBlockedMessage": "This activity belongs to a group. Leave the group to remove it.",
+  "groupUpdatedSuccess": "Group updated successfully",
+  "groupInviteCanceledMessage": "Invitation canceled.",
+  "groupInviteSentMessage": "Invitation sent.",
+  "timerReadingReminderBody": "Another 30 minutes of reading completed.",
+  "timerHobbyFinishedBody": "Hobby practice completed.",
+  "timerFocusFinishedBody": "Session completed. Time for a break.",
+  "timerRestFinishedBody": "A new session has started.",
+  "timerSessionFinishedBody": "Activity completed.",
+  "timerBackgroundSuffix": "App in background",
+  "timerBreakStatLabel": "Break",
+  "timerSessionEndedTitle": "Session ended",
+  "timerSessionEndedMessage": "Your focus on {subjectName} was saved successfully.",
+  "@timerSessionEndedMessage": {
+    "placeholders": {"subjectName": {"type": "String"}}
+  },
+  "createSubjectPauseDurationHint": "Break duration",
+  "groupInvitationsTitle": "Invitations",
+  "groupInvitationFrom": "Invitation from {inviter}",
+  "@groupInvitationFrom": {
+    "placeholders": {"inviter": {"type": "String"}}
+  },
+  "groupsLoadErrorTitle": "Could not load groups",
+  "groupsLoadErrorDescription": "The connection took longer than expected. Your groups may still exist, but we could not fetch them right now.",
+  "personalInformationTitle": "Personal information",
+  "editGroupInfoSection": "Group information",
+  "createGroupFocusGoalLabel": "Focus goal",
+  "connectedAccountsSection": "Connected accounts",
+  "contactSection": "Contact",
+  "receivedTab": "Received",
+  "invitedPeopleCount": "{count, plural, =1{1 person invited} other{{count} people invited}}",
+  "@invitedPeopleCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "inviteMembersTitle": "Invite members",
+  "invitedLabel": "Invited",
+  "selectButton": "Select",
+  "cancelInviteConfirmTitle": "Cancel invite?",
+  "inviteFriendConfirmTitle": "Invite friend?",
+  "cancelInviteConfirmMessage": "Cancel the invite sent to {friendName}?",
+  "@cancelInviteConfirmMessage": {
+    "placeholders": {"friendName": {"type": "String"}}
+  },
+  "inviteFriendConfirmMessage": "Invite {friendName} to {groupName}?",
+  "@inviteFriendConfirmMessage": {
+    "placeholders": {"friendName": {"type": "String"}, "groupName": {"type": "String"}}
+  },
+  "cancelInviteButton": "Cancel invite",
+  "inviteButton": "Invite",
+  "retryButton": "Try again",
+  "timerSessionEndedConfirm": "All good"
 }
