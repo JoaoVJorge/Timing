@@ -63,7 +63,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
               child: Icon(
                 Icons.delete_outline_rounded,
                 color: context.colorTokens.white,
-                size: 28,
+                size: 22,
               ),
             ),
             const Gap(12),

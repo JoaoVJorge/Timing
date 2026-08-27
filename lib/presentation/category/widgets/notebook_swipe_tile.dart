@@ -190,6 +190,8 @@ class _RevealAction extends StatelessWidget {
 
   static const double _revealWidth = 58;
   static const double gap = 8;
+  static const double _defaultIconSize = 25;
+  static const double _trashIconSize = 20;
 
   final String? iconPath;
   final IconData? iconData;
@@ -198,6 +200,9 @@ class _RevealAction extends StatelessWidget {
   final Color? color;
   final Gradient? gradient;
   final bool showLock;
+
+  double get _iconSize =>
+      iconPath == "trash" ? _trashIconSize : _defaultIconSize;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -215,8 +220,16 @@ class _RevealAction extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: iconPath != null
-              ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: 25)
-              : Icon(iconData, color: iconColor ?? Colors.white, size: 25),
+              ? AppIcon(
+                  iconPath!,
+                  color: iconColor ?? Colors.white,
+                  size: _iconSize,
+                )
+              : Icon(
+                  iconData,
+                  color: iconColor ?? Colors.white,
+                  size: _iconSize,
+                ),
         ),
         if (showLock)
           Positioned(

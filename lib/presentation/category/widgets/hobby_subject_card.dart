@@ -423,7 +423,7 @@ class _HobbyDeleteAction extends StatelessWidget {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     color: isLocked ? accent : context.colorTokens.white,
-                    size: 22,
+                    size: 18,
                   ),
                 ),
                 if (isLocked)

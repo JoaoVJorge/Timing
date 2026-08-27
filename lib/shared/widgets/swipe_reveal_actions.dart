@@ -137,9 +137,14 @@ class _RevealActionButton extends StatelessWidget {
   const _RevealActionButton({required this.action, required this.onTap});
 
   static const double _width = _SwipeRevealActionsState._actionWidth;
+  static const double _defaultIconSize = 25;
+  static const double _trashIconSize = 20;
 
   final SwipeRevealAction action;
   final VoidCallback onTap;
+
+  double get _iconSize =>
+      action.iconPath == "trash" ? _trashIconSize : _defaultIconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -174,8 +179,8 @@ class _RevealActionButton extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: action.iconPath != null
-                ? AppIcon(action.iconPath!, color: iconColor, size: 25)
-                : Icon(action.iconData, color: iconColor, size: 25),
+                ? AppIcon(action.iconPath!, color: iconColor, size: _iconSize)
+                : Icon(action.iconData, color: iconColor, size: _iconSize),
           ),
           if (locked) const Positioned(top: -2, right: -2, child: _LockBadge()),
         ],
@@ -194,9 +199,13 @@ class _LockBadge extends StatelessWidget {
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       shape: BoxShape.circle,
-      border: Border.all(
-        color: context.colorTokens.textHint.withValues(alpha: 0.22),
-      ),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
+          blurRadius: 10,
+          offset: const Offset(2, 2),
+        ),
+      ],
     ),
     alignment: Alignment.center,
     child: Icon(

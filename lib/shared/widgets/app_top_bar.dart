@@ -10,6 +10,7 @@ class AppTopBar extends StatelessWidget {
     this.showBackButton = false,
     this.onBack,
     this.onTitleTap,
+    this.leadingAccessory,
     this.trailing,
     this.titleMaxLines = 2,
     super.key,
@@ -19,6 +20,7 @@ class AppTopBar extends StatelessWidget {
   final bool showBackButton;
   final VoidCallback? onBack;
   final VoidCallback? onTitleTap;
+  final Widget? leadingAccessory;
   final Widget? trailing;
   final int titleMaxLines;
 
@@ -28,8 +30,17 @@ class AppTopBar extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final int leadingSlots =
+            (showBackButton ? 1 : 0) + (leadingAccessory == null ? 0 : 1);
+        final int trailingSlots = trailing == null ? 0 : 1;
+        final int reservedSlots = leadingSlots > trailingSlots
+            ? leadingSlots
+            : trailingSlots;
         final double titleMaxWidth =
-            (constraints.maxWidth - ((AppSpacing.minTapTarget + 8) * 2))
+            (constraints.maxWidth -
+                    ((AppSpacing.minTapTarget + 8) *
+                        (reservedSlots == 0 ? 1 : reservedSlots) *
+                        2))
                 .clamp(0, constraints.maxWidth)
                 .toDouble();
 
@@ -65,21 +76,30 @@ class AppTopBar extends StatelessWidget {
                   ),
                 ),
               ),
-              if (showBackButton) ...[
+              if (showBackButton || leadingAccessory != null) ...[
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Semantics(
-                    button: true,
-                    label: MaterialLocalizations.of(context).backButtonTooltip,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onBack ?? appNavigator.back,
-                      child: const SizedBox(
-                        width: AppSpacing.minTapTarget,
-                        height: AppSpacing.minTapTarget,
-                        child: Center(child: _BackIcon(size: iconSize)),
-                      ),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showBackButton)
+                        Semantics(
+                          button: true,
+                          label: MaterialLocalizations.of(
+                            context,
+                          ).backButtonTooltip,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: onBack ?? appNavigator.back,
+                            child: const SizedBox(
+                              width: AppSpacing.minTapTarget,
+                              height: AppSpacing.minTapTarget,
+                              child: Center(child: _BackIcon(size: iconSize)),
+                            ),
+                          ),
+                        ),
+                      ?leadingAccessory,
+                    ],
                   ),
                 ),
               ],

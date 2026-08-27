@@ -15,6 +15,7 @@ import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
+import "package:timing/shared/widgets/swipe_hint_button.dart";
 import "package:timing/theme/app_spacing.dart";
 
 class CategoryPage extends StatelessWidget {
@@ -28,6 +29,13 @@ class CategoryPage extends StatelessWidget {
       topBar: AppTopBar(
         title: controller.category.localizedLabel(context),
         showBackButton: true,
+        trailing: controller.category == TimeCategoryType.hobbies
+            ? null
+            : const SwipeHintButton(
+                title: "Gestos da atividade",
+                message:
+                    "Arraste uma atividade para ver notas, dados, editar ou apagar. Itens de grupo podem ter algumas ações bloqueadas.",
+              ),
       ),
       body: Obx(() {
         final List<SubjectEntity> subjects = controller.subjects;
