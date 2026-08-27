@@ -6,6 +6,7 @@ import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
+import "package:timing/core/domain/entities/group_image_messages_page.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
@@ -15,6 +16,8 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/theme/group_colors.dart";
+import "package:supabase_flutter/supabase_flutter.dart"
+    show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
 
 class GroupsDataSource {
   GroupsDataSource({required this._supabaseService, required this._logger});
@@ -22,6 +25,7 @@ class GroupsDataSource {
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   static const Duration _activityScoresTimeout = Duration(seconds: 8);
+  static const int _imageMessagesPageSize = 50;
 
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     try {
@@ -292,22 +296,44 @@ class GroupsDataSource {
     }
   }
 
-  Future<Either<AppError, List<GroupImageMessageEntity>>> getImageMessages(
-    String groupId,
-  ) async {
+  Future<Either<AppError, GroupImageMessagesPage>> getImageMessages(
+    String groupId, {
+    GroupImageMessageEntity? before,
+  }) async {
     try {
       final String? userId = _supabaseService.currentUserId;
       if (userId == null) {
-        return const Right([]);
+        return const Right(
+          GroupImageMessagesPage(messages: [], hasMore: false),
+        );
       }
 
       final List<Map<String, dynamic>> rows = await _selectRows(
         table: "group_image_messages",
         columns: "id, group_id, sender_id, image_base64, created_at",
-        filters: (query) =>
-            query.eq("group_id", groupId).order("created_at", ascending: true),
+        filters: (query) {
+          PostgrestFilterBuilder<PostgrestList> filtered = query.eq(
+            "group_id",
+            groupId,
+          );
+          if (before != null) {
+            final String timestamp = before.createdAt.toUtc().toIso8601String();
+            filtered = filtered.or(
+              "created_at.lt.\"$timestamp\","
+              "and(created_at.eq.\"$timestamp\",id.lt.${before.id})",
+            );
+          }
+          return filtered
+              .order("created_at", ascending: false)
+              .order("id", ascending: false)
+              .limit(_imageMessagesPageSize + 1);
+        },
       );
-      final List<String> senderIds = rows
+      final bool hasMore = rows.length > _imageMessagesPageSize;
+      final List<Map<String, dynamic>> pageRows = rows
+          .take(_imageMessagesPageSize)
+          .toList();
+      final List<String> senderIds = pageRows
           .map((row) => row["sender_id"] as String)
           .toSet()
           .toList();
@@ -315,14 +341,17 @@ class GroupsDataSource {
           await _profilesById(senderIds, withPhoto: true);
 
       return Right(
-        rows
-            .map(
-              (row) => _imageMessageFromRow(
-                row,
-                profileRow: profilesById[row["sender_id"]],
-              ),
-            )
-            .toList(),
+        GroupImageMessagesPage(
+          messages: pageRows.reversed
+              .map(
+                (row) => _imageMessageFromRow(
+                  row,
+                  profileRow: profilesById[row["sender_id"]],
+                ),
+              )
+              .toList(),
+          hasMore: hasMore,
+        ),
       );
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -841,9 +870,12 @@ class GroupsDataSource {
   Future<List<Map<String, dynamic>>> _selectRows({
     required String table,
     required String columns,
-    required dynamic Function(dynamic query) filters,
+    required PostgrestTransformBuilder<PostgrestList> Function(
+      PostgrestFilterBuilder<PostgrestList> query,
+    )
+    filters,
   }) async {
-    final dynamic response = await filters(
+    final PostgrestList response = await filters(
       _supabaseService.requireClient.from(table).select(columns),
     );
     _logger.logResponse("select public.$table", response);

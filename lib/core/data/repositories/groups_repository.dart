@@ -5,6 +5,7 @@ import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
+import "package:timing/core/domain/entities/group_image_messages_page.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
@@ -46,9 +47,10 @@ class GroupsRepository {
   getGroupActivityProgress(String groupId, {String? localDate}) =>
       _groupsDataSource.getGroupActivityProgress(groupId, localDate: localDate);
 
-  Future<Either<AppError, List<GroupImageMessageEntity>>> getImageMessages(
-    String groupId,
-  ) => _groupsDataSource.getImageMessages(groupId);
+  Future<Either<AppError, GroupImageMessagesPage>> getImageMessages(
+    String groupId, {
+    GroupImageMessageEntity? before,
+  }) => _groupsDataSource.getImageMessages(groupId, before: before);
 
   Future<Either<AppError, GroupImageMessageEntity>> sendImageMessage({
     required String groupId,
