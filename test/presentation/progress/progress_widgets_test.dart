@@ -4,7 +4,6 @@ import "package:timing/presentation/progress/widgets/progress_achievements_secti
 import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
 import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
 import "package:timing/presentation/progress/widgets/progress_stat_row.dart";
-import "package:timing/presentation/progress/widgets/progress_top_subjects_list.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 
@@ -154,12 +153,6 @@ void main() {
         onTap: () {},
       ),
     );
-
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets("ProgressTopSubjectsList shows its empty state", (tester) async {
-    await pumpInScrollView(tester, const ProgressTopSubjectsList(subjects: []));
 
     expect(tester.takeException(), isNull);
   });

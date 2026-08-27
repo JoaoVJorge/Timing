@@ -121,15 +121,15 @@ class _ProgressLoadingSkeleton extends StatelessWidget {
   const _ProgressLoadingSkeleton();
 
   @override
-  Widget build(BuildContext context) => AppSkeleton(
+  Widget build(BuildContext context) => const AppSkeleton(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AppSkeletonBox(width: 132, height: 28, radius: 9),
-        const Gap(AppSpacing.titleToDescription),
-        const AppSkeletonBox(height: 15, radius: 7),
-        const Gap(AppSpacing.betweenSections - 4),
-        const Row(
+        AppSkeletonBox(width: 132, height: 28, radius: 9),
+        Gap(AppSpacing.titleToDescription),
+        AppSkeletonBox(height: 15, radius: 7),
+        Gap(AppSpacing.betweenSections - 4),
+        Row(
           children: [
             Expanded(child: AppSkeletonBox(height: 38, radius: 19)),
             Gap(8),
@@ -138,29 +138,29 @@ class _ProgressLoadingSkeleton extends StatelessWidget {
             Expanded(child: AppSkeletonBox(height: 38, radius: 19)),
           ],
         ),
-        const Gap(AppSpacing.betweenRelated),
+        Gap(AppSpacing.betweenRelated),
         AppSkeletonBox(
           width: double.infinity,
           height: 154,
           radius: AppSurfaces.primaryRadius,
         ),
-        const Gap(AppSpacing.betweenRelated),
-        const _ProgressStatsSkeleton(),
-        const Gap(AppSpacing.betweenSections),
-        const AppSkeletonBox(width: 128, height: 18, radius: 7),
-        const Gap(AppSpacing.betweenRelated),
+        Gap(AppSpacing.betweenRelated),
+        _ProgressStatsSkeleton(),
+        Gap(AppSpacing.betweenSections),
+        AppSkeletonBox(width: 128, height: 18, radius: 7),
+        Gap(AppSpacing.betweenRelated),
         AppSkeletonBox(
           width: double.infinity,
           height: 190,
           radius: AppSurfaces.contentRadius,
         ),
-        const Gap(AppSpacing.betweenSections),
-        const AppSkeletonBox(width: 152, height: 18, radius: 7),
-        const Gap(AppSpacing.betweenRelated),
-        const _DistributionSkeleton(),
-        const Gap(AppSpacing.betweenSections),
-        const AppSkeletonBox(width: 120, height: 18, radius: 7),
-        const Gap(AppSpacing.betweenRelated),
+        Gap(AppSpacing.betweenSections),
+        AppSkeletonBox(width: 152, height: 18, radius: 7),
+        Gap(AppSpacing.betweenRelated),
+        _DistributionSkeleton(),
+        Gap(AppSpacing.betweenSections),
+        AppSkeletonBox(width: 120, height: 18, radius: 7),
+        Gap(AppSpacing.betweenRelated),
         AppSkeletonBox(
           width: double.infinity,
           height: 132,
