@@ -152,6 +152,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                     const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
                       iconPath: "trash",
+                      iconSize: 20,
                       color: widget.isDeleteLocked
                           ? context.colorTokens.surfaceInnerLayer
                           : context.colorTokens.error,
@@ -186,13 +187,11 @@ class _RevealAction extends StatelessWidget {
     this.color,
     this.gradient,
     this.showLock = false,
+    this.iconSize = 25,
   }) : assert(iconPath != null || iconData != null);
 
   static const double _revealWidth = 58;
   static const double gap = 8;
-  static const double _defaultIconSize = 25;
-  static const double _trashIconSize = 20;
-
   final String? iconPath;
   final IconData? iconData;
   final Color? iconColor;
@@ -200,9 +199,7 @@ class _RevealAction extends StatelessWidget {
   final Color? color;
   final Gradient? gradient;
   final bool showLock;
-
-  double get _iconSize =>
-      iconPath == "trash" ? _trashIconSize : _defaultIconSize;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -223,12 +220,12 @@ class _RevealAction extends StatelessWidget {
               ? AppIcon(
                   iconPath!,
                   color: iconColor ?? Colors.white,
-                  size: _iconSize,
+                  size: iconSize,
                 )
               : Icon(
                   iconData,
                   color: iconColor ?? Colors.white,
-                  size: _iconSize,
+                  size: iconSize,
                 ),
         ),
         if (showLock)

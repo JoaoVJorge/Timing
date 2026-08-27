@@ -10,6 +10,7 @@ import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
@@ -116,7 +117,7 @@ class CategoryController extends GetxController {
   Future<void> onTapEditSubject(SubjectEntity subject) async {
     if (subject.isFromGroup) {
       _appNavigator.showErrorSnackBar(
-        "Esta atividade é de um grupo. Edite pelo grupo para alterar.",
+        Get.context?.l10n.groupActivityEditBlockedMessage,
       );
       return;
     }
@@ -140,7 +141,7 @@ class CategoryController extends GetxController {
   Future<void> onDeleteSubject(SubjectEntity subject) async {
     if (subject.isFromGroup) {
       _appNavigator.showErrorSnackBar(
-        "Esta atividade é de um grupo. Saia do grupo para removê-la.",
+        Get.context?.l10n.groupActivityDeleteBlockedMessage,
       );
       return;
     }
@@ -175,9 +176,9 @@ class CategoryController extends GetxController {
     final Either<AppError, void> result = await _pinSubjectToStartUseCase(
       subjectId: subject.id,
     );
-    result.fold((error) {
+    await result.fold((error) async {
       _handleError(error);
-      loadSubjects();
+      await loadSubjects();
     }, (_) => loadSubjects());
   }
 

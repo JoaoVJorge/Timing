@@ -31,10 +31,9 @@ class CategoryPage extends StatelessWidget {
         showBackButton: true,
         trailing: controller.category == TimeCategoryType.hobbies
             ? null
-            : const SwipeHintButton(
-                title: "Gestos da atividade",
-                message:
-                    "Arraste uma atividade para ver notas, dados, editar ou apagar. Itens de grupo podem ter algumas ações bloqueadas.",
+            : SwipeHintButton(
+                title: context.l10n.activitySwipeHintTitle,
+                message: context.l10n.activitySwipeHintMessage,
               ),
       ),
       body: Obx(() {
@@ -277,7 +276,7 @@ class _AddListSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
     child: Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,

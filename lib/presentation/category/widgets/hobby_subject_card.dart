@@ -371,11 +371,7 @@ class _HobbySheetAction extends StatelessWidget {
               ),
             ),
             trailing ??
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: actionColor,
-                  size: 28,
-                ),
+                Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
           ],
         ),
       ),

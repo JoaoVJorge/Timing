@@ -111,7 +111,7 @@ class _SwipeHintDialog extends StatelessWidget {
           ),
           const Gap(24),
           _SwipeHintDialogButton(
-            label: "Entendi",
+            label: context.l10n.swipeHintDismissLabel,
             textColor: context.colorTokens.white,
             backgroundColor: accentColor,
             onTap: () => appNavigator.back<void>(),

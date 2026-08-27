@@ -10,6 +10,7 @@ class SwipeRevealAction {
     this.iconPath,
     this.iconData,
     this.iconColor,
+    this.iconSize = 25,
     this.borderColor,
     this.locked = false,
   }) : assert(iconPath != null || iconData != null);
@@ -19,6 +20,7 @@ class SwipeRevealAction {
   final String? iconPath;
   final IconData? iconData;
   final Color? iconColor;
+  final double iconSize;
 
   /// Optional outline, so a light button stays visible on a light surface.
   final Color? borderColor;
@@ -137,14 +139,8 @@ class _RevealActionButton extends StatelessWidget {
   const _RevealActionButton({required this.action, required this.onTap});
 
   static const double _width = _SwipeRevealActionsState._actionWidth;
-  static const double _defaultIconSize = 25;
-  static const double _trashIconSize = 20;
-
   final SwipeRevealAction action;
   final VoidCallback onTap;
-
-  double get _iconSize =>
-      action.iconPath == "trash" ? _trashIconSize : _defaultIconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -179,8 +175,16 @@ class _RevealActionButton extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: action.iconPath != null
-                ? AppIcon(action.iconPath!, color: iconColor, size: _iconSize)
-                : Icon(action.iconData, color: iconColor, size: _iconSize),
+                ? AppIcon(
+                    action.iconPath!,
+                    color: iconColor,
+                    size: action.iconSize,
+                  )
+                : Icon(
+                    action.iconData,
+                    color: iconColor,
+                    size: action.iconSize,
+                  ),
           ),
           if (locked) const Positioned(top: -2, right: -2, child: _LockBadge()),
         ],
