@@ -12,6 +12,13 @@ class SupabaseService {
 
   static Future<SupabaseService> initialize() async {
     if (!EnvironmentKeys.hasSupabaseConfig) {
+      if (kReleaseMode) {
+        throw StateError(
+          "A release build requires supabaseUrl and "
+          "supabasePublishableKey. Pass the production environment through "
+          "--dart-define-from-file.",
+        );
+      }
       return SupabaseService._(isConfigured: false);
     }
 
@@ -42,7 +49,9 @@ class SupabaseService {
     final SupabaseClient? configuredClient = client;
     if (configuredClient == null) {
       throw StateError(
-        "Supabase is not configured. Add supabaseUrl and supabasePublishableKey to the env file.",
+        "Supabase is not configured. Provide supabaseUrl and "
+        "supabasePublishableKey through --dart-define or "
+        "--dart-define-from-file.",
       );
     }
     return configuredClient;

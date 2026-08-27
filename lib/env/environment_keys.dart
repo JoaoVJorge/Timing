@@ -1,14 +1,13 @@
-import "package:flutter_dotenv/flutter_dotenv.dart";
-
 abstract class EnvironmentKeys {
   const EnvironmentKeys._();
 
-  static String get baseUrl => dotenv.env["baseUrl"] ?? "";
+  static const String baseUrl = String.fromEnvironment("baseUrl");
 
-  static String get supabaseUrl => dotenv.env["supabaseUrl"] ?? "";
+  static const String supabaseUrl = String.fromEnvironment("supabaseUrl");
 
-  static String get supabasePublishableKey =>
-      dotenv.env["supabasePublishableKey"] ?? "";
+  static const String supabasePublishableKey = String.fromEnvironment(
+    "supabasePublishableKey",
+  );
 
   static bool get hasSupabaseConfig =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;
