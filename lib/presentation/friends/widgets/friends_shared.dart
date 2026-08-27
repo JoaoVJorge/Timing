@@ -9,7 +9,6 @@ BoxDecoration friendsSurfaceDecoration(
 }) => BoxDecoration(
   color: context.colorTokens.surface,
   borderRadius: BorderRadius.circular(radius),
-  border: Border.all(color: context.colorTokens.borderUnfocused),
   boxShadow: [
     BoxShadow(
       color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),

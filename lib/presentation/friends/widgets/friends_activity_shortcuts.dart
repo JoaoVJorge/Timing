@@ -67,7 +67,6 @@ class _ShortcutTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: context.colorTokens.surface,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: context.colorTokens.borderUnfocused),
             boxShadow: [
               BoxShadow(
                 color: context.colorTokens.surfaceShadow.withValues(

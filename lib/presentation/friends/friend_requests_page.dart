@@ -73,7 +73,7 @@ class _RequestsModeTabs extends StatelessWidget {
       Expanded(
         child: _RequestModeTab(
           icon: Icons.inbox_rounded,
-          label: "Recebidas",
+          label: context.l10n.receivedTab,
           isSelected: selectedMode == FriendRequestsMode.incoming,
           onTap: () => onSelect(FriendRequestsMode.incoming),
         ),
@@ -82,7 +82,7 @@ class _RequestsModeTabs extends StatelessWidget {
       Expanded(
         child: _RequestModeTab(
           icon: Icons.send_rounded,
-          label: "Enviadas",
+          label: context.l10n.sentLabel,
           isSelected: selectedMode == FriendRequestsMode.sent,
           onTap: () => onSelect(FriendRequestsMode.sent),
         ),

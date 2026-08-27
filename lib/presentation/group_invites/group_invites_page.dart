@@ -20,7 +20,7 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
     backgroundColor: context.colorTokens.scaffold,
     padding: EdgeInsets.zero,
     topBar: AppTopBar(
-      title: "Convidar membros",
+      title: context.l10n.inviteMembersTitle,
       showBackButton: true,
       onBack: () => appNavigator.back<void>(),
     ),
@@ -161,17 +161,17 @@ class _GroupInviteRow extends StatelessWidget {
   _InviteVisuals _visualsFor(BuildContext context, GroupInviteStatus status) =>
       switch (status) {
         GroupInviteStatus.invited => _InviteVisuals(
-          label: "Convidado",
+          label: context.l10n.invitedLabel,
           icon: Icons.mark_email_read_outlined,
           color: context.colorTokens.primary,
         ),
         GroupInviteStatus.member => _InviteVisuals(
-          label: "Membro",
+          label: context.l10n.groupMemberRoleLabel,
           icon: Icons.verified_rounded,
           color: context.colorTokens.success,
         ),
         GroupInviteStatus.available => _InviteVisuals(
-          label: "Selecionar",
+          label: context.l10n.selectButton,
           icon: Icons.add_rounded,
           color: context.colorTokens.textBody,
         ),

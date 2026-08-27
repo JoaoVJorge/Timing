@@ -7,6 +7,7 @@ import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 
@@ -73,11 +74,18 @@ class GroupInvitesController extends GetxController {
     }
 
     final bool confirmed = await _confirm(
-      title: option.isInvited ? "Cancelar convite?" : "Convidar amigo?",
+      title: option.isInvited
+          ? context.l10n.cancelInviteConfirmTitle
+          : context.l10n.inviteFriendConfirmTitle,
       content: option.isInvited
-          ? "Deseja cancelar o convite enviado para ${option.friendName}?"
-          : "Deseja convidar ${option.friendName} para ${group.name}?",
-      confirmLabel: option.isInvited ? "Cancelar convite" : "Convidar",
+          ? context.l10n.cancelInviteConfirmMessage(option.friendName)
+          : context.l10n.inviteFriendConfirmMessage(
+              option.friendName,
+              group.name,
+            ),
+      confirmLabel: option.isInvited
+          ? context.l10n.cancelInviteButton
+          : context.l10n.inviteButton,
       isDestructive: option.isInvited,
     );
     if (!confirmed) {
@@ -103,8 +111,11 @@ class GroupInvitesController extends GetxController {
             ? GroupInviteStatus.available
             : GroupInviteStatus.invited,
       );
+      final BuildContext? context = Get.context;
       appNavigator.showSuccessSnackBar(
-        option.isInvited ? "Convite cancelado." : "Convite enviado.",
+        option.isInvited
+            ? context?.l10n.groupInviteCanceledMessage ?? "Invitation canceled."
+            : context?.l10n.groupInviteSentMessage ?? "Invitation sent.",
       );
 
       await Future.wait([

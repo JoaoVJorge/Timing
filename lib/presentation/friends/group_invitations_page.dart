@@ -29,7 +29,7 @@ class _GroupInvitationsPageState extends State<GroupInvitationsPage> {
   @override
   Widget build(BuildContext context) => AppScaffold(
     topBar: AppTopBar(
-      title: "Convites",
+      title: context.l10n.groupInvitationsTitle,
       showBackButton: true,
       onBack: () => Navigator.of(context).maybePop(),
     ),
@@ -77,7 +77,7 @@ class _GroupInvitationTabs extends StatelessWidget {
       Expanded(
         child: _GroupInvitationTab(
           icon: Icons.inbox_rounded,
-          label: "Recebidos",
+          label: context.l10n.receivedTab,
           isSelected: selectedMode == GroupInvitationsMode.incoming,
           onTap: () => onSelect(GroupInvitationsMode.incoming),
         ),
@@ -86,7 +86,7 @@ class _GroupInvitationTabs extends StatelessWidget {
       Expanded(
         child: _GroupInvitationTab(
           icon: Icons.send_rounded,
-          label: "Enviados",
+          label: context.l10n.sentLabel,
           isSelected: selectedMode == GroupInvitationsMode.sent,
           onTap: () => onSelect(GroupInvitationsMode.sent),
         ),
@@ -204,14 +204,14 @@ class _IncomingInvitationCard extends StatelessWidget {
         _GroupInvitationHeader(
           groupName: invitation.groupName,
           theme: invitation.theme,
-          subtitle: "Convite de ${invitation.inviterName}",
+          subtitle: context.l10n.groupInvitationFrom(invitation.inviterName),
         ),
         const Gap(14),
         Row(
           children: [
             Expanded(
               child: FriendRequestActionButton(
-                label: "Recusar",
+                label: context.l10n.declineButton,
                 isPrimary: false,
                 onTap: onDecline,
               ),
@@ -219,7 +219,7 @@ class _IncomingInvitationCard extends StatelessWidget {
             const Gap(10),
             Expanded(
               child: FriendRequestActionButton(
-                label: "Aceitar",
+                label: context.l10n.acceptButton,
                 isPrimary: true,
                 onTap: onAccept,
               ),
@@ -282,8 +282,7 @@ class _SentGroupInvitationCard extends StatelessWidget {
         _GroupInvitationHeader(
           groupName: bucket.groupName,
           theme: bucket.theme,
-          subtitle:
-              "${bucket.invitations.length} ${bucket.invitations.length == 1 ? "pessoa convidada" : "pessoas convidadas"}",
+          subtitle: context.l10n.invitedPeopleCount(bucket.invitations.length),
         ),
         const Gap(14),
         for (int index = 0; index < bucket.invitations.length; index++) ...[
@@ -390,7 +389,7 @@ class _SentInviteeRow extends StatelessWidget {
         ),
         const Gap(10),
         FriendRequestActionButton(
-          label: "Cancelar",
+          label: context.l10n.cancelButton,
           isPrimary: false,
           onTap: onCancel,
         ),
