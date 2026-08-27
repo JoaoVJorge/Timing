@@ -22,6 +22,7 @@ import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/presentation/timer/timer_controller.dart";
 
 /// Catch-all fake: none of these dependencies is exercised by the pure getters
@@ -307,6 +308,9 @@ class _FakeAppController extends _Noop implements AppController {
   final RxBool notificationsEnabled;
 
   @override
+  Locale get selectedLocale => const Locale("pt");
+
+  @override
   Future<void> setNotificationsEnabled(bool value) async {
     notificationsEnabled.value = value;
     if (value) {
@@ -373,6 +377,7 @@ TimerController _controller(
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
   focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
   analyticsService: _FakeAnalyticsService(),
+  activityChangeBus: ActivityChangeBus(),
   appController: appController ?? _FakeAppController(),
   appNavigator: _FakeAppNavigator(),
   subject: subject,

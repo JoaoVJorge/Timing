@@ -328,7 +328,7 @@ class _TimerSessionEndedDialog extends StatelessWidget {
           ),
           const Gap(22),
           Text(
-            "Sessão encerrada",
+            context.l10n.timerSessionEndedTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.colorTokens.dialogText,
@@ -339,7 +339,7 @@ class _TimerSessionEndedDialog extends StatelessWidget {
           ),
           const Gap(12),
           Text(
-            "Seu foco em $subjectName foi salvo com sucesso.",
+            context.l10n.timerSessionEndedMessage(subjectName),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.colorTokens.dialogTextMuted,
@@ -350,7 +350,7 @@ class _TimerSessionEndedDialog extends StatelessWidget {
           ),
           const Gap(24),
           _TimerExitDialogButton(
-            label: "Tudo certo",
+            label: context.l10n.timerSessionEndedConfirm,
             textColor: context.colorTokens.white,
             backgroundColor: accentColor,
             onTap: () => appNavigator.back<void>(),

@@ -44,7 +44,7 @@ Principais dependencias em `pubspec.yaml`:
 | Persistencia | `shared_preferences` | dados locais nao sensiveis |
 | Persistencia sensivel | `flutter_secure_storage` | tokens/reservado para auth real |
 | Notificacoes | `flutter_local_notifications` | timer persistente no Android |
-| Ambiente | `flutter_dotenv` | `lib/env/debug.env` e `lib/env/prod.env` |
+| Ambiente | `dart-define` | `.env` passado com `--dart-define-from-file` no build/run |
 | UI | `flutter_svg`, `gap`, `intl` | icones, espacamentos, formatacao |
 | Fonte | `Nunito` | familia tipografica completa |
 

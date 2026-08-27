@@ -2,12 +2,26 @@ import "dart:typed_data";
 
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:get/get_utils/get_utils.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timezone/data/latest_all.dart" as tz;
 import "package:timezone/timezone.dart" as tz;
 
 /// Shows an ongoing, lockscreen-visible notification (media-player style)
 /// with a live chronometer while a focus session is running.
 class TimerNotificationService {
+  TimerNotificationService({AppLoggerService? logger})
+    : _logger = logger ?? AppLoggerService();
+
+  final AppLoggerService _logger;
+
+  void _logFailure(String operation, Object error, [StackTrace? stackTrace]) {
+    _logger.logError(
+      "TimerNotificationService.$operation failed",
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+
   static const int _notificationId = 1001;
   static const int _focusFinishedNotificationId = 1002;
   static const int _restFinishedNotificationId = 1003;
@@ -66,7 +80,8 @@ class TimerNotificationService {
     try {
       await _ensureInitialized();
       return await _androidPlugin?.areNotificationsEnabled() ?? false;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logFailure("areNotificationsEnabled", error, stackTrace);
       return false;
     }
   }
@@ -85,7 +100,8 @@ class TimerNotificationService {
         await _androidPlugin?.requestFullScreenIntentPermission();
       }
       return allowed;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logFailure("requestNotificationsEnabled", error, stackTrace);
       return false;
     }
   }
@@ -101,8 +117,8 @@ class TimerNotificationService {
         _plugin.cancelAll(),
         _plugin.cancelAllPendingNotifications(),
       ]);
-    } catch (_) {
-      // Nothing to do if the platform notification backend is unavailable.
+    } catch (error, stackTrace) {
+      _logFailure("disableNotifications", error, stackTrace);
     }
   }
 
@@ -145,8 +161,9 @@ class TimerNotificationService {
         body: body,
         notificationDetails: NotificationDetails(android: androidDetails),
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
       // The timer must keep working even if notifications are unavailable.
+      _logFailure("showRunning", error, stackTrace);
     }
   }
 
@@ -183,8 +200,9 @@ class TimerNotificationService {
         body: body,
         notificationDetails: const NotificationDetails(android: androidDetails),
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
       // The timer must keep working even if notifications are unavailable.
+      _logFailure("showStatic", error, stackTrace);
     }
   }
 
@@ -340,7 +358,11 @@ class TimerNotificationService {
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         );
-      } catch (_) {
+      } catch (error) {
+        _logger.logInfo(
+          "TimerNotificationService._scheduleAlarm falling back to inexact "
+          "scheduling: $error",
+        );
         await _plugin.zonedSchedule(
           id: id,
           title: title,
@@ -350,8 +372,9 @@ class TimerNotificationService {
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
       // The timer must keep working even if notifications are unavailable.
+      _logFailure("_scheduleAlarm", error, stackTrace);
     }
   }
 
@@ -379,8 +402,8 @@ class TimerNotificationService {
               _plugin.cancel(id: _timelineNotificationIdBase + index),
         ),
       ]);
-    } catch (_) {
-      // Nothing to do if there is no scheduled notification to cancel.
+    } catch (error, stackTrace) {
+      _logFailure("cancelScheduledAlarms", error, stackTrace);
     }
   }
 
@@ -397,8 +420,8 @@ class TimerNotificationService {
               _plugin.cancel(id: _timelineNotificationIdBase + index),
         ),
       );
-    } catch (_) {
-      // Nothing to do if there is no timeline alarm to cancel.
+    } catch (error, stackTrace) {
+      _logFailure("cancelTimelineAlarms", error, stackTrace);
     }
   }
 
@@ -409,8 +432,8 @@ class TimerNotificationService {
     try {
       await _ensureInitialized();
       await _plugin.cancel(id: _notificationId);
-    } catch (_) {
-      // Nothing to do if there is no ongoing notification to cancel.
+    } catch (error, stackTrace) {
+      _logFailure("cancelOngoing", error, stackTrace);
     }
   }
 
@@ -422,8 +445,8 @@ class TimerNotificationService {
     try {
       await _ensureInitialized();
       await _plugin.cancel(id: id);
-    } catch (_) {
-      // Nothing to do if there is no scheduled notification to cancel.
+    } catch (error, stackTrace) {
+      _logFailure("_cancelAlarm", error, stackTrace);
     }
   }
 
@@ -435,8 +458,8 @@ class TimerNotificationService {
     try {
       await cancelOngoing();
       await cancelScheduledAlarms();
-    } catch (_) {
-      // Nothing to do if there is no notification to cancel.
+    } catch (error, stackTrace) {
+      _logFailure("cancel", error, stackTrace);
     }
   }
 }

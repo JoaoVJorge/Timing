@@ -22,8 +22,10 @@ import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/presentation/groups/groups_controller.dart";
+import "package:timing/l10n/app_localizations.dart";
+import "package:timing/presentation/timer/timer_session_persister.dart";
 import "package:timing/presentation/timer/widgets/timer_exit_dialog.dart";
 
 class TimerController extends GetxController with WidgetsBindingObserver {
@@ -42,6 +44,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.focusGuardService,
     required this.focusOverlayService,
     required this.analyticsService,
+    required this.activityChangeBus,
     required this.appController,
     required this.appNavigator,
     required this.subject,
@@ -52,6 +55,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
   static const Duration focusLockReturnCooldown = Duration(seconds: 5);
+
+  /// Upper bound for a session-seconds value coming back from the Live Activity
+  /// bridge, so a bogus payload can never push the counter to a nonsensical
+  /// value. ~68 years — far past any real reading session.
+  static const int _maxSessionSeconds = 1 << 31;
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
@@ -67,6 +75,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final FocusGuardService focusGuardService;
   final FocusOverlayService focusOverlayService;
   final AnalyticsService analyticsService;
+  final ActivityChangeBus activityChangeBus;
   final AppController appController;
   final AppNavigator appNavigator;
 
@@ -81,21 +90,29 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final RxInt completedFocusSections = 0.obs;
 
   Timer? _ticker;
-  int _persistedSessionSeconds = 0;
-  bool _hasLoggedTime = false;
   bool _hasRecordedLastActivity = false;
   bool _isConsumingLiveActivityAction = false;
-  bool _isPersistingTime = false;
   bool _isFinishingSession = false;
   bool _isAppInForeground = true;
   bool _isCatchingUpAfterBackground = false;
-  bool _shouldPersistAgain = false;
   bool _isRequestingFocusLockReturn = false;
   final int _todayFocusSecondsAtSessionStart;
   DateTime? _lastFocusLockWarningAt;
   Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
-  late DateTime _lastAutoSaveAt;
+
+  late final TimerSessionPersister _persister = TimerSessionPersister(
+    updateSubjectTimeUseCase: updateSubjectTimeUseCase,
+    logActivityUseCase: logActivityUseCase,
+    activityHistoryService: activityHistoryService,
+    dailyProgressService: dailyProgressService,
+    subjectDailyHistoryService: subjectDailyHistoryService,
+    achievementUnlockService: achievementUnlockService,
+    subject: () => subject,
+    sessionSeconds: () => sessionSeconds.value,
+    onGroupActivityChanged: _notifyGroupActivityChanged,
+    autoSaveInterval: autoSaveInterval,
+  );
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
@@ -197,7 +214,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     _lastTickAt = DateTime.now();
-    _lastAutoSaveAt = _lastTickAt;
     if (_isDailyHobbyGoalAlreadyComplete) {
       _markDailyHobbyGoalCompleteAtStart();
       _disableFocusGuard();
@@ -241,7 +257,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     _advanceBy(elapsedSeconds);
-    _autoSaveIfNeeded(now);
+    _persister.autoSaveIfNeeded(now);
   }
 
   void _advanceBy(int seconds) {
@@ -295,7 +311,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _completeFocusSection() {
-    _persistAccumulatedTime();
+    _persister.flush();
     completedFocusSections.value = (completedFocusSections.value + 1).clamp(
       0,
       focusSessionCount,
@@ -341,13 +357,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     unawaited(HapticFeedback.selectionClick());
     if (!isRunning.value) {
-      _persistAccumulatedTime();
+      _persister.flush();
     }
     _updateNotification();
     _syncFocusGuard();
   }
 
-  void saveProgress() => _persistAccumulatedTime();
+  void saveProgress() => _persister.flush();
 
   void skipRest() {
     if (!isResting.value || isReading) {
@@ -375,7 +391,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void finishSession() {
     final bool alreadyFinished = isSessionFinished.value;
-    _persistAccumulatedTime();
+    _persister.flush();
     _recordLastActivityIfNeeded();
     isRunning.value = false;
     isSessionFinished.value = true;
@@ -497,7 +513,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void finishReadingSession(int pagesRead) {
     final int sanitizedPages = pagesRead < 0 ? 0 : pagesRead;
-    _persistAccumulatedTime();
+    _persister.flush();
     if (sanitizedPages > 0) {
       final int nextPages = subject.currentPages + sanitizedPages;
       subject = subject.copyWith(currentPages: nextPages);
@@ -529,13 +545,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           subjectId: subject.id,
           subjectName: subject.name,
           pages: sanitizedPages,
-        ).then((_) {
-          if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
-            return Get.find<GroupsController>().refreshAfterActivityChange(
-              groupId: subject.groupId,
-            );
-          }
-        }),
+        ).then((_) => _notifyGroupActivityChanged()),
       );
     }
     _recordLastActivityIfNeeded();
@@ -556,91 +566,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  void _persistAccumulatedTime() {
-    if (_isPersistingTime) {
-      _shouldPersistAgain = true;
-      return;
+  void _notifyGroupActivityChanged() {
+    if (subject.isFromGroup) {
+      activityChangeBus.notifyGroupActivityChanged(groupId: subject.groupId);
     }
-    _isPersistingTime = true;
-    unawaited(_persistAccumulatedTimeLoop());
-  }
-
-  Future<void> _persistAccumulatedTimeLoop() async {
-    try {
-      do {
-        _shouldPersistAgain = false;
-        await _persistAccumulatedTimeOnce();
-      } while (_shouldPersistAgain);
-    } finally {
-      _isPersistingTime = false;
-    }
-  }
-
-  Future<void> _persistAccumulatedTimeOnce() async {
-    final int sessionSecondsToPersist = sessionSeconds.value;
-    final int elapsedSinceLastPersist =
-        sessionSecondsToPersist - _persistedSessionSeconds;
-    if (elapsedSinceLastPersist <= 0) {
-      return;
-    }
-
-    final result = await updateSubjectTimeUseCase(
-      subjectId: subject.id,
-      totalSeconds: subject.totalSeconds + sessionSecondsToPersist,
-    );
-    final bool didPersist = result.fold((_) => false, (_) => true);
-    if (!didPersist) {
-      return;
-    }
-
-    _hasLoggedTime = true;
-    _persistedSessionSeconds = sessionSecondsToPersist;
-    unawaited(
-      activityHistoryService.record(
-        category: subject.category,
-        subjectId: subject.id,
-        subjectName: subject.name,
-        seconds: elapsedSinceLastPersist,
-      ),
-    );
-    unawaited(
-      logActivityUseCase(
-        category: subject.category,
-        subjectId: subject.id,
-        subjectName: subject.name,
-        seconds: elapsedSinceLastPersist,
-      ).then((_) {
-        if (subject.isFromGroup && Get.isRegistered<GroupsController>()) {
-          return Get.find<GroupsController>().refreshAfterActivityChange(
-            groupId: subject.groupId,
-          );
-        }
-      }),
-    );
-    await dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
-    await subjectDailyHistoryService.addFocusSeconds(
-      subject.id,
-      elapsedSinceLastPersist,
-    );
-    await achievementUnlockService.checkForNewUnlocks();
-    if (sessionSeconds.value > sessionSecondsToPersist) {
-      _shouldPersistAgain = true;
-    }
-  }
-
-  void _autoSaveIfNeeded(DateTime now) {
-    if (sessionSeconds.value <= _persistedSessionSeconds) {
-      return;
-    }
-    if (now.difference(_lastAutoSaveAt) < autoSaveInterval) {
-      return;
-    }
-    _lastAutoSaveAt = now;
-    _persistAccumulatedTime();
   }
 
   void _recordLastActivityIfNeeded() {
-    if (!_hasLoggedTime || _hasRecordedLastActivity) {
+    if (!_persister.hasLoggedTime || _hasRecordedLastActivity) {
       return;
     }
     _hasRecordedLastActivity = true;
@@ -678,19 +611,18 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    final BuildContext? context = Get.context;
-    final String runningBody =
-        context?.l10n.timerNotificationRunning ?? "Sessão de foco em andamento";
-    final String restingBody =
-        context?.l10n.timerNotificationResting ?? "Descansando - volta já";
-    final String pausedBody =
-        context?.l10n.timerNotificationPaused ?? "Pausado";
+    final AppLocalizations l10n = lookupAppLocalizations(
+      appController.selectedLocale,
+    );
+    final String runningBody = l10n.timerNotificationRunning;
+    final String restingBody = l10n.timerNotificationResting;
+    final String pausedBody = l10n.timerNotificationPaused;
     final String backgroundRunningBody = _isAppInForeground
         ? runningBody
-        : "$runningBody · App em segundo plano";
+        : "$runningBody · ${l10n.timerBackgroundSuffix}";
     final String backgroundRestingBody = _isAppInForeground
         ? restingBody
-        : "$restingBody · App em segundo plano";
+        : "$restingBody · ${l10n.timerBackgroundSuffix}";
 
     if (!isRunning.value) {
       timerNotificationService.cancelScheduledAlarms();
@@ -738,12 +670,15 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         isSessionFinished.value) {
       return;
     }
+    final AppLocalizations l10n = lookupAppLocalizations(
+      appController.selectedLocale,
+    );
 
     if (isReading) {
       unawaited(
         timerNotificationService.scheduleReadingReminders(
           title: subject.name,
-          body: "Mais 30 minutos de leitura concluídos.",
+          body: l10n.timerReadingReminderBody,
           firstReminder: Duration(seconds: readingIntervalRemainingSeconds),
           interval: const Duration(seconds: defaultFocusIntervalSeconds),
         ),
@@ -755,7 +690,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       unawaited(
         timerNotificationService.scheduleFocusFinished(
           title: subject.name,
-          body: "Prática de hobby concluída.",
+          body: l10n.timerHobbyFinishedBody,
           remaining: Duration(seconds: breakCountdownSeconds.value),
         ),
       );
@@ -765,9 +700,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     unawaited(
       timerNotificationService.scheduleSessionTimeline(
         title: subject.name,
-        focusFinishedBody: "Sessão concluída. Hora da pausa.",
-        restFinishedBody: "Nova sessão iniciada.",
-        sessionFinishedBody: "Atividade concluída.",
+        focusFinishedBody: l10n.timerFocusFinishedBody,
+        restFinishedBody: l10n.timerRestFinishedBody,
+        sessionFinishedBody: l10n.timerSessionFinishedBody,
         focusRemaining: Duration(seconds: breakCountdownSeconds.value),
         restRemaining: Duration(seconds: restCountdownSeconds.value),
         focusInterval: Duration(seconds: focusIntervalSeconds),
@@ -844,7 +779,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       }
       _lastTickAt = DateTime.now();
       if (!value.isRunning) {
-        _persistAccumulatedTime();
+        _persister.flush();
       }
       _updateNotification();
       return true;
@@ -855,7 +790,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   void _applyLiveActivityState(TimerLiveActivityAction value) {
     if (isReading) {
-      sessionSeconds.value = value.remainingSeconds.clamp(0, 1 << 31);
+      sessionSeconds.value = value.remainingSeconds.clamp(0, _maxSessionSeconds);
       isResting.value = false;
       isRunning.value = value.isRunning;
       _syncFocusGuard();
@@ -902,7 +837,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         state == AppLifecycleState.detached) {
       final bool wasInForeground = _isAppInForeground;
       _isAppInForeground = false;
-      _persistAccumulatedTime();
+      _persister.flush();
       _recordLastActivityIfNeeded();
       _updateNotification();
       if (wasInForeground) {
@@ -973,7 +908,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _focusLockReturnResetTimer?.cancel();
-    _persistAccumulatedTime();
+    _persister.flush();
     _recordLastActivityIfNeeded();
     if (_isAppInForeground) {
       timerNotificationService.cancel();

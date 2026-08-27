@@ -1,5 +1,6 @@
 import "dart:math" as math;
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
@@ -22,9 +23,14 @@ class TimerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TimerController controller = Get.find();
 
+    // Outer Obx tracks only the coarse visual state (running / resting /
+    // paused / finished). It rebuilds the chrome — background, header, action
+    // buttons — on a transition, not on every one-second tick. The clock,
+    // progress ring and stat values live behind their own inner Obx below so
+    // the per-second rebuild stays scoped to what actually changes.
     return Obx(() {
       final TimerVisualState state = _stateFor(controller);
-      final _TimerViewData data = _TimerViewData.fromController(
+      final _TimerChrome chrome = _TimerChrome.fromController(
         context: context,
         controller: controller,
         state: state,
@@ -42,7 +48,7 @@ class TimerPage extends StatelessWidget {
           }
         },
         child: _TimerScaffold(
-          data: data,
+          chrome: chrome,
           onBackTap: () async {
             if (await controller.confirmExitIfNeeded()) {
               appNavigator.back(result: controller.subject);
@@ -95,94 +101,128 @@ class TimerPage extends StatelessWidget {
 
 class _TimerScaffold extends StatelessWidget {
   const _TimerScaffold({
-    required this.data,
+    required this.chrome,
     required this.onBackTap,
     required this.onEndTap,
     required this.onMainTap,
     required this.onTrailingTap,
   });
 
-  final _TimerViewData data;
+  final _TimerChrome chrome;
   final VoidCallback onBackTap;
   final VoidCallback onEndTap;
   final VoidCallback onMainTap;
   final VoidCallback onTrailingTap;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.colorTokens.black,
-    body: DecoratedBox(
-      decoration: BoxDecoration(gradient: data.backgroundGradient),
-      child: Stack(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final double progressSize = math.min(
-                  constraints.maxWidth * 0.76,
-                  292,
-                );
+  Widget build(BuildContext context) {
+    final TimerController controller = Get.find();
 
-                return CustomScrollView(
-                  slivers: [
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(22, 14, 22, 18),
-                        child: Column(
-                          children: [
-                            _TimerHeader(data: data, onBackTap: onBackTap),
-                            const Gap(20),
-                            _TimerProgressRing(data: data, size: progressSize),
-                            const Gap(32),
-                            if (data.state == TimerVisualState.resting)
-                              const _RestMessage()
-                            else
-                              _TimerStatsCard(data: data),
-                            const Spacer(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                _TimerActionButton(
-                                  iconPath: "stop",
-                                  label: context.l10n.timerEndActionLabel,
-                                  onTap: onEndTap,
+    return Scaffold(
+      backgroundColor: context.colorTokens.black,
+      body: DecoratedBox(
+        decoration: BoxDecoration(gradient: chrome.backgroundGradient),
+        child: Stack(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double progressSize = math.min(
+                    constraints.maxWidth * 0.76,
+                    292,
+                  );
+                  final double bottomPadding = math.max(
+                    18,
+                    MediaQuery.paddingOf(context).bottom,
+                  );
+
+                  return CustomScrollView(
+                    slivers: [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            22,
+                            14,
+                            22,
+                            bottomPadding,
+                          ),
+                          child: Column(
+                            children: [
+                              _TimerHeader(
+                                chrome: chrome,
+                                onBackTap: onBackTap,
+                              ),
+                              const Gap(20),
+                              Obx(
+                                () => _TimerProgressRing(
+                                  chrome: chrome,
+                                  tick: _TimerTick.fromController(
+                                    controller: controller,
+                                    state: chrome.state,
+                                  ),
+                                  size: progressSize,
                                 ),
-                                _TimerMainActionButton(
-                                  icon: data.mainActionIcon,
-                                  label: data.mainActionLabel,
-                                  accentColor: data.accentColor,
-                                  onTap: onMainTap,
+                              ),
+                              const Gap(32),
+                              if (chrome.state == TimerVisualState.resting)
+                                const _RestMessage()
+                              else
+                                Obx(
+                                  () => _TimerStatsCard(
+                                    chrome: chrome,
+                                    tick: _TimerTick.fromController(
+                                      controller: controller,
+                                      state: chrome.state,
+                                    ),
+                                  ),
                                 ),
-                                _TimerActionButton(
-                                  iconPath: "note",
-                                  label: data.trailingLabel,
-                                  onTap: onTrailingTap,
-                                ),
-                              ],
-                            ),
-                            const Gap(28),
-                          ],
+                              const Spacer(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  _TimerActionButton(
+                                    iconPath: "stop",
+                                    label: context.l10n.timerEndActionLabel,
+                                    onTap: onEndTap,
+                                  ),
+                                  _TimerMainActionButton(
+                                    icon: chrome.mainActionIcon,
+                                    label: chrome.mainActionLabel,
+                                    accentColor: chrome.accentColor,
+                                    onTap: onMainTap,
+                                  ),
+                                  _TimerActionButton(
+                                    iconPath: "note",
+                                    label: chrome.trailingLabel,
+                                    onTap: onTrailingTap,
+                                  ),
+                                ],
+                              ),
+                              const Gap(28),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _TimerHeader extends StatelessWidget {
-  const _TimerHeader({required this.data, required this.onBackTap});
+  const _TimerHeader({required this.chrome, required this.onBackTap});
 
-  final _TimerViewData data;
+  final _TimerChrome chrome;
   final VoidCallback onBackTap;
 
   @override
@@ -211,17 +251,17 @@ class _TimerHeader extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: data.headerIconColor,
+                color: chrome.headerIconColor,
               ),
               child: Center(
-                child: data.subjectSvgIconName == null
+                child: chrome.subjectSvgIconName == null
                     ? Icon(
-                        data.subjectIcon,
+                        chrome.subjectIcon,
                         color: context.colorTokens.white,
                         size: 22,
                       )
                     : AppIcon(
-                        data.subjectSvgIconName!,
+                        chrome.subjectSvgIconName!,
                         color: context.colorTokens.white,
                         size: 22,
                       ),
@@ -233,7 +273,7 @@ class _TimerHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  data.subjectName,
+                  chrome.subjectName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -245,7 +285,7 @@ class _TimerHeader extends StatelessWidget {
                 ),
                 const Gap(6),
                 Text(
-                  data.status,
+                  chrome.status,
                   style: TextStyle(
                     color: context.colorTokens.white.withValues(alpha: 0.58),
                     fontSize: 14,
@@ -263,14 +303,19 @@ class _TimerHeader extends StatelessWidget {
 }
 
 class _TimerProgressRing extends StatelessWidget {
-  const _TimerProgressRing({required this.data, required this.size});
+  const _TimerProgressRing({
+    required this.chrome,
+    required this.tick,
+    required this.size,
+  });
 
-  final _TimerViewData data;
+  final _TimerChrome chrome;
+  final _TimerTick tick;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    final int percent = (data.progress.clamp(0, 1) * 100).round();
+    final int percent = (tick.progress.clamp(0, 1) * 100).round();
     return MergeSemantics(
       child: Semantics(
         label: context.l10n.timerProgressSemanticLabel(percent),
@@ -282,25 +327,31 @@ class _TimerProgressRing extends StatelessWidget {
               ExcludeSemantics(
                 child: CustomPaint(
                   size: Size.square(size),
-                  painter: _TimerRingPainter(data: data),
+                  painter: _TimerRingPainter(
+                    progress: tick.progress,
+                    trackColor: chrome.trackColor,
+                    ringGradientColors: chrome.ringGradientColors,
+                    accentColor: chrome.accentColor,
+                    showStartDot: chrome.showStartDot,
+                  ),
                 ),
               ),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    data.mainLabel,
+                    chrome.mainLabel,
                     style: TextStyle(
-                      color: data.accentColor,
+                      color: chrome.accentColor,
                       fontSize: math.max(15, size * 0.055),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Gap(math.max(10, size * 0.055)),
                   _TimerClockDisplay(
-                    value: data.currentTime,
-                    leadingUnit: data.currentTimeLeadingUnit,
-                    trailingUnit: data.currentTimeTrailingUnit,
+                    value: tick.currentTime,
+                    leadingUnit: tick.currentTimeLeadingUnit,
+                    trailingUnit: tick.currentTimeTrailingUnit,
                     size: size,
                   ),
                 ],
@@ -426,16 +477,17 @@ class _TimerClockPart extends StatelessWidget {
 }
 
 class _TimerStatsCard extends StatelessWidget {
-  const _TimerStatsCard({required this.data});
+  const _TimerStatsCard({required this.chrome, required this.tick});
 
-  final _TimerViewData data;
+  final _TimerChrome chrome;
+  final _TimerTick tick;
 
   @override
   Widget build(BuildContext context) {
-    final String firstLabel = data.isReading
+    final String firstLabel = chrome.isReading
         ? context.l10n.timerCurrentPagesLabel
-        : context.l10n.groupActivityPauseDataLabel;
-    final IconData firstIcon = data.isReading
+        : context.l10n.timerBreakStatLabel;
+    final IconData firstIcon = chrome.isReading
         ? Icons.menu_book_rounded
         : Icons.free_breakfast_rounded;
 
@@ -455,8 +507,8 @@ class _TimerStatsCard extends StatelessWidget {
             child: _TimerStatItem(
               icon: firstIcon,
               label: firstLabel,
-              value: data.nextBreak,
-              accentColor: data.accentColor,
+              value: tick.nextBreak,
+              accentColor: chrome.accentColor,
             ),
           ),
           _TimerStatDivider(),
@@ -464,8 +516,8 @@ class _TimerStatsCard extends StatelessWidget {
             child: _TimerStatItem(
               icon: Icons.repeat_rounded,
               label: context.l10n.sessionSection,
-              value: data.focusSectionLabel,
-              accentColor: data.accentColor,
+              value: tick.focusSectionLabel,
+              accentColor: chrome.accentColor,
             ),
           ),
           _TimerStatDivider(),
@@ -473,8 +525,8 @@ class _TimerStatsCard extends StatelessWidget {
             child: _TimerStatItem(
               icon: Icons.bar_chart_rounded,
               label: context.l10n.todayLabel,
-              value: data.totalSubjectTimeLabel,
-              accentColor: data.accentColor,
+              value: tick.totalSubjectTimeLabel,
+              accentColor: chrome.accentColor,
             ),
           ),
         ],
@@ -691,9 +743,19 @@ class _RestMessage extends StatelessWidget {
 }
 
 class _TimerRingPainter extends CustomPainter {
-  const _TimerRingPainter({required this.data});
+  const _TimerRingPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.ringGradientColors,
+    required this.accentColor,
+    required this.showStartDot,
+  });
 
-  final _TimerViewData data;
+  final double progress;
+  final Color trackColor;
+  final List<Color> ringGradientColors;
+  final Color accentColor;
+  final bool showStartDot;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -702,19 +764,19 @@ class _TimerRingPainter extends CustomPainter {
     final double radius = (size.width - strokeWidth) / 2;
     final Rect rect = Rect.fromCircle(center: center, radius: radius);
     const double startAngle = -math.pi / 2;
-    final double sweepAngle = math.pi * 2 * data.progress;
+    final double sweepAngle = math.pi * 2 * progress;
 
     final Paint trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth
-      ..color = data.trackColor;
+      ..color = trackColor;
     final Paint progressPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth
       ..shader = SweepGradient(
-        colors: data.ringGradientColors,
+        colors: ringGradientColors,
         stops: const [0, 0.55, 1],
         transform: const GradientRotation(-math.pi / 2),
       ).createShader(rect);
@@ -723,13 +785,13 @@ class _TimerRingPainter extends CustomPainter {
       ..drawCircle(center, radius, trackPaint)
       ..drawArc(rect, startAngle, sweepAngle, false, progressPaint);
 
-    if (data.showStartDot) {
+    if (showStartDot) {
       _drawDot(
         canvas,
         center,
         radius,
         startAngle,
-        data.accentColor,
+        accentColor,
         strokeWidth * 0.9,
       );
       _drawDot(
@@ -737,7 +799,7 @@ class _TimerRingPainter extends CustomPainter {
         center,
         radius,
         startAngle + sweepAngle,
-        data.accentColor,
+        accentColor,
         strokeWidth * 0.56,
       );
     } else {
@@ -746,7 +808,7 @@ class _TimerRingPainter extends CustomPainter {
         center,
         radius,
         startAngle + sweepAngle,
-        data.accentColor,
+        accentColor,
         strokeWidth * 0.84,
       );
     }
@@ -769,27 +831,27 @@ class _TimerRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TimerRingPainter oldDelegate) =>
-      oldDelegate.data != data;
+      oldDelegate.progress != progress ||
+      oldDelegate.trackColor != trackColor ||
+      oldDelegate.accentColor != accentColor ||
+      oldDelegate.showStartDot != showStartDot ||
+      !listEquals(oldDelegate.ringGradientColors, ringGradientColors);
 }
 
-class _TimerViewData {
-  const _TimerViewData({
+/// State-derived view data for the timer chrome: everything that only changes
+/// when the session moves between focusing / resting / paused / finished, or
+/// that comes straight off the subject. Rebuilt by the outer [Obx].
+class _TimerChrome {
+  const _TimerChrome({
     required this.state,
     required this.subjectName,
     required this.status,
     required this.mainLabel,
-    required this.currentTime,
-    required this.currentTimeLeadingUnit,
-    required this.currentTimeTrailingUnit,
-    required this.nextBreak,
-    required this.focusSectionLabel,
     required this.isReading,
-    required this.totalSubjectTimeLabel,
     required this.accentColor,
     required this.headerIconColor,
     required this.subjectIcon,
     required this.subjectSvgIconName,
-    required this.progress,
     required this.backgroundGradient,
     required this.trackColor,
     required this.ringGradientColors,
@@ -799,7 +861,7 @@ class _TimerViewData {
     required this.showStartDot,
   });
 
-  factory _TimerViewData.fromController({
+  factory _TimerChrome.fromController({
     required BuildContext context,
     required TimerController controller,
     required TimerVisualState state,
@@ -807,29 +869,9 @@ class _TimerViewData {
     final bool isResting = state == TimerVisualState.resting;
     final bool isReading =
         controller.subject.category == TimeCategoryType.reading;
-    final bool isDailyHobby =
-        controller.subject.category == TimeCategoryType.hobbies &&
-        controller.subject.activityType == SubjectActivityType.daily;
     final Color accent = isResting
         ? TimerRestPalette.accent
         : Color(controller.subject.colorValue);
-    final int currentSeconds = isResting
-        ? (controller.restIntervalSeconds -
-                  controller.restCountdownSeconds.value)
-              .clamp(0, controller.restIntervalSeconds)
-        : isDailyHobby
-        ? controller.currentActivitySeconds
-        : controller.sessionSeconds.value;
-    final bool currentTimeUsesHours = currentSeconds >= 3600;
-    final double progress = state == TimerVisualState.finished
-        ? 1
-        : isReading
-        ? 1
-        : isResting
-        ? 1 -
-              (controller.restCountdownSeconds.value /
-                  controller.restIntervalSeconds)
-        : controller.focusProgress;
     final String iconName = controller.subject.iconName.isEmpty
         ? controller.subject.category.iconName
         : controller.subject.iconName;
@@ -837,7 +879,7 @@ class _TimerViewData {
     final String? subjectSvgIconName =
         subjectIcon == null && iconName.isNotEmpty ? iconName : null;
 
-    return _TimerViewData(
+    return _TimerChrome(
       state: state,
       subjectName: controller.subject.name,
       status: switch (state) {
@@ -854,29 +896,13 @@ class _TimerViewData {
           : isReading
           ? context.l10n.timerReadingLabel
           : context.l10n.timerFocusLabel,
-      currentTime: formatDurationCompactClock(
-        Duration(seconds: currentSeconds),
-      ),
-      currentTimeLeadingUnit: currentTimeUsesHours ? "h" : "min",
-      currentTimeTrailingUnit: currentTimeUsesHours ? "min" : "s",
-      nextBreak: isReading
-          ? "${controller.currentActivityPages}"
-          : _formatRestDuration(
-              Duration(seconds: controller.restIntervalSeconds),
-              controller.subject.category,
-            ),
-      focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
-      totalSubjectTimeLabel: formatDurationLong(
-        Duration(seconds: controller.currentActivitySeconds),
-      ),
       accentColor: accent,
       headerIconColor: accent.withValues(alpha: 0.82),
       subjectIcon:
           subjectIcon ??
           (isReading ? Icons.menu_book_rounded : Icons.school_rounded),
       subjectSvgIconName: subjectSvgIconName,
-      progress: progress.clamp(0, 1).toDouble(),
       backgroundGradient: isResting
           ? TimerRestPalette.backgroundGradient
           : TimerWallpapers.byIndex(controller.subject.wallpaperIndex),
@@ -907,29 +933,15 @@ class _TimerViewData {
     );
   }
 
-  static String _formatRestDuration(
-    Duration duration,
-    TimeCategoryType category,
-  ) => category == TimeCategoryType.exercises
-      ? formatDurationTotalSeconds(duration)
-      : formatDurationTotalMinutes(duration);
-
   final TimerVisualState state;
   final String subjectName;
   final String status;
   final String mainLabel;
-  final String currentTime;
-  final String currentTimeLeadingUnit;
-  final String currentTimeTrailingUnit;
-  final String nextBreak;
-  final String focusSectionLabel;
   final bool isReading;
-  final String totalSubjectTimeLabel;
   final Color accentColor;
   final Color headerIconColor;
   final IconData subjectIcon;
   final String? subjectSvgIconName;
-  final double progress;
   final LinearGradient backgroundGradient;
   final Color trackColor;
   final List<Color> ringGradientColors;
@@ -937,4 +949,81 @@ class _TimerViewData {
   final String mainActionLabel;
   final String trailingLabel;
   final bool showStartDot;
+}
+
+/// The per-second slice: clock text, ring progress and the stat values.
+/// Rebuilt by the inner [Obx] wrappers so the tick stays off the chrome.
+class _TimerTick {
+  const _TimerTick({
+    required this.currentTime,
+    required this.currentTimeLeadingUnit,
+    required this.currentTimeTrailingUnit,
+    required this.nextBreak,
+    required this.focusSectionLabel,
+    required this.totalSubjectTimeLabel,
+    required this.progress,
+  });
+
+  factory _TimerTick.fromController({
+    required TimerController controller,
+    required TimerVisualState state,
+  }) {
+    final bool isResting = state == TimerVisualState.resting;
+    final bool isReading =
+        controller.subject.category == TimeCategoryType.reading;
+    final bool isDailyHobby =
+        controller.subject.category == TimeCategoryType.hobbies &&
+        controller.subject.activityType == SubjectActivityType.daily;
+    final int currentSeconds = isResting
+        ? (controller.restIntervalSeconds -
+                  controller.restCountdownSeconds.value)
+              .clamp(0, controller.restIntervalSeconds)
+        : isDailyHobby
+        ? controller.currentActivitySeconds
+        : controller.sessionSeconds.value;
+    final bool currentTimeUsesHours = currentSeconds >= 3600;
+    final double progress = state == TimerVisualState.finished
+        ? 1
+        : isReading
+        ? 1
+        : isResting
+        ? 1 -
+              (controller.restCountdownSeconds.value /
+                  controller.restIntervalSeconds)
+        : controller.focusProgress;
+
+    return _TimerTick(
+      currentTime: formatDurationCompactClock(
+        Duration(seconds: currentSeconds),
+      ),
+      currentTimeLeadingUnit: currentTimeUsesHours ? "h" : "min",
+      currentTimeTrailingUnit: currentTimeUsesHours ? "min" : "s",
+      nextBreak: isReading
+          ? "${controller.currentActivityPages}"
+          : _formatRestDuration(
+              Duration(seconds: controller.restIntervalSeconds),
+              controller.subject.category,
+            ),
+      focusSectionLabel: "${controller.currentFocusSection}",
+      totalSubjectTimeLabel: formatDurationLong(
+        Duration(seconds: controller.currentActivitySeconds),
+      ),
+      progress: progress.clamp(0, 1).toDouble(),
+    );
+  }
+
+  static String _formatRestDuration(
+    Duration duration,
+    TimeCategoryType category,
+  ) => category == TimeCategoryType.exercises
+      ? formatDurationTotalSeconds(duration)
+      : formatDurationTotalMinutes(duration);
+
+  final String currentTime;
+  final String currentTimeLeadingUnit;
+  final String currentTimeTrailingUnit;
+  final String nextBreak;
+  final String focusSectionLabel;
+  final String totalSubjectTimeLabel;
+  final double progress;
 }
