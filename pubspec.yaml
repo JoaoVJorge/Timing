@@ -1,5 +1,5 @@
 name: timing
-description: "A new Flutter project."
+description: "Focus, routine, goals, and shared progress app."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -12,7 +12,6 @@ dependencies:
   equatable: ^2.0.8
   flutter:
     sdk: flutter
-  flutter_dotenv: ^6.0.1
   flutter_local_notifications: ^22.0.1
   flutter_localizations:
     sdk: flutter
@@ -29,6 +28,7 @@ dependencies:
   timezone: ^0.11.1
 
 dev_dependencies:
+  fake_async: any
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
@@ -39,8 +39,6 @@ flutter:
   generate: true
 
   assets:
-    - lib/env/debug.env
-    - lib/env/prod.env
     - assets/icons/
     - assets/images/
     - assets/sounds/
@@ -48,43 +46,17 @@ flutter:
   fonts:
     - family: Nunito
       fonts:
-        - asset: assets/fonts/Nunito/static/Nunito-ExtraLight.ttf
-          weight: 200
-        - asset: assets/fonts/Nunito/static/Nunito-ExtraLightItalic.ttf
-          weight: 200
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-Light.ttf
           weight: 300
-        - asset: assets/fonts/Nunito/static/Nunito-LightItalic.ttf
-          weight: 300
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Nunito/static/Nunito-Italic.ttf
-          weight: 400
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Nunito/static/Nunito-MediumItalic.ttf
-          weight: 500
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Nunito/static/Nunito-SemiBoldItalic.ttf
-          weight: 600
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Nunito/static/Nunito-BoldItalic.ttf
-          weight: 700
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-ExtraBold.ttf
           weight: 800
-        - asset: assets/fonts/Nunito/static/Nunito-ExtraBoldItalic.ttf
-          weight: 800
-          style: italic
         - asset: assets/fonts/Nunito/static/Nunito-Black.ttf
           weight: 900
-        - asset: assets/fonts/Nunito/static/Nunito-BlackItalic.ttf
-          weight: 900
-          style: italic
