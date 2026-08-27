@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
@@ -34,6 +36,7 @@ class DailyGoalsController extends GetxController {
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
+  final Set<String> _togglingTaskIds = <String>{};
 
   List<DailyTaskEntity> get pendingTasks =>
       tasks.where((task) => !task.isDoneForCurrentCycle).toList();
@@ -106,24 +109,72 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> onToggleTask(DailyTaskEntity task) async {
-    final Either<AppError, DailyTaskEntity> result =
-        await _toggleDailyTaskCheckUseCase(taskId: task.id);
+    if (!_togglingTaskIds.add(task.id)) {
+      return;
+    }
 
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
-      final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
-      if (index != -1) {
-        tasks[index] = updatedTask;
-      }
-      if (updatedTask.isCheckedToday) {
-        _lastActivityService.record(updatedTask.name);
-      }
-      if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
-        Get.find<GroupsController>().refreshAfterActivityChange(
-          groupId: updatedTask.groupId,
-        );
-      }
-      _achievementUnlockService.checkForNewUnlocks();
-    });
+    final int originalIndex = tasks.indexWhere((item) => item.id == task.id);
+    if (originalIndex == -1) {
+      _togglingTaskIds.remove(task.id);
+      return;
+    }
+    final List<DailyTaskEntity> taskSnapshot = List.of(tasks);
+    final DailyTaskEntity originalTask = tasks[originalIndex];
+    final String todayKey = DailyTaskEntity.dateKey(DateTime.now());
+    final List<String> optimisticDates =
+        originalTask.completedDates.contains(todayKey)
+        ? originalTask.completedDates.where((date) => date != todayKey).toList()
+        : [...originalTask.completedDates, todayKey];
+    tasks[originalIndex] = originalTask.copyWith(
+      completedDates: optimisticDates,
+      updatedAt: DateTime.now().toUtc(),
+    );
+
+    try {
+      final Either<AppError, DailyTaskEntity> result =
+          await _toggleDailyTaskCheckUseCase(
+            taskId: task.id,
+            currentTasks: taskSnapshot,
+          );
+
+      result.fold(
+        (error) {
+          _restoreTask(originalTask);
+          _appNavigator.showErrorSnackBar();
+        },
+        (updatedTask) {
+          final int index = tasks.indexWhere(
+            (item) => item.id == updatedTask.id,
+          );
+          if (index != -1) {
+            tasks[index] = updatedTask;
+          }
+          if (updatedTask.isCheckedToday) {
+            unawaited(_lastActivityService.record(updatedTask.name));
+          }
+          if (updatedTask.isFromGroup && Get.isRegistered<GroupsController>()) {
+            unawaited(
+              Get.find<GroupsController>().refreshAfterActivityChange(
+                groupId: updatedTask.groupId,
+              ),
+            );
+          }
+          unawaited(_achievementUnlockService.checkForNewUnlocks());
+        },
+      );
+    } catch (_) {
+      _restoreTask(originalTask);
+      _appNavigator.showErrorSnackBar();
+    } finally {
+      _togglingTaskIds.remove(task.id);
+    }
+  }
+
+  void _restoreTask(DailyTaskEntity task) {
+    final int index = tasks.indexWhere((item) => item.id == task.id);
+    if (index != -1) {
+      tasks[index] = task;
+    }
   }
 
   Future<void> _askAboutMissedYesterday() async {
@@ -156,6 +207,7 @@ class DailyGoalsController extends GetxController {
           date: didComplete ? yesterday : null,
           resolvedMissedDate: missedDate,
           toggleDate: didComplete,
+          currentTasks: List.of(tasks),
         );
 
     result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {

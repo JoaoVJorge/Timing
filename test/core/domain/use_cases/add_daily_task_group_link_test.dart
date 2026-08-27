@@ -48,7 +48,7 @@ void main() {
       expect(created.isFromGroup, true);
     });
 
-    test("links an existing goal to the group when reused", () async {
+    test("does not turn a personal goal into the group's goal", () async {
       final repository = _FakeDailyTasksRepository([
         DailyTaskEntity(
           id: "existing",
@@ -73,11 +73,43 @@ void main() {
       final DailyTaskEntity linked = result.getOrElse(
         () => throw StateError("expected task"),
       );
-      expect(linked.id, "existing");
+      expect(linked.id, isNot("existing"));
       expect(linked.isFromGroup, true);
-      // Persisted, not just returned.
-      expect(repository.savedTasks?.single.groupId, "group-123");
-      expect(repository.savedTasks?.single.groupActivityId, "activity-123");
+      expect(repository.savedTasks, hasLength(2));
+      expect(repository.savedTasks?.first.groupId, isNull);
+      expect(repository.savedTasks?.last.groupId, "group-123");
+      expect(repository.savedTasks?.last.groupActivityId, "activity-123");
+    });
+
+    test("reuses the canonical copy of the same group goal", () async {
+      final DailyTaskEntity canonical = DailyTaskEntity(
+        id: "grp_activity-123",
+        name: "Estudar",
+        colorValue: 1,
+        targetDays: 5,
+        completedDates: const ["2026-08-26"],
+        groupId: "group-123",
+        groupActivityId: "activity-123",
+      );
+      final repository = _FakeDailyTasksRepository([canonical]);
+      final useCase = AddDailyTaskUseCase(dailyTasksRepository: repository);
+
+      final result = await useCase(
+        name: "Estudar",
+        colorValue: 1,
+        targetDays: 5,
+        sequenceType: DailyTaskSequenceType.casual,
+        reuseMatchingTask: true,
+        groupId: "group-123",
+        groupActivityId: "activity-123",
+        id: "grp_activity-123",
+      );
+
+      expect(
+        result.getOrElse(() => throw StateError("expected task")),
+        canonical,
+      );
+      expect(repository.savedTasks, isNull);
     });
   });
 }

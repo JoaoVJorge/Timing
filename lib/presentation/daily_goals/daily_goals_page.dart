@@ -11,6 +11,7 @@ import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
+import "package:timing/shared/widgets/swipe_hint_button.dart";
 import "package:timing/theme/app_spacing.dart";
 
 class DailyGoalsPage extends StatelessWidget {
@@ -24,6 +25,11 @@ class DailyGoalsPage extends StatelessWidget {
       topBar: AppTopBar(
         title: context.l10n.homeTasksSection,
         showBackButton: true,
+        trailing: const SwipeHintButton(
+          title: "Gestos da meta",
+          message:
+              "Arraste uma meta para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.",
+        ),
       ),
       body: Obx(() {
         final List<DailyTaskEntity> pending = controller.pendingTasks;
@@ -69,7 +75,7 @@ class DailyGoalsPage extends StatelessWidget {
                 ),
               ),
               const Gap(AppSpacing.betweenRelated),
-              _AnimatedTaskSection(
+              _TaskSection(
                 tasks: pending,
                 onEdit: controller.onEditTask,
                 onToggle: controller.onToggleTask,
@@ -94,7 +100,7 @@ class DailyGoalsPage extends StatelessWidget {
                     : null,
               ),
               const Gap(AppSpacing.betweenRelated),
-              _AnimatedTaskSection(
+              _TaskSection(
                 tasks: completed,
                 onEdit: controller.onEditTask,
                 onToggle: controller.onToggleTask,
@@ -162,8 +168,8 @@ class _SkeletonTaskTile extends StatelessWidget {
   );
 }
 
-class _AnimatedTaskSection extends StatefulWidget {
-  const _AnimatedTaskSection({
+class _TaskSection extends StatelessWidget {
+  const _TaskSection({
     required this.tasks,
     required this.onEdit,
     required this.onToggle,
@@ -176,148 +182,18 @@ class _AnimatedTaskSection extends StatefulWidget {
   final ValueChanged<DailyTaskEntity> onDelete;
 
   @override
-  State<_AnimatedTaskSection> createState() => _AnimatedTaskSectionState();
-}
-
-class _AnimatedTaskSectionState extends State<_AnimatedTaskSection>
-    with TickerProviderStateMixin {
-  static const Duration _duration = Duration(milliseconds: 260);
-
-  late final List<_TaskListItem> _items = [
-    for (final DailyTaskEntity task in widget.tasks)
-      _TaskListItem(task: task, isVisible: true),
-  ];
-
-  @override
-  void didUpdateWidget(_AnimatedTaskSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _syncItems();
-  }
-
-  void _syncItems() {
-    final Set<String> nextIds = widget.tasks.map((task) => task.id).toSet();
-    final Map<String, DailyTaskEntity> nextById = {
-      for (final DailyTaskEntity task in widget.tasks) task.id: task,
-    };
-
-    for (final _TaskListItem item in _items) {
-      final DailyTaskEntity? nextTask = nextById[item.task.id];
-      if (nextTask == null) {
-        item.isVisible = false;
-      } else {
-        item.task = nextTask;
-      }
-    }
-
-    final Set<String> currentIds = _items.map((item) => item.task.id).toSet();
-    for (int index = 0; index < widget.tasks.length; index++) {
-      final DailyTaskEntity task = widget.tasks[index];
-      if (currentIds.contains(task.id)) {
-        continue;
-      }
-      final _TaskListItem item = _TaskListItem(task: task, isVisible: false);
-      _items.insert(index.clamp(0, _items.length), item);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => item.isVisible = true);
-        }
-      });
-    }
-
-    _items.sort((a, b) {
-      final int aIndex = widget.tasks.indexWhere(
-        (task) => task.id == a.task.id,
-      );
-      final int bIndex = widget.tasks.indexWhere(
-        (task) => task.id == b.task.id,
-      );
-      if (aIndex == -1 && bIndex == -1) {
-        return 0;
-      }
-      if (aIndex == -1) {
-        return 1;
-      }
-      if (bIndex == -1) {
-        return -1;
-      }
-      return aIndex.compareTo(bIndex);
-    });
-
-    setState(() {});
-    Future<void>.delayed(_duration, () {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _items.removeWhere(
-          (item) => !item.isVisible && !nextIds.contains(item.task.id),
-        );
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) => Column(
     children: [
-      for (final _TaskListItem item in _items) ...[
-        _AnimatedTaskEntry(
-          key: ValueKey(item.task.id),
-          isVisible: item.isVisible,
-          duration: _duration,
-          child: DailyTaskTile(
-            task: item.task,
-            onEdit: () => widget.onEdit(item.task),
-            onToggle: () => widget.onToggle(item.task),
-            onDelete: () => widget.onDelete(item.task),
-          ),
+      for (int index = 0; index < tasks.length; index++) ...[
+        DailyTaskTile(
+          key: ValueKey(tasks[index].id),
+          task: tasks[index],
+          onEdit: () => onEdit(tasks[index]),
+          onToggle: () => onToggle(tasks[index]),
+          onDelete: () => onDelete(tasks[index]),
         ),
-        AnimatedSize(
-          duration: _duration,
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: item.isVisible
-              ? const Gap(AppSpacing.betweenRelated)
-              : const SizedBox.shrink(),
-        ),
+        if (index != tasks.length - 1) const Gap(AppSpacing.betweenRelated),
       ],
     ],
   );
-}
-
-class _AnimatedTaskEntry extends StatelessWidget {
-  const _AnimatedTaskEntry({
-    required this.isVisible,
-    required this.duration,
-    required this.child,
-    super.key,
-  });
-
-  final bool isVisible;
-  final Duration duration;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => AnimatedSize(
-    duration: duration,
-    curve: Curves.easeOutCubic,
-    alignment: Alignment.topCenter,
-    child: AnimatedOpacity(
-      duration: duration,
-      curve: Curves.easeOut,
-      opacity: isVisible ? 1 : 0,
-      child: AnimatedSlide(
-        duration: duration,
-        curve: Curves.easeOutCubic,
-        offset: isVisible ? Offset.zero : const Offset(0.08, -0.08),
-        child: isVisible ? child : SizedBox(height: 0, child: child),
-      ),
-    ),
-  );
-}
-
-class _TaskListItem {
-  _TaskListItem({required this.task, required this.isVisible});
-
-  DailyTaskEntity task;
-  bool isVisible;
 }

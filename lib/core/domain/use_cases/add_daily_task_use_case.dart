@@ -29,7 +29,10 @@ class AddDailyTaskUseCase {
           (task) =>
               task.name.trim().toLowerCase() == normalizedName &&
               task.targetDays == targetDays &&
-              task.sequenceType == sequenceType,
+              task.sequenceType == sequenceType &&
+              (groupActivityId == null ||
+                  task.groupActivityId == groupActivityId ||
+                  task.groupId == groupId && task.groupActivityId == null),
         );
         if (matchIndex != -1) {
           final DailyTaskEntity match = tasks[matchIndex];

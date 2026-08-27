@@ -3,7 +3,6 @@ import "package:gap/gap.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
-import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/swipe_reveal_actions.dart";
 
 class DailyTaskTile extends StatefulWidget {
@@ -79,11 +78,10 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
         ),
         child: Row(
           children: [
-            BounceTap(
+            GestureDetector(
               onTap: _onTapToggle,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
@@ -96,32 +94,16 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
                     width: 2,
                   ),
                 ),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
-                  switchInCurve: Curves.easeOutBack,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) => ScaleTransition(
-                    scale: animation,
-                    child: FadeTransition(opacity: animation, child: child),
-                  ),
-                  child: isCheckedToday
-                      ? const Center(
-                          key: ValueKey("checked"),
-                          child: AppIcon(
-                            "check",
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const SizedBox.shrink(key: ValueKey("unchecked")),
-                ),
+                child: isCheckedToday
+                    ? const Center(
+                        child: AppIcon("check", size: 14, color: Colors.white),
+                      )
+                    : null,
               ),
             ),
             const Gap(12),
             Expanded(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
+              child: Opacity(
                 opacity: contentOpacity,
                 child: Text(
                   widget.task.name,
@@ -141,9 +123,7 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
               ),
             ),
             const Gap(12),
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
+            Opacity(
               opacity: contentOpacity,
               child: widget.task.hasInfiniteTarget
                   ? Text(

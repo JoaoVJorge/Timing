@@ -1,0 +1,64 @@
+import "package:dartz/dartz.dart";
+import "package:flutter_test/flutter_test.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
+
+class _FakeDailyTasksRepository implements DailyTasksRepository {
+  _FakeDailyTasksRepository(this.tasks);
+
+  List<DailyTaskEntity> tasks;
+  int getTasksCalls = 0;
+  List<DailyTaskEntity>? savedTasks;
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
+    getTasksCalls++;
+    return Right(tasks);
+  }
+
+  @override
+  Future<Either<AppError, void>> saveTasks(
+    List<DailyTaskEntity> updatedTasks,
+  ) async {
+    savedTasks = updatedTasks;
+    tasks = updatedTasks;
+    return const Right(null);
+  }
+}
+
+void main() {
+  test(
+    "uses the in-memory snapshot without fetching before a toggle",
+    () async {
+      final DailyTaskEntity task = DailyTaskEntity(
+        id: "goal-1",
+        name: "Meta",
+        colorValue: 1,
+        targetDays: 14,
+        completedDates: const [],
+      );
+      final _FakeDailyTasksRepository repository = _FakeDailyTasksRepository([
+        task,
+      ]);
+      final ToggleDailyTaskCheckUseCase useCase = ToggleDailyTaskCheckUseCase(
+        dailyTasksRepository: repository,
+      );
+
+      final Either<AppError, DailyTaskEntity> result = await useCase(
+        taskId: task.id,
+        currentTasks: [task],
+      );
+
+      expect(repository.getTasksCalls, 0);
+      expect(repository.savedTasks?.single.isCheckedToday, true);
+      expect(
+        result
+            .getOrElse(() => throw StateError("expected task"))
+            .isCheckedToday,
+        true,
+      );
+    },
+  );
+}

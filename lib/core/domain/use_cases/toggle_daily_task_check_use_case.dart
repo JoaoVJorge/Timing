@@ -13,9 +13,12 @@ class ToggleDailyTaskCheckUseCase {
     DateTime? date,
     String? resolvedMissedDate,
     bool toggleDate = true,
+    List<DailyTaskEntity>? currentTasks,
   }) async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
-        await _dailyTasksRepository.getTasks();
+        currentTasks == null
+        ? await _dailyTasksRepository.getTasks()
+        : Right(List<DailyTaskEntity>.of(currentTasks));
 
     return getResult.fold((error) async => Left(error), (tasks) async {
       final int index = tasks.indexWhere((task) => task.id == taskId);
