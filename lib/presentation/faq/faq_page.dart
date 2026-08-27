@@ -96,7 +96,7 @@ class _FaqExpansionCardState extends State<_FaqExpansionCard> {
               secondChild: Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     color: context.colorTokens.surfaceShadow,

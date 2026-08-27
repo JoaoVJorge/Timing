@@ -32,12 +32,11 @@ class AnalyticsEvent extends Equatable {
   );
 
   /// A new subject/activity was created.
-  factory AnalyticsEvent.subjectCreated({
-    required TimeCategoryType category,
-  }) => AnalyticsEvent(
-    "subject_created",
-    properties: {"category": category.name},
-  );
+  factory AnalyticsEvent.subjectCreated({required TimeCategoryType category}) =>
+      AnalyticsEvent(
+        "subject_created",
+        properties: {"category": category.name},
+      );
 
   final String name;
   final Map<String, Object?> properties;

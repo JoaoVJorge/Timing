@@ -36,7 +36,9 @@ migrate_working_dir/
 # Local environment values
 lib/env/*.env
 !lib/env/*.env.example
-backend/
+
+# Only the canonical Supabase setup is versioned under backend/.
+backend/supabase-setup.sql
 
 # Symbolication related
 app.*.symbols

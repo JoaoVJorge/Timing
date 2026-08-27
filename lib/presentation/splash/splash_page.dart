@@ -33,7 +33,7 @@ class SplashPage extends StatelessWidget {
                 ),
               ),
             ),
-            Gap(12),
+            const Gap(12),
             Text(
               AppConstants.appTitle,
               style: context.textStyles.textPrimaryButton.copyWith(

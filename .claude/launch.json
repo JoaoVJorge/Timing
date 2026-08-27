@@ -2,9 +2,29 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "timing-web",
+      "name": "timing-web-no-backend",
       "runtimeExecutable": "flutter",
-      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "5959"],
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "chrome",
+        "--web-port",
+        "5959"
+      ],
+      "port": 5959
+    },
+    {
+      "name": "timing-web-with-backend",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "chrome",
+        "--web-port",
+        "5959",
+        "--dart-define-from-file",
+        "lib/env/debug.env"
+      ],
       "port": 5959
     }
   ]

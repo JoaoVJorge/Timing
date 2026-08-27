@@ -80,7 +80,7 @@ class EditProfilePage extends StatelessWidget {
             ),
             const Gap(14),
             _ProfileSection(
-              title: "Informações pessoais",
+              title: context.l10n.personalInformationTitle,
               children: [
                 _ProfileTextField(
                   controller: controller.nameController,
@@ -115,12 +115,12 @@ class EditProfilePage extends StatelessWidget {
             ),
             const Gap(14),
             _ProfileSection(
-              title: "Contas conectadas",
+              title: context.l10n.connectedAccountsSection,
               children: [_LinkedAuthCard(controller: controller)],
             ),
             const Gap(14),
             _ProfileSection(
-              title: "Contato",
+              title: context.l10n.contactSection,
               children: [
                 _ProfileTextField(
                   controller: controller.phoneController,

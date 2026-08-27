@@ -94,7 +94,7 @@ class ProgressHeroCard extends StatelessWidget {
               alpha: 0.18,
             ),
           ),
-          child: Icon(Icons.timer_rounded, color: Colors.white, size: 30),
+          child: const Icon(Icons.timer_rounded, color: Colors.white, size: 30),
         ),
       ],
     ),

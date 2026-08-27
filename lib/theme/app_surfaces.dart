@@ -22,7 +22,7 @@ class AppSurfaces {
     borderRadius: BorderRadius.circular(primaryRadius),
   );
 
-  /// Container that groups several [AppNavRow]s behind a single border.
+  /// Container that groups several navigation rows behind a single border.
   static BoxDecoration rowGroup(AppColorTokens tokens) => BoxDecoration(
     color: tokens.surface,
     borderRadius: BorderRadius.circular(groupRadius),

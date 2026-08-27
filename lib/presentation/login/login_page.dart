@@ -41,7 +41,7 @@ class LoginPage extends StatelessWidget {
                   const Expanded(child: _LoginHeroContent()),
                   const Gap(8),
                   _AuthCard(controller: controller),
-                  Gap(12),
+                  const Gap(12),
                 ],
               ),
             ),
