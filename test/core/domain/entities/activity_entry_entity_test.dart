@@ -18,7 +18,7 @@ void main() {
     });
 
     test("falls back to studying for an unknown category name", () {
-      final ActivityEntryEntity entry = ActivityEntryEntity.fromMap({
+      final ActivityEntryEntity entry = ActivityEntryEntity.fromMap(const {
         "id": "1-0",
         "category": "not-a-category",
         "subjectId": "s",

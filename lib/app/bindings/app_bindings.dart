@@ -1,5 +1,3 @@
-import "package:flutter/foundation.dart";
-import "package:flutter_dotenv/flutter_dotenv.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
@@ -15,10 +13,6 @@ import "package:shared_preferences/shared_preferences.dart";
 class AppBindings extends Bindings {
   @override
   Future<void> dependencies() async {
-    await dotenv.load(
-      fileName: kDebugMode ? "lib/env/debug.env" : "lib/env/prod.env",
-    );
-
     Get.put<AppNavigator>(AppNavigator(), permanent: true);
 
     await ServicesBindings().dependencies();

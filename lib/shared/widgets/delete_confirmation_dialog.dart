@@ -3,6 +3,9 @@ import "package:gap/gap.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
+typedef DeleteConfirmationCallback =
+    Future<bool> Function({required String itemName, String? itemTypeName});
+
 Future<bool> showDeleteConfirmationDialog({
   required String itemName,
   String? itemTypeName,

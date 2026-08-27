@@ -18,10 +18,7 @@ class EditGroupPage extends GetView<EditGroupController> {
 
   @override
   Widget build(BuildContext context) => AppScaffold(
-    topBar: AppTopBar(
-      title: context.l10n.editGroupLabel,
-      showBackButton: true,
-    ),
+    topBar: AppTopBar(title: context.l10n.editGroupLabel, showBackButton: true),
     body: Obx(() {
       final GroupThemeType? theme = controller.theme;
       if (theme == null) {
@@ -37,7 +34,7 @@ class EditGroupPage extends GetView<EditGroupController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SectionCard(
-                    title: "Informacoes do grupo",
+                    title: context.l10n.editGroupInfoSection,
                     icon: AppIcon(
                       "group",
                       size: 20,
@@ -47,7 +44,7 @@ class EditGroupPage extends GetView<EditGroupController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _LabeledField(
-                          label: "Titulo",
+                          label: context.l10n.scheduleTitleHint,
                           controller: controller.nameController,
                           hintText: context.l10n.groupNameExampleHint,
                           prefixIcon: AppIcon(
@@ -70,7 +67,7 @@ class EditGroupPage extends GetView<EditGroupController> {
                   ),
                   const Gap(16),
                   _SectionCard(
-                    title: "Atividade",
+                    title: context.l10n.createGroupStepActivity,
                     icon: AppIcon(
                       theme.iconName,
                       size: 20,
@@ -104,7 +101,7 @@ class _ActivityForm extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _LabeledField(
-        label: "Nome da atividade",
+        label: context.l10n.createGroupActivityNameLabel,
         controller: controller.activityNameController,
         hintText: context.l10n.createGroupActivityNameLabel,
         prefixIcon: Icon(
@@ -118,8 +115,8 @@ class _ActivityForm extends StatelessWidget {
         label: controller.isDailyGoalsTheme
             ? context.l10n.targetDaysLabel
             : controller.isReadingTheme
-            ? "Meta de paginas"
-            : "Meta de foco",
+            ? context.l10n.createGroupPagesGoalLabel
+            : context.l10n.createGroupFocusGoalLabel,
         controller: controller.activityGoalController,
         hintText: controller.isDailyGoalsTheme
             ? context.l10n.targetDaysHint
@@ -139,7 +136,7 @@ class _ActivityForm extends StatelessWidget {
           children: [
             Expanded(
               child: _LabeledField(
-                label: "Pausa",
+                label: context.l10n.restLabel,
                 controller: controller.restController,
                 hintText: "0",
                 suffixText: controller.restSuffix,
@@ -150,7 +147,7 @@ class _ActivityForm extends StatelessWidget {
             const Gap(12),
             Expanded(
               child: _LabeledField(
-                label: "Sessoes",
+                label: context.l10n.sessionsLabel,
                 controller: controller.sessionsController,
                 hintText: "1",
                 keyboardType: TextInputType.number,
@@ -206,10 +203,7 @@ class _SectionCard extends StatelessWidget {
                 style: context.textStyles.black20.copyWith(fontSize: 18),
               ),
             ),
-            if (trailing != null) ...[
-              const Gap(10),
-              trailing!,
-            ],
+            if (trailing != null) ...[const Gap(10), trailing!],
           ],
         ),
         const Gap(16),
@@ -337,7 +331,7 @@ class _SaveButton extends StatelessWidget {
                 ),
               )
             : Text(
-                "Salvar alteracoes",
+                context.l10n.saveChangesButton,
                 style: context.textStyles.textPrimaryButton,
               ),
       ),

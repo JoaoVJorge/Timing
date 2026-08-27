@@ -10,7 +10,9 @@ Future<void> _pumpSkeleton(WidgetTester tester, Widget child) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
-      home: Scaffold(body: Padding(padding: const EdgeInsets.all(16), child: child)),
+      home: Scaffold(
+        body: Padding(padding: const EdgeInsets.all(16), child: child),
+      ),
     ),
   );
   await tester.pump(const Duration(milliseconds: 300));

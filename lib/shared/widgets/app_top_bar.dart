@@ -10,7 +10,6 @@ class AppTopBar extends StatelessWidget {
     this.showBackButton = false,
     this.onBack,
     this.onTitleTap,
-    this.leadingAccessory,
     this.trailing,
     this.titleMaxLines = 2,
     super.key,
@@ -20,7 +19,6 @@ class AppTopBar extends StatelessWidget {
   final bool showBackButton;
   final VoidCallback? onBack;
   final VoidCallback? onTitleTap;
-  final Widget? leadingAccessory;
   final Widget? trailing;
   final int titleMaxLines;
 
@@ -30,17 +28,8 @@ class AppTopBar extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int leadingSlots =
-            (showBackButton ? 1 : 0) + (leadingAccessory == null ? 0 : 1);
-        final int trailingSlots = trailing == null ? 0 : 1;
-        final int reservedSlots = leadingSlots > trailingSlots
-            ? leadingSlots
-            : trailingSlots;
         final double titleMaxWidth =
-            (constraints.maxWidth -
-                    ((AppSpacing.minTapTarget + 8) *
-                        (reservedSlots == 0 ? 1 : reservedSlots) *
-                        2))
+            (constraints.maxWidth - ((AppSpacing.minTapTarget + 8) * 2))
                 .clamp(0, constraints.maxWidth)
                 .toDouble();
 
@@ -76,7 +65,7 @@ class AppTopBar extends StatelessWidget {
                   ),
                 ),
               ),
-              if (showBackButton || leadingAccessory != null) ...[
+              if (showBackButton) ...[
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Row(
@@ -98,7 +87,6 @@ class AppTopBar extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ?leadingAccessory,
                     ],
                   ),
                 ),

@@ -348,7 +348,10 @@ class AppController extends GetxController {
   }
 
   Locale _resolvedLocale(String? code) {
-    if (code != null) {
+    if (code != null &&
+        AppLocalizations.supportedLocales.any(
+          (locale) => locale.languageCode == code,
+        )) {
       return Locale(code);
     }
 

@@ -79,15 +79,18 @@ Future<(SubjectsDataSource, PendingSyncStore, _MemStorage)> _build(
 
 void main() {
   group("SubjectsDataSource offline sync", () {
-    test("saves locally and marks pending when the remote sync fails", () async {
-      final (dataSource, store, storage) = await _build(_OfflineSupabase());
+    test(
+      "saves locally and marks pending when the remote sync fails",
+      () async {
+        final (dataSource, store, storage) = await _build(_OfflineSupabase());
 
-      final result = await dataSource.saveSubjects([_subject()]);
+        final result = await dataSource.saveSubjects([_subject()]);
 
-      expect(result.isRight(), isTrue);
-      expect(storage.data[LocalStorageKeys.subjects], isNotNull);
-      expect(store.contains(PendingSyncDataset.subjects), isTrue);
-    });
+        expect(result.isRight(), isTrue);
+        expect(storage.data[LocalStorageKeys.subjects], isNotNull);
+        expect(store.contains(PendingSyncDataset.subjects), isTrue);
+      },
+    );
 
     test("keeps the dataset pending while the retry still fails", () async {
       final (dataSource, store, _) = await _build(_OfflineSupabase());
