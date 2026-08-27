@@ -51,6 +51,7 @@ class HomeController extends GetxController {
 
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxList<DailyTaskEntity> dailyTasks = <DailyTaskEntity>[].obs;
+  final RxBool isLoading = true.obs;
 
   RxString get userName => _appController.userName;
 
@@ -71,26 +72,31 @@ class HomeController extends GetxController {
     bool reloadSchedule = true,
     bool reloadDailyTasks = true,
   }) async {
-    final Either<AppError, List<SubjectEntity>> subjectsResult =
-        await _getSubjectsUseCase();
-    subjectsResult.fold((error) {
-      subjects.clear();
-      _appNavigator.showErrorSnackBar(error.message);
-    }, (value) => subjects.value = value);
-
-    // Daily tasks only change on the Daily Goals screen, so most returns to Home
-    // keep the in-memory list instead of re-fetching it on every navigation.
-    if (reloadDailyTasks) {
-      final Either<AppError, List<DailyTaskEntity>> tasksResult =
-          await _getDailyTasksUseCase();
-      tasksResult.fold((error) {
-        dailyTasks.clear();
+    isLoading.value = true;
+    try {
+      final Either<AppError, List<SubjectEntity>> subjectsResult =
+          await _getSubjectsUseCase();
+      subjectsResult.fold((error) {
+        subjects.clear();
         _appNavigator.showErrorSnackBar(error.message);
-      }, (value) => dailyTasks.value = value);
-    }
+      }, (value) => subjects.value = value);
 
-    if (reloadSchedule) {
-      await _scheduleController.loadEntries();
+      // Daily tasks only change on the Daily Goals screen, so most returns to Home
+      // keep the in-memory list instead of re-fetching it on every navigation.
+      if (reloadDailyTasks) {
+        final Either<AppError, List<DailyTaskEntity>> tasksResult =
+            await _getDailyTasksUseCase();
+        tasksResult.fold((error) {
+          dailyTasks.clear();
+          _appNavigator.showErrorSnackBar(error.message);
+        }, (value) => dailyTasks.value = value);
+      }
+
+      if (reloadSchedule) {
+        await _scheduleController.loadEntries();
+      }
+    } finally {
+      isLoading.value = false;
     }
     await _achievementUnlockService.initializeBaselineIfNeeded();
     unawaited(_syncHomeWidget());

@@ -13,6 +13,7 @@ import "package:timing/shared/functions/format_relative_time.dart";
 import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 
@@ -244,6 +245,7 @@ class _PlanDayRows extends StatelessWidget {
                 _PlanDayRow(
                   icon: Icons.event_available_rounded,
                   title: context.l10n.homeTasksSection,
+                  isLoading: controller.isLoading.value,
                   subtitle: controller.goalsTotal > 0
                       ? context.l10n.homeGoalsProgress(
                           controller.goalsDoneToday,
@@ -257,6 +259,7 @@ class _PlanDayRows extends StatelessWidget {
                 _PlanDayRow(
                   icon: Icons.calendar_month_rounded,
                   title: _nextCommitmentTitle(context),
+                  isLoading: controller.isLoading.value,
                   subtitle: next == null
                       ? _scheduleSubtitle(context)
                       : "${_todayLabel(context)}, ${formatScheduleRange(context, next.startMinutes, next.endMinutes)}",
@@ -280,6 +283,7 @@ class _PlanDayRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.isLoading,
     required this.accent,
     required this.onTap,
   });
@@ -287,6 +291,7 @@ class _PlanDayRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final bool isLoading;
   final Color accent;
   final VoidCallback onTap;
 
@@ -327,12 +332,17 @@ class _PlanDayRow extends StatelessWidget {
                   style: context.textStyles.cardTitle.copyWith(fontSize: 15),
                 ),
                 const Gap(3),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.caption.copyWith(fontSize: 12),
-                ),
+                if (isLoading)
+                  const AppSkeleton(
+                    child: AppSkeletonBox(height: 16, width: 160, radius: 4),
+                  )
+                else
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.caption.copyWith(fontSize: 12),
+                  ),
               ],
             ),
           ),
