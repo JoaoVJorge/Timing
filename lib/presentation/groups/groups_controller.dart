@@ -225,7 +225,7 @@ class GroupsController extends GetxController {
   }
 
   /// Per-member completion of the selected group's activities, used by the
-  /// group's "Metas" tab to mark who reached the goal.
+  /// group's "Metas" tab to show who completed it today.
   Future<void> loadActivityProgress() async {
     final GroupEntity? group = selectedGroup.value;
     if (group == null) {

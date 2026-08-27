@@ -1,8 +1,8 @@
 import "package:equatable/equatable.dart";
 
 /// One member's completion of a group activity, as returned by the
-/// `group_activity_progress` RPC. [reached] is the "atingiu a meta" flag the
-/// group tab shows; [progress]/[target] back a progress label.
+/// `group_activity_progress` RPC. For goals, [reached] means the member marked
+/// the current local day as done; [progress]/[target] show total goal progress.
 class GroupActivityProgressEntity extends Equatable {
   const GroupActivityProgressEntity({
     required this.activityId,

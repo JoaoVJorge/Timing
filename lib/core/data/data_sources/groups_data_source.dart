@@ -948,8 +948,8 @@ class GroupsDataSource {
   }
 
   DateTime _todayStart() {
-    final DateTime now = DateTime.now().toUtc();
-    return DateTime.utc(now.year, now.month, now.day);
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day).toUtc();
   }
 
   DateTime _weekStart() {
@@ -958,8 +958,8 @@ class GroupsDataSource {
   }
 
   DateTime _monthStart() {
-    final DateTime now = DateTime.now().toUtc();
-    return DateTime.utc(now.year, now.month);
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month).toUtc();
   }
 }
 

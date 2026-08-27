@@ -1040,6 +1040,10 @@ class _GroupActivityDataView extends StatelessWidget {
     GroupsController controller,
     GroupActivityProgressEntity header,
   ) {
+    if (header.isGoal) {
+      return _goalData(context, controller, header);
+    }
+
     final LeaderboardPeriodType period = controller.selectedPeriod.value;
     final int total = group.members.length;
     final int focusSeconds = header.focusSeconds > 0
@@ -1075,6 +1079,7 @@ class _GroupActivityDataView extends StatelessWidget {
           pendingMembers: pendingMembers,
           progressByMember: progressByMember,
           targetPerMember: targetPerMember,
+          targetByMember: const {},
           unit: group.theme.unit,
         ),
         const Gap(AppSpacing.betweenRelated),
@@ -1090,6 +1095,65 @@ class _GroupActivityDataView extends StatelessWidget {
           group: group,
           header: header,
           focusSeconds: focusSeconds,
+          goalProgress: 0,
+          goalTarget: 0,
+        ),
+      ],
+    );
+  }
+
+  Widget _goalData(
+    BuildContext context,
+    GroupsController controller,
+    GroupActivityProgressEntity header,
+  ) {
+    final List<GroupActivityProgressEntity> rows = controller.activityProgress
+        .where((item) => item.activityId == header.activityId)
+        .toList();
+    final Map<String, GroupActivityProgressEntity> progressByMemberId = {
+      for (final GroupActivityProgressEntity item in rows) item.memberId: item,
+    };
+    final int fallbackTarget = rows.fold<int>(
+      header.target,
+      (largest, item) => item.target > largest ? item.target : largest,
+    );
+    final Map<String, int> progressByMember = {
+      for (final GroupMemberEntity member in group.members)
+        member.id: progressByMemberId[member.id]?.progress ?? 0,
+    };
+    final Map<String, int> targetByMember = {
+      for (final GroupMemberEntity member in group.members)
+        member.id: (progressByMemberId[member.id]?.target ?? 0) > 0
+            ? progressByMemberId[member.id]!.target
+            : fallbackTarget,
+    };
+    final List<GroupMemberEntity> completedMembers = group.members
+        .where((member) => progressByMemberId[member.id]?.reached ?? false)
+        .toList();
+    final List<GroupMemberEntity> pendingMembers = group.members
+        .where((member) => !(progressByMemberId[member.id]?.reached ?? false))
+        .toList();
+    final int currentUserProgress =
+        progressByMember[controller.currentUserId] ?? 0;
+
+    return Column(
+      children: [
+        _ParticipantsProgressCard(
+          total: group.members.length,
+          completedMembers: completedMembers,
+          pendingMembers: pendingMembers,
+          progressByMember: progressByMember,
+          targetPerMember: fallbackTarget,
+          targetByMember: targetByMember,
+          unit: GroupMetricUnit.days,
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        _ActivityOverviewCard(
+          group: group,
+          header: header,
+          focusSeconds: 0,
+          goalProgress: currentUserProgress,
+          goalTarget: fallbackTarget,
         ),
       ],
     );
@@ -1101,11 +1165,15 @@ class _ActivityOverviewCard extends StatelessWidget {
     required this.group,
     required this.header,
     required this.focusSeconds,
+    required this.goalProgress,
+    required this.goalTarget,
   });
 
   final GroupEntity group;
   final GroupActivityProgressEntity header;
   final int focusSeconds;
+  final int goalProgress;
+  final int goalTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -1126,7 +1194,9 @@ class _ActivityOverviewCard extends StatelessWidget {
               const Gap(12),
               Expanded(
                 child: Text(
-                  localizedGroupName(context, group),
+                  header.isGoal
+                      ? header.name
+                      : localizedGroupName(context, group),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.black20.copyWith(
@@ -1159,39 +1229,60 @@ class _ActivityOverviewCard extends StatelessWidget {
           const Gap(16),
           IntrinsicHeight(
             child: Row(
-              children: [
-                Expanded(
-                  child: _ActivityDataTile(
-                    icon: Icons.timer_outlined,
-                    label: context.l10n.groupActivityFocusDataLabel,
-                    value: formatDurationTotalMinutes(
-                      Duration(seconds: focusSeconds),
-                    ),
-                  ),
-                ),
-                if (group.theme != GroupThemeType.hobbies) ...[
-                  _MetricDivider(),
-                  Expanded(
-                    child: _ActivityDataTile(
-                      icon: Icons.coffee_outlined,
-                      label: context.l10n.groupActivityPauseDataLabel,
-                      value: _formatRestValue(
-                        context,
-                        group.theme,
-                        header.restMinutes,
+              children: header.isGoal
+                  ? [
+                      Expanded(
+                        child: _ActivityDataTile(
+                          icon: Icons.flag_outlined,
+                          label: context.l10n.groupGoalTargetDataLabel,
+                          value: context.l10n.unitDays(goalTarget),
+                        ),
                       ),
-                    ),
-                  ),
-                  _MetricDivider(),
-                  Expanded(
-                    child: _ActivityDataTile(
-                      icon: Icons.repeat_rounded,
-                      label: context.l10n.groupActivitySessionsDataLabel,
-                      value: header.focusSessionCount.toString(),
-                    ),
-                  ),
-                ],
-              ],
+                      _MetricDivider(),
+                      Expanded(
+                        child: _ActivityDataTile(
+                          icon: Icons.today_outlined,
+                          label: context.l10n.groupGoalCurrentDayDataLabel,
+                          value: context.l10n.taskDaysProgress(
+                            goalProgress,
+                            goalTarget,
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [
+                      Expanded(
+                        child: _ActivityDataTile(
+                          icon: Icons.timer_outlined,
+                          label: context.l10n.groupActivityFocusDataLabel,
+                          value: formatDurationTotalMinutes(
+                            Duration(seconds: focusSeconds),
+                          ),
+                        ),
+                      ),
+                      if (group.theme != GroupThemeType.hobbies) ...[
+                        _MetricDivider(),
+                        Expanded(
+                          child: _ActivityDataTile(
+                            icon: Icons.coffee_outlined,
+                            label: context.l10n.groupActivityPauseDataLabel,
+                            value: _formatRestValue(
+                              context,
+                              group.theme,
+                              header.restMinutes,
+                            ),
+                          ),
+                        ),
+                        _MetricDivider(),
+                        Expanded(
+                          child: _ActivityDataTile(
+                            icon: Icons.repeat_rounded,
+                            label: context.l10n.groupActivitySessionsDataLabel,
+                            value: header.focusSessionCount.toString(),
+                          ),
+                        ),
+                      ],
+                    ],
             ),
           ),
         ],
@@ -1216,6 +1307,7 @@ class _ParticipantsProgressCard extends StatelessWidget {
     required this.pendingMembers,
     required this.progressByMember,
     required this.targetPerMember,
+    required this.targetByMember,
     required this.unit,
   });
 
@@ -1224,6 +1316,7 @@ class _ParticipantsProgressCard extends StatelessWidget {
   final List<GroupMemberEntity> pendingMembers;
   final Map<String, int> progressByMember;
   final int targetPerMember;
+  final Map<String, int> targetByMember;
   final GroupMetricUnit unit;
 
   @override
@@ -1273,7 +1366,7 @@ class _ParticipantsProgressCard extends StatelessWidget {
             _ParticipantProgressRow(
               member: member,
               current: progressByMember[member.id] ?? 0,
-              target: targetPerMember,
+              target: targetByMember[member.id] ?? targetPerMember,
               unit: unit,
               isCompleted: true,
             ),
@@ -1295,7 +1388,7 @@ class _ParticipantsProgressCard extends StatelessWidget {
             _ParticipantProgressRow(
               member: member,
               current: progressByMember[member.id] ?? 0,
-              target: targetPerMember,
+              target: targetByMember[member.id] ?? targetPerMember,
               unit: unit,
               isCompleted: false,
             ),
