@@ -1,12 +1,34 @@
+import "dart:math";
+
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/utils/id_generator.dart";
+
+class _BoundCheckingRandom implements Random {
+  final List<int> requestedBounds = <int>[];
+
+  @override
+  int nextInt(int max) {
+    requestedBounds.add(max);
+    return max - 1;
+  }
+
+  @override
+  bool nextBool() => false;
+
+  @override
+  double nextDouble() => 0;
+}
 
 void main() {
   group("generateEntityId", () {
     test("produces unique ids even in a tight loop", () {
+      final EntityIdGenerator generator = EntityIdGenerator(
+        random: Random(2468),
+        timestampMicros: () => 123456789,
+      );
       final ids = <String>{};
       for (int i = 0; i < 100000; i++) {
-        ids.add(generateEntityId());
+        ids.add(generator.generate());
       }
 
       expect(ids.length, 100000);
@@ -14,17 +36,39 @@ void main() {
 
     test("contains only characters safe for the in (...) filter", () {
       final RegExp safe = RegExp(r"^[0-9a-z-]+$");
+      final EntityIdGenerator generator = EntityIdGenerator(
+        random: Random(1357),
+        timestampMicros: () => 123456789,
+      );
 
       for (int i = 0; i < 1000; i++) {
-        expect(safe.hasMatch(generateEntityId()), isTrue);
+        final String id = generator.generate();
+        expect(safe.hasMatch(id), isTrue);
+        expect(id.split("-").last.length, 14);
       }
     });
 
     test("keeps ids roughly time-ordered by their timestamp prefix", () {
-      final String first = generateEntityId();
+      final EntityIdGenerator generator = EntityIdGenerator(
+        random: Random(9753),
+        timestampMicros: () => 123456789,
+      );
+      final String first = generator.generate();
       final int firstTimestamp = int.parse(first.split("-").first);
 
-      expect(firstTimestamp, greaterThan(0));
+      expect(firstTimestamp, 123456789);
+    });
+
+    test("requests only dart2js-safe 16-bit random words", () {
+      final _BoundCheckingRandom random = _BoundCheckingRandom();
+      final EntityIdGenerator generator = EntityIdGenerator(
+        random: random,
+        timestampMicros: () => 123456789,
+      );
+
+      generator.generate();
+
+      expect(random.requestedBounds, [0x10000, 0x10000, 0x10000, 0x10000]);
     });
   });
 }
