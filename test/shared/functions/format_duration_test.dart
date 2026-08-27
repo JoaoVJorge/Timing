@@ -17,4 +17,17 @@ void main() {
     expect(formatDurationTotalSeconds(const Duration(seconds: 60)), "60s");
     expect(formatDurationTotalSeconds(const Duration(seconds: 90)), "90s");
   });
+
+  test("formatDurationCompactClock drops seconds when hours are visible", () {
+    expect(
+      formatDurationCompactClock(const Duration(minutes: 48, seconds: 33)),
+      "48:33",
+    );
+    expect(
+      formatDurationCompactClock(
+        const Duration(hours: 1, minutes: 12, seconds: 45),
+      ),
+      "01:12",
+    );
+  });
 }

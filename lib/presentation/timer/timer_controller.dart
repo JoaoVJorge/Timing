@@ -99,8 +99,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
-  int get currentActivitySeconds =>
-      _todayFocusSecondsAtSessionStart + sessionSeconds.value;
+  int get currentActivitySeconds {
+    final int seconds = _todayFocusSecondsAtSessionStart + sessionSeconds.value;
+    if (_isDailyHobbyGoal) {
+      return seconds.clamp(0, focusIntervalSeconds).toInt();
+    }
+    return seconds;
+  }
 
   int get currentActivityPages =>
       subject.activityType == SubjectActivityType.daily
@@ -110,6 +115,15 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool get isReading => subject.category == TimeCategoryType.reading;
 
   bool get isHobby => subject.category == TimeCategoryType.hobbies;
+
+  bool get _isDailyHobbyGoal =>
+      isHobby &&
+      subject.activityType == SubjectActivityType.daily &&
+      focusIntervalSeconds > 0;
+
+  bool get _isDailyHobbyGoalAlreadyComplete =>
+      _isDailyHobbyGoal &&
+      _todayFocusSecondsAtSessionStart >= focusIntervalSeconds;
 
   int get focusIntervalSeconds => subject.goalSeconds > 0
       ? subject.goalSeconds
@@ -158,6 +172,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (isReading || focusIntervalSeconds <= 0) {
       return focusIntervalSeconds;
     }
+    if (_isDailyHobbyGoal) {
+      final int remainingSeconds =
+          focusIntervalSeconds - _todayFocusSecondsAtSessionStart;
+      return remainingSeconds.clamp(0, focusIntervalSeconds).toInt();
+    }
     final int elapsedInSection =
         (subject.activityType == SubjectActivityType.daily
             ? subjectDailyHistoryService
@@ -179,6 +198,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _lastTickAt = DateTime.now();
     _lastAutoSaveAt = _lastTickAt;
+    if (_isDailyHobbyGoalAlreadyComplete) {
+      _markDailyHobbyGoalCompleteAtStart();
+      _disableFocusGuard();
+      return;
+    }
     _ticker = Timer.periodic(
       const Duration(seconds: 1),
       (timer) => unawaited(_tick()),
@@ -189,6 +213,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     analyticsService.track(
       AnalyticsEvent.focusSessionStarted(category: subject.category),
     );
+  }
+
+  void _markDailyHobbyGoalCompleteAtStart() {
+    completedFocusSections.value = focusSessionCount;
+    breakCountdownSeconds.value = 0;
+    isRunning.value = false;
+    isResting.value = false;
+    isSessionFinished.value = true;
   }
 
   Future<void> _tick() async {
@@ -384,11 +416,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<bool> confirmExitIfNeeded() async {
-    if (isFocusLockActive) {
-      warnFocusLock();
-      return false;
-    }
-
     if (!hasActiveSession) {
       saveProgress();
       return true;

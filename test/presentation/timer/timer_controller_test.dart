@@ -80,9 +80,14 @@ class _FakeDailyProgressService extends _Noop implements DailyProgressService {
 
 class _FakeSubjectDailyHistoryService extends _Noop
     implements SubjectDailyHistoryService {
+  _FakeSubjectDailyHistoryService([
+    this.progress = const DailyProgressEntity(),
+  ]);
+
+  final DailyProgressEntity progress;
+
   @override
-  DailyProgressEntity todayForSubject(String subjectId) =>
-      const DailyProgressEntity();
+  DailyProgressEntity todayForSubject(String subjectId) => progress;
 
   @override
   Future<void> addFocusSeconds(String subjectId, int seconds) async {}
@@ -323,6 +328,7 @@ SubjectEntity _subject({
   int focusSessionCount = 1,
   int currentPages = 0,
   String notes = "",
+  SubjectActivityType activityType = SubjectActivityType.permanent,
 }) => SubjectEntity(
   id: "subject-1",
   name: "Matemática",
@@ -337,9 +343,9 @@ SubjectEntity _subject({
   restMinutes: restMinutes,
   focusSessionCount: focusSessionCount,
   wallpaperIndex: 0,
-  // Permanent keeps _initialBreakCountdownSeconds off the daily-history
-  // service, so the getters stay pure.
-  activityType: SubjectActivityType.permanent,
+  // Permanent keeps most getter tests off the daily-history service, so the
+  // getters stay pure unless a test opts into daily activity behavior.
+  activityType: activityType,
 );
 
 TimerController _controller(
@@ -348,6 +354,7 @@ TimerController _controller(
   FocusGuardService? focusGuardService,
   FocusOverlayService? focusOverlayService,
   TimerNotificationService? timerNotificationService,
+  SubjectDailyHistoryService? subjectDailyHistoryService,
   AppController? appController,
 }) => TimerController(
   updateSubjectTimeUseCase: _FakeUpdateSubjectTimeUseCase(),
@@ -356,7 +363,8 @@ TimerController _controller(
   lastActivityService: _FakeLastActivityService(),
   activityHistoryService: _FakeActivityHistoryService(),
   dailyProgressService: _FakeDailyProgressService(),
-  subjectDailyHistoryService: _FakeSubjectDailyHistoryService(),
+  subjectDailyHistoryService:
+      subjectDailyHistoryService ?? _FakeSubjectDailyHistoryService(),
   achievementUnlockService: _FakeAchievementUnlockService(),
   timerNotificationService:
       timerNotificationService ?? _FakeTimerNotificationService(),
@@ -490,6 +498,48 @@ void main() {
       expect(controller.isReading, isTrue);
       expect(controller.breakCountdownSeconds.value, 1800);
     });
+
+    test("daily hobbies stay complete after today's goal is reached", () {
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 30 * 60,
+          activityType: SubjectActivityType.daily,
+        ),
+        subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
+          const DailyProgressEntity(focusSeconds: 36 * 60),
+        ),
+      );
+
+      expect(controller.breakCountdownSeconds.value, 0);
+      expect(controller.focusProgress, 1);
+      expect(controller.currentActivitySeconds, 30 * 60);
+    });
+
+    test("daily hobbies already completed today open stopped", () async {
+      final guard = _FakeFocusGuardService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 30 * 60,
+          activityType: SubjectActivityType.daily,
+        ),
+        focusGuardService: guard,
+        subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
+          const DailyProgressEntity(focusSeconds: 36 * 60),
+        ),
+      );
+
+      controller.onInit();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.isRunning.value, isFalse);
+      expect(controller.isSessionFinished.value, isTrue);
+      expect(controller.completedFocusSections.value, 1);
+      expect(guard.keepScreenOnValues.last, isFalse);
+
+      controller.onClose();
+    });
   });
 
   group("TimerController reading interval remaining", () {
@@ -560,19 +610,21 @@ void main() {
       expect(controller.subject.notes, "depois");
     });
 
-    test("focus lock blocks leaving while the session is running", () async {
-      final feedback = _FakeFocusFeedbackService();
-      final controller = _controller(
-        _subject(),
-        focusFeedbackService: feedback,
-        appController: _FakeAppController(focusLockEnabled: true),
-      );
-      controller.sessionSeconds.value = 10;
+    test(
+      "focus lock does not block an explicit exit without progress",
+      () async {
+        final feedback = _FakeFocusFeedbackService();
+        final controller = _controller(
+          _subject(),
+          focusFeedbackService: feedback,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
 
-      expect(await controller.confirmExitIfNeeded(), isFalse);
-      expect(feedback.focusLockWarningCount, 1);
-      expect(controller.isSessionFinished.value, isFalse);
-    });
+        expect(await controller.confirmExitIfNeeded(), isTrue);
+        expect(feedback.focusLockWarningCount, 0);
+        expect(controller.isSessionFinished.value, isFalse);
+      },
+    );
 
     test("pausing focus lock allows the normal exit flow", () async {
       final feedback = _FakeFocusFeedbackService();
@@ -658,6 +710,27 @@ void main() {
       expect(controller.isResting.value, isFalse);
       expect(controller.isSessionFinished.value, isTrue);
       expect(feedback.finishFeedbackCount, 1);
+    });
+
+    test("hobby daily goal stops at today's target instead of overflowing", () {
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 30 * 60,
+          activityType: SubjectActivityType.daily,
+        ),
+        subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
+          const DailyProgressEntity(focusSeconds: 29 * 60),
+        ),
+      );
+
+      controller.advanceForTesting(120);
+
+      expect(controller.sessionSeconds.value, 60);
+      expect(controller.currentActivitySeconds, 30 * 60);
+      expect(controller.breakCountdownSeconds.value, 0);
+      expect(controller.completedFocusSections.value, 1);
+      expect(controller.isSessionFinished.value, isTrue);
     });
 
     test("alarms at section end and rest end before the next section", () {
@@ -747,16 +820,19 @@ void main() {
     test("returns to the app when focus lock goes to background", () async {
       final overlay = _FakeFocusOverlayService();
       final guard = _FakeFocusGuardService();
+      final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
         _subject(),
         focusOverlayService: overlay,
         focusGuardService: guard,
+        focusFeedbackService: feedback,
         appController: _FakeAppController(focusLockEnabled: true),
       );
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
       await Future<void>.delayed(Duration.zero);
 
+      expect(feedback.focusLockWarningCount, 1);
       expect(guard.bringAppToFrontCount, 1);
       expect(overlay.showCount, 0);
       controller.onClose();

@@ -5,6 +5,7 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/timer/timer_controller.dart";
@@ -30,7 +31,7 @@ class TimerPage extends StatelessWidget {
       );
 
       return PopScope(
-        canPop: !controller.hasActiveSession && !controller.isFocusLockActive,
+        canPop: !controller.hasActiveSession,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) {
             controller.saveProgress();
@@ -115,6 +116,7 @@ class _TimerScaffold extends StatelessWidget {
       child: Stack(
         children: [
           SafeArea(
+            bottom: false,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final double progressSize = math.min(
@@ -127,12 +129,7 @@ class _TimerScaffold extends StatelessWidget {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          22,
-                          14,
-                          22,
-                          math.max(MediaQuery.paddingOf(context).bottom, 10),
-                        ),
+                        padding: EdgeInsets.fromLTRB(22, 14, 22, 18),
                         child: Column(
                           children: [
                             _TimerHeader(data: data, onBackTap: onBackTap),
@@ -142,34 +139,7 @@ class _TimerScaffold extends StatelessWidget {
                             if (data.state == TimerVisualState.resting)
                               const _RestMessage()
                             else
-                              Column(
-                                children: [
-                                  if (!data.isHobby) ...[
-                                    _TimerInfoRow(
-                                      icon: Icons.schedule_rounded,
-                                      label: data.nextBreakLabel,
-                                      value: data.nextBreak,
-                                      accentColor: data.accentColor,
-                                    ),
-                                    if (!data.isReading) ...[
-                                      const Gap(10),
-                                      _TimerInfoRow(
-                                        icon: Icons.repeat_rounded,
-                                        label: context.l10n.timerSessionLabel,
-                                        value: data.focusSectionLabel,
-                                        accentColor: data.accentColor,
-                                      ),
-                                    ],
-                                    const Gap(10),
-                                  ],
-                                  _TimerInfoRow(
-                                    icon: Icons.bar_chart_rounded,
-                                    label: context.l10n.timerTotalTodayLabel,
-                                    value: data.totalSubjectTimeLabel,
-                                    accentColor: data.accentColor,
-                                  ),
-                                ],
-                              ),
+                              _TimerStatsCard(data: data),
                             const Spacer(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -193,7 +163,7 @@ class _TimerScaffold extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const Gap(10),
+                            const Gap(28),
                           ],
                         ),
                       ),
@@ -327,23 +297,11 @@ class _TimerProgressRing extends StatelessWidget {
                     ),
                   ),
                   Gap(math.max(10, size * 0.055)),
-                  Text(
-                    data.currentTime,
-                    style: TextStyle(
-                      color: context.colorTokens.white,
-                      fontSize: math.max(44, size * 0.22),
-                      fontWeight: FontWeight.w300,
-                      height: 1,
-                    ),
-                  ),
-                  Gap(math.max(8, size * 0.045)),
-                  Text(
-                    data.totalTimeLabel,
-                    style: TextStyle(
-                      color: context.colorTokens.white.withValues(alpha: 0.52),
-                      fontSize: math.max(14, size * 0.05),
-                      fontWeight: FontWeight.w600,
-                    ),
+                  _TimerClockDisplay(
+                    value: data.currentTime,
+                    leadingUnit: data.currentTimeLeadingUnit,
+                    trailingUnit: data.currentTimeTrailingUnit,
+                    size: size,
                   ),
                 ],
               ),
@@ -355,8 +313,178 @@ class _TimerProgressRing extends StatelessWidget {
   }
 }
 
-class _TimerInfoRow extends StatelessWidget {
-  const _TimerInfoRow({
+class _TimerClockDisplay extends StatelessWidget {
+  const _TimerClockDisplay({
+    required this.value,
+    required this.leadingUnit,
+    required this.trailingUnit,
+    required this.size,
+  });
+
+  final String value;
+  final String leadingUnit;
+  final String trailingUnit;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final double fontSize = math.max(44, size * 0.22);
+    final double unitFontSize = math.max(12, size * 0.045);
+    final List<String> parts = value.split(":");
+    final String leadingValue = parts.isNotEmpty ? parts.first : value;
+    final String trailingValue = parts.length > 1 ? parts[1] : "";
+
+    return SizedBox(
+      width: size * 0.86,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _TimerClockPart(
+              value: leadingValue,
+              unit: leadingUnit,
+              fontSize: fontSize,
+              unitFontSize: unitFontSize,
+            ),
+            Text(
+              ":",
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                color: context.colorTokens.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w300,
+                height: 0.96,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            _TimerClockPart(
+              value: trailingValue,
+              unit: trailingUnit,
+              fontSize: fontSize,
+              unitFontSize: unitFontSize,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TimerClockPart extends StatelessWidget {
+  const _TimerClockPart({
+    required this.value,
+    required this.unit,
+    required this.fontSize,
+    required this.unitFontSize,
+  });
+
+  final String value;
+  final String unit;
+  final double fontSize;
+  final double unitFontSize;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: fontSize * 1.32,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          value,
+          maxLines: 1,
+          softWrap: false,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: context.colorTokens.white,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w300,
+            height: 0.96,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const Gap(1),
+        Text(
+          unit,
+          maxLines: 1,
+          softWrap: false,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: context.colorTokens.white.withValues(alpha: 0.58),
+            fontSize: unitFontSize,
+            fontWeight: FontWeight.w700,
+            height: 1,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _TimerStatsCard extends StatelessWidget {
+  const _TimerStatsCard({required this.data});
+
+  final _TimerViewData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final String firstLabel = data.isReading
+        ? context.l10n.timerCurrentPagesLabel
+        : context.l10n.groupActivityPauseDataLabel;
+    final IconData firstIcon = data.isReading
+        ? Icons.menu_book_rounded
+        : Icons.free_breakfast_rounded;
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 480),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: context.colorTokens.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.colorTokens.white.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _TimerStatItem(
+              icon: firstIcon,
+              label: firstLabel,
+              value: data.nextBreak,
+              accentColor: data.accentColor,
+            ),
+          ),
+          _TimerStatDivider(),
+          Expanded(
+            child: _TimerStatItem(
+              icon: Icons.repeat_rounded,
+              label: context.l10n.sessionSection,
+              value: data.focusSectionLabel,
+              accentColor: data.accentColor,
+            ),
+          ),
+          _TimerStatDivider(),
+          Expanded(
+            child: _TimerStatItem(
+              icon: Icons.bar_chart_rounded,
+              label: context.l10n.todayLabel,
+              value: data.totalSubjectTimeLabel,
+              accentColor: data.accentColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimerStatItem extends StatelessWidget {
+  const _TimerStatItem({
     required this.icon,
     required this.label,
     required this.value,
@@ -369,43 +497,49 @@ class _TimerInfoRow extends StatelessWidget {
   final Color accentColor;
 
   @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(maxWidth: 480),
-    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-    decoration: BoxDecoration(
-      color: context.colorTokens.black.withValues(alpha: 0.1),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(
-        color: context.colorTokens.white.withValues(alpha: 0.12),
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, color: accentColor, size: 24),
+      const Gap(9),
+      Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: context.colorTokens.white.withValues(alpha: 0.62),
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          height: 1,
+        ),
       ),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: accentColor, size: 21),
-        const Gap(14),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: context.colorTokens.white.withValues(alpha: 0.64),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const Gap(10),
-        Text(
+      const Gap(6),
+      FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
           value,
+          maxLines: 1,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            color: accentColor,
+            color: context.colorTokens.white,
             fontSize: 16,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
+            height: 1,
           ),
         ),
-      ],
-    ),
+      ),
+    ],
+  );
+}
+
+class _TimerStatDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 1,
+    height: 58,
+    margin: const EdgeInsets.symmetric(horizontal: 10),
+    color: context.colorTokens.white.withValues(alpha: 0.12),
   );
 }
 
@@ -420,6 +554,9 @@ class _TimerActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
+  static const double _buttonSize = 64;
+  static const double _iconSize = 24;
+
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -427,18 +564,27 @@ class _TimerActionButton extends StatelessWidget {
     onTap: onTap,
     child: ExcludeSemantics(
       child: SizedBox(
-        width: 72,
+        width: 82,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
               onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
+              child: Container(
+                width: _buttonSize,
+                height: _buttonSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colorTokens.white.withValues(alpha: 0.08),
+                  border: Border.all(
+                    color: context.colorTokens.white.withValues(alpha: 0.12),
+                  ),
+                ),
+                alignment: Alignment.center,
                 child: AppIcon(
                   iconPath,
                   color: context.colorTokens.white.withValues(alpha: 0.9),
-                  size: 40,
+                  size: _iconSize,
                 ),
               ),
             ),
@@ -633,12 +779,11 @@ class _TimerViewData {
     required this.status,
     required this.mainLabel,
     required this.currentTime,
-    required this.totalTimeLabel,
-    required this.nextBreakLabel,
+    required this.currentTimeLeadingUnit,
+    required this.currentTimeTrailingUnit,
     required this.nextBreak,
     required this.focusSectionLabel,
     required this.isReading,
-    required this.isHobby,
     required this.totalSubjectTimeLabel,
     required this.accentColor,
     required this.headerIconColor,
@@ -650,7 +795,6 @@ class _TimerViewData {
     required this.ringGradientColors,
     required this.mainActionIcon,
     required this.mainActionLabel,
-    required this.trailingActionIcon,
     required this.trailingLabel,
     required this.showStartDot,
   });
@@ -663,19 +807,20 @@ class _TimerViewData {
     final bool isResting = state == TimerVisualState.resting;
     final bool isReading =
         controller.subject.category == TimeCategoryType.reading;
-    final bool isHobby =
-        controller.subject.category == TimeCategoryType.hobbies;
+    final bool isDailyHobby =
+        controller.subject.category == TimeCategoryType.hobbies &&
+        controller.subject.activityType == SubjectActivityType.daily;
     final Color accent = isResting
         ? TimerRestPalette.accent
         : Color(controller.subject.colorValue);
-    final int totalIntervalSeconds = isResting
-        ? controller.restIntervalSeconds
-        : controller.focusIntervalSeconds;
-    final int currentSeconds = isReading
-        ? controller.sessionSeconds.value
-        : isResting
-        ? controller.restCountdownSeconds.value
-        : controller.breakCountdownSeconds.value;
+    final int currentSeconds = isResting
+        ? (controller.restIntervalSeconds -
+                  controller.restCountdownSeconds.value)
+              .clamp(0, controller.restIntervalSeconds)
+        : isDailyHobby
+        ? controller.currentActivitySeconds
+        : controller.sessionSeconds.value;
+    final bool currentTimeUsesHours = currentSeconds >= 3600;
     final double progress = state == TimerVisualState.finished
         ? 1
         : isReading
@@ -709,15 +854,11 @@ class _TimerViewData {
           : isReading
           ? context.l10n.timerReadingLabel
           : context.l10n.timerFocusLabel,
-      currentTime: formatDurationClock(Duration(seconds: currentSeconds)),
-      totalTimeLabel: isReading
-          ? context.l10n.timerReadingTimeLabel
-          : context.l10n.timerTotalOfLabel(
-              formatDurationClock(Duration(seconds: totalIntervalSeconds)),
-            ),
-      nextBreakLabel: isReading
-          ? context.l10n.timerCurrentPagesLabel
-          : _nextBreakDurationLabel(context),
+      currentTime: formatDurationCompactClock(
+        Duration(seconds: currentSeconds),
+      ),
+      currentTimeLeadingUnit: currentTimeUsesHours ? "h" : "min",
+      currentTimeTrailingUnit: currentTimeUsesHours ? "min" : "s",
       nextBreak: isReading
           ? "${controller.currentActivityPages}"
           : _formatRestDuration(
@@ -726,7 +867,6 @@ class _TimerViewData {
             ),
       focusSectionLabel: "${controller.currentFocusSection}",
       isReading: isReading,
-      isHobby: isHobby,
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.currentActivitySeconds),
       ),
@@ -760,18 +900,12 @@ class _TimerViewData {
         TimerVisualState.finished => context.l10n.timerBackToSubjectsButton,
         TimerVisualState.focusing => context.l10n.timerPauseButton,
       },
-      trailingActionIcon: isResting
-          ? Icons.skip_next_rounded
-          : Icons.sticky_note_2_outlined,
       trailingLabel: isResting
           ? context.l10n.timerSkipRestButton
           : context.l10n.timerNotesLabel,
       showStartDot: !isResting,
     );
   }
-
-  static String _nextBreakDurationLabel(BuildContext context) =>
-      context.l10n.nextBreakDurationLabel;
 
   static String _formatRestDuration(
     Duration duration,
@@ -785,12 +919,11 @@ class _TimerViewData {
   final String status;
   final String mainLabel;
   final String currentTime;
-  final String totalTimeLabel;
-  final String nextBreakLabel;
+  final String currentTimeLeadingUnit;
+  final String currentTimeTrailingUnit;
   final String nextBreak;
   final String focusSectionLabel;
   final bool isReading;
-  final bool isHobby;
   final String totalSubjectTimeLabel;
   final Color accentColor;
   final Color headerIconColor;
@@ -802,7 +935,6 @@ class _TimerViewData {
   final List<Color> ringGradientColors;
   final IconData mainActionIcon;
   final String mainActionLabel;
-  final IconData trailingActionIcon;
   final String trailingLabel;
   final bool showStartDot;
 }
