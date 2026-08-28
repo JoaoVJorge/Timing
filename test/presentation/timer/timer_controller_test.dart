@@ -1,6 +1,7 @@
+import "package:fake_async/fake_async.dart";
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
@@ -23,7 +24,10 @@ import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/timer/timer_controller.dart";
+import "package:timing/presentation/timer/timer_page.dart";
+import "package:timing/theme/theme.dart";
 
 /// Catch-all fake: none of these dependencies is exercised by the pure getters
 /// under test, so every member routes through [noSuchMethod] and returns null.
@@ -34,11 +38,16 @@ class _Noop {
 
 class _FakeUpdateSubjectTimeUseCase extends _Noop
     implements UpdateSubjectTimeUseCase {
+  final List<int> totals = <int>[];
+
   @override
   Future<Either<AppError, void>> call({
     required String subjectId,
     required int totalSeconds,
-  }) async => const Right(null);
+  }) async {
+    totals.add(totalSeconds);
+    return const Right(null);
+  }
 }
 
 class _FakeUpdateSubjectPagesUseCase extends _Noop
@@ -56,7 +65,10 @@ class _FakeLogActivityUseCase extends _Noop implements LogActivityUseCase {
   }) async => const Right(null);
 }
 
-class _FakeLastActivityService extends _Noop implements LastActivityService {}
+class _FakeLastActivityService extends _Noop implements LastActivityService {
+  @override
+  Future<void> record(String label, {String? subjectId}) async {}
+}
 
 class _FakeActivityHistoryService extends _Noop
     implements ActivityHistoryService {
@@ -72,11 +84,15 @@ class _FakeActivityHistoryService extends _Noop
 }
 
 class _FakeDailyProgressService extends _Noop implements DailyProgressService {
+  int registeredSessions = 0;
+
   @override
   Future<void> addFocusSeconds(int seconds) async {}
 
   @override
-  Future<void> registerSession() async {}
+  Future<void> registerSession() async {
+    registeredSessions++;
+  }
 }
 
 class _FakeSubjectDailyHistoryService extends _Noop
@@ -86,12 +102,15 @@ class _FakeSubjectDailyHistoryService extends _Noop
   ]);
 
   final DailyProgressEntity progress;
+  int addedSeconds = 0;
 
   @override
   DailyProgressEntity todayForSubject(String subjectId) => progress;
 
   @override
-  Future<void> addFocusSeconds(String subjectId, int seconds) async {}
+  Future<void> addFocusSeconds(String subjectId, int seconds) async {
+    addedSeconds += seconds;
+  }
 }
 
 class _FakeAchievementUnlockService extends _Noop
@@ -204,6 +223,11 @@ class _FakeTimerNotificationService extends _Noop
 
 class _FakeTimerLiveActivityService extends _Noop
     implements TimerLiveActivityService {
+  TimerLiveActivityAction? pendingAction;
+  int? timerSeconds;
+  bool? countsUp;
+  int endCount = 0;
+
   @override
   Future<void> startOrUpdate({
     required String subjectName,
@@ -212,13 +236,22 @@ class _FakeTimerLiveActivityService extends _Noop
     required bool isRunning,
     required bool isResting,
     required bool isCountUp,
-  }) async {}
+  }) async {
+    timerSeconds = remainingSeconds;
+    countsUp = isCountUp;
+  }
 
   @override
-  Future<TimerLiveActivityAction?> consumePendingAction() async => null;
+  Future<TimerLiveActivityAction?> consumePendingAction() async {
+    final action = pendingAction;
+    pendingAction = null;
+    return action;
+  }
 
   @override
-  Future<void> end() async {}
+  Future<void> end() async {
+    endCount++;
+  }
 }
 
 class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
@@ -358,21 +391,26 @@ TimerController _controller(
   FocusGuardService? focusGuardService,
   FocusOverlayService? focusOverlayService,
   TimerNotificationService? timerNotificationService,
+  TimerLiveActivityService? timerLiveActivityService,
+  UpdateSubjectTimeUseCase? updateSubjectTimeUseCase,
+  DailyProgressService? dailyProgressService,
   SubjectDailyHistoryService? subjectDailyHistoryService,
   AppController? appController,
 }) => TimerController(
-  updateSubjectTimeUseCase: _FakeUpdateSubjectTimeUseCase(),
+  updateSubjectTimeUseCase:
+      updateSubjectTimeUseCase ?? _FakeUpdateSubjectTimeUseCase(),
   updateSubjectPagesUseCase: _FakeUpdateSubjectPagesUseCase(),
   logActivityUseCase: _FakeLogActivityUseCase(),
   lastActivityService: _FakeLastActivityService(),
   activityHistoryService: _FakeActivityHistoryService(),
-  dailyProgressService: _FakeDailyProgressService(),
+  dailyProgressService: dailyProgressService ?? _FakeDailyProgressService(),
   subjectDailyHistoryService:
       subjectDailyHistoryService ?? _FakeSubjectDailyHistoryService(),
   achievementUnlockService: _FakeAchievementUnlockService(),
   timerNotificationService:
       timerNotificationService ?? _FakeTimerNotificationService(),
-  timerLiveActivityService: _FakeTimerLiveActivityService(),
+  timerLiveActivityService:
+      timerLiveActivityService ?? _FakeTimerLiveActivityService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
   focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
@@ -385,6 +423,77 @@ TimerController _controller(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets("hobby overtime keeps the full ring and working controls", (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(Get.reset);
+    Get.put<AppNavigator>(AppNavigator());
+    final controller = Get.put(
+      _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 30 * 60,
+          activityType: SubjectActivityType.daily,
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.dark),
+        locale: const Locale("pt"),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const TimerPage(),
+      ),
+    );
+    final l10n = lookupAppLocalizations(const Locale("pt"));
+    Finder actionButton(String label) => find.descendant(
+      of: find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == label,
+      ),
+      matching: find.byType(GestureDetector),
+    );
+    final fullRing = find.byWidgetPredicate(
+      (widget) =>
+          widget is Semantics &&
+          widget.properties.label == l10n.timerProgressSemanticLabel(100),
+    );
+    controller.advanceForTesting(30 * 60);
+    await tester.pump();
+    expect(fullRing, findsOneWidget);
+
+    controller.advanceForTesting(60);
+    await tester.pump();
+    expect(find.text("31"), findsOneWidget);
+    expect(fullRing, findsOneWidget);
+    expect(find.text(l10n.timerPauseButton), findsOneWidget);
+    expect(find.text(l10n.timerEndActionLabel), findsOneWidget);
+    expect(find.text(l10n.timerSessionSavedTitle), findsNothing);
+
+    await tester.tap(actionButton(l10n.timerPauseButton));
+    await tester.pump();
+    controller.advanceForTesting(60);
+    expect(controller.sessionSeconds.value, 31 * 60);
+    expect(fullRing, findsOneWidget);
+
+    await tester.tap(actionButton(l10n.timerContinueButton));
+    await tester.pump();
+    controller.advanceForTesting(60);
+    await tester.pump();
+    expect(find.text("32"), findsOneWidget);
+
+    await tester.tap(actionButton(l10n.timerEndActionLabel));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+    expect(controller.isSessionFinished.value, isTrue);
+    expect(controller.sessionSeconds.value, 32 * 60);
+    expect(tester.takeException(), isNull);
+  });
 
   group("TimerController focus interval", () {
     test("uses the subject goal when it is positive", () {
@@ -518,11 +627,13 @@ void main() {
 
       expect(controller.breakCountdownSeconds.value, 0);
       expect(controller.focusProgress, 1);
-      expect(controller.currentActivitySeconds, 30 * 60);
+      expect(controller.currentActivitySeconds, 36 * 60);
     });
 
-    test("daily hobbies already completed today open stopped", () async {
+    test("daily hobbies already completed today can keep running", () async {
       final guard = _FakeFocusGuardService();
+      final feedback = _FakeFocusFeedbackService();
+      final daily = _FakeDailyProgressService();
       final controller = _controller(
         _subject(
           category: TimeCategoryType.hobbies,
@@ -530,6 +641,9 @@ void main() {
           activityType: SubjectActivityType.daily,
         ),
         focusGuardService: guard,
+        focusFeedbackService: feedback,
+        dailyProgressService: daily,
+        appController: _FakeAppController(focusLockEnabled: true),
         subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
           const DailyProgressEntity(focusSeconds: 36 * 60),
         ),
@@ -538,10 +652,16 @@ void main() {
       controller.onInit();
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.isRunning.value, isFalse);
-      expect(controller.isSessionFinished.value, isTrue);
+      controller.advanceForTesting(60);
+
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.isSessionFinished.value, isFalse);
       expect(controller.completedFocusSections.value, 1);
-      expect(guard.keepScreenOnValues.last, isFalse);
+      expect(controller.currentActivitySeconds, 37 * 60);
+      expect(controller.focusProgress, 1);
+      expect(guard.keepScreenOnValues.last, isTrue);
+      expect(feedback.finishFeedbackCount, 0);
+      expect(daily.registeredSessions, 0);
 
       controller.onClose();
     });
@@ -696,8 +816,10 @@ void main() {
       expect(feedback.finishFeedbackCount, 3);
     });
 
-    test("hobby finishes directly without starting a rest", () {
+    test("hobby keeps running after the goal without starting a rest", () {
       final feedback = _FakeFocusFeedbackService();
+      final daily = _FakeDailyProgressService();
+      final liveActivity = _FakeTimerLiveActivityService();
       final controller = _controller(
         _subject(
           category: TimeCategoryType.hobbies,
@@ -706,6 +828,8 @@ void main() {
           focusSessionCount: 3,
         ),
         focusFeedbackService: feedback,
+        dailyProgressService: daily,
+        timerLiveActivityService: liveActivity,
       );
 
       controller.advanceForTesting(10);
@@ -713,11 +837,22 @@ void main() {
       expect(controller.sessionSeconds.value, 10);
       expect(controller.completedFocusSections.value, 1);
       expect(controller.isResting.value, isFalse);
-      expect(controller.isSessionFinished.value, isTrue);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.focusProgress, 1);
+
+      controller.advanceForTesting(90);
+      controller.advanceForTesting(1);
+
+      expect(controller.sessionSeconds.value, 101);
+      expect(controller.breakCountdownSeconds.value, 0);
+      expect(controller.focusProgress, 1);
       expect(feedback.finishFeedbackCount, 1);
+      expect(daily.registeredSessions, 1);
+      expect(liveActivity.endCount, 0);
     });
 
-    test("hobby daily goal stops at today's target instead of overflowing", () {
+    test("hobby daily goal keeps the extra time with a full ring", () {
       final controller = _controller(
         _subject(
           category: TimeCategoryType.hobbies,
@@ -731,11 +866,51 @@ void main() {
 
       controller.advanceForTesting(120);
 
-      expect(controller.sessionSeconds.value, 60);
-      expect(controller.currentActivitySeconds, 30 * 60);
+      expect(controller.sessionSeconds.value, 120);
+      expect(controller.currentActivitySeconds, 31 * 60);
       expect(controller.breakCountdownSeconds.value, 0);
       expect(controller.completedFocusSections.value, 1);
+      expect(controller.focusProgress, 1);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(controller.isRunning.value, isTrue);
+    });
+
+    test("hobby overtime can be paused, resumed and saved on finish", () async {
+      final update = _FakeUpdateSubjectTimeUseCase();
+      final history = _FakeSubjectDailyHistoryService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          goalSeconds: 30 * 60,
+          totalSeconds: 100,
+          activityType: SubjectActivityType.daily,
+        ),
+        updateSubjectTimeUseCase: update,
+        subjectDailyHistoryService: history,
+      );
+
+      controller.advanceForTesting(31 * 60);
+      controller.togglePause();
+      controller.advanceForTesting(60);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.sessionSeconds.value, 31 * 60);
+      expect(controller.isRunning.value, isFalse);
+      expect(controller.focusProgress, 1);
+      expect(update.totals.last, 100 + 31 * 60);
+
+      controller.togglePause();
+      controller.advanceForTesting(60);
+      controller.finishSession();
+      controller.advanceForTesting(60);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.sessionSeconds.value, 32 * 60);
+      expect(controller.currentActivitySeconds, 32 * 60);
       expect(controller.isSessionFinished.value, isTrue);
+      expect(controller.isRunning.value, isFalse);
+      expect(update.totals.last, 100 + 32 * 60);
+      expect(history.addedSeconds, 32 * 60);
     });
 
     test("alarms at section end and rest end before the next section", () {
@@ -803,6 +978,84 @@ void main() {
   });
 
   group("TimerController background focus indicator", () {
+    test("counts all hobby overtime in the background without stopping", () {
+      final feedback = _FakeFocusFeedbackService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies, goalSeconds: 30 * 60),
+        focusFeedbackService: feedback,
+      );
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      controller.advanceForTesting(31 * 60);
+
+      expect(controller.sessionSeconds.value, 31 * 60);
+      expect(controller.focusProgress, 1);
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(feedback.finishFeedbackCount, 0);
+    });
+
+    test(
+      "hobby live activity supports pause, resume and finish in overtime",
+      () {
+        fakeAsync((async) {
+          final liveActivity = _FakeTimerLiveActivityService();
+          final daily = _FakeDailyProgressService();
+          final controller = _controller(
+            _subject(
+              category: TimeCategoryType.hobbies,
+              activityType: SubjectActivityType.daily,
+            ),
+            timerLiveActivityService: liveActivity,
+            dailyProgressService: daily,
+            subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
+              const DailyProgressEntity(focusSeconds: 29 * 60),
+            ),
+          );
+          controller.onInit();
+          async.flushMicrotasks();
+          expect(liveActivity.countsUp, isTrue);
+
+          liveActivity.pendingAction = const TimerLiveActivityAction(
+            action: "pause",
+            isRunning: false,
+            isResting: false,
+            remainingSeconds: 120,
+          );
+          async.elapse(const Duration(seconds: 1));
+          expect(controller.currentActivitySeconds, 31 * 60);
+          expect(controller.isRunning.value, isFalse);
+          expect(controller.isSessionFinished.value, isFalse);
+          expect(controller.focusProgress, 1);
+
+          liveActivity.pendingAction = const TimerLiveActivityAction(
+            action: "resume",
+            isRunning: true,
+            isResting: false,
+            remainingSeconds: 120,
+          );
+          async.elapse(const Duration(seconds: 1));
+          expect(controller.isRunning.value, isTrue);
+          expect(liveActivity.timerSeconds, 120);
+
+          liveActivity.pendingAction = const TimerLiveActivityAction(
+            action: "finish",
+            isRunning: false,
+            isResting: false,
+            remainingSeconds: 180,
+          );
+          async.elapse(const Duration(seconds: 1));
+          expect(controller.currentActivitySeconds, 32 * 60);
+          expect(controller.isSessionFinished.value, isTrue);
+          expect(controller.isRunning.value, isFalse);
+          expect(daily.registeredSessions, 1);
+          expect(liveActivity.endCount, 1);
+          controller.onClose();
+          async.flushMicrotasks();
+        });
+      },
+    );
+
     test("enables timer alerts when a session starts", () async {
       final notifications = _FakeTimerNotificationService();
       final appController = _FakeAppController(notificationsEnabled: false);
@@ -866,7 +1119,7 @@ void main() {
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.countsUp, isFalse);
+      expect(overlay.countsUp, isTrue);
       expect(overlay.usesRoutine, isFalse);
     });
 
@@ -901,6 +1154,26 @@ void main() {
       expect(notifications.scheduleFocusFinishedCount, 1);
       expect(notifications.scheduleSessionTimelineCount, 0);
       expect(notifications.scheduleRestFinishedCount, 0);
+    });
+
+    test("keeps the hobby overlay counting without new alarms in overtime", () {
+      final overlay = _FakeFocusOverlayService();
+      final notifications = _FakeTimerNotificationService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies),
+        focusOverlayService: overlay,
+        timerNotificationService: notifications,
+      );
+      controller.advanceForTesting(31 * 60);
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.timerSeconds, 31 * 60);
+      expect(overlay.countsUp, isTrue);
+      expect(overlay.usesRoutine, isFalse);
+      expect(notifications.scheduleFocusFinishedCount, 0);
+      expect(notifications.showRunningCount, 1);
+      expect(notifications.cancelOngoingCount, 0);
     });
 
     test(

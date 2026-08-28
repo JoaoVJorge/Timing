@@ -116,13 +116,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
 
-  int get currentActivitySeconds {
-    final int seconds = _todayFocusSecondsAtSessionStart + sessionSeconds.value;
-    if (_isDailyHobbyGoal) {
-      return seconds.clamp(0, focusIntervalSeconds).toInt();
-    }
-    return seconds;
-  }
+  int get currentActivitySeconds =>
+      _todayFocusSecondsAtSessionStart + sessionSeconds.value;
 
   int get currentActivityPages =>
       subject.activityType == SubjectActivityType.daily
@@ -215,9 +210,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _lastTickAt = DateTime.now();
     if (_isDailyHobbyGoalAlreadyComplete) {
-      _markDailyHobbyGoalCompleteAtStart();
-      _disableFocusGuard();
-      return;
+      completedFocusSections.value = focusSessionCount;
     }
     _ticker = Timer.periodic(
       const Duration(seconds: 1),
@@ -229,14 +222,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     analyticsService.track(
       AnalyticsEvent.focusSessionStarted(category: subject.category),
     );
-  }
-
-  void _markDailyHobbyGoalCompleteAtStart() {
-    completedFocusSections.value = focusSessionCount;
-    breakCountdownSeconds.value = 0;
-    isRunning.value = false;
-    isResting.value = false;
-    isSessionFinished.value = true;
   }
 
   Future<void> _tick() async {
@@ -277,6 +262,21 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           ) {
             unawaited(focusFeedbackService.playFocusFinishedFeedback());
           }
+        }
+        remaining = 0;
+        continue;
+      }
+
+      if (isHobby) {
+        final int previousRemaining = breakCountdownSeconds.value;
+        sessionSeconds.value += remaining;
+        breakCountdownSeconds.value = (previousRemaining - remaining).clamp(
+          0,
+          focusIntervalSeconds,
+        );
+        // Reaching the goal is a milestone, not the end of a hobby session.
+        if (previousRemaining > 0 && breakCountdownSeconds.value == 0) {
+          _completeFocusSection();
         }
         remaining = 0;
         continue;
@@ -326,7 +326,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     if (isHobby) {
-      finishSession();
       return;
     }
 
@@ -595,14 +594,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       timerLiveActivityService.startOrUpdate(
         subjectName: subject.name,
         colorValue: subject.colorValue,
-        remainingSeconds: isReading
+        remainingSeconds: isReading || isHobby
             ? sessionSeconds.value
             : isResting.value
             ? restCountdownSeconds.value
             : breakCountdownSeconds.value,
         isRunning: isRunning.value,
         isResting: isResting.value,
-        isCountUp: isReading,
+        isCountUp: isReading || isHobby,
       ),
     );
 
@@ -687,6 +686,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
 
     if (isHobby) {
+      if (breakCountdownSeconds.value <= 0) {
+        return;
+      }
       unawaited(
         timerNotificationService.scheduleFocusFinished(
           title: subject.name,
@@ -715,7 +717,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   int get _overlayRemainingSeconds {
-    if (isReading) {
+    if (isReading || isHobby) {
       return sessionSeconds.value;
     }
     if (isResting.value) {
@@ -745,7 +747,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         remainingSeconds: _overlayRemainingSeconds,
         isRunning: isRunning.value,
         isResting: isResting.value,
-        isCountUp: isReading,
+        isCountUp: isReading || isHobby,
         usesFocusRoutine: !isReading && !isHobby,
         colorValue: subject.colorValue,
         currentFocusSection: currentFocusSection,
@@ -789,8 +791,22 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _applyLiveActivityState(TimerLiveActivityAction value) {
+    if (isHobby) {
+      final int elapsedSeconds =
+          value.remainingSeconds.clamp(0, _maxSessionSeconds) -
+          sessionSeconds.value;
+      isRunning.value = true;
+      _advanceBy(elapsedSeconds);
+      isResting.value = false;
+      isRunning.value = value.isRunning;
+      _syncFocusGuard();
+      return;
+    }
     if (isReading) {
-      sessionSeconds.value = value.remainingSeconds.clamp(0, _maxSessionSeconds);
+      sessionSeconds.value = value.remainingSeconds.clamp(
+        0,
+        _maxSessionSeconds,
+      );
       isResting.value = false;
       isRunning.value = value.isRunning;
       _syncFocusGuard();
