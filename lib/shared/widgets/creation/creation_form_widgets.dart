@@ -460,11 +460,13 @@ class CreationSubmitButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 180),
-        opacity: !isEnabled ? 0.62 : 1,
+        opacity: !isEnabled && !isLoading ? 0.62 : 1,
         child: Container(
           width: double.infinity,
           height: 60,
-          padding: const EdgeInsets.only(left: 56, right: 8),
+          padding: isLoading
+              ? EdgeInsets.zero
+              : const EdgeInsets.only(left: 56, right: 8),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
