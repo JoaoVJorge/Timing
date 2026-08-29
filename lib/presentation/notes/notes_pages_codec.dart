@@ -11,5 +11,6 @@ class NotesPagesCodec {
     return value.split(_separator);
   }
 
-  static String encode(Iterable<String> pages) => pages.join(_separator);
+  static String encode(Iterable<String> pages) =>
+      pages.where((page) => page.trim().isNotEmpty).join(_separator);
 }

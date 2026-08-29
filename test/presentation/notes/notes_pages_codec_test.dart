@@ -11,10 +11,23 @@ void main() {
       expect(NotesPagesCodec.decode("Old note"), <String>["Old note"]);
     });
 
-    test("round-trips multiple pages", () {
-      final List<String> pages = <String>["First", "", "Third"];
+    test("round-trips multiple pages with content", () {
+      final List<String> pages = <String>["First", "Third"];
 
       expect(NotesPagesCodec.decode(NotesPagesCodec.encode(pages)), pages);
+    });
+
+    test("does not save empty or whitespace-only pages", () {
+      final List<String> pages = <String>["First", "", "  \n", "Third"];
+
+      expect(NotesPagesCodec.decode(NotesPagesCodec.encode(pages)), <String>[
+        "First",
+        "Third",
+      ]);
+    });
+
+    test("encodes a notebook with no content as empty", () {
+      expect(NotesPagesCodec.encode(<String>["", "  "]), "");
     });
   });
 }

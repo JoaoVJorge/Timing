@@ -34,7 +34,9 @@ class NotesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _lastSavedNotes = _currentNotes;
+    // Keep the raw stored value so legacy notebooks containing blank pages are
+    // normalized the next time the user saves/closes them.
+    _lastSavedNotes = subject.notes;
   }
 
   void onPageChanged(int index) => currentPageIndex.value = index;
