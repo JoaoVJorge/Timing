@@ -33,21 +33,41 @@ class _AppSkeletonState extends State<AppSkeleton>
     child: widget.child,
     builder: (context, child) {
       final double sweep = _controller.value * 2.4 - 0.7;
+      final bool isDark = context.isDarkMode;
+      final Color base = context.colorTokens.surfaceInnerLayer.withValues(
+        alpha: isDark ? 0.46 : 0.22,
+      );
+      final Color highlight = isDark
+          ? Color.lerp(
+              context.colorTokens.surfaceInnerLayer,
+              context.colorTokens.borderUnfocused,
+              0.7,
+            )!.withValues(alpha: 0.82)
+          : context.colorTokens.white.withValues(alpha: 0.7);
+      final Color shoulder = isDark
+          ? Color.lerp(base, highlight, 0.42)!
+          : highlight;
       return ShaderMask(
         blendMode: BlendMode.srcATop,
         shaderCallback: (bounds) => LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-            context.colorTokens.white.withValues(alpha: 0.7),
-            context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-          ],
-          stops: [
-            (sweep - 0.18).clamp(0.0, 1.0),
-            sweep.clamp(0.0, 1.0),
-            (sweep + 0.18).clamp(0.0, 1.0),
-          ],
+          colors: isDark
+              ? [base, shoulder, highlight, shoulder, base]
+              : [base, highlight, base],
+          stops: isDark
+              ? [
+                  (sweep - 0.32).clamp(0.0, 1.0),
+                  (sweep - 0.16).clamp(0.0, 1.0),
+                  sweep.clamp(0.0, 1.0),
+                  (sweep + 0.16).clamp(0.0, 1.0),
+                  (sweep + 0.32).clamp(0.0, 1.0),
+                ]
+              : [
+                  (sweep - 0.18).clamp(0.0, 1.0),
+                  sweep.clamp(0.0, 1.0),
+                  (sweep + 0.18).clamp(0.0, 1.0),
+                ],
         ).createShader(bounds),
         child: child,
       );

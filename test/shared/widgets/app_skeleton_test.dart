@@ -6,10 +6,14 @@ import "package:timing/theme/theme.dart";
 
 /// Renders [child] in a bounded page (like the real Scaffold body) and advances
 /// a few frames. [AppSkeleton] loops forever, so `pumpAndSettle` is avoided.
-Future<void> _pumpSkeleton(WidgetTester tester, Widget child) async {
+Future<void> _pumpSkeleton(
+  WidgetTester tester,
+  Widget child, {
+  Brightness brightness = Brightness.light,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
-      theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+      theme: AppThemes.build(seed: Colors.blue, brightness: brightness),
       home: Scaffold(
         body: Padding(padding: const EdgeInsets.all(16), child: child),
       ),
@@ -52,6 +56,17 @@ void main() {
       expect(find.byType(AppSkeleton), findsOneWidget);
       expect(find.byType(AppSkeletonBox), findsWidgets);
       expect(find.byType(AppSkeletonCircle), findsWidgets);
+    });
+
+    testWidgets("renders the softer shimmer in dark mode", (tester) async {
+      await _pumpSkeleton(
+        tester,
+        const AppSkeleton(child: AppSkeletonBox(height: 48)),
+        brightness: Brightness.dark,
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(ShaderMask), findsOneWidget);
     });
   });
 }
