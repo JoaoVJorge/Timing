@@ -37,8 +37,9 @@ migrate_working_dir/
 lib/env/*.env
 !lib/env/*.env.example
 
-# Only the canonical Supabase setup is versioned under backend/.
+# Supabase configuration stays local; keep a single canonical setup file.
 backend/supabase-setup.sql
+backend/migrations/
 
 # Symbolication related
 app.*.symbols
