@@ -5,7 +5,10 @@ class MainNavigationBindings extends Bindings {
   @override
   void dependencies() {
     Get.put<MainNavigationController>(
-      MainNavigationController(appNavigator: Get.find()),
+      MainNavigationController(
+        appNavigator: Get.find(),
+        mainTabRefreshService: Get.find(),
+      ),
     );
   }
 }

@@ -268,6 +268,7 @@ class AppRoutes {
   static Route? onGenerateChildRoute({
     required RouteSettings settings,
     required String parentRouteName,
+    Transition? transition,
   }) {
     if (settings.name == null) {
       return null;
@@ -289,6 +290,9 @@ class AppRoutes {
       settings: settings,
       page: childRoute.page,
       binding: childRoute.binding,
+      transition: transition,
+      transitionDuration: pageTransitionDuration,
+      curve: pageTransitionCurve,
     );
   }
 }

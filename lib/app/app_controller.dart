@@ -30,6 +30,8 @@ import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
+import "package:timing/presentation/home/home_controller.dart";
+import "package:timing/presentation/progress/progress_controller.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 import "package:timing/theme/accent_presets.dart";
 
@@ -227,6 +229,12 @@ class AppController extends GetxController {
 
     if (Get.isRegistered<GroupsController>()) {
       reloads.add(Get.find<GroupsController>().loadGroups());
+    }
+    if (Get.isRegistered<HomeController>()) {
+      reloads.add(Get.find<HomeController>().load(reloadSchedule: false));
+    }
+    if (Get.isRegistered<ProgressController>()) {
+      reloads.add(Get.find<ProgressController>().loadStats());
     }
 
     await Future.wait(reloads);

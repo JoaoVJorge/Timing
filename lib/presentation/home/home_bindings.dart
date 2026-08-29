@@ -4,6 +4,8 @@ import "package:timing/presentation/home/home_controller.dart";
 class HomeBindings extends Bindings {
   @override
   void dependencies() {
+    if (Get.isRegistered<HomeController>()) return;
+
     Get.put<HomeController>(
       HomeController(
         appController: Get.find(),
@@ -16,7 +18,9 @@ class HomeBindings extends Bindings {
         scheduleController: Get.find(),
         achievementUnlockService: Get.find(),
         homeWidgetService: Get.find(),
+        mainTabRefreshService: Get.find(),
       ),
+      permanent: true,
     );
   }
 }

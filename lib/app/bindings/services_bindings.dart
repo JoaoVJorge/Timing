@@ -18,6 +18,7 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/env/environment_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -34,6 +35,7 @@ class ServicesBindings extends Bindings {
     );
     Get.put<AppLoggerService>(AppLoggerService(), permanent: true);
     Get.put<ActivityChangeBus>(ActivityChangeBus(), permanent: true);
+    Get.put<MainTabRefreshService>(MainTabRefreshService(), permanent: true);
     Get.put<AnalyticsService>(
       LoggingAnalyticsService(logger: Get.find()),
       permanent: true,

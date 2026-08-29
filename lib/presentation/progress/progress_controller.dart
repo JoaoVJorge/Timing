@@ -246,7 +246,6 @@ class ProgressController extends GetxController {
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??
         Future<void>.value());
-    await loadStats();
   }
 }
 

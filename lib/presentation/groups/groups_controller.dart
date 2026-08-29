@@ -20,6 +20,7 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
@@ -36,7 +37,9 @@ class GroupsController extends GetxController {
     required this._supabaseService,
     required this._localStorageService,
     required this._activityChangeBus,
-  });
+    MainTabRefreshService? mainTabRefreshService,
+  }) : _mainTabRefreshService =
+           mainTabRefreshService ?? MainTabRefreshService();
 
   final GetGroupsUseCase _getGroupsUseCase;
   final GroupsRepository _groupsRepository;
@@ -44,6 +47,7 @@ class GroupsController extends GetxController {
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
   final ActivityChangeBus _activityChangeBus;
+  final MainTabRefreshService _mainTabRefreshService;
   final ImagePicker _imagePicker = ImagePicker();
 
   /// A logged focus session auto-saves every few seconds; without a debounce
@@ -89,6 +93,7 @@ class GroupsController extends GetxController {
   final RxSet<String> _loadingOlderImageMessageGroupIds = <String>{}.obs;
   final Map<String, bool> _hasMoreImageMessagesByGroup = <String, bool>{};
   static const Duration _groupsLoadTimeout = Duration(seconds: 20);
+  bool _hasLoadedGroups = false;
 
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
@@ -209,6 +214,7 @@ class GroupsController extends GetxController {
 
   Future<void> loadGroups({String? preferredGroupId}) async {
     final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
+    bool membershipChanged = false;
     isLoading.value = true;
     didFailLoadingGroups.value = false;
     try {
@@ -221,13 +227,29 @@ class GroupsController extends GetxController {
         },
         (value) {
           didFailLoadingGroups.value = false;
+          final Set<String> previousGroupIds = groups
+              .map((item) => item.id)
+              .toSet();
+          final Set<String> loadedGroupIds = value
+              .map((item) => item.id)
+              .toSet();
+          if (_hasLoadedGroups &&
+              (previousGroupIds.length != loadedGroupIds.length ||
+                  !previousGroupIds.containsAll(loadedGroupIds))) {
+            membershipChanged = true;
+            _mainTabRefreshService.markGroupsChanged();
+          }
           // Copy so the controller's list doesn't alias the data source's mutable
           // store — otherwise a created group appears in both the store add and the
           // controller add below, showing up twice.
           groups.value = List.of(value);
           selectedGroup.value = _preferredGroup(value, selectedGroupId);
+          _hasLoadedGroups = true;
         },
       );
+      if (membershipChanged) {
+        await _invalidateActivityCaches();
+      }
     } on TimeoutException {
       didFailLoadingGroups.value = true;
       _appNavigator.showErrorSnackBar();
@@ -514,6 +536,7 @@ class GroupsController extends GetxController {
     _activityProgressCacheKey = null;
     activityProgress.clear();
     groups.refresh();
+    _mainTabRefreshService.markGroupsChanged();
     // CreateGroupController already writes the owner's local copy of the
     // group activity. Keep that cache intact so the activity appears in "mine"
     // immediately instead of waiting for a remote refetch.
@@ -537,6 +560,7 @@ class GroupsController extends GetxController {
     _activityProgressCacheKey = null;
     activityProgress.clear();
     groups.refresh();
+    _mainTabRefreshService.markGroupsChanged();
     await _invalidateActivityCaches();
   }
 
@@ -611,6 +635,7 @@ class GroupsController extends GetxController {
     _activityProgressCacheKey = null;
     activityProgress.clear();
     groups.refresh();
+    _mainTabRefreshService.markGroupsChanged();
     await _invalidateActivityCaches();
     if (selectedDetailsTab.value == GroupDetailsTab.goals) {
       await loadActivityProgress();
@@ -629,7 +654,9 @@ class GroupsController extends GetxController {
     final Either<AppError, void> result = await _groupsRepository.leaveGroup(
       group.id,
     );
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+    await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
+      _,
+    ) async {
       groups.removeWhere((item) => item.id == group.id);
       imageMessagesByGroup.remove(group.id);
       _hasMoreImageMessagesByGroup.remove(group.id);
@@ -642,7 +669,8 @@ class GroupsController extends GetxController {
       isShowingMemberManagement.value = false;
       isShowingGroupDetails.value = false;
       groups.refresh();
-      unawaited(_invalidateActivityCaches());
+      _mainTabRefreshService.markGroupsChanged();
+      await _invalidateActivityCaches();
       _closeGroupDetailsRoute();
       _appNavigator.showSuccessSnackBar(
         Get.context?.l10n.leftGroupMessage ?? "You left the group.",

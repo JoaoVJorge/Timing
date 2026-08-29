@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/foundation.dart";
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
@@ -20,6 +21,7 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/home_widget/home_widget_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -36,6 +38,7 @@ class HomeController extends GetxController {
     required this._scheduleController,
     required this._achievementUnlockService,
     required this._homeWidgetService,
+    required this._mainTabRefreshService,
   });
 
   final AppController _appController;
@@ -48,6 +51,7 @@ class HomeController extends GetxController {
   final ScheduleController _scheduleController;
   final AchievementUnlockService _achievementUnlockService;
   final HomeWidgetService _homeWidgetService;
+  final MainTabRefreshService _mainTabRefreshService;
 
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxList<DailyTaskEntity> dailyTasks = <DailyTaskEntity>[].obs;
@@ -242,11 +246,21 @@ class HomeController extends GetxController {
     bool reloadSchedule = true,
     bool reloadDailyTasks = false,
   }) async {
+    final List<SubjectEntity> subjectsBefore = List.of(subjects);
+    final List<DailyTaskEntity> tasksBefore = List.of(dailyTasks);
+    final DailyProgressEntity progressBefore = todayProgress.value;
+
     await (_appNavigator.toNamed(route, arguments: arguments) ??
         Future<void>.value());
     await load(
       reloadSchedule: reloadSchedule,
       reloadDailyTasks: reloadDailyTasks,
     );
+
+    if (!listEquals(subjectsBefore, subjects) ||
+        !listEquals(tasksBefore, dailyTasks) ||
+        progressBefore != todayProgress.value) {
+      _mainTabRefreshService.markHomeDataChanged();
+    }
   }
 }

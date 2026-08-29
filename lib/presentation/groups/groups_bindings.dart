@@ -1,4 +1,5 @@
 import "package:get/get.dart";
+import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 
 class GroupsBindings extends Bindings {
@@ -14,6 +15,7 @@ class GroupsBindings extends Bindings {
         supabaseService: Get.find(),
         localStorageService: Get.find(),
         activityChangeBus: Get.find(),
+        mainTabRefreshService: Get.find<MainTabRefreshService>(),
       ),
       permanent: true,
     );
