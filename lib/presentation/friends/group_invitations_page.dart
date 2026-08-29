@@ -46,6 +46,8 @@ class _GroupInvitationsPageState extends State<GroupInvitationsPage> {
             () => switch (selectedMode) {
               GroupInvitationsMode.incoming => _IncomingInvitationsList(
                 invitations: controller.groupInvitations.toList(),
+                acceptingInvitationIds: controller.acceptingGroupInvitationIds
+                    .toSet(),
                 onAccept: controller.acceptGroupInvitation,
                 onDecline: controller.declineGroupInvitation,
               ),
@@ -150,11 +152,13 @@ class _GroupInvitationTab extends StatelessWidget {
 class _IncomingInvitationsList extends StatelessWidget {
   const _IncomingInvitationsList({
     required this.invitations,
+    required this.acceptingInvitationIds,
     required this.onAccept,
     required this.onDecline,
   });
 
   final List<GroupInvitationEntity> invitations;
+  final Set<String> acceptingInvitationIds;
   final ValueChanged<GroupInvitationEntity> onAccept;
   final ValueChanged<GroupInvitationEntity> onDecline;
 
@@ -176,6 +180,7 @@ class _IncomingInvitationsList extends StatelessWidget {
         final GroupInvitationEntity invitation = invitations[index];
         return _IncomingInvitationCard(
           invitation: invitation,
+          isAccepting: acceptingInvitationIds.contains(invitation.id),
           onAccept: () => onAccept(invitation),
           onDecline: () => onDecline(invitation),
         );
@@ -187,11 +192,13 @@ class _IncomingInvitationsList extends StatelessWidget {
 class _IncomingInvitationCard extends StatelessWidget {
   const _IncomingInvitationCard({
     required this.invitation,
+    required this.isAccepting,
     required this.onAccept,
     required this.onDecline,
   });
 
   final GroupInvitationEntity invitation;
+  final bool isAccepting;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
@@ -213,6 +220,7 @@ class _IncomingInvitationCard extends StatelessWidget {
               child: FriendRequestActionButton(
                 label: context.l10n.declineButton,
                 isPrimary: false,
+                isEnabled: !isAccepting,
                 onTap: onDecline,
               ),
             ),
@@ -221,6 +229,7 @@ class _IncomingInvitationCard extends StatelessWidget {
               child: FriendRequestActionButton(
                 label: context.l10n.acceptButton,
                 isPrimary: true,
+                isLoading: isAccepting,
                 onTap: onAccept,
               ),
             ),

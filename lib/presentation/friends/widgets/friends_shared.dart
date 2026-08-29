@@ -198,39 +198,56 @@ class FriendRequestActionButton extends StatelessWidget {
     required this.label,
     required this.isPrimary,
     required this.onTap,
+    this.isLoading = false,
+    this.isEnabled = true,
     super.key,
   });
 
   final String label;
   final bool isPrimary;
   final VoidCallback onTap;
+  final bool isLoading;
+  final bool isEnabled;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    pressedScale: 0.96,
-    onTap: onTap,
-    child: Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: isPrimary ? context.colorTokens.primaryGradient : null,
-        color: isPrimary ? null : context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: isPrimary
-            ? null
-            : Border.all(color: context.colorTokens.borderUnfocused),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodySmall.copyWith(
-          color: isPrimary
-              ? context.colorTokens.primaryForeground
-              : context.colorTokens.textHint,
-          fontWeight: FontWeight.w900,
+  Widget build(BuildContext context) => IgnorePointer(
+    ignoring: !isEnabled || isLoading,
+    child: BounceTap(
+      pressedScale: 0.96,
+      onTap: onTap,
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: isPrimary ? context.colorTokens.primaryGradient : null,
+          color: isPrimary ? null : context.colorTokens.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: isPrimary
+              ? null
+              : Border.all(color: context.colorTokens.borderUnfocused),
         ),
+        child: isLoading
+            ? SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: isPrimary
+                      ? context.colorTokens.primaryForeground
+                      : context.colorTokens.textHint,
+                ),
+              )
+            : Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodySmall.copyWith(
+                  color: isPrimary
+                      ? context.colorTokens.primaryForeground
+                      : context.colorTokens.textHint,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
       ),
     ),
   );

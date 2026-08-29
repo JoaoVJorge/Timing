@@ -45,6 +45,8 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
             () => switch (selectedMode) {
               FriendRequestsMode.incoming => _IncomingRequestsList(
                 requests: controller.requests.toList(),
+                acceptingRequestIds: controller.acceptingFriendRequestIds
+                    .toSet(),
                 onAccept: controller.acceptRequest,
                 onDecline: controller.declineRequest,
               ),
@@ -146,11 +148,13 @@ class _RequestModeTab extends StatelessWidget {
 class _IncomingRequestsList extends StatelessWidget {
   const _IncomingRequestsList({
     required this.requests,
+    required this.acceptingRequestIds,
     required this.onAccept,
     required this.onDecline,
   });
 
   final List<FriendEntity> requests;
+  final Set<String> acceptingRequestIds;
   final ValueChanged<FriendEntity> onAccept;
   final ValueChanged<FriendEntity> onDecline;
 
@@ -169,6 +173,7 @@ class _IncomingRequestsList extends StatelessWidget {
         return _RequestProfileCard(
           profile: profile,
           mode: FriendRequestsMode.incoming,
+          isAccepting: acceptingRequestIds.contains(profile.id),
           onAccept: () => onAccept(profile),
           onDecline: () => onDecline(profile),
           onCancel: () {},
@@ -199,6 +204,7 @@ class _SentRequestsList extends StatelessWidget {
         return _RequestProfileCard(
           profile: profile,
           mode: FriendRequestsMode.sent,
+          isAccepting: false,
           onAccept: () {},
           onDecline: () {},
           onCancel: () => onCancel(profile),
@@ -212,6 +218,7 @@ class _RequestProfileCard extends StatelessWidget {
   const _RequestProfileCard({
     required this.profile,
     required this.mode,
+    required this.isAccepting,
     required this.onAccept,
     required this.onDecline,
     required this.onCancel,
@@ -219,6 +226,7 @@ class _RequestProfileCard extends StatelessWidget {
 
   final FriendEntity profile;
   final FriendRequestsMode mode;
+  final bool isAccepting;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
   final VoidCallback onCancel;
@@ -283,6 +291,7 @@ class _RequestProfileCard extends StatelessWidget {
                 child: FriendRequestActionButton(
                   label: context.l10n.declineButton,
                   isPrimary: false,
+                  isEnabled: !isAccepting,
                   onTap: onDecline,
                 ),
               ),
@@ -291,6 +300,7 @@ class _RequestProfileCard extends StatelessWidget {
                 child: FriendRequestActionButton(
                   label: context.l10n.acceptButton,
                   isPrimary: true,
+                  isLoading: isAccepting,
                   onTap: onAccept,
                 ),
               ),

@@ -64,6 +64,8 @@ class FriendsController extends GetxController {
       <SentGroupInvitationEntity>[].obs;
   final RxString inviteCode = "".obs;
   final RxBool isLoading = true.obs;
+  final RxSet<String> acceptingFriendRequestIds = <String>{}.obs;
+  final RxSet<String> acceptingGroupInvitationIds = <String>{}.obs;
 
   final Rxn<FriendSuggestionEntity> foundUser = Rxn<FriendSuggestionEntity>();
   final RxBool isSearching = false.obs;
@@ -121,18 +123,25 @@ class FriendsController extends GetxController {
   }
 
   Future<void> acceptGroupInvitation(GroupInvitationEntity invitation) async {
-    final result = await _acceptGroupInvitationUseCase(invitation.id);
-    await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
-      group,
-    ) async {
-      if (Get.isRegistered<GroupsController>()) {
-        await Get.find<GroupsController>().upsertJoinedGroup(group);
-      }
-      groupInvitations.removeWhere((item) => item.id == invitation.id);
-      _appNavigator.showSuccessSnackBar(
-        _l10n?.joinedGroupMessage ?? "You joined the group",
-      );
-    });
+    if (!acceptingGroupInvitationIds.add(invitation.id)) {
+      return;
+    }
+    try {
+      final result = await _acceptGroupInvitationUseCase(invitation.id);
+      await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
+        group,
+      ) async {
+        if (Get.isRegistered<GroupsController>()) {
+          await Get.find<GroupsController>().upsertJoinedGroup(group);
+        }
+        groupInvitations.removeWhere((item) => item.id == invitation.id);
+        _appNavigator.showSuccessSnackBar(
+          _l10n?.joinedGroupMessage ?? "You joined the group",
+        );
+      });
+    } finally {
+      acceptingGroupInvitationIds.remove(invitation.id);
+    }
   }
 
   Future<void> declineGroupInvitation(GroupInvitationEntity invitation) async {
@@ -179,13 +188,20 @@ class FriendsController extends GetxController {
   }
 
   Future<void> acceptRequest(FriendEntity profile) async {
-    final result = await _acceptFriendRequestUseCase(profile.friendshipId);
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-      requests.removeWhere((request) => request.id == profile.id);
-      if (!friends.any((friend) => friend.id == profile.id)) {
-        friends.insert(0, profile);
-      }
-    });
+    if (!acceptingFriendRequestIds.add(profile.id)) {
+      return;
+    }
+    try {
+      final result = await _acceptFriendRequestUseCase(profile.friendshipId);
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+        requests.removeWhere((request) => request.id == profile.id);
+        if (!friends.any((friend) => friend.id == profile.id)) {
+          friends.insert(0, profile);
+        }
+      });
+    } finally {
+      acceptingFriendRequestIds.remove(profile.id);
+    }
   }
 
   Future<void> declineRequest(FriendEntity profile) async {
