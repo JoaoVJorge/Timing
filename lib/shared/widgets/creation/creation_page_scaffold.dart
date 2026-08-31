@@ -116,6 +116,8 @@ class CreationHeroHeader extends StatelessWidget {
               width: 128,
               height: 128,
               fit: BoxFit.contain,
+              cacheWidth: (128 * MediaQuery.devicePixelRatioOf(context))
+                  .round(),
             ),
           ),
         ],

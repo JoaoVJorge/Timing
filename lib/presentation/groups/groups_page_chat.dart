@@ -46,6 +46,7 @@ class _ChatTab extends StatelessWidget {
                       final GroupImageMessageEntity message =
                           messages[messages.length - index - 1];
                       return _ImageMessageBubble(
+                        key: ValueKey(message.id),
                         message: message,
                         isMine: message.senderId == controller.currentUserId,
                       );
@@ -64,15 +65,43 @@ class _ChatTab extends StatelessWidget {
   });
 }
 
-class _ImageMessageBubble extends StatelessWidget {
-  const _ImageMessageBubble({required this.message, required this.isMine});
+class _ImageMessageBubble extends StatefulWidget {
+  const _ImageMessageBubble({
+    required this.message,
+    required this.isMine,
+    super.key,
+  });
 
   final GroupImageMessageEntity message;
   final bool isMine;
 
   @override
+  State<_ImageMessageBubble> createState() => _ImageMessageBubbleState();
+}
+
+class _ImageMessageBubbleState extends State<_ImageMessageBubble> {
+  late Uint8List _imageBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageBytes = base64Decode(widget.message.imageBase64);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ImageMessageBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.message.imageBase64 != widget.message.imageBase64) {
+      _imageBytes = base64Decode(widget.message.imageBase64);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Uint8List imageBytes = base64Decode(message.imageBase64);
+    final GroupImageMessageEntity message = widget.message;
+    final bool isMine = widget.isMine;
+    final int decodeWidth = (220 * MediaQuery.devicePixelRatioOf(context))
+        .round();
 
     return Row(
       mainAxisAlignment: isMine
@@ -121,9 +150,10 @@ class _ImageMessageBubble extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.memory(
-                    imageBytes,
+                    _imageBytes,
                     width: 220,
                     fit: BoxFit.cover,
+                    cacheWidth: decodeWidth,
                   ),
                 ),
                 const Gap(6),

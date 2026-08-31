@@ -173,6 +173,11 @@ class _HeroIllustration extends StatelessWidget {
                 child: Image.asset(
                   "assets/images/login_page.png",
                   fit: BoxFit.fill,
+                  cacheWidth:
+                      (constraints.maxWidth *
+                              MediaQuery.devicePixelRatioOf(context))
+                          .round()
+                          .clamp(1, _sourceWidth.toInt()),
                   filterQuality: FilterQuality.high,
                 ),
               ),
