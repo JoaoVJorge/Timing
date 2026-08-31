@@ -8,6 +8,7 @@ import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/home/home_controller.dart";
 import "package:timing/presentation/main_navigation/enums/bottom_nav_button_type.dart";
+import "package:timing/presentation/main_navigation/main_tab_slide_transition.dart";
 import "package:timing/presentation/progress/progress_controller.dart";
 
 class MainNavigationController extends GetxController {
@@ -29,13 +30,13 @@ class MainNavigationController extends GetxController {
 
   final Rx<BottomNavButtonType> selectedButton = BottomNavButtonType.home.obs;
   String currentRouteName = AppRoutes.home;
-  Transition _nextTabTransition = Transition.rightToLeft;
+  final MainTabSlideTransition _tabSlideTransition = MainTabSlideTransition();
 
   Route<dynamic>? onGenerateRoute(RouteSettings settings) =>
       AppRoutes.onGenerateChildRoute(
         settings: settings,
         parentRouteName: AppRoutes.mainNavigation,
-        transition: _nextTabTransition,
+        customTransition: _tabSlideTransition,
       );
 
   void onTapBottomBarButton(BottomNavButtonType type) {
@@ -61,9 +62,7 @@ class MainNavigationController extends GetxController {
         type == BottomNavButtonType.progress &&
         _mainTabRefreshService.consumeProgressRefresh();
 
-    _nextTabTransition = type.index < currentIndex
-        ? Transition.leftToRight
-        : Transition.rightToLeft;
+    _tabSlideTransition.setDirection(forward: type.index > currentIndex);
     selectedButton.value = type;
     switch (type) {
       case BottomNavButtonType.home:

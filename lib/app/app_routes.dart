@@ -269,6 +269,7 @@ class AppRoutes {
     required RouteSettings settings,
     required String parentRouteName,
     Transition? transition,
+    CustomTransition? customTransition,
   }) {
     if (settings.name == null) {
       return null;
@@ -291,6 +292,7 @@ class AppRoutes {
       page: childRoute.page,
       binding: childRoute.binding,
       transition: transition,
+      customTransition: customTransition,
       transitionDuration: pageTransitionDuration,
       curve: pageTransitionCurve,
     );
