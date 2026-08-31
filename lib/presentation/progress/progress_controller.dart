@@ -50,6 +50,11 @@ class ProgressController extends GetxController {
   final RxBool isLoading = true.obs;
   final Rx<ProgressPeriod> selectedPeriod = ProgressPeriod.week.obs;
 
+  ProgressPeriod? _cachedPeriod;
+  DailyProgressEntity? _cachedToday;
+  List<DailyProgressEntity> _cachedCurrentPeriod = const [];
+  List<DailyProgressEntity> _cachedPreviousPeriod = const [];
+
   bool get hasGoalStarted =>
       tasks.any((task) => task.completedDays > 0 || task.isDoneForCurrentCycle);
 
@@ -162,18 +167,15 @@ class ProgressController extends GetxController {
   }
 
   /// The selected window plus the one immediately before it, oldest first.
-  List<DailyProgressEntity> get _bothPeriods {
-    _dailyProgressService.today.value;
-    return _dailyProgressService.progressForLastDays(
-      selectedPeriod.value.dayCount * 2,
-    );
+  List<DailyProgressEntity> get _currentPeriod {
+    _refreshPeriodCacheIfNeeded();
+    return _cachedCurrentPeriod;
   }
 
-  List<DailyProgressEntity> get _currentPeriod =>
-      _bothPeriods.sublist(selectedPeriod.value.dayCount);
-
-  List<DailyProgressEntity> get _previousPeriod =>
-      _bothPeriods.sublist(0, selectedPeriod.value.dayCount);
+  List<DailyProgressEntity> get _previousPeriod {
+    _refreshPeriodCacheIfNeeded();
+    return _cachedPreviousPeriod;
+  }
 
   (DateTime start, DateTime end) get _selectedPeriodWindow {
     final DateTime now = DateTime.now();
@@ -192,23 +194,61 @@ class ProgressController extends GetxController {
 
   Future<void> loadStats() async {
     isLoading.value = true;
-    final Either<AppError, ProfileStatsEntity> statsResult =
-        await _getProfileStatsUseCase();
-    final Either<AppError, List<DailyTaskEntity>> tasksResult =
-        await _getDailyTasksUseCase();
-    final Either<AppError, List<SubjectEntity>> subjectsResult =
-        await _getSubjectsUseCase();
+    try {
+      final statsFuture = _getProfileStatsUseCase();
+      final tasksFuture = _getDailyTasksUseCase();
+      final subjectsFuture = _getSubjectsUseCase();
 
-    statsResult.fold((error) => null, (value) => stats.value = value);
-    tasksResult.fold((error) => null, (value) => tasks.assignAll(value));
-    subjectsResult.fold((error) => null, (value) => subjects.assignAll(value));
-    isLoading.value = false;
+      final Either<AppError, ProfileStatsEntity> statsResult =
+          await statsFuture;
+      final Either<AppError, List<DailyTaskEntity>> tasksResult =
+          await tasksFuture;
+      final Either<AppError, List<SubjectEntity>> subjectsResult =
+          await subjectsFuture;
+
+      statsResult.fold((error) => null, (value) => stats.value = value);
+      tasksResult.fold((error) => null, (value) => tasks.assignAll(value));
+      subjectsResult.fold(
+        (error) => null,
+        (value) => subjects.assignAll(value),
+      );
+      _invalidatePeriodCache();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> onTapAchievements() =>
       _navigateAndRefresh(AppRoutes.achievements);
 
-  void onSelectPeriod(ProgressPeriod period) => selectedPeriod.value = period;
+  void onSelectPeriod(ProgressPeriod period) {
+    if (selectedPeriod.value == period) {
+      return;
+    }
+    selectedPeriod.value = period;
+    _invalidatePeriodCache();
+  }
+
+  void _refreshPeriodCacheIfNeeded() {
+    final ProgressPeriod period = selectedPeriod.value;
+    final DailyProgressEntity today = _dailyProgressService.today.value;
+    if (_cachedPeriod == period && identical(_cachedToday, today)) {
+      return;
+    }
+
+    final int dayCount = period.dayCount;
+    final List<DailyProgressEntity> both = _dailyProgressService
+        .progressForLastDays(dayCount * 2);
+    _cachedPeriod = period;
+    _cachedToday = today;
+    _cachedPreviousPeriod = List.unmodifiable(both.take(dayCount));
+    _cachedCurrentPeriod = List.unmodifiable(both.skip(dayCount));
+  }
+
+  void _invalidatePeriodCache() {
+    _cachedPeriod = null;
+    _cachedToday = null;
+  }
 
   int _sumFocus(List<DailyProgressEntity> period) =>
       period.fold(0, (total, progress) => total + progress.focusSeconds);

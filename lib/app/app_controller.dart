@@ -130,8 +130,13 @@ class AppController extends GetxController {
 
   Future<void> _loadInitialConfig() async {
     await _loadAppConfig();
-    await refreshProfileFromBackend();
-    await _restoreActivityHistoryFromBackendIfNeeded();
+    await Future.wait([
+      refreshProfileFromBackend(),
+      _restoreActivityHistoryFromBackendIfNeeded(),
+    ]);
+    // The saved preference is enough to paint the first frame. Reconciling it
+    // with the OS notification permission can complete after navigation.
+    unawaited(refreshNotificationsEnabledFromSystem());
     if (_supabaseService.hasSignedInUser) {
       unawaited(_syncReconciliationService.flushPending());
     }
@@ -141,7 +146,6 @@ class AppController extends GetxController {
     final Either<AppError, AppConfigEntity> result =
         await _getAppConfigUseCase();
     result.fold((error) => null, _applyConfig);
-    await refreshNotificationsEnabledFromSystem();
   }
 
   void _applyConfig(AppConfigEntity config) {

@@ -84,22 +84,23 @@ class FriendsController extends GetxController {
 
   Future<void> loadSocial() async {
     isLoading.value = true;
-    final result = await _getFriendsSocialUseCase();
-    result.fold(
-      (error) {
-        isLoading.value = false;
-        _appNavigator.showErrorSnackBar();
-      },
-      (FriendsSocialEntity social) {
+    try {
+      final socialFuture = _getFriendsSocialUseCase();
+      final groupInvitationsFuture = _loadGroupInvitations();
+      final sentGroupInvitationsFuture = _loadSentGroupInvitations();
+      final result = await socialFuture;
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (
+        FriendsSocialEntity social,
+      ) {
         inviteCode.value = social.inviteCode;
         requests.assignAll(social.requests);
         sentRequests.assignAll(social.sentRequests);
         friends.assignAll(social.friends);
-        isLoading.value = false;
-      },
-    );
-    await _loadGroupInvitations();
-    await _loadSentGroupInvitations();
+      });
+      await Future.wait([groupInvitationsFuture, sentGroupInvitationsFuture]);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> _loadGroupInvitations() async {

@@ -88,10 +88,11 @@ class AchievementUnlockService {
   }
 
   Future<Set<int>?> _currentUnlockedIds() async {
-    final Either<AppError, ProfileStatsEntity> statsResult =
-        await getProfileStatsUseCase();
+    final statsFuture = getProfileStatsUseCase();
+    final tasksFuture = getDailyTasksUseCase();
+    final Either<AppError, ProfileStatsEntity> statsResult = await statsFuture;
     final Either<AppError, List<DailyTaskEntity>> tasksResult =
-        await getDailyTasksUseCase();
+        await tasksFuture;
 
     ProfileStatsEntity? stats;
     List<DailyTaskEntity>? tasks;

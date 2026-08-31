@@ -78,8 +78,14 @@ class HomeController extends GetxController {
   }) async {
     isLoading.value = true;
     try {
+      final subjectsFuture = _getSubjectsUseCase();
+      final tasksFuture = reloadDailyTasks ? _getDailyTasksUseCase() : null;
+      final scheduleFuture = reloadSchedule
+          ? _scheduleController.loadEntries()
+          : null;
+
       final Either<AppError, List<SubjectEntity>> subjectsResult =
-          await _getSubjectsUseCase();
+          await subjectsFuture;
       subjectsResult.fold((error) {
         subjects.clear();
         _appNavigator.showErrorSnackBar(error.message);
@@ -87,17 +93,17 @@ class HomeController extends GetxController {
 
       // Daily tasks only change on the Daily Goals screen, so most returns to Home
       // keep the in-memory list instead of re-fetching it on every navigation.
-      if (reloadDailyTasks) {
+      if (tasksFuture != null) {
         final Either<AppError, List<DailyTaskEntity>> tasksResult =
-            await _getDailyTasksUseCase();
+            await tasksFuture;
         tasksResult.fold((error) {
           dailyTasks.clear();
           _appNavigator.showErrorSnackBar(error.message);
         }, (value) => dailyTasks.value = value);
       }
 
-      if (reloadSchedule) {
-        await _scheduleController.loadEntries();
+      if (scheduleFuture != null) {
+        await scheduleFuture;
       }
     } finally {
       isLoading.value = false;
@@ -184,14 +190,17 @@ class HomeController extends GetxController {
   ScheduleEntryEntity? get nextTodayEntry {
     final DateTime now = DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
-    final List<ScheduleEntryEntity> upcoming =
-        todayScheduleEntries
-            .where(
-              (e) => e.startMinutes != null && e.startMinutes! >= nowMinutes,
-            )
-            .toList()
-          ..sort((a, b) => a.startMinutes!.compareTo(b.startMinutes!));
-    return upcoming.isEmpty ? null : upcoming.first;
+    ScheduleEntryEntity? next;
+    for (final ScheduleEntryEntity entry in todayScheduleEntries) {
+      final int? startMinutes = entry.startMinutes;
+      if (startMinutes == null || startMinutes < nowMinutes) {
+        continue;
+      }
+      if (next == null || startMinutes < next.startMinutes!) {
+        next = entry;
+      }
+    }
+    return next;
   }
 
   Future<void> onTapCategory(TimeCategoryType category) => _navigateAndRefresh(

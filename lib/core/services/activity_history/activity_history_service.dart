@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:collection";
 
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
@@ -25,8 +26,11 @@ class ActivityHistoryService {
   static const int retentionDays = 400;
 
   final List<ActivityEntryEntity> _entries = [];
+  late final List<ActivityEntryEntity> _readOnlyEntries = UnmodifiableListView(
+    _entries,
+  );
 
-  List<ActivityEntryEntity> get all => List.unmodifiable(_entries);
+  List<ActivityEntryEntity> get all => _readOnlyEntries;
 
   bool get isEmpty => _entries.isEmpty;
 
@@ -116,24 +120,46 @@ class ActivityHistoryService {
     DateTime end, {
     TimeCategoryType? category,
     String? subjectId,
-  }) => entriesBetween(
+  }) => _sumBetween(
     start,
     end,
     category: category,
     subjectId: subjectId,
-  ).fold(0, (total, entry) => total + entry.seconds);
+    valueOf: (entry) => entry.seconds,
+  );
 
   int pagesBetween(
     DateTime start,
     DateTime end, {
     TimeCategoryType? category,
     String? subjectId,
-  }) => entriesBetween(
+  }) => _sumBetween(
     start,
     end,
     category: category,
     subjectId: subjectId,
-  ).fold(0, (total, entry) => total + entry.pages);
+    valueOf: (entry) => entry.pages,
+  );
+
+  int _sumBetween(
+    DateTime start,
+    DateTime end, {
+    required int Function(ActivityEntryEntity entry) valueOf,
+    TimeCategoryType? category,
+    String? subjectId,
+  }) {
+    int total = 0;
+    for (final ActivityEntryEntity entry in _entries) {
+      if (entry.timestamp.isBefore(start) ||
+          !entry.timestamp.isBefore(end) ||
+          (category != null && entry.category != category) ||
+          (subjectId != null && entry.subjectId != subjectId)) {
+        continue;
+      }
+      total += valueOf(entry);
+    }
+    return total;
+  }
 
   static DateTime _startOfDay(DateTime date) =>
       DateTime(date.year, date.month, date.day);
