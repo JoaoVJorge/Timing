@@ -61,7 +61,7 @@ class GroupsController extends GetxController {
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
   final Rx<LeaderboardPeriodType> selectedPeriod =
-      LeaderboardPeriodType.today.obs;
+      LeaderboardPeriodType.total.obs;
   final Rx<GroupDetailsTab> selectedDetailsTab = GroupDetailsTab.ranking.obs;
   final RxBool isLoading = true.obs;
   final RxBool isShowingGroupDetails = false.obs;
@@ -85,6 +85,9 @@ class GroupsController extends GetxController {
   GroupEntity? _rankedCacheGroup;
   LeaderboardPeriodType? _rankedCachePeriod;
   List<GroupMemberEntity> _rankedCache = const [];
+  Map<String, int> _rankByMemberId = const {};
+  Map<String, int?> _differenceByMemberId = const {};
+  Map<int, int> _memberCountByScore = const {};
   String? _activityProgressCacheKey;
   final Set<String> _loadingActivityProgressKeys = <String>{};
   final Map<String, List<GroupActivityProgressEntity>>
@@ -99,6 +102,7 @@ class GroupsController extends GetxController {
     final GroupEntity? group = selectedGroup.value;
     final LeaderboardPeriodType period = selectedPeriod.value;
     if (group == null) {
+      _clearRankingCaches();
       return const [];
     }
     if (identical(group, _rankedCacheGroup) && period == _rankedCachePeriod) {
@@ -109,7 +113,50 @@ class GroupsController extends GetxController {
     _rankedCacheGroup = group;
     _rankedCachePeriod = period;
     _rankedCache = members;
+    _buildRankingCaches(members, period);
     return members;
+  }
+
+  void _clearRankingCaches() {
+    _rankedCacheGroup = null;
+    _rankedCachePeriod = null;
+    _rankedCache = const [];
+    _rankByMemberId = const {};
+    _differenceByMemberId = const {};
+    _memberCountByScore = const {};
+  }
+
+  void _buildRankingCaches(
+    List<GroupMemberEntity> members,
+    LeaderboardPeriodType period,
+  ) {
+    final Map<String, int> ranks = {};
+    final Map<String, int?> differences = {};
+    final Map<int, int> scoreCounts = {};
+    int rank = 1;
+    int? previousScore;
+    int? higherScore;
+
+    for (int index = 0; index < members.length; index++) {
+      final GroupMemberEntity member = members[index];
+      final int score = member.secondsFor(period);
+      if (previousScore != null && score < previousScore) {
+        rank = index + 1;
+        higherScore = previousScore;
+      }
+      ranks[member.id] = rank;
+      differences[member.id] = index == 0
+          ? null
+          : higherScore == null
+          ? 0
+          : higherScore - score;
+      scoreCounts.update(score, (count) => count + 1, ifAbsent: () => 1);
+      previousScore = score;
+    }
+
+    _rankByMemberId = ranks;
+    _differenceByMemberId = differences;
+    _memberCountByScore = scoreCounts;
   }
 
   GroupMemberEntity? get currentUserMember {
@@ -127,6 +174,13 @@ class GroupsController extends GetxController {
   }
 
   int rankOf(GroupMemberEntity member) {
+    // Reading the getter refreshes every derived ranking cache when the group
+    // or selected period changed.
+    rankedMembers;
+    final int? cachedRank = _rankByMemberId[member.id];
+    if (cachedRank != null) {
+      return cachedRank;
+    }
     final int value = member.secondsFor(selectedPeriod.value);
     return rankedMembers
             .where((item) => item.secondsFor(selectedPeriod.value) > value)
@@ -140,10 +194,7 @@ class GroupsController extends GetxController {
       return false;
     }
     final int value = member.secondsFor(selectedPeriod.value);
-    return rankedMembers
-            .where((item) => item.secondsFor(selectedPeriod.value) == value)
-            .length >
-        1;
+    return (_memberCountByScore[value] ?? 0) > 1;
   }
 
   /// Member ranked immediately above the current user, used to turn "2nd place"
@@ -164,6 +215,11 @@ class GroupsController extends GetxController {
   }
 
   int? differenceToPrevious(GroupMemberEntity member) {
+    // Keep this lookup in sync with the same lazy cache used by rankOf.
+    rankedMembers;
+    if (_differenceByMemberId.containsKey(member.id)) {
+      return _differenceByMemberId[member.id];
+    }
     final List<GroupMemberEntity> members = rankedMembers;
     final int index = members.indexWhere((item) => item.id == member.id);
     if (index <= 0) {

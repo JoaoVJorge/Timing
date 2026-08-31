@@ -64,8 +64,8 @@ class GroupsDataSource {
           .toList();
       final Map<String, Map<String, dynamic>> profilesById =
           await _profilesById(memberIds, withPhoto: true);
-      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme =
-          await _leaderboardScoresForMembers(memberIds);
+      final Map<String, Map<String, _PeriodScores>> scoresByGroup =
+          await _leaderboardScoresForGroups(groupIds);
 
       final Map<String, List<Map<String, dynamic>>> membersByGroup = {};
       for (final Map<String, dynamic> row in memberRows) {
@@ -78,9 +78,9 @@ class GroupsDataSource {
           final GroupThemeType theme = GroupThemeType.byName(
             row["theme"] as String?,
           );
-          final Map<String, _PeriodScores> scoresByUser =
-              scoresByTheme[theme] ?? const {};
           final String groupId = row["id"] as String;
+          final Map<String, _PeriodScores> scoresByUser =
+              scoresByGroup[groupId] ?? const {};
           final List<GroupMemberEntity> members =
               membersByGroup[groupId]
                   ?.map(
@@ -88,7 +88,6 @@ class GroupsDataSource {
                       memberRow: memberRow,
                       profileRow: profilesById[memberRow["user_id"]],
                       scoresByUser: scoresByUser,
-                      theme: theme,
                     ),
                   )
                   .toList() ??
@@ -141,9 +140,10 @@ class GroupsDataSource {
     }
   }
 
-  Future<Map<GroupThemeType, Map<String, _PeriodScores>>>
-  _leaderboardScoresForMembers(List<String> memberIds) async {
-    if (memberIds.isEmpty) {
+  Future<Map<String, Map<String, _PeriodScores>>> _leaderboardScoresForGroups(
+    List<String> groupIds,
+  ) async {
+    if (groupIds.isEmpty) {
       return const {};
     }
 
@@ -152,7 +152,7 @@ class GroupsDataSource {
           .rpc(
             "group_leaderboard_scores",
             params: {
-              "target_member_ids": memberIds,
+              "target_group_ids": groupIds,
               "today_start": _todayStart().toIso8601String(),
               "week_start": _weekStart().toIso8601String(),
               "month_start": _monthStart().toIso8601String(),
@@ -161,26 +161,27 @@ class GroupsDataSource {
           .timeout(_activityScoresTimeout);
       _logger.logResponse("rpc public.group_leaderboard_scores", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
-      final Map<GroupThemeType, Map<String, _PeriodScores>> scoresByTheme = {
-        for (final GroupThemeType theme in GroupThemeType.values)
-          theme: <String, _PeriodScores>{},
-      };
+      final Map<String, Map<String, _PeriodScores>> scoresByGroup = {};
       for (final dynamic value in rows) {
         final Map<String, dynamic> row = Map<String, dynamic>.from(
           value as Map,
         );
+        final String? groupId = row["group_id"] as String?;
         final String? userId = row["user_id"] as String?;
-        final GroupThemeType? theme = _themeByName(row["category"] as String?);
-        if (userId == null || theme == null) {
+        if (groupId == null || userId == null) {
           continue;
         }
-        scoresByTheme[theme]![userId] = _PeriodScores(
+        scoresByGroup.putIfAbsent(
+          groupId,
+          () => <String, _PeriodScores>{},
+        )[userId] = _PeriodScores(
           today: _intValue(row["today_score"]),
           week: _intValue(row["week_score"]),
           month: _intValue(row["month_score"]),
+          total: _intValue(row["total_score"] ?? row["month_score"]),
         );
       }
-      return scoresByTheme;
+      return scoresByGroup;
     } on TimeoutException catch (error, stackTrace) {
       _logger.logError(
         "Timed out loading group leaderboard scores",
@@ -771,7 +772,6 @@ class GroupsDataSource {
           },
           profileRow: profilesById[userId],
           scoresByUser: const {},
-          theme: theme,
         ),
       ];
 
@@ -910,7 +910,6 @@ class GroupsDataSource {
     required Map<String, dynamic> memberRow,
     required Map<String, dynamic>? profileRow,
     required Map<String, _PeriodScores> scoresByUser,
-    required GroupThemeType theme,
   }) {
     final String userId = memberRow["user_id"] as String;
     final _PeriodScores scores =
@@ -927,6 +926,7 @@ class GroupsDataSource {
       todaySeconds: scores.today,
       weekSeconds: scores.week,
       monthSeconds: scores.month,
+      totalSeconds: scores.total,
       role: memberRow["role"] as String? ?? "member",
       joinedAt: DateTime.tryParse(memberRow["joined_at"] as String? ?? ""),
     );
@@ -954,15 +954,6 @@ class GroupsDataSource {
   }
 
   int _intValue(Object? value) => value is num ? value.toInt() : 0;
-
-  GroupThemeType? _themeByName(String? name) {
-    for (final GroupThemeType value in GroupThemeType.values) {
-      if (value.name == name) {
-        return value;
-      }
-    }
-    return null;
-  }
 
   String _displayName(Map<String, dynamic>? row, {required String fallback}) {
     if (row == null) {
@@ -1000,9 +991,11 @@ class _PeriodScores {
     required this.today,
     required this.week,
     required this.month,
+    this.total = 0,
   });
 
   final int today;
   final int week;
   final int month;
+  final int total;
 }

@@ -31,7 +31,10 @@ class _RankingTab extends StatelessWidget {
           ),
           const Gap(AppSpacing.betweenSections),
         ],
-        _GroupSectionTitle(title: context.l10n.leaderboardTitle),
+        _GroupSectionTitle(
+          title: context.l10n.leaderboardTitle,
+          trailing: _LeaderboardPeriodFilter(controller: controller),
+        ),
         const Gap(AppSpacing.betweenRelated),
         Container(
           decoration: AppSurfaces.rowGroup(context.colorTokens),
@@ -68,4 +71,111 @@ class _RankingTab extends StatelessWidget {
       ],
     );
   }
+}
+
+class _LeaderboardPeriodFilter extends StatelessWidget {
+  const _LeaderboardPeriodFilter({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final LeaderboardPeriodType selected = controller.selectedPeriod.value;
+    final BorderRadius buttonRadius = BorderRadius.circular(16);
+
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(highlightColor: context.colorTokens.primaryVeryLight),
+      child: PopupMenuButton<LeaderboardPeriodType>(
+        key: const ValueKey("leaderboard-period-filter"),
+        initialValue: selected,
+        tooltip: selected.localizedLabel(context),
+        onSelected: controller.onSelectPeriod,
+        position: PopupMenuPosition.under,
+        offset: const Offset(0, 6),
+        color: context.colorTokens.surface,
+        surfaceTintColor: context.colorTokens.transparent,
+        elevation: 8,
+        menuPadding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: buttonRadius,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        itemBuilder: (context) => [
+          for (final LeaderboardPeriodType period
+              in LeaderboardPeriodType.values)
+            PopupMenuItem<LeaderboardPeriodType>(
+              value: period,
+              child: Row(
+                children: [
+                  Icon(
+                    _periodIcon(period),
+                    size: 22,
+                    color: context.colorTokens.primary,
+                  ),
+                  const Gap(12),
+                  Expanded(
+                    child: Text(
+                      period.localizedLabel(context),
+                      style: context.textStyles.bodySmall.copyWith(
+                        color: context.colorTokens.textBody,
+                        fontWeight: period == selected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (period == selected) ...[
+                    const Gap(16),
+                    Icon(
+                      Icons.check_rounded,
+                      size: 22,
+                      color: context.colorTokens.primary,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+        ],
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 120, minHeight: 44),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: context.colorTokens.primaryGradient,
+            borderRadius: buttonRadius,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  selected.localizedLabel(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.primaryForeground,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const Gap(8),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 21,
+                color: context.colorTokens.primaryForeground,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _periodIcon(LeaderboardPeriodType period) => switch (period) {
+    LeaderboardPeriodType.today => Icons.today_rounded,
+    LeaderboardPeriodType.thisWeek => Icons.date_range_rounded,
+    LeaderboardPeriodType.thisMonth => Icons.calendar_month_rounded,
+    LeaderboardPeriodType.total => Icons.bar_chart_rounded,
+  };
 }

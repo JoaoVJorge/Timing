@@ -91,6 +91,7 @@ class _GroupActivityDataView extends StatelessWidget {
     final int targetPerMember = _targetForPeriod(
       header.target > 0 ? header.target : focusSeconds,
       period,
+      since: group.createdAt,
     );
     final Map<String, int> progressByMember = {
       for (final GroupMemberEntity member in group.members)
@@ -898,14 +899,29 @@ class _GroupStatItem extends StatelessWidget {
 
 Color _groupDataAccent(BuildContext context) => context.colorTokens.primary;
 
-int _targetForPeriod(int dailyTarget, LeaderboardPeriodType period) =>
-    dailyTarget * _elapsedDaysForPeriod(period);
+int _targetForPeriod(
+  int dailyTarget,
+  LeaderboardPeriodType period, {
+  DateTime? since,
+}) => dailyTarget * _elapsedDaysForPeriod(period, since: since);
 
-int _elapsedDaysForPeriod(LeaderboardPeriodType period) {
+int _elapsedDaysForPeriod(LeaderboardPeriodType period, {DateTime? since}) {
   final DateTime now = DateTime.now();
+  if (period == LeaderboardPeriodType.total) {
+    if (since == null) {
+      return 1;
+    }
+    final int elapsedDays = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).difference(DateTime(since.year, since.month, since.day)).inDays;
+    return elapsedDays < 0 ? 1 : elapsedDays + 1;
+  }
   return switch (period) {
     LeaderboardPeriodType.today => 1,
     LeaderboardPeriodType.thisWeek => now.weekday,
     LeaderboardPeriodType.thisMonth => now.day,
+    LeaderboardPeriodType.total => 1,
   };
 }

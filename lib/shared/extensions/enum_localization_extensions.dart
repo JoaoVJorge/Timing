@@ -36,6 +36,7 @@ extension LeaderboardPeriodTypeLocalizationX on LeaderboardPeriodType {
     LeaderboardPeriodType.today => context.l10n.periodToday,
     LeaderboardPeriodType.thisWeek => context.l10n.periodThisWeek,
     LeaderboardPeriodType.thisMonth => context.l10n.periodThisMonth,
+    LeaderboardPeriodType.total => context.l10n.periodTotal,
   };
 }
 

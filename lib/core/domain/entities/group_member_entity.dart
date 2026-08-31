@@ -11,10 +11,11 @@ class GroupMemberEntity extends Equatable {
     required this.todaySeconds,
     required this.weekSeconds,
     required this.monthSeconds,
+    int? totalSeconds,
     this.avatar = "",
     this.role = "member",
     this.joinedAt,
-  });
+  }) : totalSeconds = totalSeconds ?? monthSeconds;
 
   factory GroupMemberEntity.fromJson(String source) =>
       GroupMemberEntity.fromMap(jsonDecode(source) as Map<String, dynamic>);
@@ -28,6 +29,7 @@ class GroupMemberEntity extends Equatable {
     todaySeconds: map["todaySeconds"] as int? ?? map["todayScore"] as int? ?? 0,
     weekSeconds: map["weekSeconds"] as int? ?? map["weekScore"] as int? ?? 0,
     monthSeconds: map["monthSeconds"] as int? ?? map["monthScore"] as int? ?? 0,
+    totalSeconds: map["totalSeconds"] as int? ?? map["totalScore"] as int?,
     avatar: map["avatar"] as String? ?? "",
     role: map["role"] as String? ?? "member",
     joinedAt: DateTime.tryParse(map["joinedAt"] as String? ?? ""),
@@ -39,6 +41,7 @@ class GroupMemberEntity extends Equatable {
   final int todaySeconds;
   final int weekSeconds;
   final int monthSeconds;
+  final int totalSeconds;
   final String avatar;
   final String role;
   final DateTime? joinedAt;
@@ -49,10 +52,13 @@ class GroupMemberEntity extends Equatable {
 
   int get monthScore => monthSeconds;
 
+  int get totalScore => totalSeconds;
+
   int secondsFor(LeaderboardPeriodType period) => switch (period) {
     LeaderboardPeriodType.today => todaySeconds,
     LeaderboardPeriodType.thisWeek => weekSeconds,
     LeaderboardPeriodType.thisMonth => monthSeconds,
+    LeaderboardPeriodType.total => totalSeconds,
   };
 
   Map<String, dynamic> toMap() => {
@@ -62,12 +68,14 @@ class GroupMemberEntity extends Equatable {
     "todaySeconds": todaySeconds,
     "weekSeconds": weekSeconds,
     "monthSeconds": monthSeconds,
+    "totalSeconds": totalSeconds,
     "avatar": avatar,
     "role": role,
     "joinedAt": joinedAt?.toIso8601String(),
     "todayScore": todayScore,
     "weekScore": weekScore,
     "monthScore": monthScore,
+    "totalScore": totalScore,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -80,6 +88,7 @@ class GroupMemberEntity extends Equatable {
     todaySeconds,
     weekSeconds,
     monthSeconds,
+    totalSeconds,
     avatar,
     role,
     joinedAt,

@@ -12,6 +12,7 @@ import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/groups/widgets/current_user_rank_card.dart";
@@ -182,9 +183,10 @@ class _GroupsList extends StatelessWidget {
 }
 
 class _GroupSectionTitle extends StatelessWidget {
-  const _GroupSectionTitle({required this.title});
+  const _GroupSectionTitle({required this.title, this.trailing});
 
   final String title;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -209,6 +211,7 @@ class _GroupSectionTitle extends StatelessWidget {
           ),
         ),
       ),
+      if (trailing != null) ...[const Gap(12), trailing!],
     ],
   );
 }

@@ -1,1 +1,1 @@
-enum LeaderboardPeriodType { today, thisWeek, thisMonth }
+enum LeaderboardPeriodType { today, thisWeek, thisMonth, total }
