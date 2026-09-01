@@ -24,8 +24,11 @@ class _RankingTab extends StatelessWidget {
           CurrentUserRankCard(
             rank: controller.currentUserRank,
             theme: group.theme,
-            value: currentUser.secondsFor(controller.selectedPeriod.value),
-            differenceToPrevious: controller.differenceToPrevious(currentUser),
+            value: currentUser.totalSeconds,
+            differenceToPrevious: controller.differenceToPrevious(
+              currentUser,
+              period: LeaderboardPeriodType.total,
+            ),
             memberAhead: controller.memberAheadOfCurrentUser,
             isTiedForFirst: controller.currentUserIsTiedForFirst,
           ),
@@ -33,7 +36,9 @@ class _RankingTab extends StatelessWidget {
         ],
         _GroupSectionTitle(
           title: context.l10n.leaderboardTitle,
-          trailing: _LeaderboardPeriodFilter(controller: controller),
+          trailing: group.theme == GroupThemeType.dailyGoals
+              ? null
+              : _LeaderboardPeriodFilter(controller: controller),
         ),
         const Gap(AppSpacing.betweenRelated),
         Container(
@@ -45,9 +50,7 @@ class _RankingTab extends StatelessWidget {
                   rank: controller.rankOf(members[index]),
                   member: members[index],
                   theme: group.theme,
-                  value: members[index].secondsFor(
-                    controller.selectedPeriod.value,
-                  ),
+                  value: members[index].secondsFor(controller.rankingPeriod),
                   isCurrentUser: controller.isCurrentUser(members[index]),
                   isFirst: index == 0,
                   isLast: index == members.length - 1,

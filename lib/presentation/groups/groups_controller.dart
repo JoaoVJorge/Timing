@@ -98,9 +98,16 @@ class GroupsController extends GetxController {
   static const Duration _groupsLoadTimeout = Duration(seconds: 20);
   bool _hasLoadedGroups = false;
 
+  /// Daily-goal groups are cumulative challenges, so their leaderboard never
+  /// follows the date filter used by the other group themes.
+  LeaderboardPeriodType get rankingPeriod =>
+      selectedGroup.value?.theme == GroupThemeType.dailyGoals
+      ? LeaderboardPeriodType.total
+      : selectedPeriod.value;
+
   List<GroupMemberEntity> get rankedMembers {
     final GroupEntity? group = selectedGroup.value;
-    final LeaderboardPeriodType period = selectedPeriod.value;
+    final LeaderboardPeriodType period = rankingPeriod;
     if (group == null) {
       _clearRankingCaches();
       return const [];
@@ -170,65 +177,85 @@ class GroupsController extends GetxController {
 
   int get currentUserRank {
     final GroupMemberEntity? member = currentUserMember;
-    return member == null ? 0 : rankOf(member);
+    return member == null
+        ? 0
+        : rankOf(member, period: LeaderboardPeriodType.total);
   }
 
-  int rankOf(GroupMemberEntity member) {
+  int rankOf(GroupMemberEntity member, {LeaderboardPeriodType? period}) {
+    final LeaderboardPeriodType effectivePeriod = period ?? rankingPeriod;
     // Reading the getter refreshes every derived ranking cache when the group
     // or selected period changed.
-    rankedMembers;
-    final int? cachedRank = _rankByMemberId[member.id];
-    if (cachedRank != null) {
-      return cachedRank;
+    if (effectivePeriod == rankingPeriod) {
+      rankedMembers;
+      final int? cachedRank = _rankByMemberId[member.id];
+      if (cachedRank != null) {
+        return cachedRank;
+      }
     }
-    final int value = member.secondsFor(selectedPeriod.value);
-    return rankedMembers
-            .where((item) => item.secondsFor(selectedPeriod.value) > value)
-            .length +
+    final int value = member.secondsFor(effectivePeriod);
+    return _rankedMembersFor(
+          effectivePeriod,
+        ).where((item) => item.secondsFor(effectivePeriod) > value).length +
         1;
   }
 
   bool get currentUserIsTiedForFirst {
     final GroupMemberEntity? member = currentUserMember;
-    if (member == null || rankOf(member) != 1) {
+    if (member == null ||
+        rankOf(member, period: LeaderboardPeriodType.total) != 1) {
       return false;
     }
-    final int value = member.secondsFor(selectedPeriod.value);
-    return (_memberCountByScore[value] ?? 0) > 1;
+    final int value = member.totalSeconds;
+    if (rankingPeriod == LeaderboardPeriodType.total) {
+      rankedMembers;
+      return (_memberCountByScore[value] ?? 0) > 1;
+    }
+    return _rankedMembersFor(
+          LeaderboardPeriodType.total,
+        ).where((item) => item.totalSeconds == value).length >
+        1;
   }
 
   /// Member ranked immediately above the current user, used to turn "2nd place"
   /// into a concrete target.
   GroupMemberEntity? get memberAheadOfCurrentUser {
-    final List<GroupMemberEntity> members = rankedMembers;
+    const LeaderboardPeriodType period = LeaderboardPeriodType.total;
+    final List<GroupMemberEntity> members = _rankedMembersFor(period);
     final int index = members.indexWhere(isCurrentUser);
     if (index <= 0) {
       return null;
     }
-    final int currentValue = members[index].secondsFor(selectedPeriod.value);
+    final int currentValue = members[index].secondsFor(period);
     for (int i = index - 1; i >= 0; i--) {
-      if (members[i].secondsFor(selectedPeriod.value) > currentValue) {
+      if (members[i].secondsFor(period) > currentValue) {
         return members[i];
       }
     }
     return null;
   }
 
-  int? differenceToPrevious(GroupMemberEntity member) {
+  int? differenceToPrevious(
+    GroupMemberEntity member, {
+    LeaderboardPeriodType? period,
+  }) {
+    final LeaderboardPeriodType effectivePeriod = period ?? rankingPeriod;
     // Keep this lookup in sync with the same lazy cache used by rankOf.
-    rankedMembers;
-    if (_differenceByMemberId.containsKey(member.id)) {
-      return _differenceByMemberId[member.id];
+    if (effectivePeriod == rankingPeriod) {
+      rankedMembers;
+      if (_differenceByMemberId.containsKey(member.id)) {
+        return _differenceByMemberId[member.id];
+      }
     }
-    final List<GroupMemberEntity> members = rankedMembers;
+    final List<GroupMemberEntity> members = _rankedMembersFor(effectivePeriod);
     final int index = members.indexWhere((item) => item.id == member.id);
     if (index <= 0) {
       return null;
     }
-    final int value = member.secondsFor(selectedPeriod.value);
+    final int value = member.secondsFor(effectivePeriod);
     GroupMemberEntity? previous;
     for (int i = index - 1; i >= 0; i--) {
-      if (members[i].secondsFor(selectedPeriod.value) > value) {
+      if (members[i].secondsFor(effectivePeriod) > value) {
         previous = members[i];
         break;
       }
@@ -236,7 +263,19 @@ class GroupsController extends GetxController {
     if (previous == null) {
       return 0;
     }
-    return previous.secondsFor(selectedPeriod.value) - value;
+    return previous.secondsFor(effectivePeriod) - value;
+  }
+
+  List<GroupMemberEntity> _rankedMembersFor(LeaderboardPeriodType period) {
+    if (period == rankingPeriod) {
+      return rankedMembers;
+    }
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null) {
+      return const [];
+    }
+    return List<GroupMemberEntity>.of(group.members)
+      ..sort((a, b) => b.secondsFor(period).compareTo(a.secondsFor(period)));
   }
 
   bool isCurrentUser(GroupMemberEntity member) => member.id == currentUserId;

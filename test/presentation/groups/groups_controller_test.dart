@@ -262,9 +262,9 @@ void main() {
     },
   );
 
-  test("ranking changes with the selected period and defaults to total", () {
+  test("daily-goal ranking always uses total", () {
     final GroupsController controller = _controller(_FakeGroupsRepository([]));
-    final GroupMemberEntity historicalLeader = GroupMemberEntity(
+    const GroupMemberEntity historicalLeader = GroupMemberEntity(
       id: "historical-leader",
       name: "Historical leader",
       avatarColorValue: 1,
@@ -273,7 +273,7 @@ void main() {
       monthSeconds: 60,
       totalSeconds: 500,
     );
-    final GroupMemberEntity dailyLeader = GroupMemberEntity(
+    const GroupMemberEntity dailyLeader = GroupMemberEntity(
       id: "daily-leader",
       name: "Daily leader",
       avatarColorValue: 2,
@@ -282,7 +282,7 @@ void main() {
       monthSeconds: 40,
       totalSeconds: 200,
     );
-    controller.selectedGroup.value = GroupEntity(
+    controller.selectedGroup.value = const GroupEntity(
       id: "period-ranking",
       name: "Period ranking",
       theme: GroupThemeType.dailyGoals,
@@ -294,9 +294,85 @@ void main() {
 
     controller.onSelectPeriod(LeaderboardPeriodType.today);
 
+    expect(controller.rankingPeriod, LeaderboardPeriodType.total);
+    expect(controller.rankedMembers.first, historicalLeader);
+    expect(controller.rankOf(historicalLeader), 1);
+    expect(controller.rankOf(dailyLeader), 2);
+  });
+
+  test("non-goal ranking follows the selected period", () {
+    final GroupsController controller = _controller(_FakeGroupsRepository([]));
+    const GroupMemberEntity historicalLeader = GroupMemberEntity(
+      id: "historical-leader",
+      name: "Historical leader",
+      avatarColorValue: 1,
+      todaySeconds: 2,
+      weekSeconds: 20,
+      monthSeconds: 60,
+      totalSeconds: 500,
+    );
+    const GroupMemberEntity dailyLeader = GroupMemberEntity(
+      id: "daily-leader",
+      name: "Daily leader",
+      avatarColorValue: 2,
+      todaySeconds: 10,
+      weekSeconds: 15,
+      monthSeconds: 40,
+      totalSeconds: 200,
+    );
+    controller.selectedGroup.value = const GroupEntity(
+      id: "period-ranking",
+      name: "Period ranking",
+      theme: GroupThemeType.studying,
+      members: [historicalLeader, dailyLeader],
+    );
+
+    controller.onSelectPeriod(LeaderboardPeriodType.today);
+
+    expect(controller.rankingPeriod, LeaderboardPeriodType.today);
     expect(controller.rankedMembers.first, dailyLeader);
     expect(controller.rankOf(dailyLeader), 1);
     expect(controller.rankOf(historicalLeader), 2);
+  });
+
+  test("current-user performance always uses the total ranking", () {
+    final GroupsController controller = _controller(_FakeGroupsRepository([]));
+    const GroupMemberEntity currentUser = GroupMemberEntity(
+      id: "me",
+      name: "Me",
+      avatarColorValue: 1,
+      todaySeconds: 10,
+      weekSeconds: 10,
+      monthSeconds: 10,
+      totalSeconds: 20,
+    );
+    const GroupMemberEntity totalLeader = GroupMemberEntity(
+      id: "total-leader",
+      name: "Total leader",
+      avatarColorValue: 2,
+      todaySeconds: 1,
+      weekSeconds: 1,
+      monthSeconds: 1,
+      totalSeconds: 50,
+    );
+    controller.selectedGroup.value = const GroupEntity(
+      id: "performance-ranking",
+      name: "Performance ranking",
+      theme: GroupThemeType.studying,
+      members: [currentUser, totalLeader],
+    );
+    controller.onSelectPeriod(LeaderboardPeriodType.today);
+
+    expect(controller.rankedMembers.first, currentUser);
+    expect(controller.currentUserRank, 2);
+    expect(controller.memberAheadOfCurrentUser, totalLeader);
+    expect(
+      controller.differenceToPrevious(
+        currentUser,
+        period: LeaderboardPeriodType.total,
+      ),
+      30,
+    );
   });
 
   testWidgets("group details tabs and member management render after split", (
@@ -307,7 +383,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    final GroupEntity group = _group("group-1", "Grupo de teste");
+    final GroupEntity group = _group(
+      "group-1",
+      "Grupo de teste",
+      theme: GroupThemeType.studying,
+    );
     final _FakeGroupsRepository repository = _FakeGroupsRepository([group]);
     final GroupsController controller = _controller(repository);
     controller.selectedGroup.value = group;
@@ -352,6 +432,18 @@ void main() {
     controller.onSelectPeriod(LeaderboardPeriodType.thisWeek);
     await tester.pump();
     expect(controller.selectedPeriod.value, LeaderboardPeriodType.thisWeek);
+
+    controller.selectedGroup.value = _group(
+      "goal-group",
+      "Metas",
+      theme: GroupThemeType.dailyGoals,
+    );
+    await tester.pump();
+    expect(
+      find.byKey(const ValueKey("leaderboard-period-filter")),
+      findsNothing,
+    );
+    expect(controller.rankingPeriod, LeaderboardPeriodType.total);
 
     await tester.tap(find.text(l10n.goalsTabLabel).first);
     await tester.pump(const Duration(milliseconds: 500));
@@ -422,10 +514,14 @@ GroupsController _controller(
   activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
 );
 
-GroupEntity _group(String id, String name) => GroupEntity(
+GroupEntity _group(
+  String id,
+  String name, {
+  GroupThemeType theme = GroupThemeType.dailyGoals,
+}) => GroupEntity(
   id: id,
   name: name,
-  theme: GroupThemeType.dailyGoals,
+  theme: theme,
   members: const [
     GroupMemberEntity(
       id: "me",
