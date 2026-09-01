@@ -1656,6 +1656,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get hobbyViewStatistics => 'Statistiken anzeigen';
 
   @override
+  String get hobbyViewNotes => 'Notizen anzeigen';
+
+  @override
   String get hobbyEdit => 'Hobby bearbeiten';
 
   @override

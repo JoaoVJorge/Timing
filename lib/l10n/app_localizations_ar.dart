@@ -1624,6 +1624,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hobbyViewStatistics => '??? ?????????';
 
   @override
+  String get hobbyViewNotes => 'عرض الملاحظات';
+
+  @override
   String get hobbyEdit => '????? ???????';
 
   @override

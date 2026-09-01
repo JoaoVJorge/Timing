@@ -1638,6 +1638,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hobbyViewStatistics => 'Ver estatísticas';
 
   @override
+  String get hobbyViewNotes => 'Ver notas';
+
+  @override
   String get hobbyEdit => 'Editar hobby';
 
   @override
