@@ -11,21 +11,19 @@ class HobbySubjectCard extends StatelessWidget {
   const HobbySubjectCard({
     required this.subject,
     required this.onTapPlay,
+    required this.onTapNotes,
     required this.onTapStats,
     required this.onTapEdit,
-    required this.onTapPin,
     required this.onDelete,
-    required this.isPinned,
     super.key,
   });
 
   final SubjectEntity subject;
   final VoidCallback onTapPlay;
+  final VoidCallback onTapNotes;
   final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
-  final VoidCallback onTapPin;
   final VoidCallback onDelete;
-  final bool isPinned;
 
   @override
   Widget build(BuildContext context) {
@@ -115,19 +113,18 @@ class HobbySubjectCard extends StatelessWidget {
       ),
       builder: (context) => _HobbyOptionsSheet(
         subject: subject,
-        isPinned: isPinned,
         onAction: (action) => Navigator.of(context).pop(action),
       ),
     );
 
+    if (action == "notes") {
+      onTapNotes();
+    }
     if (action == "stats") {
       onTapStats();
     }
     if (action == "edit") {
       onTapEdit();
-    }
-    if (action == "pin") {
-      onTapPin();
     }
     if (action == "delete") {
       onDelete();
@@ -139,14 +136,9 @@ String _hobbyIconName(SubjectEntity subject) =>
     subject.iconName.isEmpty ? "music" : subject.iconName;
 
 class _HobbyOptionsSheet extends StatelessWidget {
-  const _HobbyOptionsSheet({
-    required this.subject,
-    required this.isPinned,
-    required this.onAction,
-  });
+  const _HobbyOptionsSheet({required this.subject, required this.onAction});
 
   final SubjectEntity subject;
-  final bool isPinned;
   final ValueChanged<String> onAction;
 
   @override
@@ -262,16 +254,10 @@ class _HobbyOptionsSheet extends StatelessWidget {
                   ),
                   Divider(height: 1, color: context.colorTokens.divider),
                   _HobbySheetAction(
-                    icon: Icons.push_pin_outlined,
-                    label: context.l10n.pinToStart,
+                    icon: Icons.notes_rounded,
+                    label: context.l10n.hobbyViewNotes,
                     accent: accent,
-                    trailing: Switch.adaptive(
-                      value: isPinned,
-                      activeThumbColor: accent,
-                      activeTrackColor: accent.withValues(alpha: 0.32),
-                      onChanged: isPinned ? null : (_) => onAction("pin"),
-                    ),
-                    onTap: isPinned ? null : () => onAction("pin"),
+                    onTap: () => onAction("notes"),
                   ),
                 ],
               ),
@@ -313,7 +299,6 @@ class _HobbySheetAction extends StatelessWidget {
     required this.accent,
     this.isLocked = false,
     this.onTap,
-    this.trailing,
   });
 
   final IconData icon;
@@ -321,7 +306,6 @@ class _HobbySheetAction extends StatelessWidget {
   final Color accent;
   final bool isLocked;
   final VoidCallback? onTap;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -370,8 +354,7 @@ class _HobbySheetAction extends StatelessWidget {
                 ),
               ),
             ),
-            trailing ??
-                Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
+            Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
           ],
         ),
       ),

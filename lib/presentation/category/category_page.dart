@@ -86,11 +86,10 @@ class CategoryPage extends StatelessWidget {
               return HobbySubjectCard(
                 subject: subject,
                 onTapPlay: () => controller.onTapSubject(subject),
+                onTapNotes: () => controller.onTapNotes(subject),
                 onTapStats: () => controller.onTapSubjectStats(subject),
                 onTapEdit: () => controller.onTapEditSubject(subject),
-                onTapPin: () => controller.onPinSubjectToStart(subject),
                 onDelete: () => controller.onDeleteSubject(subject),
-                isPinned: index == 0,
               );
             },
           );
