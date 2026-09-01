@@ -1630,6 +1630,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hobbyViewStatistics => 'View statistics';
 
   @override
+  String get hobbyViewNotes => 'View notes';
+
+  @override
   String get hobbyEdit => 'Edit hobby';
 
   @override

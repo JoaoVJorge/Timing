@@ -2950,6 +2950,12 @@ abstract class AppLocalizations {
   /// **'View statistics'**
   String get hobbyViewStatistics;
 
+  /// No description provided for @hobbyViewNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'View notes'**
+  String get hobbyViewNotes;
+
   /// No description provided for @hobbyEdit.
   ///
   /// In en, this message translates to:
