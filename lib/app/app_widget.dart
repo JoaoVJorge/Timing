@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter_quill/flutter_quill.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_controller.dart";
@@ -25,7 +26,10 @@ class AppWidget extends StatelessWidget {
         ),
         locale: appController.selectedLocale,
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          FlutterQuillLocalizations.delegate,
+        ],
         builder: (context, child) => Directionality(
           textDirection: TextDirection.ltr,
           child: child ?? const SizedBox.shrink(),

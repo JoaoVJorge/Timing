@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
+import "package:flutter_quill/flutter_quill.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/use_cases/update_subject_notes_use_case.dart";
 import "package:timing/presentation/notes/notes_pages_codec.dart";
+import "package:timing/presentation/notes/notes_rich_text_codec.dart";
 
 enum NotesSaveState { idle, saving, saved }
 
@@ -16,13 +18,25 @@ class NotesController extends GetxController {
 
   final UpdateSubjectNotesUseCase _updateSubjectNotesUseCase;
   final AppNavigator _appNavigator;
+  static final List<Attribute<dynamic>> _formattingAttributes = [
+    Attribute.bold,
+    Attribute.italic,
+    Attribute.underline,
+    Attribute.strikeThrough,
+  ];
+  final Set<String> _activeFormattingKeys = <String>{};
 
   final SubjectEntity subject;
   late final PageController pageController = PageController();
-  late final RxList<TextEditingController> notesControllers =
-      NotesPagesCodec.decode(
-        subject.notes,
-      ).map((String page) => TextEditingController(text: page)).toList().obs;
+  late final RxList<QuillController> notesControllers =
+      NotesPagesCodec.decode(subject.notes)
+          .map(
+            (String page) => _createNotesController(
+              document: NotesRichTextCodec.decode(page),
+            ),
+          )
+          .toList()
+          .obs;
   final RxInt currentPageIndex = 0.obs;
   final Rx<NotesSaveState> saveState = NotesSaveState.idle.obs;
 
@@ -30,6 +44,9 @@ class NotesController extends GetxController {
   bool _isClosing = false;
 
   int get pageCount => notesControllers.length;
+
+  QuillController get activeNotesController =>
+      notesControllers[currentPageIndex.value];
 
   @override
   void onInit() {
@@ -39,7 +56,30 @@ class NotesController extends GetxController {
     _lastSavedNotes = subject.notes;
   }
 
-  void onPageChanged(int index) => currentPageIndex.value = index;
+  void onPageChanged(int index) {
+    currentPageIndex.value = index;
+    _applyFormattingState(activeNotesController);
+  }
+
+  bool isFormattingActive(Attribute<dynamic> attribute) =>
+      _activeFormattingKeys.contains(attribute.key);
+
+  void toggleFormatting(Attribute<dynamic> attribute) {
+    final bool shouldActivate = !isFormattingActive(attribute);
+    if (shouldActivate) {
+      _activeFormattingKeys.add(attribute.key);
+    } else {
+      _activeFormattingKeys.remove(attribute.key);
+    }
+
+    final QuillController quillController = activeNotesController;
+    if (!quillController.selection.isCollapsed) {
+      quillController.formatSelection(
+        shouldActivate ? attribute : Attribute.clone(attribute, null),
+      );
+    }
+    _applyFormattingState(quillController);
+  }
 
   void previousPage() {
     if (currentPageIndex.value == 0) {
@@ -56,7 +96,7 @@ class NotesController extends GetxController {
   }
 
   void addPage() {
-    notesControllers.add(TextEditingController());
+    notesControllers.add(_createNotesController(document: Document()));
     currentPageIndex.value = pageCount - 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!pageController.hasClients) {
@@ -92,6 +132,28 @@ class NotesController extends GetxController {
     );
   }
 
+  QuillController _createNotesController({required Document document}) {
+    late final QuillController controller;
+    controller = QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+      onSelectionChanged: (_) => _applyFormattingState(controller),
+    );
+    _applyFormattingState(controller);
+    return controller;
+  }
+
+  void _applyFormattingState(QuillController controller) {
+    controller.forceToggledStyle(
+      Style.attr({
+        for (final Attribute<dynamic> attribute in _formattingAttributes)
+          attribute.key: isFormattingActive(attribute)
+              ? attribute
+              : Attribute.clone(attribute, null),
+      }),
+    );
+  }
+
   Future<bool> _save() async {
     final String notes = _currentNotes;
     if (notes == _lastSavedNotes || saveState.value == NotesSaveState.saving) {
@@ -119,13 +181,21 @@ class NotesController extends GetxController {
   }
 
   String get _currentNotes => NotesPagesCodec.encode(
-    notesControllers.map((controller) => controller.text),
+    notesControllers
+        .where(
+          (QuillController controller) =>
+              !NotesRichTextCodec.isEmpty(controller.document),
+        )
+        .map(
+          (QuillController controller) =>
+              NotesRichTextCodec.encode(controller.document),
+        ),
   );
 
   @override
   void onClose() {
     pageController.dispose();
-    for (final TextEditingController controller in notesControllers) {
+    for (final QuillController controller in notesControllers) {
       controller.dispose();
     }
     super.onClose();
