@@ -69,29 +69,31 @@ class _EvolutionBarChartState extends State<EvolutionBarChart> {
               constraints.maxWidth,
               safeValues.length,
             ),
-            child: CustomPaint(
-              painter: _EvolutionBarChartPainter(
-                values: widget.values,
-                unit: widget.unit,
-                selectedIndex: _selectedIndex,
-                highlightPosition: highlightPosition,
-                barColor: context.colorTokens.primary,
-                gridColor: context.colorTokens.divider,
-                axisColor: context.colorTokens.textHint,
-                axisTextStyle: context.textStyles.caption.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: _EvolutionBarChartPainter(
+                  values: widget.values,
+                  unit: widget.unit,
+                  selectedIndex: _selectedIndex,
+                  highlightPosition: highlightPosition,
+                  barColor: context.colorTokens.primary,
+                  gridColor: context.colorTokens.divider,
+                  axisColor: context.colorTokens.textHint,
+                  axisTextStyle: context.textStyles.caption.copyWith(
+                    color: context.colorTokens.textHint,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  tooltipTextStyle: context.textStyles.caption.copyWith(
+                    color: context.colorTokens.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  axisLabels: _axisLabels(context, dates),
+                  pointLabels: _pointLabels(dates),
                 ),
-                tooltipTextStyle: context.textStyles.caption.copyWith(
-                  color: context.colorTokens.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-                axisLabels: _axisLabels(context, dates),
-                pointLabels: _pointLabels(dates),
+                child: const SizedBox.expand(),
               ),
-              child: const SizedBox.expand(),
             ),
           );
         },
