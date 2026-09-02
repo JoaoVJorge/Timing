@@ -39,6 +39,27 @@ class _Filters extends StatelessWidget {
   );
 }
 
+/// UI-only wrapper so "All categories" carries a real (non-null) value.
+/// A [PopupMenuButton] routes a `null` selection to `onCanceled`, never
+/// `onSelected`, which is why picking "All categories" used to do nothing.
+enum _CategoryFilter {
+  all(null),
+  focus(AchievementCategory.focus),
+  study(AchievementCategory.study),
+  reading(AchievementCategory.reading),
+  goals(AchievementCategory.goals),
+  social(AchievementCategory.social);
+
+  const _CategoryFilter(this.category);
+
+  final AchievementCategory? category;
+
+  static _CategoryFilter of(AchievementCategory? category) =>
+      values.firstWhere((filter) => filter.category == category);
+}
+
+/// Mirrors the group leaderboard's period filter: a gradient trigger and a
+/// menu that drops straight under it with icon / label / check rows.
 class _CategoryMenu extends StatelessWidget {
   const _CategoryMenu({required this.controller});
 
@@ -47,91 +68,112 @@ class _CategoryMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final AchievementCategory? selected = controller.selectedCategory.value;
+    final BorderRadius buttonRadius = BorderRadius.circular(16);
 
-    return PopupMenuButton<AchievementCategory?>(
-      tooltip: context.l10n.selectCategoryTooltip,
-      initialValue: selected,
-      onSelected: controller.onSelectCategory,
-      color: context.colorTokens.surface,
-      elevation: 8,
-      offset: const Offset(0, 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      itemBuilder: (context) => [
-        PopupMenuItem<AchievementCategory?>(
-          value: null,
-          child: _CategoryOption(
-            label: context.l10n.allCategoriesLabel,
-            color: context.colorTokens.primary,
-            icon: Icons.apps_rounded,
-            isSelected: selected == null,
-          ),
-        ),
-        ...AchievementCategory.values.map(
-          (category) => PopupMenuItem<AchievementCategory?>(
-            value: category,
-            child: _CategoryOption(
-              label: category.label(context),
-              color: category.color,
-              icon: _categoryIcon(category),
-              isSelected: selected == category,
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(highlightColor: context.colorTokens.primaryVeryLight),
+      child: PopupMenuButton<_CategoryFilter>(
+        key: const ValueKey("achievements-category-filter"),
+        tooltip: context.l10n.selectCategoryTooltip,
+        initialValue: _CategoryFilter.of(selected),
+        onSelected: (filter) => controller.onSelectCategory(filter.category),
+        position: PopupMenuPosition.under,
+        offset: const Offset(0, 6),
+        color: context.colorTokens.surface,
+        surfaceTintColor: context.colorTokens.transparent,
+        elevation: 8,
+        menuPadding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: buttonRadius,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        itemBuilder: (context) => [
+          for (final _CategoryFilter filter in _CategoryFilter.values)
+            PopupMenuItem<_CategoryFilter>(
+              value: filter,
+              child: _CategoryMenuRow(
+                filter: filter,
+                isSelected: filter.category == selected,
+              ),
             ),
+        ],
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 120, minHeight: 36),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: context.colorTokens.primaryGradient,
+            borderRadius: buttonRadius,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  selected?.label(context) ?? context.l10n.allCategoriesLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.primaryForeground,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const Gap(8),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 21,
+                color: context.colorTokens.primaryForeground,
+              ),
+            ],
           ),
         ),
-      ],
-      child: _FilterChip(
-        label: selected?.label(context) ?? context.l10n.byCategoryLabel,
-        isSelected: selected != null,
-        trailing: Icons.keyboard_arrow_down_rounded,
       ),
     );
   });
 }
 
-class _CategoryOption extends StatelessWidget {
-  const _CategoryOption({
-    required this.label,
-    required this.color,
-    required this.icon,
-    required this.isSelected,
-  });
+class _CategoryMenuRow extends StatelessWidget {
+  const _CategoryMenuRow({required this.filter, required this.isSelected});
 
-  final String label;
-  final Color color;
-  final IconData icon;
+  final _CategoryFilter filter;
   final bool isSelected;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withValues(alpha: 0.16),
-        ),
-        child: Icon(icon, color: color, size: 17),
-      ),
-      const Gap(10),
-      Expanded(
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.bodySmall.copyWith(
-            color: context.colorTokens.textBody,
-            fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final AchievementCategory? category = filter.category;
+    final Color color = category?.color ?? context.colorTokens.primary;
+    final IconData icon = category == null
+        ? Icons.apps_rounded
+        : _categoryIcon(category);
+
+    return Row(
+      children: [
+        Icon(icon, size: 22, color: color),
+        const Gap(12),
+        Expanded(
+          child: Text(
+            category?.label(context) ?? context.l10n.allCategoriesLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.bodySmall.copyWith(
+              color: context.colorTokens.textBody,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            ),
           ),
         ),
-      ),
-      if (isSelected)
-        Icon(
-          Icons.check_circle_rounded,
-          color: context.colorTokens.primary,
-          size: 19,
-        ),
-    ],
-  );
+        if (isSelected) ...[
+          const Gap(16),
+          Icon(
+            Icons.check_rounded,
+            size: 22,
+            color: context.colorTokens.primary,
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 class _FilterChip extends StatelessWidget {
@@ -139,13 +181,11 @@ class _FilterChip extends StatelessWidget {
     required this.label,
     required this.isSelected,
     this.onTap,
-    this.trailing,
   });
 
   final String label;
   final bool isSelected;
   final VoidCallback? onTap;
-  final IconData? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -179,16 +219,6 @@ class _FilterChip extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          if (trailing != null) ...[
-            const Gap(6),
-            Icon(
-              trailing,
-              color: isSelected
-                  ? context.colorTokens.primary
-                  : context.colorTokens.textHint,
-              size: 18,
-            ),
-          ],
         ],
       ),
     );
