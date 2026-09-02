@@ -4,6 +4,8 @@ import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/widgets/friends_shared.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
+import "package:timing/shared/widgets/app_section_header.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class FriendsSection extends StatelessWidget {
   const FriendsSection({
@@ -21,10 +23,7 @@ class FriendsSection extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      _SectionHeader(
-        title: context.l10n.yourFriendsTitle(friends.length),
-        action: friends.length > 5 ? context.l10n.seeAllButton : null,
-      ),
+      AppSectionHeader(title: context.l10n.yourFriendsTitle(friends.length)),
       const Gap(12),
       if (friends.isEmpty)
         _EmptyFriendsCard(onShare: onShare)
@@ -33,6 +32,7 @@ class FriendsSection extends StatelessWidget {
           children: [
             for (int index = 0; index < friends.length; index++) ...[
               _FriendRow(
+                key: ValueKey(friends[index].id),
                 profile: friends[index],
                 index: index,
                 onRemove: () => onRemove(friends[index]),
@@ -50,6 +50,7 @@ class _FriendRow extends StatefulWidget {
     required this.profile,
     required this.index,
     required this.onRemove,
+    super.key,
   });
 
   final FriendEntity profile;
@@ -106,7 +107,8 @@ class _FriendRowState extends State<_FriendRow>
           Positioned.fill(
             child: Align(
               alignment: Alignment.centerRight,
-              child: GestureDetector(
+              child: BounceTap(
+                pressedScale: 0.9,
                 onTap: _onTapDelete,
                 child: Container(
                   width: 64,
@@ -246,36 +248,5 @@ class _EmptyFriendsCard extends StatelessWidget {
         FriendShareButton(onTap: onShare, label: context.l10n.shareCodeButton),
       ],
     ),
-  );
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.action});
-
-  final String title;
-  final String? action;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(
-        child: Text(
-          title,
-          style: context.textStyles.bodyMedium.copyWith(
-            color: context.colorTokens.textBody,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-      if (action != null)
-        Text(
-          action!,
-          style: context.textStyles.bodySmall.copyWith(
-            color: context.colorTokens.primary,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-    ],
   );
 }

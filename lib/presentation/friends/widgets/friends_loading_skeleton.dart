@@ -27,8 +27,6 @@ class FriendsLoadingSkeleton extends StatelessWidget {
             _FriendSkeletonRow(),
             Gap(10),
             _FriendSkeletonRow(),
-            Gap(10),
-            _FriendSkeletonRow(),
           ],
         ),
       ],
