@@ -3014,7 +3014,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timerHobbyFinishedBody => 'اكتملت ممارسة الهواية.';
 
   @override
-  String get timerFocusFinishedBody => 'اكتملت الجلسة. حان وقت الاستراحة.';
+  String get timerFocusFinishedBody => 'اكتملت فترة التركيز. يستمر المؤقت.';
 
   @override
   String get timerRestFinishedBody => 'بدأت جلسة جديدة.';

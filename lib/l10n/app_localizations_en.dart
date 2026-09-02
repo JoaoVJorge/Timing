@@ -3026,7 +3026,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerHobbyFinishedBody => 'Hobby practice completed.';
 
   @override
-  String get timerFocusFinishedBody => 'Session completed. Time for a break.';
+  String get timerFocusFinishedBody =>
+      'Focus interval completed. The timer continues.';
 
   @override
   String get timerRestFinishedBody => 'A new session has started.';

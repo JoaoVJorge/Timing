@@ -5455,7 +5455,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerFocusFinishedBody.
   ///
   /// In en, this message translates to:
-  /// **'Session completed. Time for a break.'**
+  /// **'Focus interval completed. The timer continues.'**
   String get timerFocusFinishedBody;
 
   /// No description provided for @timerRestFinishedBody.

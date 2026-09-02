@@ -1601,7 +1601,7 @@
   "groupInviteSentMessage": "تم إرسال الدعوة.",
   "timerReadingReminderBody": "اكتملت 30 دقيقة إضافية من القراءة.",
   "timerHobbyFinishedBody": "اكتملت ممارسة الهواية.",
-  "timerFocusFinishedBody": "اكتملت الجلسة. حان وقت الاستراحة.",
+  "timerFocusFinishedBody": "اكتملت فترة التركيز. يستمر المؤقت.",
   "timerRestFinishedBody": "بدأت جلسة جديدة.",
   "timerSessionFinishedBody": "اكتمل النشاط.",
   "timerBackgroundSuffix": "التطبيق في الخلفية",

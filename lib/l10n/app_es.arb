@@ -1291,7 +1291,7 @@
   "groupInviteSentMessage": "Invitación enviada.",
   "timerReadingReminderBody": "Completaste otros 30 minutos de lectura.",
   "timerHobbyFinishedBody": "Práctica de hobby completada.",
-  "timerFocusFinishedBody": "Sesión completada. Hora de descansar.",
+  "timerFocusFinishedBody": "Intervalo de enfoque completado. El temporizador continúa.",
   "timerRestFinishedBody": "Comenzó una nueva sesión.",
   "timerSessionFinishedBody": "Actividad completada.",
   "timerBackgroundSuffix": "App en segundo plano",

@@ -3064,7 +3064,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get timerFocusFinishedBody =>
-      'Sitzung abgeschlossen. Zeit für eine Pause.';
+      'Fokusintervall abgeschlossen. Der Timer läuft weiter.';
 
   @override
   String get timerRestFinishedBody => 'Eine neue Sitzung hat begonnen.';

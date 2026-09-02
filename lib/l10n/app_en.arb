@@ -1674,7 +1674,7 @@
   "groupInviteSentMessage": "Invitation sent.",
   "timerReadingReminderBody": "Another 30 minutes of reading completed.",
   "timerHobbyFinishedBody": "Hobby practice completed.",
-  "timerFocusFinishedBody": "Session completed. Time for a break.",
+  "timerFocusFinishedBody": "Focus interval completed. The timer continues.",
   "timerRestFinishedBody": "A new session has started.",
   "timerSessionFinishedBody": "Activity completed.",
   "timerBackgroundSuffix": "App in background",
