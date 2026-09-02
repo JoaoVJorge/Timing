@@ -5,6 +5,7 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/faq/faq_controller.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class FaqPage extends StatelessWidget {
   const FaqPage({super.key});
@@ -48,7 +49,8 @@ class _FaqExpansionCardState extends State<_FaqExpansionCard> {
   bool isExpanded = false;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.98,
     behavior: HitTestBehavior.opaque,
     onTap: () => setState(() => isExpanded = !isExpanded),
     child: AnimatedContainer(

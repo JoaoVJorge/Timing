@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 
 class AddTaskTile extends StatelessWidget {
   const AddTaskTile({required this.onTap, super.key});
@@ -9,7 +10,9 @@ class AddTaskTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.97,
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
       width: double.infinity,

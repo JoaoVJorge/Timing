@@ -3,6 +3,7 @@ import "package:gap/gap.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/swipe_reveal_actions.dart";
 
 class DailyTaskTile extends StatefulWidget {
@@ -79,7 +80,8 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
         ),
         child: Row(
           children: [
-            GestureDetector(
+            BounceTap(
+              pressedScale: 0.88,
               onTap: _onTapToggle,
               behavior: HitTestBehavior.opaque,
               child: Container(

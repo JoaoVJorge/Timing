@@ -83,7 +83,8 @@ class HobbySubjectCard extends StatelessWidget {
             Positioned(
               top: -8,
               right: -8,
-              child: GestureDetector(
+              child: BounceTap(
+                pressedScale: 0.85,
                 behavior: HitTestBehavior.opaque,
                 onTap: () => _showOptions(context),
                 child: SizedBox(
@@ -311,53 +312,59 @@ class _HobbySheetAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color actionColor = isLocked ? context.colorTokens.textHint : accent;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        height: 58,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _HobbySheetIcon(
-                  color: actionColor.withValues(alpha: 0.12),
-                  child: Icon(icon, color: actionColor, size: 22),
-                ),
-                if (isLocked)
-                  Positioned(
-                    top: -4,
-                    right: -4,
-                    child: GroupActivityLockBadge(
-                      size: 20,
-                      iconSize: 12,
-                      backgroundColor: context.colorTokens.surface,
-                      iconColor: actionColor,
-                    ),
+    final Widget row = Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _HobbySheetIcon(
+                color: actionColor.withValues(alpha: 0.12),
+                child: Icon(icon, color: actionColor, size: 22),
+              ),
+              if (isLocked)
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: GroupActivityLockBadge(
+                    size: 20,
+                    iconSize: 12,
+                    backgroundColor: context.colorTokens.surface,
+                    iconColor: actionColor,
                   ),
-              ],
-            ),
-            const Gap(12),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyLarge.copyWith(
-                  color: isLocked
-                      ? context.colorTokens.textHint
-                      : context.colorTokens.dialogText,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
                 ),
+            ],
+          ),
+          const Gap(12),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyLarge.copyWith(
+                color: isLocked
+                    ? context.colorTokens.textHint
+                    : context.colorTokens.dialogText,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
-          ],
-        ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
+        ],
       ),
+    );
+
+    if (onTap == null) {
+      return row;
+    }
+    return BounceTap(
+      pressedScale: 0.97,
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap!,
+      child: row,
     );
   }
 }
@@ -381,7 +388,8 @@ class _HobbyDeleteAction extends StatelessWidget {
         ? context.colorTokens.textHint
         : context.colorTokens.error;
 
-    return GestureDetector(
+    return BounceTap(
+      pressedScale: 0.97,
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(

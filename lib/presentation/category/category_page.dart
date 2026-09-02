@@ -14,6 +14,7 @@ import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
 import "package:timing/shared/widgets/swipe_hint_button.dart";
 import "package:timing/theme/app_spacing.dart";
@@ -235,7 +236,9 @@ class _AddHobbyCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.97,
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
       decoration: BoxDecoration(
@@ -272,7 +275,9 @@ class _AddListSubjectCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => BounceTap(
+    pressedScale: 0.97,
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.all(16),
