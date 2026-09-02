@@ -4,8 +4,6 @@ import "package:timing/presentation/achievements/achievements_bindings.dart";
 import "package:timing/presentation/achievements/achievements_page.dart";
 import "package:timing/presentation/category/category_bindings.dart";
 import "package:timing/presentation/category/category_page.dart";
-import "package:timing/presentation/config/config_bindings.dart";
-import "package:timing/presentation/config/config_page.dart";
 import "package:timing/presentation/create_group/create_group_bindings.dart";
 import "package:timing/presentation/create_group/create_group_page.dart";
 import "package:timing/presentation/create_subject/create_subject_bindings.dart";
@@ -26,8 +24,6 @@ import "package:timing/presentation/group_invites/group_invites_bindings.dart";
 import "package:timing/presentation/group_invites/group_invites_page.dart";
 import "package:timing/presentation/groups/groups_bindings.dart";
 import "package:timing/presentation/groups/groups_page.dart";
-import "package:timing/presentation/home/home_bindings.dart";
-import "package:timing/presentation/home/home_page.dart";
 import "package:timing/presentation/join_group/join_group_bindings.dart";
 import "package:timing/presentation/join_group/join_group_page.dart";
 import "package:timing/presentation/login/login_bindings.dart";
@@ -36,8 +32,6 @@ import "package:timing/presentation/main_navigation/main_navigation_bindings.dar
 import "package:timing/presentation/main_navigation/main_navigation_page.dart";
 import "package:timing/presentation/notes/notes_bindings.dart";
 import "package:timing/presentation/notes/notes_page.dart";
-import "package:timing/presentation/progress/progress_bindings.dart";
-import "package:timing/presentation/progress/progress_page.dart";
 import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
 import "package:timing/presentation/schedule/schedule_bindings.dart";
 import "package:timing/presentation/schedule/schedule_page.dart";
@@ -54,12 +48,8 @@ class AppRoutes {
   static const String splash = "/";
   static const String login = "/login";
   static const String mainNavigation = "/mainNavigation";
-  static const String home = "/home";
-  static const String progress = "/progress";
   static const String friends = "/friends";
-  static const String groups = "/groups";
   static const String groupDetails = "/groupDetails";
-  static const String config = "/config";
   static const String category = "/category";
   static const String createSubject = "/createSubject";
   static const String createTask = "/createTask";
@@ -93,28 +83,6 @@ class AppRoutes {
       page: () => const MainNavigationPage(),
       binding: MainNavigationBindings(),
       transition: Transition.fadeIn,
-      children: [
-        GetPage(
-          name: home,
-          page: () => const HomePage(),
-          binding: HomeBindings(),
-        ),
-        GetPage(
-          name: progress,
-          page: () => const ProgressPage(),
-          binding: ProgressBindings(),
-        ),
-        GetPage(
-          name: groups,
-          page: () => const GroupsPage(),
-          binding: GroupsBindings(),
-        ),
-        GetPage(
-          name: config,
-          page: () => const ConfigPage(),
-          binding: ConfigBindings(),
-        ),
-      ],
     ),
     GetPage(
       name: category,
@@ -262,39 +230,6 @@ class AppRoutes {
     ),
   ];
 
-  static const Duration pageTransitionDuration = Duration(milliseconds: 320);
-  static const Curve pageTransitionCurve = Curves.easeInOutCubic;
-
-  static Route? onGenerateChildRoute({
-    required RouteSettings settings,
-    required String parentRouteName,
-    Transition? transition,
-    CustomTransition? customTransition,
-  }) {
-    if (settings.name == null) {
-      return null;
-    }
-
-    final GetPage? parentRoute = getPages.firstWhereOrNull(
-      (page) => page.name == parentRouteName,
-    );
-    final GetPage? childRoute = parentRoute?.children.firstWhereOrNull(
-      (page) => page.name == settings.name,
-    );
-
-    if (childRoute == null) {
-      return null;
-    }
-
-    Get.routing.args = settings.arguments;
-    return GetPageRoute(
-      settings: settings,
-      page: childRoute.page,
-      binding: childRoute.binding,
-      transition: transition,
-      customTransition: customTransition,
-      transitionDuration: pageTransitionDuration,
-      curve: pageTransitionCurve,
-    );
-  }
+  static const Duration pageTransitionDuration = Duration(milliseconds: 260);
+  static const Curve pageTransitionCurve = Curves.easeOutCubic;
 }

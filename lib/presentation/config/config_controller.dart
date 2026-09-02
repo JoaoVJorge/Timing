@@ -36,6 +36,13 @@ class ConfigController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    syncNotificationsFromSystem();
+  }
+
+  /// Reconciles the stored notifications preference with the OS permission.
+  /// Called on first build and every time the Config tab is reopened, since
+  /// the user may have changed the permission in the system settings.
+  void syncNotificationsFromSystem() {
     _appController.refreshNotificationsEnabledFromSystem();
   }
 

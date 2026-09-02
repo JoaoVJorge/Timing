@@ -303,11 +303,7 @@ Rotas em `lib/app/app_routes.dart`.
 | `/phoneLogin` | Login por telefone | coleta numero |
 | `/otp` | OTP | recebe telefone |
 | `/credentials` | Credenciais | recebe telefone, coleta nome/nascimento |
-| `/mainNavigation` | Shell principal | bottom navigation com navigator aninhado |
-| `/home` | Home | aba do shell |
-| `/profile` | Perfil | aba do shell |
-| `/groups` | Grupos | aba do shell |
-| `/config` | Configuracoes | aba do shell |
+| `/mainNavigation` | Shell principal | abas Home, Progresso, Grupos e Configuracoes persistentes e carregadas sob demanda |
 | `/category` | Categoria | recebe `TimeCategoryType` |
 | `/createSubject` | Criar subject | recebe categoria e retorna `SubjectEntity` |
 | `/dailyGoals` | Metas diarias | lista habitos |
