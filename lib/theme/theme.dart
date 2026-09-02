@@ -2,7 +2,29 @@ import "package:flutter/material.dart";
 import "package:timing/theme/colors.dart";
 
 abstract class AppThemes {
+  static (int, Brightness)? _cacheKey;
+  static ThemeData? _cachedTheme;
+
+  /// [GetMaterialApp] is rebuilt inside an [Obx], so this runs on every accent /
+  /// brightness / locale change. Building a [ThemeData] (notably
+  /// [ColorScheme.fromSeed]) is expensive, so the last result is reused whenever
+  /// the seed and brightness are unchanged.
   static ThemeData build({
+    required Color seed,
+    required Brightness brightness,
+  }) {
+    final (int, Brightness) key = (seed.toARGB32(), brightness);
+    if (_cacheKey == key && _cachedTheme != null) {
+      return _cachedTheme!;
+    }
+
+    final ThemeData theme = _build(seed: seed, brightness: brightness);
+    _cacheKey = key;
+    _cachedTheme = theme;
+    return theme;
+  }
+
+  static ThemeData _build({
     required Color seed,
     required Brightness brightness,
   }) {

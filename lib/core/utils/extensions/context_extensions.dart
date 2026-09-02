@@ -22,8 +22,16 @@ extension AppColorTokensX on BuildContext {
   );
 }
 
+/// Keyed by the theme's [AppColorTokens] instance, which is stable while the
+/// seed and brightness stay put (see `AppThemes.build`), so `context.textStyles`
+/// stops allocating a fresh holder on every call in hot build paths.
+final Expando<AppTextStyles> _textStylesByTokens = Expando<AppTextStyles>();
+
 extension AppTextStylesX on BuildContext {
-  AppTextStyles get textStyles => AppTextStyles(colorTokens);
+  AppTextStyles get textStyles {
+    final AppColorTokens tokens = colorTokens;
+    return _textStylesByTokens[tokens] ??= AppTextStyles(tokens);
+  }
 }
 
 extension AppLocalizationsX on BuildContext {
