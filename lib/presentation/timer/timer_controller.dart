@@ -329,8 +329,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    isResting.value = true;
+    // A focus interval is a milestone, not a mandatory stop. Keep the timer
+    // running and start the next interval immediately after the alarm.
+    isResting.value = false;
     restCountdownSeconds.value = restIntervalSeconds;
+    breakCountdownSeconds.value = focusIntervalSeconds;
     _updateNotification();
     _syncFocusGuard();
   }
@@ -673,45 +676,36 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       appController.selectedLocale,
     );
 
-    if (isReading) {
+    if (!isHobby) {
       unawaited(
-        timerNotificationService.scheduleReadingReminders(
+        timerNotificationService.scheduleIntervalReminders(
           title: subject.name,
-          body: l10n.timerReadingReminderBody,
-          firstReminder: Duration(seconds: readingIntervalRemainingSeconds),
-          interval: const Duration(seconds: defaultFocusIntervalSeconds),
+          body: isReading
+              ? l10n.timerReadingReminderBody
+              : l10n.timerFocusFinishedBody,
+          firstReminder: Duration(
+            seconds: isReading
+                ? readingIntervalRemainingSeconds
+                : breakCountdownSeconds.value,
+          ),
+          interval: Duration(
+            seconds: isReading
+                ? defaultFocusIntervalSeconds
+                : focusIntervalSeconds,
+          ),
         ),
       );
       return;
     }
 
-    if (isHobby) {
-      if (breakCountdownSeconds.value <= 0) {
-        return;
-      }
-      unawaited(
-        timerNotificationService.scheduleFocusFinished(
-          title: subject.name,
-          body: l10n.timerHobbyFinishedBody,
-          remaining: Duration(seconds: breakCountdownSeconds.value),
-        ),
-      );
+    if (breakCountdownSeconds.value <= 0) {
       return;
     }
-
     unawaited(
-      timerNotificationService.scheduleSessionTimeline(
+      timerNotificationService.scheduleFocusFinished(
         title: subject.name,
-        focusFinishedBody: l10n.timerFocusFinishedBody,
-        restFinishedBody: l10n.timerRestFinishedBody,
-        sessionFinishedBody: l10n.timerSessionFinishedBody,
-        focusRemaining: Duration(seconds: breakCountdownSeconds.value),
-        restRemaining: Duration(seconds: restCountdownSeconds.value),
-        focusInterval: Duration(seconds: focusIntervalSeconds),
-        restInterval: Duration(seconds: restIntervalSeconds),
-        remainingFocusSections:
-            focusSessionCount - completedFocusSections.value,
-        isResting: isResting.value,
+        body: l10n.timerHobbyFinishedBody,
+        remaining: Duration(seconds: breakCountdownSeconds.value),
       ),
     );
   }

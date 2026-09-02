@@ -126,13 +126,13 @@ class _FakeTimerNotificationService extends _Noop
   int cancelScheduledAlarmsCount = 0;
   int scheduleFocusFinishedCount = 0;
   int scheduleRestFinishedCount = 0;
-  int scheduleReadingRemindersCount = 0;
+  int scheduleIntervalRemindersCount = 0;
   int scheduleSessionTimelineCount = 0;
   int cancelOngoingCount = 0;
   int cancelCount = 0;
   int showRunningCount = 0;
-  Duration? readingFirstReminder;
-  Duration? readingReminderInterval;
+  Duration? firstIntervalReminder;
+  Duration? reminderInterval;
 
   @override
   Future<void> cancelFocusFinished() async {
@@ -168,15 +168,15 @@ class _FakeTimerNotificationService extends _Noop
   }
 
   @override
-  Future<void> scheduleReadingReminders({
+  Future<void> scheduleIntervalReminders({
     required String title,
     required String body,
     required Duration firstReminder,
     required Duration interval,
   }) async {
-    scheduleReadingRemindersCount++;
-    readingFirstReminder = firstReminder;
-    readingReminderInterval = interval;
+    scheduleIntervalRemindersCount++;
+    firstIntervalReminder = firstReminder;
+    reminderInterval = interval;
   }
 
   @override
@@ -799,7 +799,7 @@ void main() {
     });
   });
 
-  group("TimerController focus/rest cycle", () {
+  group("TimerController focus interval cycle", () {
     test("reading keeps counting up without sections or an end", () {
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
@@ -913,7 +913,7 @@ void main() {
       expect(history.addedSeconds, 32 * 60);
     });
 
-    test("alarms at section end and rest end before the next section", () {
+    test("alarms at an interval boundary and immediately keeps focusing", () {
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
         _subject(goalSeconds: 10, restMinutes: 1, focusSessionCount: 2),
@@ -923,19 +923,21 @@ void main() {
       controller.advanceForTesting(10);
 
       expect(feedback.finishFeedbackCount, 1);
-      expect(controller.isResting.value, isTrue);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.breakCountdownSeconds.value, 10);
       expect(controller.completedFocusSections.value, 1);
 
-      controller.restCountdownSeconds.value = 1;
-      controller.advanceForTesting(1);
+      controller.advanceForTesting(10);
 
       expect(feedback.finishFeedbackCount, 2);
       expect(controller.isResting.value, isFalse);
+      expect(controller.isRunning.value, isTrue);
       expect(controller.breakCountdownSeconds.value, 10);
-      expect(controller.completedFocusSections.value, 1);
+      expect(controller.completedFocusSections.value, 2);
     });
 
-    test("does not alarm when the user skips rest manually", () {
+    test("ignores skip-rest when the interval continued automatically", () {
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
         _subject(goalSeconds: 10, restMinutes: 1, focusSessionCount: 2),
@@ -950,7 +952,7 @@ void main() {
       expect(controller.breakCountdownSeconds.value, 10);
     });
 
-    test("finishes a single-section activity only after its rest", () {
+    test("keeps a single-section activity running after every milestone", () {
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
         _subject(
@@ -964,16 +966,20 @@ void main() {
 
       controller.advanceForTesting(10);
 
-      expect(controller.isResting.value, isTrue);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isRunning.value, isTrue);
       expect(controller.isSessionFinished.value, isFalse);
-      expect(controller.restCountdownSeconds.value, 30);
+      expect(controller.breakCountdownSeconds.value, 10);
       expect(feedback.finishFeedbackCount, 1);
 
       controller.advanceForTesting(30);
 
       expect(controller.isResting.value, isFalse);
-      expect(controller.isSessionFinished.value, isTrue);
-      expect(feedback.finishFeedbackCount, 2);
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(controller.sessionSeconds.value, 40);
+      expect(controller.breakCountdownSeconds.value, 10);
+      expect(feedback.finishFeedbackCount, 4);
     });
   });
 
@@ -1133,12 +1139,9 @@ void main() {
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(notifications.scheduleReadingRemindersCount, 1);
-      expect(notifications.readingFirstReminder, const Duration(minutes: 25));
-      expect(
-        notifications.readingReminderInterval,
-        const Duration(minutes: 30),
-      );
+      expect(notifications.scheduleIntervalRemindersCount, 1);
+      expect(notifications.firstIntervalReminder, const Duration(minutes: 25));
+      expect(notifications.reminderInterval, const Duration(minutes: 30));
       expect(notifications.scheduleSessionTimelineCount, 0);
     });
 
@@ -1176,25 +1179,25 @@ void main() {
       expect(notifications.cancelOngoingCount, 0);
     });
 
-    test(
-      "schedules the complete remaining timeline when sent to background",
-      () {
-        final notifications = _FakeTimerNotificationService();
-        final controller = _controller(
-          _subject(goalSeconds: 10, restMinutes: 3, focusSessionCount: 2),
-          timerNotificationService: notifications,
-        );
+    test("schedules repeating focus reminders when sent to background", () {
+      final notifications = _FakeTimerNotificationService();
+      final controller = _controller(
+        _subject(goalSeconds: 10, restMinutes: 3, focusSessionCount: 2),
+        timerNotificationService: notifications,
+      );
 
-        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        expect(notifications.scheduleSessionTimelineCount, 1);
+      expect(notifications.scheduleIntervalRemindersCount, 1);
+      expect(notifications.firstIntervalReminder, const Duration(seconds: 10));
+      expect(notifications.reminderInterval, const Duration(seconds: 10));
+      expect(notifications.scheduleSessionTimelineCount, 0);
 
-        controller.didChangeAppLifecycleState(AppLifecycleState.hidden);
-        expect(notifications.scheduleSessionTimelineCount, 1);
-      },
-    );
+      controller.didChangeAppLifecycleState(AppLifecycleState.hidden);
+      expect(notifications.scheduleIntervalRemindersCount, 1);
+    });
 
-    test("keeps the final alarm scheduled when the background timer ends", () {
+    test("keeps focusing across interval boundaries in the background", () {
       final notifications = _FakeTimerNotificationService();
       final controller = _controller(
         _subject(
@@ -1208,8 +1211,12 @@ void main() {
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
       controller.advanceForTesting(40);
 
-      expect(controller.isSessionFinished.value, isTrue);
-      expect(notifications.cancelOngoingCount, 1);
+      expect(controller.sessionSeconds.value, 40);
+      expect(controller.breakCountdownSeconds.value, 10);
+      expect(controller.isRunning.value, isTrue);
+      expect(controller.isResting.value, isFalse);
+      expect(controller.isSessionFinished.value, isFalse);
+      expect(notifications.cancelOngoingCount, 0);
       expect(notifications.cancelCount, 0);
     });
   });

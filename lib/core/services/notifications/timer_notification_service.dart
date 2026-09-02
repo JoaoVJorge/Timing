@@ -228,9 +228,9 @@ class TimerNotificationService {
     remaining: remaining,
   );
 
-  /// Schedules a rolling set of reading reminders. Reading has no sections or
-  /// end time: these alarms are only milestones on an unbounded stopwatch.
-  Future<void> scheduleReadingReminders({
+  /// Schedules rolling interval reminders for a timer that continues running.
+  /// These alarms mark milestones; they never imply that the session stopped.
+  Future<void> scheduleIntervalReminders({
     required String title,
     required String body,
     required Duration firstReminder,
