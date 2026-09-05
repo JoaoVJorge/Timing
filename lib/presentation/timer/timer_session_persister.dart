@@ -28,8 +28,13 @@ class TimerSessionPersister {
     required this._subject,
     required this._sessionSeconds,
     required this._onGroupActivityChanged,
+    this.initialPersistedSeconds = 0,
+    this.initialHasLoggedTime = false,
+    this.onPersisted,
     DateTime? now,
-  }) : _lastAutoSaveAt = now ?? DateTime.now();
+  }) : _persistedSeconds = initialPersistedSeconds,
+       _hasLoggedTime = initialHasLoggedTime,
+       _lastAutoSaveAt = now ?? DateTime.now();
 
   final UpdateSubjectTimeUseCase _updateSubjectTimeUseCase;
   final LogActivityUseCase _logActivityUseCase;
@@ -41,11 +46,14 @@ class TimerSessionPersister {
   final int Function() _sessionSeconds;
   final void Function() _onGroupActivityChanged;
   final Duration autoSaveInterval;
+  final int initialPersistedSeconds;
+  final bool initialHasLoggedTime;
+  final void Function()? onPersisted;
 
-  int _persistedSeconds = 0;
+  int _persistedSeconds;
   bool _isPersisting = false;
   bool _shouldPersistAgain = false;
-  bool _hasLoggedTime = false;
+  bool _hasLoggedTime;
   DateTime _lastAutoSaveAt;
 
   /// Whether at least one flush has reached the backend. Used to decide if the
@@ -129,6 +137,7 @@ class TimerSessionPersister {
       elapsedSinceLastPersist,
     );
     await _achievementUnlockService.checkForNewUnlocks();
+    onPersisted?.call();
     if (_sessionSeconds() > sessionSecondsToPersist) {
       _shouldPersistAgain = true;
     }

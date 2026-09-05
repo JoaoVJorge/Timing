@@ -20,6 +20,7 @@ import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
+import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/env/environment_keys.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -62,6 +63,10 @@ class ServicesBindings extends Bindings {
         secureStorage: Get.find(),
         supabaseService: Get.find(),
       ),
+      permanent: true,
+    );
+    Get.put<ActiveTimerSessionService>(
+      ActiveTimerSessionService(localStorageService: Get.find()),
       permanent: true,
     );
 

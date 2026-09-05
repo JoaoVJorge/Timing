@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/entities/active_timer_session_entity.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
@@ -24,6 +25,7 @@ import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/timer/timer_controller.dart";
 import "package:timing/presentation/timer/timer_page.dart";
@@ -225,20 +227,20 @@ class _FakeTimerLiveActivityService extends _Noop
     implements TimerLiveActivityService {
   TimerLiveActivityAction? pendingAction;
   int? timerSeconds;
-  bool? countsUp;
+  bool? isReading;
   int endCount = 0;
 
   @override
   Future<void> startOrUpdate({
     required String subjectName,
     required int colorValue,
-    required int remainingSeconds,
+    required int elapsedSeconds,
     required bool isRunning,
     required bool isResting,
-    required bool isCountUp,
+    required bool isReading,
   }) async {
-    timerSeconds = remainingSeconds;
-    countsUp = isCountUp;
+    timerSeconds = elapsedSeconds;
+    this.isReading = isReading;
   }
 
   @override
@@ -293,6 +295,7 @@ class _FakeFocusGuardService extends _Noop implements FocusGuardService {
 class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
   int showCount = 0;
   int? timerSeconds;
+  int? intervalRemainingSeconds;
   bool? countsUp;
   bool? usesRoutine;
 
@@ -305,10 +308,11 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
   @override
   Future<void> show({
     required String subjectName,
-    required int remainingSeconds,
+    required int elapsedSeconds,
+    required int sessionElapsedSeconds,
+    required int intervalRemainingSeconds,
     required bool isRunning,
     required bool isResting,
-    required bool isCountUp,
     required bool usesFocusRoutine,
     required int colorValue,
     required int currentFocusSection,
@@ -317,8 +321,9 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
     required int restIntervalSeconds,
   }) async {
     showCount++;
-    timerSeconds = remainingSeconds;
-    countsUp = isCountUp;
+    timerSeconds = elapsedSeconds;
+    this.intervalRemainingSeconds = intervalRemainingSeconds;
+    countsUp = true;
     usesRoutine = usesFocusRoutine;
   }
 
@@ -327,6 +332,25 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
 }
 
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
+
+class _FakeActiveTimerSessionService extends _Noop
+    implements ActiveTimerSessionService {
+  ActiveTimerSessionEntity? savedSession;
+  int saveCount = 0;
+  int clearCount = 0;
+
+  @override
+  Future<void> save(ActiveTimerSessionEntity session) async {
+    saveCount++;
+    savedSession = session;
+  }
+
+  @override
+  Future<void> clear() async {
+    clearCount++;
+    savedSession = null;
+  }
+}
 
 class _FakeAppController extends _Noop implements AppController {
   _FakeAppController({
@@ -396,6 +420,8 @@ TimerController _controller(
   DailyProgressService? dailyProgressService,
   SubjectDailyHistoryService? subjectDailyHistoryService,
   AppController? appController,
+  ActiveTimerSessionService? activeTimerSessionService,
+  ActiveTimerSessionEntity? restoredSession,
 }) => TimerController(
   updateSubjectTimeUseCase:
       updateSubjectTimeUseCase ?? _FakeUpdateSubjectTimeUseCase(),
@@ -411,6 +437,8 @@ TimerController _controller(
       timerNotificationService ?? _FakeTimerNotificationService(),
   timerLiveActivityService:
       timerLiveActivityService ?? _FakeTimerLiveActivityService(),
+  activeTimerSessionService:
+      activeTimerSessionService ?? _FakeActiveTimerSessionService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
   focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
@@ -419,6 +447,7 @@ TimerController _controller(
   appController: appController ?? _FakeAppController(),
   appNavigator: _FakeAppNavigator(),
   subject: subject,
+  restoredSession: restoredSession,
 );
 
 void main() {
@@ -664,6 +693,129 @@ void main() {
       expect(daily.registeredSessions, 0);
 
       controller.onClose();
+    });
+  });
+
+  group("TimerController cold-start recovery", () {
+    test("adds wall time elapsed since a running checkpoint", () {
+      fakeAsync((async) {
+        final SubjectEntity subject = _subject(
+          category: TimeCategoryType.reading,
+        );
+        final ActiveTimerSessionEntity checkpoint = ActiveTimerSessionEntity(
+          subject: subject,
+          sessionSeconds: 20 * 60,
+          breakCountdownSeconds: 10 * 60,
+          restCountdownSeconds: 5 * 60,
+          isRunning: true,
+          isResting: false,
+          completedFocusSections: 0,
+          persistedSeconds: 20 * 60,
+          todayFocusSecondsAtSessionStart: 0,
+          capturedAt: DateTime.now().subtract(const Duration(minutes: 30)),
+        );
+        final checkpointService = _FakeActiveTimerSessionService();
+        final controller = _controller(
+          subject,
+          activeTimerSessionService: checkpointService,
+          restoredSession: checkpoint,
+        );
+
+        controller.onInit();
+        async.flushMicrotasks();
+
+        expect(controller.sessionSeconds.value, 50 * 60);
+        expect(checkpointService.savedSession?.sessionSeconds, 50 * 60);
+
+        controller.onClose();
+        async.flushMicrotasks();
+      });
+    });
+
+    test("does not add wall time to a paused checkpoint", () {
+      final SubjectEntity subject = _subject(
+        category: TimeCategoryType.reading,
+      );
+      final ActiveTimerSessionEntity checkpoint = ActiveTimerSessionEntity(
+        subject: subject,
+        sessionSeconds: 20 * 60,
+        breakCountdownSeconds: 10 * 60,
+        restCountdownSeconds: 5 * 60,
+        isRunning: false,
+        isResting: false,
+        completedFocusSections: 0,
+        persistedSeconds: 20 * 60,
+        todayFocusSecondsAtSessionStart: 0,
+        capturedAt: DateTime.now().subtract(const Duration(minutes: 30)),
+      );
+      final controller = _controller(subject, restoredSession: checkpoint);
+
+      controller.onInit();
+
+      expect(controller.sessionSeconds.value, 20 * 60);
+      controller.onClose();
+    });
+
+    test("caps an old running checkpoint to one interval and pauses", () {
+      final SubjectEntity subject = _subject(
+        category: TimeCategoryType.reading,
+      );
+      final ActiveTimerSessionEntity checkpoint = ActiveTimerSessionEntity(
+        subject: subject,
+        sessionSeconds: 20 * 60,
+        breakCountdownSeconds: 10 * 60,
+        restCountdownSeconds: 5 * 60,
+        isRunning: true,
+        isResting: false,
+        completedFocusSections: 0,
+        persistedSeconds: 20 * 60,
+        todayFocusSecondsAtSessionStart: 0,
+        capturedAt: DateTime.now().subtract(const Duration(hours: 8)),
+      );
+      final controller = _controller(subject, restoredSession: checkpoint);
+
+      controller.onInit();
+
+      expect(controller.sessionSeconds.value, 50 * 60);
+      expect(controller.isRunning.value, isFalse);
+      controller.onClose();
+    });
+
+    test("discards an untouched timer when its route closes", () {
+      fakeAsync((async) {
+        final checkpointService = _FakeActiveTimerSessionService();
+        final controller = _controller(
+          _subject(),
+          activeTimerSessionService: checkpointService,
+        );
+
+        controller.onInit();
+        async.flushMicrotasks();
+        controller.onClose();
+        async.flushMicrotasks();
+
+        expect(checkpointService.clearCount, 1);
+        expect(checkpointService.savedSession, isNull);
+      });
+    });
+
+    test("coalesces checkpoints whose timer state did not change", () {
+      fakeAsync((async) {
+        final checkpointService = _FakeActiveTimerSessionService();
+        final controller = _controller(
+          _subject(),
+          activeTimerSessionService: checkpointService,
+        );
+
+        controller.onInit();
+        async.flushMicrotasks();
+        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+        async.flushMicrotasks();
+
+        expect(checkpointService.saveCount, 1);
+        controller.onClose();
+        async.flushMicrotasks();
+      });
     });
   });
 
@@ -1020,13 +1172,13 @@ void main() {
           );
           controller.onInit();
           async.flushMicrotasks();
-          expect(liveActivity.countsUp, isTrue);
+          expect(liveActivity.isReading, isFalse);
 
           liveActivity.pendingAction = const TimerLiveActivityAction(
             action: "pause",
             isRunning: false,
             isResting: false,
-            remainingSeconds: 120,
+            elapsedSeconds: 31 * 60,
           );
           async.elapse(const Duration(seconds: 1));
           expect(controller.currentActivitySeconds, 31 * 60);
@@ -1038,17 +1190,17 @@ void main() {
             action: "resume",
             isRunning: true,
             isResting: false,
-            remainingSeconds: 120,
+            elapsedSeconds: 31 * 60,
           );
           async.elapse(const Duration(seconds: 1));
           expect(controller.isRunning.value, isTrue);
-          expect(liveActivity.timerSeconds, 120);
+          expect(liveActivity.timerSeconds, 31 * 60);
 
           liveActivity.pendingAction = const TimerLiveActivityAction(
             action: "finish",
             isRunning: false,
             isResting: false,
-            remainingSeconds: 180,
+            elapsedSeconds: 32 * 60,
           );
           async.elapse(const Duration(seconds: 1));
           expect(controller.currentActivitySeconds, 32 * 60);
@@ -1061,6 +1213,33 @@ void main() {
         });
       },
     );
+
+    test("focus live activity returns elapsed time to the app", () {
+      fakeAsync((async) {
+        final liveActivity = _FakeTimerLiveActivityService();
+        final controller = _controller(
+          _subject(goalSeconds: 30 * 60),
+          timerLiveActivityService: liveActivity,
+        );
+        controller.advanceForTesting(19 * 60);
+        controller.onInit();
+        async.flushMicrotasks();
+
+        liveActivity.pendingAction = const TimerLiveActivityAction(
+          action: "pause",
+          isRunning: false,
+          isResting: false,
+          elapsedSeconds: 20 * 60,
+        );
+        async.elapse(const Duration(seconds: 1));
+
+        expect(controller.sessionSeconds.value, 20 * 60);
+        expect(controller.breakCountdownSeconds.value, 10 * 60);
+        expect(controller.isRunning.value, isFalse);
+        controller.onClose();
+        async.flushMicrotasks();
+      });
+    });
 
     test("enables timer alerts when a session starts", () async {
       final notifications = _FakeTimerNotificationService();
@@ -1113,6 +1292,61 @@ void main() {
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       expect(overlay.timerSeconds, 42);
+      expect(overlay.countsUp, isTrue);
+    });
+
+    test("shows elapsed focus time instead of the remaining interval", () {
+      final overlay = _FakeFocusOverlayService();
+      final liveActivity = _FakeTimerLiveActivityService();
+      final controller = _controller(
+        _subject(goalSeconds: 30 * 60),
+        focusOverlayService: overlay,
+        timerLiveActivityService: liveActivity,
+      );
+      controller.advanceForTesting(19 * 60);
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.timerSeconds, 19 * 60);
+      expect(overlay.intervalRemainingSeconds, 11 * 60);
+      expect(overlay.countsUp, isTrue);
+      expect(liveActivity.timerSeconds, 19 * 60);
+      expect(liveActivity.isReading, isFalse);
+    });
+
+    test("matches the app's accumulated value for a daily hobby", () {
+      final overlay = _FakeFocusOverlayService();
+      final controller = _controller(
+        _subject(
+          category: TimeCategoryType.hobbies,
+          activityType: SubjectActivityType.daily,
+        ),
+        focusOverlayService: overlay,
+        subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
+          const DailyProgressEntity(focusSeconds: 10 * 60),
+        ),
+      );
+      controller.advanceForTesting(2 * 60);
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.timerSeconds, 12 * 60);
+      expect(overlay.countsUp, isTrue);
+    });
+
+    test("shows elapsed rest time instead of remaining rest time", () {
+      final overlay = _FakeFocusOverlayService();
+      final controller = _controller(
+        _subject(restMinutes: 5),
+        focusOverlayService: overlay,
+      );
+      controller.isResting.value = true;
+      controller.restCountdownSeconds.value = 3 * 60;
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(overlay.timerSeconds, 2 * 60);
+      expect(overlay.intervalRemainingSeconds, 3 * 60);
       expect(overlay.countsUp, isTrue);
     });
 

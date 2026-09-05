@@ -1,4 +1,6 @@
 import "package:get/get.dart";
+import "package:timing/core/domain/entities/active_timer_session_entity.dart";
+import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 
@@ -34,4 +36,11 @@ class CreateTaskRouteArguments {
   const CreateTaskRouteArguments({this.initialName});
 
   final String? initialName;
+}
+
+class TimerRouteArguments {
+  const TimerRouteArguments({required this.subject, this.restoredSession});
+
+  final SubjectEntity subject;
+  final ActiveTimerSessionEntity? restoredSession;
 }

@@ -9,6 +9,7 @@ enum LocalStorageKeys {
   subjectDailyHistory(hasSensitiveData: false, isUserScoped: true),
   scheduleEntries(hasSensitiveData: false, isUserScoped: true),
   pendingRemoteSyncs(hasSensitiveData: false, isUserScoped: true),
+  activeTimerSession(hasSensitiveData: false, isUserScoped: true),
   isDarkMode(hasSensitiveData: false, isUserScoped: false),
   languageCode(hasSensitiveData: false, isUserScoped: false),
   focusLockStudyingEnabled(hasSensitiveData: false, isUserScoped: false),

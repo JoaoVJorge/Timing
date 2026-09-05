@@ -24,18 +24,18 @@ struct ToggleTimerIntent: LiveActivityIntent {
 
     var state = activity.content.state
     if state.isRunning {
-      state.remainingSeconds = state.currentRemainingSeconds
+      state.elapsedSeconds = state.currentElapsedSeconds
       state.isRunning = false
     } else {
-      state.endDate = state.countsUp
-        ? Date().addingTimeInterval(-TimeInterval(state.remainingSeconds))
-        : Date().addingTimeInterval(TimeInterval(state.remainingSeconds))
+      state.startedAt = Date().addingTimeInterval(
+        -TimeInterval(state.elapsedSeconds)
+      )
       state.isRunning = true
     }
     await activity.update(
       ActivityContent(
         state: state,
-        staleDate: state.countsUp ? nil : state.endDate
+        staleDate: nil
       )
     )
     TimerActivitySharedStore.saveAction(
@@ -66,7 +66,7 @@ struct FinishTimerIntent: LiveActivityIntent {
       return .result()
     }
     var state = activity.content.state
-    state.remainingSeconds = state.currentRemainingSeconds
+    state.elapsedSeconds = state.currentElapsedSeconds
     state.isRunning = false
     TimerActivitySharedStore.saveAction("finish", state: state)
     await activity.end(

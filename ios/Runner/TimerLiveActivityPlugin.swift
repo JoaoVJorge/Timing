@@ -27,10 +27,10 @@ final class TimerLiveActivityPlugin: NSObject, FlutterPlugin {
       guard let arguments = call.arguments as? [String: Any],
             let subjectName = arguments["subjectName"] as? String,
             let colorHex = arguments["colorHex"] as? String,
-            let remainingSeconds = arguments["remainingSeconds"] as? Int,
+            let elapsedSeconds = arguments["elapsedSeconds"] as? Int,
             let isRunning = arguments["isRunning"] as? Bool,
             let isResting = arguments["isResting"] as? Bool,
-            let isCountUp = arguments["isCountUp"] as? Bool else {
+            let isReading = arguments["isReading"] as? Bool else {
         result(FlutterError(code: "bad_arguments", message: nil, details: nil))
         return
       }
@@ -39,10 +39,10 @@ final class TimerLiveActivityPlugin: NSObject, FlutterPlugin {
         await TimerLiveActivityManager.shared.startOrUpdate(
           subjectName: subjectName,
           colorHex: colorHex,
-          remainingSeconds: remainingSeconds,
+          elapsedSeconds: elapsedSeconds,
           isRunning: isRunning,
           isResting: isResting,
-          isCountUp: isCountUp
+          isReading: isReading
         )
         result(nil)
       }
@@ -81,27 +81,25 @@ private final class TimerLiveActivityManager {
   func startOrUpdate(
     subjectName: String,
     colorHex: String,
-    remainingSeconds: Int,
+    elapsedSeconds: Int,
     isRunning: Bool,
     isResting: Bool,
-    isCountUp: Bool
+    isReading: Bool
   ) async {
     guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
 
-    let safeRemaining = max(0, remainingSeconds)
-    let timerDate = isCountUp
-      ? Date().addingTimeInterval(-TimeInterval(safeRemaining))
-      : Date().addingTimeInterval(TimeInterval(safeRemaining))
+    let safeElapsed = max(0, elapsedSeconds)
+    let startedAt = Date().addingTimeInterval(-TimeInterval(safeElapsed))
     let state = TimerActivityAttributes.ContentState(
-      remainingSeconds: safeRemaining,
-      endDate: timerDate,
+      elapsedSeconds: safeElapsed,
+      startedAt: startedAt,
       isRunning: isRunning,
       isResting: isResting,
-      isCountUp: isCountUp
+      isReading: isReading
     )
     let content = ActivityContent(
       state: state,
-      staleDate: isCountUp ? nil : state.endDate
+      staleDate: nil
     )
 
     if let activity = Activity<TimerActivityAttributes>.activities.first,

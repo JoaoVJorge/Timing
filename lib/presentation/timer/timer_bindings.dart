@@ -7,9 +7,11 @@ import "package:timing/presentation/timer/timer_controller.dart";
 class TimerBindings extends Bindings {
   @override
   void dependencies() {
-    final SubjectEntity subject = RouteArguments.of<SubjectEntity>(
-      AppRoutes.timer,
-    );
+    final TimerRouteArguments? timerArguments =
+        RouteArguments.maybeOf<TimerRouteArguments>();
+    final SubjectEntity subject =
+        timerArguments?.subject ??
+        RouteArguments.of<SubjectEntity>(AppRoutes.timer);
 
     Get.put<TimerController>(
       TimerController(
@@ -23,6 +25,7 @@ class TimerBindings extends Bindings {
         achievementUnlockService: Get.find(),
         timerNotificationService: Get.find(),
         timerLiveActivityService: Get.find(),
+        activeTimerSessionService: Get.find(),
         focusFeedbackService: Get.find(),
         focusGuardService: Get.find(),
         focusOverlayService: Get.find(),
@@ -31,6 +34,7 @@ class TimerBindings extends Bindings {
         appController: Get.find(),
         appNavigator: Get.find(),
         subject: subject,
+        restoredSession: timerArguments?.restoredSession,
       ),
     );
   }

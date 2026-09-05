@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/domain/entities/active_timer_session_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart";
@@ -23,6 +24,7 @@ import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/timer/timer_session_persister.dart";
@@ -40,6 +42,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.achievementUnlockService,
     required this.timerNotificationService,
     required this.timerLiveActivityService,
+    required this.activeTimerSessionService,
     required this.focusFeedbackService,
     required this.focusGuardService,
     required this.focusOverlayService,
@@ -48,13 +51,16 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.appController,
     required this.appNavigator,
     required this.subject,
-  }) : _todayFocusSecondsAtSessionStart = subjectDailyHistoryService
-           .todayForSubject(subject.id)
-           .focusSeconds;
+    this.restoredSession,
+  }) : _todayFocusSecondsAtSessionStart =
+           restoredSession?.todayFocusSecondsAtSessionStart ??
+           subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds;
 
   static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
   static const Duration focusLockReturnCooldown = Duration(seconds: 5);
+  static const Duration maxTrustedRecoveryGap = Duration(hours: 4);
+  static const Duration maxStaleCheckpointCatchUp = Duration(hours: 1);
 
   /// Upper bound for a session-seconds value coming back from the Live Activity
   /// bridge, so a bogus payload can never push the counter to a nonsensical
@@ -71,6 +77,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final AchievementUnlockService achievementUnlockService;
   final TimerNotificationService timerNotificationService;
   final TimerLiveActivityService timerLiveActivityService;
+  final ActiveTimerSessionService activeTimerSessionService;
   final FocusFeedbackService focusFeedbackService;
   final FocusGuardService focusGuardService;
   final FocusOverlayService focusOverlayService;
@@ -80,14 +87,19 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final AppNavigator appNavigator;
 
   SubjectEntity subject;
+  final ActiveTimerSessionEntity? restoredSession;
 
-  final RxInt sessionSeconds = 0.obs;
-  late final RxInt breakCountdownSeconds = _initialBreakCountdownSeconds.obs;
-  late final RxInt restCountdownSeconds = restIntervalSeconds.obs;
-  final RxBool isRunning = true.obs;
-  final RxBool isResting = false.obs;
+  late final RxInt sessionSeconds = (restoredSession?.sessionSeconds ?? 0).obs;
+  late final RxInt breakCountdownSeconds =
+      (restoredSession?.breakCountdownSeconds ?? _initialBreakCountdownSeconds)
+          .obs;
+  late final RxInt restCountdownSeconds =
+      (restoredSession?.restCountdownSeconds ?? restIntervalSeconds).obs;
+  late final RxBool isRunning = (restoredSession?.isRunning ?? true).obs;
+  late final RxBool isResting = (restoredSession?.isResting ?? false).obs;
   final RxBool isSessionFinished = false.obs;
-  final RxInt completedFocusSections = 0.obs;
+  late final RxInt completedFocusSections =
+      (restoredSession?.completedFocusSections ?? 0).obs;
 
   Timer? _ticker;
   bool _hasRecordedLastActivity = false;
@@ -98,6 +110,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isRequestingFocusLockReturn = false;
   final int _todayFocusSecondsAtSessionStart;
   DateTime? _lastFocusLockWarningAt;
+  DateTime? _lastSessionCheckpointAt;
+  ActiveTimerSessionEntity? _lastQueuedSessionCheckpoint;
   Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
 
@@ -112,6 +126,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     sessionSeconds: () => sessionSeconds.value,
     onGroupActivityChanged: _notifyGroupActivityChanged,
     autoSaveInterval: autoSaveInterval,
+    initialPersistedSeconds: restoredSession?.persistedSeconds ?? 0,
+    initialHasLoggedTime: (restoredSession?.persistedSeconds ?? 0) > 0,
+    onPersisted: () => unawaited(_saveActiveSession()),
   );
 
   int get totalSeconds => subject.totalSeconds + sessionSeconds.value;
@@ -208,14 +225,19 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    _lastTickAt = DateTime.now();
+    final DateTime now = DateTime.now();
+    _lastTickAt = now;
+    _restoreElapsedSinceCheckpoint(now);
     if (_isDailyHobbyGoalAlreadyComplete) {
       completedFocusSections.value = focusSessionCount;
     }
-    _ticker = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) => unawaited(_tick()),
-    );
+    if (!isSessionFinished.value) {
+      _ticker = Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) => unawaited(_tick()),
+      );
+      unawaited(_saveActiveSession(capturedAt: now));
+    }
     unawaited(_ensureTimerNotifications());
     _syncFocusGuard();
     unawaited(_ensureOverlayPermission());
@@ -243,6 +265,40 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     _advanceBy(elapsedSeconds);
     _persister.autoSaveIfNeeded(now);
+    if (_lastSessionCheckpointAt == null ||
+        now.difference(_lastSessionCheckpointAt!) >= autoSaveInterval) {
+      unawaited(_saveActiveSession(capturedAt: now));
+    }
+  }
+
+  void _restoreElapsedSinceCheckpoint(DateTime now) {
+    final ActiveTimerSessionEntity? checkpoint = restoredSession;
+    if (checkpoint == null || !checkpoint.isRunning) {
+      return;
+    }
+    final Duration elapsed = now.difference(checkpoint.capturedAt);
+    final bool isStale = elapsed > maxTrustedRecoveryGap;
+    final int elapsedSeconds = (isStale
+        ? elapsed.inSeconds.clamp(
+            0,
+            <int>[
+              focusIntervalSeconds,
+              maxStaleCheckpointCatchUp.inSeconds,
+            ].reduce((a, b) => a < b ? a : b),
+          )
+        : elapsed.inSeconds.clamp(0, _maxSessionSeconds));
+    if (elapsedSeconds <= 0) {
+      return;
+    }
+    _isCatchingUpAfterBackground = true;
+    try {
+      _advanceBy(elapsedSeconds);
+    } finally {
+      _isCatchingUpAfterBackground = false;
+    }
+    if (isStale) {
+      isRunning.value = false;
+    }
   }
 
   void _advanceBy(int seconds) {
@@ -397,6 +453,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _recordLastActivityIfNeeded();
     isRunning.value = false;
     isSessionFinished.value = true;
+    unawaited(activeTimerSessionService.clear());
     _ticker?.cancel();
     unawaited(HapticFeedback.mediumImpact());
     if (_isAppInForeground) {
@@ -554,6 +611,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     final bool alreadyFinished = isSessionFinished.value;
     isRunning.value = false;
     isSessionFinished.value = true;
+    unawaited(activeTimerSessionService.clear());
     _ticker?.cancel();
     if (_isAppInForeground) {
       timerNotificationService.cancel();
@@ -593,18 +651,15 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _updateNotification() {
+    unawaited(_saveActiveSession());
     unawaited(
       timerLiveActivityService.startOrUpdate(
         subjectName: subject.name,
         colorValue: subject.colorValue,
-        remainingSeconds: isReading || isHobby
-            ? sessionSeconds.value
-            : isResting.value
-            ? restCountdownSeconds.value
-            : breakCountdownSeconds.value,
+        elapsedSeconds: _displayElapsedSeconds,
         isRunning: isRunning.value,
         isResting: isResting.value,
-        isCountUp: isReading || isHobby,
+        isReading: isReading,
       ),
     );
 
@@ -710,15 +765,68 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     );
   }
 
-  int get _overlayRemainingSeconds {
-    if (isReading || isHobby) {
-      return sessionSeconds.value;
+  int get _displayElapsedSeconds {
+    if (isResting.value) {
+      return (restIntervalSeconds - restCountdownSeconds.value).clamp(
+        0,
+        restIntervalSeconds,
+      );
     }
+    if (_isDailyHobbyGoal) {
+      return currentActivitySeconds;
+    }
+    return sessionSeconds.value;
+  }
+
+  int get _overlayIntervalRemainingSeconds {
     if (isResting.value) {
       return restCountdownSeconds.value;
     }
     return breakCountdownSeconds.value;
   }
+
+  Future<void> _saveActiveSession({DateTime? capturedAt}) async {
+    if (isSessionFinished.value) {
+      _lastQueuedSessionCheckpoint = null;
+      await activeTimerSessionService.clear();
+      return;
+    }
+    final DateTime checkpointAt = capturedAt ?? DateTime.now();
+    _lastSessionCheckpointAt = checkpointAt;
+    final ActiveTimerSessionEntity checkpoint = ActiveTimerSessionEntity(
+      subject: subject,
+      sessionSeconds: sessionSeconds.value,
+      breakCountdownSeconds: breakCountdownSeconds.value,
+      restCountdownSeconds: restCountdownSeconds.value,
+      isRunning: isRunning.value,
+      isResting: isResting.value,
+      completedFocusSections: completedFocusSections.value,
+      persistedSeconds: _persister.persistedSeconds,
+      todayFocusSecondsAtSessionStart: _todayFocusSecondsAtSessionStart,
+      capturedAt: checkpointAt,
+    );
+    if (_hasSameCheckpointState(_lastQueuedSessionCheckpoint, checkpoint)) {
+      return;
+    }
+    _lastQueuedSessionCheckpoint = checkpoint;
+    await activeTimerSessionService.save(checkpoint);
+  }
+
+  bool _hasSameCheckpointState(
+    ActiveTimerSessionEntity? previous,
+    ActiveTimerSessionEntity current,
+  ) =>
+      previous != null &&
+      previous.subject == current.subject &&
+      previous.sessionSeconds == current.sessionSeconds &&
+      previous.breakCountdownSeconds == current.breakCountdownSeconds &&
+      previous.restCountdownSeconds == current.restCountdownSeconds &&
+      previous.isRunning == current.isRunning &&
+      previous.isResting == current.isResting &&
+      previous.completedFocusSections == current.completedFocusSections &&
+      previous.persistedSeconds == current.persistedSeconds &&
+      previous.todayFocusSecondsAtSessionStart ==
+          current.todayFocusSecondsAtSessionStart;
 
   Future<void> _ensureOverlayPermission() async {
     if (_overlayPermissionRequested) {
@@ -738,10 +846,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     unawaited(
       focusOverlayService.show(
         subjectName: subject.name,
-        remainingSeconds: _overlayRemainingSeconds,
+        elapsedSeconds: _displayElapsedSeconds,
+        sessionElapsedSeconds: sessionSeconds.value,
+        intervalRemainingSeconds: _overlayIntervalRemainingSeconds,
         isRunning: isRunning.value,
         isResting: isResting.value,
-        isCountUp: isReading || isHobby,
         usesFocusRoutine: !isReading && !isHobby,
         colorValue: subject.colorValue,
         currentFocusSection: currentFocusSection,
@@ -787,8 +896,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void _applyLiveActivityState(TimerLiveActivityAction value) {
     if (isHobby) {
       final int elapsedSeconds =
-          value.remainingSeconds.clamp(0, _maxSessionSeconds) -
-          sessionSeconds.value;
+          value.elapsedSeconds.clamp(0, _maxSessionSeconds) -
+          _displayElapsedSeconds;
       isRunning.value = true;
       _advanceBy(elapsedSeconds);
       isResting.value = false;
@@ -797,31 +906,25 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       return;
     }
     if (isReading) {
-      sessionSeconds.value = value.remainingSeconds.clamp(
-        0,
-        _maxSessionSeconds,
-      );
+      sessionSeconds.value = value.elapsedSeconds.clamp(0, _maxSessionSeconds);
       isResting.value = false;
       isRunning.value = value.isRunning;
       _syncFocusGuard();
       return;
     }
     if (!value.isResting) {
-      final int completedCycles = sessionSeconds.value - cycleElapsedSeconds;
-      sessionSeconds.value =
-          completedCycles.clamp(0, sessionSeconds.value) +
-          (focusIntervalSeconds - value.remainingSeconds).clamp(
-            0,
-            focusIntervalSeconds,
-          );
-      breakCountdownSeconds.value = value.remainingSeconds;
-      if (value.remainingSeconds <= 0) {
-        _completeFocusSection();
-        return;
-      }
+      final int elapsedSeconds =
+          value.elapsedSeconds.clamp(0, _maxSessionSeconds) -
+          sessionSeconds.value;
+      isResting.value = false;
+      isRunning.value = true;
+      _advanceBy(elapsedSeconds);
     } else {
-      restCountdownSeconds.value = value.remainingSeconds;
-      if (value.remainingSeconds <= 0) {
+      restCountdownSeconds.value =
+          (restIntervalSeconds -
+                  value.elapsedSeconds.clamp(0, restIntervalSeconds))
+              .clamp(0, restIntervalSeconds);
+      if (restCountdownSeconds.value <= 0) {
         _finishRestPeriod();
         return;
       }
@@ -919,6 +1022,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     _ticker?.cancel();
     _focusLockReturnResetTimer?.cancel();
     _persister.flush();
+    if (!isSessionFinished.value) {
+      if (_isAppInForeground && sessionSeconds.value == 0) {
+        _lastQueuedSessionCheckpoint = null;
+        unawaited(activeTimerSessionService.clear());
+      } else {
+        unawaited(_saveActiveSession());
+      }
+    }
     _recordLastActivityIfNeeded();
     if (_isAppInForeground) {
       timerNotificationService.cancel();

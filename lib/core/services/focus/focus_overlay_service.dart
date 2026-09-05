@@ -33,10 +33,11 @@ class FocusOverlayService {
 
   Future<void> show({
     required String subjectName,
-    required int remainingSeconds,
+    required int elapsedSeconds,
+    required int sessionElapsedSeconds,
+    required int intervalRemainingSeconds,
     required bool isRunning,
     required bool isResting,
-    required bool isCountUp,
     required bool usesFocusRoutine,
     required int colorValue,
     required int currentFocusSection,
@@ -46,10 +47,11 @@ class FocusOverlayService {
   }) async {
     await _invoke("show", <String, Object?>{
       "subjectName": subjectName,
-      "remainingSeconds": remainingSeconds,
+      "elapsedSeconds": elapsedSeconds,
+      "sessionElapsedSeconds": sessionElapsedSeconds,
+      "intervalRemainingSeconds": intervalRemainingSeconds,
       "isRunning": isRunning,
       "isResting": isResting,
-      "isCountUp": isCountUp,
       "usesFocusRoutine": usesFocusRoutine,
       "currentFocusSection": currentFocusSection,
       "totalFocusSections": totalFocusSections,

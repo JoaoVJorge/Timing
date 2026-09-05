@@ -7,13 +7,13 @@ class TimerLiveActivityAction {
     required this.action,
     required this.isRunning,
     required this.isResting,
-    required this.remainingSeconds,
+    required this.elapsedSeconds,
   });
 
   final String action;
   final bool isRunning;
   final bool isResting;
-  final int remainingSeconds;
+  final int elapsedSeconds;
 }
 
 /// Bridges the Flutter timer to the iOS Live Activity / Dynamic Island.
@@ -30,10 +30,10 @@ class TimerLiveActivityService {
   Future<void> startOrUpdate({
     required String subjectName,
     required int colorValue,
-    required int remainingSeconds,
+    required int elapsedSeconds,
     required bool isRunning,
     required bool isResting,
-    required bool isCountUp,
+    required bool isReading,
   }) async {
     if (!_isSupported) {
       return;
@@ -43,10 +43,10 @@ class TimerLiveActivityService {
       await _channel.invokeMethod<void>("startOrUpdate", {
         "subjectName": subjectName,
         "colorHex": (colorValue & 0xFFFFFF).toRadixString(16).padLeft(6, "0"),
-        "remainingSeconds": remainingSeconds,
+        "elapsedSeconds": elapsedSeconds,
         "isRunning": isRunning,
         "isResting": isResting,
-        "isCountUp": isCountUp,
+        "isReading": isReading,
       });
     } catch (_) {
       // iOS < 16.2, disabled activities, simulator and signing failures are
@@ -69,7 +69,10 @@ class TimerLiveActivityService {
         action: value["action"] as String,
         isRunning: value["isRunning"] as bool,
         isResting: value["isResting"] as bool,
-        remainingSeconds: value["remainingSeconds"] as int,
+        // Keep accepting the former key for an activity that was already open
+        // while the app was updated.
+        elapsedSeconds:
+            (value["elapsedSeconds"] ?? value["remainingSeconds"]) as int,
       );
     } catch (_) {
       return null;

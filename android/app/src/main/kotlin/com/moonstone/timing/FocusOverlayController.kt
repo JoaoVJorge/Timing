@@ -18,8 +18,8 @@ import kotlin.math.abs
 /// A floating pill drawn over other apps while a focus session runs.
 ///
 /// It updates the time locally (one tick per second) so it stays accurate even
-/// when the Flutter engine is throttled in the background. Reading is an
-/// unbounded count-up stopwatch; focus and rest periods count down.
+/// when the Flutter engine is throttled in the background. The displayed clock
+/// mirrors the app's elapsed-time clock and therefore only counts up.
 object FocusOverlayController {
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
@@ -28,10 +28,11 @@ object FocusOverlayController {
     private val handler = Handler(Looper.getMainLooper())
     private var ticker: Runnable? = null
 
-    private var remainingSeconds = 0
+    private var elapsedSeconds = 0
+    private var sessionElapsedSeconds = 0
+    private var intervalRemainingSeconds = 0
     private var isRunning = false
     private var isResting = false
-    private var isCountUp = false
     private var usesFocusRoutine = true
     private var subjectName = ""
     private var currentFocusSection = 1
@@ -52,10 +53,11 @@ object FocusOverlayController {
     fun show(
         context: Context,
         subjectName: String,
-        remainingSeconds: Int,
+        elapsedSeconds: Int,
+        sessionElapsedSeconds: Int,
+        intervalRemainingSeconds: Int,
         isRunning: Boolean,
         isResting: Boolean,
-        isCountUp: Boolean,
         usesFocusRoutine: Boolean,
         currentFocusSection: Int,
         totalFocusSections: Int,
@@ -67,10 +69,11 @@ object FocusOverlayController {
             return
         }
         this.subjectName = subjectName
-        this.remainingSeconds = remainingSeconds
+        this.elapsedSeconds = elapsedSeconds.coerceAtLeast(0)
+        this.sessionElapsedSeconds = sessionElapsedSeconds.coerceAtLeast(0)
+        this.intervalRemainingSeconds = intervalRemainingSeconds.coerceAtLeast(0)
         this.isRunning = isRunning
         this.isResting = isResting
-        this.isCountUp = isCountUp
         this.usesFocusRoutine = usesFocusRoutine
         this.currentFocusSection = currentFocusSection.coerceAtLeast(1)
         this.totalFocusSections = totalFocusSections.coerceAtLeast(1)
@@ -145,16 +148,14 @@ object FocusOverlayController {
         val view = overlayView ?: return
         val title = view.findViewById<TextView>(R.id.overlay_title)
         val time = view.findViewById<TextView>(R.id.overlay_time)
-        title.text = if (isCountUp) {
-            subjectName.ifEmpty { "Leitura" }
-        } else if (!usesFocusRoutine) {
+        title.text = if (!usesFocusRoutine) {
             subjectName.ifEmpty { "Hobby" }
         } else if (isResting) {
             "Descanso · próxima ${nextFocusSection()}/$totalFocusSections"
         } else {
             "${subjectName.ifEmpty { "Foco" }} · $currentFocusSection/$totalFocusSections"
         }
-        time.text = formatTime(remainingSeconds)
+        time.text = formatTime(elapsedSeconds)
         if (accentColor != null) {
             view.findViewById<View>(R.id.overlay_dot)
                 .background
@@ -172,16 +173,17 @@ object FocusOverlayController {
                 if (!isRunning) {
                     return
                 }
-                if (isCountUp) {
-                    remainingSeconds += 1
-                    overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
-                        formatTime(remainingSeconds)
-                } else if (remainingSeconds > 0) {
-                    remainingSeconds -= 1
-                    overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
-                        formatTime(remainingSeconds)
+                elapsedSeconds += 1
+                if (!isResting) {
+                    sessionElapsedSeconds += 1
                 }
-                if (!isCountUp && remainingSeconds <= 0) {
+                overlayView?.findViewById<TextView>(R.id.overlay_time)?.text =
+                    formatTime(elapsedSeconds)
+
+                if (usesFocusRoutine && intervalRemainingSeconds > 0) {
+                    intervalRemainingSeconds -= 1
+                }
+                if (usesFocusRoutine && intervalRemainingSeconds <= 0) {
                     advanceCycle()
                     if (overlayView == null) {
                         return
@@ -195,24 +197,19 @@ object FocusOverlayController {
     }
 
     private fun advanceCycle() {
-        if (!usesFocusRoutine) {
-            hide()
-            return
-        }
         if (isResting) {
-            if (currentFocusSection >= totalFocusSections) {
-                hide()
-                return
-            }
             isResting = false
             currentFocusSection = nextFocusSection()
-            remainingSeconds = focusIntervalSeconds
+            elapsedSeconds = sessionElapsedSeconds
+            intervalRemainingSeconds = focusIntervalSeconds
             applyState(accentColor)
             return
         }
 
-        isResting = true
-        remainingSeconds = restIntervalSeconds
+        // Focus intervals are milestones. The app starts the next interval
+        // immediately, so the native overlay must keep counting up as well.
+        currentFocusSection = nextFocusSection()
+        intervalRemainingSeconds = focusIntervalSeconds
         applyState(accentColor)
     }
 

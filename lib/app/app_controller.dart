@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/app/route_arguments.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/core/domain/entities/app_config_entity.dart";
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
@@ -28,6 +29,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/sync_reconciliation_service.dart";
+import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/home/home_controller.dart";
@@ -46,6 +48,7 @@ class AppController extends GetxController {
     required this._appNavigator,
     required this._supabaseService,
     required this._timerNotificationService,
+    required this._activeTimerSessionService,
     required this._syncReconciliationService,
     required this.localStorageService,
     int? initialAccentColorValue,
@@ -62,6 +65,7 @@ class AppController extends GetxController {
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final TimerNotificationService _timerNotificationService;
+  final ActiveTimerSessionService _activeTimerSessionService;
   final SyncReconciliationService _syncReconciliationService;
   final AppLocalStorageService localStorageService;
 
@@ -126,6 +130,17 @@ class AppController extends GetxController {
     }
 
     await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
+
+    final activeSession = await _activeTimerSessionService.restore();
+    if (activeSession != null) {
+      await _appNavigator.toNamed(
+        AppRoutes.timer,
+        arguments: TimerRouteArguments(
+          subject: activeSession.subject,
+          restoredSession: activeSession,
+        ),
+      );
+    }
   }
 
   Future<void> _loadInitialConfig() async {

@@ -29,7 +29,7 @@ struct TimerLiveActivityWidget: Widget {
             Text(
               context.state.isResting
                 ? "Pausa"
-                : context.state.countsUp ? "Leitura" : "Foco"
+                : context.state.isReading ? "Leitura" : "Foco"
             )
               .font(.caption2)
               .foregroundStyle(.secondary)
@@ -82,7 +82,7 @@ private struct LockScreenTimerView: View {
         Text(
           context.state.isResting
             ? "Pausa da sessão"
-            : context.state.countsUp ? "Leitura" : "Foco · Sessão de estudo"
+            : context.state.isReading ? "Leitura" : "Foco · Sessão de estudo"
         )
           .font(.caption)
           .foregroundStyle(.secondary)
@@ -134,21 +134,13 @@ private struct TimerText: View {
   var body: some View {
     Group {
       if state.isRunning {
-        if state.countsUp {
-          Text(
-            timerInterval: state.endDate...Date.distantFuture,
-            countsDown: false,
-            showsHours: true
-          )
-        } else {
-          Text(
-            timerInterval: Date()...max(Date().addingTimeInterval(1), state.endDate),
-            countsDown: true,
-            showsHours: true
-          )
-        }
+        Text(
+          timerInterval: state.startedAt...Date.distantFuture,
+          countsDown: false,
+          showsHours: true
+        )
       } else {
-        Text(formatDuration(state.remainingSeconds))
+        Text(formatDuration(state.elapsedSeconds))
       }
     }
     .font(.system(size: fontSize, weight: .bold, design: .rounded))
