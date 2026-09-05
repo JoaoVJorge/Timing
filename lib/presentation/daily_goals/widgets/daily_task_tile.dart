@@ -72,19 +72,19 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
           onTap: widget.onDelete,
         ),
       ],
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            BounceTap(
-              pressedScale: 0.88,
-              onTap: _onTapToggle,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
+      child: BounceTap(
+        pressedScale: 0.98,
+        onTap: _onTapToggle,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.colorTokens.surface,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
@@ -103,50 +103,50 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
                       )
                     : null,
               ),
-            ),
-            const Gap(12),
-            Expanded(
-              child: Opacity(
-                opacity: contentOpacity,
-                child: Text(
-                  widget.task.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w800,
-                    decoration: isCheckedToday
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                    decorationThickness: 2,
-                    decorationColor: context.colorTokens.textBody.withValues(
-                      alpha: 0.72,
+              const Gap(12),
+              Expanded(
+                child: Opacity(
+                  opacity: contentOpacity,
+                  child: Text(
+                    widget.task.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w800,
+                      decoration: isCheckedToday
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      decorationThickness: 2,
+                      decorationColor: context.colorTokens.textBody.withValues(
+                        alpha: 0.72,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const Gap(12),
-            Opacity(
-              opacity: contentOpacity,
-              child: widget.task.hasInfiniteTarget
-                  ? Text(
-                      "${widget.task.currentProgress} ${context.l10n.daysSuffix}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodyMedium.copyWith(
-                        color: taskColor,
-                        fontWeight: FontWeight.w900,
+              const Gap(12),
+              Opacity(
+                opacity: contentOpacity,
+                child: widget.task.hasInfiniteTarget
+                    ? Text(
+                        "${widget.task.currentProgress} ${context.l10n.daysSuffix}",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: taskColor,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      )
+                    : Text(
+                        "${widget.task.currentProgress}/${widget.task.currentTarget} ${context.l10n.daysSuffix}",
+                        style: context.textStyles.bodyMedium.copyWith(
+                          color: taskColor,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                    )
-                  : Text(
-                      "${widget.task.currentProgress}/${widget.task.currentTarget} ${context.l10n.daysSuffix}",
-                      style: context.textStyles.bodyMedium.copyWith(
-                        color: taskColor,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
