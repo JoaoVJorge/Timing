@@ -9,6 +9,7 @@ class _Filters extends StatelessWidget {
   Widget build(BuildContext context) => Obx(
     () => SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: _pageInset,
       child: Row(
         children: [
           _FilterChip(

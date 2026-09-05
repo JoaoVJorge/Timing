@@ -73,7 +73,7 @@ class _AchievementCard extends StatelessWidget {
                 size: 34,
                 iconSize: 18,
               ),
-              const Gap(6),
+              const Gap(8),
               Text(
                 achievement.title,
                 maxLines: 2,
@@ -81,7 +81,7 @@ class _AchievementCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: titleStyle,
               ),
-              const Gap(3),
+              const Gap(4),
               Text(
                 achievement.description,
                 maxLines: 2,
@@ -100,26 +100,53 @@ class _AchievementCard extends StatelessWidget {
 }
 
 class _AchievementInfoPill extends StatelessWidget {
-  const _AchievementInfoPill({required this.label});
+  const _AchievementInfoPill({
+    required this.label,
+    required this.icon,
+    required this.color,
+    this.emphasizeIcon = false,
+  });
 
   final String label;
+  final IconData icon;
+  final Color color;
+  final bool emphasizeIcon;
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
     decoration: BoxDecoration(
-      color: context.colorTokens.surfaceInnerLayer,
+      color: emphasizeIcon
+          ? color.withValues(alpha: 0.10)
+          : context.colorTokens.surfaceInnerLayer,
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: context.colorTokens.borderUnfocused),
     ),
-    child: Text(
-      label,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: context.textStyles.bodyTiny.copyWith(
-        color: context.colorTokens.textHint,
-        fontWeight: FontWeight.w900,
-      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          decoration: emphasizeIcon
+              ? BoxDecoration(color: color, shape: BoxShape.circle)
+              : null,
+          child: Icon(
+            icon,
+            color: emphasizeIcon ? context.colorTokens.white : color,
+            size: 15,
+          ),
+        ),
+        const Gap(8),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.bodySmall.copyWith(
+            color: context.colorTokens.dialogTextMuted,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -153,20 +180,14 @@ class _SmallBadge extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({
-    required this.isUnlocked,
-    this.size = 18,
-    this.iconSize = 12,
-  });
+  const _StatusBadge({required this.isUnlocked});
 
   final bool isUnlocked;
-  final double size;
-  final double iconSize;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
+    width: 18,
+    height: 18,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: isUnlocked
@@ -176,7 +197,7 @@ class _StatusBadge extends StatelessWidget {
     child: Icon(
       isUnlocked ? Icons.check_rounded : Icons.lock_rounded,
       color: context.colorTokens.white,
-      size: iconSize,
+      size: 12,
     ),
   );
 }
