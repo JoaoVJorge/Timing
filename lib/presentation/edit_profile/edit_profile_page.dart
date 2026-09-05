@@ -548,14 +548,10 @@ class _ProfilePhotoPreview extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: context.colorTokens.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.colorTokens.surfaceShadow,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: context.colorTokens.scaffold,
+                    width: 2.5,
+                  ),
                 ),
                 child: const Icon(
                   Icons.photo_camera_rounded,
