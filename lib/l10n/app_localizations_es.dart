@@ -2704,6 +2704,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get achievement50Description => 'Desbloquea 25 logros';
 
   @override
+  String get achievementUnlockedDialogTitle => '¡Logro desbloqueado!';
+
+  @override
+  String get achievementUnlockedDialogMessage =>
+      '¡Sigue así, tu progreso importa!';
+
+  @override
+  String get achievementLockedDialogTitle => 'Logro bloqueado';
+
+  @override
+  String get achievementLockedDialogMessage =>
+      'Sigue avanzando para desbloquear este logro.';
+
+  @override
   String get achievementUnlockedNotificationTitle => 'Logro desbloqueado';
 
   @override

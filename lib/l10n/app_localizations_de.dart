@@ -2723,6 +2723,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get achievement50Description => 'Schalte 25 Erfolge frei';
 
   @override
+  String get achievementUnlockedDialogTitle => 'Erfolg freigeschaltet!';
+
+  @override
+  String get achievementUnlockedDialogMessage =>
+      'Weiter so, dein Fortschritt zählt!';
+
+  @override
+  String get achievementLockedDialogTitle => 'Erfolg gesperrt';
+
+  @override
+  String get achievementLockedDialogMessage =>
+      'Mach weiter, um diesen Erfolg freizuschalten.';
+
+  @override
   String get achievementUnlockedNotificationTitle => 'Erfolg freigeschaltet';
 
   @override

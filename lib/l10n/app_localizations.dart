@@ -4864,6 +4864,30 @@ abstract class AppLocalizations {
   /// **'Unlock 25 achievements'**
   String get achievement50Description;
 
+  /// No description provided for @achievementUnlockedDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked!'**
+  String get achievementUnlockedDialogTitle;
+
+  /// No description provided for @achievementUnlockedDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it up, your progress matters!'**
+  String get achievementUnlockedDialogMessage;
+
+  /// No description provided for @achievementLockedDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement locked'**
+  String get achievementLockedDialogTitle;
+
+  /// No description provided for @achievementLockedDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep progressing to unlock this achievement.'**
+  String get achievementLockedDialogMessage;
+
   /// No description provided for @achievementUnlockedNotificationTitle.
   ///
   /// In en, this message translates to:

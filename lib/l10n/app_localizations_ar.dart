@@ -2679,6 +2679,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get achievement50Description => 'افتح 25 إنجازا';
 
   @override
+  String get achievementUnlockedDialogTitle => 'تم فتح الإنجاز!';
+
+  @override
+  String get achievementUnlockedDialogMessage => 'واصل التقدم، فتقدمك مهم!';
+
+  @override
+  String get achievementLockedDialogTitle => 'الإنجاز مقفل';
+
+  @override
+  String get achievementLockedDialogMessage => 'واصل التقدم لفتح هذا الإنجاز.';
+
+  @override
   String get achievementUnlockedNotificationTitle => 'تم فتح إنجاز';
 
   @override

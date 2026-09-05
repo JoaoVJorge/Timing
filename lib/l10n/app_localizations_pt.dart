@@ -2700,6 +2700,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get achievement50Description => 'Desbloqueie 25 conquistas';
 
   @override
+  String get achievementUnlockedDialogTitle => 'Conquista desbloqueada!';
+
+  @override
+  String get achievementUnlockedDialogMessage =>
+      'Continue assim, seu progresso importa!';
+
+  @override
+  String get achievementLockedDialogTitle => 'Conquista bloqueada';
+
+  @override
+  String get achievementLockedDialogMessage =>
+      'Continue avançando para desbloquear esta conquista.';
+
+  @override
   String get achievementUnlockedNotificationTitle => 'Conquista desbloqueada';
 
   @override

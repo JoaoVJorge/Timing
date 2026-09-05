@@ -2691,6 +2691,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievement50Description => 'Unlock 25 achievements';
 
   @override
+  String get achievementUnlockedDialogTitle => 'Achievement unlocked!';
+
+  @override
+  String get achievementUnlockedDialogMessage =>
+      'Keep it up, your progress matters!';
+
+  @override
+  String get achievementLockedDialogTitle => 'Achievement locked';
+
+  @override
+  String get achievementLockedDialogMessage =>
+      'Keep progressing to unlock this achievement.';
+
+  @override
   String get achievementUnlockedNotificationTitle => 'Achievement unlocked';
 
   @override
