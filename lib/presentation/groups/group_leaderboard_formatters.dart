@@ -38,9 +38,6 @@ String progressLabel(
 
 int _secondsToDisplayMinutes(int seconds) => (seconds / 60).ceil();
 
-String groupDescription(BuildContext context, GroupEntity group) =>
-    context.l10n.groupDescription(groupMetricDescription(context, group.theme));
-
 String friendsCardSubtitle(BuildContext context, int groupCount) =>
     context.l10n.groupsFriendsSubtitleWithCount(groupCount);
 

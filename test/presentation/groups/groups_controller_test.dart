@@ -6,7 +6,10 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
@@ -16,6 +19,7 @@ import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
+import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
@@ -71,6 +75,25 @@ class _FakeGroupsRepository implements GroupsRepository {
     olderImageCursor.complete(before);
     return Right(await olderImagePage.future);
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeFriendsRepository implements FriendsRepository {
+  _FakeFriendsRepository(this.friends);
+
+  final List<FriendEntity> friends;
+
+  @override
+  Future<Either<AppError, FriendsSocialEntity>> getSocial() async => Right(
+    FriendsSocialEntity(
+      inviteCode: "",
+      requests: const [],
+      sentRequests: const [],
+      friends: friends,
+    ),
+  );
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -491,7 +514,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(l10n.groupsFriendsSubtitleWithCount(2)), findsNothing);
-    expect(find.byType(AppSkeleton), findsOneWidget);
+    expect(find.byType(AppSkeleton), findsWidgets);
 
     repository.groupsCompleter!.complete([freshGroup]);
     await tester.pumpAndSettle();
@@ -500,13 +523,131 @@ void main() {
     expect(find.text(l10n.groupsFriendsSubtitleWithCount(1)), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets("friends card renders the current friends", (tester) async {
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([
+      _group("group-1", "Grupo", description: "Descrição criada pelo usuário"),
+    ]);
+    final GroupsController controller = _controller(
+      repository,
+      friends: const [
+        FriendEntity(
+          id: "ana",
+          friendshipId: "friendship-1",
+          name: "Ana",
+          handle: "ana",
+          colorValue: 1,
+        ),
+        FriendEntity(
+          id: "bia",
+          friendshipId: "friendship-2",
+          name: "Bia",
+          handle: "bia",
+          colorValue: 2,
+        ),
+      ],
+    );
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("en"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey("friends-card-avatar-ana")),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey("friends-card-avatar-bia")),
+      findsOneWidget,
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey("friends-card-avatar-slot"))),
+      tester.getTopLeft(find.byKey(const ValueKey("friends-card-avatar-ana"))),
+    );
+    final Finder friendsCard = find.byKey(const ValueKey("friends-card"));
+    final Finder friendsTitle = find.descendant(
+      of: friendsCard,
+      matching: find.text(
+        lookupAppLocalizations(const Locale("en")).groupsFriendsTitle,
+      ),
+    );
+    final Finder friendsDescription = find.byKey(
+      const ValueKey("friends-card-description"),
+    );
+    expect(friendsDescription, findsOneWidget);
+    expect(
+      tester.getTopLeft(friendsDescription).dy,
+      greaterThan(tester.getBottomLeft(friendsTitle).dy),
+    );
+    expect(
+      tester
+          .getTopLeft(find.byKey(const ValueKey("friends-card-avatar-ana")))
+          .dy,
+      greaterThan(tester.getBottomLeft(friendsDescription).dy),
+    );
+    expect(find.text("Descrição criada pelo usuário"), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("group cards grow with their descriptions", (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(430, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final GroupsController controller = _controller(
+      _FakeGroupsRepository([
+        _group("short", "Grupo curto", description: "Descrição curta."),
+        _group(
+          "long",
+          "Grupo longo",
+          description:
+              "Uma descrição maior que ocupa várias linhas para que o cartão "
+              "acompanhe naturalmente o conteúdo sem manter uma altura fixa.",
+        ),
+      ]),
+    );
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("en"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final double shortHeight = tester
+        .getSize(find.byKey(const ValueKey("group-card-short")))
+        .height;
+    final double longHeight = tester
+        .getSize(find.byKey(const ValueKey("group-card-long")))
+        .height;
+    expect(longHeight, greaterThan(shortHeight));
+    expect(tester.takeException(), isNull);
+  });
 }
 
 GroupsController _controller(
   _FakeGroupsRepository repository, {
   ActivityChangeBus? activityChangeBus,
+  List<FriendEntity> friends = const [],
 }) => GroupsController(
   getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
+  getFriendsSocialUseCase: GetFriendsSocialUseCase(
+    friendsRepository: _FakeFriendsRepository(friends),
+  ),
   groupsRepository: repository,
   appNavigator: _FakeAppNavigator(),
   supabaseService: _FakeSupabaseService(),
@@ -518,10 +659,12 @@ GroupEntity _group(
   String id,
   String name, {
   GroupThemeType theme = GroupThemeType.dailyGoals,
+  String description = "",
 }) => GroupEntity(
   id: id,
   name: name,
   theme: theme,
+  description: description,
   members: const [
     GroupMemberEntity(
       id: "me",

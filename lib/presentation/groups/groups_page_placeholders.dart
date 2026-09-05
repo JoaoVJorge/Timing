@@ -15,7 +15,12 @@ class _GroupsEmptyState extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
     children: [
-      _FriendsCard(groupCount: 0, isLoading: false, onTap: onTapFriends),
+      _FriendsCard(
+        groupCount: 0,
+        friends: const [],
+        isLoading: false,
+        onTap: onTapFriends,
+      ),
       const Gap(AppSpacing.betweenRelated),
       AppEmptyState(
         icon: Icons.groups_2_outlined,

@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
@@ -95,7 +96,9 @@ class _GroupsHomeView extends StatelessWidget {
 
           return _GroupsList(
             groups: controller.groups,
+            friends: controller.friends,
             isLoading: controller.isLoading.value,
+            isLoadingFriends: controller.isLoadingFriends.value,
             onTapFriends: controller.onTapFriends,
             onSelectGroup: controller.onSelectGroup,
           );
@@ -153,13 +156,17 @@ class _GroupDetailsView extends StatelessWidget {
 class _GroupsList extends StatelessWidget {
   const _GroupsList({
     required this.groups,
+    required this.friends,
     required this.isLoading,
+    required this.isLoadingFriends,
     required this.onTapFriends,
     required this.onSelectGroup,
   });
 
   final List<GroupEntity> groups;
+  final List<FriendEntity> friends;
   final bool isLoading;
+  final bool isLoadingFriends;
   final VoidCallback onTapFriends;
   final ValueChanged<GroupEntity> onSelectGroup;
 
@@ -172,7 +179,8 @@ class _GroupsList extends StatelessWidget {
       if (index == 0) {
         return _FriendsCard(
           groupCount: groups.length,
-          isLoading: isLoading,
+          friends: friends,
+          isLoading: isLoading || isLoadingFriends,
           onTap: onTapFriends,
         );
       }
@@ -223,59 +231,70 @@ class _GroupCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    pressedScale: 0.98,
-    child: Container(
-      constraints: const BoxConstraints(minHeight: 124),
-      padding: const EdgeInsets.all(14),
-      decoration: AppSurfaces.content(context.colorTokens),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _GroupIcon(theme: group.theme, size: 72, iconSize: 34),
-          const Gap(14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  localizedGroupName(context, group),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.black20.copyWith(fontSize: 22),
-                ),
-                const Gap(4),
-                Text(
-                  groupDescription(context, group),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(height: 1.28),
-                ),
-                const Gap(12),
-                _OverlappingMembers(members: group.members),
-              ],
+  Widget build(BuildContext context) {
+    final String description = group.description.trim();
+
+    return BounceTap(
+      key: ValueKey<String>("group-card-${group.id}"),
+      onTap: onTap,
+      pressedScale: 0.98,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: AppSurfaces.content(context.colorTokens),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _GroupIcon(theme: group.theme, size: 72, iconSize: 34),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    localizedGroupName(context, group),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.black20.copyWith(fontSize: 22),
+                  ),
+                  if (description.isNotEmpty) ...[
+                    const Gap(4),
+                    Text(
+                      description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        height: 1.28,
+                      ),
+                    ),
+                  ],
+                  const Gap(12),
+                  _OverlappingMembers(members: group.members),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _FriendsCard extends StatelessWidget {
   const _FriendsCard({
     required this.groupCount,
+    required this.friends,
     required this.isLoading,
     required this.onTap,
   });
 
   final int groupCount;
+  final List<FriendEntity> friends;
   final bool isLoading;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => BounceTap(
+    key: const ValueKey<String>("friends-card"),
     onTap: onTap,
     pressedScale: 0.98,
     child: Container(
@@ -319,6 +338,7 @@ class _FriendsCard extends StatelessWidget {
                 else
                   Text(
                     friendsCardSubtitle(context, groupCount),
+                    key: const ValueKey<String>("friends-card-description"),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodySmall.copyWith(
@@ -326,6 +346,22 @@ class _FriendsCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                if (isLoading || friends.isNotEmpty) ...[
+                  const Gap(8),
+                  SizedBox(
+                    key: const ValueKey<String>("friends-card-avatar-slot"),
+                    width: 90,
+                    height: 30,
+                    child: isLoading
+                        ? const AppSkeleton(
+                            child: AppSkeletonBox(height: 30, radius: 999),
+                          )
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: _OverlappingFriends(friends: friends),
+                          ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -339,6 +375,73 @@ class _FriendsCard extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _OverlappingFriends extends StatelessWidget {
+  const _OverlappingFriends({required this.friends});
+
+  final List<FriendEntity> friends;
+
+  @override
+  Widget build(BuildContext context) {
+    const int visibleCount = 3;
+    const double size = 30;
+    const double overlap = 10;
+    final List<FriendEntity> visibleFriends = friends
+        .take(visibleCount)
+        .toList();
+    final int extraCount = friends.length - visibleFriends.length;
+
+    return SizedBox(
+      height: size,
+      width:
+          size +
+          (visibleFriends.length - 1) * (size - overlap) +
+          (extraCount > 0 ? size - overlap : 0),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (int index = 0; index < visibleFriends.length; index++)
+            Positioned(
+              left: index * (size - overlap),
+              child: GroupMemberAvatar(
+                key: ValueKey<String>(
+                  "friends-card-avatar-${visibleFriends[index].id}",
+                ),
+                name: visibleFriends[index].name,
+                colorValue: visibleFriends[index].colorValue,
+                size: size,
+                borderColor: context.colorTokens.surface,
+              ),
+            ),
+          if (extraCount > 0)
+            Positioned(
+              left: visibleFriends.length * (size - overlap),
+              child: Container(
+                width: size,
+                height: size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: context.colorTokens.primaryVeryLight,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: context.colorTokens.surface,
+                    width: 2,
+                  ),
+                ),
+                child: Text(
+                  "+$extraCount",
+                  style: context.textStyles.bodyTiny.copyWith(
+                    color: context.colorTokens.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _OverlappingMembers extends StatelessWidget {

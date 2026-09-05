@@ -7,6 +7,8 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
@@ -16,6 +18,7 @@ import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
+import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -32,6 +35,7 @@ enum GroupDetailsTab { ranking, goals, chat }
 class GroupsController extends GetxController {
   GroupsController({
     required this._getGroupsUseCase,
+    required this._getFriendsSocialUseCase,
     required this._groupsRepository,
     required this._appNavigator,
     required this._supabaseService,
@@ -42,6 +46,7 @@ class GroupsController extends GetxController {
            mainTabRefreshService ?? MainTabRefreshService();
 
   final GetGroupsUseCase _getGroupsUseCase;
+  final GetFriendsSocialUseCase _getFriendsSocialUseCase;
   final GroupsRepository _groupsRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
@@ -59,11 +64,13 @@ class GroupsController extends GetxController {
   String? _pendingActivityChangeGroupId;
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
+  final RxList<FriendEntity> friends = <FriendEntity>[].obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
   final Rx<LeaderboardPeriodType> selectedPeriod =
       LeaderboardPeriodType.total.obs;
   final Rx<GroupDetailsTab> selectedDetailsTab = GroupDetailsTab.ranking.obs;
   final RxBool isLoading = true.obs;
+  final RxBool isLoadingFriends = true.obs;
   final RxBool isShowingGroupDetails = false.obs;
   final RxBool isShowingMemberManagement = false.obs;
   final RxBool isLoadingActivityProgress = false.obs;
@@ -287,6 +294,18 @@ class GroupsController extends GetxController {
       _onGroupActivityChanged,
     );
     loadGroups();
+    unawaited(loadFriends());
+  }
+
+  Future<void> loadFriends() async {
+    isLoadingFriends.value = true;
+    try {
+      final Either<AppError, FriendsSocialEntity> result =
+          await _getFriendsSocialUseCase();
+      result.fold((_) {}, (social) => friends.assignAll(social.friends));
+    } finally {
+      isLoadingFriends.value = false;
+    }
   }
 
   @override
@@ -692,8 +711,10 @@ class GroupsController extends GetxController {
   }
 
   /// Friends live next to Groups: both answer "how am I doing with others?".
-  Future<void> onTapFriends() =>
-      _appNavigator.toNamed(AppRoutes.friends) ?? Future<void>.value();
+  Future<void> onTapFriends() async {
+    await (_appNavigator.toNamed(AppRoutes.friends) ?? Future<void>.value());
+    await loadFriends();
+  }
 
   Future<void> onTapInviteMembers() async {
     final GroupEntity? group = selectedGroup.value;
