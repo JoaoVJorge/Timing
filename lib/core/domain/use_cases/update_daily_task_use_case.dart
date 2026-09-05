@@ -16,7 +16,7 @@ class UpdateDailyTaskUseCase {
     required DailyTaskSequenceType sequenceType,
   }) => dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
-        await dailyTasksRepository.getTasks();
+        await dailyTasksRepository.getTasksForMutation();
 
     return getResult.fold((error) async => Left(error), (tasks) async {
       final int index = tasks.indexWhere((item) => item.id == task.id);

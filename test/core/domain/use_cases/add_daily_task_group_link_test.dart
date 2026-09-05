@@ -6,9 +6,10 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 
 class _FakeDailyTasksRepository implements DailyTasksRepository {
-  _FakeDailyTasksRepository(this._tasks);
+  _FakeDailyTasksRepository(this._tasks, {this.hydratedTasks});
 
   List<DailyTaskEntity> _tasks;
+  final List<DailyTaskEntity>? hydratedTasks;
   List<DailyTaskEntity>? savedTasks;
 
   @override
@@ -20,6 +21,18 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
       Right(_tasks);
 
   @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async =>
+      Right(_tasks);
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() async {
+    if (hydratedTasks != null) {
+      _tasks = List.of(hydratedTasks!);
+    }
+    return Right(_tasks);
+  }
+
+  @override
   Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) async {
     savedTasks = tasks;
     _tasks = tasks;
@@ -29,6 +42,36 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
 
 void main() {
   group("AddDailyTaskUseCase group link", () {
+    test("preserves remote goals when the local device is empty", () async {
+      const DailyTaskEntity remoteGoal = DailyTaskEntity(
+        id: "remote-goal",
+        name: "Meta remota",
+        colorValue: 2,
+        targetDays: 10,
+        completedDates: [],
+      );
+      final repository = _FakeDailyTasksRepository(
+        [],
+        hydratedTasks: const [remoteGoal],
+      );
+      final useCase = AddDailyTaskUseCase(dailyTasksRepository: repository);
+
+      await useCase(
+        name: "Meta do grupo",
+        colorValue: 1,
+        targetDays: 5,
+        sequenceType: DailyTaskSequenceType.casual,
+        groupId: "group-123",
+        groupActivityId: "activity-123",
+        id: "group-goal",
+      );
+
+      expect(repository.savedTasks?.map((task) => task.id), [
+        "remote-goal",
+        "group-goal",
+      ]);
+    });
+
     test("stamps groupId on a freshly created group goal", () async {
       final repository = _FakeDailyTasksRepository([]);
       final useCase = AddDailyTaskUseCase(dailyTasksRepository: repository);

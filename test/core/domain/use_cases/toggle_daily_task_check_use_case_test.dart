@@ -9,7 +9,7 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
   _FakeDailyTasksRepository(this.tasks);
 
   List<DailyTaskEntity> tasks;
-  int getTasksCalls = 0;
+  int getMutationTasksCalls = 0;
   List<DailyTaskEntity>? savedTasks;
 
   @override
@@ -17,10 +17,19 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
       mutation();
 
   @override
-  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
-    getTasksCalls++;
+  Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async {
     return Right(tasks);
   }
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() async {
+    getMutationTasksCalls++;
+    return Right(tasks);
+  }
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async =>
+      Right(tasks);
 
   @override
   Future<Either<AppError, void>> saveTasks(
@@ -33,7 +42,7 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
 }
 
 void main() {
-  test("reads the canonical repository state before a toggle", () async {
+  test("hydrates mutation state before a toggle", () async {
     final DailyTaskEntity task = const DailyTaskEntity(
       id: "goal-1",
       name: "Meta",
@@ -52,7 +61,7 @@ void main() {
       taskId: task.id,
     );
 
-    expect(repository.getTasksCalls, 1);
+    expect(repository.getMutationTasksCalls, 1);
     expect(repository.savedTasks?.single.isCheckedToday, true);
     expect(
       result.getOrElse(() => throw StateError("expected task")).isCheckedToday,

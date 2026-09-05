@@ -20,7 +20,7 @@ class AddDailyTaskUseCase {
     String? id,
   }) => _dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
-        await _dailyTasksRepository.getTasks();
+        await _dailyTasksRepository.getTasksForMutation();
 
     return getResult.fold((error) async => Left(error), (tasks) async {
       if (reuseMatchingTask) {

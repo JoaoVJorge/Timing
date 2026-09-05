@@ -30,6 +30,14 @@ class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
       Right(List.of(tasks));
 
   @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async =>
+      Right(List.of(tasks));
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() async =>
+      Right(List.of(tasks));
+
+  @override
   Future<Either<AppError, void>> saveTasks(
     List<DailyTaskEntity> updatedTasks,
   ) async {

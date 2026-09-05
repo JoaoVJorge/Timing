@@ -15,7 +15,7 @@ class ToggleDailyTaskCheckUseCase {
     bool toggleDate = true,
   }) => _dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
-        await _dailyTasksRepository.getTasks();
+        await _dailyTasksRepository.getTasksForMutation();
 
     return getResult.fold((error) async => Left(error), (tasks) async {
       final int index = tasks.indexWhere((task) => task.id == taskId);

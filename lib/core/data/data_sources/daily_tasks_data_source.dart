@@ -23,6 +23,31 @@ class DailyTasksDataSource {
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final PendingSyncStore _pendingSyncStore;
+  Future<void> _remoteSyncTail = Future<void>.value();
+  int _latestRemoteSyncRevision = 0;
+  String? _hydratedRemoteUserId;
+
+  bool get hasHydratedCurrentUserFromRemote {
+    final String? userId = _supabaseService.currentUserId;
+    return userId == null || _hydratedRemoteUserId == userId;
+  }
+
+  @visibleForTesting
+  bool canDeleteRemoteTasks(String userId) => _hydratedRemoteUserId == userId;
+
+  Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async {
+    try {
+      final String? savedTasks = await _localStorageService.read<String?>(
+        LocalStorageKeys.dailyTasks,
+      );
+      if (savedTasks == null) {
+        return const Right([]);
+      }
+      return Right(_decodeTasks(savedTasks));
+    } catch (error, stackTrace) {
+      return Left(SerializationAppError(error: error, stackTrace: stackTrace));
+    }
+  }
 
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
     try {
@@ -38,10 +63,7 @@ class DailyTasksDataSource {
         return Right(remoteTasks);
       }
 
-      final List<dynamic> decoded = jsonDecode(savedTasks) as List<dynamic>;
-      final List<DailyTaskEntity> localTasks = decoded
-          .map((item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>))
-          .toList();
+      final List<DailyTaskEntity> localTasks = _decodeTasks(savedTasks);
       if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
         final List<DailyTaskEntity> remoteTasks = await _getRemoteTasks();
         if (remoteTasks.isNotEmpty) {
@@ -60,13 +82,49 @@ class DailyTasksDataSource {
     }
   }
 
+  /// Ensures a full remote snapshot was observed before a read-modify-write.
+  /// If the network is unavailable, callers may still update the local cache,
+  /// but [_syncRemoteTasks] will refuse to issue remote deletes.
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() async {
+    if (hasHydratedCurrentUserFromRemote) {
+      return getLocalTasks();
+    }
+
+    try {
+      final String? savedTasks = await _localStorageService.read<String?>(
+        LocalStorageKeys.dailyTasks,
+      );
+      final List<DailyTaskEntity> localTasks = savedTasks == null
+          ? const []
+          : _decodeTasks(savedTasks);
+      final List<DailyTaskEntity> remoteTasks = await _getRemoteTasks();
+      if (!hasHydratedCurrentUserFromRemote) {
+        return Right(localTasks);
+      }
+      final List<DailyTaskEntity> mergedTasks = mergeTasks(
+        localTasks: localTasks,
+        remoteTasks: remoteTasks,
+      );
+      await _saveLocalTasks(mergedTasks);
+      return Right(mergedTasks);
+    } catch (error, stackTrace) {
+      return Left(SerializationAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) async {
     try {
+      final bool shouldSync = _supabaseService.currentUserId != null;
+      if (shouldSync) {
+        await _pendingSyncStore.markPending(PendingSyncDataset.dailyTasks);
+      }
       final String encoded = jsonEncode(
         tasks.map((task) => task.toMap()).toList(),
       );
       await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
-      await _syncRemoteTasks(tasks);
+      if (shouldSync) {
+        unawaited(_enqueueRemoteSync(tasks));
+      }
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -78,6 +136,26 @@ class DailyTasksDataSource {
       tasks.map((task) => task.toMap()).toList(),
     );
     await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
+  }
+
+  List<DailyTaskEntity> _decodeTasks(String encoded) {
+    final List<dynamic> decoded = jsonDecode(encoded) as List<dynamic>;
+    return decoded
+        .map((item) => DailyTaskEntity.fromMap(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> _enqueueRemoteSync(List<DailyTaskEntity> tasks) {
+    final List<DailyTaskEntity> snapshot = List.of(tasks);
+    final int revision = ++_latestRemoteSyncRevision;
+    final Future<void> scheduled = _remoteSyncTail.then(
+      (_) => _syncRemoteTasks(snapshot, revision: revision),
+    );
+    _remoteSyncTail = scheduled.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return scheduled;
   }
 
   @visibleForTesting
@@ -180,6 +258,7 @@ class DailyTasksDataSource {
           .eq("user_id", userId)
           .order("created_at");
       _logger.logResponse("select public.daily_goals", rows);
+      _hydratedRemoteUserId = userId;
 
       return rows
           .map((row) => _taskFromRow(row as Map<String, dynamic>))
@@ -194,7 +273,10 @@ class DailyTasksDataSource {
     }
   }
 
-  Future<void> _syncRemoteTasks(List<DailyTaskEntity> tasks) async {
+  Future<void> _syncRemoteTasks(
+    List<DailyTaskEntity> tasks, {
+    required int revision,
+  }) async {
     final String? userId = _supabaseService.currentUserId;
     if (userId == null) {
       return;
@@ -210,13 +292,24 @@ class DailyTasksDataSource {
         await client.from("daily_goals").upsert(rows, onConflict: "user_id,id");
       }
 
+      if (!canDeleteRemoteTasks(userId)) {
+        _logger.logInfo(
+          "Skipping remote daily_goals deletion before a complete read",
+        );
+        return;
+      }
+
       final List<String> ids = tasks.map((task) => task.id).toList();
       var delete = client.from("daily_goals").delete().eq("user_id", userId);
       if (ids.isNotEmpty) {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
-      await _pendingSyncStore.clear(PendingSyncDataset.dailyTasks);
+      // A newer local snapshot may already be waiting behind this request.
+      // Only the latest successful upload makes the dataset fully synced.
+      if (revision == _latestRemoteSyncRevision) {
+        await _pendingSyncStore.clear(PendingSyncDataset.dailyTasks);
+      }
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to sync remote daily_goals",
@@ -234,8 +327,9 @@ class DailyTasksDataSource {
     if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
       return;
     }
-    final Either<AppError, List<DailyTaskEntity>> local = await getTasks();
-    await local.fold((_) async {}, _syncRemoteTasks);
+    final Either<AppError, List<DailyTaskEntity>> hydrated =
+        await getTasksForMutation();
+    await hydrated.fold((_) async {}, _enqueueRemoteSync);
   }
 
   DailyTaskEntity _taskFromRow(Map<String, dynamic> row) =>

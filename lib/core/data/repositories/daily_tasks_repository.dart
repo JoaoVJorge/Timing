@@ -24,7 +24,14 @@ class DailyTasksRepository {
   }
 
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() =>
-      _dailyTasksDataSource.getTasks();
+      runSerializedMutation(_dailyTasksDataSource.getTasks);
+
+  Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() =>
+      _dailyTasksDataSource.getLocalTasks();
+
+  /// Must be called from inside [runSerializedMutation].
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() =>
+      _dailyTasksDataSource.getTasksForMutation();
 
   Future<Either<AppError, void>> saveTasks(List<DailyTaskEntity> tasks) =>
       _dailyTasksDataSource.saveTasks(tasks);

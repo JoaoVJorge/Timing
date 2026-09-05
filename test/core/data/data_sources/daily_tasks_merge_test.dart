@@ -15,6 +15,11 @@ class _DummyStorage extends _Dummy implements AppLocalStorageService {}
 
 class _DummySupabase extends _Dummy implements SupabaseService {}
 
+class _SignedInSupabase extends _Dummy implements SupabaseService {
+  @override
+  String? get currentUserId => "user-1";
+}
+
 class _DummyLogger extends _Dummy implements AppLoggerService {}
 
 class _DummyPendingSync extends _Dummy implements PendingSyncStore {}
@@ -45,6 +50,17 @@ void main() {
     logger: _DummyLogger(),
     pendingSyncStore: _DummyPendingSync(),
   );
+
+  test("remote deletes stay disabled before the first complete read", () {
+    final nonHydratedDataSource = DailyTasksDataSource(
+      localStorageService: _DummyStorage(),
+      supabaseService: _SignedInSupabase(),
+      logger: _DummyLogger(),
+      pendingSyncStore: _DummyPendingSync(),
+    );
+
+    expect(nonHydratedDataSource.canDeleteRemoteTasks("user-1"), isFalse);
+  });
 
   group("DailyTasksDataSource.mergeTasks last-write-wins", () {
     test("keeps a fresh local change over a stale remote copy", () {
