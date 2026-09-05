@@ -711,19 +711,12 @@
       }
     }
   },
-  "@minutesAgoShort": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "myCodeLabel": "Meu código",
   "yourInviteCodeLabel": "Seu código de convite",
   "yourFriendsTitle": "Seus amigos ({count})",
   "seeAllButton": "Ver todos",
   "onlineLabel": "Online",
-  "minutesAgoShort": "Há {minutes} min",
+  "offlineLabel": "Offline",
   "friendsEmptyTitle": "Você ainda não tem amigos",
   "friendsEmptySubtitle": "Busque pessoas acima ou compartilhe seu código de convite.",
   "shareCodeButton": "Compartilhar código",

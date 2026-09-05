@@ -224,17 +224,22 @@ class GroupsDataSource {
           .toSet()
           .toList();
       final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(friendIds);
+          await _profilesById(friendIds, withPhoto: true);
 
       return Right(
-        friendIds
-            .map(
-              (id) => (
-                id: id,
-                name: _displayName(profilesById[id], fallback: "Friend"),
-              ),
-            )
-            .toList(),
+        friendIds.map((id) {
+          final Map<String, dynamic>? profile = profilesById[id];
+          return (
+            id: id,
+            name: _displayName(profile, fallback: "Friend"),
+            colorValue:
+                (profile?["accent_color_value"] as num?)?.toInt() ??
+                GroupAvatarColors.byIndex(id.hashCode.abs()),
+            avatarIconIndex: (profile?["avatar_icon_index"] as num?)?.toInt(),
+            profilePhotoBase64:
+                profile?["profile_photo_base64"] as String? ?? "",
+          );
+        }).toList(),
       );
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -896,8 +901,9 @@ class GroupsDataSource {
     final List<Map<String, dynamic>> profileRows = await _selectRows(
       table: "profiles",
       columns: withPhoto
-          ? "id, nick_name, user_name, accent_color_value, profile_photo_base64"
-          : "id, nick_name, user_name, accent_color_value",
+          ? "id, nick_name, user_name, accent_color_value, "
+                "avatar_icon_index, profile_photo_base64"
+          : "id, nick_name, user_name, accent_color_value, avatar_icon_index",
       filters: (query) => query.inFilter("id", ids),
     );
     return {
@@ -923,6 +929,7 @@ class GroupsDataSource {
           (profileRow?["accent_color_value"] as num?)?.toInt() ??
           GroupAvatarColors.byIndex(userId.hashCode.abs()),
       avatar: profileRow?["profile_photo_base64"] as String? ?? "",
+      avatarIconIndex: (profileRow?["avatar_icon_index"] as num?)?.toInt(),
       todaySeconds: scores.today,
       weekSeconds: scores.week,
       monthSeconds: scores.month,
@@ -947,6 +954,8 @@ class GroupsDataSource {
           DateTime.now(),
       senderName: _displayName(profileRow, fallback: "Membro"),
       senderAvatar: profileRow?["profile_photo_base64"] as String? ?? "",
+      senderAvatarIconIndex: (profileRow?["avatar_icon_index"] as num?)
+          ?.toInt(),
       senderAvatarColorValue:
           (profileRow?["accent_color_value"] as num?)?.toInt() ??
           GroupAvatarColors.byIndex(senderId.hashCode.abs()),

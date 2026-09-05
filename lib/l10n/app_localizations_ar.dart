@@ -1767,9 +1767,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onlineLabel => '????';
 
   @override
-  String minutesAgoShort(int minutes) {
-    return '??? $minutes ?';
-  }
+  String get offlineLabel => 'غير متصل';
 
   @override
   String get friendsEmptyTitle => '??? ???? ?????? ???';

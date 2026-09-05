@@ -3226,11 +3226,11 @@ abstract class AppLocalizations {
   /// **'Online'**
   String get onlineLabel;
 
-  /// No description provided for @minutesAgoShort.
+  /// No description provided for @offlineLabel.
   ///
   /// In en, this message translates to:
-  /// **'{minutes} min ago'**
-  String minutesAgoShort(int minutes);
+  /// **'Offline'**
+  String get offlineLabel;
 
   /// No description provided for @friendsEmptyTitle.
   ///

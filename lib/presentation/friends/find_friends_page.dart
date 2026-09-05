@@ -304,6 +304,8 @@ class _FoundUserSection extends StatelessWidget {
                       GroupMemberAvatar(
                         name: profile.name,
                         colorValue: profile.colorValue,
+                        avatarIconIndex: profile.avatarIconIndex,
+                        avatar: profile.profilePhotoBase64,
                         size: 52,
                       ),
                       const Gap(12),

@@ -13,6 +13,7 @@ class GroupMemberEntity extends Equatable {
     required this.monthSeconds,
     int? totalSeconds,
     this.avatar = "",
+    this.avatarIconIndex,
     this.role = "member",
     this.joinedAt,
   }) : totalSeconds = totalSeconds ?? monthSeconds;
@@ -31,6 +32,7 @@ class GroupMemberEntity extends Equatable {
     monthSeconds: map["monthSeconds"] as int? ?? map["monthScore"] as int? ?? 0,
     totalSeconds: map["totalSeconds"] as int? ?? map["totalScore"] as int?,
     avatar: map["avatar"] as String? ?? "",
+    avatarIconIndex: map["avatarIconIndex"] as int?,
     role: map["role"] as String? ?? "member",
     joinedAt: DateTime.tryParse(map["joinedAt"] as String? ?? ""),
   );
@@ -43,6 +45,7 @@ class GroupMemberEntity extends Equatable {
   final int monthSeconds;
   final int totalSeconds;
   final String avatar;
+  final int? avatarIconIndex;
   final String role;
   final DateTime? joinedAt;
 
@@ -70,6 +73,7 @@ class GroupMemberEntity extends Equatable {
     "monthSeconds": monthSeconds,
     "totalSeconds": totalSeconds,
     "avatar": avatar,
+    "avatarIconIndex": avatarIconIndex,
     "role": role,
     "joinedAt": joinedAt?.toIso8601String(),
     "todayScore": todayScore,
@@ -90,6 +94,7 @@ class GroupMemberEntity extends Equatable {
     monthSeconds,
     totalSeconds,
     avatar,
+    avatarIconIndex,
     role,
     joinedAt,
   ];

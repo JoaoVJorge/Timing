@@ -1787,9 +1787,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onlineLabel => 'Online';
 
   @override
-  String minutesAgoShort(int minutes) {
-    return 'Hace $minutes min';
-  }
+  String get offlineLabel => 'Desconectado';
 
   @override
   String get friendsEmptyTitle => 'Aún no tienes amigos';

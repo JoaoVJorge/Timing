@@ -4,7 +4,6 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
-import "package:timing/theme/group_colors.dart";
 
 class FriendTile extends StatelessWidget {
   const FriendTile({
@@ -40,7 +39,9 @@ class FriendTile extends StatelessWidget {
         children: [
           GroupMemberAvatar(
             name: friend.name,
-            colorValue: GroupAvatarColors.byIndex(friend.id.hashCode),
+            colorValue: friend.colorValue,
+            avatarIconIndex: friend.avatarIconIndex,
+            avatar: friend.profilePhotoBase64,
           ),
           const SizedBox(width: 12),
           Expanded(

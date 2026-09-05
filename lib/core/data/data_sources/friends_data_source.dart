@@ -1,5 +1,6 @@
 import "package:dartz/dartz.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
+import "package:timing/core/domain/entities/friend_presence_entity.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -12,6 +13,36 @@ class FriendsDataSource {
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+
+  Future<Either<AppError, List<FriendPresenceEntity>>> getPresences(
+    List<String> friendIds,
+  ) async {
+    if (friendIds.isEmpty) {
+      return const Right([]);
+    }
+    try {
+      final List<Map<String, dynamic>> rows = await _selectRows(
+        table: "profile_presence_status",
+        columns: "id, is_online, last_seen_at",
+        filters: (query) => query.inFilter("id", friendIds),
+      );
+      return Right(
+        rows
+            .map(
+              (row) => FriendPresenceEntity(
+                id: row["id"] as String,
+                isOnline: row["is_online"] as bool? ?? false,
+                lastSeenAt: DateTime.tryParse(
+                  row["last_seen_at"] as String? ?? "",
+                ),
+              ),
+            )
+            .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
 
   Future<Either<AppError, FriendsSocialEntity>> getSocial() async {
     try {
@@ -227,10 +258,11 @@ class FriendsDataSource {
 
   Future<List<Map<String, dynamic>>> _selectRows({
     required String table,
+    String columns = "*",
     required dynamic Function(dynamic query) filters,
   }) async {
     final dynamic response = await filters(
-      _supabaseService.requireClient.from(table).select(),
+      _supabaseService.requireClient.from(table).select(columns),
     );
     _logger.logResponse("select public.$table", response);
     return (response as List<dynamic>)
@@ -263,6 +295,11 @@ class FriendsDataSource {
     name: _displayName(profileRow),
     handle: _handleFor(userId, profileRow),
     colorValue: _colorFor(userId, profileRow),
+    avatarIconIndex: (profileRow?["avatar_icon_index"] as num?)?.toInt(),
+    profilePhotoBase64: (profileRow?["profile_photo_base64"] as String? ?? "")
+        .trim(),
+    isOnline: profileRow?["is_online"] as bool? ?? false,
+    lastSeenAt: DateTime.tryParse(profileRow?["last_seen_at"] as String? ?? ""),
   );
 
   FriendSuggestionEntity _suggestionFromRow(Map<String, dynamic> row) {
@@ -272,6 +309,8 @@ class FriendsDataSource {
       name: _displayName(row),
       handle: _handleFor(id, row),
       colorValue: _colorFor(id, row),
+      avatarIconIndex: (row["avatar_icon_index"] as num?)?.toInt(),
+      profilePhotoBase64: (row["profile_photo_base64"] as String? ?? "").trim(),
     );
   }
 

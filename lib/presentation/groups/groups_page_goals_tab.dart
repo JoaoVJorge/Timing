@@ -751,6 +751,7 @@ class _ParticipantProgressRow extends StatelessWidget {
             name: member.name,
             colorValue: member.avatarColorValue,
             avatar: member.avatar,
+            avatarIconIndex: member.avatarIconIndex,
             size: 38,
           ),
           const Gap(10),

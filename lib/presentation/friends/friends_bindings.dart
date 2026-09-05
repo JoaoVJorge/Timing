@@ -7,6 +7,8 @@ class FriendsBindings extends Bindings {
     Get.put<FriendsController>(
       FriendsController(
         getFriendsSocialUseCase: Get.find(),
+        getFriendPresencesUseCase: Get.find(),
+        appController: Get.find(),
         sendFriendRequestUseCase: Get.find(),
         acceptFriendRequestUseCase: Get.find(),
         declineFriendRequestUseCase: Get.find(),

@@ -68,6 +68,7 @@ class FriendsPage extends GetView<FriendsController> {
                   const Gap(18),
                   FriendsSection(
                     friends: controller.friends.toList(),
+                    now: controller.presenceNow.value,
                     onShare: controller.shareInviteCode,
                     onRemove: controller.removeFriend,
                   ),

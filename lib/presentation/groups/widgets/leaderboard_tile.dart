@@ -67,6 +67,8 @@ class LeaderboardTile extends StatelessWidget {
           GroupMemberAvatar(
             name: member.name,
             colorValue: member.avatarColorValue,
+            avatar: member.avatar,
+            avatarIconIndex: member.avatarIconIndex,
             size: 50,
           ),
           const Gap(14),

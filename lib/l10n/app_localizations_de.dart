@@ -1802,9 +1802,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onlineLabel => 'Online';
 
   @override
-  String minutesAgoShort(int minutes) {
-    return 'Vor $minutes Min.';
-  }
+  String get offlineLabel => 'Offline';
 
   @override
   String get friendsEmptyTitle => 'Du hast noch keine Freunde';

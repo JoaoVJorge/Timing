@@ -12,12 +12,14 @@ class FriendsSection extends StatelessWidget {
     required this.friends,
     required this.onShare,
     required this.onRemove,
+    required this.now,
     super.key,
   });
 
   final List<FriendEntity> friends;
   final VoidCallback onShare;
   final ValueChanged<FriendEntity> onRemove;
+  final DateTime now;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -34,8 +36,8 @@ class FriendsSection extends StatelessWidget {
               _FriendRow(
                 key: ValueKey(friends[index].id),
                 profile: friends[index],
-                index: index,
                 onRemove: () => onRemove(friends[index]),
+                now: now,
               ),
               if (index < friends.length - 1) const Gap(10),
             ],
@@ -48,14 +50,14 @@ class FriendsSection extends StatelessWidget {
 class _FriendRow extends StatefulWidget {
   const _FriendRow({
     required this.profile,
-    required this.index,
     required this.onRemove,
+    required this.now,
     super.key,
   });
 
   final FriendEntity profile;
-  final int index;
   final VoidCallback onRemove;
+  final DateTime now;
 
   @override
   State<_FriendRow> createState() => _FriendRowState();
@@ -146,6 +148,8 @@ class _FriendRowState extends State<_FriendRow>
           GroupMemberAvatar(
             name: widget.profile.name,
             colorValue: widget.profile.colorValue,
+            avatarIconIndex: widget.profile.avatarIconIndex,
+            avatar: widget.profile.profilePhotoBase64,
             size: 40,
           ),
           const Gap(10),
@@ -157,10 +161,10 @@ class _FriendRowState extends State<_FriendRow>
           ),
           const Gap(10),
           _FriendStatusChip(
-            label: widget.index < 2
+            isOnline: widget.profile.isOnlineAt(widget.now),
+            label: widget.profile.isOnlineAt(widget.now)
                 ? context.l10n.onlineLabel
-                : context.l10n.minutesAgoShort(widget.index + 1),
-            index: widget.index,
+                : context.l10n.offlineLabel,
           ),
         ],
       ),
@@ -169,14 +173,14 @@ class _FriendRowState extends State<_FriendRow>
 }
 
 class _FriendStatusChip extends StatelessWidget {
-  const _FriendStatusChip({required this.label, required this.index});
+  const _FriendStatusChip({required this.label, required this.isOnline});
 
   final String label;
-  final int index;
+  final bool isOnline;
 
   @override
   Widget build(BuildContext context) {
-    final Color color = index < 2
+    final Color color = isOnline
         ? context.colorTokens.success
         : context.colorTokens.textHint;
 

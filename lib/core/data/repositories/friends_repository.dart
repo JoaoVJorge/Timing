@@ -1,6 +1,7 @@
 import "package:dartz/dartz.dart";
 import "package:timing/core/data/data_sources/friends_data_source.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
+import "package:timing/core/domain/entities/friend_presence_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 
@@ -11,6 +12,10 @@ class FriendsRepository {
 
   Future<Either<AppError, FriendsSocialEntity>> getSocial() =>
       _friendsDataSource.getSocial();
+
+  Future<Either<AppError, List<FriendPresenceEntity>>> getPresences(
+    List<String> friendIds,
+  ) => _friendsDataSource.getPresences(friendIds);
 
   Future<Either<AppError, void>> sendFriendRequest(String addresseeId) =>
       _friendsDataSource.sendFriendRequest(addresseeId);

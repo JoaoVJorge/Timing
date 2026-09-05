@@ -1,10 +1,14 @@
+import "dart:async";
+
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
+import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
+import "package:timing/core/domain/entities/friend_presence_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
@@ -15,6 +19,7 @@ import "package:timing/core/domain/use_cases/decline_friend_request_use_case.dar
 import "package:timing/core/domain/use_cases/decline_group_invitation_use_case.dart";
 import "package:timing/core/domain/use_cases/find_profile_by_code_use_case.dart";
 import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:timing/core/domain/use_cases/get_friend_presences_use_case.dart";
 import "package:timing/core/domain/use_cases/get_group_invitations_use_case.dart";
 import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
@@ -26,9 +31,30 @@ import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 import "package:share_plus/share_plus.dart";
 
+@visibleForTesting
+List<FriendEntity> mergeFriendPresences(
+  Iterable<FriendEntity> currentFriends,
+  Iterable<FriendPresenceEntity> presences,
+) {
+  final byId = {for (final presence in presences) presence.id: presence};
+  return currentFriends
+      .map((friend) {
+        final FriendPresenceEntity? presence = byId[friend.id];
+        return presence == null
+            ? friend
+            : friend.copyWith(
+                isOnline: presence.isOnline,
+                lastSeenAt: presence.lastSeenAt,
+              );
+      })
+      .toList(growable: false);
+}
+
 class FriendsController extends GetxController {
   FriendsController({
     required this._getFriendsSocialUseCase,
+    required this._getFriendPresencesUseCase,
+    required this._appController,
     required this._sendFriendRequestUseCase,
     required this._acceptFriendRequestUseCase,
     required this._declineFriendRequestUseCase,
@@ -43,6 +69,8 @@ class FriendsController extends GetxController {
   });
 
   final GetFriendsSocialUseCase _getFriendsSocialUseCase;
+  final GetFriendPresencesUseCase _getFriendPresencesUseCase;
+  final AppController _appController;
   final SendFriendRequestUseCase _sendFriendRequestUseCase;
   final AcceptFriendRequestUseCase _acceptFriendRequestUseCase;
   final DeclineFriendRequestUseCase _declineFriendRequestUseCase;
@@ -64,12 +92,17 @@ class FriendsController extends GetxController {
       <SentGroupInvitationEntity>[].obs;
   final RxString inviteCode = "".obs;
   final RxBool isLoading = true.obs;
+  final Rx<DateTime> presenceNow = DateTime.now().toUtc().obs;
   final RxSet<String> acceptingFriendRequestIds = <String>{}.obs;
   final RxSet<String> acceptingGroupInvitationIds = <String>{}.obs;
 
   final Rxn<FriendSuggestionEntity> foundUser = Rxn<FriendSuggestionEntity>();
   final RxBool isSearching = false.obs;
   final RxBool hasSearched = false.obs;
+  Timer? _presenceTimer;
+  Worker? _foregroundWorker;
+  bool _isRefreshingPresence = false;
+  int _presenceTicks = 0;
 
   Set<String> get sentRequestIds =>
       sentRequests.map((request) => request.id).toSet();
@@ -80,6 +113,50 @@ class FriendsController extends GetxController {
   void onInit() {
     super.onInit();
     loadSocial();
+    _foregroundWorker = ever<bool>(
+      _appController.isAppInForeground,
+      _setPresencePolling,
+    );
+    _setPresencePolling(_appController.isAppInForeground.value);
+  }
+
+  void _setPresencePolling(bool isForeground) {
+    _presenceTimer?.cancel();
+    _presenceTimer = null;
+    if (!isForeground) {
+      return;
+    }
+    _presenceTicks = 0;
+    presenceNow.value = DateTime.now().toUtc();
+    unawaited(_refreshPresences());
+    _presenceTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      presenceNow.value = DateTime.now().toUtc();
+      _presenceTicks++;
+      if (_presenceTicks.isEven) {
+        unawaited(_refreshPresences());
+      }
+    });
+  }
+
+  Future<void> _refreshPresences() async {
+    if (_isRefreshingPresence || friends.isEmpty) {
+      return;
+    }
+    _isRefreshingPresence = true;
+    try {
+      final result = await _getFriendPresencesUseCase(
+        friends.map((friend) => friend.id).toList(),
+      );
+      result.fold((_) => null, (List<FriendPresenceEntity> presences) {
+        final List<FriendEntity> updated = mergeFriendPresences(
+          friends,
+          presences,
+        );
+        friends.assignAll(updated);
+      });
+    } finally {
+      _isRefreshingPresence = false;
+    }
   }
 
   Future<void> loadSocial() async {
@@ -180,6 +257,8 @@ class FriendsController extends GetxController {
           name: profile.name,
           handle: profile.handle,
           colorValue: profile.colorValue,
+          avatarIconIndex: profile.avatarIconIndex,
+          profilePhotoBase64: profile.profilePhotoBase64,
         ),
       );
       _appNavigator.showSuccessSnackBar(
@@ -311,5 +390,12 @@ class FriendsController extends GetxController {
   AppLocalizations? get _l10n {
     final BuildContext? context = Get.context;
     return context == null ? null : AppLocalizations.of(context);
+  }
+
+  @override
+  void onClose() {
+    _presenceTimer?.cancel();
+    _foregroundWorker?.dispose();
+    super.onClose();
   }
 }

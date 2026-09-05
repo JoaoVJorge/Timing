@@ -9,6 +9,7 @@ class GroupImageMessageEntity extends Equatable {
     required this.createdAt,
     this.senderName = "Membro",
     this.senderAvatar = "",
+    this.senderAvatarIconIndex,
     this.senderAvatarColorValue = 0xFF6B9528,
   });
 
@@ -19,6 +20,7 @@ class GroupImageMessageEntity extends Equatable {
   final DateTime createdAt;
   final String senderName;
   final String senderAvatar;
+  final int? senderAvatarIconIndex;
   final int senderAvatarColorValue;
 
   @override
@@ -30,6 +32,7 @@ class GroupImageMessageEntity extends Equatable {
     createdAt,
     senderName,
     senderAvatar,
+    senderAvatarIconIndex,
     senderAvatarColorValue,
   ];
 }

@@ -112,7 +112,9 @@ class _SummaryStep extends StatelessWidget {
                 for (final FriendOption friend in selectedFriends.take(5))
                   GroupMemberAvatar(
                     name: friend.name,
-                    colorValue: GroupAvatarColors.byIndex(friend.id.hashCode),
+                    colorValue: friend.colorValue,
+                    avatarIconIndex: friend.avatarIconIndex,
+                    avatar: friend.profilePhotoBase64,
                   ),
                 if (selectedFriends.length > 5)
                   Container(

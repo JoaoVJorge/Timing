@@ -37,7 +37,7 @@ import "package:timing/presentation/progress/progress_controller.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
 import "package:timing/theme/accent_presets.dart";
 
-class AppController extends GetxController {
+class AppController extends GetxController with WidgetsBindingObserver {
   AppController({
     required this._getAppConfigUseCase,
     required this._getActivityEntriesUseCase,
@@ -79,6 +79,7 @@ class AppController extends GetxController {
   final Rx<String?> profilePhotoBase64 = Rx<String?>(null);
   final RxInt avatarIconIndex = 0.obs;
   final RxBool notificationsEnabled = true.obs;
+  final RxBool isAppInForeground = true.obs;
   final Rx<String?> languageCode = Rx<String?>(null);
   final RxString friendCode = "".obs;
   final RxBool focusLockStudyingEnabled = false.obs;
@@ -88,6 +89,12 @@ class AppController extends GetxController {
 
   String? _decodedPhotoSource;
   Uint8List? _decodedPhotoBytes;
+  Timer? _presenceHeartbeat;
+  Future<void> _presenceWriteQueue = Future<void>.value();
+
+  static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
+  static const Duration _presenceRequestTimeout = Duration(seconds: 2);
+  static const Duration _presenceLogoutWait = Duration(milliseconds: 1500);
 
   /// Decoded once per photo change and reused afterwards: `Image.memory` keys
   /// its cache by byte-list identity, so handing it a fresh list on every
@@ -109,6 +116,15 @@ class AppController extends GetxController {
   Locale get selectedLocale => _resolvedLocale(languageCode.value);
 
   String get effectiveLanguageCode => selectedLocale.languageCode;
+
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addObserver(this);
+    if (_supabaseService.hasSignedInUser) {
+      _startPresenceTracking();
+    }
+  }
 
   Future<void> initialize() async {
     await Future.wait([
@@ -194,6 +210,7 @@ class AppController extends GetxController {
     if (!_supabaseService.hasSignedInUser) {
       return false;
     }
+    _startPresenceTracking();
 
     final Either<AppError, AppConfigEntity?> result =
         await _getCurrentProfileUseCase();
@@ -419,6 +436,11 @@ class AppController extends GetxController {
   }
 
   Future<void> logOut() async {
+    _presenceHeartbeat?.cancel();
+    _presenceHeartbeat = null;
+    await _writePresence(
+      isOnline: false,
+    ).timeout(_presenceLogoutWait, onTimeout: () {});
     await _signOutUseCase();
     userName.value = "";
     nickName.value = "";
@@ -440,4 +462,60 @@ class AppController extends GetxController {
 
   Future<void> _saveCachedAccentColorValue(int value) =>
       localStorageService.write(LocalStorageKeys.cachedAccentColorValue, value);
+
+  void _startPresenceTracking() {
+    if (!_supabaseService.hasSignedInUser) {
+      return;
+    }
+    unawaited(_writePresence(isOnline: true));
+    _presenceHeartbeat ??= Timer.periodic(
+      _presenceHeartbeatInterval,
+      (_) => unawaited(_writePresence(isOnline: true)),
+    );
+  }
+
+  Future<void> _writePresence({required bool isOnline}) async {
+    final String? userId = _supabaseService.currentUserId;
+    if (userId == null) {
+      return;
+    }
+    _presenceWriteQueue = _presenceWriteQueue.then((_) async {
+      try {
+        await _supabaseService.requireClient
+            .from("profiles")
+            .update({
+              "is_online": isOnline,
+              "last_seen_at": DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq("id", userId)
+            .timeout(_presenceRequestTimeout);
+      } catch (_) {
+        // Presence is best-effort and must never block navigation or logout.
+      }
+    });
+    await _presenceWriteQueue;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      isAppInForeground.value = true;
+      _startPresenceTracking();
+      return;
+    }
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      isAppInForeground.value = false;
+      _presenceHeartbeat?.cancel();
+      _presenceHeartbeat = null;
+      unawaited(_writePresence(isOnline: false));
+    }
+  }
+
+  @override
+  void onClose() {
+    _presenceHeartbeat?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
 }

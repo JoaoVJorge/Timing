@@ -1021,19 +1021,12 @@
       }
     }
   },
-  "@minutesAgoShort": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "myCodeLabel": "Mein Code",
   "yourInviteCodeLabel": "Dein Einladungscode",
   "yourFriendsTitle": "Deine Freunde ({count})",
   "seeAllButton": "Alle anzeigen",
   "onlineLabel": "Online",
-  "minutesAgoShort": "Vor {minutes} Min.",
+  "offlineLabel": "Offline",
   "friendsEmptyTitle": "Du hast noch keine Freunde",
   "friendsEmptySubtitle": "Suche oben nach Personen oder teile deinen Einladungscode.",
   "shareCodeButton": "Code teilen",

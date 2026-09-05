@@ -3,12 +3,14 @@ import "dart:typed_data";
 
 import "package:flutter/material.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/theme/avatar_presets.dart";
 
 class GroupMemberAvatar extends StatefulWidget {
   const GroupMemberAvatar({
     required this.name,
     required this.colorValue,
     this.avatar = "",
+    this.avatarIconIndex,
     this.size = 40,
     this.borderColor,
     super.key,
@@ -17,6 +19,7 @@ class GroupMemberAvatar extends StatefulWidget {
   final String name;
   final int colorValue;
   final String avatar;
+  final int? avatarIconIndex;
   final double size;
   final Color? borderColor;
 
@@ -67,9 +70,15 @@ class _GroupMemberAvatarState extends State<GroupMemberAvatar> {
 
   void _decodeAvatar() {
     final String payload = widget.avatar.trim();
-    _imageBytes = payload.isEmpty
-        ? null
-        : base64Decode(GroupMemberAvatar._base64Payload(payload));
+    if (payload.isEmpty) {
+      _imageBytes = null;
+      return;
+    }
+    try {
+      _imageBytes = base64Decode(GroupMemberAvatar._base64Payload(payload));
+    } on FormatException {
+      _imageBytes = null;
+    }
   }
 
   @override
@@ -97,7 +106,8 @@ class _GroupMemberAvatarState extends State<GroupMemberAvatar> {
       ),
       child: imageBytes != null
           ? null
-          : Text(
+          : widget.avatarIconIndex == null
+          ? Text(
               GroupMemberAvatar._initials(widget.name),
               maxLines: 1,
               overflow: TextOverflow.clip,
@@ -105,6 +115,11 @@ class _GroupMemberAvatarState extends State<GroupMemberAvatar> {
                 color: color,
                 fontWeight: FontWeight.w900,
               ),
+            )
+          : Icon(
+              AppAvatarPresets.byIndex(widget.avatarIconIndex!),
+              color: color,
+              size: widget.size * 0.56,
             ),
     );
   }

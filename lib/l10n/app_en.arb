@@ -1042,19 +1042,12 @@
       }
     }
   },
-  "@minutesAgoShort": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "myCodeLabel": "My code",
   "yourInviteCodeLabel": "Your invite code",
   "yourFriendsTitle": "Your friends ({count})",
   "seeAllButton": "View all",
   "onlineLabel": "Online",
-  "minutesAgoShort": "{minutes} min ago",
+  "offlineLabel": "Offline",
   "friendsEmptyTitle": "You do not have friends yet",
   "friendsEmptySubtitle": "Search people above or share your invite code.",
   "shareCodeButton": "Share code",

@@ -1021,19 +1021,12 @@
       }
     }
   },
-  "@minutesAgoShort": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "myCodeLabel": "????",
   "yourInviteCodeLabel": "??? ?????",
   "yourFriendsTitle": "أصدقاؤك ({count})",
   "seeAllButton": "??? ????",
   "onlineLabel": "????",
-  "minutesAgoShort": "??? {minutes} ?",
+  "offlineLabel": "غير متصل",
   "friendsEmptyTitle": "??? ???? ?????? ???",
   "friendsEmptySubtitle": "ابحث عن أشخاص أعلاه أو شارك رمز الدعوة.",
   "shareCodeButton": "?????? ?????",

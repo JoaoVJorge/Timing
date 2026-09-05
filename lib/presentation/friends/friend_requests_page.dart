@@ -242,6 +242,8 @@ class _RequestProfileCard extends StatelessWidget {
             GroupMemberAvatar(
               name: profile.name,
               colorValue: profile.colorValue,
+              avatarIconIndex: profile.avatarIconIndex,
+              avatar: profile.profilePhotoBase64,
               size: 48,
             ),
             const Gap(12),

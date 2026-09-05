@@ -183,6 +183,7 @@ class _MemberRow extends StatelessWidget {
           name: member.name,
           colorValue: member.avatarColorValue,
           avatar: member.avatar,
+          avatarIconIndex: member.avatarIconIndex,
           size: 44,
         ),
         const Gap(12),
