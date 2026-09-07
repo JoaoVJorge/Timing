@@ -1699,6 +1699,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'I completed it';
 
   @override
+  String get missedYesterdayMultiTitle =>
+      'Which ones did you complete yesterday?';
+
+  @override
+  String get missedYesterdayMultiContent =>
+      'You did not register some goals yesterday. Check the ones you actually completed.';
+
+  @override
+  String get missedYesterdayMultiConfirmButton => 'Confirm';
+
+  @override
   String get scheduleTitleRequiredError => 'Fill in the title to continue';
 
   @override

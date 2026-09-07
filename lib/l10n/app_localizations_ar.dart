@@ -1693,6 +1693,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get missedYesterdayCompletedButton => '??????';
 
   @override
+  String get missedYesterdayMultiTitle => 'ما الأهداف التي أنجزتها أمس؟';
+
+  @override
+  String get missedYesterdayMultiContent =>
+      'لم تسجّل بعض الأهداف أمس. حدّد الأهداف التي أنجزتها بالفعل.';
+
+  @override
+  String get missedYesterdayMultiConfirmButton => 'تأكيد';
+
+  @override
   String get scheduleTitleRequiredError => 'أدخل العنوان للمتابعة';
 
   @override

@@ -3082,6 +3082,24 @@ abstract class AppLocalizations {
   /// **'I completed it'**
   String get missedYesterdayCompletedButton;
 
+  /// No description provided for @missedYesterdayMultiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which ones did you complete yesterday?'**
+  String get missedYesterdayMultiTitle;
+
+  /// No description provided for @missedYesterdayMultiContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You did not register some goals yesterday. Check the ones you actually completed.'**
+  String get missedYesterdayMultiContent;
+
+  /// No description provided for @missedYesterdayMultiConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get missedYesterdayMultiConfirmButton;
+
   /// No description provided for @scheduleTitleRequiredError.
   ///
   /// In en, this message translates to:
