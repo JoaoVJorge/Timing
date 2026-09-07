@@ -15,6 +15,7 @@ import "package:timing/core/services/achievements/achievement_unlock_service.dar
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/daily_goals/widgets/missed_yesterday_multi_dialog.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
@@ -64,7 +65,7 @@ class DailyGoalsController extends GetxController {
           await _getDailyTasksUseCase();
       result.fold((error) => null, (loadedTasks) {
         tasks.value = loadedTasks;
-        _askAboutMissedYesterday();
+        _scheduleMissedYesterdayPrompt();
       });
     } finally {
       isLoading.value = false;
@@ -176,6 +177,15 @@ class DailyGoalsController extends GetxController {
     }
   }
 
+  void _scheduleMissedYesterdayPrompt() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (isClosed) {
+        return;
+      }
+      unawaited(_askAboutMissedYesterday());
+    });
+  }
+
   Future<void> _askAboutMissedYesterday() async {
     final BuildContext? context = Get.context;
     if (context == null) {
@@ -183,44 +193,70 @@ class DailyGoalsController extends GetxController {
     }
 
     final DateTime now = DateTime.now();
-    final DailyTaskEntity? task = tasks.firstWhereOrNull(
-      (task) => task.shouldAskAboutMissedYesterday(now),
-    );
-    if (task == null) {
+    final List<DailyTaskEntity> missedTasks = tasks
+        .where((task) => task.shouldAskAboutMissedYesterday(now))
+        .toList();
+    if (missedTasks.isEmpty) {
       return;
     }
 
     final DateTime yesterday = now.subtract(const Duration(days: 1));
     final String missedDate = DailyTaskEntity.dateKey(yesterday);
+
+    final Set<String>? completedTaskIds = missedTasks.length == 1
+        ? await _askAboutSingleMissedTask(missedTasks.first)
+        : await _askAboutMultipleMissedTasks(missedTasks);
+    if (completedTaskIds == null) {
+      return;
+    }
+
+    bool didUnlockCheck = false;
+    for (final DailyTaskEntity missedTask in missedTasks) {
+      final bool didComplete = completedTaskIds.contains(missedTask.id);
+      final Either<AppError, DailyTaskEntity> result =
+          await _toggleDailyTaskCheckUseCase(
+            taskId: missedTask.id,
+            date: didComplete ? yesterday : null,
+            resolvedMissedDate: missedDate,
+            toggleDate: didComplete,
+          );
+
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
+        final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
+        if (index != -1) {
+          tasks[index] = updatedTask;
+        }
+        if (updatedTask.isFromGroup) {
+          _activityChangeBus.notifyGroupActivityChanged(
+            groupId: updatedTask.groupId,
+          );
+        }
+        didUnlockCheck = true;
+      });
+    }
+
+    if (didUnlockCheck) {
+      unawaited(_achievementUnlockService.checkForNewUnlocks());
+    }
+  }
+
+  Future<Set<String>?> _askAboutSingleMissedTask(DailyTaskEntity task) async {
     final bool? didComplete = await _appNavigator.dialog<bool>(
       child: _MissedYesterdayDialog(taskName: task.name),
       barrierDismissible: false,
     );
     if (didComplete == null) {
-      return;
+      return null;
     }
-
-    final Either<AppError, DailyTaskEntity> result =
-        await _toggleDailyTaskCheckUseCase(
-          taskId: task.id,
-          date: didComplete ? yesterday : null,
-          resolvedMissedDate: missedDate,
-          toggleDate: didComplete,
-        );
-
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
-      final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
-      if (index != -1) {
-        tasks[index] = updatedTask;
-      }
-      if (updatedTask.isFromGroup) {
-        _activityChangeBus.notifyGroupActivityChanged(
-          groupId: updatedTask.groupId,
-        );
-      }
-      _achievementUnlockService.checkForNewUnlocks();
-    });
+    return didComplete ? <String>{task.id} : <String>{};
   }
+
+  Future<Set<String>?> _askAboutMultipleMissedTasks(
+    List<DailyTaskEntity> missedTasks,
+  ) => _appNavigator.dialog<Set<String>>(
+    child: MissedYesterdayMultiDialog(tasks: missedTasks),
+    barrierDismissible: false,
+  );
 
   Future<void> onDeleteTask(DailyTaskEntity task) async {
     if (task.isFromGroup) {
