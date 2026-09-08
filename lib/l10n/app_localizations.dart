@@ -5673,6 +5673,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All good'**
   String get timerSessionEndedConfirm;
+
+  /// No description provided for @cropProfilePhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust profile photo'**
+  String get cropProfilePhotoTitle;
+
+  /// No description provided for @cropProfilePhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag and zoom to choose what appears in your profile.'**
+  String get cropProfilePhotoHint;
+
+  /// No description provided for @cropProfilePhotoConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use photo'**
+  String get cropProfilePhotoConfirm;
+
+  /// No description provided for @cropProfilePhotoFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t crop this photo. Please try again.'**
+  String get cropProfilePhotoFailure;
+
+  /// No description provided for @leaveGroupConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group?'**
+  String get leaveGroupConfirmTitle;
+
+  /// No description provided for @leaveGroupConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave {groupName}?'**
+  String leaveGroupConfirmMessage(String groupName);
+
+  /// No description provided for @leaveGroupConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leaveGroupConfirmButton;
+
+  /// No description provided for @resetGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset group'**
+  String get resetGroupLabel;
+
+  /// No description provided for @resetGroupConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset group progress?'**
+  String get resetGroupConfirmTitle;
+
+  /// No description provided for @resetGroupConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This resets the shared progress and ranking in {groupName}. Each member\'s personal activity history will be kept.'**
+  String resetGroupConfirmMessage(String groupName);
+
+  /// No description provided for @resetGroupConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetGroupConfirmButton;
+
+  /// No description provided for @groupResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'The group\'s progress and ranking were reset.'**
+  String get groupResetSuccess;
+
+  /// No description provided for @ownerOnlyGroupActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group owner can do this.'**
+  String get ownerOnlyGroupActionError;
 }
 
 class _AppLocalizationsDelegate

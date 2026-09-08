@@ -3139,4 +3139,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get timerSessionEndedConfirm => 'تمام';
+
+  @override
+  String get cropProfilePhotoTitle => 'ضبط صورة الملف الشخصي';
+
+  @override
+  String get cropProfilePhotoHint =>
+      'اسحب وكبّر لاختيار ما سيظهر في ملفك الشخصي.';
+
+  @override
+  String get cropProfilePhotoConfirm => 'استخدام الصورة';
+
+  @override
+  String get cropProfilePhotoFailure => 'تعذر قص هذه الصورة. حاول مرة أخرى.';
+
+  @override
+  String get leaveGroupConfirmTitle => 'مغادرة المجموعة؟';
+
+  @override
+  String leaveGroupConfirmMessage(String groupName) {
+    return 'هل أنت متأكد من رغبتك في مغادرة $groupName؟';
+  }
+
+  @override
+  String get leaveGroupConfirmButton => 'مغادرة';
+
+  @override
+  String get resetGroupLabel => 'إعادة ضبط المجموعة';
+
+  @override
+  String get resetGroupConfirmTitle => 'إعادة ضبط تقدم المجموعة؟';
+
+  @override
+  String resetGroupConfirmMessage(String groupName) {
+    return 'سيؤدي هذا إلى إعادة ضبط التقدم المشترك وترتيب $groupName. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.';
+  }
+
+  @override
+  String get resetGroupConfirmButton => 'إعادة ضبط';
+
+  @override
+  String get groupResetSuccess => 'تمت إعادة ضبط تقدم المجموعة وترتيبها.';
+
+  @override
+  String get ownerOnlyGroupActionError =>
+      'يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء.';
 }

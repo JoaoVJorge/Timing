@@ -3164,4 +3164,51 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get timerSessionEndedConfirm => 'Tudo certo';
+
+  @override
+  String get cropProfilePhotoTitle => 'Ajustar foto de perfil';
+
+  @override
+  String get cropProfilePhotoHint =>
+      'Arraste e amplie para escolher o que aparecerá no perfil.';
+
+  @override
+  String get cropProfilePhotoConfirm => 'Usar foto';
+
+  @override
+  String get cropProfilePhotoFailure =>
+      'Não foi possível recortar esta foto. Tente novamente.';
+
+  @override
+  String get leaveGroupConfirmTitle => 'Sair do grupo?';
+
+  @override
+  String leaveGroupConfirmMessage(String groupName) {
+    return 'Tem certeza de que deseja sair de $groupName?';
+  }
+
+  @override
+  String get leaveGroupConfirmButton => 'Sair';
+
+  @override
+  String get resetGroupLabel => 'Resetar grupo';
+
+  @override
+  String get resetGroupConfirmTitle => 'Resetar progresso do grupo?';
+
+  @override
+  String resetGroupConfirmMessage(String groupName) {
+    return 'Isso zera o progresso compartilhado e o ranking de $groupName. O histórico pessoal de atividade de cada membro será mantido.';
+  }
+
+  @override
+  String get resetGroupConfirmButton => 'Resetar';
+
+  @override
+  String get groupResetSuccess =>
+      'O progresso e o ranking do grupo foram resetados.';
+
+  @override
+  String get ownerOnlyGroupActionError =>
+      'Apenas o dono do grupo pode fazer isso.';
 }

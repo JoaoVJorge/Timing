@@ -1630,5 +1630,18 @@
   "cancelInviteButton": "إلغاء الدعوة",
   "inviteButton": "دعوة",
   "retryButton": "إعادة المحاولة",
-  "timerSessionEndedConfirm": "تمام"
+  "timerSessionEndedConfirm": "تمام",
+  "cropProfilePhotoTitle": "ضبط صورة الملف الشخصي",
+  "cropProfilePhotoHint": "اسحب وكبّر لاختيار ما سيظهر في ملفك الشخصي.",
+  "cropProfilePhotoConfirm": "استخدام الصورة",
+  "cropProfilePhotoFailure": "تعذر قص هذه الصورة. حاول مرة أخرى.",
+  "leaveGroupConfirmTitle": "مغادرة المجموعة؟",
+  "leaveGroupConfirmMessage": "هل أنت متأكد من رغبتك في مغادرة {groupName}؟",
+  "leaveGroupConfirmButton": "مغادرة",
+  "resetGroupLabel": "إعادة ضبط المجموعة",
+  "resetGroupConfirmTitle": "إعادة ضبط تقدم المجموعة؟",
+  "resetGroupConfirmMessage": "سيؤدي هذا إلى إعادة ضبط التقدم المشترك وترتيب {groupName}. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.",
+  "resetGroupConfirmButton": "إعادة ضبط",
+  "groupResetSuccess": "تمت إعادة ضبط تقدم المجموعة وترتيبها.",
+  "ownerOnlyGroupActionError": "يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء."
 }

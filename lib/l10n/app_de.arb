@@ -1630,5 +1630,18 @@
   "cancelInviteButton": "Einladung zurückziehen",
   "inviteButton": "Einladen",
   "retryButton": "Erneut versuchen",
-  "timerSessionEndedConfirm": "Alles klar"
+  "timerSessionEndedConfirm": "Alles klar",
+  "cropProfilePhotoTitle": "Profilfoto anpassen",
+  "cropProfilePhotoHint": "Verschiebe und zoome das Bild, um den Profilausschnitt festzulegen.",
+  "cropProfilePhotoConfirm": "Foto verwenden",
+  "cropProfilePhotoFailure": "Dieses Foto konnte nicht zugeschnitten werden. Versuche es erneut.",
+  "leaveGroupConfirmTitle": "Gruppe verlassen?",
+  "leaveGroupConfirmMessage": "Möchtest du {groupName} wirklich verlassen?",
+  "leaveGroupConfirmButton": "Verlassen",
+  "resetGroupLabel": "Gruppe zurücksetzen",
+  "resetGroupConfirmTitle": "Gruppenfortschritt zurücksetzen?",
+  "resetGroupConfirmMessage": "Dadurch werden der gemeinsame Fortschritt und die Rangliste von {groupName} zurückgesetzt. Der persönliche Aktivitätsverlauf jedes Mitglieds bleibt erhalten.",
+  "resetGroupConfirmButton": "Zurücksetzen",
+  "groupResetSuccess": "Gruppenfortschritt und Rangliste wurden zurückgesetzt.",
+  "ownerOnlyGroupActionError": "Nur der Gruppeneigentümer kann das tun."
 }

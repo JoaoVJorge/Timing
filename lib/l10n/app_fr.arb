@@ -1630,5 +1630,18 @@
   "cancelInviteButton": "Annuler l'invitation",
   "inviteButton": "Inviter",
   "retryButton": "Réessayer",
-  "timerSessionEndedConfirm": "Parfait"
+  "timerSessionEndedConfirm": "Parfait",
+  "cropProfilePhotoTitle": "Ajuster la photo de profil",
+  "cropProfilePhotoHint": "Faites glisser et zoomez pour choisir ce qui apparaîtra sur votre profil.",
+  "cropProfilePhotoConfirm": "Utiliser la photo",
+  "cropProfilePhotoFailure": "Impossible de recadrer cette photo. Réessayez.",
+  "leaveGroupConfirmTitle": "Quitter le groupe ?",
+  "leaveGroupConfirmMessage": "Voulez-vous vraiment quitter {groupName} ?",
+  "leaveGroupConfirmButton": "Quitter",
+  "resetGroupLabel": "Réinitialiser le groupe",
+  "resetGroupConfirmTitle": "Réinitialiser la progression du groupe ?",
+  "resetGroupConfirmMessage": "Cela réinitialise la progression partagée et le classement de {groupName}. L’historique d’activité personnel de chaque membre sera conservé.",
+  "resetGroupConfirmButton": "Réinitialiser",
+  "groupResetSuccess": "La progression et le classement du groupe ont été réinitialisés.",
+  "ownerOnlyGroupActionError": "Seul le propriétaire du groupe peut effectuer cette action."
 }

@@ -1718,5 +1718,24 @@
   "cancelInviteButton": "Cancel invite",
   "inviteButton": "Invite",
   "retryButton": "Try again",
-  "timerSessionEndedConfirm": "All good"
+  "timerSessionEndedConfirm": "All good",
+  "cropProfilePhotoTitle": "Adjust profile photo",
+  "cropProfilePhotoHint": "Drag and zoom to choose what appears in your profile.",
+  "cropProfilePhotoConfirm": "Use photo",
+  "cropProfilePhotoFailure": "We couldn't crop this photo. Please try again.",
+  "leaveGroupConfirmTitle": "Leave group?",
+  "leaveGroupConfirmMessage": "Are you sure you want to leave {groupName}?",
+  "@leaveGroupConfirmMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "leaveGroupConfirmButton": "Leave",
+  "resetGroupLabel": "Reset group",
+  "resetGroupConfirmTitle": "Reset group progress?",
+  "resetGroupConfirmMessage": "This resets the shared progress and ranking in {groupName}. Each member's personal activity history will be kept.",
+  "@resetGroupConfirmMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "resetGroupConfirmButton": "Reset",
+  "groupResetSuccess": "The group's progress and ranking were reset.",
+  "ownerOnlyGroupActionError": "Only the group owner can do this."
 }
