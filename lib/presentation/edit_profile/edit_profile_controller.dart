@@ -13,6 +13,7 @@ import "package:timing/core/domain/use_cases/get_linked_auth_providers_use_case.
 import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
+import "package:timing/shared/widgets/profile_photo_crop_dialog.dart";
 import "package:image_picker/image_picker.dart";
 
 class EditProfileController extends GetxController {
@@ -100,8 +101,19 @@ class EditProfileController extends GetxController {
       return;
     }
 
-    final List<int> bytes = await image.readAsBytes();
-    await _appController.setProfilePhotoBase64(base64Encode(bytes));
+    final Uint8List bytes = await image.readAsBytes();
+    final BuildContext? context = Get.context;
+    if (context == null || !context.mounted) {
+      return;
+    }
+    final Uint8List? croppedBytes = await showProfilePhotoCropDialog(
+      context: context,
+      image: bytes,
+    );
+    if (croppedBytes == null) {
+      return;
+    }
+    await _appController.setProfilePhotoBase64(base64Encode(croppedBytes));
   }
 
   Future<void> onTapRemovePhoto() => _appController.setProfilePhotoBase64(null);
