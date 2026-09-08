@@ -1,14 +1,9 @@
 part of "create_group_page.dart";
 
 class _InformationStep extends StatelessWidget {
-  const _InformationStep({
-    required this.controller,
-    required this.groupNameKey,
-    required this.themeKey,
-  });
+  const _InformationStep({required this.controller, required this.themeKey});
 
   final CreateGroupController controller;
-  final Key groupNameKey;
   final Key themeKey;
 
   @override
@@ -16,30 +11,9 @@ class _InformationStep extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _SectionCard(
-        key: groupNameKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.groupNameLabel,
-              style: context.textStyles.bodySmall,
-            ),
-            const Gap(8),
-            TextField(
-              controller: controller.groupNameController,
-              onChanged: controller.onGroupNameChanged,
-              style: context.textStyles.inputText,
-              decoration: AppInputDecoration.withBorder(
-                tokens: context.colorTokens,
-                hintText: context.l10n.groupNameExampleHint,
-                prefixIcon: AppIcon(
-                  "group",
-                  size: 20,
-                  color: context.colorTokens.textHint,
-                ),
-              ),
-            ),
-            const Gap(16),
             Text(
               context.l10n.createGroupDescriptionLabel,
               style: context.textStyles.bodySmall,

@@ -78,6 +78,8 @@ class CreateGroupController extends GetxController
   final RxInt currentStep = 0.obs;
   GroupThemeType? _themeUsedForActivityDefaults;
   bool _hasInitializedThemeColor = false;
+  bool _groupNameWasManuallyEdited = false;
+  bool _isSyncingGroupNameFromActivity = false;
 
   bool get hasName => groupName.value.trim().isNotEmpty;
 
@@ -165,6 +167,7 @@ class CreateGroupController extends GetxController
     );
     activityNameController.addListener(() {
       activityName.value = activityNameController.text;
+      _syncGroupNameFromActivity();
       _refreshCanCreate();
     });
     activityGoalController.addListener(() {
@@ -194,6 +197,9 @@ class CreateGroupController extends GetxController
   }
 
   void onGroupNameChanged(String value) {
+    if (!_isSyncingGroupNameFromActivity) {
+      _groupNameWasManuallyEdited = true;
+    }
     if (groupName.value != value) {
       groupName.value = value;
     }
@@ -202,11 +208,24 @@ class CreateGroupController extends GetxController
 
   void _syncGroupName() {
     final String value = groupNameController.text;
+    if (!_isSyncingGroupNameFromActivity) {
+      _groupNameWasManuallyEdited = true;
+    }
     if (groupName.value == value) {
       return;
     }
     groupName.value = value;
     _refreshCanCreate();
+  }
+
+  void _syncGroupNameFromActivity() {
+    if (_groupNameWasManuallyEdited) {
+      return;
+    }
+    _isSyncingGroupNameFromActivity = true;
+    groupNameController.text = activityNameController.text;
+    groupName.value = groupNameController.text;
+    _isSyncingGroupNameFromActivity = false;
   }
 
   void onFriendSearchChanged(String value) => friendSearchQuery.value = value;
@@ -331,10 +350,6 @@ class CreateGroupController extends GetxController
 
   void onTapContinue() {
     if (isInformationStep) {
-      if (!hasName) {
-        _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
-        return;
-      }
       if (!hasTheme) {
         _appNavigator.showErrorSnackBar(
           Get.context!.l10n.groupThemeRequiredError,
@@ -357,6 +372,10 @@ class CreateGroupController extends GetxController
         _appNavigator.showErrorSnackBar(
           Get.context!.l10n.createGroupActivityGoalInvalidError,
         );
+        return;
+      }
+      if (!hasName) {
+        _appNavigator.showErrorSnackBar(Get.context!.l10n.nameRequiredError);
         return;
       }
       currentStep.value = 2;

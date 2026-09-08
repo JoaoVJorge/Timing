@@ -1,11 +1,14 @@
+import "package:dartz/dartz.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/data/repositories/subjects_repository.dart";
+import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/create_group_use_case.dart";
@@ -51,6 +54,30 @@ void main() {
       expect(draft.focusSessionCount, 1);
       expect(draft.goalSeconds, 45 * 60);
     });
+
+    test("uses the activity name as the default group name", () {
+      final CreateGroupController controller = _buildController();
+      controller.onInit();
+      controller.onSelectTheme(GroupThemeType.dailyGoals);
+
+      controller.onTapContinue();
+      controller.activityNameController.text = "Beber água";
+
+      expect(controller.currentStep.value, 1);
+      expect(controller.groupNameController.text, "Beber água");
+      controller.onClose();
+    });
+
+    test("preserves a custom group name when the activity name changes", () {
+      final CreateGroupController controller = _buildController();
+      controller.onInit();
+      controller.groupNameController.text = "Desafio da família";
+
+      controller.activityNameController.text = "Beber água";
+
+      expect(controller.groupNameController.text, "Desafio da família");
+      controller.onClose();
+    });
   });
 }
 
@@ -72,6 +99,10 @@ CreateGroupController _buildController() {
 }
 
 class _NoopGroupsRepository implements GroupsRepository {
+  @override
+  Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async =>
+      const Right([]);
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

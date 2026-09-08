@@ -72,13 +72,13 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 child: switch (step) {
                   0 => _InformationStep(
                     controller: controller,
-                    groupNameKey: _groupNameKey,
                     themeKey: _themeKey,
                   ),
                   1 => _ActivityStep(
                     controller: controller,
                     activityNameKey: _activityNameKey,
                     activityGoalKey: _activityGoalKey,
+                    groupNameKey: _groupNameKey,
                   ),
                   2 => _FriendsStep(
                     controller: controller,
@@ -122,16 +122,14 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     GlobalKey? targetKey;
 
     if (controller.isInformationStep) {
-      targetKey = !controller.hasName
-          ? _groupNameKey
-          : !controller.hasTheme
-          ? _themeKey
-          : null;
+      targetKey = !controller.hasTheme ? _themeKey : null;
     } else if (controller.isActivityStep) {
       targetKey = controller.activityName.value.trim().isEmpty
           ? _activityNameKey
           : !controller.hasValidActivityGoal
           ? _activityGoalKey
+          : !controller.hasName
+          ? _groupNameKey
           : null;
     } else if (controller.isFriendsStep && !controller.hasFriends) {
       targetKey = _friendsKey;
@@ -142,7 +140,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
 
   Future<void> _scrollToCreateError(CreateGroupController controller) async {
     if (!controller.hasName) {
-      controller.currentStep.value = 0;
+      controller.currentStep.value = 1;
       await _scrollToKey(_groupNameKey);
       return;
     }
@@ -200,8 +198,8 @@ class _BottomAction extends StatelessWidget {
   Widget build(BuildContext context) => Obx(() {
     final bool isSummary = controller.isSummaryStep;
     final bool isEnabled = switch (controller.currentStep.value) {
-      0 => controller.hasName && controller.hasTheme,
-      1 => controller.hasActivity,
+      0 => controller.hasTheme,
+      1 => controller.hasActivity && controller.hasName,
       2 => controller.hasFriends,
       _ => controller.canCreate.value,
     };
