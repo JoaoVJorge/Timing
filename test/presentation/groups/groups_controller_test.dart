@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 
 import "package:dartz/dartz.dart";
 import "package:fake_async/fake_async.dart";
@@ -10,6 +11,7 @@ import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
@@ -21,6 +23,7 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
 import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/l10n/app_localizations.dart";
@@ -46,6 +49,8 @@ class _FakeGroupsRepository implements GroupsRepository {
       Completer<GroupImageMessageEntity>();
   final Completer<GroupImageMessagesPage> olderImagePage =
       Completer<GroupImageMessagesPage>();
+  final List<String> leaveRequests = <String>[];
+  final List<String> resetRequests = <String>[];
 
   @override
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
@@ -74,6 +79,18 @@ class _FakeGroupsRepository implements GroupsRepository {
     }
     olderImageCursor.complete(before);
     return Right(await olderImagePage.future);
+  }
+
+  @override
+  Future<Either<AppError, void>> leaveGroup(String groupId) async {
+    leaveRequests.add(groupId);
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<AppError, void>> resetGroupProgress(String groupId) async {
+    resetRequests.add(groupId);
+    return const Right(null);
   }
 
   @override
@@ -109,10 +126,33 @@ class _FakeSupabaseService implements SupabaseService {
 
 class _FakeAppNavigator implements AppNavigator {
   @override
+  void showErrorSnackBar([String? text]) {}
+
+  @override
+  void showSuccessSnackBar(String text) {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeLocalStorageService implements AppLocalStorageService {
+  final Map<LocalStorageKeys, Object> values = <LocalStorageKeys, Object>{};
+  final List<LocalStorageKeys> deletedKeys = <LocalStorageKeys>[];
+
+  @override
+  Future<T?> read<T>(LocalStorageKeys key) async => values[key] as T?;
+
+  @override
+  Future<void> write<T>(LocalStorageKeys key, T value) async {
+    values[key] = value as Object;
+  }
+
+  @override
+  Future<void> delete(LocalStorageKeys key) async {
+    deletedKeys.add(key);
+    values.remove(key);
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -187,6 +227,118 @@ void main() {
       controller.onClose();
       bus.dispose();
     });
+  });
+
+  test(
+    "leaving a group preserves personal and unrelated goals and activities",
+    () async {
+      final GroupEntity departingGroup = _group("group-1", "Saindo");
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([
+        departingGroup,
+      ]);
+      final _FakeLocalStorageService storage = _FakeLocalStorageService();
+      storage.values[LocalStorageKeys.dailyTasks] = jsonEncode([
+        _dailyTask("personal").toMap(),
+        _dailyTask("departing", groupId: "group-1").toMap(),
+        _dailyTask("other-group", groupId: "group-2").toMap(),
+      ]);
+      storage.values[LocalStorageKeys.subjects] = jsonEncode([
+        {"id": "personal-activity", "groupId": null},
+        {"id": "departing-activity", "groupId": "group-1"},
+        {"id": "other-group-activity", "groupId": "group-2"},
+      ]);
+      final GroupsController controller = _controller(
+        repository,
+        localStorageService: storage,
+      );
+      controller.groups.value = [departingGroup];
+      controller.selectedGroup.value = departingGroup;
+
+      await controller.onConfirmLeaveGroup();
+
+      final List<dynamic> retainedGoals =
+          jsonDecode(storage.values[LocalStorageKeys.dailyTasks]! as String)
+              as List<dynamic>;
+      expect(
+        retainedGoals.map((item) => (item as Map<String, dynamic>)["id"]),
+        ["personal", "other-group"],
+      );
+      final List<dynamic> retainedActivities =
+          jsonDecode(storage.values[LocalStorageKeys.subjects]! as String)
+              as List<dynamic>;
+      expect(
+        retainedActivities.map((item) => (item as Map<String, dynamic>)["id"]),
+        ["personal-activity", "other-group-activity"],
+      );
+      expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.subjects)));
+      expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.dailyTasks)));
+      expect(repository.leaveRequests, ["group-1"]);
+    },
+  );
+
+  test("leaving a group preserves malformed activity caches", () async {
+    final GroupEntity departingGroup = _group("group-1", "Saindo");
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([
+      departingGroup,
+    ]);
+    final _FakeLocalStorageService storage = _FakeLocalStorageService();
+    storage.values[LocalStorageKeys.dailyTasks] = "not-json";
+    storage.values[LocalStorageKeys.subjects] = jsonEncode(["invalid-item"]);
+    final GroupsController controller = _controller(
+      repository,
+      localStorageService: storage,
+    );
+    controller.groups.value = [departingGroup];
+    controller.selectedGroup.value = departingGroup;
+
+    await controller.onConfirmLeaveGroup();
+
+    expect(storage.values[LocalStorageKeys.dailyTasks], "not-json");
+    expect(
+      storage.values[LocalStorageKeys.subjects],
+      jsonEncode(["invalid-item"]),
+    );
+    expect(repository.leaveRequests, ["group-1"]);
+  });
+
+  test("only the owner can reset group progress", () async {
+    final GroupEntity ownedGroup = _group("owned", "Meu grupo");
+    final GroupEntity memberGroup = _group(
+      "member",
+      "Outro grupo",
+      ownerId: "someone-else",
+      memberRole: "member",
+    );
+    final GroupEntity staleRoleGroup = _group(
+      "stale-role",
+      "Papel local desatualizado",
+      ownerId: "someone-else",
+      memberRole: "owner",
+    );
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([
+      ownedGroup,
+      memberGroup,
+      staleRoleGroup,
+    ]);
+    final _FakeLocalStorageService storage = _FakeLocalStorageService();
+    final GroupsController controller = _controller(
+      repository,
+      localStorageService: storage,
+    );
+    controller.groups.value = [ownedGroup, memberGroup];
+
+    controller.selectedGroup.value = memberGroup;
+    await controller.onConfirmResetGroup();
+    expect(repository.resetRequests, isEmpty);
+
+    controller.selectedGroup.value = staleRoleGroup;
+    await controller.onConfirmResetGroup();
+    expect(repository.resetRequests, isEmpty);
+
+    controller.selectedGroup.value = ownedGroup;
+    await controller.onConfirmResetGroup();
+    expect(repository.resetRequests, ["owned"]);
+    expect(storage.deletedKeys, isEmpty);
   });
 
   test(
@@ -643,6 +795,7 @@ GroupsController _controller(
   _FakeGroupsRepository repository, {
   ActivityChangeBus? activityChangeBus,
   List<FriendEntity> friends = const [],
+  AppLocalStorageService? localStorageService,
 }) => GroupsController(
   getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
   getFriendsSocialUseCase: GetFriendsSocialUseCase(
@@ -651,7 +804,7 @@ GroupsController _controller(
   groupsRepository: repository,
   appNavigator: _FakeAppNavigator(),
   supabaseService: _FakeSupabaseService(),
-  localStorageService: _FakeLocalStorageService(),
+  localStorageService: localStorageService ?? _FakeLocalStorageService(),
   activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
 );
 
@@ -660,12 +813,15 @@ GroupEntity _group(
   String name, {
   GroupThemeType theme = GroupThemeType.dailyGoals,
   String description = "",
+  String ownerId = "me",
+  String memberRole = "owner",
 }) => GroupEntity(
   id: id,
   name: name,
   theme: theme,
   description: description,
-  members: const [
+  ownerId: ownerId,
+  members: [
     GroupMemberEntity(
       id: "me",
       name: "Eu",
@@ -673,6 +829,7 @@ GroupEntity _group(
       todaySeconds: 0,
       weekSeconds: 0,
       monthSeconds: 0,
+      role: memberRole,
     ),
   ],
 );
@@ -694,3 +851,12 @@ GroupImageMessageEntity _imageMessage(String id, DateTime createdAt) =>
       imageBase64: "image",
       createdAt: createdAt,
     );
+
+DailyTaskEntity _dailyTask(String id, {String? groupId}) => DailyTaskEntity(
+  id: id,
+  name: id,
+  colorValue: 1,
+  targetDays: 1,
+  completedDates: const [],
+  groupId: groupId,
+);

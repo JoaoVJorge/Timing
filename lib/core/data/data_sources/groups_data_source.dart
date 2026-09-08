@@ -421,6 +421,32 @@ class GroupsDataSource {
     }
   }
 
+  Future<Either<AppError, void>> resetGroupProgress(String groupId) async {
+    const String operation = "rpc public.reset_group_progress";
+    try {
+      _logger.logRequest(operation, {"target_group_id": groupId});
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "reset_group_progress",
+        params: {"target_group_id": groupId},
+      );
+      _logger.logResponse(operation, response);
+      return const Right(null);
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Supabase $operation failed",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
+      return Left(
+        SqlOperationAppError(
+          operation: operation,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
   Future<Either<AppError, List<GroupInvitationEntity>>>
   getPendingInvitations() async {
     try {

@@ -7,6 +7,7 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 Future<bool> showAppConfirmationDialog({
   required String title,
   required String message,
+  required String cancelLabel,
   required String confirmLabel,
   required IconData icon,
   bool isDestructive = false,
@@ -15,6 +16,7 @@ Future<bool> showAppConfirmationDialog({
     child: _AppConfirmationDialog(
       title: title,
       message: message,
+      cancelLabel: cancelLabel,
       confirmLabel: confirmLabel,
       icon: icon,
       isDestructive: isDestructive,
@@ -27,6 +29,7 @@ class _AppConfirmationDialog extends StatelessWidget {
   const _AppConfirmationDialog({
     required this.title,
     required this.message,
+    required this.cancelLabel,
     required this.confirmLabel,
     required this.icon,
     required this.isDestructive,
@@ -34,6 +37,7 @@ class _AppConfirmationDialog extends StatelessWidget {
 
   final String title;
   final String message;
+  final String cancelLabel;
   final String confirmLabel;
   final IconData icon;
   final bool isDestructive;
@@ -103,7 +107,7 @@ class _AppConfirmationDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: _ConfirmationButton(
-                    label: "Voltar",
+                    label: cancelLabel,
                     foreground: context.colorTokens.primary,
                     borderColor: context.colorTokens.primary,
                     onTap: () => appNavigator.back<bool>(result: false),

@@ -63,6 +63,9 @@ class GroupsRepository {
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
 
+  Future<Either<AppError, void>> resetGroupProgress(String groupId) =>
+      _groupsDataSource.resetGroupProgress(groupId);
+
   Future<Either<AppError, GroupEntity>> updateGroup({
     required GroupEntity group,
     required String name,

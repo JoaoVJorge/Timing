@@ -151,6 +151,7 @@ class GroupInvitesController extends GetxController {
     return showAppConfirmationDialog(
       title: title,
       message: content,
+      cancelLabel: Get.context!.l10n.cancelButton,
       confirmLabel: confirmLabel,
       icon: isDestructive
           ? Icons.mail_outline_rounded

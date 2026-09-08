@@ -27,6 +27,7 @@ import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
+import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 
@@ -76,6 +77,7 @@ class GroupsController extends GetxController {
   final RxBool isLoadingActivityProgress = false.obs;
   final RxBool isLoadingChat = false.obs;
   final RxBool isSendingImage = false.obs;
+  final RxBool isResettingGroup = false.obs;
   final RxBool didFailLoadingGroups = false.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
@@ -83,6 +85,19 @@ class GroupsController extends GetxController {
       <GroupActivityProgressEntity>[].obs;
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
+
+  bool get isSelectedGroupOwner {
+    final GroupEntity? group = selectedGroup.value;
+    return group != null && isGroupOwner(group);
+  }
+
+  bool isGroupOwner(GroupEntity group) {
+    final String userId = currentUserId;
+    if (userId.isEmpty) {
+      return false;
+    }
+    return group.ownerId == userId;
+  }
 
   /// Sorting the members is cheap on its own, but the ranking tab reads this
   /// getter (directly and through `rankOf`/`differenceToPrevious`) dozens of
@@ -493,7 +508,13 @@ class GroupsController extends GetxController {
     _closeGroupDetailsRoute();
   }
 
-  void onManageMembers() => isShowingMemberManagement.value = true;
+  void onManageMembers() {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null || !_ensureGroupOwner(group)) {
+      return;
+    }
+    isShowingMemberManagement.value = true;
+  }
 
   void onBackToGroupDetails() => isShowingMemberManagement.value = false;
 
@@ -690,13 +711,52 @@ class GroupsController extends GetxController {
     }
   }
 
-  /// Creating, joining, or leaving a group changes the member's group-owned
+  /// Creating, joining, or editing a group changes the member's group-owned
   /// subjects and goals server-side (fan-out / cleanup trigger). Dropping the
   /// local caches makes the next Category / Daily Goals load refetch them.
   Future<void> _invalidateActivityCaches() async {
     await _localStorageService.delete(LocalStorageKeys.subjects);
     await _localStorageService.delete(LocalStorageKeys.dailyTasks);
     await _reloadVisibleActivityControllers();
+  }
+
+  /// Leaving a group must not drop the complete activity caches. A remote
+  /// reload can fail or briefly return no rows immediately after the membership
+  /// is removed; deleting the caches first would then make every personal goal
+  /// and subject disappear from the UI. Remove only the departing group's local
+  /// copies and keep all personal items available while the server catches up.
+  Future<void> _removeDepartedGroupActivityCaches(String groupId) async {
+    await Future.wait([
+      _removeGroupItemsFromCache(LocalStorageKeys.subjects, groupId),
+      _removeGroupItemsFromCache(LocalStorageKeys.dailyTasks, groupId),
+    ]);
+    await _reloadVisibleActivityControllers();
+  }
+
+  Future<void> _removeGroupItemsFromCache(
+    LocalStorageKeys key,
+    String groupId,
+  ) async {
+    final String? encodedItems = await _localStorageService.read<String?>(key);
+    if (encodedItems == null) {
+      return;
+    }
+
+    try {
+      final dynamic decodedItems = jsonDecode(encodedItems);
+      if (decodedItems is! List<dynamic> ||
+          decodedItems.any((item) => item is! Map<String, dynamic>)) {
+        return;
+      }
+      final List<dynamic> retainedItems = decodedItems.where((item) {
+        final Map<String, dynamic> cachedItem = item as Map<String, dynamic>;
+        return cachedItem["groupId"] != groupId;
+      }).toList();
+      await _localStorageService.write(key, jsonEncode(retainedItems));
+    } on FormatException {
+      // Preserve unreadable cache data. The subsequent remote reload may heal
+      // it, while deleting it here could hide unrelated personal activities.
+    }
   }
 
   Future<void> _reloadVisibleActivityControllers() async {
@@ -726,7 +786,7 @@ class GroupsController extends GetxController {
 
   Future<void> onTapEditGroup() async {
     final GroupEntity? group = selectedGroup.value;
-    if (group == null) {
+    if (group == null || !_ensureGroupOwner(group)) {
       return;
     }
     final dynamic result = await _appNavigator.toNamed(
@@ -761,6 +821,88 @@ class GroupsController extends GetxController {
     );
   }
 
+  Future<void> onTapLeaveGroup() async {
+    final GroupEntity? group = selectedGroup.value;
+    final BuildContext? context = Get.context;
+    if (group == null || context == null) {
+      return;
+    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.leaveGroupConfirmTitle,
+      message: context.l10n.leaveGroupConfirmMessage(group.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.leaveGroupConfirmButton,
+      icon: Icons.logout_rounded,
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await onConfirmLeaveGroup();
+    }
+  }
+
+  Future<void> onTapResetGroup() async {
+    final GroupEntity? group = selectedGroup.value;
+    final BuildContext? context = Get.context;
+    if (group == null || context == null || !_ensureGroupOwner(group)) {
+      return;
+    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.resetGroupConfirmTitle,
+      message: context.l10n.resetGroupConfirmMessage(group.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.resetGroupConfirmButton,
+      icon: Icons.restart_alt_rounded,
+      isDestructive: true,
+    );
+    if (!confirmed || selectedGroup.value?.id != group.id) {
+      return;
+    }
+    await onConfirmResetGroup();
+  }
+
+  Future<void> onConfirmResetGroup() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null || isResettingGroup.value || !_ensureGroupOwner(group)) {
+      return;
+    }
+
+    isResettingGroup.value = true;
+    try {
+      final Either<AppError, void> result = await _groupsRepository
+          .resetGroupProgress(group.id);
+      await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
+        _,
+      ) async {
+        _activityProgressByCacheKey.removeWhere(
+          (key, value) => key.startsWith("${group.id}:"),
+        );
+        _activityProgressCacheKey = null;
+        activityProgress.clear();
+        await loadGroups(preferredGroupId: group.id);
+        if (selectedDetailsTab.value == GroupDetailsTab.goals) {
+          await loadActivityProgress();
+        }
+        _appNavigator.showSuccessSnackBar(
+          Get.context?.l10n.groupResetSuccess ??
+              "The group's progress and ranking were reset.",
+        );
+      });
+    } finally {
+      isResettingGroup.value = false;
+    }
+  }
+
+  bool _ensureGroupOwner(GroupEntity group) {
+    if (isGroupOwner(group)) {
+      return true;
+    }
+    _appNavigator.showErrorSnackBar(
+      Get.context?.l10n.ownerOnlyGroupActionError ??
+          "Only the group owner can do this.",
+    );
+    return false;
+  }
+
   Future<void> onConfirmLeaveGroup() async {
     final GroupEntity? group = selectedGroup.value;
     if (group == null) {
@@ -786,7 +928,7 @@ class GroupsController extends GetxController {
       isShowingGroupDetails.value = false;
       groups.refresh();
       _mainTabRefreshService.markGroupsChanged();
-      await _invalidateActivityCaches();
+      await _removeDepartedGroupActivityCaches(group.id);
       _closeGroupDetailsRoute();
       _appNavigator.showSuccessSnackBar(
         Get.context?.l10n.leftGroupMessage ?? "You left the group.",
