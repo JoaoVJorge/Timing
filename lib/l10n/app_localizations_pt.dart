@@ -456,6 +456,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get highlightTextTooltip => 'Destacar texto';
+
+  @override
+  String get removeHighlightTooltip => 'Remover destaque';
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration de $goalDuration';
   }

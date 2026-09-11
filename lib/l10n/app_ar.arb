@@ -508,6 +508,8 @@
   "saveNotesButton": "حفظ",
   "addNotesPageTooltip": "إضافة صفحة",
   "notesPageCounter": "صفحة {currentPage} من {pageCount}",
+  "highlightTextTooltip": "تمييز النص",
+  "removeHighlightTooltip": "إزالة التمييز",
   "durationProgress": "{duration} من {goalDuration}",
   "timerTotalLabel": "الإجمالي: {duration}",
   "timerNextBreakLabel": "الاستراحة التالية في {duration}",

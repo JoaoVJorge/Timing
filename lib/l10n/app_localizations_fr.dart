@@ -460,6 +460,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get highlightTextTooltip => 'Surligner le texte';
+
+  @override
+  String get removeHighlightTooltip => 'Supprimer le surlignage';
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration sur $goalDuration';
   }

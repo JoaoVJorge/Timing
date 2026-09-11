@@ -880,6 +880,18 @@ abstract class AppLocalizations {
   /// **'Page {currentPage} of {pageCount}'**
   String notesPageCounter(int currentPage, int pageCount);
 
+  /// No description provided for @highlightTextTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight text'**
+  String get highlightTextTooltip;
+
+  /// No description provided for @removeHighlightTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove highlight'**
+  String get removeHighlightTooltip;
+
   /// No description provided for @durationProgress.
   ///
   /// In en, this message translates to:

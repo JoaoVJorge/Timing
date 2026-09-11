@@ -450,6 +450,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get highlightTextTooltip => 'تمييز النص';
+
+  @override
+  String get removeHighlightTooltip => 'إزالة التمييز';
+
+  @override
   String durationProgress(String duration, String goalDuration) {
     return '$duration من $goalDuration';
   }

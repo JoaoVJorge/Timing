@@ -146,6 +146,8 @@
       }
     }
   },
+  "highlightTextTooltip": "Resaltar texto",
+  "removeHighlightTooltip": "Quitar resaltado",
   "durationProgress": "{duration} de {goalDuration}",
   "timerTotalLabel": "Total: {duration}",
   "timerNextBreakLabel": "Próximo descanso en {duration}",

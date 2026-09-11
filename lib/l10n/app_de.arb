@@ -508,6 +508,8 @@
   "saveNotesButton": "Speichern",
   "addNotesPageTooltip": "Seite hinzufügen",
   "notesPageCounter": "Seite {currentPage} von {pageCount}",
+  "highlightTextTooltip": "Text hervorheben",
+  "removeHighlightTooltip": "Hervorhebung entfernen",
   "durationProgress": "{duration} von {goalDuration}",
   "timerTotalLabel": "Gesamt: {duration}",
   "timerNextBreakLabel": "Nächste Pause in {duration}",

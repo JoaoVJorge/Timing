@@ -294,6 +294,8 @@
       }
     }
   },
+  "highlightTextTooltip": "Highlight text",
+  "removeHighlightTooltip": "Remove highlight",
   "durationProgress": "{duration} of {goalDuration}",
   "@durationProgress": {
     "placeholders": {
