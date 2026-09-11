@@ -145,18 +145,33 @@ class AppController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    await _appNavigator.offAllNamed(AppRoutes.mainNavigation);
-
     final activeSession = await _activeTimerSessionService.restore();
-    if (activeSession != null) {
-      await _appNavigator.toNamed(
-        AppRoutes.timer,
-        arguments: TimerRouteArguments(
-          subject: activeSession.subject,
-          restoredSession: activeSession,
-        ),
-      );
+    unawaited(
+      _appNavigator.offAllNamed<void>(AppRoutes.mainNavigation) ??
+          Future<void>.value(),
+    );
+    if (activeSession == null) {
+      return;
     }
+
+    // Navigation futures complete when the pushed route is later removed, not
+    // when its first frame is shown. Push the recovered timer after Home has
+    // been installed instead of awaiting mainNavigation forever.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute != AppRoutes.mainNavigation) {
+        return;
+      }
+      unawaited(
+        _appNavigator.toNamed<void>(
+              AppRoutes.timer,
+              arguments: TimerRouteArguments(
+                subject: activeSession.subject,
+                restoredSession: activeSession,
+              ),
+            ) ??
+            Future<void>.value(),
+      );
+    });
   }
 
   Future<void> _loadInitialConfig() async {

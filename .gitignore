@@ -32,7 +32,9 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
-/test/
+/test/**
+!/test/app/
+!/test/app/app_controller_timer_restore_test.dart
 
 # Local AI assistant settings
 .claude/settings.local.json
