@@ -13,6 +13,7 @@ import "package:timing/presentation/notes/notes_controller.dart";
 import "package:timing/presentation/notes/notes_page.dart";
 import "package:timing/presentation/notes/notes_pages_codec.dart";
 import "package:timing/presentation/notes/notes_rich_text_codec.dart";
+import "package:timing/theme/colors.dart";
 import "package:timing/theme/theme.dart";
 
 class _FakeUpdateSubjectNotesUseCase implements UpdateSubjectNotesUseCase {
@@ -98,13 +99,22 @@ void main() {
     await tester.pump();
 
     expect(find.byType(QuillEditor), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey("notes-formatting-toolbar")),
+      findsNothing,
+    );
+    expect(find.byKey(const ValueKey("notes-format-bold")), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const ValueKey("notes-format-bold")), findsOneWidget);
     expect(find.byKey(const ValueKey("notes-format-italic")), findsOneWidget);
     expect(
       find.byKey(const ValueKey("notes-format-underline")),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey("notes-format-marker")), findsNothing);
+    expect(find.byKey(const ValueKey("notes-format-marker")), findsOneWidget);
     expect(find.byKey(const ValueKey("notes-format-strike")), findsOneWidget);
 
     final QuillEditor editor = tester.widget<QuillEditor>(
@@ -154,7 +164,8 @@ void main() {
     expect(find.text("1 / 1"), findsOneWidget);
     expect(toolbarRect.width, closeTo(pageControlsRect.width, 1));
     expect(toolbarRect.bottom, lessThan(pageControlsRect.top));
-    expect(toolbarRect, toolbarRectBeforeKeyboard);
+    expect(toolbarRect.top, lessThan(toolbarRectBeforeKeyboard.top));
+    expect(toolbarRect.bottom, lessThanOrEqualTo(900 - 300));
     expect(pageControlsRect, pageControlsRectBeforeKeyboard);
 
     controller.notesControllers.first.updateSelection(
@@ -166,6 +177,48 @@ void main() {
     await tester.tap(find.byKey(const ValueKey("notes-format-strike")));
     await tester.pump();
 
+    await tester.tap(find.byKey(const ValueKey("notes-format-marker")));
+    await tester.pumpAndSettle();
+
+    final Finder noColorSwatch = find.byKey(
+      const ValueKey("notes-highlight-none"),
+    );
+    expect(noColorSwatch, findsOneWidget);
+    final Container noColorContainer = tester.widget<Container>(
+      find
+          .descendant(of: noColorSwatch, matching: find.byType(Container))
+          .first,
+    );
+    final BoxDecoration noColorDecoration =
+        noColorContainer.decoration! as BoxDecoration;
+    final AppColorTokens colorTokens = Theme.of(
+      tester.element(noColorSwatch),
+    ).extension<AppColorTokens>()!;
+    expect(noColorDecoration.color, colorTokens.white);
+    expect(noColorDecoration.border, isNull);
+    final Finder blueSwatch = find.byKey(
+      const ValueKey("notes-highlight-cde4f9"),
+    );
+    expect(blueSwatch, findsOneWidget);
+    expect(
+      tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor,
+      Theme.of(
+        tester.element(find.byType(BottomSheet)),
+      ).extension<AppColorTokens>()!.surface,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(SafeArea),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(blueSwatch);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey("notes-highlight-none")), findsNothing);
+
     final Map<String, Attribute<dynamic>> attributes = controller
         .notesControllers
         .first
@@ -173,6 +226,7 @@ void main() {
         .attributes;
     expect(attributes, contains(Attribute.bold.key));
     expect(attributes, contains(Attribute.strikeThrough.key));
+    expect(attributes[Attribute.background.key]?.value, "#cde4f9");
 
     await controller.onBack();
 
@@ -185,7 +239,89 @@ void main() {
         .attributes;
     expect(savedAttributes, contains(Attribute.bold.key));
     expect(savedAttributes, contains(Attribute.strikeThrough.key));
+    expect(savedAttributes[Attribute.background.key]?.value, "#cde4f9");
     expect(navigator.backResult, savedNotes);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("creates a page past the last one and drops it if left empty", (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(430, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final NotesController controller = NotesController(
+      updateSubjectNotesUseCase: _FakeUpdateSubjectNotesUseCase(),
+      appNavigator: _FakeAppNavigator(),
+      subject: const SubjectEntity(
+        id: "subject-1",
+        name: "Study",
+        category: TimeCategoryType.studying,
+        colorValue: 1,
+        totalSeconds: 0,
+        goalSeconds: 0,
+        currentPages: 0,
+        goalPages: 0,
+        notes: "",
+        iconName: "",
+        restMinutes: 5,
+        focusSessionCount: 1,
+        wallpaperIndex: 0,
+      ),
+    );
+    Get.put<NotesController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("pt"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          FlutterQuillLocalizations.delegate,
+        ],
+        home: const NotesPage(),
+      ),
+    );
+    await tester.pump();
+
+    final Finder nextButton = find.widgetWithIcon(
+      IconButton,
+      Icons.chevron_right_rounded,
+    );
+    final Finder previousButton = find.widgetWithIcon(
+      IconButton,
+      Icons.chevron_left_rounded,
+    );
+
+    expect(find.text("1 / 1"), findsOneWidget);
+
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+
+    expect(controller.pageCount, 2);
+    expect(find.text("2 / 2"), findsOneWidget);
+
+    await tester.tap(previousButton);
+    await tester.pumpAndSettle();
+
+    expect(controller.pageCount, 1);
+    expect(find.text("1 / 1"), findsOneWidget);
+
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+
+    expect(controller.pageCount, 2);
+    controller.notesControllers[1].document.insert(0, "Hi");
+    await tester.pump();
+
+    await tester.tap(previousButton);
+    await tester.pumpAndSettle();
+
+    expect(controller.pageCount, 2);
+    expect(find.text("1 / 2"), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

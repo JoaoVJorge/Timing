@@ -6,6 +6,16 @@ class SubjectColors {
 
   static const List<Color> values = AppAccentPresets.values;
 
+  static const List<Color> veryLightValues = [
+    Color(0xFFCDE4F9), // Azul
+    Color(0xFFEADCF5), // Roxo
+    Color(0xFFDEF0B4), // Verde oliva
+    Color(0xFFF6D6E7), // Rosa
+    Color(0xFFB9F0F5), // Ciano
+    Color(0xFFFBEBAA), // Amarelo
+    Color(0xFFFFE2B3), // Laranja
+  ];
+
   static const List<Color> darkValues = [
     Color(0xFF8FCBFF), // Azul
     Color(0xFFD6A8F2), // Roxo

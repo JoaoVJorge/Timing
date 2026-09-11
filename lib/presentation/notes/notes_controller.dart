@@ -25,6 +25,7 @@ class NotesController extends GetxController {
     Attribute.strikeThrough,
   ];
   final Set<String> _activeFormattingKeys = <String>{};
+  Color? _activeHighlightColor;
 
   final SubjectEntity subject;
   late final PageController pageController = PageController();
@@ -39,6 +40,7 @@ class NotesController extends GetxController {
           .obs;
   final RxInt currentPageIndex = 0.obs;
   final Rx<NotesSaveState> saveState = NotesSaveState.idle.obs;
+  final RxBool isFormattingToolbarVisible = false.obs;
 
   String? _lastSavedNotes;
   bool _isClosing = false;
@@ -64,6 +66,28 @@ class NotesController extends GetxController {
   bool isFormattingActive(Attribute<dynamic> attribute) =>
       _activeFormattingKeys.contains(attribute.key);
 
+  Color? get activeHighlightColor => _activeHighlightColor;
+
+  bool get isHighlightActive => _activeHighlightColor != null;
+
+  void setHighlightColor(Color? color) {
+    _activeHighlightColor = color;
+
+    final QuillController quillController = activeNotesController;
+    if (!quillController.selection.isCollapsed) {
+      quillController.formatSelection(
+        color == null
+            ? Attribute.background
+            : BackgroundAttribute(_toHex(color)),
+      );
+    }
+    _applyFormattingState(quillController);
+  }
+
+  void toggleFormattingToolbar() {
+    isFormattingToolbarVisible.toggle();
+  }
+
   void toggleFormatting(Attribute<dynamic> attribute) {
     final bool shouldActivate = !isFormattingActive(attribute);
     if (shouldActivate) {
@@ -85,11 +109,25 @@ class NotesController extends GetxController {
     if (currentPageIndex.value == 0) {
       return;
     }
-    _goToPage(currentPageIndex.value - 1);
+    final int leavingIndex = currentPageIndex.value;
+    final QuillController leavingController = notesControllers[leavingIndex];
+    final bool isLeavingPageEmpty = NotesRichTextCodec.isEmpty(
+      leavingController.document,
+    );
+    final int targetIndex = leavingIndex - 1;
+    _goToPage(targetIndex).then((_) {
+      if (!isLeavingPageEmpty) {
+        return;
+      }
+      notesControllers.removeAt(leavingIndex);
+      leavingController.dispose();
+      currentPageIndex.value = targetIndex;
+    });
   }
 
   void nextPage() {
     if (currentPageIndex.value >= pageCount - 1) {
+      addPage();
       return;
     }
     _goToPage(currentPageIndex.value + 1);
@@ -124,13 +162,11 @@ class NotesController extends GetxController {
     _appNavigator.back<String>(result: _currentNotes);
   }
 
-  void _goToPage(int index) {
-    pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 240),
-      curve: Curves.easeOut,
-    );
-  }
+  Future<void> _goToPage(int index) => pageController.animateToPage(
+    index,
+    duration: const Duration(milliseconds: 240),
+    curve: Curves.easeOut,
+  );
 
   QuillController _createNotesController({required Document document}) {
     late final QuillController controller;
@@ -150,9 +186,15 @@ class NotesController extends GetxController {
           attribute.key: isFormattingActive(attribute)
               ? attribute
               : Attribute.clone(attribute, null),
+        Attribute.background.key: _activeHighlightColor == null
+            ? Attribute.background
+            : BackgroundAttribute(_toHex(_activeHighlightColor!)),
       }),
     );
   }
+
+  static String _toHex(Color color) =>
+      "#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, "0")}";
 
   Future<bool> _save() async {
     final String notes = _currentNotes;
