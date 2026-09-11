@@ -83,6 +83,30 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
+            "timing/timer_foreground_service"
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "start" -> {
+                    TimerForegroundService.start(
+                        context = this,
+                        title = call.argument<String>("title") ?: "",
+                        body = call.argument<String>("body") ?: "",
+                        startedAtMilliseconds = call
+                            .argument<String>("startedAtMilliseconds")
+                            ?.toLongOrNull()
+                    )
+                    result.success(null)
+                }
+                "stop" -> {
+                    TimerForegroundService.stop(this)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
             "timing/home_widget"
         ).setMethodCallHandler { call, result ->
             when (call.method) {

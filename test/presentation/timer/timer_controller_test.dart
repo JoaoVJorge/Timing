@@ -21,6 +21,7 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
 import "package:timing/core/services/focus/focus_overlay_service.dart";
+import "package:timing/core/services/foreground/timer_foreground_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
@@ -331,6 +332,31 @@ class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
   Future<void> hide() async {}
 }
 
+class _FakeTimerForegroundService extends TimerForegroundService {
+  int startCount = 0;
+  int stopCount = 0;
+  String? lastTitle;
+  String? lastBody;
+  DateTime? lastStartedAt;
+
+  @override
+  Future<void> start({
+    required String title,
+    required String body,
+    DateTime? startedAt,
+  }) async {
+    startCount++;
+    lastTitle = title;
+    lastBody = body;
+    lastStartedAt = startedAt;
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCount++;
+  }
+}
+
 class _FakeAnalyticsService extends _Noop implements AnalyticsService {}
 
 class _FakeActiveTimerSessionService extends _Noop
@@ -414,6 +440,7 @@ TimerController _controller(
   FocusFeedbackService? focusFeedbackService,
   FocusGuardService? focusGuardService,
   FocusOverlayService? focusOverlayService,
+  TimerForegroundService? timerForegroundService,
   TimerNotificationService? timerNotificationService,
   TimerLiveActivityService? timerLiveActivityService,
   UpdateSubjectTimeUseCase? updateSubjectTimeUseCase,
@@ -442,6 +469,8 @@ TimerController _controller(
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
   focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
+  timerForegroundService:
+      timerForegroundService ?? _FakeTimerForegroundService(),
   analyticsService: _FakeAnalyticsService(),
   activityChangeBus: ActivityChangeBus(),
   appController: appController ?? _FakeAppController(),
@@ -1030,6 +1059,7 @@ void main() {
     test("hobby overtime can be paused, resumed and saved on finish", () async {
       final update = _FakeUpdateSubjectTimeUseCase();
       final history = _FakeSubjectDailyHistoryService();
+      final foregroundService = _FakeTimerForegroundService();
       final controller = _controller(
         _subject(
           category: TimeCategoryType.hobbies,
@@ -1039,6 +1069,7 @@ void main() {
         ),
         updateSubjectTimeUseCase: update,
         subjectDailyHistoryService: history,
+        timerForegroundService: foregroundService,
       );
 
       controller.advanceForTesting(31 * 60);
@@ -1063,6 +1094,7 @@ void main() {
       expect(controller.isRunning.value, isFalse);
       expect(update.totals.last, 100 + 32 * 60);
       expect(history.addedSeconds, 32 * 60);
+      expect(foregroundService.stopCount, 1);
     });
 
     test("alarms at an interval boundary and immediately keeps focusing", () {
@@ -1243,10 +1275,12 @@ void main() {
 
     test("enables timer alerts when a session starts", () async {
       final notifications = _FakeTimerNotificationService();
+      final foregroundService = _FakeTimerForegroundService();
       final appController = _FakeAppController(notificationsEnabled: false);
       final controller = _controller(
         _subject(),
         timerNotificationService: notifications,
+        timerForegroundService: foregroundService,
         appController: appController,
       );
 
@@ -1256,6 +1290,8 @@ void main() {
       expect(appController.notificationsEnabled.value, isTrue);
       expect(appController.enableNotificationsCount, 1);
       expect(notifications.showRunningCount, 1);
+      expect(foregroundService.startCount, 1);
+      expect(foregroundService.lastStartedAt, isNotNull);
 
       controller.onClose();
     });

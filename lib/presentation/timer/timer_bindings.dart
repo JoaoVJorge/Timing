@@ -29,6 +29,7 @@ class TimerBindings extends Bindings {
         focusFeedbackService: Get.find(),
         focusGuardService: Get.find(),
         focusOverlayService: Get.find(),
+        timerForegroundService: Get.find(),
         analyticsService: Get.find(),
         activityChangeBus: Get.find(),
         appController: Get.find(),

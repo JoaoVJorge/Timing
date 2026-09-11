@@ -20,6 +20,7 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
 import "package:timing/core/services/focus/focus_overlay_service.dart";
+import "package:timing/core/services/foreground/timer_foreground_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
@@ -46,6 +47,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.focusFeedbackService,
     required this.focusGuardService,
     required this.focusOverlayService,
+    required this.timerForegroundService,
     required this.analyticsService,
     required this.activityChangeBus,
     required this.appController,
@@ -81,6 +83,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final FocusFeedbackService focusFeedbackService;
   final FocusGuardService focusGuardService;
   final FocusOverlayService focusOverlayService;
+  final TimerForegroundService timerForegroundService;
   final AnalyticsService analyticsService;
   final ActivityChangeBus activityChangeBus;
   final AppController appController;
@@ -463,6 +466,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       // sound/vibration source when Flutter is suspended in the background.
       timerNotificationService.cancelOngoing();
     }
+    unawaited(timerForegroundService.stop());
     _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
@@ -618,6 +622,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     } else {
       timerNotificationService.cancelOngoing();
     }
+    unawaited(timerForegroundService.stop());
     _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
@@ -665,6 +670,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     if (!appController.notificationsEnabled.value) {
       timerNotificationService.cancel();
+      unawaited(timerForegroundService.stop());
       return;
     }
 
@@ -687,6 +693,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         title: subject.name,
         body: pausedBody,
       );
+      unawaited(
+        timerForegroundService.start(title: subject.name, body: pausedBody),
+      );
       return;
     }
 
@@ -695,15 +704,29 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         title: subject.name,
         body: backgroundRestingBody,
       );
+      unawaited(
+        timerForegroundService.start(
+          title: subject.name,
+          body: backgroundRestingBody,
+        ),
+      );
       return;
     }
 
     timerNotificationService.cancelRestFinished();
+    final DateTime startedAt = DateTime.now().subtract(
+      Duration(seconds: sessionSeconds.value),
+    );
     timerNotificationService.showRunning(
       title: subject.name,
       body: backgroundRunningBody,
-      startedAt: DateTime.now().subtract(
-        Duration(seconds: sessionSeconds.value),
+      startedAt: startedAt,
+    );
+    unawaited(
+      timerForegroundService.start(
+        title: subject.name,
+        body: backgroundRunningBody,
+        startedAt: startedAt,
       ),
     );
   }
@@ -1036,6 +1059,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     } else {
       timerNotificationService.cancelOngoing();
     }
+    unawaited(timerForegroundService.stop());
     _hideOverlay();
     _disableFocusGuard();
     unawaited(timerLiveActivityService.end());
