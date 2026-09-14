@@ -32,16 +32,22 @@ class SwipeRevealAction {
 }
 
 /// Swipe a row to the left to reveal a fixed set of trailing actions (edit,
-/// delete, …). Shared so every list in the app — daily goals, schedule — uses
-/// the exact same reveal gesture and motion.
+/// delete, …), or to the right to reveal leading actions. Shared so every
+/// list in the app uses the exact same reveal gesture and motion.
 class SwipeRevealActions extends StatefulWidget {
   const SwipeRevealActions({
     required this.child,
     required this.actions,
+    this.leadingActions = const [],
     super.key,
   });
 
   final Widget child;
+
+  /// Actions revealed when the row is pulled to the right.
+  final List<SwipeRevealAction> leadingActions;
+
+  /// Actions revealed when the row is pulled to the left.
   final List<SwipeRevealAction> actions;
 
   @override
@@ -54,16 +60,25 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
   static const double _actionGap = 8;
   static const double _leadingGap = 8;
 
-  late final double _revealWidth =
-      widget.actions.length * _actionWidth +
-      (widget.actions.length - 1) * _actionGap +
-      _leadingGap;
+  double _revealWidthFor(List<SwipeRevealAction> actions) {
+    if (actions.isEmpty) {
+      return 0;
+    }
+    return actions.length * _actionWidth +
+        (actions.length - 1) * _actionGap +
+        _leadingGap;
+  }
+
+  late final double _trailingRevealWidth = _revealWidthFor(widget.actions);
+  late final double _leadingRevealWidth = _revealWidthFor(
+    widget.leadingActions,
+  );
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 220),
-    lowerBound: -_revealWidth,
-    upperBound: 0,
+    lowerBound: -_trailingRevealWidth,
+    upperBound: _leadingRevealWidth,
     value: 0,
   );
 
@@ -75,15 +90,20 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
 
   void _onDragUpdate(DragUpdateDetails details) {
     _controller.value = (_controller.value + details.delta.dx).clamp(
-      -_revealWidth,
-      0,
+      -_trailingRevealWidth,
+      _leadingRevealWidth,
     );
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final double target = _controller.value < -_revealWidth / 2
-        ? -_revealWidth
-        : 0;
+    final double target;
+    if (_controller.value < -_trailingRevealWidth / 2) {
+      target = -_trailingRevealWidth;
+    } else if (_controller.value > _leadingRevealWidth / 2) {
+      target = _leadingRevealWidth;
+    } else {
+      target = 0;
+    }
     _controller.animateTo(target, curve: Curves.easeOut);
   }
 
@@ -115,6 +135,28 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
                     _RevealActionButton(
                       action: widget.actions[index],
                       onTap: () => _onTapAction(widget.actions[index]),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        if (_controller.value > 0)
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (
+                    int index = 0;
+                    index < widget.leadingActions.length;
+                    index++
+                  ) ...[
+                    if (index > 0) const SizedBox(width: _actionGap),
+                    _RevealActionButton(
+                      action: widget.leadingActions[index],
+                      onTap: () => _onTapAction(widget.leadingActions[index]),
                     ),
                   ],
                 ],
