@@ -3190,4 +3190,36 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get ownerOnlyGroupActionError =>
       'يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء.';
+
+  @override
+  String get viewMembersLabel => 'عرض الأعضاء';
+
+  @override
+  String get groupMembersPageTitle => 'أعضاء المجموعة';
+
+  @override
+  String get reportGroupLabel => 'الإبلاغ عن المجموعة';
+
+  @override
+  String get requestFriendButton => 'طلب صداقة';
+
+  @override
+  String get cancelFriendRequestButton => 'إلغاء الطلب';
+
+  @override
+  String get friendStatusLabel => 'صديق';
+
+  @override
+  String get friendRequestReceivedLabel => 'طلب مستلم';
+
+  @override
+  String get transferGroupLeadershipTitle => 'تعيين هذا العضو قائدًا؟';
+
+  @override
+  String transferGroupLeadershipMessage(String memberName) {
+    return 'سيصبح $memberName قائد المجموعة. ستبقى عضوًا.';
+  }
+
+  @override
+  String get transferGroupLeadershipButton => 'تعيين قائد';
 }

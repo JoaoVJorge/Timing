@@ -3244,4 +3244,37 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ownerOnlyGroupActionError =>
       'Nur der Gruppeneigentümer kann das tun.';
+
+  @override
+  String get viewMembersLabel => 'Mitglieder ansehen';
+
+  @override
+  String get groupMembersPageTitle => 'Gruppenmitglieder';
+
+  @override
+  String get reportGroupLabel => 'Gruppe melden';
+
+  @override
+  String get requestFriendButton => 'Freundschaft anfragen';
+
+  @override
+  String get cancelFriendRequestButton => 'Anfrage abbrechen';
+
+  @override
+  String get friendStatusLabel => 'Freund';
+
+  @override
+  String get friendRequestReceivedLabel => 'Anfrage erhalten';
+
+  @override
+  String get transferGroupLeadershipTitle =>
+      'Dieses Mitglied zum Leiter machen?';
+
+  @override
+  String transferGroupLeadershipMessage(String memberName) {
+    return '$memberName wird Gruppenleiter. Du bleibst Mitglied.';
+  }
+
+  @override
+  String get transferGroupLeadershipButton => 'Zum Leiter machen';
 }

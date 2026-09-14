@@ -1739,5 +1739,18 @@
   },
   "resetGroupConfirmButton": "Reset",
   "groupResetSuccess": "The group's progress and ranking were reset.",
-  "ownerOnlyGroupActionError": "Only the group owner can do this."
+  "ownerOnlyGroupActionError": "Only the group owner can do this.",
+  "viewMembersLabel": "View members",
+  "groupMembersPageTitle": "Group members",
+  "reportGroupLabel": "Report group",
+  "requestFriendButton": "Add friend",
+  "cancelFriendRequestButton": "Cancel request",
+  "friendStatusLabel": "Friend",
+  "friendRequestReceivedLabel": "Request received",
+  "transferGroupLeadershipTitle": "Make this member the leader?",
+  "transferGroupLeadershipMessage": "{memberName} will become the group leader. You will remain a member.",
+  "@transferGroupLeadershipMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "transferGroupLeadershipButton": "Make leader"
 }

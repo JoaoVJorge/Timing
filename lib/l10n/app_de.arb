@@ -1645,5 +1645,18 @@
   "resetGroupConfirmMessage": "Dadurch werden der gemeinsame Fortschritt und die Rangliste von {groupName} zurückgesetzt. Der persönliche Aktivitätsverlauf jedes Mitglieds bleibt erhalten.",
   "resetGroupConfirmButton": "Zurücksetzen",
   "groupResetSuccess": "Gruppenfortschritt und Rangliste wurden zurückgesetzt.",
-  "ownerOnlyGroupActionError": "Nur der Gruppeneigentümer kann das tun."
+  "ownerOnlyGroupActionError": "Nur der Gruppeneigentümer kann das tun.",
+  "viewMembersLabel": "Mitglieder ansehen",
+  "groupMembersPageTitle": "Gruppenmitglieder",
+  "reportGroupLabel": "Gruppe melden",
+  "requestFriendButton": "Freundschaft anfragen",
+  "cancelFriendRequestButton": "Anfrage abbrechen",
+  "friendStatusLabel": "Freund",
+  "friendRequestReceivedLabel": "Anfrage erhalten",
+  "transferGroupLeadershipTitle": "Dieses Mitglied zum Leiter machen?",
+  "transferGroupLeadershipMessage": "{memberName} wird Gruppenleiter. Du bleibst Mitglied.",
+  "@transferGroupLeadershipMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "transferGroupLeadershipButton": "Zum Leiter machen"
 }

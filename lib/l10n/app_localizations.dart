@@ -5763,6 +5763,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only the group owner can do this.'**
   String get ownerOnlyGroupActionError;
+
+  /// No description provided for @viewMembersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'View members'**
+  String get viewMembersLabel;
+
+  /// No description provided for @groupMembersPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group members'**
+  String get groupMembersPageTitle;
+
+  /// No description provided for @reportGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Report group'**
+  String get reportGroupLabel;
+
+  /// No description provided for @requestFriendButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friend'**
+  String get requestFriendButton;
+
+  /// No description provided for @cancelFriendRequestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get cancelFriendRequestButton;
+
+  /// No description provided for @friendStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend'**
+  String get friendStatusLabel;
+
+  /// No description provided for @friendRequestReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Request received'**
+  String get friendRequestReceivedLabel;
+
+  /// No description provided for @transferGroupLeadershipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this member the leader?'**
+  String get transferGroupLeadershipTitle;
+
+  /// No description provided for @transferGroupLeadershipMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName} will become the group leader. You will remain a member.'**
+  String transferGroupLeadershipMessage(String memberName);
+
+  /// No description provided for @transferGroupLeadershipButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Make leader'**
+  String get transferGroupLeadershipButton;
 }
 
 class _AppLocalizationsDelegate

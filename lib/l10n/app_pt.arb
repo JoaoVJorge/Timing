@@ -1335,5 +1335,18 @@
   "resetGroupConfirmMessage": "Isso zera o progresso compartilhado e o ranking de {groupName}. O histórico pessoal de atividade de cada membro será mantido.",
   "resetGroupConfirmButton": "Resetar",
   "groupResetSuccess": "O progresso e o ranking do grupo foram resetados.",
-  "ownerOnlyGroupActionError": "Apenas o dono do grupo pode fazer isso."
+  "ownerOnlyGroupActionError": "Apenas o dono do grupo pode fazer isso.",
+  "viewMembersLabel": "Ver membros",
+  "groupMembersPageTitle": "Membros do grupo",
+  "reportGroupLabel": "Reportar grupo",
+  "requestFriendButton": "Solicitar amizade",
+  "cancelFriendRequestButton": "Cancelar pedido",
+  "friendStatusLabel": "Amigo",
+  "friendRequestReceivedLabel": "Pedido recebido",
+  "transferGroupLeadershipTitle": "Tornar este membro líder?",
+  "transferGroupLeadershipMessage": "{memberName} será o novo líder do grupo. Você continuará como membro.",
+  "@transferGroupLeadershipMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "transferGroupLeadershipButton": "Tornar líder"
 }

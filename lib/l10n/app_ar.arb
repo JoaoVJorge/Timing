@@ -1645,5 +1645,18 @@
   "resetGroupConfirmMessage": "سيؤدي هذا إلى إعادة ضبط التقدم المشترك وترتيب {groupName}. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.",
   "resetGroupConfirmButton": "إعادة ضبط",
   "groupResetSuccess": "تمت إعادة ضبط تقدم المجموعة وترتيبها.",
-  "ownerOnlyGroupActionError": "يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء."
+  "ownerOnlyGroupActionError": "يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء.",
+  "viewMembersLabel": "عرض الأعضاء",
+  "groupMembersPageTitle": "أعضاء المجموعة",
+  "reportGroupLabel": "الإبلاغ عن المجموعة",
+  "requestFriendButton": "طلب صداقة",
+  "cancelFriendRequestButton": "إلغاء الطلب",
+  "friendStatusLabel": "صديق",
+  "friendRequestReceivedLabel": "طلب مستلم",
+  "transferGroupLeadershipTitle": "تعيين هذا العضو قائدًا؟",
+  "transferGroupLeadershipMessage": "سيصبح {memberName} قائد المجموعة. ستبقى عضوًا.",
+  "@transferGroupLeadershipMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "transferGroupLeadershipButton": "تعيين قائد"
 }
