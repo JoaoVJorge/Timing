@@ -19,6 +19,10 @@ import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
 import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -37,6 +41,10 @@ class GroupsController extends GetxController {
   GroupsController({
     required this._getGroupsUseCase,
     required this._getFriendsSocialUseCase,
+    required this._sendFriendRequestUseCase,
+    required this._cancelFriendRequestUseCase,
+    required this._acceptFriendRequestUseCase,
+    required this._removeFriendUseCase,
     required this._groupsRepository,
     required this._appNavigator,
     required this._supabaseService,
@@ -48,6 +56,10 @@ class GroupsController extends GetxController {
 
   final GetGroupsUseCase _getGroupsUseCase;
   final GetFriendsSocialUseCase _getFriendsSocialUseCase;
+  final SendFriendRequestUseCase _sendFriendRequestUseCase;
+  final CancelFriendRequestUseCase _cancelFriendRequestUseCase;
+  final AcceptFriendRequestUseCase _acceptFriendRequestUseCase;
+  final RemoveFriendUseCase _removeFriendUseCase;
   final GroupsRepository _groupsRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
@@ -66,6 +78,10 @@ class GroupsController extends GetxController {
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
   final RxList<FriendEntity> friends = <FriendEntity>[].obs;
+  final RxList<FriendEntity> incomingFriendRequests = <FriendEntity>[].obs;
+  final RxList<FriendEntity> sentFriendRequests = <FriendEntity>[].obs;
+  final RxSet<String> updatingFriendshipMemberIds = <String>{}.obs;
+  final RxSet<String> updatingGroupMemberIds = <String>{}.obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
   final Rx<LeaderboardPeriodType> selectedPeriod =
       LeaderboardPeriodType.total.obs;
@@ -302,6 +318,15 @@ class GroupsController extends GetxController {
 
   bool isCurrentUser(GroupMemberEntity member) => member.id == currentUserId;
 
+  bool isFriend(String memberId) =>
+      friends.any((friend) => friend.id == memberId);
+
+  bool hasIncomingFriendRequest(String memberId) =>
+      incomingFriendRequests.any((request) => request.id == memberId);
+
+  FriendEntity? sentFriendRequestFor(String memberId) =>
+      sentFriendRequests.firstWhereOrNull((request) => request.id == memberId);
+
   @override
   void onInit() {
     super.onInit();
@@ -317,7 +342,11 @@ class GroupsController extends GetxController {
     try {
       final Either<AppError, FriendsSocialEntity> result =
           await _getFriendsSocialUseCase();
-      result.fold((_) {}, (social) => friends.assignAll(social.friends));
+      result.fold((_) {}, (social) {
+        friends.assignAll(social.friends);
+        incomingFriendRequests.assignAll(social.requests);
+        sentFriendRequests.assignAll(social.sentRequests);
+      });
     } finally {
       isLoadingFriends.value = false;
     }
@@ -510,7 +539,7 @@ class GroupsController extends GetxController {
 
   void onManageMembers() {
     final GroupEntity? group = selectedGroup.value;
-    if (group == null || !_ensureGroupOwner(group)) {
+    if (group == null) {
       return;
     }
     isShowingMemberManagement.value = true;
@@ -783,6 +812,209 @@ class GroupsController extends GetxController {
     }
     await _appNavigator.toNamed<void>(AppRoutes.groupInvites, arguments: group);
   }
+
+  Future<void> onSendFriendRequestToMember(GroupMemberEntity member) async {
+    if (isCurrentUser(member) ||
+        isFriend(member.id) ||
+        hasIncomingFriendRequest(member.id) ||
+        sentFriendRequestFor(member.id) != null ||
+        !updatingFriendshipMemberIds.add(member.id)) {
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _sendFriendRequestUseCase(
+        member.id,
+      );
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+        sentFriendRequests.add(
+          FriendEntity(
+            id: member.id,
+            friendshipId: "",
+            name: member.name,
+            handle: "",
+            colorValue: member.avatarColorValue,
+            avatarIconIndex: member.avatarIconIndex,
+            profilePhotoBase64: member.avatar,
+          ),
+        );
+        _appNavigator.showSuccessSnackBar(
+          Get.context?.l10n.friendRequestSentMessage ?? "Request sent",
+        );
+      });
+    } finally {
+      updatingFriendshipMemberIds.remove(member.id);
+    }
+  }
+
+  Future<void> onCancelFriendRequestToMember(GroupMemberEntity member) async {
+    final FriendEntity? request = sentFriendRequestFor(member.id);
+    if (request == null || !updatingFriendshipMemberIds.add(member.id)) {
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _cancelFriendRequestUseCase(
+        addresseeId: member.id,
+        friendshipId: request.friendshipId,
+      );
+      result.fold(
+        (error) => _appNavigator.showErrorSnackBar(),
+        (_) => sentFriendRequests.removeWhere(
+          (sentRequest) => sentRequest.id == member.id,
+        ),
+      );
+    } finally {
+      updatingFriendshipMemberIds.remove(member.id);
+    }
+  }
+
+  Future<void> onTapFriendshipMemberAction(GroupMemberEntity member) async {
+    final FriendEntity? friend = friends.firstWhereOrNull(
+      (item) => item.id == member.id,
+    );
+    if (friend != null) {
+      await onRemoveFriendFromMember(member, friend);
+      return;
+    }
+    if (sentFriendRequestFor(member.id) != null) {
+      await onCancelFriendRequestToMember(member);
+      return;
+    }
+    final FriendEntity? incomingRequest = incomingFriendRequests
+        .firstWhereOrNull((item) => item.id == member.id);
+    if (incomingRequest != null) {
+      await onAcceptFriendRequestFromMember(member, incomingRequest);
+      return;
+    }
+    await onSendFriendRequestToMember(member);
+  }
+
+  Future<void> onAcceptFriendRequestFromMember(
+    GroupMemberEntity member,
+    FriendEntity request,
+  ) async {
+    if (!updatingFriendshipMemberIds.add(member.id)) {
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _acceptFriendRequestUseCase(
+        request.friendshipId,
+      );
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
+        incomingFriendRequests.removeWhere((item) => item.id == member.id);
+        if (!isFriend(member.id)) {
+          friends.add(request);
+        }
+      });
+    } finally {
+      updatingFriendshipMemberIds.remove(member.id);
+    }
+  }
+
+  Future<void> onRemoveFriendFromMember(
+    GroupMemberEntity member,
+    FriendEntity friend,
+  ) async {
+    final BuildContext? context = Get.context;
+    if (context == null || !updatingFriendshipMemberIds.add(member.id)) {
+      return;
+    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.deleteConfirmationTitle(context.l10n.friendTypeName),
+      message: context.l10n.deleteConfirmationContent(friend.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.deleteButton,
+      icon: Icons.person_remove_outlined,
+      isDestructive: true,
+    );
+    if (!confirmed) {
+      updatingFriendshipMemberIds.remove(member.id);
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _removeFriendUseCase(
+        friendId: member.id,
+        friendshipId: friend.friendshipId,
+      );
+      result.fold(
+        (error) => _appNavigator.showErrorSnackBar(),
+        (_) => friends.removeWhere((item) => item.id == member.id),
+      );
+    } finally {
+      updatingFriendshipMemberIds.remove(member.id);
+    }
+  }
+
+  Future<void> onRemoveGroupMember(GroupMemberEntity member) async {
+    final GroupEntity? group = selectedGroup.value;
+    final BuildContext? context = Get.context;
+    if (group == null ||
+        context == null ||
+        isCurrentUser(member) ||
+        !_ensureGroupOwner(group) ||
+        !updatingGroupMemberIds.add(member.id)) {
+      return;
+    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.deleteConfirmationTitle(
+        context.l10n.groupMemberRoleLabel,
+      ),
+      message: context.l10n.deleteConfirmationContent(member.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.deleteButton,
+      icon: Icons.person_remove_outlined,
+      isDestructive: true,
+    );
+    if (!confirmed) {
+      updatingGroupMemberIds.remove(member.id);
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _groupsRepository
+          .removeMember(groupId: group.id, memberId: member.id);
+      await result.fold(
+        (error) async => _appNavigator.showErrorSnackBar(),
+        (_) => loadGroups(preferredGroupId: group.id),
+      );
+    } finally {
+      updatingGroupMemberIds.remove(member.id);
+    }
+  }
+
+  Future<void> onTransferGroupLeadership(GroupMemberEntity member) async {
+    final GroupEntity? group = selectedGroup.value;
+    final BuildContext? context = Get.context;
+    if (group == null ||
+        context == null ||
+        isCurrentUser(member) ||
+        !_ensureGroupOwner(group) ||
+        !updatingGroupMemberIds.add(member.id)) {
+      return;
+    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.transferGroupLeadershipTitle,
+      message: context.l10n.transferGroupLeadershipMessage(member.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.transferGroupLeadershipButton,
+      icon: Icons.workspace_premium_outlined,
+    );
+    if (!confirmed) {
+      updatingGroupMemberIds.remove(member.id);
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _groupsRepository
+          .transferLeadership(groupId: group.id, nextLeaderId: member.id);
+      await result.fold(
+        (error) async => _appNavigator.showErrorSnackBar(),
+        (_) => loadGroups(preferredGroupId: group.id),
+      );
+    } finally {
+      updatingGroupMemberIds.remove(member.id);
+    }
+  }
+
+  // Reporting is intentionally only an interface affordance for now.
+  void onReportGroupMember(GroupMemberEntity member) {}
 
   Future<void> onTapEditGroup() async {
     final GroupEntity? group = selectedGroup.value;

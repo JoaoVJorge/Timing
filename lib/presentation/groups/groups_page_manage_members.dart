@@ -30,7 +30,7 @@ class _ManageMembersView extends StatelessWidget {
       children: [
         const Gap(12),
         AppTopBar(
-          title: context.l10n.manageMembersTitle,
+          title: context.l10n.groupMembersPageTitle,
           showBackButton: true,
           onBack: controller.onBackToGroupDetails,
         ),
@@ -44,13 +44,14 @@ class _ManageMembersView extends StatelessWidget {
               if (leader != null) ...[
                 _MembersSectionLabel(label: context.l10n.groupLeaderLabel),
                 const Gap(8),
-                _MemberRow(
+                _MemberSwipeActions(
+                  controller: controller,
                   member: leader,
                   roleLabel: context.l10n.groupLeaderRoleLabel,
                   badgeLabel: context.l10n.groupLeaderLabel,
                   isFirst: true,
                   isLast: true,
-                  showActions: false,
+                  isGroupLeader: currentUserIsLeader,
                 ),
                 const Gap(12),
               ],
@@ -61,12 +62,13 @@ class _ManageMembersView extends StatelessWidget {
                 child: Column(
                   children: [
                     for (int index = 0; index < members.length; index++) ...[
-                      _MemberRow(
+                      _MemberSwipeActions(
+                        controller: controller,
                         member: members[index],
                         roleLabel: context.l10n.groupMemberRoleLabel,
                         isFirst: index == 0,
                         isLast: index == members.length - 1,
-                        showActions: currentUserIsLeader,
+                        isGroupLeader: currentUserIsLeader,
                       ),
                       if (index < members.length - 1)
                         Divider(
@@ -151,7 +153,7 @@ class _MemberRow extends StatelessWidget {
     required this.isFirst,
     required this.isLast,
     this.badgeLabel,
-    this.showActions = false,
+    this.friendshipStatusLabel,
   });
 
   final GroupMemberEntity member;
@@ -159,7 +161,7 @@ class _MemberRow extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
   final String? badgeLabel;
-  final bool showActions;
+  final String? friendshipStatusLabel;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -200,7 +202,9 @@ class _MemberRow extends StatelessWidget {
               ),
               const Gap(2),
               Text(
-                roleLabel,
+                friendshipStatusLabel == null
+                    ? roleLabel
+                    : "$roleLabel · $friendshipStatusLabel",
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodyMedium.copyWith(
@@ -227,17 +231,107 @@ class _MemberRow extends StatelessWidget {
             ),
           ),
         ],
-        if (showActions) ...[
-          const Gap(8),
-          Icon(
-            Icons.more_vert_rounded,
-            size: 22,
-            color: context.colorTokens.textBody,
-          ),
-        ],
       ],
     ),
   );
+}
+
+class _MemberSwipeActions extends StatelessWidget {
+  const _MemberSwipeActions({
+    required this.controller,
+    required this.member,
+    required this.roleLabel,
+    required this.isFirst,
+    required this.isLast,
+    required this.isGroupLeader,
+    this.badgeLabel,
+  });
+
+  final GroupsController controller;
+  final GroupMemberEntity member;
+  final String roleLabel;
+  final bool isFirst;
+  final bool isLast;
+  final bool isGroupLeader;
+  final String? badgeLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    if (controller.isCurrentUser(member)) {
+      return _MemberRow(
+        member: member,
+        roleLabel: roleLabel,
+        badgeLabel: badgeLabel,
+        isFirst: isFirst,
+        isLast: isLast,
+      );
+    }
+    return Obx(() {
+      final bool isFriend = controller.isFriend(member.id);
+      final bool hasSentRequest =
+          controller.sentFriendRequestFor(member.id) != null;
+      final bool hasIncomingRequest = controller.hasIncomingFriendRequest(
+        member.id,
+      );
+      final String? statusLabel = isFriend
+          ? context.l10n.friendStatusLabel
+          : hasSentRequest
+          ? context.l10n.pendingLabel
+          : hasIncomingRequest
+          ? context.l10n.friendRequestReceivedLabel
+          : null;
+      final bool isUpdatingFriendship = controller.updatingFriendshipMemberIds
+          .contains(member.id);
+      final bool isUpdatingMembership = controller.updatingGroupMemberIds
+          .contains(member.id);
+
+      return IgnorePointer(
+        ignoring: isUpdatingFriendship || isUpdatingMembership,
+        child: SwipeRevealActions(
+          leadingActions: [
+            SwipeRevealAction(
+              iconData: isFriend
+                  ? Icons.person_remove_alt_1_rounded
+                  : hasSentRequest
+                  ? Icons.close_rounded
+                  : Icons.person_add_alt_1_rounded,
+              background: isFriend
+                  ? context.colorTokens.error
+                  : context.colorTokens.primary,
+              onTap: () => controller.onTapFriendshipMemberAction(member),
+            ),
+            if (isGroupLeader)
+              SwipeRevealAction(
+                iconData: Icons.workspace_premium_outlined,
+                background: context.colorTokens.primary,
+                onTap: () => controller.onTransferGroupLeadership(member),
+              ),
+          ],
+          actions: [
+            if (isGroupLeader)
+              SwipeRevealAction(
+                iconData: Icons.person_remove_alt_1_rounded,
+                background: context.colorTokens.error,
+                onTap: () => controller.onRemoveGroupMember(member),
+              ),
+            SwipeRevealAction(
+              iconData: Icons.flag_outlined,
+              background: context.colorTokens.error,
+              onTap: () => controller.onReportGroupMember(member),
+            ),
+          ],
+          child: _MemberRow(
+            member: member,
+            roleLabel: roleLabel,
+            badgeLabel: badgeLabel,
+            friendshipStatusLabel: statusLabel,
+            isFirst: isFirst,
+            isLast: isLast,
+          ),
+        ),
+      );
+    });
+  }
 }
 
 class _AddMemberButton extends StatelessWidget {

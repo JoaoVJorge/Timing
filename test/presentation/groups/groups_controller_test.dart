@@ -22,6 +22,10 @@ import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
 import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
+import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
+import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
+import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -101,6 +105,8 @@ class _FakeFriendsRepository implements FriendsRepository {
   _FakeFriendsRepository(this.friends);
 
   final List<FriendEntity> friends;
+  final List<String> sentRequestIds = <String>[];
+  final List<String> canceledRequestIds = <String>[];
 
   @override
   Future<Either<AppError, FriendsSocialEntity>> getSocial() async => Right(
@@ -111,6 +117,21 @@ class _FakeFriendsRepository implements FriendsRepository {
       friends: friends,
     ),
   );
+
+  @override
+  Future<Either<AppError, void>> sendFriendRequest(String addresseeId) async {
+    sentRequestIds.add(addresseeId);
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<AppError, void>> cancelSentRequest({
+    required String addresseeId,
+    String friendshipId = "",
+  }) async {
+    canceledRequestIds.add(addresseeId);
+    return const Right(null);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -789,24 +810,69 @@ void main() {
     expect(longHeight, greaterThan(shortHeight));
     expect(tester.takeException(), isNull);
   });
+
+  test("sends and cancels a friendship request from a group member", () async {
+    final _FakeFriendsRepository friendsRepository = _FakeFriendsRepository(
+      const [],
+    );
+    final GroupsController controller = _controller(
+      _FakeGroupsRepository(const []),
+      friendsRepository: friendsRepository,
+    );
+    const GroupMemberEntity member = GroupMemberEntity(
+      id: "member-2",
+      name: "Ana",
+      avatarColorValue: 1,
+      todaySeconds: 0,
+      weekSeconds: 0,
+      monthSeconds: 0,
+    );
+
+    await controller.onSendFriendRequestToMember(member);
+
+    expect(friendsRepository.sentRequestIds, [member.id]);
+    expect(controller.sentFriendRequestFor(member.id), isNotNull);
+
+    await controller.onCancelFriendRequestToMember(member);
+
+    expect(friendsRepository.canceledRequestIds, [member.id]);
+    expect(controller.sentFriendRequestFor(member.id), isNull);
+  });
 }
 
 GroupsController _controller(
   _FakeGroupsRepository repository, {
   ActivityChangeBus? activityChangeBus,
   List<FriendEntity> friends = const [],
+  _FakeFriendsRepository? friendsRepository,
   AppLocalStorageService? localStorageService,
-}) => GroupsController(
-  getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
-  getFriendsSocialUseCase: GetFriendsSocialUseCase(
-    friendsRepository: _FakeFriendsRepository(friends),
-  ),
-  groupsRepository: repository,
-  appNavigator: _FakeAppNavigator(),
-  supabaseService: _FakeSupabaseService(),
-  localStorageService: localStorageService ?? _FakeLocalStorageService(),
-  activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
-);
+}) {
+  final _FakeFriendsRepository effectiveFriendsRepository =
+      friendsRepository ?? _FakeFriendsRepository(friends);
+  return GroupsController(
+    getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
+    getFriendsSocialUseCase: GetFriendsSocialUseCase(
+      friendsRepository: effectiveFriendsRepository,
+    ),
+    sendFriendRequestUseCase: SendFriendRequestUseCase(
+      friendsRepository: effectiveFriendsRepository,
+    ),
+    cancelFriendRequestUseCase: CancelFriendRequestUseCase(
+      friendsRepository: effectiveFriendsRepository,
+    ),
+    acceptFriendRequestUseCase: AcceptFriendRequestUseCase(
+      friendsRepository: effectiveFriendsRepository,
+    ),
+    removeFriendUseCase: RemoveFriendUseCase(
+      friendsRepository: effectiveFriendsRepository,
+    ),
+    groupsRepository: repository,
+    appNavigator: _FakeAppNavigator(),
+    supabaseService: _FakeSupabaseService(),
+    localStorageService: localStorageService ?? _FakeLocalStorageService(),
+    activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
+  );
+}
 
 GroupEntity _group(
   String id,

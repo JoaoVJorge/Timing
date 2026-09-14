@@ -13,6 +13,7 @@ class GroupMemberAvatar extends StatefulWidget {
     this.avatarIconIndex,
     this.size = 40,
     this.borderColor,
+    this.useSolidFallbackBackground = false,
     super.key,
   });
 
@@ -22,6 +23,9 @@ class GroupMemberAvatar extends StatefulWidget {
   final int? avatarIconIndex;
   final double size;
   final Color? borderColor;
+
+  /// Keeps compact avatars readable over a card when no profile photo exists.
+  final bool useSolidFallbackBackground;
 
   @override
   State<GroupMemberAvatar> createState() => _GroupMemberAvatarState();
@@ -92,7 +96,9 @@ class _GroupMemberAvatarState extends State<GroupMemberAvatar> {
       height: widget.size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: context.isDarkMode ? 0.28 : 0.18),
+        color: imageBytes == null && widget.useSolidFallbackBackground
+            ? color
+            : color.withValues(alpha: context.isDarkMode ? 0.28 : 0.18),
         shape: BoxShape.circle,
         border: widget.borderColor == null
             ? null
@@ -112,13 +118,17 @@ class _GroupMemberAvatarState extends State<GroupMemberAvatar> {
               maxLines: 1,
               overflow: TextOverflow.clip,
               style: context.textStyles.bodySmall.copyWith(
-                color: color,
+                color: widget.useSolidFallbackBackground
+                    ? context.colorTokens.white
+                    : color,
                 fontWeight: FontWeight.w900,
               ),
             )
           : Icon(
               AppAvatarPresets.byIndex(widget.avatarIconIndex!),
-              color: color,
+              color: widget.useSolidFallbackBackground
+                  ? context.colorTokens.white
+                  : color,
               size: widget.size * 0.56,
             ),
     );

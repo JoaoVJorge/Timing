@@ -29,6 +29,7 @@ import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/shared/widgets/swipe_reveal_actions.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
 
@@ -414,6 +415,7 @@ class _OverlappingFriends extends StatelessWidget {
                 avatar: visibleFriends[index].profilePhotoBase64,
                 size: size,
                 borderColor: context.colorTokens.surface,
+                useSolidFallbackBackground: true,
               ),
             ),
           if (extraCount > 0)

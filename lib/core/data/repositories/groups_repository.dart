@@ -63,6 +63,19 @@ class GroupsRepository {
   Future<Either<AppError, void>> leaveGroup(String groupId) =>
       _groupsDataSource.leaveGroup(groupId);
 
+  Future<Either<AppError, void>> removeMember({
+    required String groupId,
+    required String memberId,
+  }) => _groupsDataSource.removeMember(groupId: groupId, memberId: memberId);
+
+  Future<Either<AppError, void>> transferLeadership({
+    required String groupId,
+    required String nextLeaderId,
+  }) => _groupsDataSource.transferLeadership(
+    groupId: groupId,
+    nextLeaderId: nextLeaderId,
+  );
+
   Future<Either<AppError, void>> resetGroupProgress(String groupId) =>
       _groupsDataSource.resetGroupProgress(groupId);
 

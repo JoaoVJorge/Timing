@@ -27,6 +27,7 @@ Future<void> _showGroupActionsSheet(
       Navigator.of(sheetContext).pop();
       controller.onTapLeaveGroup();
     },
+    onReportGroup: () => Navigator.of(sheetContext).pop(),
   ),
 );
 
@@ -37,6 +38,7 @@ class _GroupActionsSheet extends StatelessWidget {
     required this.onEditGroup,
     required this.onResetGroup,
     required this.onLeaveGroup,
+    required this.onReportGroup,
   });
 
   final bool isOwner;
@@ -44,6 +46,7 @@ class _GroupActionsSheet extends StatelessWidget {
   final VoidCallback onEditGroup;
   final VoidCallback onResetGroup;
   final VoidCallback onLeaveGroup;
+  final VoidCallback onReportGroup;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -67,13 +70,13 @@ class _GroupActionsSheet extends StatelessWidget {
               ),
             ),
             const Gap(16),
+            _GroupActionRow(
+              icon: Icons.groups_2_outlined,
+              label: context.l10n.viewMembersLabel,
+              onTap: onManageMembers,
+            ),
+            const Gap(8),
             if (isOwner) ...[
-              _GroupActionRow(
-                icon: Icons.groups_2_outlined,
-                label: context.l10n.manageMembersTitle,
-                onTap: onManageMembers,
-              ),
-              const Gap(8),
               _GroupActionRow(
                 icon: Icons.edit_outlined,
                 label: context.l10n.editGroupLabel,
@@ -85,6 +88,15 @@ class _GroupActionsSheet extends StatelessWidget {
                 label: context.l10n.resetGroupLabel,
                 style: _GroupActionStyle.outlinedDestructive,
                 onTap: onResetGroup,
+              ),
+              const Gap(8),
+            ],
+            if (!isOwner) ...[
+              _GroupActionRow(
+                icon: Icons.flag_outlined,
+                label: context.l10n.reportGroupLabel,
+                style: _GroupActionStyle.outlinedDestructive,
+                onTap: onReportGroup,
               ),
               const Gap(8),
             ],

@@ -421,6 +421,55 @@ class GroupsDataSource {
     }
   }
 
+  Future<Either<AppError, void>> removeMember({
+    required String groupId,
+    required String memberId,
+  }) async {
+    try {
+      await _supabaseService.requireClient
+          .from("group_members")
+          .delete()
+          .eq("group_id", groupId)
+          .eq("user_id", memberId);
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  Future<Either<AppError, void>> transferLeadership({
+    required String groupId,
+    required String nextLeaderId,
+  }) async {
+    const String operation = "rpc public.transfer_group_ownership";
+    try {
+      final Map<String, dynamic> payload = {
+        "target_group_id": groupId,
+        "next_owner_id": nextLeaderId,
+      };
+      _logger.logRequest(operation, payload);
+      final dynamic response = await _supabaseService.requireClient.rpc(
+        "transfer_group_ownership",
+        params: payload,
+      );
+      _logger.logResponse(operation, response);
+      return const Right(null);
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to transfer group ownership",
+        error: SqlOperationAppError.describe(error),
+        stackTrace: stackTrace,
+      );
+      return Left(
+        SqlOperationAppError(
+          operation: operation,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
   Future<Either<AppError, void>> resetGroupProgress(String groupId) async {
     const String operation = "rpc public.reset_group_progress";
     try {
