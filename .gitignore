@@ -31,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/android/build/
 /coverage/
 /test/**
 !/test/app/
@@ -42,6 +43,16 @@ migrate_working_dir/
 # Local environment values
 lib/env/*.env
 !lib/env/*.env.example
+
+# Android upload signing material
+android/key.properties
+android/*.jks
+android/*.keystore
+
+# Local Google Play capture and generated image artifacts
+/docs/play-store/screenshots/
+/docs/play-store/*.png
+/docs/timing_feature_graphic_1024x500.png
 
 # Supabase configuration stays local; keep a single canonical setup file.
 backend/supabase-setup.sql
