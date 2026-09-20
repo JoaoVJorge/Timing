@@ -238,6 +238,19 @@ class GroupsController extends GetxController {
         1;
   }
 
+  bool isTied(GroupMemberEntity member, {LeaderboardPeriodType? period}) {
+    final LeaderboardPeriodType effectivePeriod = period ?? rankingPeriod;
+    final int value = member.secondsFor(effectivePeriod);
+    if (effectivePeriod == rankingPeriod) {
+      rankedMembers;
+      return (_memberCountByScore[value] ?? 0) > 1;
+    }
+    return _rankedMembersFor(
+          effectivePeriod,
+        ).where((item) => item.secondsFor(effectivePeriod) == value).length >
+        1;
+  }
+
   bool get currentUserIsTiedForFirst {
     final GroupMemberEntity? member = currentUserMember;
     if (member == null ||

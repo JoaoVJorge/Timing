@@ -54,6 +54,7 @@ class _RankingTab extends StatelessWidget {
                   isCurrentUser: controller.isCurrentUser(members[index]),
                   isFirst: index == 0,
                   isLast: index == members.length - 1,
+                  isTied: controller.isTied(members[index]),
                   differenceToPrevious: controller.differenceToPrevious(
                     members[index],
                   ),

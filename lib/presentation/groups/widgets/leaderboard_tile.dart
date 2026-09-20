@@ -16,6 +16,7 @@ class LeaderboardTile extends StatelessWidget {
     required this.isCurrentUser,
     required this.isFirst,
     required this.isLast,
+    required this.isTied,
     this.differenceToPrevious,
     super.key,
   });
@@ -27,6 +28,7 @@ class LeaderboardTile extends StatelessWidget {
   final bool isCurrentUser;
   final bool isFirst;
   final bool isLast;
+  final bool isTied;
   final int? differenceToPrevious;
 
   @override
@@ -124,6 +126,11 @@ class LeaderboardTile extends StatelessWidget {
   String _subtitleText(BuildContext context, {required bool isLeader}) {
     if (isCurrentUser) {
       return context.l10n.currentUserRankSubtitle;
+    }
+    if (isTied) {
+      return context.l10n.leaderboardTiedPosition(
+        formatRankLabel(context, rank),
+      );
     }
     if (isLeader) {
       return context.l10n.leaderboardTopPosition;
