@@ -38,6 +38,7 @@ class NotesController extends GetxController {
           )
           .toList()
           .obs;
+  final List<FocusNode> focusNodes = [];
   final RxInt currentPageIndex = 0.obs;
   final Rx<NotesSaveState> saveState = NotesSaveState.idle.obs;
   final RxBool isFormattingToolbarVisible = false.obs;
@@ -59,6 +60,9 @@ class NotesController extends GetxController {
   }
 
   void onPageChanged(int index) {
+    if (index != currentPageIndex.value) {
+      focusNodes[currentPageIndex.value].unfocus();
+    }
     currentPageIndex.value = index;
     _applyFormattingState(activeNotesController);
   }
@@ -121,6 +125,7 @@ class NotesController extends GetxController {
       }
       notesControllers.removeAt(leavingIndex);
       leavingController.dispose();
+      focusNodes.removeAt(leavingIndex).dispose();
       currentPageIndex.value = targetIndex;
     });
   }
@@ -134,6 +139,7 @@ class NotesController extends GetxController {
   }
 
   void addPage() {
+    focusNodes[currentPageIndex.value].unfocus();
     notesControllers.add(_createNotesController(document: Document()));
     currentPageIndex.value = pageCount - 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -176,6 +182,7 @@ class NotesController extends GetxController {
       onSelectionChanged: (_) => _applyFormattingState(controller),
     );
     _applyFormattingState(controller);
+    focusNodes.add(FocusNode());
     return controller;
   }
 
@@ -239,6 +246,9 @@ class NotesController extends GetxController {
     pageController.dispose();
     for (final QuillController controller in notesControllers) {
       controller.dispose();
+    }
+    for (final FocusNode focusNode in focusNodes) {
+      focusNode.dispose();
     }
     super.onClose();
   }
