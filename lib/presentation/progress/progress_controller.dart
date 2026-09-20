@@ -110,6 +110,9 @@ class ProgressController extends GetxController {
     return historyValue > 0 ? historyValue : selectedPeriodPages;
   }
 
+  bool hasActivityFor(TimeCategoryType category) =>
+      subjects.any((subject) => subject.category == category);
+
   int selectedPeriodGoalSecondsFor(TimeCategoryType category) {
     final List<SubjectEntity> categorySubjects = subjects
         .where((subject) => subject.category == category)

@@ -73,13 +73,17 @@ class ProgressPage extends StatelessWidget {
                   ),
                   (
                     icon: Icons.flag_rounded,
-                    value: controller.longestGoal?.name ?? "-",
+                    value:
+                        controller.longestGoal?.name ??
+                        context.l10n.profileTopSubjectEmptyTitle,
                     label: context.l10n.progressStatLongestGoal,
                     accent: ProgressAccentColors.pink,
                   ),
                   (
                     icon: Icons.auto_stories_rounded,
-                    value: controller.mainReadingSubject?.name ?? "-",
+                    value:
+                        controller.mainReadingSubject?.name ??
+                        context.l10n.profileTopSubjectEmptyTitle,
                     label: context.l10n.progressStatMainReading,
                     accent: TimeCategoryType.reading.accentColor,
                   ),
@@ -336,6 +340,7 @@ class _DistributionCard extends StatelessWidget {
               ),
             ),
             color: TimeCategoryType.studying.accentColor,
+            hasActivity: controller.hasActivityFor(TimeCategoryType.studying),
           ),
           _DistributionRow(
             icon: Icons.fitness_center_rounded,
@@ -348,6 +353,9 @@ class _DistributionCard extends StatelessWidget {
               ),
             ),
             color: TimeCategoryType.exercises.accentColor,
+            hasActivity: controller.hasActivityFor(
+              TimeCategoryType.exercises,
+            ),
           ),
           _DistributionRow(
             icon: Icons.auto_stories_rounded,
@@ -358,6 +366,7 @@ class _DistributionCard extends StatelessWidget {
               controller.selectedPeriodReadingGoalPages,
             ),
             color: TimeCategoryType.reading.accentColor,
+            hasActivity: controller.hasActivityFor(TimeCategoryType.reading),
           ),
           _DistributionRow(
             icon: Icons.palette_rounded,
@@ -365,6 +374,7 @@ class _DistributionCard extends StatelessWidget {
             value: formatDurationLong(Duration(seconds: hobbySeconds)),
             progress: hobbySeconds > 0 ? 1 : 0,
             color: TimeCategoryType.hobbies.accentColor,
+            hasActivity: controller.hasActivityFor(TimeCategoryType.hobbies),
             isLast: true,
           ),
         ],
@@ -383,6 +393,7 @@ class _DistributionRow extends StatelessWidget {
     required this.value,
     required this.progress,
     required this.color,
+    required this.hasActivity,
     this.isLast = false,
   });
 
@@ -391,51 +402,61 @@ class _DistributionRow extends StatelessWidget {
   final String value;
   final double progress;
   final Color color;
+  final bool hasActivity;
   final bool isLast;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.betweenRelated),
-    child: Row(
-      children: [
-        AppIconBadge(icon: icon, color: color, size: 32),
-        const Gap(AppSpacing.betweenRelated),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final Color effectiveColor = hasActivity
+        ? color
+        : Color.lerp(color, context.colorTokens.textHint, 0.6)!;
+    final double effectiveProgress = hasActivity ? progress : 1;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.betweenRelated),
+      child: Row(
+        children: [
+          AppIconBadge(icon: icon, color: effectiveColor, size: 32),
+          const Gap(AppSpacing.betweenRelated),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                  ),
-                  Text(
-                    value,
-                    style: context.textStyles.caption.copyWith(fontSize: 12),
-                  ),
-                ],
-              ),
-              const Gap(AppSpacing.titleToDescription),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: color.withValues(alpha: 0.12),
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                    Text(
+                      value,
+                      style: context.textStyles.caption.copyWith(
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const Gap(AppSpacing.titleToDescription),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: LinearProgressIndicator(
+                    value: effectiveProgress,
+                    minHeight: 6,
+                    backgroundColor: effectiveColor.withValues(alpha: 0.12),
+                    valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
