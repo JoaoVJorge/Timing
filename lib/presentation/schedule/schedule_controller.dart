@@ -31,6 +31,22 @@ class ScheduleController extends GetxController {
   final RxBool isLoading = true.obs;
   final Rx<DateTime> selectedDate = _todayDate().obs;
 
+  Map<int, List<ScheduleEntryEntity>>? _weekdayIndexCache;
+
+  Map<int, List<ScheduleEntryEntity>> get _weekdayIndex {
+    final Map<int, List<ScheduleEntryEntity>>? cached = _weekdayIndexCache;
+    if (cached != null) {
+      return cached;
+    }
+    final Map<int, List<ScheduleEntryEntity>> index = {};
+    for (final ScheduleEntryEntity entry in entries) {
+      (index[entry.weekday] ??= []).add(entry);
+    }
+    return _weekdayIndexCache = index;
+  }
+
+  void _invalidateWeekdayIndex() => _weekdayIndexCache = null;
+
   List<ScheduleEntryEntity> get sortedEntries =>
       _sortedEntriesForDate(selectedDate.value);
 
@@ -82,8 +98,8 @@ class ScheduleController extends GetxController {
           .map((entry) => _nextDateForWeekday(entry.weekday, entry.activeFrom))
           .reduce((a, b) => a.isBefore(b) ? a : b);
 
-  bool hasEntriesForDate(DateTime date) =>
-      entries.any((entry) => _isEntryActiveOn(entry, date));
+  bool hasEntriesForDate(DateTime date) => (_weekdayIndex[date.weekday] ?? const [])
+      .any((entry) => _isEntryActiveOn(entry, date));
 
   Color? firstEntryColorForDate(DateTime date) {
     final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForDate(date);
@@ -99,7 +115,9 @@ class ScheduleController extends GetxController {
   ];
 
   List<ScheduleEntryEntity> _sortedEntriesForDate(DateTime date) =>
-      entries.where((entry) => _isEntryActiveOn(entry, date)).toList()
+      (_weekdayIndex[date.weekday] ?? const [])
+          .where((entry) => _isEntryActiveOn(entry, date))
+          .toList()
         ..sort((a, b) {
           final int aMinutes = a.startMinutes ?? 24 * 60 + 1;
           final int bMinutes = b.startMinutes ?? 24 * 60 + 1;
@@ -159,6 +177,7 @@ class ScheduleController extends GetxController {
       entries.clear();
       _appNavigator.showErrorSnackBar(error.message);
     }, (value) => entries.value = value);
+    _invalidateWeekdayIndex();
     isLoading.value = false;
   }
 
@@ -205,6 +224,7 @@ class ScheduleController extends GetxController {
     }
 
     entries.value = [...entries, ...addedEntries];
+    _invalidateWeekdayIndex();
     selectedDate.value = _firstOccurrenceDate(addedEntries);
     entries.refresh();
   }
@@ -235,6 +255,7 @@ class ScheduleController extends GetxController {
       (error) => _appNavigator.showErrorSnackBar(error.message),
       (updatedEntries) {
         entries.value = updatedEntries;
+        _invalidateWeekdayIndex();
         entries.refresh();
       },
     );
@@ -243,11 +264,13 @@ class ScheduleController extends GetxController {
   Future<void> onDeleteEntry(String entryId) async {
     final List<ScheduleEntryEntity> previousEntries = entries.toList();
     entries.removeWhere((entry) => entry.id == entryId);
+    _invalidateWeekdayIndex();
     final Either<AppError, void> result = await _deleteScheduleEntryUseCase(
       entryId,
     );
     result.fold((error) {
       entries.value = previousEntries;
+      _invalidateWeekdayIndex();
       _appNavigator.showErrorSnackBar(error.message);
     }, (_) {});
   }
