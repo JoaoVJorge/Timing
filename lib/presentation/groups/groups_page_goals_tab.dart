@@ -63,10 +63,20 @@ class _GroupActivityDataView extends StatelessWidget {
       if (headers.isEmpty) {
         return const SizedBox.shrink();
       }
+      final Map<String, List<GroupActivityProgressEntity>> progressByActivityId =
+          {};
+      for (final GroupActivityProgressEntity item in controller.activityProgress) {
+        (progressByActivityId[item.activityId] ??= []).add(item);
+      }
       return Column(
         children: [
           for (final GroupActivityProgressEntity header in headers) ...[
-            _activityData(context, controller, header),
+            _activityData(
+              context,
+              controller,
+              header,
+              progressByActivityId[header.activityId] ?? const [],
+            ),
             const Gap(AppSpacing.betweenSections),
           ],
         ],
@@ -78,9 +88,10 @@ class _GroupActivityDataView extends StatelessWidget {
     BuildContext context,
     GroupsController controller,
     GroupActivityProgressEntity header,
+    List<GroupActivityProgressEntity> rowsForActivity,
   ) {
     if (header.isGoal) {
-      return _goalData(context, controller, header);
+      return _goalData(context, controller, header, rowsForActivity);
     }
 
     final LeaderboardPeriodType period = controller.selectedPeriod.value;
@@ -146,10 +157,8 @@ class _GroupActivityDataView extends StatelessWidget {
     BuildContext context,
     GroupsController controller,
     GroupActivityProgressEntity header,
+    List<GroupActivityProgressEntity> rows,
   ) {
-    final List<GroupActivityProgressEntity> rows = controller.activityProgress
-        .where((item) => item.activityId == header.activityId)
-        .toList();
     final Map<String, GroupActivityProgressEntity> progressByMemberId = {
       for (final GroupActivityProgressEntity item in rows) item.memberId: item,
     };

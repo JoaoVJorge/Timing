@@ -38,10 +38,12 @@ class GroupMemberAvatar extends StatefulWidget {
     return value.substring(commaIndex + 1);
   }
 
+  static final RegExp _whitespace = RegExp(r"\s+");
+
   static String _initials(String name) {
     final List<String> words = name
         .trim()
-        .split(RegExp(r"\s+"))
+        .split(_whitespace)
         .where((word) => word.isNotEmpty)
         .toList();
     if (words.isEmpty) {
