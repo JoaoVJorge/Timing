@@ -362,8 +362,25 @@ class AppController extends GetxController with WidgetsBindingObserver {
     await _restoreActivityHistoryFromBackendIfNeeded();
   }
 
+  /// Backfills local progress caches from `activity_entries` so a device
+  /// whose local history doesn't cover everything the account has logged
+  /// elsewhere (a reinstall, a new device, or a cache that only partially
+  /// rebuilt) catches up. Gated on a persisted flag rather than the caches
+  /// being empty: local storage is per-device, so as soon as the user logs
+  /// one session here the caches stop being empty even though older history
+  /// logged on another device is still missing, which would otherwise close
+  /// this backfill's only chance to run ever again.
   Future<bool> _restoreActivityHistoryFromBackendIfNeeded() async {
     if (!_supabaseService.hasSignedInUser) {
+      return false;
+    }
+
+    final bool alreadyBackfilled =
+        await localStorageService.read<bool?>(
+          LocalStorageKeys.activityHistoryBackfillCompleted,
+        ) ??
+        false;
+    if (alreadyBackfilled) {
       return false;
     }
 
@@ -374,26 +391,27 @@ class AppController extends GetxController with WidgetsBindingObserver {
     final SubjectDailyHistoryService subjectDailyHistoryService =
         Get.find<SubjectDailyHistoryService>();
 
-    if (!activityHistoryService.isEmpty ||
-        !dailyProgressService.isEmpty ||
-        !subjectDailyHistoryService.isEmpty) {
-      return false;
-    }
-
     final Either<AppError, List<ActivityEntryEntity>> result =
         await _getActivityEntriesUseCase(
           retentionDays: ActivityHistoryService.retentionDays,
         );
     return await result.fold((error) async => false, (entries) async {
-      if (entries.isEmpty) {
-        return false;
+      bool merged = false;
+      if (entries.isNotEmpty) {
+        final List<bool> results = await Future.wait([
+          activityHistoryService.mergeMissingDaysFromActivityEntries(entries),
+          dailyProgressService.mergeMissingDaysFromActivityEntries(entries),
+          subjectDailyHistoryService.mergeMissingDaysFromActivityEntries(
+            entries,
+          ),
+        ]);
+        merged = results.any((didMerge) => didMerge);
       }
-      await Future.wait([
-        activityHistoryService.replaceAll(entries),
-        dailyProgressService.replaceFromActivityEntries(entries),
-        subjectDailyHistoryService.replaceFromActivityEntries(entries),
-      ]);
-      return true;
+      await localStorageService.write(
+        LocalStorageKeys.activityHistoryBackfillCompleted,
+        true,
+      );
+      return merged;
     });
   }
 

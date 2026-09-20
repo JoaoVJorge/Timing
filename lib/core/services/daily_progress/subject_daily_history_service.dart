@@ -71,17 +71,23 @@ class SubjectDailyHistoryService {
     await _update(subjectId, current.copyWith(pages: current.pages + pages));
   }
 
-  Future<void> replaceFromActivityEntries(
+  /// Fills in any (subject, day) pair this device has no local record for,
+  /// from [entries] fetched off the backend. Pairs already present locally
+  /// are left untouched, mirroring [DailyProgressService.mergeMissingDaysFromActivityEntries].
+  Future<bool> mergeMissingDaysFromActivityEntries(
     List<ActivityEntryEntity> entries,
   ) async {
-    _bySubject.clear();
+    final Map<String, Map<String, DailyProgressEntity>> missing = {};
     for (final ActivityEntryEntity entry in entries) {
       if (entry.subjectId.isEmpty) {
         continue;
       }
       final String key = DailyProgressService.dateKey(entry.timestamp);
+      if (_bySubject[entry.subjectId]?.containsKey(key) ?? false) {
+        continue;
+      }
       final Map<String, DailyProgressEntity> days =
-          _bySubject[entry.subjectId] ??= {};
+          missing[entry.subjectId] ??= {};
       final DailyProgressEntity current =
           days[key] ?? const DailyProgressEntity();
       days[key] = current.copyWith(
@@ -89,7 +95,14 @@ class SubjectDailyHistoryService {
         pages: current.pages + entry.pages,
       );
     }
+    if (missing.isEmpty) {
+      return false;
+    }
+    missing.forEach((subjectId, days) {
+      (_bySubject[subjectId] ??= {}).addAll(days);
+    });
     await _persist();
+    return true;
   }
 
   /// The subject's daily counters for the last [days] days, oldest first.
