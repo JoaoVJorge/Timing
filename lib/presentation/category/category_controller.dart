@@ -34,6 +34,12 @@ class CategoryController extends GetxController {
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
   final RxBool isLoading = true.obs;
 
+  /// Id of the subject just created in this session, so the list can point a
+  /// one-off swipe hint at it. Cleared once it's shown or dismissed.
+  final Rxn<String> justCreatedSubjectId = Rxn<String>();
+
+  void dismissCreationHint() => justCreatedSubjectId.value = null;
+
   bool get isPageBased => category == TimeCategoryType.reading;
 
   int progressSecondsFor(SubjectEntity subject) =>
@@ -213,6 +219,7 @@ class CategoryController extends GetxController {
       );
       if (belongsToCurrentCategory && !isAlreadyListed) {
         subjects.add(createdSubject);
+        justCreatedSubjectId.value = createdSubject.id;
       }
       await loadSubjects();
     }

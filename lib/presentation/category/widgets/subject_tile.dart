@@ -60,7 +60,7 @@ class SubjectTile extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress,
                       minHeight: 4,
-                      backgroundColor: color.withValues(alpha: 0.15),
+                      backgroundColor: color.withValues(alpha: 0.24),
                       valueColor: AlwaysStoppedAnimation(color),
                     ),
                   ),

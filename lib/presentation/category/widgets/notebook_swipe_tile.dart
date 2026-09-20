@@ -15,6 +15,7 @@ class NotebookSwipeTile extends StatefulWidget {
     required this.onDelete,
     this.isEditLocked = false,
     this.isDeleteLocked = false,
+    this.onDragStart,
     super.key,
   });
 
@@ -26,6 +27,10 @@ class NotebookSwipeTile extends StatefulWidget {
   final VoidCallback onDelete;
   final bool isEditLocked;
   final bool isDeleteLocked;
+
+  /// Fired the moment the user starts dragging the tile, before any reveal
+  /// distance is known. Used to dismiss a one-off swipe hint on first touch.
+  final VoidCallback? onDragStart;
 
   @override
   State<NotebookSwipeTile> createState() => _NotebookSwipeTileState();
@@ -142,7 +147,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                       iconData: Icons.edit_rounded,
                       color: widget.isEditLocked
                           ? context.colorTokens.surfaceInnerLayer
-                          : context.colorTokens.surface,
+                          : widget.accent.withValues(alpha: 0.14),
                       iconColor: widget.isEditLocked
                           ? context.colorTokens.textHint
                           : widget.accent,
@@ -167,6 +172,7 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
               ),
             ),
           GestureDetector(
+            onHorizontalDragStart: (_) => widget.onDragStart?.call(),
             onHorizontalDragUpdate: _onDragUpdate,
             onHorizontalDragEnd: _onDragEnd,
             child: Transform.translate(offset: Offset(value, 0), child: child),

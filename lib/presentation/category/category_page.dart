@@ -8,6 +8,7 @@ import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/category/widgets/hobby_subject_card.dart";
 import "package:timing/presentation/category/widgets/notebook_swipe_tile.dart";
 import "package:timing/presentation/category/widgets/reading_subject_tile.dart";
+import "package:timing/presentation/category/widgets/subject_creation_hint_bubble.dart";
 import "package:timing/presentation/category/widgets/subject_tile.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
@@ -16,7 +17,6 @@ import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/illustrated_empty_state.dart";
-import "package:timing/shared/widgets/swipe_hint_button.dart";
 import "package:timing/theme/app_spacing.dart";
 
 class CategoryPage extends StatelessWidget {
@@ -30,110 +30,129 @@ class CategoryPage extends StatelessWidget {
       topBar: AppTopBar(
         title: controller.category.localizedLabel(context),
         showBackButton: true,
-        trailing: controller.category == TimeCategoryType.hobbies
-            ? null
-            : SwipeHintButton(
-                title: context.l10n.activitySwipeHintTitle,
-                message: context.l10n.activitySwipeHintMessage,
-              ),
       ),
-      body: Obx(() {
-        final List<SubjectEntity> subjects = controller.subjects;
+      body: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => controller.dismissCreationHint(),
+        child: Obx(() {
+          final List<SubjectEntity> subjects = controller.subjects;
+          // Read here (not inside itemBuilder) so Obx actually tracks this
+          // value — itemBuilder runs outside Obx's synchronous build, so a
+          // .value read there is invisible to its dependency tracking.
+          final String? justCreatedSubjectId =
+              controller.justCreatedSubjectId.value;
 
-        if (controller.isLoading.value && subjects.isEmpty) {
-          return const _CategoryLoadingSkeleton();
-        }
+          if (controller.isLoading.value && subjects.isEmpty) {
+            return const _CategoryLoadingSkeleton();
+          }
 
-        if (subjects.isEmpty) {
-          return Center(
-            child: SingleChildScrollView(
+          if (subjects.isEmpty) {
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  top: AppSpacing.betweenRelated,
+                  bottom: AppSpacing.betweenSections,
+                ),
+                child: IllustratedEmptyState(
+                  title: _emptyTitle(context, controller.category),
+                  description: _emptyDescription(context, controller.category),
+                  actionLabel: context.l10n.addItemButton(
+                    controller.category.itemNoun(context),
+                  ),
+                  onTapAction: controller.onTapAddSubject,
+                  suggestionsTitle: _suggestionsTitle(context),
+                  suggestions: _suggestionsFor(context, controller.category),
+                  onTapSuggestion: controller.onTapSuggestion,
+                ),
+              ),
+            );
+          }
+
+          if (controller.category == TimeCategoryType.hobbies) {
+            return GridView.builder(
               padding: const EdgeInsets.only(
-                top: AppSpacing.betweenRelated,
                 bottom: AppSpacing.betweenSections,
               ),
-              child: IllustratedEmptyState(
-                title: _emptyTitle(context, controller.category),
-                description: _emptyDescription(context, controller.category),
-                actionLabel: context.l10n.addItemButton(
-                  controller.category.itemNoun(context),
-                ),
-                onTapAction: controller.onTapAddSubject,
-                suggestionsTitle: _suggestionsTitle(context),
-                suggestions: _suggestionsFor(context, controller.category),
-                onTapSuggestion: controller.onTapSuggestion,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3 / 4,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
               ),
-            ),
-          );
-        }
+              itemCount: subjects.length + 1,
+              itemBuilder: (context, index) {
+                if (index == subjects.length) {
+                  return _AddHobbyCard(
+                    category: controller.category,
+                    onTap: controller.onTapAddSubject,
+                  );
+                }
 
-        if (controller.category == TimeCategoryType.hobbies) {
-          return GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 3 / 4,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-            ),
+                final SubjectEntity subject = subjects[index];
+                return HobbySubjectCard(
+                  subject: subject,
+                  onTapPlay: () => controller.onTapSubject(subject),
+                  onTapNotes: () => controller.onTapNotes(subject),
+                  onTapStats: () => controller.onTapSubjectStats(subject),
+                  onTapEdit: () => controller.onTapEditSubject(subject),
+                  onDelete: () => controller.onDeleteSubject(subject),
+                );
+              },
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
             itemCount: subjects.length + 1,
+            separatorBuilder: (context, index) => const Gap(12),
             itemBuilder: (context, index) {
               if (index == subjects.length) {
-                return _AddHobbyCard(
+                return _AddListSubjectCard(
                   category: controller.category,
                   onTap: controller.onTapAddSubject,
                 );
               }
 
               final SubjectEntity subject = subjects[index];
-              return HobbySubjectCard(
-                subject: subject,
-                onTapPlay: () => controller.onTapSubject(subject),
+              final Color subjectColor = Color(subject.colorValue);
+              final bool isJustCreated = subject.id == justCreatedSubjectId;
+
+              final Widget tile = NotebookSwipeTile(
+                accent: subjectColor,
+                isEditLocked: subject.isFromGroup,
+                isDeleteLocked: subject.isFromGroup,
                 onTapNotes: () => controller.onTapNotes(subject),
                 onTapStats: () => controller.onTapSubjectStats(subject),
                 onTapEdit: () => controller.onTapEditSubject(subject),
                 onDelete: () => controller.onDeleteSubject(subject),
+                onDragStart: isJustCreated
+                    ? controller.dismissCreationHint
+                    : null,
+                child: switch (controller.category) {
+                  TimeCategoryType.reading => ReadingSubjectTile(
+                    subject: subject,
+                    currentSeconds: controller.progressSecondsFor(subject),
+                    currentPages: controller.progressPagesFor(subject),
+                    onTapPlay: () => controller.onTapSubject(subject),
+                  ),
+                  _ => SubjectTile(
+                    subject: subject,
+                    currentSeconds: controller.progressSecondsFor(subject),
+                    onTapPlay: () => controller.onTapSubject(subject),
+                  ),
+                },
+              );
+
+              return SubjectCreationHintBubble(
+                visible: isJustCreated,
+                message: context.l10n.activitySwipeHintMessage,
+                onAutoDismiss: controller.dismissCreationHint,
+                child: tile,
               );
             },
           );
-        }
-
-        return ListView.separated(
-          itemCount: subjects.length + 1,
-          separatorBuilder: (context, index) => const Gap(12),
-          itemBuilder: (context, index) {
-            if (index == subjects.length) {
-              return _AddListSubjectCard(
-                category: controller.category,
-                onTap: controller.onTapAddSubject,
-              );
-            }
-
-            final SubjectEntity subject = subjects[index];
-            final Color subjectColor = Color(subject.colorValue);
-            return NotebookSwipeTile(
-              accent: subjectColor,
-              isEditLocked: subject.isFromGroup,
-              isDeleteLocked: subject.isFromGroup,
-              onTapNotes: () => controller.onTapNotes(subject),
-              onTapStats: () => controller.onTapSubjectStats(subject),
-              onTapEdit: () => controller.onTapEditSubject(subject),
-              onDelete: () => controller.onDeleteSubject(subject),
-              child: switch (controller.category) {
-                TimeCategoryType.reading => ReadingSubjectTile(
-                  subject: subject,
-                  currentSeconds: controller.progressSecondsFor(subject),
-                  currentPages: controller.progressPagesFor(subject),
-                  onTapPlay: () => controller.onTapSubject(subject),
-                ),
-                _ => SubjectTile(
-                  subject: subject,
-                  currentSeconds: controller.progressSecondsFor(subject),
-                  onTapPlay: () => controller.onTapSubject(subject),
-                ),
-              },
-            );
-          },
-        );
-      }),
+        }),
+      ),
     );
   }
 }

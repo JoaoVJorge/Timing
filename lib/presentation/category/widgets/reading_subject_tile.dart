@@ -100,7 +100,7 @@ class ReadingSubjectTile extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6,
-                    backgroundColor: color.withValues(alpha: 0.16),
+                    backgroundColor: color.withValues(alpha: 0.24),
                     valueColor: AlwaysStoppedAnimation(color),
                   ),
                 ),
