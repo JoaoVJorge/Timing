@@ -934,6 +934,18 @@ abstract class AppLocalizations {
   /// **'Paused'**
   String get timerNotificationPaused;
 
+  /// No description provided for @timerNotificationPauseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get timerNotificationPauseAction;
+
+  /// No description provided for @timerNotificationResumeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get timerNotificationResumeAction;
+
   /// No description provided for @timerStateFocusingTitle.
   ///
   /// In en, this message translates to:
@@ -1599,6 +1611,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'leading this ranking'**
   String get leaderboardTopPosition;
+
+  /// No description provided for @leaderboardTiedPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Tied for {rank} place'**
+  String leaderboardTiedPosition(String rank);
 
   /// No description provided for @leaderboardDifferenceAhead.
   ///

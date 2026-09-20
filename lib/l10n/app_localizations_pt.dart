@@ -491,6 +491,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timerNotificationPaused => 'Pausado';
 
   @override
+  String get timerNotificationPauseAction => 'Pausar';
+
+  @override
+  String get timerNotificationResumeAction => 'Retomar';
+
+  @override
   String get timerStateFocusingTitle => 'Foco em andamento';
 
   @override
@@ -854,6 +860,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get leaderboardTopPosition => 'lidera este ranking';
+
+  @override
+  String leaderboardTiedPosition(String rank) {
+    return 'Empate pelo $rank lugar';
+  }
 
   @override
   String leaderboardDifferenceAhead(String value) {

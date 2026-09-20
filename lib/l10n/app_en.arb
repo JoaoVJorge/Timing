@@ -334,6 +334,8 @@
   "timerNotificationRunning": "Focus session in progress",
   "timerNotificationResting": "Resting — back soon",
   "timerNotificationPaused": "Paused",
+  "timerNotificationPauseAction": "Pause",
+  "timerNotificationResumeAction": "Resume",
   "timerStateFocusingTitle": "Focus in progress",
   "timerStateFocusingDescription": "Keep your focus. A break will be suggested soon.",
   "timerStatePausedTitle": "Timer paused",
@@ -517,6 +519,14 @@
   "currentUserRankLeading": "You're leading this ranking.",
   "currentUserRankSubtitle": "your current position",
   "leaderboardTopPosition": "leading this ranking",
+  "leaderboardTiedPosition": "Tied for {rank} place",
+  "@leaderboardTiedPosition": {
+    "placeholders": {
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
   "leaderboardDifferenceAhead": "+{value} ahead",
   "@leaderboardDifferenceAhead": {
     "placeholders": {

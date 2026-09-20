@@ -485,6 +485,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get timerNotificationPaused => 'متوقف مؤقتًا';
 
   @override
+  String get timerNotificationPauseAction => 'إيقاف مؤقت';
+
+  @override
+  String get timerNotificationResumeAction => 'استئناف';
+
+  @override
   String get timerStateFocusingTitle => 'التركيز قيد التقدم';
 
   @override
@@ -845,6 +851,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get leaderboardTopPosition => 'يقود هذا الترتيب';
+
+  @override
+  String leaderboardTiedPosition(String rank) {
+    return 'تعادل على المركز $rank';
+  }
 
   @override
   String leaderboardDifferenceAhead(String value) {
