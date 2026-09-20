@@ -83,7 +83,7 @@ class SettingsUserCard extends StatelessWidget {
                 const Gap(4),
                 Text(
                   context.l10n.accountDataSubtitle(nickname),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,

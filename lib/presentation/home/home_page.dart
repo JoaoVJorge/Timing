@@ -64,7 +64,7 @@ class _Greeting extends StatelessWidget {
             controller.userName.value.isEmpty
                 ? context.l10n.homeGreetingDefault
                 : context.l10n.homeGreetingWithName(
-                    capitalizeName(controller.userName.value),
+                    capitalizeName(controller.userName.value).split(" ").first,
                   ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -339,7 +339,7 @@ class _PlanDayRow extends StatelessWidget {
                 else
                   Text(
                     subtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.caption.copyWith(fontSize: 12),
                   ),
