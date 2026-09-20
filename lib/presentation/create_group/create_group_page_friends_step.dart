@@ -183,7 +183,6 @@ class _FriendList extends StatelessWidget {
       );
     }
 
-    final Set<String> selectedIds = controller.selectedFriendIds.toSet();
     final List<FriendOption> friends = controller.filteredFriends;
 
     if (friends.isEmpty) {
@@ -203,7 +202,7 @@ class _FriendList extends StatelessWidget {
         final FriendOption friend = friends[index];
         return FriendTile(
           friend: friend,
-          isSelected: selectedIds.contains(friend.id),
+          isSelected: controller.selectedFriendIds.contains(friend.id),
           onTap: () => controller.onToggleFriend(friend.id),
         );
       },
