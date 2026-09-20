@@ -8,7 +8,6 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
-import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/foreground/timer_foreground_service.dart";
 import "package:timing/core/services/home_widget/home_widget_service.dart";
 import "package:timing/core/services/http/http_client_service.dart";
@@ -52,7 +51,6 @@ class ServicesBindings extends Bindings {
     );
     Get.put<FocusFeedbackService>(FocusFeedbackService(), permanent: true);
     Get.put<FocusGuardService>(FocusGuardService(), permanent: true);
-    Get.put<FocusOverlayService>(FocusOverlayService(), permanent: true);
     Get.put<HomeWidgetService>(HomeWidgetService(), permanent: true);
     Get.put<TimerForegroundService>(
       TimerForegroundService(),

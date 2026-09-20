@@ -19,7 +19,6 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
-import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/foreground/timer_foreground_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
@@ -46,7 +45,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     required this.activeTimerSessionService,
     required this.focusFeedbackService,
     required this.focusGuardService,
-    required this.focusOverlayService,
     required this.timerForegroundService,
     required this.analyticsService,
     required this.activityChangeBus,
@@ -82,7 +80,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   final ActiveTimerSessionService activeTimerSessionService;
   final FocusFeedbackService focusFeedbackService;
   final FocusGuardService focusGuardService;
-  final FocusOverlayService focusOverlayService;
   final TimerForegroundService timerForegroundService;
   final AnalyticsService analyticsService;
   final ActivityChangeBus activityChangeBus;
@@ -222,8 +219,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     return focusIntervalSeconds - elapsedInSection;
   }
 
-  static bool _overlayPermissionRequested = false;
-
   @override
   void onInit() {
     super.onInit();
@@ -243,7 +238,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
     unawaited(_ensureTimerNotifications());
     _syncFocusGuard();
-    unawaited(_ensureOverlayPermission());
     analyticsService.track(
       AnalyticsEvent.focusSessionStarted(category: subject.category),
     );
@@ -252,6 +246,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   Future<void> _tick() async {
     final bool consumedAction = await _consumeLiveActivityAction();
     if (consumedAction || isSessionFinished.value) {
+      return;
+    }
+    if (await _consumeAndroidToggleAction()) {
       return;
     }
 
@@ -467,7 +464,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       timerNotificationService.cancelOngoing();
     }
     unawaited(timerForegroundService.stop());
-    _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
     if (!alreadyFinished) {
@@ -623,7 +619,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       timerNotificationService.cancelOngoing();
     }
     unawaited(timerForegroundService.stop());
-    _hideOverlay();
     _syncFocusGuard();
     unawaited(timerLiveActivityService.end());
     if (!alreadyFinished) {
@@ -689,44 +684,45 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
     if (!isRunning.value) {
       timerNotificationService.cancelScheduledAlarms();
-      timerNotificationService.showStatic(
-        title: subject.name,
-        body: pausedBody,
-      );
       unawaited(
-        timerForegroundService.start(title: subject.name, body: pausedBody),
+        timerForegroundService.start(
+          title: subject.name,
+          body: pausedBody,
+          actionLabel: l10n.timerNotificationResumeAction,
+          isRunning: false,
+          isTicking: false,
+          elapsedSeconds: _displayElapsedSeconds,
+          colorValue: subject.colorValue,
+        ),
       );
       return;
     }
 
     if (isResting.value) {
-      timerNotificationService.showStatic(
-        title: subject.name,
-        body: backgroundRestingBody,
-      );
       unawaited(
         timerForegroundService.start(
           title: subject.name,
           body: backgroundRestingBody,
+          actionLabel: l10n.timerNotificationPauseAction,
+          isRunning: true,
+          isTicking: false,
+          elapsedSeconds: _displayElapsedSeconds,
+          colorValue: subject.colorValue,
         ),
       );
       return;
     }
 
     timerNotificationService.cancelRestFinished();
-    final DateTime startedAt = DateTime.now().subtract(
-      Duration(seconds: sessionSeconds.value),
-    );
-    timerNotificationService.showRunning(
-      title: subject.name,
-      body: backgroundRunningBody,
-      startedAt: startedAt,
-    );
     unawaited(
       timerForegroundService.start(
         title: subject.name,
         body: backgroundRunningBody,
-        startedAt: startedAt,
+        actionLabel: l10n.timerNotificationPauseAction,
+        isRunning: true,
+        isTicking: true,
+        elapsedSeconds: _displayElapsedSeconds,
+        colorValue: subject.colorValue,
       ),
     );
   }
@@ -801,13 +797,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     return sessionSeconds.value;
   }
 
-  int get _overlayIntervalRemainingSeconds {
-    if (isResting.value) {
-      return restCountdownSeconds.value;
-    }
-    return breakCountdownSeconds.value;
-  }
-
   Future<void> _saveActiveSession({DateTime? capturedAt}) async {
     if (isSessionFinished.value) {
       _lastQueuedSessionCheckpoint = null;
@@ -851,41 +840,19 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       previous.todayFocusSecondsAtSessionStart ==
           current.todayFocusSecondsAtSessionStart;
 
-  Future<void> _ensureOverlayPermission() async {
-    if (_overlayPermissionRequested) {
-      return;
-    }
-    _overlayPermissionRequested = true;
-    if (await focusOverlayService.hasPermission()) {
-      return;
-    }
-    await focusOverlayService.requestPermission();
-  }
-
-  void _showOverlay() {
+  /// Consumes a pause/resume tap from the ongoing notification's lock screen
+  /// mini player or the tray notification, if any.
+  Future<bool> _consumeAndroidToggleAction() async {
     if (isSessionFinished.value) {
-      return;
+      return false;
     }
-    unawaited(
-      focusOverlayService.show(
-        subjectName: subject.name,
-        elapsedSeconds: _displayElapsedSeconds,
-        sessionElapsedSeconds: sessionSeconds.value,
-        intervalRemainingSeconds: _overlayIntervalRemainingSeconds,
-        isRunning: isRunning.value,
-        isResting: isResting.value,
-        usesFocusRoutine: !isReading && !isHobby,
-        colorValue: subject.colorValue,
-        currentFocusSection: currentFocusSection,
-        totalFocusSections: focusSessionCount,
-        focusIntervalSeconds: focusIntervalSeconds,
-        restIntervalSeconds: restIntervalSeconds,
-      ),
-    );
-  }
-
-  void _hideOverlay() {
-    unawaited(focusOverlayService.hide());
+    final bool foregroundServiceRequested = await timerForegroundService
+        .consumePendingToggleRequest();
+    if (!foregroundServiceRequested) {
+      return false;
+    }
+    togglePause();
+    return true;
   }
 
   Future<bool> _consumeLiveActivityAction() async {
@@ -962,7 +929,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
       _clearFocusLockReturnRequest();
-      _hideOverlay();
       unawaited(_resumeFromBackground());
       _syncFocusGuard();
       return;
@@ -981,8 +947,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       }
       if (isFocusLockActive) {
         _requestFocusLockReturn();
-      } else {
-        _showOverlay();
       }
     }
   }
@@ -1060,7 +1024,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       timerNotificationService.cancelOngoing();
     }
     unawaited(timerForegroundService.stop());
-    _hideOverlay();
     _disableFocusGuard();
     unawaited(timerLiveActivityService.end());
     super.onClose();

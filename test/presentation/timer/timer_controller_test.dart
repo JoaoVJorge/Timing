@@ -20,7 +20,6 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
-import "package:timing/core/services/focus/focus_overlay_service.dart";
 import "package:timing/core/services/foreground/timer_foreground_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
@@ -133,7 +132,6 @@ class _FakeTimerNotificationService extends _Noop
   int scheduleSessionTimelineCount = 0;
   int cancelOngoingCount = 0;
   int cancelCount = 0;
-  int showRunningCount = 0;
   Duration? firstIntervalReminder;
   Duration? reminderInterval;
 
@@ -202,21 +200,6 @@ class _FakeTimerNotificationService extends _Noop
   Future<void> cancelOngoing() async {
     cancelOngoingCount++;
   }
-
-  @override
-  Future<void> showRunning({
-    required String title,
-    required String body,
-    required DateTime startedAt,
-  }) async {
-    showRunningCount++;
-  }
-
-  @override
-  Future<void> showStatic({
-    required String title,
-    required String body,
-  }) async {}
 
   @override
   Future<void> cancel() async {
@@ -293,62 +276,35 @@ class _FakeFocusGuardService extends _Noop implements FocusGuardService {
   }
 }
 
-class _FakeFocusOverlayService extends _Noop implements FocusOverlayService {
-  int showCount = 0;
-  int? timerSeconds;
-  int? intervalRemainingSeconds;
-  bool? countsUp;
-  bool? usesRoutine;
-
-  @override
-  Future<bool> hasPermission() async => true;
-
-  @override
-  Future<void> requestPermission() async {}
-
-  @override
-  Future<void> show({
-    required String subjectName,
-    required int elapsedSeconds,
-    required int sessionElapsedSeconds,
-    required int intervalRemainingSeconds,
-    required bool isRunning,
-    required bool isResting,
-    required bool usesFocusRoutine,
-    required int colorValue,
-    required int currentFocusSection,
-    required int totalFocusSections,
-    required int focusIntervalSeconds,
-    required int restIntervalSeconds,
-  }) async {
-    showCount++;
-    timerSeconds = elapsedSeconds;
-    this.intervalRemainingSeconds = intervalRemainingSeconds;
-    countsUp = true;
-    usesRoutine = usesFocusRoutine;
-  }
-
-  @override
-  Future<void> hide() async {}
-}
-
 class _FakeTimerForegroundService extends TimerForegroundService {
   int startCount = 0;
   int stopCount = 0;
   String? lastTitle;
   String? lastBody;
-  DateTime? lastStartedAt;
+  String? lastActionLabel;
+  bool? lastIsRunning;
+  bool? lastIsTicking;
+  int? lastElapsedSeconds;
+  int? lastColorValue;
 
   @override
   Future<void> start({
     required String title,
     required String body,
-    DateTime? startedAt,
+    required String actionLabel,
+    required bool isRunning,
+    required bool isTicking,
+    required int elapsedSeconds,
+    required int colorValue,
   }) async {
     startCount++;
     lastTitle = title;
     lastBody = body;
-    lastStartedAt = startedAt;
+    lastActionLabel = actionLabel;
+    lastIsRunning = isRunning;
+    lastIsTicking = isTicking;
+    lastElapsedSeconds = elapsedSeconds;
+    lastColorValue = colorValue;
   }
 
   @override
@@ -439,7 +395,6 @@ TimerController _controller(
   SubjectEntity subject, {
   FocusFeedbackService? focusFeedbackService,
   FocusGuardService? focusGuardService,
-  FocusOverlayService? focusOverlayService,
   TimerForegroundService? timerForegroundService,
   TimerNotificationService? timerNotificationService,
   TimerLiveActivityService? timerLiveActivityService,
@@ -468,7 +423,6 @@ TimerController _controller(
       activeTimerSessionService ?? _FakeActiveTimerSessionService(),
   focusFeedbackService: focusFeedbackService ?? _FakeFocusFeedbackService(),
   focusGuardService: focusGuardService ?? _FakeFocusGuardService(),
-  focusOverlayService: focusOverlayService ?? _FakeFocusOverlayService(),
   timerForegroundService:
       timerForegroundService ?? _FakeTimerForegroundService(),
   analyticsService: _FakeAnalyticsService(),
@@ -1289,20 +1243,17 @@ void main() {
 
       expect(appController.notificationsEnabled.value, isTrue);
       expect(appController.enableNotificationsCount, 1);
-      expect(notifications.showRunningCount, 1);
       expect(foregroundService.startCount, 1);
-      expect(foregroundService.lastStartedAt, isNotNull);
+      expect(foregroundService.lastIsTicking, isTrue);
 
       controller.onClose();
     });
 
     test("returns to the app when focus lock goes to background", () async {
-      final overlay = _FakeFocusOverlayService();
       final guard = _FakeFocusGuardService();
       final feedback = _FakeFocusFeedbackService();
       final controller = _controller(
         _subject(),
-        focusOverlayService: overlay,
         focusGuardService: guard,
         focusFeedbackService: feedback,
         appController: _FakeAppController(focusLockEnabled: true),
@@ -1313,51 +1264,47 @@ void main() {
 
       expect(feedback.focusLockWarningCount, 1);
       expect(guard.bringAppToFrontCount, 1);
-      expect(overlay.showCount, 0);
       controller.onClose();
     });
 
-    test("shows reading as a count-up stopwatch in the overlay", () {
-      final overlay = _FakeFocusOverlayService();
+    test("shows reading as a count-up stopwatch in the notification", () {
+      final foregroundService = _FakeTimerForegroundService();
       final controller = _controller(
         _subject(category: TimeCategoryType.reading, goalSeconds: 0),
-        focusOverlayService: overlay,
+        timerForegroundService: foregroundService,
       );
       controller.sessionSeconds.value = 42;
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.timerSeconds, 42);
-      expect(overlay.countsUp, isTrue);
+      expect(foregroundService.lastElapsedSeconds, 42);
     });
 
     test("shows elapsed focus time instead of the remaining interval", () {
-      final overlay = _FakeFocusOverlayService();
+      final foregroundService = _FakeTimerForegroundService();
       final liveActivity = _FakeTimerLiveActivityService();
       final controller = _controller(
         _subject(goalSeconds: 30 * 60),
-        focusOverlayService: overlay,
+        timerForegroundService: foregroundService,
         timerLiveActivityService: liveActivity,
       );
       controller.advanceForTesting(19 * 60);
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.timerSeconds, 19 * 60);
-      expect(overlay.intervalRemainingSeconds, 11 * 60);
-      expect(overlay.countsUp, isTrue);
+      expect(foregroundService.lastElapsedSeconds, 19 * 60);
       expect(liveActivity.timerSeconds, 19 * 60);
       expect(liveActivity.isReading, isFalse);
     });
 
     test("matches the app's accumulated value for a daily hobby", () {
-      final overlay = _FakeFocusOverlayService();
+      final foregroundService = _FakeTimerForegroundService();
       final controller = _controller(
         _subject(
           category: TimeCategoryType.hobbies,
           activityType: SubjectActivityType.daily,
         ),
-        focusOverlayService: overlay,
+        timerForegroundService: foregroundService,
         subjectDailyHistoryService: _FakeSubjectDailyHistoryService(
           const DailyProgressEntity(focusSeconds: 10 * 60),
         ),
@@ -1366,37 +1313,21 @@ void main() {
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.timerSeconds, 12 * 60);
-      expect(overlay.countsUp, isTrue);
+      expect(foregroundService.lastElapsedSeconds, 12 * 60);
     });
 
     test("shows elapsed rest time instead of remaining rest time", () {
-      final overlay = _FakeFocusOverlayService();
+      final foregroundService = _FakeTimerForegroundService();
       final controller = _controller(
         _subject(restMinutes: 5),
-        focusOverlayService: overlay,
+        timerForegroundService: foregroundService,
       );
       controller.isResting.value = true;
       controller.restCountdownSeconds.value = 3 * 60;
 
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.timerSeconds, 2 * 60);
-      expect(overlay.intervalRemainingSeconds, 3 * 60);
-      expect(overlay.countsUp, isTrue);
-    });
-
-    test("hides sections and rest cycles from the hobby overlay", () {
-      final overlay = _FakeFocusOverlayService();
-      final controller = _controller(
-        _subject(category: TimeCategoryType.hobbies),
-        focusOverlayService: overlay,
-      );
-
-      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
-
-      expect(overlay.countsUp, isTrue);
-      expect(overlay.usesRoutine, isFalse);
+      expect(foregroundService.lastElapsedSeconds, 2 * 60);
     });
 
     test("schedules reading reminders every 30 minutes", () {
@@ -1429,25 +1360,26 @@ void main() {
       expect(notifications.scheduleRestFinishedCount, 0);
     });
 
-    test("keeps the hobby overlay counting without new alarms in overtime", () {
-      final overlay = _FakeFocusOverlayService();
-      final notifications = _FakeTimerNotificationService();
-      final controller = _controller(
-        _subject(category: TimeCategoryType.hobbies),
-        focusOverlayService: overlay,
-        timerNotificationService: notifications,
-      );
-      controller.advanceForTesting(31 * 60);
+    test(
+      "keeps the notification counting without new alarms in overtime",
+      () {
+        final notifications = _FakeTimerNotificationService();
+        final foregroundService = _FakeTimerForegroundService();
+        final controller = _controller(
+          _subject(category: TimeCategoryType.hobbies),
+          timerNotificationService: notifications,
+          timerForegroundService: foregroundService,
+        );
+        controller.advanceForTesting(31 * 60);
 
-      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(overlay.timerSeconds, 31 * 60);
-      expect(overlay.countsUp, isTrue);
-      expect(overlay.usesRoutine, isFalse);
-      expect(notifications.scheduleFocusFinishedCount, 0);
-      expect(notifications.showRunningCount, 1);
-      expect(notifications.cancelOngoingCount, 0);
-    });
+        expect(foregroundService.lastElapsedSeconds, 31 * 60);
+        expect(notifications.scheduleFocusFinishedCount, 0);
+        expect(foregroundService.startCount, 1);
+        expect(notifications.cancelOngoingCount, 0);
+      },
+    );
 
     test("schedules repeating focus reminders when sent to background", () {
       final notifications = _FakeTimerNotificationService();

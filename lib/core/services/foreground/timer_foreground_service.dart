@@ -1,7 +1,7 @@
 import "package:flutter/services.dart";
 import "package:get/get_utils/get_utils.dart";
 
-/// Keeps the native focus overlay and ongoing notification attached to a real
+/// Keeps the ongoing, lock-screen-visible notification attached to a real
 /// Android foreground service while a session is active.
 ///
 /// Timer progress itself remains durable through `ActiveTimerSessionService`;
@@ -17,18 +17,25 @@ class TimerForegroundService {
   Future<void> start({
     required String title,
     required String body,
-    DateTime? startedAt,
+    required String actionLabel,
+    required bool isRunning,
+    required bool isTicking,
+    required int elapsedSeconds,
+    required int colorValue,
   }) async {
     if (!_isSupported) {
       return;
     }
 
     try {
-      await _channel.invokeMethod<void>("start", <String, String>{
+      await _channel.invokeMethod<void>("start", <String, Object>{
         "title": title,
         "body": body,
-        if (startedAt != null)
-          "startedAtMilliseconds": startedAt.millisecondsSinceEpoch.toString(),
+        "actionLabel": actionLabel,
+        "isRunning": isRunning,
+        "isTicking": isTicking,
+        "elapsedSeconds": elapsedSeconds,
+        "colorHex": (colorValue & 0xFFFFFF).toRadixString(16).padLeft(6, "0"),
       });
     } on PlatformException {
       return;
@@ -48,6 +55,23 @@ class TimerForegroundService {
       return;
     } on MissingPluginException {
       return;
+    }
+  }
+
+  /// Consumes a pause/resume tap made on the lock screen's mini player
+  /// (MediaSession transport controls), if any.
+  Future<bool> consumePendingToggleRequest() async {
+    if (!_isSupported) {
+      return false;
+    }
+
+    try {
+      return await _channel.invokeMethod<bool>("consumePendingToggle") ??
+          false;
+    } on PlatformException {
+      return false;
+    } on MissingPluginException {
+      return false;
     }
   }
 }

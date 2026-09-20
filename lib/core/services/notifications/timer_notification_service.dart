@@ -6,8 +6,15 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timezone/data/latest_all.dart" as tz;
 import "package:timezone/timezone.dart" as tz;
 
-/// Shows an ongoing, lockscreen-visible notification (media-player style)
-/// with a live chronometer while a focus session is running.
+/// Schedules the one-shot "focus/rest finished" alarms and timeline
+/// reminders for a focus session.
+///
+/// The ongoing, lockscreen-visible mini player (chronometer, pause/resume)
+/// is now owned entirely by the native TimerForegroundService, since it
+/// needs a MediaSession + MediaStyle notification that this plugin cannot
+/// build; posting to the same notification id from both sides would race and
+/// the plain notification would win, dropping the media-style lock screen
+/// controls.
 class TimerNotificationService {
   TimerNotificationService({AppLoggerService? logger})
     : _logger = logger ?? AppLoggerService();
@@ -27,10 +34,6 @@ class TimerNotificationService {
   static const int _restFinishedNotificationId = 1003;
   static const int _timelineNotificationIdBase = 1100;
   static const int _maxTimelineAlarms = 64;
-  static const String _channelId = "focus_timer";
-  static const String _channelName = "Focus timer";
-  static const String _channelDescription =
-      "Ongoing focus session shown on the lockscreen";
   static const String _finishChannelId = "focus_timer_finished_v3";
   static const String _finishChannelName = "Focus timer finished";
   static const String _finishChannelDescription =
@@ -119,90 +122,6 @@ class TimerNotificationService {
       ]);
     } catch (error, stackTrace) {
       _logFailure("disableNotifications", error, stackTrace);
-    }
-  }
-
-  Future<void> showRunning({
-    required String title,
-    required String body,
-    required DateTime startedAt,
-  }) async {
-    if (!_isSupported) {
-      return;
-    }
-
-    try {
-      await _ensureInitialized();
-      if (!await areNotificationsEnabled()) {
-        return;
-      }
-      final AndroidNotificationDetails androidDetails =
-          AndroidNotificationDetails(
-            _channelId,
-            _channelName,
-            channelDescription: _channelDescription,
-            importance: Importance.low,
-            priority: Priority.low,
-            ongoing: true,
-            autoCancel: false,
-            showWhen: true,
-            usesChronometer: true,
-            when: startedAt.millisecondsSinceEpoch,
-            visibility: NotificationVisibility.public,
-            category: AndroidNotificationCategory.stopwatch,
-            icon: _notificationIcon,
-            onlyAlertOnce: true,
-            playSound: false,
-            enableVibration: false,
-          );
-      await _plugin.show(
-        id: _notificationId,
-        title: title,
-        body: body,
-        notificationDetails: NotificationDetails(android: androidDetails),
-      );
-    } catch (error, stackTrace) {
-      // The timer must keep working even if notifications are unavailable.
-      _logFailure("showRunning", error, stackTrace);
-    }
-  }
-
-  Future<void> showStatic({required String title, required String body}) async {
-    if (!_isSupported) {
-      return;
-    }
-
-    try {
-      await _ensureInitialized();
-      if (!await areNotificationsEnabled()) {
-        return;
-      }
-      const AndroidNotificationDetails androidDetails =
-          AndroidNotificationDetails(
-            _channelId,
-            _channelName,
-            channelDescription: _channelDescription,
-            importance: Importance.low,
-            priority: Priority.low,
-            ongoing: true,
-            autoCancel: false,
-            showWhen: false,
-            visibility: NotificationVisibility.public,
-            category: AndroidNotificationCategory.stopwatch,
-            icon: _notificationIcon,
-            onlyAlertOnce: true,
-            playSound: false,
-            enableVibration: false,
-          );
-      await _plugin.show(
-        id: _notificationId,
-        title: title,
-        body: body,
-        notificationDetails: const NotificationDetails(android: androidDetails),
-      );
-    } catch (error, stackTrace) {
-      // The timer must keep working even if notifications are unavailable.
-      _logFailure("showStatic", error, stackTrace);
     }
   }
 

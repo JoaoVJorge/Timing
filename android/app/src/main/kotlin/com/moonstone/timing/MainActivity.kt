@@ -2,9 +2,7 @@ package com.moonstone.timing
 
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -45,44 +43,6 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "timing/focus_overlay"
-        ).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "hasPermission" -> {
-                    result.success(FocusOverlayController.hasPermission(this))
-                }
-                "requestPermission" -> {
-                    requestOverlayPermission()
-                    result.success(null)
-                }
-                "show" -> {
-                    FocusOverlayController.show(
-                        context = this,
-                        subjectName = call.argument<String>("subjectName") ?: "",
-                        elapsedSeconds = call.argument<Int>("elapsedSeconds") ?: 0,
-                        sessionElapsedSeconds = call.argument<Int>("sessionElapsedSeconds") ?: 0,
-                        intervalRemainingSeconds = call.argument<Int>("intervalRemainingSeconds") ?: 0,
-                        isRunning = call.argument<Boolean>("isRunning") ?: false,
-                        isResting = call.argument<Boolean>("isResting") ?: false,
-                        usesFocusRoutine = call.argument<Boolean>("usesFocusRoutine") ?: true,
-                        currentFocusSection = call.argument<Int>("currentFocusSection") ?: 1,
-                        totalFocusSections = call.argument<Int>("totalFocusSections") ?: 1,
-                        focusIntervalSeconds = call.argument<Int>("focusIntervalSeconds") ?: 1800,
-                        restIntervalSeconds = call.argument<Int>("restIntervalSeconds") ?: 60,
-                        accentColor = parseColor(call.argument<String>("colorHex"))
-                    )
-                    result.success(null)
-                }
-                "hide" -> {
-                    FocusOverlayController.hide()
-                    result.success(null)
-                }
-                else -> result.notImplemented()
-            }
-        }
-
-        MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
             "timing/timer_foreground_service"
         ).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -91,15 +51,20 @@ class MainActivity : FlutterActivity() {
                         context = this,
                         title = call.argument<String>("title") ?: "",
                         body = call.argument<String>("body") ?: "",
-                        startedAtMilliseconds = call
-                            .argument<String>("startedAtMilliseconds")
-                            ?.toLongOrNull()
+                        actionLabel = call.argument<String>("actionLabel") ?: "",
+                        isRunning = call.argument<Boolean>("isRunning") ?: true,
+                        isTicking = call.argument<Boolean>("isTicking") ?: false,
+                        elapsedSeconds = call.argument<Int>("elapsedSeconds") ?: 0,
+                        color = parseColor(call.argument<String>("colorHex"))
                     )
                     result.success(null)
                 }
                 "stop" -> {
                     TimerForegroundService.stop(this)
                     result.success(null)
+                }
+                "consumePendingToggle" -> {
+                    result.success(TimerForegroundService.consumePendingToggleRequest())
                 }
                 else -> result.notImplemented()
             }
@@ -121,22 +86,6 @@ class MainActivity : FlutterActivity() {
                 }
                 else -> result.notImplemented()
             }
-        }
-    }
-
-    private fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)) {
-            return
-        }
-        val intent = Intent(
-            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:$packageName")
-        )
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            startActivity(intent)
-        } catch (error: Exception) {
-            // The settings screen may be unavailable on some devices.
         }
     }
 
