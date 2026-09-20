@@ -21,6 +21,8 @@ import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
 import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
+import "package:timing/core/services/auth/offline_grace_period.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
@@ -28,8 +30,10 @@ import "package:timing/core/services/local_storage/app_local_storage_service.dar
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 import "package:timing/core/services/timer/active_timer_session_service.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/home/home_controller.dart";
@@ -91,6 +95,9 @@ class AppController extends GetxController with WidgetsBindingObserver {
   Uint8List? _decodedPhotoBytes;
   Timer? _presenceHeartbeat;
   Future<void> _presenceWriteQueue = Future<void>.value();
+  final OfflineGracePeriod _offlineGracePeriod = const OfflineGracePeriod();
+  StreamSubscription<String>? _pendingSyncSubscription;
+  StreamSubscription<bool>? _connectivitySubscription;
 
   static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
   static const Duration _presenceRequestTimeout = Duration(seconds: 2);
@@ -124,6 +131,18 @@ class AppController extends GetxController with WidgetsBindingObserver {
     if (_supabaseService.hasSignedInUser) {
       _startPresenceTracking();
     }
+    _pendingSyncSubscription = Get.find<PendingSyncStore>().onMarkedPending
+        .listen((_) {
+          if (!Get.find<ConnectivityService>().isOnline.value) {
+            _appNavigator.showOfflineSnackBar();
+          }
+        });
+    _connectivitySubscription = Get.find<ConnectivityService>().isOnline
+        .listen((online) {
+          if (online && _supabaseService.hasSignedInUser) {
+            unawaited(_syncReconciliationService.flushPending());
+          }
+        });
   }
 
   Future<void> initialize() async {
@@ -137,6 +156,11 @@ class AppController extends GetxController with WidgetsBindingObserver {
   Future<void> _navigateAfterSplash() async {
     if (_supabaseService.isConfigured && !_supabaseService.hasSignedInUser) {
       await _appNavigator.offAllNamed(AppRoutes.login);
+      return;
+    }
+
+    if (_supabaseService.hasSignedInUser && await _hasGracePeriodExpired()) {
+      await _forceReauthentication();
       return;
     }
 
@@ -194,6 +218,51 @@ class AppController extends GetxController with WidgetsBindingObserver {
     result.fold((error) => null, _applyConfig);
   }
 
+  /// Marks "the app just talked to the backend successfully while signed
+  /// in" — resets the 30-day offline grace clock. Called from every place
+  /// that confirms a real round-trip: a successful profile refresh here and
+  /// a fresh sign-in in [LoginController].
+  Future<void> recordSuccessfulBackendContact() => localStorageService.write(
+    LocalStorageKeys.lastVerifiedOnlineAt,
+    DateTime.now().toUtc().toIso8601String(),
+  );
+
+  /// Whether this device has gone more than [OfflineGracePeriod.duration]
+  /// without ever successfully reaching the backend while signed in. A
+  /// device that predates this check (no timestamp recorded yet) is
+  /// grandfathered in as not expired, so existing signed-in users aren't
+  /// forced to re-authenticate purely because the app updated.
+  Future<bool> _hasGracePeriodExpired() async {
+    final String? raw = await localStorageService.read<String?>(
+      LocalStorageKeys.lastVerifiedOnlineAt,
+    );
+    final DateTime? lastVerified = raw == null ? null : DateTime.tryParse(raw);
+    if (lastVerified == null) {
+      await recordSuccessfulBackendContact();
+      return false;
+    }
+    return _offlineGracePeriod.hasExpired(
+      lastVerifiedOnlineAt: lastVerified,
+      now: DateTime.now(),
+    );
+  }
+
+  Future<void> _forceReauthentication() async {
+    final bool wasOffline =
+        Get.isRegistered<ConnectivityService>() &&
+        !Get.find<ConnectivityService>().isOnline.value;
+    await _signOutUseCase();
+    await _appNavigator.offAllNamed(AppRoutes.login);
+    if (wasOffline) {
+      final BuildContext? context = Get.context;
+      if (context != null && context.mounted) {
+        _appNavigator.showOfflineSnackBar(
+          context.l10n.offlineSessionExpiredMessage,
+        );
+      }
+    }
+  }
+
   void _applyConfig(AppConfigEntity config) {
     isDarkMode.value = config.isDarkMode;
     accentColor.value = Color(config.accentColorValue);
@@ -230,6 +299,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     final Either<AppError, AppConfigEntity?> result =
         await _getCurrentProfileUseCase();
     return await result.fold((error) async => false, (config) async {
+      await recordSuccessfulBackendContact();
       if (config == null) {
         return false;
       }
@@ -530,6 +600,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     _presenceHeartbeat?.cancel();
+    unawaited(_pendingSyncSubscription?.cancel());
+    unawaited(_connectivitySubscription?.cancel());
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
   }

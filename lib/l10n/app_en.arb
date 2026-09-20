@@ -1762,5 +1762,7 @@
   "@transferGroupLeadershipMessage": {
     "placeholders": {"memberName": {"type": "String"}}
   },
-  "transferGroupLeadershipButton": "Make leader"
+  "transferGroupLeadershipButton": "Make leader",
+  "offlineChangesQueuedMessage": "You're offline. This will be saved once you reconnect.",
+  "offlineSessionExpiredMessage": "You've been offline for a while. Connect to the internet to sign in again."
 }

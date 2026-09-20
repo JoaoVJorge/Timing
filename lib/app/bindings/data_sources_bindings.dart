@@ -18,7 +18,12 @@ class DataSourcesBindings extends Bindings {
       permanent: true,
     );
     Get.put<ActivityDataSource>(
-      ActivityDataSource(supabaseService: Get.find()),
+      ActivityDataSource(
+        supabaseService: Get.find(),
+        localStorageService: Get.find(),
+        pendingSyncStore: Get.find(),
+        logger: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<SubjectsDataSource>(
@@ -40,11 +45,21 @@ class DataSourcesBindings extends Bindings {
       permanent: true,
     );
     Get.put<GroupsDataSource>(
-      GroupsDataSource(supabaseService: Get.find(), logger: Get.find()),
+      GroupsDataSource(
+        supabaseService: Get.find(),
+        logger: Get.find(),
+        localStorageService: Get.find(),
+        pendingSyncStore: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<FriendsDataSource>(
-      FriendsDataSource(supabaseService: Get.find(), logger: Get.find()),
+      FriendsDataSource(
+        supabaseService: Get.find(),
+        logger: Get.find(),
+        localStorageService: Get.find(),
+        pendingSyncStore: Get.find(),
+      ),
       permanent: true,
     );
     Get.put<ProfileSyncDataSource>(
@@ -70,6 +85,9 @@ class DataSourcesBindings extends Bindings {
         subjectsDataSource: Get.find(),
         scheduleDataSource: Get.find(),
         dailyTasksDataSource: Get.find(),
+        activityDataSource: Get.find(),
+        groupsDataSource: Get.find(),
+        friendsDataSource: Get.find(),
       ),
       permanent: true,
     );
