@@ -26,6 +26,7 @@ import "package:timing/core/services/notifications/timer_notification_service.da
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/serial_task_queue.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/timer/timer_session_persister.dart";
 import "package:timing/presentation/timer/widgets/timer_exit_dialog.dart";
@@ -58,7 +59,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   static const int defaultFocusIntervalSeconds = 30 * 60;
   static const Duration autoSaveInterval = Duration(seconds: 10);
-  static const Duration focusLockReturnCooldown = Duration(seconds: 5);
   static const Duration maxTrustedRecoveryGap = Duration(hours: 4);
   static const Duration maxStaleCheckpointCatchUp = Duration(hours: 1);
 
@@ -98,6 +98,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   late final RxBool isRunning = (restoredSession?.isRunning ?? true).obs;
   late final RxBool isResting = (restoredSession?.isResting ?? false).obs;
   final RxBool isSessionFinished = false.obs;
+  final Rx<FocusProtectionStatus> focusProtectionStatus =
+      FocusProtectionStatus.unavailable.obs;
   late final RxInt completedFocusSections =
       (restoredSession?.completedFocusSections ?? 0).obs;
 
@@ -107,12 +109,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   bool _isFinishingSession = false;
   bool _isAppInForeground = true;
   bool _isCatchingUpAfterBackground = false;
-  bool _isRequestingFocusLockReturn = false;
+  bool _focusGuardDisposed = false;
+  bool _hasRequestedScreenPinning = false;
+  bool _isReady = false;
+  int _focusActivationGeneration = 0;
+  final SerialTaskQueue _focusGuardQueue = SerialTaskQueue();
   final int _todayFocusSecondsAtSessionStart;
-  DateTime? _lastFocusLockWarningAt;
   DateTime? _lastSessionCheckpointAt;
   ActiveTimerSessionEntity? _lastQueuedSessionCheckpoint;
-  Timer? _focusLockReturnResetTimer;
   late DateTime _lastTickAt;
 
   late final TimerSessionPersister _persister = TimerSessionPersister(
@@ -230,10 +234,12 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       completedFocusSections.value = focusSessionCount;
     }
     if (!isSessionFinished.value) {
-      _ticker = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) => unawaited(_tick()),
-      );
+      _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_isAppInForeground && isFocusLockActive) {
+          unawaited(refreshFocusProtection());
+        }
+        unawaited(_tick());
+      });
       unawaited(_saveActiveSession(capturedAt: now));
     }
     unawaited(_ensureTimerNotifications());
@@ -241,6 +247,13 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     analyticsService.track(
       AnalyticsEvent.focusSessionStarted(category: subject.category),
     );
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _isReady = true;
+    _requestScreenPinningIfNeeded();
   }
 
   Future<void> _tick() async {
@@ -479,15 +492,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         completedAllSections: completedFocusSections.value >= focusSessionCount,
       ),
     );
-  }
-
-  void warnFocusLock() {
-    unawaited(focusFeedbackService.warnFocusLock());
-    final BuildContext? context = Get.context;
-    if (context == null) {
-      return;
-    }
-    appNavigator.showSuccessSnackBar(context.l10n.timerFocusLockWarning);
   }
 
   Future<bool> confirmExitIfNeeded() async {
@@ -939,7 +943,6 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
-      _clearFocusLockReturnRequest();
       unawaited(_resumeFromBackground());
       _syncFocusGuard();
       return;
@@ -956,37 +959,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       if (wasInForeground) {
         _scheduleBackgroundTimeline();
       }
-      if (isFocusLockActive) {
-        _requestFocusLockReturn();
-      }
     }
-  }
-
-  void _requestFocusLockReturn() {
-    final DateTime now = DateTime.now();
-    if (_lastFocusLockWarningAt == null ||
-        now.difference(_lastFocusLockWarningAt!) >= focusLockReturnCooldown) {
-      _lastFocusLockWarningAt = now;
-      warnFocusLock();
-    }
-
-    if (_isRequestingFocusLockReturn) {
-      return;
-    }
-
-    _isRequestingFocusLockReturn = true;
-    _focusLockReturnResetTimer?.cancel();
-    _focusLockReturnResetTimer = Timer(
-      focusLockReturnCooldown,
-      _clearFocusLockReturnRequest,
-    );
-    unawaited(focusGuardService.bringAppToFront());
-  }
-
-  void _clearFocusLockReturnRequest() {
-    _focusLockReturnResetTimer?.cancel();
-    _focusLockReturnResetTimer = null;
-    _isRequestingFocusLockReturn = false;
   }
 
   Future<void> _catchUpAfterBackground() async {
@@ -1004,21 +977,87 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   void _syncFocusGuard() {
-    final bool lockActive = isFocusLockActive;
-    unawaited(focusGuardService.setKeepScreenOn(lockActive));
-    unawaited(focusGuardService.setImmersiveMode(lockActive));
+    // Every transition (pause/resume, rest/focus, foreground/background,
+    // disposal) starts a new activation epoch. A screen-pinning request
+    // captures the epoch it started in and, once the native round trip
+    // completes, checks whether that epoch is still current instead of
+    // re-reading individual flags — one comparison instead of re-deriving
+    // "did anything relevant change" from scratch after every await.
+    _focusActivationGeneration++;
+    if (!_focusGuardDisposed && isFocusLockActive) {
+      _requestScreenPinningIfNeeded();
+    } else {
+      // Reset so the next time focus lock activates (a new focus interval,
+      // a resume from pause, returning to the foreground) it is requested
+      // again instead of staying silently unpinned for the rest of the
+      // session.
+      _hasRequestedScreenPinning = false;
+    }
+    unawaited(
+      _focusGuardQueue.run(() async {
+        final bool active = !_focusGuardDisposed && isFocusLockActive;
+        await focusGuardService.setKeepScreenOn(active);
+        focusProtectionStatus.value = active
+            ? await focusGuardService.getProtectionStatus()
+            : await focusGuardService.stopScreenPinning();
+        await focusGuardService.setImmersiveMode(
+          active && focusProtectionStatus.value == FocusProtectionStatus.pinned,
+        );
+      }),
+    );
+  }
+
+  void _requestScreenPinningIfNeeded() {
+    if (!_isReady || _hasRequestedScreenPinning || !isFocusLockActive) {
+      return;
+    }
+    _hasRequestedScreenPinning = true;
+    unawaited(requestScreenPinning());
   }
 
   void _disableFocusGuard() {
-    unawaited(focusGuardService.setKeepScreenOn(false));
-    unawaited(focusGuardService.setImmersiveMode(false));
+    _focusGuardDisposed = true;
+    _syncFocusGuard();
+  }
+
+  Future<void> refreshFocusProtection() => _focusGuardQueue.run(() async {
+    if (_focusGuardDisposed) {
+      return;
+    }
+    focusProtectionStatus.value = await focusGuardService.getProtectionStatus();
+    await focusGuardService.setImmersiveMode(
+      isFocusLockActive &&
+          focusProtectionStatus.value == FocusProtectionStatus.pinned,
+    );
+  });
+
+  Future<void> requestScreenPinning() {
+    if (_focusGuardDisposed || !isFocusLockActive) {
+      return Future<void>.value();
+    }
+    final int requestedGeneration = _focusActivationGeneration;
+    return _focusGuardQueue.run(() async {
+      if (_focusGuardDisposed ||
+          _focusActivationGeneration != requestedGeneration ||
+          !_isAppInForeground) {
+        return;
+      }
+      focusProtectionStatus.value = await focusGuardService
+          .requestScreenPinning();
+      // The native confirmation can complete after this activation ended
+      // (session paused, rest started, app backgrounded, ...).
+      if (_focusGuardDisposed ||
+          _focusActivationGeneration != requestedGeneration) {
+        focusProtectionStatus.value = await focusGuardService
+            .stopScreenPinning();
+      }
+    });
   }
 
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
-    _focusLockReturnResetTimer?.cancel();
     _persister.flush();
     if (!isSessionFinished.value) {
       if (_isAppInForeground && sessionSeconds.value == 0) {

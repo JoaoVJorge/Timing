@@ -5041,7 +5041,7 @@ abstract class AppLocalizations {
   /// No description provided for @concentrationModeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose which focus sessions block leaving the app.'**
+  /// **'Choose which activities use focus mode.'**
   String get concentrationModeSubtitle;
 
   /// No description provided for @concentrationStudyTitle.
@@ -5377,7 +5377,7 @@ abstract class AppLocalizations {
   /// No description provided for @concentrationModeSheetDescription.
   ///
   /// In en, this message translates to:
-  /// **'When enabled, the app helps you stay focused during the activity until you pause or finish.'**
+  /// **'During a session, you can pin the screen on Android or use Guided Access on iPhone. The timer shows when protection is actually active.'**
   String get concentrationModeSheetDescription;
 
   /// No description provided for @timerFocusLockWarning.

@@ -1,6 +1,7 @@
 package com.moonstone.timing
 
-import android.content.Intent
+import android.app.ActivityManager
+import android.app.KeyguardManager
 import android.graphics.Color
 import android.os.Build
 import android.view.View
@@ -11,6 +12,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    private var releasePendingPin = false
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -33,9 +36,30 @@ class MainActivity : FlutterActivity() {
                     setImmersiveMode(enabled)
                     result.success(null)
                 }
-                "bringAppToFront" -> {
-                    bringAppToFront()
-                    result.success(null)
+                "getProtectionStatus" -> {
+                    releasePinIfNeeded()
+                    result.success(protectionStatus())
+                }
+                "requestScreenPinning" -> {
+                    val keyguard = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+                    if (!hasWindowFocus() || keyguard.isKeyguardLocked) {
+                        result.success(protectionStatus())
+                    } else {
+                        try {
+                            releasePendingPin = false
+                            if (protectionStatus() != "pinned") {
+                                startLockTask()
+                            }
+                            result.success(protectionStatus())
+                        } catch (error: Exception) {
+                            result.error("PINNING_UNAVAILABLE", "Screen pinning could not start", null)
+                        }
+                    }
+                }
+                "stopScreenPinning" -> {
+                    releasePendingPin = true
+                    releasePinIfNeeded()
+                    result.success(protectionStatus())
                 }
                 else -> result.notImplemented()
             }
@@ -94,21 +118,36 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun bringAppToFront() {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        launchIntent?.addFlags(
-            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
-                Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-        if (launchIntent == null) {
-            return
+    private fun protectionStatus(): String {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        return if (manager.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE) {
+            "pinned"
+        } else {
+            "inactive"
         }
-        try {
-            startActivity(launchIntent)
-        } catch (error: Exception) {
-            // Some Android variants may reject background activity launches.
+    }
+
+    private fun releasePinIfNeeded() {
+        if (releasePendingPin && protectionStatus() == "pinned") {
+            try {
+                stopLockTask()
+            } catch (error: Exception) {
+                // Report the actual state; never claim that release succeeded.
+            }
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) releasePinIfNeeded()
+    }
+
+    override fun onDestroy() {
+        if (!isChangingConfigurations && protectionStatus() == "pinned") {
+            releasePendingPin = true
+            releasePinIfNeeded()
+        }
+        super.onDestroy()
     }
 
     @Suppress("DEPRECATION")

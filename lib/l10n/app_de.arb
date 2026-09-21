@@ -1525,7 +1525,7 @@
     }
   },
   "concentrationModeTitle": "Konzentrationsmodus",
-  "concentrationModeSubtitle": "Wähle, welche Sitzungen das Verlassen der App blockieren.",
+  "concentrationModeSubtitle": "Wähle die Aktivitäten für den Konzentrationsmodus.",
   "concentrationStudyTitle": "Lernen",
   "concentrationStudySubtitle": "Volle Konzentration auf dein Lernen.",
   "concentrationExercisesTitle": "Übungen",
@@ -1581,7 +1581,7 @@
   "timerTotalOfLabel": "von {duration}",
   "timerCurrentPagesLabel": "Aktuelle Seiten",
   "timerNotesLabel": "Notizen",
-  "concentrationModeSheetDescription": "Wenn aktiviert, hilft dir die App, während der Aktivität konzentriert zu bleiben, bis du pausierst oder beendest.",
+  "concentrationModeSheetDescription": "Während einer Sitzung kannst du den Bildschirm unter Android anheften oder den geführten Zugriff auf dem iPhone nutzen. Der Timer zeigt an, wann der Schutz tatsächlich aktiv ist.",
   "timerFocusLockWarning": "Der Konzentrationsmodus ist aktiv. Beende oder pausiere die Sitzung, um die App zu verlassen.",
   "timerProgressSemanticLabel": "Fortschritt: {percent}%",
   "homeStreakLabel": "{count, plural, one{{count} Tag in Folge} other{{count} Tage in Folge}}",

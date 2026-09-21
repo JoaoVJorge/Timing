@@ -2791,7 +2791,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get concentrationModeSubtitle =>
-      'Escolha quais sessões bloqueiam a saída do app.';
+      'Escolha em quais atividades usar o modo concentração.';
 
   @override
   String get concentrationStudyTitle => 'Estudo';
@@ -2977,7 +2977,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get concentrationModeSheetDescription =>
-      'Quando ativado, o app ajuda você a se manter concentrado durante a atividade até pausar ou finalizar.';
+      'Durante a sessão, você pode fixar a tela no Android ou usar o Acesso Guiado no iPhone. O timer indica quando a proteção está realmente ativa.';
 
   @override
   String get timerFocusLockWarning =>

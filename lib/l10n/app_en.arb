@@ -1553,7 +1553,7 @@
     }
   },
   "concentrationModeTitle": "Focus mode",
-  "concentrationModeSubtitle": "Choose which focus sessions block leaving the app.",
+  "concentrationModeSubtitle": "Choose which activities use focus mode.",
   "concentrationStudyTitle": "Study",
   "concentrationStudySubtitle": "Full focus on your studies.",
   "concentrationExercisesTitle": "Exercises",
@@ -1640,7 +1640,7 @@
   },
   "timerCurrentPagesLabel": "Current pages",
   "timerNotesLabel": "Notes",
-  "concentrationModeSheetDescription": "When enabled, the app helps you stay focused during the activity until you pause or finish.",
+  "concentrationModeSheetDescription": "During a session, you can pin the screen on Android or use Guided Access on iPhone. The timer shows when protection is actually active.",
   "timerFocusLockWarning": "Focus mode is active. Finish or pause the session to leave.",
   "timerProgressSemanticLabel": "Progress: {percent}%",
   "@timerProgressSemanticLabel": {

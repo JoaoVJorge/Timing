@@ -1525,7 +1525,7 @@
     }
   },
   "concentrationModeTitle": "وضع التركيز",
-  "concentrationModeSubtitle": "اختر الجلسات التي تمنع مغادرة التطبيق.",
+  "concentrationModeSubtitle": "اختر الأنشطة التي تستخدم وضع التركيز.",
   "concentrationStudyTitle": "الدراسة",
   "concentrationStudySubtitle": "تركيز كامل على دراستك.",
   "concentrationExercisesTitle": "التمارين",
@@ -1581,7 +1581,7 @@
   "timerTotalOfLabel": "من {duration}",
   "timerCurrentPagesLabel": "الصفحات الحالية",
   "timerNotesLabel": "ملاحظات",
-  "concentrationModeSheetDescription": "عند التفعيل، يساعدك التطبيق على البقاء مركزا أثناء النشاط حتى توقفه مؤقتا أو تنهيه.",
+  "concentrationModeSheetDescription": "خلال الجلسة، يمكنك تثبيت الشاشة في Android أو استخدام الوصول الموجّه في iPhone. يوضح المؤقت متى تكون الحماية مفعّلة بالفعل.",
   "timerFocusLockWarning": "وضع التركيز مفعل. أنه الجلسة أو أوقفها مؤقتا للخروج.",
   "timerProgressSemanticLabel": "التقدم: {percent}٪",
   "homeStreakLabel": "{count, plural, zero{{count} يوم متتالٍ} one{يوم واحد متتالٍ} two{يومان متتاليان} few{{count} أيام متتالية} many{{count} يومًا متتاليًا} other{{count} يوم متتالٍ}}",

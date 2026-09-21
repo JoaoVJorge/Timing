@@ -1215,7 +1215,7 @@
     }
   },
   "concentrationModeTitle": "Modo de concentración",
-  "concentrationModeSubtitle": "Elige qué sesiones bloquean la salida de la app.",
+  "concentrationModeSubtitle": "Elige en qué actividades usar el modo de concentración.",
   "concentrationStudyTitle": "Estudio",
   "concentrationStudySubtitle": "Enfoque total en tus estudios.",
   "concentrationExercisesTitle": "Ejercicios",
@@ -1271,7 +1271,7 @@
   "timerTotalOfLabel": "de {duration}",
   "timerCurrentPagesLabel": "Páginas actuales",
   "timerNotesLabel": "Notas",
-  "concentrationModeSheetDescription": "Cuando está activado, la app te ayuda a mantenerte concentrado durante la actividad hasta que pauses o finalices.",
+  "concentrationModeSheetDescription": "Durante la sesión puedes fijar la pantalla en Android o usar Acceso guiado en iPhone. El temporizador indica cuándo la protección está realmente activa.",
   "timerFocusLockWarning": "El modo de concentración está activo. Termina o pausa la sesión para salir.",
   "timerProgressSemanticLabel": "Progreso: {percent}%",
   "homeStreakLabel": "{count, plural, one{{count} día seguido} other{{count} días seguidos}}",

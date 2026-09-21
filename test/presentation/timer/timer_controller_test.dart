@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:fake_async/fake_async.dart";
 import "package:dartz/dartz.dart";
 import "package:get/get.dart";
@@ -258,7 +260,26 @@ class _FakeFocusFeedbackService extends _Noop implements FocusFeedbackService {
 class _FakeFocusGuardService extends _Noop implements FocusGuardService {
   final List<bool> keepScreenOnValues = <bool>[];
   final List<bool> immersiveModeValues = <bool>[];
-  int bringAppToFrontCount = 0;
+  FocusProtectionStatus status = FocusProtectionStatus.inactive;
+  int pinRequests = 0;
+  int stopRequests = 0;
+  Completer<FocusProtectionStatus>? pinResult;
+
+  @override
+  Future<FocusProtectionStatus> getProtectionStatus() async => status;
+
+  @override
+  Future<FocusProtectionStatus> requestScreenPinning() async {
+    pinRequests++;
+    return pinResult?.future ?? status;
+  }
+
+  @override
+  Future<FocusProtectionStatus> stopScreenPinning() async {
+    stopRequests++;
+    status = FocusProtectionStatus.inactive;
+    return status;
+  }
 
   @override
   Future<void> setKeepScreenOn(bool enabled) async {
@@ -268,11 +289,6 @@ class _FakeFocusGuardService extends _Noop implements FocusGuardService {
   @override
   Future<void> setImmersiveMode(bool enabled) async {
     immersiveModeValues.add(enabled);
-  }
-
-  @override
-  Future<void> bringAppToFront() async {
-    bringAppToFrontCount++;
   }
 }
 
@@ -913,22 +929,94 @@ void main() {
   });
 
   group("TimerController focus guard", () {
-    test("keeps the screen awake and hides navigation while active", () async {
-      final guard = _FakeFocusGuardService();
-      final controller = _controller(
-        _subject(),
-        focusGuardService: guard,
-        appController: _FakeAppController(focusLockEnabled: true),
-      );
+    test(
+      "keeps the screen awake without claiming unconfirmed protection",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
 
-      controller.onInit();
-      await Future<void>.delayed(Duration.zero);
+        controller.onInit();
+        await Future<void>.delayed(Duration.zero);
 
-      expect(guard.keepScreenOnValues, contains(true));
-      expect(guard.immersiveModeValues, contains(true));
+        expect(guard.keepScreenOnValues, contains(true));
+        expect(guard.immersiveModeValues, contains(false));
+        expect(guard.pinRequests, 0);
+        expect(
+          controller.focusProtectionStatus.value,
+          FocusProtectionStatus.inactive,
+        );
 
-      controller.onClose();
-    });
+        controller.onClose();
+      },
+    );
+
+    test(
+      "requests screen pinning automatically when the timer opens",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
+
+        controller.onInit();
+        controller.onReady();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(guard.pinRequests, 1);
+        controller.onReady();
+        await Future<void>.delayed(Duration.zero);
+        expect(guard.pinRequests, 1);
+        controller.onClose();
+      },
+    );
+
+    test(
+      "requests screen pinning again after a pause/resume cycle",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
+
+        controller.onInit();
+        controller.onReady();
+        await Future<void>.delayed(Duration.zero);
+        expect(guard.pinRequests, 1);
+
+        controller.togglePause();
+        await Future<void>.delayed(Duration.zero);
+        controller.togglePause();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(guard.pinRequests, 2);
+        controller.onClose();
+      },
+    );
+
+    test(
+      "does not request screen pinning when concentration is disabled",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(),
+        );
+
+        controller.onReady();
+        await Future<void>.delayed(Duration.zero);
+
+        expect(guard.pinRequests, 0);
+      },
+    );
 
     test("restores screen navigation when the session is paused", () async {
       final guard = _FakeFocusGuardService();
@@ -943,6 +1031,90 @@ void main() {
 
       expect(guard.keepScreenOnValues.last, isFalse);
       expect(guard.immersiveModeValues.last, isFalse);
+      expect(guard.stopRequests, 1);
+    });
+
+    test(
+      "cancelled consent remains unpinned and is not requested again automatically",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
+        await controller.requestScreenPinning();
+        await controller.refreshFocusProtection();
+        expect(guard.pinRequests, 1);
+        expect(
+          controller.focusProtectionStatus.value,
+          FocusProtectionStatus.inactive,
+        );
+      },
+    );
+
+    test(
+      "reflects native confirmation and subsequent manual unpinning",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
+        await controller.requestScreenPinning();
+        guard.status = FocusProtectionStatus.pinned;
+        await controller.refreshFocusProtection();
+        expect(
+          controller.focusProtectionStatus.value,
+          FocusProtectionStatus.pinned,
+        );
+        guard.status = FocusProtectionStatus.inactive;
+        await controller.refreshFocusProtection();
+        expect(
+          controller.focusProtectionStatus.value,
+          FocusProtectionStatus.inactive,
+        );
+        expect(guard.pinRequests, 1);
+      },
+    );
+
+    test(
+      "pausing while consent is pending releases a late confirmation",
+      () async {
+        final guard = _FakeFocusGuardService()
+          ..pinResult = Completer<FocusProtectionStatus>();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
+        final request = controller.requestScreenPinning();
+        await Future<void>.delayed(Duration.zero);
+        controller.togglePause();
+        guard.pinResult!.complete(FocusProtectionStatus.pinned);
+        await request;
+        await Future<void>.delayed(Duration.zero);
+        expect(guard.stopRequests, greaterThan(0));
+        expect(
+          controller.focusProtectionStatus.value,
+          FocusProtectionStatus.inactive,
+        );
+      },
+    );
+
+    test("closing the timer releases screen pinning", () async {
+      final guard = _FakeFocusGuardService()
+        ..status = FocusProtectionStatus.pinned;
+      final controller = _controller(
+        _subject(),
+        focusGuardService: guard,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
+      controller.onClose();
+      await Future<void>.delayed(Duration.zero);
+      expect(guard.stopRequests, 1);
+      expect(guard.keepScreenOnValues.last, false);
     });
   });
 
@@ -1262,23 +1434,26 @@ void main() {
       controller.onClose();
     });
 
-    test("returns to the app when focus lock goes to background", () async {
-      final guard = _FakeFocusGuardService();
-      final feedback = _FakeFocusFeedbackService();
-      final controller = _controller(
-        _subject(),
-        focusGuardService: guard,
-        focusFeedbackService: feedback,
-        appController: _FakeAppController(focusLockEnabled: true),
-      );
+    test(
+      "does not pull the app forward or warn during system consent",
+      () async {
+        final guard = _FakeFocusGuardService();
+        final feedback = _FakeFocusFeedbackService();
+        final controller = _controller(
+          _subject(),
+          focusGuardService: guard,
+          focusFeedbackService: feedback,
+          appController: _FakeAppController(focusLockEnabled: true),
+        );
 
-      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
-      await Future<void>.delayed(Duration.zero);
+        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+        await Future<void>.delayed(Duration.zero);
 
-      expect(feedback.focusLockWarningCount, 1);
-      expect(guard.bringAppToFrontCount, 1);
-      controller.onClose();
-    });
+        expect(feedback.focusLockWarningCount, 0);
+        expect(guard.pinRequests, 0);
+        controller.onClose();
+      },
+    );
 
     test("shows reading as a count-up stopwatch in the notification", () {
       final foregroundService = _FakeTimerForegroundService();
