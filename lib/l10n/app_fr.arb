@@ -1661,5 +1661,7 @@
   "@transferGroupLeadershipMessage": {
     "placeholders": {"memberName": {"type": "String"}}
   },
-  "transferGroupLeadershipButton": "Nommer chef"
+  "transferGroupLeadershipButton": "Nommer chef",
+  "offlineChangesQueuedMessage": "Vous êtes hors ligne. Cela sera enregistré dès que vous serez reconnecté(e).",
+  "offlineSessionExpiredMessage": "Vous êtes hors ligne depuis un moment. Connectez-vous à internet pour vous reconnecter."
 }

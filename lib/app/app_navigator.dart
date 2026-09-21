@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:get/get.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
 final AppNavigator appNavigator = Get.find();
@@ -156,5 +157,28 @@ class AppNavigator {
       return;
     }
     showSnackBar(text: text, backgroundColor: context.colorTokens.success);
+  }
+
+  void showOfflineSnackBar([String? text]) {
+    final BuildContext? context = Get.context;
+    if (text == null && context == null) {
+      return;
+    }
+    showSnackBar(
+      text: text ?? context!.l10n.offlineChangesQueuedMessage,
+      backgroundColor: context?.colorTokens.warning,
+    );
+  }
+
+  /// For actions that only work online (creating/joining a group, accepting
+  /// an invitation, ...): shows the offline notice instead of a generic
+  /// error when the failure is plausibly just "no connection right now".
+  void showErrorOrOfflineSnackBar([String? text]) {
+    if (Get.isRegistered<ConnectivityService>() &&
+        !Get.find<ConnectivityService>().isOnline.value) {
+      showOfflineSnackBar();
+      return;
+    }
+    showErrorSnackBar(text);
   }
 }

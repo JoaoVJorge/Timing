@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -11,6 +12,9 @@ class PendingSyncDataset {
   static const String subjects = "subjects";
   static const String schedule = "schedule";
   static const String dailyTasks = "dailyTasks";
+  static const String activityEntries = "activityEntries";
+  static const String groups = "groups";
+  static const String friends = "friends";
 }
 
 /// Remembers which datasets have local changes that failed to reach the
@@ -23,6 +27,13 @@ class PendingSyncStore {
   final AppLocalStorageService _localStorageService;
 
   final Set<String> _pending = {};
+  final StreamController<String> _markedPendingController =
+      StreamController<String>.broadcast();
+
+  /// Fires the dataset id every time [markPending] newly marks it — i.e. a
+  /// write just failed to reach the backend. Used to surface an "offline,
+  /// not saved yet" notice without coupling that UI to every write call site.
+  Stream<String> get onMarkedPending => _markedPendingController.stream;
 
   Future<void> load() async {
     try {
@@ -46,6 +57,7 @@ class PendingSyncStore {
   Future<void> markPending(String dataset) async {
     if (_pending.add(dataset)) {
       await _persist();
+      _markedPendingController.add(dataset);
     }
   }
 

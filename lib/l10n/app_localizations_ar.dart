@@ -3233,4 +3233,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transferGroupLeadershipButton => 'تعيين قائد';
+
+  @override
+  String get offlineChangesQueuedMessage =>
+      'أنت غير متصل بالإنترنت. سيتم حفظ هذا بمجرد إعادة الاتصال.';
+
+  @override
+  String get offlineSessionExpiredMessage =>
+      'لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى.';
 }

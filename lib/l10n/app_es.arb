@@ -1351,5 +1351,7 @@
   "@transferGroupLeadershipMessage": {
     "placeholders": {"memberName": {"type": "String"}}
   },
-  "transferGroupLeadershipButton": "Hacer líder"
+  "transferGroupLeadershipButton": "Hacer líder",
+  "offlineChangesQueuedMessage": "Estás sin conexión. Esto se guardará en cuanto vuelvas a conectarte.",
+  "offlineSessionExpiredMessage": "Has estado sin conexión por un tiempo. Conéctate a internet para iniciar sesión de nuevo."
 }

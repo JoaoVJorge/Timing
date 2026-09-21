@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 
 import "package:dartz/dartz.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
@@ -13,103 +14,130 @@ import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/local_storage/app_local_storage_service.dart";
+import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/theme/group_colors.dart";
 import "package:supabase_flutter/supabase_flutter.dart"
     show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
 
 class GroupsDataSource {
-  GroupsDataSource({required this._supabaseService, required this._logger});
+  GroupsDataSource({
+    required this._supabaseService,
+    required this._logger,
+    required this._localStorageService,
+    required this._pendingSyncStore,
+  });
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  final AppLocalStorageService _localStorageService;
+  final PendingSyncStore _pendingSyncStore;
   static const Duration _activityScoresTimeout = Duration(seconds: 8);
+  static const Duration _offlineFallbackTimeout = Duration(seconds: 8);
   static const int _imageMessagesPageSize = 50;
 
+  /// Groups are remote-authoritative shared state (other members change
+  /// them), unlike subjects, so reads stay remote-first: this tries the
+  /// backend first, exactly as before, and only falls back to the last
+  /// locally cached list if that fails (offline, timeout, etc). An inner
+  /// timeout keeps that fallback fast — otherwise an offline user would wait
+  /// out a long OS-level connection timeout before ever seeing the cache.
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
+    final String? userId = _supabaseService.currentUserId;
+    if (userId == null) {
+      return const Right([]);
+    }
+
     try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return const Right([]);
-      }
-
-      final List<Map<String, dynamic>> currentMemberships = await _selectRows(
-        table: "group_members",
-        columns: "group_id",
-        filters: (query) => query.eq("user_id", userId),
-      );
-      final List<String> groupIds = currentMemberships
-          .map((row) => row["group_id"] as String)
-          .toList();
-      if (groupIds.isEmpty) {
-        return const Right([]);
-      }
-
-      final List<Map<String, dynamic>> groupRows = await _selectRows(
-        table: "groups",
-        columns:
-            "id, name, theme, description, owner_id, created_at, "
-            "invite_code, privacy",
-        filters: (query) => query.inFilter("id", groupIds),
-      );
-      final List<Map<String, dynamic>> memberRows = await _selectRows(
-        table: "group_members",
-        columns: "group_id, user_id, role, joined_at",
-        filters: (query) => query.inFilter("group_id", groupIds),
-      );
-      final List<String> memberIds = memberRows
-          .map((row) => row["user_id"] as String)
-          .toSet()
-          .toList();
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(memberIds, withPhoto: true);
-      final Map<String, Map<String, _PeriodScores>> scoresByGroup =
-          await _leaderboardScoresForGroups(groupIds);
-
-      final Map<String, List<Map<String, dynamic>>> membersByGroup = {};
-      for (final Map<String, dynamic> row in memberRows) {
-        final String groupId = row["group_id"] as String;
-        membersByGroup.putIfAbsent(groupId, () => []).add(row);
-      }
-
-      return Right(
-        groupRows.map((row) {
-          final GroupThemeType theme = GroupThemeType.byName(
-            row["theme"] as String?,
-          );
-          final String groupId = row["id"] as String;
-          final Map<String, _PeriodScores> scoresByUser =
-              scoresByGroup[groupId] ?? const {};
-          final List<GroupMemberEntity> members =
-              membersByGroup[groupId]
-                  ?.map(
-                    (memberRow) => _memberFromRows(
-                      memberRow: memberRow,
-                      profileRow: profilesById[memberRow["user_id"]],
-                      scoresByUser: scoresByUser,
-                    ),
-                  )
-                  .toList() ??
-              [];
-
-          return GroupEntity(
-            id: groupId,
-            name: row["name"] as String? ?? "",
-            theme: theme,
-            members: members,
-            description: row["description"] as String? ?? "",
-            ownerId: row["owner_id"] as String? ?? "",
-            createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
-            inviteCode: row["invite_code"] as String? ?? "",
-            privacy: row["privacy"] as String? ?? "inviteOnly",
-            createdActivityId: row["activity_id"] as String?,
-          );
-        }).toList(),
-      );
+      final List<GroupEntity> groups = await _fetchRemoteGroups(
+        userId,
+      ).timeout(_offlineFallbackTimeout);
+      await _cacheGroups(groups);
+      return Right(groups);
     } catch (error, stackTrace) {
+      final List<GroupEntity>? cached = await _readCachedGroups();
+      if (cached != null) {
+        return Right(cached);
+      }
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
+  }
+
+  Future<List<GroupEntity>> _fetchRemoteGroups(String userId) async {
+    final List<Map<String, dynamic>> currentMemberships = await _selectRows(
+      table: "group_members",
+      columns: "group_id",
+      filters: (query) => query.eq("user_id", userId),
+    );
+    final List<String> groupIds = currentMemberships
+        .map((row) => row["group_id"] as String)
+        .toList();
+    if (groupIds.isEmpty) {
+      return const [];
+    }
+
+    final List<Map<String, dynamic>> groupRows = await _selectRows(
+      table: "groups",
+      columns:
+          "id, name, theme, description, owner_id, created_at, "
+          "invite_code, privacy",
+      filters: (query) => query.inFilter("id", groupIds),
+    );
+    final List<Map<String, dynamic>> memberRows = await _selectRows(
+      table: "group_members",
+      columns: "group_id, user_id, role, joined_at",
+      filters: (query) => query.inFilter("group_id", groupIds),
+    );
+    final List<String> memberIds = memberRows
+        .map((row) => row["user_id"] as String)
+        .toSet()
+        .toList();
+    final Map<String, Map<String, dynamic>> profilesById =
+        await _profilesById(memberIds, withPhoto: true);
+    final Map<String, Map<String, _PeriodScores>> scoresByGroup =
+        await _leaderboardScoresForGroups(groupIds);
+
+    final Map<String, List<Map<String, dynamic>>> membersByGroup = {};
+    for (final Map<String, dynamic> row in memberRows) {
+      final String groupId = row["group_id"] as String;
+      membersByGroup.putIfAbsent(groupId, () => []).add(row);
+    }
+
+    return groupRows.map((row) {
+      final GroupThemeType theme = GroupThemeType.byName(
+        row["theme"] as String?,
+      );
+      final String groupId = row["id"] as String;
+      final Map<String, _PeriodScores> scoresByUser =
+          scoresByGroup[groupId] ?? const {};
+      final List<GroupMemberEntity> members =
+          membersByGroup[groupId]
+              ?.map(
+                (memberRow) => _memberFromRows(
+                  memberRow: memberRow,
+                  profileRow: profilesById[memberRow["user_id"]],
+                  scoresByUser: scoresByUser,
+                ),
+              )
+              .toList() ??
+          [];
+
+      return GroupEntity(
+        id: groupId,
+        name: row["name"] as String? ?? "",
+        theme: theme,
+        members: members,
+        description: row["description"] as String? ?? "",
+        ownerId: row["owner_id"] as String? ?? "",
+        createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
+        inviteCode: row["invite_code"] as String? ?? "",
+        privacy: row["privacy"] as String? ?? "inviteOnly",
+        createdActivityId: row["activity_id"] as String?,
+      );
+    }).toList();
   }
 
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
@@ -398,27 +426,42 @@ class GroupsDataSource {
     }
   }
 
+  /// Leaves the caller's own membership — safe to retry offline (deleting an
+  /// already-gone `group_members` row is a no-op), so a failure is queued
+  /// instead of surfaced as an error.
   Future<Either<AppError, void>> leaveGroup(String groupId) async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return Left(
-          GenericAppError(
-            error: StateError("User must be signed in to leave a group."),
-            stackTrace: StackTrace.current,
-          ),
-        );
-      }
+    final String? userId = _supabaseService.currentUserId;
+    if (userId == null) {
+      return Left(
+        GenericAppError(
+          error: StateError("User must be signed in to leave a group."),
+          stackTrace: StackTrace.current,
+        ),
+      );
+    }
 
-      await _supabaseService.requireClient
-          .from("group_members")
-          .delete()
-          .eq("group_id", groupId)
-          .eq("user_id", userId);
+    try {
+      await _leaveGroupRemote(groupId, userId);
+      await _removeCachedGroup(groupId);
       return const Right(null);
     } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      _logger.logError(
+        "Failed to leave group $groupId, queueing for retry",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      await _removeCachedGroup(groupId);
+      await _enqueueGroupAction({"type": "leaveGroup", "groupId": groupId});
+      return const Right(null);
     }
+  }
+
+  Future<void> _leaveGroupRemote(String groupId, String userId) async {
+    await _supabaseService.requireClient
+        .from("group_members")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", userId);
   }
 
   Future<Either<AppError, void>> removeMember({
@@ -885,6 +928,9 @@ class GroupsDataSource {
     }
   }
 
+  /// Updates the caller's own group settings — queued and applied
+  /// optimistically to the cache on failure, since only the client already
+  /// knows (name/description/activity), nothing server-generated is needed.
   Future<Either<AppError, GroupEntity>> updateGroup({
     required GroupEntity group,
     required String name,
@@ -893,57 +939,157 @@ class GroupsDataSource {
   }) async {
     const String operation = "rpc public.update_group_with_activity";
     try {
-      final Map<String, dynamic> payload = {
-        "target_group_id": group.id,
-        "group_name": name,
-        "group_description": description,
-        "activity_payload": activityPayload,
-      };
-      _logger.logRequest(operation, payload);
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "update_group_with_activity",
-        params: payload,
+      final GroupEntity updated = await _updateGroupRemote(
+        groupId: group.id,
+        name: name,
+        description: description,
+        activityPayload: activityPayload,
+        fallbackGroup: group,
       );
-      _logger.logResponse(operation, response);
-
-      final List<dynamic> rows = response as List<dynamic>;
-      if (rows.isEmpty) {
-        throw StateError("update_group_with_activity returned no group row.");
-      }
-      final Map<String, dynamic> row = Map<String, dynamic>.from(
-        rows.first as Map,
-      );
-
-      return Right(
-        GroupEntity(
-          id: row["id"] as String? ?? group.id,
-          name: row["name"] as String? ?? name,
-          theme: GroupThemeType.byName(row["theme"] as String?),
-          members: group.members,
-          description: row["description"] as String? ?? description,
-          ownerId: row["owner_id"] as String? ?? group.ownerId,
-          createdAt:
-              DateTime.tryParse(row["created_at"] as String? ?? "") ??
-              group.createdAt,
-          inviteCode: row["invite_code"] as String? ?? group.inviteCode,
-          privacy: row["privacy"] as String? ?? group.privacy,
-          createdActivityId:
-              row["activity_id"] as String? ?? group.createdActivityId,
-        ),
-      );
+      await _updateCachedGroup(updated);
+      return Right(updated);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Supabase $operation failed",
+        "Supabase $operation failed, queueing for retry",
         error: SqlOperationAppError.describe(error),
         stackTrace: stackTrace,
       );
-      return Left(
-        SqlOperationAppError(
-          operation: operation,
-          error: error,
-          stackTrace: stackTrace,
-        ),
+      final GroupEntity optimistic = GroupEntity(
+        id: group.id,
+        name: name,
+        theme: group.theme,
+        members: group.members,
+        description: description,
+        ownerId: group.ownerId,
+        createdAt: group.createdAt,
+        inviteCode: group.inviteCode,
+        privacy: group.privacy,
+        createdActivityId: group.createdActivityId,
       );
+      await _updateCachedGroup(optimistic);
+      await _enqueueGroupAction({
+        "type": "updateGroup",
+        "groupId": group.id,
+        "name": name,
+        "description": description,
+        "activityPayload": activityPayload,
+      });
+      return Right(optimistic);
+    }
+  }
+
+  Future<GroupEntity> _updateGroupRemote({
+    required String groupId,
+    required String name,
+    required String description,
+    required Map<String, dynamic> activityPayload,
+    required GroupEntity fallbackGroup,
+  }) async {
+    const String operation = "rpc public.update_group_with_activity";
+    final Map<String, dynamic> payload = {
+      "target_group_id": groupId,
+      "group_name": name,
+      "group_description": description,
+      "activity_payload": activityPayload,
+    };
+    _logger.logRequest(operation, payload);
+    final dynamic response = await _supabaseService.requireClient.rpc(
+      "update_group_with_activity",
+      params: payload,
+    );
+    _logger.logResponse(operation, response);
+
+    final List<dynamic> rows = response as List<dynamic>;
+    if (rows.isEmpty) {
+      throw StateError("update_group_with_activity returned no group row.");
+    }
+    final Map<String, dynamic> row = Map<String, dynamic>.from(
+      rows.first as Map,
+    );
+
+    return GroupEntity(
+      id: row["id"] as String? ?? fallbackGroup.id,
+      name: row["name"] as String? ?? name,
+      theme: GroupThemeType.byName(row["theme"] as String?),
+      members: fallbackGroup.members,
+      description: row["description"] as String? ?? description,
+      ownerId: row["owner_id"] as String? ?? fallbackGroup.ownerId,
+      createdAt:
+          DateTime.tryParse(row["created_at"] as String? ?? "") ??
+          fallbackGroup.createdAt,
+      inviteCode: row["invite_code"] as String? ?? fallbackGroup.inviteCode,
+      privacy: row["privacy"] as String? ?? fallbackGroup.privacy,
+      createdActivityId:
+          row["activity_id"] as String? ?? fallbackGroup.createdActivityId,
+    );
+  }
+
+  /// Re-attempts group actions that failed to reach the backend earlier, in
+  /// the order they were queued. Stops at the first failure so a later
+  /// action never gets applied out of order ahead of an earlier one.
+  Future<void> flushPendingSync() async {
+    if (!_pendingSyncStore.contains(PendingSyncDataset.groups)) {
+      return;
+    }
+    final List<Map<String, dynamic>> queue = await _readGroupActionQueue();
+    if (queue.isEmpty) {
+      await _pendingSyncStore.clear(PendingSyncDataset.groups);
+      return;
+    }
+
+    int processed = 0;
+    try {
+      for (final Map<String, dynamic> action in queue) {
+        await _replayGroupAction(action);
+        processed++;
+      }
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to flush a queued group action",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final List<Map<String, dynamic>> remaining = queue.sublist(processed);
+    await _writeGroupActionQueue(remaining);
+    if (remaining.isEmpty) {
+      await _pendingSyncStore.clear(PendingSyncDataset.groups);
+    }
+  }
+
+  Future<void> _replayGroupAction(Map<String, dynamic> action) async {
+    switch (action["type"] as String?) {
+      case "updateGroup":
+        final String groupId = action["groupId"] as String;
+        final List<GroupEntity> cached = await _readCachedGroups() ?? const [];
+        final GroupEntity fallback = cached.firstWhere(
+          (item) => item.id == groupId,
+          orElse: () => GroupEntity(
+            id: groupId,
+            name: action["name"] as String? ?? "",
+            theme: GroupThemeType.byName(null),
+            members: const [],
+          ),
+        );
+        final GroupEntity updated = await _updateGroupRemote(
+          groupId: groupId,
+          name: action["name"] as String,
+          description: action["description"] as String,
+          activityPayload: Map<String, dynamic>.from(
+            action["activityPayload"] as Map? ?? const {},
+          ),
+          fallbackGroup: fallback,
+        );
+        await _updateCachedGroup(updated);
+      case "leaveGroup":
+        final String groupId = action["groupId"] as String;
+        final String? userId = _supabaseService.currentUserId;
+        if (userId == null) {
+          throw StateError("User must be signed in to leave a group.");
+        }
+        await _leaveGroupRemote(groupId, userId);
+        await _removeCachedGroup(groupId);
     }
   }
 
@@ -1067,6 +1213,76 @@ class GroupsDataSource {
   DateTime _monthStart() {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month).toUtc();
+  }
+
+  Future<void> _cacheGroups(List<GroupEntity> groups) async {
+    await _localStorageService.write(
+      LocalStorageKeys.cachedGroups,
+      jsonEncode(groups.map((group) => group.toMap()).toList()),
+    );
+  }
+
+  Future<List<GroupEntity>?> _readCachedGroups() async {
+    final String? saved = await _localStorageService.read<String?>(
+      LocalStorageKeys.cachedGroups,
+    );
+    if (saved == null) {
+      return null;
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
+      return decoded
+          .map((item) => GroupEntity.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _updateCachedGroup(GroupEntity group) async {
+    final List<GroupEntity> cached = await _readCachedGroups() ?? [];
+    final int index = cached.indexWhere((item) => item.id == group.id);
+    if (index >= 0) {
+      cached[index] = group;
+    } else {
+      cached.add(group);
+    }
+    await _cacheGroups(cached);
+  }
+
+  Future<void> _removeCachedGroup(String groupId) async {
+    final List<GroupEntity> cached = await _readCachedGroups() ?? [];
+    cached.removeWhere((item) => item.id == groupId);
+    await _cacheGroups(cached);
+  }
+
+  Future<void> _enqueueGroupAction(Map<String, dynamic> action) async {
+    final List<Map<String, dynamic>> queue = await _readGroupActionQueue();
+    queue.add(action);
+    await _writeGroupActionQueue(queue);
+    await _pendingSyncStore.markPending(PendingSyncDataset.groups);
+  }
+
+  Future<List<Map<String, dynamic>>> _readGroupActionQueue() async {
+    final String? saved = await _localStorageService.read<String?>(
+      LocalStorageKeys.pendingGroupActions,
+    );
+    if (saved == null) {
+      return [];
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
+      return decoded.map((item) => item as Map<String, dynamic>).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _writeGroupActionQueue(List<Map<String, dynamic>> queue) async {
+    await _localStorageService.write(
+      LocalStorageKeys.pendingGroupActions,
+      jsonEncode(queue),
+    );
   }
 }
 

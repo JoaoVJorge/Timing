@@ -13,6 +13,18 @@ class FriendEntity extends Equatable {
     this.lastSeenAt,
   });
 
+  factory FriendEntity.fromMap(Map<String, dynamic> map) => FriendEntity(
+    id: map["id"] as String,
+    friendshipId: map["friendshipId"] as String,
+    name: map["name"] as String,
+    handle: map["handle"] as String,
+    colorValue: map["colorValue"] as int,
+    avatarIconIndex: map["avatarIconIndex"] as int?,
+    profilePhotoBase64: map["profilePhotoBase64"] as String? ?? "",
+    isOnline: map["isOnline"] as bool? ?? false,
+    lastSeenAt: DateTime.tryParse(map["lastSeenAt"] as String? ?? ""),
+  );
+
   final String id;
   final String friendshipId;
   final String name;
@@ -39,6 +51,18 @@ class FriendEntity extends Equatable {
     isOnline: isOnline ?? this.isOnline,
     lastSeenAt: lastSeenAt ?? this.lastSeenAt,
   );
+
+  Map<String, dynamic> toMap() => {
+    "id": id,
+    "friendshipId": friendshipId,
+    "name": name,
+    "handle": handle,
+    "colorValue": colorValue,
+    "avatarIconIndex": avatarIconIndex,
+    "profilePhotoBase64": profilePhotoBase64,
+    "isOnline": isOnline,
+    "lastSeenAt": lastSeenAt?.toIso8601String(),
+  };
 
   bool isOnlineAt(DateTime now) {
     final DateTime? seenAt = lastSeenAt;

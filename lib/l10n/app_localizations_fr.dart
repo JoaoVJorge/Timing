@@ -3300,4 +3300,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transferGroupLeadershipButton => 'Nommer chef';
+
+  @override
+  String get offlineChangesQueuedMessage =>
+      'Vous êtes hors ligne. Cela sera enregistré dès que vous serez reconnecté(e).';
+
+  @override
+  String get offlineSessionExpiredMessage =>
+      'Vous êtes hors ligne depuis un moment. Connectez-vous à internet pour vous reconnecter.';
 }

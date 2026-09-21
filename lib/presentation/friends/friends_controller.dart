@@ -206,17 +206,18 @@ class FriendsController extends GetxController {
     }
     try {
       final result = await _acceptGroupInvitationUseCase(invitation.id);
-      await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
-        group,
-      ) async {
-        if (Get.isRegistered<GroupsController>()) {
-          await Get.find<GroupsController>().upsertJoinedGroup(group);
-        }
-        groupInvitations.removeWhere((item) => item.id == invitation.id);
-        _appNavigator.showSuccessSnackBar(
-          _l10n?.joinedGroupMessage ?? "You joined the group",
-        );
-      });
+      await result.fold(
+        (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
+        (group) async {
+          if (Get.isRegistered<GroupsController>()) {
+            await Get.find<GroupsController>().upsertJoinedGroup(group);
+          }
+          groupInvitations.removeWhere((item) => item.id == invitation.id);
+          _appNavigator.showSuccessSnackBar(
+            _l10n?.joinedGroupMessage ?? "You joined the group",
+          );
+        },
+      );
     } finally {
       acceptingGroupInvitationIds.remove(invitation.id);
     }
@@ -225,7 +226,7 @@ class FriendsController extends GetxController {
   Future<void> declineGroupInvitation(GroupInvitationEntity invitation) async {
     final result = await _declineGroupInvitationUseCase(invitation.id);
     result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
+      (error) => _appNavigator.showErrorOrOfflineSnackBar(),
       (_) => groupInvitations.removeWhere((item) => item.id == invitation.id),
     );
   }
