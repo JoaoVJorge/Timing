@@ -50,12 +50,17 @@ class MainActivity : FlutterActivity() {
                     TimerForegroundService.start(
                         context = this,
                         title = call.argument<String>("title") ?: "",
-                        body = call.argument<String>("body") ?: "",
                         actionLabel = call.argument<String>("actionLabel") ?: "",
                         isRunning = call.argument<Boolean>("isRunning") ?: true,
                         isTicking = call.argument<Boolean>("isTicking") ?: false,
+                        ticksWhenRunning =
+                            call.argument<Boolean>("ticksWhenRunning") ?: true,
                         elapsedSeconds = call.argument<Int>("elapsedSeconds") ?: 0,
-                        color = parseColor(call.argument<String>("colorHex"))
+                        totalSeconds = call.argument<Int>("totalSeconds") ?: 0,
+                        currentSection = call.argument<Int>("currentSection") ?: 1,
+                        totalSections = call.argument<Int>("totalSections") ?: 1,
+                        color = parseColor(call.argument<String>("colorHex")),
+                        activityIcon = call.argument<ByteArray>("activityIcon")
                     )
                     result.success(null)
                 }

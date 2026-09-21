@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/timer_card"
+    android:layout_width="match_parent" android:layout_height="48dp"
+    android:orientation="horizontal" android:gravity="center_vertical"
+    android:paddingStart="10dp" android:paddingEnd="4dp" android:background="@drawable/timer_card_compact">
+    <FrameLayout
+        android:id="@+id/timer_icon_circle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/timer_activity_icon_background">
+        <ImageView
+            android:id="@+id/timer_activity_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_notification"
+            android:tint="#FFFFFF"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="10dp" android:layout_marginEnd="8dp">
+        <TextView android:id="@+id/timer_phase" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#252B23" android:textSize="12sp" android:fontFamily="sans-serif-medium" android:maxLines="1" android:ellipsize="end" />
+        <Chronometer android:id="@+id/timer_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#60665D" android:textSize="10sp" android:maxLines="1" />
+        <ProgressBar android:id="@+id/timer_progress" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="3dp" android:layout_marginTop="2dp" android:progressDrawable="@drawable/timer_progress_compact" android:indeterminate="false" />
+    </LinearLayout>
+    <ImageButton android:id="@+id/timer_toggle" android:layout_width="48dp" android:layout_height="48dp" android:padding="15dp" android:background="@android:color/transparent" android:tint="#252B23" android:src="@drawable/ic_overlay_pause" android:contentDescription="@string/timer_notification_pause" />
+</LinearLayout>

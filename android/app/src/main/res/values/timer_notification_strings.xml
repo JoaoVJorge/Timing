@@ -1,0 +1,12 @@
+<resources>
+    <string name="timer_notification_focus">Focus</string>
+    <string name="timer_notification_rest">Rest</string>
+    <string name="timer_notification_header">TIMING  •  %1$s</string>
+    <string name="timer_notification_session">Session %1$d of %2$d</string>
+    <string name="timer_notification_total">of %1$s</string>
+    <string name="timer_notification_remaining">%1$s remaining</string>
+    <string name="timer_notification_overtime">+%1$s overtime</string>
+    <string name="timer_notification_paused">Paused</string>
+    <string name="timer_notification_pause">Pause</string>
+    <string name="timer_notification_resume">Resume</string>
+</resources>

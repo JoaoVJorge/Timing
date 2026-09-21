@@ -650,6 +650,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     return context.l10n.timerReadingExitContent(duration, subject.name);
   }
 
+  // Reading has no fixed target ("keeps counting up without sections or an
+  // end"), so there is no meaningful total to show for it.
+  int get _notificationTotalSeconds =>
+      isReading ? 0 : focusIntervalSeconds * focusSessionCount;
+
   void _updateNotification() {
     unawaited(_saveActiveSession());
     unawaited(
@@ -672,27 +677,25 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     final AppLocalizations l10n = lookupAppLocalizations(
       appController.selectedLocale,
     );
-    final String runningBody = l10n.timerNotificationRunning;
-    final String restingBody = l10n.timerNotificationResting;
-    final String pausedBody = l10n.timerNotificationPaused;
-    final String backgroundRunningBody = _isAppInForeground
-        ? runningBody
-        : "$runningBody · ${l10n.timerBackgroundSuffix}";
-    final String backgroundRestingBody = _isAppInForeground
-        ? restingBody
-        : "$restingBody · ${l10n.timerBackgroundSuffix}";
+    final String notificationIconName = subject.iconName.isEmpty
+        ? subject.category.iconName
+        : subject.iconName;
 
     if (!isRunning.value) {
       timerNotificationService.cancelScheduledAlarms();
       unawaited(
         timerForegroundService.start(
           title: subject.name,
-          body: pausedBody,
           actionLabel: l10n.timerNotificationResumeAction,
           isRunning: false,
           isTicking: false,
+          ticksWhenRunning: !isResting.value,
           elapsedSeconds: _displayElapsedSeconds,
+          totalSeconds: _notificationTotalSeconds,
+          currentSection: currentFocusSection,
+          totalSections: focusSessionCount,
           colorValue: subject.colorValue,
+          iconName: notificationIconName,
         ),
       );
       return;
@@ -702,12 +705,16 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       unawaited(
         timerForegroundService.start(
           title: subject.name,
-          body: backgroundRestingBody,
           actionLabel: l10n.timerNotificationPauseAction,
           isRunning: true,
           isTicking: false,
+          ticksWhenRunning: false,
           elapsedSeconds: _displayElapsedSeconds,
+          totalSeconds: _notificationTotalSeconds,
+          currentSection: currentFocusSection,
+          totalSections: focusSessionCount,
           colorValue: subject.colorValue,
+          iconName: notificationIconName,
         ),
       );
       return;
@@ -717,12 +724,16 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     unawaited(
       timerForegroundService.start(
         title: subject.name,
-        body: backgroundRunningBody,
         actionLabel: l10n.timerNotificationPauseAction,
         isRunning: true,
         isTicking: true,
+        ticksWhenRunning: true,
         elapsedSeconds: _displayElapsedSeconds,
+        totalSeconds: _notificationTotalSeconds,
+        currentSection: currentFocusSection,
+        totalSections: focusSessionCount,
         colorValue: subject.colorValue,
+        iconName: notificationIconName,
       ),
     );
   }

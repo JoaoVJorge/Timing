@@ -280,31 +280,43 @@ class _FakeTimerForegroundService extends TimerForegroundService {
   int startCount = 0;
   int stopCount = 0;
   String? lastTitle;
-  String? lastBody;
   String? lastActionLabel;
   bool? lastIsRunning;
   bool? lastIsTicking;
+  bool? lastTicksWhenRunning;
   int? lastElapsedSeconds;
+  int? lastTotalSeconds;
+  int? lastCurrentSection;
+  int? lastTotalSections;
   int? lastColorValue;
+  String? lastIconName;
 
   @override
   Future<void> start({
     required String title,
-    required String body,
     required String actionLabel,
     required bool isRunning,
     required bool isTicking,
+    required bool ticksWhenRunning,
     required int elapsedSeconds,
+    required int totalSeconds,
+    required int currentSection,
+    required int totalSections,
     required int colorValue,
+    required String iconName,
   }) async {
     startCount++;
     lastTitle = title;
-    lastBody = body;
     lastActionLabel = actionLabel;
     lastIsRunning = isRunning;
     lastIsTicking = isTicking;
+    lastTicksWhenRunning = ticksWhenRunning;
     lastElapsedSeconds = elapsedSeconds;
+    lastTotalSeconds = totalSeconds;
+    lastCurrentSection = currentSection;
+    lastTotalSections = totalSections;
     lastColorValue = colorValue;
+    lastIconName = iconName;
   }
 
   @override
@@ -1245,6 +1257,7 @@ void main() {
       expect(appController.enableNotificationsCount, 1);
       expect(foregroundService.startCount, 1);
       expect(foregroundService.lastIsTicking, isTrue);
+      expect(foregroundService.lastTicksWhenRunning, isTrue);
 
       controller.onClose();
     });
@@ -1278,6 +1291,7 @@ void main() {
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       expect(foregroundService.lastElapsedSeconds, 42);
+      expect(foregroundService.lastTotalSeconds, 0);
     });
 
     test("shows elapsed focus time instead of the remaining interval", () {
@@ -1293,8 +1307,25 @@ void main() {
       controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
       expect(foregroundService.lastElapsedSeconds, 19 * 60);
+      expect(foregroundService.lastTotalSeconds, 30 * 60);
+      expect(foregroundService.lastCurrentSection, 1);
+      expect(foregroundService.lastTotalSections, 1);
       expect(liveActivity.timerSeconds, 19 * 60);
       expect(liveActivity.isReading, isFalse);
+    });
+
+    test("reports the section count and total time for a multi-section goal", () {
+      final foregroundService = _FakeTimerForegroundService();
+      final controller = _controller(
+        _subject(goalSeconds: 10 * 60, focusSessionCount: 3),
+        timerForegroundService: foregroundService,
+      );
+
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(foregroundService.lastCurrentSection, 1);
+      expect(foregroundService.lastTotalSections, 3);
+      expect(foregroundService.lastTotalSeconds, 10 * 60 * 3);
     });
 
     test("matches the app's accumulated value for a daily hobby", () {
@@ -1360,26 +1391,23 @@ void main() {
       expect(notifications.scheduleRestFinishedCount, 0);
     });
 
-    test(
-      "keeps the notification counting without new alarms in overtime",
-      () {
-        final notifications = _FakeTimerNotificationService();
-        final foregroundService = _FakeTimerForegroundService();
-        final controller = _controller(
-          _subject(category: TimeCategoryType.hobbies),
-          timerNotificationService: notifications,
-          timerForegroundService: foregroundService,
-        );
-        controller.advanceForTesting(31 * 60);
+    test("keeps the notification counting without new alarms in overtime", () {
+      final notifications = _FakeTimerNotificationService();
+      final foregroundService = _FakeTimerForegroundService();
+      final controller = _controller(
+        _subject(category: TimeCategoryType.hobbies),
+        timerNotificationService: notifications,
+        timerForegroundService: foregroundService,
+      );
+      controller.advanceForTesting(31 * 60);
 
-        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-        expect(foregroundService.lastElapsedSeconds, 31 * 60);
-        expect(notifications.scheduleFocusFinishedCount, 0);
-        expect(foregroundService.startCount, 1);
-        expect(notifications.cancelOngoingCount, 0);
-      },
-    );
+      expect(foregroundService.lastElapsedSeconds, 31 * 60);
+      expect(notifications.scheduleFocusFinishedCount, 0);
+      expect(foregroundService.startCount, 1);
+      expect(notifications.cancelOngoingCount, 0);
+    });
 
     test("schedules repeating focus reminders when sent to background", () {
       final notifications = _FakeTimerNotificationService();
