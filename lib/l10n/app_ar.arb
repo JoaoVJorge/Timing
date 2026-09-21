@@ -1661,5 +1661,7 @@
   "@transferGroupLeadershipMessage": {
     "placeholders": {"memberName": {"type": "String"}}
   },
-  "transferGroupLeadershipButton": "تعيين قائد"
+  "transferGroupLeadershipButton": "تعيين قائد",
+  "offlineChangesQueuedMessage": "أنت غير متصل بالإنترنت. سيتم حفظ هذا بمجرد إعادة الاتصال.",
+  "offlineSessionExpiredMessage": "لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى."
 }

@@ -5841,6 +5841,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Make leader'**
   String get transferGroupLeadershipButton;
+
+  /// No description provided for @offlineChangesQueuedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. This will be saved once you reconnect.'**
+  String get offlineChangesQueuedMessage;
+
+  /// No description provided for @offlineSessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve been offline for a while. Connect to the internet to sign in again.'**
+  String get offlineSessionExpiredMessage;
 }
 
 class _AppLocalizationsDelegate

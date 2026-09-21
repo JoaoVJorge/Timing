@@ -104,6 +104,7 @@ class LoginController extends GetxController {
       }
       await appController.reloadUserScopedState();
       _hasCompletedSignIn = true;
+      await appController.recordSuccessfulBackendContact();
       if (Get.currentRoute != AppRoutes.mainNavigation) {
         await appNavigator.offAllNamed(AppRoutes.mainNavigation);
       }

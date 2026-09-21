@@ -88,14 +88,33 @@ class ActivityHistoryService {
     await _persist();
   }
 
-  Future<void> replaceAll(List<ActivityEntryEntity> entries) async {
+  /// Fills in remote entries for any day this device has no local entry on,
+  /// so per-category/per-subject breakdowns cover the same history as
+  /// [DailyProgressService] once merged. Days already represented locally
+  /// are left untouched to avoid double counting a session that already
+  /// synced.
+  Future<bool> mergeMissingDaysFromActivityEntries(
+    List<ActivityEntryEntity> entries,
+  ) async {
+    final Set<String> localDays = _entries
+        .map((entry) => _startOfDay(entry.timestamp).toIso8601String())
+        .toSet();
+    final List<ActivityEntryEntity> missing = entries
+        .where(
+          (entry) => !localDays.contains(
+            _startOfDay(entry.timestamp).toIso8601String(),
+          ),
+        )
+        .toList();
+    if (missing.isEmpty) {
+      return false;
+    }
     final DateTime now = DateTime.now();
-    _entries
-      ..clear()
-      ..addAll(entries);
+    _entries.addAll(missing);
     _pruneOldEntries(now);
     _entries.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     await _persist();
+    return true;
   }
 
   /// Entries whose timestamp falls in `[start, end)`, optionally filtered by

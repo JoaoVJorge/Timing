@@ -475,7 +475,7 @@ class CreateGroupController extends GetxController
     isCreating.value = false;
 
     await result.fold(
-      (error) async => _appNavigator.showErrorSnackBar(error.message),
+      (error) async => _appNavigator.showErrorOrOfflineSnackBar(error.message),
       (group) async {
         await _ensureLocalActivity(activity, group);
         Get.back<GroupEntity>(result: group, closeOverlays: true);

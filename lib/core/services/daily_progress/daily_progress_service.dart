@@ -89,21 +89,33 @@ class DailyProgressService {
     await _update(current.copyWith(pages: current.pages + pages));
   }
 
-  Future<void> replaceFromActivityEntries(
+  /// Fills in any day this device has no local record for, from [entries]
+  /// fetched off the backend. Days already present locally are left
+  /// untouched, so a local write that hasn't synced yet is never clobbered
+  /// or double counted against the same day's remote copy.
+  Future<bool> mergeMissingDaysFromActivityEntries(
     List<ActivityEntryEntity> entries,
   ) async {
-    _byDate.clear();
+    final Map<String, DailyProgressEntity> missing = {};
     for (final ActivityEntryEntity entry in entries) {
       final String key = dateKey(entry.timestamp);
+      if (_byDate.containsKey(key)) {
+        continue;
+      }
       final DailyProgressEntity current =
-          _byDate[key] ?? const DailyProgressEntity();
-      _byDate[key] = current.copyWith(
+          missing[key] ?? const DailyProgressEntity();
+      missing[key] = current.copyWith(
         focusSeconds: current.focusSeconds + entry.seconds,
         pages: current.pages + entry.pages,
       );
     }
+    if (missing.isEmpty) {
+      return false;
+    }
+    _byDate.addAll(missing);
     _refreshToday();
     await _persist();
+    return true;
   }
 
   List<DailyProgressEntity> progressForLastDays(int days) {

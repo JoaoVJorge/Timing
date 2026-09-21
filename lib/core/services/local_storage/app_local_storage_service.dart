@@ -47,7 +47,7 @@ class AppLocalStorageService {
     if (value != null ||
         !key.isUserScoped ||
         !supabaseService.hasSignedInUser) {
-      return value as T?;
+      return _castValue<T>(value);
     }
 
     final Object? legacyValue = localStorage.get(key.name);
@@ -57,7 +57,17 @@ class AppLocalStorageService {
 
     await _writeLocalValue(storageKey, legacyValue);
     await localStorage.remove(key.name);
-    return legacyValue as T?;
+    return _castValue<T>(legacyValue);
+  }
+
+  // Some shared_preferences backends decode stored string lists as
+  // List<Object?> instead of List<String>, which fails a direct cast
+  // even though every element is actually a String.
+  T? _castValue<T>(Object? value) {
+    if (value is List && value is! List<String>) {
+      return value.map((element) => element.toString()).toList() as T?;
+    }
+    return value as T?;
   }
 
   Future<void> delete(LocalStorageKeys key) async {

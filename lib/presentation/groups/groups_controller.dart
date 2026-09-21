@@ -985,7 +985,7 @@ class GroupsController extends GetxController {
       final Either<AppError, void> result = await _groupsRepository
           .removeMember(groupId: group.id, memberId: member.id);
       await result.fold(
-        (error) async => _appNavigator.showErrorSnackBar(),
+        (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
         (_) => loadGroups(preferredGroupId: group.id),
       );
     } finally {
@@ -1018,7 +1018,7 @@ class GroupsController extends GetxController {
       final Either<AppError, void> result = await _groupsRepository
           .transferLeadership(groupId: group.id, nextLeaderId: member.id);
       await result.fold(
-        (error) async => _appNavigator.showErrorSnackBar(),
+        (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
         (_) => loadGroups(preferredGroupId: group.id),
       );
     } finally {
@@ -1115,23 +1115,24 @@ class GroupsController extends GetxController {
     try {
       final Either<AppError, void> result = await _groupsRepository
           .resetGroupProgress(group.id);
-      await result.fold((error) async => _appNavigator.showErrorSnackBar(), (
-        _,
-      ) async {
-        _activityProgressByCacheKey.removeWhere(
-          (key, value) => key.startsWith("${group.id}:"),
-        );
-        _activityProgressCacheKey = null;
-        activityProgress.clear();
-        await loadGroups(preferredGroupId: group.id);
-        if (selectedDetailsTab.value == GroupDetailsTab.goals) {
-          await loadActivityProgress();
-        }
-        _appNavigator.showSuccessSnackBar(
-          Get.context?.l10n.groupResetSuccess ??
-              "The group's progress and ranking were reset.",
-        );
-      });
+      await result.fold(
+        (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
+        (_) async {
+          _activityProgressByCacheKey.removeWhere(
+            (key, value) => key.startsWith("${group.id}:"),
+          );
+          _activityProgressCacheKey = null;
+          activityProgress.clear();
+          await loadGroups(preferredGroupId: group.id);
+          if (selectedDetailsTab.value == GroupDetailsTab.goals) {
+            await loadActivityProgress();
+          }
+          _appNavigator.showSuccessSnackBar(
+            Get.context?.l10n.groupResetSuccess ??
+                "The group's progress and ranking were reset.",
+          );
+        },
+      );
     } finally {
       isResettingGroup.value = false;
     }

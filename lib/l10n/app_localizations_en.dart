@@ -3250,4 +3250,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferGroupLeadershipButton => 'Make leader';
+
+  @override
+  String get offlineChangesQueuedMessage =>
+      'You\'re offline. This will be saved once you reconnect.';
+
+  @override
+  String get offlineSessionExpiredMessage =>
+      'You\'ve been offline for a while. Connect to the internet to sign in again.';
 }
