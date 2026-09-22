@@ -7,6 +7,7 @@ class EditGroupBindings extends Bindings {
     Get.put<EditGroupController>(
       EditGroupController(
         groupsRepository: Get.find(),
+        dailyTasksRepository: Get.find(),
         appNavigator: Get.find(),
       ),
     );

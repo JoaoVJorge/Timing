@@ -2,92 +2,391 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/edit_group/edit_group_controller.dart";
-import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
-import "package:timing/theme/app_surfaces.dart";
+import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/theme/decoration.dart";
 
-class EditGroupPage extends GetView<EditGroupController> {
+const Color _fireSequenceColor = Color(0xFFFF6A00);
+
+enum _EditGroupStep { overview, information, activity }
+
+class EditGroupPage extends StatefulWidget {
   const EditGroupPage({super.key});
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
-    topBar: AppTopBar(title: context.l10n.editGroupLabel, showBackButton: true),
-    body: Obx(() {
-      final GroupThemeType? theme = controller.theme;
-      if (theme == null) {
-        return const SizedBox.shrink();
-      }
+  State<EditGroupPage> createState() => _EditGroupPageState();
+}
 
-      return Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionCard(
-                    title: context.l10n.editGroupInfoSection,
-                    icon: AppIcon(
-                      "group",
-                      size: 20,
-                      color: context.colorTokens.primary,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _LabeledField(
-                          label: context.l10n.scheduleTitleHint,
-                          controller: controller.nameController,
-                          hintText: context.l10n.groupNameExampleHint,
-                          prefixIcon: AppIcon(
-                            "group",
-                            size: 18,
-                            color: context.colorTokens.textHint,
-                          ),
-                        ),
-                        const Gap(14),
-                        _LabeledField(
-                          label: context.l10n.createGroupDescriptionLabel,
-                          controller: controller.descriptionController,
-                          hintText: context.l10n.createGroupDescriptionHint,
-                          minLines: 3,
-                          maxLines: 5,
-                          maxLength: 280,
-                        ),
+class _EditGroupPageState extends State<EditGroupPage> {
+  final EditGroupController controller = Get.find<EditGroupController>();
+  _EditGroupStep _step = _EditGroupStep.overview;
+
+  void _showStep(_EditGroupStep step) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _step = step);
+  }
+
+  void _back() {
+    if (_step == _EditGroupStep.overview) {
+      controller.appNavigator.back();
+    } else {
+      _showStep(_EditGroupStep.overview);
+    }
+  }
+
+  void _continue() {
+    if (controller.nameController.text.trim().isEmpty) {
+      controller.appNavigator.showErrorSnackBar(context.l10n.nameRequiredError);
+      return;
+    }
+    _showStep(_EditGroupStep.activity);
+  }
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: _step == _EditGroupStep.overview,
+    onPopInvokedWithResult: (didPop, result) {
+      if (!didPop) _back();
+    },
+    child: AppScaffold(
+      backgroundColor: context.creationPageBackground,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      topBar: AppTopBar(
+        title: context.l10n.editGroupLabel,
+        showBackButton: true,
+        onBack: _back,
+      ),
+      body: Obx(() {
+        final GroupThemeType? theme = controller.theme;
+        if (theme == null) return const SizedBox.shrink();
+        controller.initializeThemeColor(context.colorTokens.primary);
+        final bool overview = _step == _EditGroupStep.overview;
+        final bool information = _step == _EditGroupStep.information;
+
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                key: ValueKey(_step),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (overview || information)
+                      _EditorCard(
+                        icon: "group",
+                        title: context.l10n.editGroupInfoSection,
+                        description:
+                            context.l10n.editGroupInformationDescription,
+                        onTap: overview
+                            ? () => _showStep(_EditGroupStep.information)
+                            : null,
+                        child: information ? _informationForm(context) : null,
+                      ),
+                    if (overview) const Gap(16),
+                    if (overview || !information)
+                      _EditorCard(
+                        icon: theme.iconName,
+                        title: context.l10n.createGroupStepActivity,
+                        description: overview
+                            ? context.l10n.editGroupActivityOverview
+                            : context.l10n.editGroupActivityDescription,
+                        onTap: overview
+                            ? () => _showStep(_EditGroupStep.activity)
+                            : null,
+                        child: overview
+                            ? null
+                            : controller.isLoadingActivity.value
+                            ? const _ActivityLoading()
+                            : _ActivityForm(controller: controller),
+                      ),
+                    if (!overview &&
+                        !information &&
+                        !controller.isLoadingActivity.value) ...[
+                      const Gap(16),
+                      if (controller.isDailyGoalsTheme) ...[
+                        _IntensitySection(controller: controller),
+                        const Gap(16),
                       ],
-                    ),
-                  ),
-                  const Gap(16),
-                  _SectionCard(
-                    title: context.l10n.createGroupStepActivity,
-                    icon: AppIcon(
-                      theme.iconName,
-                      size: 20,
-                      color: context.colorTokens.primary,
-                    ),
-                    trailing: _ThemeBadge(theme: theme),
-                    child: controller.isLoadingActivity.value
-                        ? const _ActivityLoading()
-                        : _ActivityForm(controller: controller),
-                  ),
-                ],
+                      _ColorSection(controller: controller),
+                    ],
+                    if (!information) ...[
+                      const Gap(16),
+                      _EditorTip(
+                        text: overview
+                            ? context.l10n.editGroupInformationTip
+                            : context.l10n.editGroupActivityTip,
+                      ),
+                    ],
+                    const Gap(16),
+                  ],
+                ),
               ),
             ),
+            const Gap(12),
+            _SaveButton(
+              controller: controller,
+              label: information ? context.l10n.editGroupSaveContinue : null,
+              onTap: information ? _continue : null,
+            ),
+            if (!overview) ...[
+              const Gap(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final step in [
+                    _EditGroupStep.information,
+                    _EditGroupStep.activity,
+                  ])
+                    Semantics(
+                      label: step == _EditGroupStep.information
+                          ? context.l10n.editGroupInfoSection
+                          : context.l10n.createGroupStepActivity,
+                      selected: step == _step,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: step == _step
+                              ? context.colorTokens.primary
+                              : context.colorTokens.borderUnfocused,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+            const Gap(20),
+          ],
+        );
+      }),
+    ),
+  );
+
+  Widget _informationForm(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _LabeledField(
+        label: context.l10n.groupNameLabel,
+        controller: controller.nameController,
+        hintText: context.l10n.groupNameExampleHint,
+        prefixIcon: AppIcon(
+          "group",
+          size: 20,
+          color: context.colorTokens.textHint,
+        ),
+      ),
+      const Gap(20),
+      _LabeledField(
+        label: context.l10n.createGroupDescriptionLabel,
+        controller: controller.descriptionController,
+        hintText: context.l10n.createGroupDescriptionHint,
+        minLines: 4,
+        maxLines: 6,
+        maxLength: 280,
+      ),
+    ],
+  );
+}
+
+class _EditorCard extends StatelessWidget {
+  const _EditorCard({
+    required this.icon,
+    required this.title,
+    this.description,
+    this.child,
+    this.onTap,
+  });
+
+  final String icon;
+  final String title;
+  final String? description;
+  final Widget? child;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: context.colorTokens.surface,
+    borderRadius: BorderRadius.circular(22),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.colorTokens.primaryVeryLight,
+              ),
+              child: AppIcon(
+                icon,
+                size: 30,
+                color: context.colorTokens.primary,
+              ),
+            ),
+            const Gap(12),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: context.textStyles.bodyMedium.copyWith(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (description != null) ...[
+                        const Gap(6),
+                        Text(
+                          description!,
+                          style: context.textStyles.bodySmall.copyWith(
+                            color: context.colorTokens.textHint,
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (onTap != null) ...[
+                  const Gap(12),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: context.colorTokens.textBody,
+                  ),
+                ],
+              ],
+            ),
+            if (child != null) ...[const Gap(24), child!],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _EditorTip extends StatelessWidget {
+  const _EditorTip({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.primaryVeryLight,
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.lightbulb_rounded,
+          color: context.colorTokens.primary,
+          size: 24,
+        ),
+        const Gap(12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.editGroupTipLabel,
+                style: context.textStyles.bodySmall.copyWith(
+                  color: context.colorTokens.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Gap(4),
+              Text(
+                text,
+                style: context.textStyles.bodySmall.copyWith(
+                  color: context.colorTokens.textHint,
+                  height: 1.4,
+                ),
+              ),
+            ],
           ),
-          const Gap(12),
-          _SaveButton(controller: controller),
-          const Gap(16),
+        ),
+      ],
+    ),
+  );
+}
+
+class _IntensitySection extends StatelessWidget {
+  const _IntensitySection({required this.controller});
+
+  final EditGroupController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final DailyTaskSequenceType selected = controller.sequenceType.value;
+
+    return CreationConfigCard(
+      accent: context.colorTokens.primary,
+      header: CreationSectionHeader(
+        icon: Icons.local_fire_department_outlined,
+        label: context.l10n.createTaskSequenceTypeLabel,
+        accent: context.colorTokens.primary,
+      ),
+      child: Column(
+        children: [
+          CreationOptionCard(
+            title: context.l10n.createTaskSequenceIntenseLabel,
+            description: context.l10n.createTaskSequenceIntenseDescription,
+            icon: Icons.local_fire_department_rounded,
+            optionColor: _fireSequenceColor,
+            isSelected: selected == DailyTaskSequenceType.intense,
+            onTap: () =>
+                controller.onSelectSequenceType(DailyTaskSequenceType.intense),
+          ),
+          const Gap(10),
+          CreationOptionCard(
+            title: context.l10n.createTaskSequenceCasualLabel,
+            description: context.l10n.createTaskSequenceCasualDescription,
+            icon: Icons.eco_rounded,
+            optionColor: context.colorTokens.primary,
+            isSelected: selected == DailyTaskSequenceType.casual,
+            onTap: () =>
+                controller.onSelectSequenceType(DailyTaskSequenceType.casual),
+          ),
         ],
-      );
-    }),
+      ),
+    );
+  });
+}
+
+class _ColorSection extends StatelessWidget {
+  const _ColorSection({required this.controller});
+
+  final EditGroupController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(
+    () => CreationColorSection(
+      accent: controller.selectedColor.value,
+      label: context.l10n.colorLabel,
+      includePastelColors: true,
+      onSelect: (color) => controller.selectedColor.value = color,
+    ),
   );
 }
 
@@ -161,58 +460,6 @@ class _ActivityForm extends StatelessWidget {
   );
 }
 
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.icon,
-    required this.child,
-    this.trailing,
-  });
-
-  final String title;
-  final Widget icon;
-  final Widget child;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: AppSurfaces.content(context.colorTokens),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: context.colorTokens.primaryVeryLight,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: icon,
-            ),
-            const Gap(12),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(fontSize: 18),
-              ),
-            ),
-            if (trailing != null) ...[const Gap(10), trailing!],
-          ],
-        ),
-        const Gap(16),
-        child,
-      ],
-    ),
-  );
-}
-
 class _LabeledField extends StatelessWidget {
   const _LabeledField({
     required this.label,
@@ -252,35 +499,24 @@ class _LabeledField extends StatelessWidget {
         maxLines: maxLines,
         maxLength: maxLength,
         style: context.textStyles.inputText,
-        decoration: AppInputDecoration.withBorder(
-          tokens: context.colorTokens,
-          hintText: hintText,
-          prefixIcon: prefixIcon,
-        ).copyWith(suffixText: suffixText),
+        decoration:
+            AppInputDecoration.withBorder(
+              tokens: context.colorTokens,
+              hintText: hintText,
+              prefixIcon: prefixIcon,
+            ).copyWith(
+              suffixText: suffixText,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.colorTokens.primary),
+              ),
+            ),
       ),
     ],
-  );
-}
-
-class _ThemeBadge extends StatelessWidget {
-  const _ThemeBadge({required this.theme});
-
-  final GroupThemeType theme;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      color: context.colorTokens.primaryVeryLight,
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Text(
-      theme.localizedLabel(context),
-      style: context.textStyles.bodySmall.copyWith(
-        color: context.colorTokens.primary,
-        fontWeight: FontWeight.w900,
-      ),
-    ),
   );
 }
 
@@ -300,7 +536,10 @@ class _ActivityLoading extends StatelessWidget {
 }
 
 class _SaveButton extends StatelessWidget {
-  const _SaveButton({required this.controller});
+  const _SaveButton({required this.controller, this.label, this.onTap});
+
+  final String? label;
+  final VoidCallback? onTap;
 
   final EditGroupController controller;
 
@@ -308,18 +547,22 @@ class _SaveButton extends StatelessWidget {
   Widget build(BuildContext context) => Obx(
     () => BounceTap(
       onTap: () {
-        if (!controller.isSaving.value) {
-          controller.save();
+        if (!controller.isSaving.value && !controller.isLoadingActivity.value) {
+          if (onTap != null) {
+            onTap!();
+          } else {
+            controller.save();
+          }
         }
       },
       pressedScale: 0.98,
       child: Container(
         width: double.infinity,
-        height: 54,
+        height: 52,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           gradient: context.colorTokens.primaryGradient,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: controller.isSaving.value
             ? SizedBox(
@@ -331,7 +574,7 @@ class _SaveButton extends StatelessWidget {
                 ),
               )
             : Text(
-                context.l10n.saveChangesButton,
+                label ?? context.l10n.saveChangesButton,
                 style: context.textStyles.textPrimaryButton,
               ),
       ),
