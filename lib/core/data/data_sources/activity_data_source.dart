@@ -9,6 +9,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/id_generator.dart";
 
 class ActivityDataSource {
@@ -17,7 +18,10 @@ class ActivityDataSource {
     required this._localStorageService,
     required this._pendingSyncStore,
     required this._logger,
+    this._activityChangeBus,
   });
+
+  final ActivityChangeBus? _activityChangeBus;
 
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
@@ -89,6 +93,7 @@ class ActivityDataSource {
           .upsert(queue, onConflict: "id");
       await _writeQueue(const []);
       await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
+      _activityChangeBus?.notifyGroupActivityChanged();
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to flush queued activity_entries",

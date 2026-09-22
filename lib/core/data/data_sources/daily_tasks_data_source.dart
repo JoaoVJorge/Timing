@@ -10,6 +10,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 
 class DailyTasksDataSource {
   DailyTasksDataSource({
@@ -17,7 +18,10 @@ class DailyTasksDataSource {
     required this._supabaseService,
     required this._logger,
     required this._pendingSyncStore,
+    this._activityChangeBus,
   });
+
+  final ActivityChangeBus? _activityChangeBus;
 
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
@@ -290,6 +294,11 @@ class DailyTasksDataSource {
 
       if (rows.isNotEmpty) {
         await client.from("daily_goals").upsert(rows, onConflict: "user_id,id");
+        // Local saves return before this upload completes. Refresh shared
+        // rankings only after the server has received the completed days.
+        if (tasks.any((task) => task.isFromGroup)) {
+          _activityChangeBus?.notifyGroupActivityChanged();
+        }
       }
 
       if (!canDeleteRemoteTasks(userId)) {
@@ -305,6 +314,7 @@ class DailyTasksDataSource {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
       await delete;
+      _activityChangeBus?.notifyGroupActivityChanged();
       // A newer local snapshot may already be waiting behind this request.
       // Only the latest successful upload makes the dataset fully synced.
       if (revision == _latestRemoteSyncRevision) {

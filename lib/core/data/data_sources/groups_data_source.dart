@@ -19,6 +19,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/theme/group_colors.dart";
 import "package:supabase_flutter/supabase_flutter.dart"
     show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
@@ -29,14 +30,17 @@ class GroupsDataSource {
     required this._logger,
     required this._localStorageService,
     required this._pendingSyncStore,
+    this._activityChangeBus,
   });
+
+  final ActivityChangeBus? _activityChangeBus;
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final AppLocalStorageService _localStorageService;
   final PendingSyncStore _pendingSyncStore;
   static const Duration _activityScoresTimeout = Duration(seconds: 8);
-  static const Duration _offlineFallbackTimeout = Duration(seconds: 8);
+  static const Duration _offlineFallbackTimeout = Duration(seconds: 15);
   static const int _imageMessagesPageSize = 50;
 
   /// Groups are remote-authoritative shared state (other members change
@@ -45,6 +49,13 @@ class GroupsDataSource {
   /// locally cached list if that fails (offline, timeout, etc). An inner
   /// timeout keeps that fallback fast — otherwise an offline user would wait
   /// out a long OS-level connection timeout before ever seeing the cache.
+  ///
+  /// This must stay comfortably above [_activityScoresTimeout]: the fetch it
+  /// wraps runs several sequential queries and only then awaits the
+  /// leaderboard RPC, which has its own [_activityScoresTimeout] budget. Equal
+  /// values let the outer timeout win the race before the RPC's own timeout
+  /// ever fires, silently serving stale cached groups after every real
+  /// activity update instead of the fresh ranking.
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     final String? userId = _supabaseService.currentUserId;
     if (userId == null) {
@@ -58,6 +69,11 @@ class GroupsDataSource {
       await _cacheGroups(groups);
       return Right(groups);
     } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to refresh groups; trying the offline cache",
+        error: error,
+        stackTrace: stackTrace,
+      );
       final List<GroupEntity>? cached = await _readCachedGroups();
       if (cached != null) {
         return Right(cached);
@@ -95,8 +111,10 @@ class GroupsDataSource {
         .map((row) => row["user_id"] as String)
         .toSet()
         .toList();
-    final Map<String, Map<String, dynamic>> profilesById =
-        await _profilesById(memberIds, withPhoto: true);
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById(
+      memberIds,
+      withPhoto: true,
+    );
     final Map<String, Map<String, _PeriodScores>> scoresByGroup =
         await _leaderboardScoresForGroups(groupIds);
 
@@ -1053,6 +1071,9 @@ class GroupsDataSource {
 
     final List<Map<String, dynamic>> remaining = queue.sublist(processed);
     await _writeGroupActionQueue(remaining);
+    if (processed > 0) {
+      _activityChangeBus?.notifyGroupActivityChanged();
+    }
     if (remaining.isEmpty) {
       await _pendingSyncStore.clear(PendingSyncDataset.groups);
     }

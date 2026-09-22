@@ -19,6 +19,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<ActivityDataSource>(
       ActivityDataSource(
+        activityChangeBus: Get.find(),
         supabaseService: Get.find(),
         localStorageService: Get.find(),
         pendingSyncStore: Get.find(),
@@ -37,6 +38,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<DailyTasksDataSource>(
       DailyTasksDataSource(
+        activityChangeBus: Get.find(),
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
@@ -46,6 +48,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<GroupsDataSource>(
       GroupsDataSource(
+        activityChangeBus: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
         localStorageService: Get.find(),
