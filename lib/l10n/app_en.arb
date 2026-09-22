@@ -1028,6 +1028,17 @@
   "missedYesterdayDialogContent": "You did not register \"{taskName}\" yesterday. Did you really miss it?",
   "missedYesterdayMissedButton": "Yes, I missed it",
   "missedYesterdayCompletedButton": "I completed it",
+  "@confirmGoalDoneTodayContent": {
+    "placeholders": {
+      "taskName": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmGoalDoneTodayTitle": "Did you complete it today?",
+  "confirmGoalDoneTodayContent": "Confirm you completed \"{taskName}\" today to count it toward the group.",
+  "confirmGoalDoneTodayConfirmButton": "Yes, I did it",
+  "confirmGoalDoneTodayCancelButton": "Not yet",
   "missedYesterdayMultiTitle": "Which ones did you complete yesterday?",
   "missedYesterdayMultiContent": "You did not register some goals yesterday. Check the ones you actually completed.",
   "missedYesterdayMultiConfirmButton": "Confirm",
@@ -1748,6 +1759,7 @@
     "placeholders": {"groupName": {"type": "String"}}
   },
   "resetGroupConfirmButton": "Reset",
+  "resetGroupClearOwnHistoryLabel": "Also clear my personal history for this goal",
   "groupResetSuccess": "The group's progress and ranking were reset.",
   "ownerOnlyGroupActionError": "Only the group owner can do this.",
   "viewMembersLabel": "View members",
@@ -1764,5 +1776,13 @@
   },
   "transferGroupLeadershipButton": "Make leader",
   "offlineChangesQueuedMessage": "You're offline. This will be saved once you reconnect.",
-  "offlineSessionExpiredMessage": "You've been offline for a while. Connect to the internet to sign in again."
+  "offlineSessionExpiredMessage": "You've been offline for a while. Connect to the internet to sign in again.",
+  "editGroupInformationDescription": "Set a name and description for the group.",
+  "editGroupActivityOverview": "Configure the activity and progress goal.",
+  "editGroupActivityDescription": "Choose the activity and set your progress goal.",
+  "editGroupInformationTip": "A clear name and description help keep the group motivated!",
+  "editGroupActivityTip": "Set a realistic goal to stay consistent!",
+  "editGroupMoreOptions": "More options",
+  "editGroupSaveContinue": "Save and continue",
+  "editGroupTipLabel": "Tip"
 }

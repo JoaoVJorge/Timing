@@ -1000,6 +1000,10 @@
   "missedYesterdayDialogContent": "?? ???? \"{taskName}\" ???. ?? ???? ?????",
   "missedYesterdayMissedButton": "???? ?????",
   "missedYesterdayCompletedButton": "??????",
+  "confirmGoalDoneTodayTitle": "هل أنجزت هذا اليوم؟",
+  "confirmGoalDoneTodayContent": "أكّد أنك أنجزت \"{taskName}\" اليوم ليتم احتسابه للمجموعة.",
+  "confirmGoalDoneTodayConfirmButton": "نعم، أنجزته",
+  "confirmGoalDoneTodayCancelButton": "ليس بعد",
   "missedYesterdayMultiTitle": "ما الأهداف التي أنجزتها أمس؟",
   "missedYesterdayMultiContent": "لم تسجّل بعض الأهداف أمس. حدّد الأهداف التي أنجزتها بالفعل.",
   "missedYesterdayMultiConfirmButton": "تأكيد",
@@ -1647,6 +1651,7 @@
   "resetGroupConfirmTitle": "إعادة ضبط تقدم المجموعة؟",
   "resetGroupConfirmMessage": "سيؤدي هذا إلى إعادة ضبط التقدم المشترك وترتيب {groupName}. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.",
   "resetGroupConfirmButton": "إعادة ضبط",
+  "resetGroupClearOwnHistoryLabel": "امسح أيضًا سجلي الشخصي لهذا الهدف",
   "groupResetSuccess": "تمت إعادة ضبط تقدم المجموعة وترتيبها.",
   "ownerOnlyGroupActionError": "يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء.",
   "viewMembersLabel": "عرض الأعضاء",
@@ -1663,5 +1668,13 @@
   },
   "transferGroupLeadershipButton": "تعيين قائد",
   "offlineChangesQueuedMessage": "أنت غير متصل بالإنترنت. سيتم حفظ هذا بمجرد إعادة الاتصال.",
-  "offlineSessionExpiredMessage": "لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى."
+  "offlineSessionExpiredMessage": "لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى.",
+  "editGroupInformationDescription": "حدد اسمًا ووصفًا للمجموعة.",
+  "editGroupActivityOverview": "اضبط النشاط وهدف التقدم.",
+  "editGroupActivityDescription": "اختر النشاط وحدد هدف تقدمك.",
+  "editGroupInformationTip": "يساعد الاسم والوصف الواضحان في تحفيز المجموعة!",
+  "editGroupActivityTip": "حدد هدفًا واقعيًا للحفاظ على الاستمرارية!",
+  "editGroupMoreOptions": "خيارات إضافية",
+  "editGroupSaveContinue": "حفظ ومتابعة",
+  "editGroupTipLabel": "نصيحة"
 }

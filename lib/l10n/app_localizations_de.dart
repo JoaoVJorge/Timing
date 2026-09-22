@@ -1743,6 +1743,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'Ich habe es erledigt';
 
   @override
+  String get confirmGoalDoneTodayTitle => 'Hast du das heute erledigt?';
+
+  @override
+  String confirmGoalDoneTodayContent(String taskName) {
+    return 'Bestätige, dass du \"$taskName\" heute erledigt hast, damit es für die Gruppe zählt.';
+  }
+
+  @override
+  String get confirmGoalDoneTodayConfirmButton => 'Ja, erledigt';
+
+  @override
+  String get confirmGoalDoneTodayCancelButton => 'Noch nicht';
+
+  @override
   String get missedYesterdayMultiTitle => 'Welche hast du gestern erledigt?';
 
   @override
@@ -3249,6 +3263,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get resetGroupConfirmButton => 'Zurücksetzen';
 
   @override
+  String get resetGroupClearOwnHistoryLabel =>
+      'Auch meinen persönlichen Verlauf für dieses Ziel löschen';
+
+  @override
   String get groupResetSuccess =>
       'Gruppenfortschritt und Rangliste wurden zurückgesetzt.';
 
@@ -3296,4 +3314,33 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get offlineSessionExpiredMessage =>
       'Du warst eine Weile offline. Verbinde dich mit dem Internet, um dich erneut anzumelden.';
+
+  @override
+  String get editGroupInformationDescription =>
+      'Lege einen Namen und eine Beschreibung für die Gruppe fest.';
+
+  @override
+  String get editGroupActivityOverview =>
+      'Konfiguriere die Aktivität und das Fortschrittsziel.';
+
+  @override
+  String get editGroupActivityDescription =>
+      'Wähle die Aktivität und lege dein Fortschrittsziel fest.';
+
+  @override
+  String get editGroupInformationTip =>
+      'Ein klarer Name und eine Beschreibung helfen, die Gruppe zu motivieren!';
+
+  @override
+  String get editGroupActivityTip =>
+      'Setze ein realistisches Ziel, um dranzubleiben!';
+
+  @override
+  String get editGroupMoreOptions => 'Weitere Optionen';
+
+  @override
+  String get editGroupSaveContinue => 'Speichern und weiter';
+
+  @override
+  String get editGroupTipLabel => 'Tipp';
 }

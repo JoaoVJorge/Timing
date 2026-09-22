@@ -3112,6 +3112,30 @@ abstract class AppLocalizations {
   /// **'I completed it'**
   String get missedYesterdayCompletedButton;
 
+  /// No description provided for @confirmGoalDoneTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you complete it today?'**
+  String get confirmGoalDoneTodayTitle;
+
+  /// No description provided for @confirmGoalDoneTodayContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm you completed \"{taskName}\" today to count it toward the group.'**
+  String confirmGoalDoneTodayContent(String taskName);
+
+  /// No description provided for @confirmGoalDoneTodayConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, I did it'**
+  String get confirmGoalDoneTodayConfirmButton;
+
+  /// No description provided for @confirmGoalDoneTodayCancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get confirmGoalDoneTodayCancelButton;
+
   /// No description provided for @missedYesterdayMultiTitle.
   ///
   /// In en, this message translates to:
@@ -5770,6 +5794,12 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get resetGroupConfirmButton;
 
+  /// No description provided for @resetGroupClearOwnHistoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Also clear my personal history for this goal'**
+  String get resetGroupClearOwnHistoryLabel;
+
   /// No description provided for @groupResetSuccess.
   ///
   /// In en, this message translates to:
@@ -5853,6 +5883,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve been offline for a while. Connect to the internet to sign in again.'**
   String get offlineSessionExpiredMessage;
+
+  /// No description provided for @editGroupInformationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a name and description for the group.'**
+  String get editGroupInformationDescription;
+
+  /// No description provided for @editGroupActivityOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure the activity and progress goal.'**
+  String get editGroupActivityOverview;
+
+  /// No description provided for @editGroupActivityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the activity and set your progress goal.'**
+  String get editGroupActivityDescription;
+
+  /// No description provided for @editGroupInformationTip.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear name and description help keep the group motivated!'**
+  String get editGroupInformationTip;
+
+  /// No description provided for @editGroupActivityTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a realistic goal to stay consistent!'**
+  String get editGroupActivityTip;
+
+  /// No description provided for @editGroupMoreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get editGroupMoreOptions;
+
+  /// No description provided for @editGroupSaveContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and continue'**
+  String get editGroupSaveContinue;
+
+  /// No description provided for @editGroupTipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get editGroupTipLabel;
 }
 
 class _AppLocalizationsDelegate

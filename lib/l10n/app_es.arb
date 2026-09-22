@@ -690,6 +690,10 @@
   "missedYesterdayDialogContent": "No registraste \"{taskName}\" ayer. ?Realmente no la concluiste?",
   "missedYesterdayMissedButton": "S?, no la conclu?",
   "missedYesterdayCompletedButton": "La conclu?",
+  "confirmGoalDoneTodayTitle": "¿Completaste esto hoy?",
+  "confirmGoalDoneTodayContent": "Confirma que completaste \"{taskName}\" hoy para que cuente en el grupo.",
+  "confirmGoalDoneTodayConfirmButton": "Sí, lo hice",
+  "confirmGoalDoneTodayCancelButton": "Todavía no",
   "missedYesterdayMultiTitle": "¿Cuáles completaste ayer?",
   "missedYesterdayMultiContent": "No registraste algunas metas ayer. Marca las que sí concluiste.",
   "missedYesterdayMultiConfirmButton": "Confirmar",
@@ -1337,6 +1341,7 @@
   "resetGroupConfirmTitle": "¿Reiniciar el progreso del grupo?",
   "resetGroupConfirmMessage": "Esto reinicia el progreso compartido y la clasificación de {groupName}. Se conservará el historial personal de actividad de cada miembro.",
   "resetGroupConfirmButton": "Reiniciar",
+  "resetGroupClearOwnHistoryLabel": "También borrar mi historial personal de esta meta",
   "groupResetSuccess": "Se reiniciaron el progreso y la clasificación del grupo.",
   "ownerOnlyGroupActionError": "Solo el propietario del grupo puede hacer esto.",
   "viewMembersLabel": "Ver miembros",
@@ -1353,5 +1358,13 @@
   },
   "transferGroupLeadershipButton": "Hacer líder",
   "offlineChangesQueuedMessage": "Estás sin conexión. Esto se guardará en cuanto vuelvas a conectarte.",
-  "offlineSessionExpiredMessage": "Has estado sin conexión por un tiempo. Conéctate a internet para iniciar sesión de nuevo."
+  "offlineSessionExpiredMessage": "Has estado sin conexión por un tiempo. Conéctate a internet para iniciar sesión de nuevo.",
+  "editGroupInformationDescription": "Define un nombre y una descripción para el grupo.",
+  "editGroupActivityOverview": "Configura la actividad y la meta de progreso.",
+  "editGroupActivityDescription": "Elige la actividad y define tu meta de progreso.",
+  "editGroupInformationTip": "¡Un nombre y una descripción claros ayudan a mantener al grupo motivado!",
+  "editGroupActivityTip": "¡Define una meta realista para mantener la constancia!",
+  "editGroupMoreOptions": "Más opciones",
+  "editGroupSaveContinue": "Guardar y continuar",
+  "editGroupTipLabel": "Consejo"
 }

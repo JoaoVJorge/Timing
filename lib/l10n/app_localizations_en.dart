@@ -1716,6 +1716,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'I completed it';
 
   @override
+  String get confirmGoalDoneTodayTitle => 'Did you complete it today?';
+
+  @override
+  String confirmGoalDoneTodayContent(String taskName) {
+    return 'Confirm you completed \"$taskName\" today to count it toward the group.';
+  }
+
+  @override
+  String get confirmGoalDoneTodayConfirmButton => 'Yes, I did it';
+
+  @override
+  String get confirmGoalDoneTodayCancelButton => 'Not yet';
+
+  @override
   String get missedYesterdayMultiTitle =>
       'Which ones did you complete yesterday?';
 
@@ -3213,6 +3227,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetGroupConfirmButton => 'Reset';
 
   @override
+  String get resetGroupClearOwnHistoryLabel =>
+      'Also clear my personal history for this goal';
+
+  @override
   String get groupResetSuccess =>
       'The group\'s progress and ranking were reset.';
 
@@ -3258,4 +3276,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineSessionExpiredMessage =>
       'You\'ve been offline for a while. Connect to the internet to sign in again.';
+
+  @override
+  String get editGroupInformationDescription =>
+      'Set a name and description for the group.';
+
+  @override
+  String get editGroupActivityOverview =>
+      'Configure the activity and progress goal.';
+
+  @override
+  String get editGroupActivityDescription =>
+      'Choose the activity and set your progress goal.';
+
+  @override
+  String get editGroupInformationTip =>
+      'A clear name and description help keep the group motivated!';
+
+  @override
+  String get editGroupActivityTip => 'Set a realistic goal to stay consistent!';
+
+  @override
+  String get editGroupMoreOptions => 'More options';
+
+  @override
+  String get editGroupSaveContinue => 'Save and continue';
+
+  @override
+  String get editGroupTipLabel => 'Tip';
 }

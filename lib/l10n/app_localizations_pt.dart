@@ -1724,6 +1724,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'Fiz ontem';
 
   @override
+  String get confirmGoalDoneTodayTitle => 'Você concluiu isso hoje?';
+
+  @override
+  String confirmGoalDoneTodayContent(String taskName) {
+    return 'Confirme que você concluiu \"$taskName\" hoje para contar no grupo.';
+  }
+
+  @override
+  String get confirmGoalDoneTodayConfirmButton => 'Sim, concluí';
+
+  @override
+  String get confirmGoalDoneTodayCancelButton => 'Ainda não';
+
+  @override
   String get missedYesterdayMultiTitle => 'Quais você fez ontem?';
 
   @override
@@ -3222,6 +3236,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get resetGroupConfirmButton => 'Resetar';
 
   @override
+  String get resetGroupClearOwnHistoryLabel =>
+      'Também apagar meu histórico pessoal desta meta';
+
+  @override
   String get groupResetSuccess =>
       'O progresso e o ranking do grupo foram resetados.';
 
@@ -3268,4 +3286,33 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get offlineSessionExpiredMessage =>
       'Você ficou offline por um tempo. Conecte-se à internet para entrar novamente.';
+
+  @override
+  String get editGroupInformationDescription =>
+      'Defina um nome e uma descrição para o grupo.';
+
+  @override
+  String get editGroupActivityOverview =>
+      'Configure a atividade e a meta de progresso.';
+
+  @override
+  String get editGroupActivityDescription =>
+      'Escolha a atividade e defina sua meta de progresso.';
+
+  @override
+  String get editGroupInformationTip =>
+      'Um nome e uma descrição claros ajudam a manter o grupo motivado!';
+
+  @override
+  String get editGroupActivityTip =>
+      'Defina uma meta realista para manter a consistência!';
+
+  @override
+  String get editGroupMoreOptions => 'Mais opções';
+
+  @override
+  String get editGroupSaveContinue => 'Salvar e continuar';
+
+  @override
+  String get editGroupTipLabel => 'Dica';
 }

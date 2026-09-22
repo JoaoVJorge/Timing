@@ -1728,6 +1728,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get missedYesterdayCompletedButton => 'La conclu?';
 
   @override
+  String get confirmGoalDoneTodayTitle => '¿Completaste esto hoy?';
+
+  @override
+  String confirmGoalDoneTodayContent(String taskName) {
+    return 'Confirma que completaste \"$taskName\" hoy para que cuente en el grupo.';
+  }
+
+  @override
+  String get confirmGoalDoneTodayConfirmButton => 'Sí, lo hice';
+
+  @override
+  String get confirmGoalDoneTodayCancelButton => 'Todavía no';
+
+  @override
   String get missedYesterdayMultiTitle => '¿Cuáles completaste ayer?';
 
   @override
@@ -3229,6 +3243,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetGroupConfirmButton => 'Reiniciar';
 
   @override
+  String get resetGroupClearOwnHistoryLabel =>
+      'También borrar mi historial personal de esta meta';
+
+  @override
   String get groupResetSuccess =>
       'Se reiniciaron el progreso y la clasificación del grupo.';
 
@@ -3275,4 +3293,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get offlineSessionExpiredMessage =>
       'Has estado sin conexión por un tiempo. Conéctate a internet para iniciar sesión de nuevo.';
+
+  @override
+  String get editGroupInformationDescription =>
+      'Define un nombre y una descripción para el grupo.';
+
+  @override
+  String get editGroupActivityOverview =>
+      'Configura la actividad y la meta de progreso.';
+
+  @override
+  String get editGroupActivityDescription =>
+      'Elige la actividad y define tu meta de progreso.';
+
+  @override
+  String get editGroupInformationTip =>
+      '¡Un nombre y una descripción claros ayudan a mantener al grupo motivado!';
+
+  @override
+  String get editGroupActivityTip =>
+      '¡Define una meta realista para mantener la constancia!';
+
+  @override
+  String get editGroupMoreOptions => 'Más opciones';
+
+  @override
+  String get editGroupSaveContinue => 'Guardar y continuar';
+
+  @override
+  String get editGroupTipLabel => 'Consejo';
 }

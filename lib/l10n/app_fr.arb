@@ -1000,6 +1000,10 @@
   "missedYesterdayDialogContent": "Vous n?avez pas enregistr? \"{taskName}\" hier. L?avez-vous vraiment manqu? ?",
   "missedYesterdayMissedButton": "Oui, je l?ai manqu?",
   "missedYesterdayCompletedButton": "Je l?ai termin?",
+  "confirmGoalDoneTodayTitle": "Avez-vous accompli cela aujourd'hui ?",
+  "confirmGoalDoneTodayContent": "Confirmez que vous avez accompli « {taskName} » aujourd'hui pour que cela compte dans le groupe.",
+  "confirmGoalDoneTodayConfirmButton": "Oui, je l'ai fait",
+  "confirmGoalDoneTodayCancelButton": "Pas encore",
   "missedYesterdayMultiTitle": "Lesquelles avez-vous terminées hier ?",
   "missedYesterdayMultiContent": "Vous n’avez pas enregistré certains objectifs hier. Cochez ceux que vous avez réellement terminés.",
   "missedYesterdayMultiConfirmButton": "Confirmer",
@@ -1647,6 +1651,7 @@
   "resetGroupConfirmTitle": "Réinitialiser la progression du groupe ?",
   "resetGroupConfirmMessage": "Cela réinitialise la progression partagée et le classement de {groupName}. L’historique d’activité personnel de chaque membre sera conservé.",
   "resetGroupConfirmButton": "Réinitialiser",
+  "resetGroupClearOwnHistoryLabel": "Effacer aussi mon historique personnel pour cet objectif",
   "groupResetSuccess": "La progression et le classement du groupe ont été réinitialisés.",
   "ownerOnlyGroupActionError": "Seul le propriétaire du groupe peut effectuer cette action.",
   "viewMembersLabel": "Voir les membres",
@@ -1663,5 +1668,13 @@
   },
   "transferGroupLeadershipButton": "Nommer chef",
   "offlineChangesQueuedMessage": "Vous êtes hors ligne. Cela sera enregistré dès que vous serez reconnecté(e).",
-  "offlineSessionExpiredMessage": "Vous êtes hors ligne depuis un moment. Connectez-vous à internet pour vous reconnecter."
+  "offlineSessionExpiredMessage": "Vous êtes hors ligne depuis un moment. Connectez-vous à internet pour vous reconnecter.",
+  "editGroupInformationDescription": "Définissez un nom et une description pour le groupe.",
+  "editGroupActivityOverview": "Configurez l’activité et l’objectif de progression.",
+  "editGroupActivityDescription": "Choisissez l’activité et définissez votre objectif de progression.",
+  "editGroupInformationTip": "Un nom et une description clairs aident à motiver le groupe !",
+  "editGroupActivityTip": "Fixez un objectif réaliste pour rester régulier !",
+  "editGroupMoreOptions": "Plus d’options",
+  "editGroupSaveContinue": "Enregistrer et continuer",
+  "editGroupTipLabel": "Conseil"
 }

@@ -690,6 +690,10 @@
   "missedYesterdayDialogContent": "Você não marcou \"{taskName}\" ontem. Se tiver feito, podemos registrar agora.",
   "missedYesterdayMissedButton": "Não fiz",
   "missedYesterdayCompletedButton": "Fiz ontem",
+  "confirmGoalDoneTodayTitle": "Você concluiu isso hoje?",
+  "confirmGoalDoneTodayContent": "Confirme que você concluiu \"{taskName}\" hoje para contar no grupo.",
+  "confirmGoalDoneTodayConfirmButton": "Sim, concluí",
+  "confirmGoalDoneTodayCancelButton": "Ainda não",
   "missedYesterdayMultiTitle": "Quais você fez ontem?",
   "missedYesterdayMultiContent": "Você não marcou algumas metas ontem. Selecione as que você concluiu.",
   "missedYesterdayMultiConfirmButton": "Confirmar",
@@ -1337,6 +1341,7 @@
   "resetGroupConfirmTitle": "Resetar progresso do grupo?",
   "resetGroupConfirmMessage": "Isso zera o progresso compartilhado e o ranking de {groupName}. O histórico pessoal de atividade de cada membro será mantido.",
   "resetGroupConfirmButton": "Resetar",
+  "resetGroupClearOwnHistoryLabel": "Também apagar meu histórico pessoal desta meta",
   "groupResetSuccess": "O progresso e o ranking do grupo foram resetados.",
   "ownerOnlyGroupActionError": "Apenas o dono do grupo pode fazer isso.",
   "viewMembersLabel": "Ver membros",
@@ -1353,5 +1358,13 @@
   },
   "transferGroupLeadershipButton": "Tornar líder",
   "offlineChangesQueuedMessage": "Você está offline. Isso será salvo assim que você se reconectar.",
-  "offlineSessionExpiredMessage": "Você ficou offline por um tempo. Conecte-se à internet para entrar novamente."
+  "offlineSessionExpiredMessage": "Você ficou offline por um tempo. Conecte-se à internet para entrar novamente.",
+  "editGroupInformationDescription": "Defina um nome e uma descrição para o grupo.",
+  "editGroupActivityOverview": "Configure a atividade e a meta de progresso.",
+  "editGroupActivityDescription": "Escolha a atividade e defina sua meta de progresso.",
+  "editGroupInformationTip": "Um nome e uma descrição claros ajudam a manter o grupo motivado!",
+  "editGroupActivityTip": "Defina uma meta realista para manter a consistência!",
+  "editGroupMoreOptions": "Mais opções",
+  "editGroupSaveContinue": "Salvar e continuar",
+  "editGroupTipLabel": "Dica"
 }

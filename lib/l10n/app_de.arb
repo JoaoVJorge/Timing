@@ -1000,6 +1000,10 @@
   "missedYesterdayDialogContent": "Du hast \"{taskName}\" gestern nicht erfasst. Hast du es wirklich verpasst?",
   "missedYesterdayMissedButton": "Ja, ich habe es verpasst",
   "missedYesterdayCompletedButton": "Ich habe es erledigt",
+  "confirmGoalDoneTodayTitle": "Hast du das heute erledigt?",
+  "confirmGoalDoneTodayContent": "Bestätige, dass du \"{taskName}\" heute erledigt hast, damit es für die Gruppe zählt.",
+  "confirmGoalDoneTodayConfirmButton": "Ja, erledigt",
+  "confirmGoalDoneTodayCancelButton": "Noch nicht",
   "missedYesterdayMultiTitle": "Welche hast du gestern erledigt?",
   "missedYesterdayMultiContent": "Du hast gestern einige Ziele nicht erfasst. Wähle die aus, die du wirklich erledigt hast.",
   "missedYesterdayMultiConfirmButton": "Bestätigen",
@@ -1647,6 +1651,7 @@
   "resetGroupConfirmTitle": "Gruppenfortschritt zurücksetzen?",
   "resetGroupConfirmMessage": "Dadurch werden der gemeinsame Fortschritt und die Rangliste von {groupName} zurückgesetzt. Der persönliche Aktivitätsverlauf jedes Mitglieds bleibt erhalten.",
   "resetGroupConfirmButton": "Zurücksetzen",
+  "resetGroupClearOwnHistoryLabel": "Auch meinen persönlichen Verlauf für dieses Ziel löschen",
   "groupResetSuccess": "Gruppenfortschritt und Rangliste wurden zurückgesetzt.",
   "ownerOnlyGroupActionError": "Nur der Gruppeneigentümer kann das tun.",
   "viewMembersLabel": "Mitglieder ansehen",
@@ -1663,5 +1668,13 @@
   },
   "transferGroupLeadershipButton": "Zum Leiter machen",
   "offlineChangesQueuedMessage": "Du bist offline. Das wird gespeichert, sobald du wieder verbunden bist.",
-  "offlineSessionExpiredMessage": "Du warst eine Weile offline. Verbinde dich mit dem Internet, um dich erneut anzumelden."
+  "offlineSessionExpiredMessage": "Du warst eine Weile offline. Verbinde dich mit dem Internet, um dich erneut anzumelden.",
+  "editGroupInformationDescription": "Lege einen Namen und eine Beschreibung für die Gruppe fest.",
+  "editGroupActivityOverview": "Konfiguriere die Aktivität und das Fortschrittsziel.",
+  "editGroupActivityDescription": "Wähle die Aktivität und lege dein Fortschrittsziel fest.",
+  "editGroupInformationTip": "Ein klarer Name und eine Beschreibung helfen, die Gruppe zu motivieren!",
+  "editGroupActivityTip": "Setze ein realistisches Ziel, um dranzubleiben!",
+  "editGroupMoreOptions": "Weitere Optionen",
+  "editGroupSaveContinue": "Speichern und weiter",
+  "editGroupTipLabel": "Tipp"
 }

@@ -1710,6 +1710,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get missedYesterdayCompletedButton => '??????';
 
   @override
+  String get confirmGoalDoneTodayTitle => 'هل أنجزت هذا اليوم؟';
+
+  @override
+  String confirmGoalDoneTodayContent(String taskName) {
+    return 'أكّد أنك أنجزت \"$taskName\" اليوم ليتم احتسابه للمجموعة.';
+  }
+
+  @override
+  String get confirmGoalDoneTodayConfirmButton => 'نعم، أنجزته';
+
+  @override
+  String get confirmGoalDoneTodayCancelButton => 'ليس بعد';
+
+  @override
   String get missedYesterdayMultiTitle => 'ما الأهداف التي أنجزتها أمس؟';
 
   @override
@@ -3196,6 +3210,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetGroupConfirmButton => 'إعادة ضبط';
 
   @override
+  String get resetGroupClearOwnHistoryLabel =>
+      'امسح أيضًا سجلي الشخصي لهذا الهدف';
+
+  @override
   String get groupResetSuccess => 'تمت إعادة ضبط تقدم المجموعة وترتيبها.';
 
   @override
@@ -3241,4 +3259,30 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get offlineSessionExpiredMessage =>
       'لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى.';
+
+  @override
+  String get editGroupInformationDescription => 'حدد اسمًا ووصفًا للمجموعة.';
+
+  @override
+  String get editGroupActivityOverview => 'اضبط النشاط وهدف التقدم.';
+
+  @override
+  String get editGroupActivityDescription => 'اختر النشاط وحدد هدف تقدمك.';
+
+  @override
+  String get editGroupInformationTip =>
+      'يساعد الاسم والوصف الواضحان في تحفيز المجموعة!';
+
+  @override
+  String get editGroupActivityTip =>
+      'حدد هدفًا واقعيًا للحفاظ على الاستمرارية!';
+
+  @override
+  String get editGroupMoreOptions => 'خيارات إضافية';
+
+  @override
+  String get editGroupSaveContinue => 'حفظ ومتابعة';
+
+  @override
+  String get editGroupTipLabel => 'نصيحة';
 }
