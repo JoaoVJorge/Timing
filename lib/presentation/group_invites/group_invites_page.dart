@@ -44,6 +44,11 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
         );
       }
 
+      final List<GroupInviteOptionEntity> options = controller.options
+          .toList();
+      final Set<String> updatingFriendIds = controller.updatingFriendIds
+          .toSet();
+
       return RefreshIndicator(
         color: context.colorTokens.primary,
         onRefresh: controller.loadOptions,
@@ -55,14 +60,12 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
             AppUiConstants.pagePadding,
             20,
           ),
-          itemCount: controller.options.length,
+          itemCount: options.length,
           separatorBuilder: (_, _) => const Gap(10),
           itemBuilder: (context, index) => _GroupInviteRow(
-            option: controller.options[index],
-            isUpdating: controller.updatingFriendIds.contains(
-              controller.options[index].friendId,
-            ),
-            onTap: () => controller.onTapOption(controller.options[index]),
+            option: options[index],
+            isUpdating: updatingFriendIds.contains(options[index].friendId),
+            onTap: () => controller.onTapOption(options[index]),
           ),
         ),
       );
