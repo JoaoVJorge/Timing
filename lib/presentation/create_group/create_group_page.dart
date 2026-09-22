@@ -42,61 +42,67 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   Widget build(BuildContext context) {
     final CreateGroupController controller = Get.find();
 
-    return AppScaffold(
-      topBar: AppTopBar(
-        title: context.l10n.createGroupTitle,
-        showBackButton: true,
-        onBack: controller.onTapBack,
-      ),
-      body: Obx(() {
-        final int step = controller.currentStep.value;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) controller.onTapBack();
+      },
+      child: AppScaffold(
+        topBar: AppTopBar(
+          title: context.l10n.createGroupTitle,
+          showBackButton: true,
+          onBack: controller.onTapBack,
+        ),
+        body: Obx(() {
+          final int step = controller.currentStep.value;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _subtitleForStep(context, step),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textHint,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _subtitleForStep(context, step),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyMedium.copyWith(
+                  color: context.colorTokens.textHint,
+                ),
               ),
-            ),
-            const Gap(18),
-            _StepProgress(currentStep: step),
-            const Gap(18),
-            Expanded(
-              child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: switch (step) {
-                  0 => _InformationStep(
-                    controller: controller,
-                    themeKey: _themeKey,
-                  ),
-                  1 => _ActivityStep(
-                    controller: controller,
-                    activityNameKey: _activityNameKey,
-                    activityGoalKey: _activityGoalKey,
-                    groupNameKey: _groupNameKey,
-                  ),
-                  2 => _FriendsStep(
-                    controller: controller,
-                    friendsKey: _friendsKey,
-                  ),
-                  _ => _SummaryStep(controller: controller),
-                },
+              const Gap(18),
+              _StepProgress(currentStep: step),
+              const Gap(18),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: switch (step) {
+                    0 => _InformationStep(
+                      controller: controller,
+                      themeKey: _themeKey,
+                    ),
+                    1 => _ActivityStep(
+                      controller: controller,
+                      activityNameKey: _activityNameKey,
+                      activityGoalKey: _activityGoalKey,
+                      groupNameKey: _groupNameKey,
+                    ),
+                    2 => _FriendsStep(
+                      controller: controller,
+                      friendsKey: _friendsKey,
+                    ),
+                    _ => _SummaryStep(controller: controller),
+                  },
+                ),
               ),
-            ),
-            const Gap(12),
-            _BottomAction(
-              controller: controller,
-              onTap: () => _onTapBottomAction(controller),
-            ),
-            const Gap(16),
-          ],
-        );
-      }),
+              const Gap(12),
+              _BottomAction(
+                controller: controller,
+                onTap: () => _onTapBottomAction(controller),
+              ),
+              const Gap(16),
+            ],
+          );
+        }),
+      ),
     );
   }
 
