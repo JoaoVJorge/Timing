@@ -124,6 +124,16 @@ class DailyGoalsController extends GetxController {
         return;
       }
       final DailyTaskEntity originalTask = tasks[originalIndex];
+
+      // Group-linked goals feed a shared group ranking, so marking one done
+      // asks for confirmation instead of toggling instantly (unchecking it
+      // back off needs no confirmation).
+      if (!originalTask.isCheckedToday &&
+          originalTask.isFromGroup &&
+          !await _confirmGoalDoneToday(originalTask)) {
+        return;
+      }
+
       final DateTime toggleDate = DateTime.now();
       tasks[originalIndex] = originalTask.copyWith(
         completedDates: originalTask.completedDatesAfterToggle(toggleDate),
@@ -238,6 +248,14 @@ class DailyGoalsController extends GetxController {
     if (didUnlockCheck) {
       unawaited(_achievementUnlockService.checkForNewUnlocks());
     }
+  }
+
+  Future<bool> _confirmGoalDoneToday(DailyTaskEntity task) async {
+    final bool? confirmed = await _appNavigator.dialog<bool>(
+      child: _ConfirmGoalDoneDialog(taskName: task.name),
+      barrierDismissible: false,
+    );
+    return confirmed ?? false;
   }
 
   Future<Set<String>?> _askAboutSingleMissedTask(DailyTaskEntity task) async {
@@ -385,6 +403,96 @@ class _MissedYesterdayDialog extends StatelessWidget {
 
   void _appNavigatorBack(bool result) {
     appNavigator.back<bool>(result: result);
+  }
+}
+
+class _ConfirmGoalDoneDialog extends StatelessWidget {
+  const _ConfirmGoalDoneDialog({required this.taskName});
+
+  final String taskName;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accent = context.colorTokens.primary;
+
+    return Dialog(
+      elevation: 0,
+      backgroundColor: context.colorTokens.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 34),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 390),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+        decoration: BoxDecoration(
+          color: context.colorTokens.dialogSurface,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.black.withValues(alpha: 0.16),
+              blurRadius: 28,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check_circle_outline_rounded, color: accent, size: 28),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              context.l10n.confirmGoalDoneTodayTitle,
+              textAlign: TextAlign.center,
+              style: context.textStyles.extraBold24.copyWith(
+                color: context.colorTokens.dialogText,
+                fontSize: 21,
+                height: 1.12,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.confirmGoalDoneTodayContent(taskName),
+              textAlign: TextAlign.center,
+              style: context.textStyles.bodyLarge.copyWith(
+                color: context.colorTokens.dialogTextMuted,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1.38,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: _MissedDialogButton(
+                    label: context.l10n.confirmGoalDoneTodayCancelButton,
+                    foreground: accent,
+                    borderColor: accent,
+                    onTap: () => appNavigator.back<bool>(result: false),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MissedDialogButton(
+                    label: context.l10n.confirmGoalDoneTodayConfirmButton,
+                    foreground: context.colorTokens.white,
+                    background: accent,
+                    onTap: () => appNavigator.back<bool>(result: true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
