@@ -16,6 +16,7 @@ class GroupsBindings extends Bindings {
         acceptFriendRequestUseCase: Get.find(),
         removeFriendUseCase: Get.find(),
         groupsRepository: Get.find(),
+        dailyTasksRepository: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),
         localStorageService: Get.find(),

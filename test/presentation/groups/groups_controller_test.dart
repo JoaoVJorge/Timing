@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
@@ -35,6 +36,8 @@ import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/groups/groups_page.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/theme/theme.dart";
+
+class _FakeDailyTasksRepository extends Fake implements DailyTasksRepository {}
 
 class _FakeGroupsRepository implements GroupsRepository {
   _FakeGroupsRepository(this.groupsResult);
@@ -867,6 +870,7 @@ GroupsController _controller(
       friendsRepository: effectiveFriendsRepository,
     ),
     groupsRepository: repository,
+    dailyTasksRepository: _FakeDailyTasksRepository(),
     appNavigator: _FakeAppNavigator(),
     supabaseService: _FakeSupabaseService(),
     localStorageService: localStorageService ?? _FakeLocalStorageService(),

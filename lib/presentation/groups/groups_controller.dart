@@ -6,7 +6,9 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
@@ -46,6 +48,7 @@ class GroupsController extends GetxController {
     required this._acceptFriendRequestUseCase,
     required this._removeFriendUseCase,
     required this._groupsRepository,
+    required this._dailyTasksRepository,
     required this._appNavigator,
     required this._supabaseService,
     required this._localStorageService,
@@ -61,6 +64,7 @@ class GroupsController extends GetxController {
   final AcceptFriendRequestUseCase _acceptFriendRequestUseCase;
   final RemoveFriendUseCase _removeFriendUseCase;
   final GroupsRepository _groupsRepository;
+  final DailyTasksRepository _dailyTasksRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
@@ -1091,21 +1095,37 @@ class GroupsController extends GetxController {
     if (group == null || context == null || !_ensureGroupOwner(group)) {
       return;
     }
-    final bool confirmed = await showAppConfirmationDialog(
-      title: context.l10n.resetGroupConfirmTitle,
-      message: context.l10n.resetGroupConfirmMessage(group.name),
-      cancelLabel: context.l10n.cancelButton,
-      confirmLabel: context.l10n.resetGroupConfirmButton,
-      icon: Icons.restart_alt_rounded,
-      isDestructive: true,
-    );
+
+    bool confirmed;
+    bool clearOwnHistory = false;
+    if (group.theme == GroupThemeType.dailyGoals) {
+      final (bool, bool) result = await showCheckboxConfirmationDialog(
+        title: context.l10n.resetGroupConfirmTitle,
+        message: context.l10n.resetGroupConfirmMessage(group.name),
+        cancelLabel: context.l10n.cancelButton,
+        confirmLabel: context.l10n.resetGroupConfirmButton,
+        checkboxLabel: context.l10n.resetGroupClearOwnHistoryLabel,
+        icon: Icons.restart_alt_rounded,
+        isDestructive: true,
+      );
+      (confirmed, clearOwnHistory) = result;
+    } else {
+      confirmed = await showAppConfirmationDialog(
+        title: context.l10n.resetGroupConfirmTitle,
+        message: context.l10n.resetGroupConfirmMessage(group.name),
+        cancelLabel: context.l10n.cancelButton,
+        confirmLabel: context.l10n.resetGroupConfirmButton,
+        icon: Icons.restart_alt_rounded,
+        isDestructive: true,
+      );
+    }
     if (!confirmed || selectedGroup.value?.id != group.id) {
       return;
     }
-    await onConfirmResetGroup();
+    await onConfirmResetGroup(clearOwnHistory: clearOwnHistory);
   }
 
-  Future<void> onConfirmResetGroup() async {
+  Future<void> onConfirmResetGroup({bool clearOwnHistory = false}) async {
     final GroupEntity? group = selectedGroup.value;
     if (group == null || isResettingGroup.value || !_ensureGroupOwner(group)) {
       return;
@@ -1118,6 +1138,9 @@ class GroupsController extends GetxController {
       await result.fold(
         (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
         (_) async {
+          if (clearOwnHistory) {
+            await _clearOwnActivityHistory(group);
+          }
           _activityProgressByCacheKey.removeWhere(
             (key, value) => key.startsWith("${group.id}:"),
           );
@@ -1137,6 +1160,38 @@ class GroupsController extends GetxController {
       isResettingGroup.value = false;
     }
   }
+
+  /// The `reset_group_progress` RPC only zeroes the shared/ranking side and
+  /// deliberately keeps each member's personal history (see
+  /// resetGroupConfirmMessage). When the owner opts in via the checkbox, also
+  /// wipe this device's own completed-days record for the group's goal so it
+  /// starts counting from zero again.
+  Future<void> _clearOwnActivityHistory(GroupEntity group) =>
+      _dailyTasksRepository.runSerializedMutation(() async {
+        final Either<AppError, List<DailyTaskEntity>> result =
+            await _dailyTasksRepository.getTasksForMutation();
+        await result.fold((_) async {}, (tasks) async {
+          final bool hasHistoryToClear = tasks.any(
+            (task) =>
+                task.groupId == group.id && task.completedDates.isNotEmpty,
+          );
+          if (!hasHistoryToClear) {
+            return;
+          }
+
+          final List<DailyTaskEntity> updatedTasks = [
+            for (final DailyTaskEntity task in tasks)
+              if (task.groupId == group.id)
+                task.copyWith(
+                  completedDates: const [],
+                  updatedAt: DateTime.now().toUtc(),
+                )
+              else
+                task,
+          ];
+          await _dailyTasksRepository.saveTasks(updatedTasks);
+        });
+      });
 
   bool _ensureGroupOwner(GroupEntity group) {
     if (isGroupOwner(group)) {
