@@ -8,6 +8,7 @@ import "package:timing/core/data/data_sources/phone_auth_data_source.dart";
 import "package:timing/core/data/data_sources/profile_sync_data_source.dart";
 import "package:timing/core/data/data_sources/schedule_data_source.dart";
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
+import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 
 class DataSourcesBindings extends Bindings {
@@ -19,7 +20,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<ActivityDataSource>(
       ActivityDataSource(
-        activityChangeBus: Get.find(),
+        activityChangeBus: Get.find<ActivityChangeBus>(),
         supabaseService: Get.find(),
         localStorageService: Get.find(),
         pendingSyncStore: Get.find(),
@@ -38,7 +39,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<DailyTasksDataSource>(
       DailyTasksDataSource(
-        activityChangeBus: Get.find(),
+        activityChangeBus: Get.find<ActivityChangeBus>(),
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
@@ -48,7 +49,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<GroupsDataSource>(
       GroupsDataSource(
-        activityChangeBus: Get.find(),
+        activityChangeBus: Get.find<ActivityChangeBus>(),
         supabaseService: Get.find(),
         logger: Get.find(),
         localStorageService: Get.find(),
