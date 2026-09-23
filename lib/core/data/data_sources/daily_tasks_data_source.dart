@@ -27,6 +27,10 @@ class DailyTasksDataSource {
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final PendingSyncStore _pendingSyncStore;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its try/catch can mark the dataset pending for retry, instead
+  // of hanging on the platform's own (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
   Future<void> _remoteSyncTail = Future<void>.value();
   int _latestRemoteSyncRevision = 0;
   String? _hydratedRemoteUserId;
@@ -260,7 +264,8 @@ class DailyTasksDataSource {
           .from("daily_goals")
           .select()
           .eq("user_id", userId)
-          .order("created_at");
+          .order("created_at")
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("select public.daily_goals", rows);
       _hydratedRemoteUserId = userId;
 
@@ -293,7 +298,10 @@ class DailyTasksDataSource {
           .toList();
 
       if (rows.isNotEmpty) {
-        await client.from("daily_goals").upsert(rows, onConflict: "user_id,id");
+        await client
+            .from("daily_goals")
+            .upsert(rows, onConflict: "user_id,id")
+            .timeout(_remoteCallTimeout);
         // Local saves return before this upload completes. Refresh shared
         // rankings only after the server has received the completed days.
         if (tasks.any((task) => task.isFromGroup)) {
@@ -313,7 +321,7 @@ class DailyTasksDataSource {
       if (ids.isNotEmpty) {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
-      await delete;
+      await delete.timeout(_remoteCallTimeout);
       _activityChangeBus?.notifyGroupActivityChanged();
       // A newer local snapshot may already be waiting behind this request.
       // Only the latest successful upload makes the dataset fully synced.

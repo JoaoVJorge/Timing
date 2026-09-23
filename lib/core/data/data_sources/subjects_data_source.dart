@@ -22,6 +22,10 @@ class SubjectsDataSource {
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final PendingSyncStore _pendingSyncStore;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its try/catch can mark the dataset pending for retry, instead
+  // of hanging on the platform's own (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async {
     try {
@@ -87,7 +91,8 @@ class SubjectsDataSource {
           .from("user_subjects")
           .select()
           .eq("user_id", userId)
-          .order("created_at");
+          .order("created_at")
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("select public.user_subjects", rows);
 
       return rows
@@ -122,7 +127,8 @@ class SubjectsDataSource {
       if (rows.isNotEmpty) {
         await client
             .from("user_subjects")
-            .upsert(rows, onConflict: "user_id,id");
+            .upsert(rows, onConflict: "user_id,id")
+            .timeout(_remoteCallTimeout);
       }
 
       final List<String> ids = subjects.map((subject) => subject.id).toList();
@@ -130,7 +136,7 @@ class SubjectsDataSource {
       if (ids.isNotEmpty) {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
-      await delete;
+      await delete.timeout(_remoteCallTimeout);
       await _pendingSyncStore.clear(PendingSyncDataset.subjects);
     } catch (error, stackTrace) {
       _logger.logError(

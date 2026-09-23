@@ -21,6 +21,10 @@ class ScheduleDataSource {
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final PendingSyncStore _pendingSyncStore;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its try/catch can mark the dataset pending for retry, instead
+  // of hanging on the platform's own (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   Future<Either<AppError, List<ScheduleEntryEntity>>> getEntries() async {
     try {
@@ -89,7 +93,8 @@ class ScheduleDataSource {
           .eq("user_id", userId)
           .order("active_from")
           .order("weekday")
-          .order("start_minutes");
+          .order("start_minutes")
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("select public.schedule_entries", rows);
 
       return rows
@@ -120,7 +125,8 @@ class ScheduleDataSource {
       if (rows.isNotEmpty) {
         await client
             .from("schedule_entries")
-            .upsert(rows, onConflict: "user_id,id");
+            .upsert(rows, onConflict: "user_id,id")
+            .timeout(_remoteCallTimeout);
       }
 
       final List<String> ids = entries.map((entry) => entry.id).toList();
@@ -131,7 +137,7 @@ class ScheduleDataSource {
       if (ids.isNotEmpty) {
         delete = delete.not("id", "in", "(${ids.join(",")})");
       }
-      await delete;
+      await delete.timeout(_remoteCallTimeout);
       await _pendingSyncStore.clear(PendingSyncDataset.schedule);
     } catch (error, stackTrace) {
       _logger.logError(

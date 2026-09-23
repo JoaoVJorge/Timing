@@ -41,6 +41,11 @@ class GroupsDataSource {
   final PendingSyncStore _pendingSyncStore;
   static const Duration _activityScoresTimeout = Duration(seconds: 8);
   static const Duration _offlineFallbackTimeout = Duration(seconds: 15);
+  // Every other remote call below must fail fast on a "connected but no real
+  // internet" network so its try/catch can queue the write for retry or
+  // surface the offline notice, instead of hanging on the platform's own
+  // (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
   static const int _imageMessagesPageSize = 50;
 
   /// Groups are remote-authoritative shared state (other members change
@@ -161,10 +166,12 @@ class GroupsDataSource {
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
   getGroupActivityProgress(String groupId, {String? localDate}) async {
     try {
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "group_activity_progress",
-        params: {"target_group_id": groupId, "local_date": localDate},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc(
+            "group_activity_progress",
+            params: {"target_group_id": groupId, "local_date": localDate},
+          )
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.group_activity_progress", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
       return Right(
@@ -296,10 +303,9 @@ class GroupsDataSource {
     String groupId,
   ) async {
     try {
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "group_invite_options",
-        params: {"target_group_id": groupId},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc("group_invite_options", params: {"target_group_id": groupId})
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.group_invite_options", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
       return Right(
@@ -321,10 +327,15 @@ class GroupsDataSource {
     required String friendId,
   }) async {
     try {
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "invite_friend_to_group",
-        params: {"target_group_id": groupId, "target_friend_id": friendId},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc(
+            "invite_friend_to_group",
+            params: {
+              "target_group_id": groupId,
+              "target_friend_id": friendId,
+            },
+          )
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.invite_friend_to_group", response);
       return const Right(null);
     } catch (error, stackTrace) {
@@ -337,10 +348,15 @@ class GroupsDataSource {
     required String friendId,
   }) async {
     try {
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "cancel_group_invitation",
-        params: {"target_group_id": groupId, "target_friend_id": friendId},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc(
+            "cancel_group_invitation",
+            params: {
+              "target_group_id": groupId,
+              "target_friend_id": friendId,
+            },
+          )
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.cancel_group_invitation", response);
       return const Right(null);
     } catch (error, stackTrace) {
@@ -433,7 +449,8 @@ class GroupsDataSource {
             "image_base64": imageBase64,
           })
           .select("id, group_id, sender_id, image_base64, created_at")
-          .single();
+          .single()
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("insert public.group_image_messages", row);
       final Map<String, Map<String, dynamic>> profilesById =
           await _profilesById([userId], withPhoto: true);
@@ -479,7 +496,8 @@ class GroupsDataSource {
         .from("group_members")
         .delete()
         .eq("group_id", groupId)
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .timeout(_remoteCallTimeout);
   }
 
   Future<Either<AppError, void>> removeMember({
@@ -491,7 +509,8 @@ class GroupsDataSource {
           .from("group_members")
           .delete()
           .eq("group_id", groupId)
-          .eq("user_id", memberId);
+          .eq("user_id", memberId)
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -509,10 +528,9 @@ class GroupsDataSource {
         "next_owner_id": nextLeaderId,
       };
       _logger.logRequest(operation, payload);
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "transfer_group_ownership",
-        params: payload,
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc("transfer_group_ownership", params: payload)
+          .timeout(_remoteCallTimeout);
       _logger.logResponse(operation, response);
       return const Right(null);
     } catch (error, stackTrace) {
@@ -535,10 +553,9 @@ class GroupsDataSource {
     const String operation = "rpc public.reset_group_progress";
     try {
       _logger.logRequest(operation, {"target_group_id": groupId});
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "reset_group_progress",
-        params: {"target_group_id": groupId},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc("reset_group_progress", params: {"target_group_id": groupId})
+          .timeout(_remoteCallTimeout);
       _logger.logResponse(operation, response);
       return const Right(null);
     } catch (error, stackTrace) {
@@ -564,9 +581,9 @@ class GroupsDataSource {
       if (userId == null) {
         return const Right([]);
       }
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "pending_group_invitations",
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc("pending_group_invitations")
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.pending_group_invitations", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
       return Right(
@@ -657,10 +674,12 @@ class GroupsDataSource {
     try {
       dynamic response;
       try {
-        response = await _supabaseService.requireClient.rpc(
-          "accept_group_invitation",
-          params: {"invitation_id": invitationId},
-        );
+        response = await _supabaseService.requireClient
+            .rpc(
+              "accept_group_invitation",
+              params: {"invitation_id": invitationId},
+            )
+            .timeout(_remoteCallTimeout);
       } catch (error) {
         if (_isRecoverableAcceptInvitationRpcError(error)) {
           return await _acceptInvitationDirectly(invitationId);
@@ -669,10 +688,12 @@ class GroupsDataSource {
           rethrow;
         }
         try {
-          response = await _supabaseService.requireClient.rpc(
-            "accept_group_invitation",
-            params: {"target_invitation_id": invitationId},
-          );
+          response = await _supabaseService.requireClient
+              .rpc(
+                "accept_group_invitation",
+                params: {"target_invitation_id": invitationId},
+              )
+              .timeout(_remoteCallTimeout);
         } catch (fallbackError) {
           if (_isRecoverableAcceptInvitationRpcError(fallbackError)) {
             return await _acceptInvitationDirectly(invitationId);
@@ -698,10 +719,12 @@ class GroupsDataSource {
 
   Future<Either<AppError, void>> declineInvitation(String invitationId) async {
     try {
-      await _supabaseService.requireClient.rpc(
-        "decline_group_invitation",
-        params: {"invitation_id": invitationId},
-      );
+      await _supabaseService.requireClient
+          .rpc(
+            "decline_group_invitation",
+            params: {"invitation_id": invitationId},
+          )
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -719,18 +742,16 @@ class GroupsDataSource {
       }
       dynamic response;
       try {
-        response = await _supabaseService.requireClient.rpc(
-          "join_group_by_invite_code",
-          params: {"lookup_code": code},
-        );
+        response = await _supabaseService.requireClient
+            .rpc("join_group_by_invite_code", params: {"lookup_code": code})
+            .timeout(_remoteCallTimeout);
       } catch (error) {
         if (!_isRpcSignatureError(error)) {
           rethrow;
         }
-        response = await _supabaseService.requireClient.rpc(
-          "join_group_by_invite_code",
-          params: {"invite_code": code},
-        );
+        response = await _supabaseService.requireClient
+            .rpc("join_group_by_invite_code", params: {"invite_code": code})
+            .timeout(_remoteCallTimeout);
       }
       _logger.logResponse(operation, response);
       final String? groupId = _groupIdFromRpcResponse(response);
@@ -761,7 +782,8 @@ class GroupsDataSource {
         .select("id, group_id, invitee_id, status")
         .eq("id", invitationId)
         .eq("invitee_id", userId)
-        .maybeSingle();
+        .maybeSingle()
+        .timeout(_remoteCallTimeout);
     _logger.logResponse("select public.group_invitations", invitationResponse);
     if (invitationResponse == null) {
       throw StateError("Group invitation was not found for current user.");
@@ -777,12 +799,15 @@ class GroupsDataSource {
 
     if (status == "pending") {
       try {
-        await _supabaseService.requireClient.from("group_members").insert({
-          "group_id": groupId,
-          "user_id": userId,
-          "role": "member",
-          "joined_at": DateTime.now().toUtc().toIso8601String(),
-        });
+        await _supabaseService.requireClient
+            .from("group_members")
+            .insert({
+              "group_id": groupId,
+              "user_id": userId,
+              "role": "member",
+              "joined_at": DateTime.now().toUtc().toIso8601String(),
+            })
+            .timeout(_remoteCallTimeout);
       } catch (error) {
         if (!_isUniqueViolation(error)) {
           rethrow;
@@ -792,7 +817,8 @@ class GroupsDataSource {
           .from("group_invitations")
           .update({"status": "accepted"})
           .eq("id", invitationId)
-          .eq("invitee_id", userId);
+          .eq("invitee_id", userId)
+          .timeout(_remoteCallTimeout);
     }
 
     return await _groupByIdAfterMembershipChange(groupId);
@@ -885,10 +911,9 @@ class GroupsDataSource {
         "activity_payload": activity?.toPayload(),
       };
       _logger.logRequest(operation, createGroupPayload);
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "create_group_with_members",
-        params: createGroupPayload,
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc("create_group_with_members", params: createGroupPayload)
+          .timeout(_remoteCallTimeout);
       _logger.logResponse(operation, response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
@@ -1011,10 +1036,9 @@ class GroupsDataSource {
       "activity_payload": activityPayload,
     };
     _logger.logRequest(operation, payload);
-    final dynamic response = await _supabaseService.requireClient.rpc(
-      "update_group_with_activity",
-      params: payload,
-    );
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("update_group_with_activity", params: payload)
+        .timeout(_remoteCallTimeout);
     _logger.logResponse(operation, response);
 
     final List<dynamic> rows = response as List<dynamic>;
@@ -1124,7 +1148,7 @@ class GroupsDataSource {
   }) async {
     final PostgrestList response = await filters(
       _supabaseService.requireClient.from(table).select(columns),
-    );
+    ).timeout(_remoteCallTimeout);
     _logger.logResponse("select public.$table", response);
     return (response as List<dynamic>)
         .map((row) => Map<String, dynamic>.from(row as Map))

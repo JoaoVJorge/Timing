@@ -27,6 +27,11 @@ class FriendsDataSource {
   final AppLocalStorageService _localStorageService;
   final PendingSyncStore _pendingSyncStore;
   static const Duration _offlineFallbackTimeout = Duration(seconds: 8);
+  // Every other remote call below must fail fast on a "connected but no real
+  // internet" network so its try/catch can queue the write for retry or
+  // surface the offline notice, instead of hanging on the platform's own
+  // (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   Future<Either<AppError, List<FriendPresenceEntity>>> getPresences(
     List<String> friendIds,
@@ -180,11 +185,14 @@ class FriendsDataSource {
     String userId,
     String addresseeId,
   ) async {
-    await _supabaseService.requireClient.from("friendships").insert({
-      "requester_id": userId,
-      "addressee_id": addresseeId,
-      "status": "pending",
-    });
+    await _supabaseService.requireClient
+        .from("friendships")
+        .insert({
+          "requester_id": userId,
+          "addressee_id": addresseeId,
+          "status": "pending",
+        })
+        .timeout(_remoteCallTimeout);
   }
 
   Future<Either<AppError, void>> acceptRequest(String friendshipId) async {
@@ -232,7 +240,8 @@ class FriendsDataSource {
     await _supabaseService.requireClient
         .from("friendships")
         .update({"status": "accepted"})
-        .eq("id", friendshipId);
+        .eq("id", friendshipId)
+        .timeout(_remoteCallTimeout);
   }
 
   Future<Either<AppError, void>> declineRequest(String friendshipId) async {
@@ -269,7 +278,8 @@ class FriendsDataSource {
     await _supabaseService.requireClient
         .from("friendships")
         .delete()
-        .eq("id", friendshipId);
+        .eq("id", friendshipId)
+        .timeout(_remoteCallTimeout);
   }
 
   Future<Either<AppError, void>> cancelSentRequest({
@@ -326,7 +336,8 @@ class FriendsDataSource {
       await _supabaseService.requireClient
           .from("friendships")
           .delete()
-          .eq("id", friendshipId);
+          .eq("id", friendshipId)
+          .timeout(_remoteCallTimeout);
       return;
     }
     await _supabaseService.requireClient
@@ -334,7 +345,8 @@ class FriendsDataSource {
         .delete()
         .eq("requester_id", userId!)
         .eq("addressee_id", addresseeId)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .timeout(_remoteCallTimeout);
   }
 
   Future<Either<AppError, void>> removeFriend({
@@ -390,7 +402,8 @@ class FriendsDataSource {
       await _supabaseService.requireClient
           .from("friendships")
           .delete()
-          .eq("id", friendshipId);
+          .eq("id", friendshipId)
+          .timeout(_remoteCallTimeout);
       return;
     }
     await _supabaseService.requireClient
@@ -400,7 +413,8 @@ class FriendsDataSource {
         .or(
           "and(requester_id.eq.$userId,addressee_id.eq.$friendId),"
           "and(requester_id.eq.$friendId,addressee_id.eq.$userId)",
-        );
+        )
+        .timeout(_remoteCallTimeout);
   }
 
   /// Re-attempts friend actions that failed to reach the backend earlier, in
@@ -487,10 +501,12 @@ class FriendsDataSource {
       if (lookupCode.isEmpty) {
         return const Right(null);
       }
-      final dynamic response = await _supabaseService.requireClient.rpc(
-        "find_profile_by_friend_code",
-        params: {"lookup_code": lookupCode},
-      );
+      final dynamic response = await _supabaseService.requireClient
+          .rpc(
+            "find_profile_by_friend_code",
+            params: {"lookup_code": lookupCode},
+          )
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.find_profile_by_friend_code", response);
       final List<dynamic> rows = response as List<dynamic>;
       if (rows.isEmpty) {
@@ -516,9 +532,10 @@ class FriendsDataSource {
     String columns = "*",
     required dynamic Function(dynamic query) filters,
   }) async {
-    final dynamic response = await filters(
+    final dynamic query = filters(
       _supabaseService.requireClient.from(table).select(columns),
     );
+    final dynamic response = await query.timeout(_remoteCallTimeout);
     _logger.logResponse("select public.$table", response);
     return (response as List<dynamic>)
         .map((row) => Map<String, dynamic>.from(row as Map))

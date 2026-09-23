@@ -27,6 +27,10 @@ class ActivityDataSource {
   final AppLocalStorageService _localStorageService;
   final PendingSyncStore _pendingSyncStore;
   final AppLoggerService _logger;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its try/catch can queue the entry for retry, instead of
+  // hanging on the platform's own (much longer) socket timeout.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   /// Inserts one focus-session row. Unlike subjects/schedule/dailyTasks this
   /// is an append-only log, not a "resync current state" entity, so a failed
@@ -62,7 +66,8 @@ class ActivityDataSource {
     try {
       await _supabaseService.requireClient
           .from("activity_entries")
-          .upsert(row, onConflict: "id");
+          .upsert(row, onConflict: "id")
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
@@ -92,7 +97,8 @@ class ActivityDataSource {
     try {
       await _supabaseService.requireClient
           .from("activity_entries")
-          .upsert(queue, onConflict: "id");
+          .upsert(queue, onConflict: "id")
+          .timeout(_remoteCallTimeout);
       await _writeQueue(const []);
       await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
       _activityChangeBus?.notifyGroupActivityChanged();
@@ -151,7 +157,8 @@ class ActivityDataSource {
           .select()
           .eq("user_id", userId)
           .gte("occurred_at", cutoff.toIso8601String())
-          .order("occurred_at");
+          .order("occurred_at")
+          .timeout(_remoteCallTimeout);
 
       return Right(
         rows
