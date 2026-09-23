@@ -10,6 +10,7 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/sync/sync_error_classifier.dart";
 import "package:timing/core/utils/id_generator.dart";
 
 class ActivityDataSource {
@@ -108,6 +109,52 @@ class ActivityDataSource {
         error: error,
         stackTrace: stackTrace,
       );
+      if (isPermanentSyncFailure(error)) {
+        await _flushRowByRow(queue);
+      }
+    }
+  }
+
+  /// A single batch upsert fails as a whole, so one row the server rejects for
+  /// good would block every other queued session forever. Retrying row by row
+  /// isolates and drops the rejected ones while transient failures stay queued.
+  Future<void> _flushRowByRow(List<Map<String, dynamic>> queue) async {
+    int processed = 0;
+    int uploaded = 0;
+    try {
+      for (final Map<String, dynamic> row in queue) {
+        try {
+          await _supabaseService.requireClient
+              .from("activity_entries")
+              .upsert(row, onConflict: "id")
+              .timeout(_remoteCallTimeout);
+          uploaded++;
+        } catch (error, stackTrace) {
+          if (!isPermanentSyncFailure(error)) {
+            rethrow;
+          }
+          _logger.logError(
+            "Dropping a queued activity_entries row the server rejected",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+        processed++;
+      }
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to flush a queued activity_entries row",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    final List<Map<String, dynamic>> remaining = queue.sublist(processed);
+    await _writeQueue(remaining);
+    if (uploaded > 0) {
+      _activityChangeBus?.notifyGroupActivityChanged();
+    }
+    if (remaining.isEmpty) {
+      await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
     }
   }
 
