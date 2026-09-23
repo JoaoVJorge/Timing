@@ -12,6 +12,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
+import "package:timing/core/services/sync/sync_error_classifier.dart";
 import "package:timing/theme/group_colors.dart";
 
 class FriendsDataSource {
@@ -433,7 +434,21 @@ class FriendsDataSource {
     int processed = 0;
     try {
       for (final Map<String, dynamic> action in queue) {
-        await _replayFriendAction(action);
+        try {
+          await _replayFriendAction(action);
+        } catch (error, stackTrace) {
+          if (!isPermanentSyncFailure(error)) {
+            rethrow;
+          }
+          // The server rejected this action for good (e.g. the request
+          // already exists); keeping it queued would block every later
+          // action forever.
+          _logger.logError(
+            "Dropping a queued friend action the server rejected",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
         processed++;
       }
     } catch (error, stackTrace) {

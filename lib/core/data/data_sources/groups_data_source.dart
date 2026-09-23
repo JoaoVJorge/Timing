@@ -20,6 +20,7 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/services/sync/sync_error_classifier.dart";
 import "package:timing/theme/group_colors.dart";
 import "package:supabase_flutter/supabase_flutter.dart"
     show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
@@ -1082,7 +1083,20 @@ class GroupsDataSource {
     int processed = 0;
     try {
       for (final Map<String, dynamic> action in queue) {
-        await _replayGroupAction(action);
+        try {
+          await _replayGroupAction(action);
+        } catch (error, stackTrace) {
+          if (!isPermanentSyncFailure(error)) {
+            rethrow;
+          }
+          // The server rejected this action for good; keeping it queued
+          // would block every later action forever.
+          _logger.logError(
+            "Dropping a queued group action the server rejected",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
         processed++;
       }
     } catch (error, stackTrace) {
