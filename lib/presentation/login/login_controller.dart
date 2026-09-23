@@ -23,6 +23,7 @@ class LoginController extends GetxController {
 
   static const bool isAppleSignInComplete = false;
   static const Duration _googleSignInTimeout = Duration(seconds: 20);
+  static const Duration _postSignInTimeout = Duration(seconds: 15);
 
   final SignInWithGoogleUseCase signInWithGoogleUseCase;
   final AppController appController;
@@ -48,6 +49,14 @@ class LoginController extends GetxController {
         unawaited(_handleSignedInUser());
       }
     });
+    // The OAuth deep-link session exchange can finish before this listener
+    // is attached (e.g. a cold start that lands on the splash screen first,
+    // where nothing is listening yet). If a session already exists by the
+    // time this page loads, treat it the same as a freshly received event
+    // instead of leaving the user stuck looking signed out.
+    if (supabaseService.hasSignedInUser) {
+      unawaited(_handleSignedInUser());
+    }
   }
 
   Future<void> onTapGoogleSignIn() async {
@@ -96,18 +105,7 @@ class LoginController extends GetxController {
 
     _isHandlingSignedInUser = true;
     try {
-      final bool hasRemoteProfile = await appController
-          .refreshProfileFromBackend();
-      if (!hasRemoteProfile) {
-        await _syncProfileFromAuthUser();
-        await appController.refreshProfileFromBackend();
-      }
-      await appController.reloadUserScopedState();
-      _hasCompletedSignIn = true;
-      await appController.recordSuccessfulBackendContact();
-      if (Get.currentRoute != AppRoutes.mainNavigation) {
-        await appNavigator.offAllNamed(AppRoutes.mainNavigation);
-      }
+      await _completeSignIn().timeout(_postSignInTimeout);
     } catch (error, stackTrace) {
       logger.logError(
         "Failed to finish Google sign in",
@@ -117,6 +115,21 @@ class LoginController extends GetxController {
       appNavigator.showErrorSnackBar();
     } finally {
       _isHandlingSignedInUser = false;
+    }
+  }
+
+  Future<void> _completeSignIn() async {
+    final bool hasRemoteProfile = await appController
+        .refreshProfileFromBackend();
+    if (!hasRemoteProfile) {
+      await _syncProfileFromAuthUser();
+      await appController.refreshProfileFromBackend();
+    }
+    await appController.reloadUserScopedState();
+    _hasCompletedSignIn = true;
+    await appController.recordSuccessfulBackendContact();
+    if (Get.currentRoute != AppRoutes.mainNavigation) {
+      await appNavigator.offAllNamed(AppRoutes.mainNavigation);
     }
   }
 
