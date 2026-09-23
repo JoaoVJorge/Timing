@@ -138,6 +138,12 @@ class ConfigPage extends StatelessWidget {
                   subtitle: context.l10n.logOutSettingsSubtitle,
                   onTap: controller.onTapLogOut,
                 ),
+                SettingsTile.danger(
+                  icon: Icons.person_remove_rounded,
+                  title: context.l10n.deleteAccountLabel,
+                  subtitle: context.l10n.deleteAccountSettingsSubtitle,
+                  onTap: controller.onTapDeleteAccount,
+                ),
               ],
             ),
           ],

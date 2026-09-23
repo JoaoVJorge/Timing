@@ -2,12 +2,15 @@ import "dart:typed_data";
 
 import "package:get/get.dart";
 import "package:flutter/material.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/config/widgets/config_dialogs.dart";
 import "package:timing/shared/functions/format_name.dart";
+import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/theme/app_languages.dart";
 
 class ConfigController extends GetxController {
@@ -127,6 +130,29 @@ class ConfigController extends GetxController {
     final bool? confirmed = await showLogOutDialog();
     if (confirmed ?? false) {
       await _appController.logOut();
+    }
+  }
+
+  Future<void> onTapDeleteAccount() async {
+    final context = Get.context!;
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.deleteAccountDialogTitle,
+      message: context.l10n.deleteAccountDialogMessage,
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.deleteAccountRequestButton,
+      icon: Icons.person_remove_rounded,
+      isDestructive: true,
+    );
+    if (!confirmed) return;
+
+    try {
+      final bool opened = await launchUrl(
+        Uri.parse(AppConstants.accountDeletionUrl),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened) _appNavigator.showErrorSnackBar();
+    } on Exception {
+      _appNavigator.showErrorSnackBar();
     }
   }
 }
