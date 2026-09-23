@@ -1042,6 +1042,23 @@ class AppLocalizationsDe extends AppLocalizations {
       'Beenden Sie die Sitzung auf diesem Gerät';
 
   @override
+  String get deleteAccountLabel => 'Konto löschen';
+
+  @override
+  String get deleteAccountSettingsSubtitle =>
+      'Löschung Ihres Kontos und Ihrer Daten beantragen';
+
+  @override
+  String get deleteAccountDialogTitle => 'Ihr Konto löschen?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Timing öffnet die offizielle Löschseite mit Anweisungen, um die dauerhafte Löschung Ihres Kontos und der zugehörigen Daten zu beantragen.';
+
+  @override
+  String get deleteAccountRequestButton => 'Anfrage öffnen';
+
+  @override
   String get logOutDialogTitle => 'Abmelden?';
 
   @override

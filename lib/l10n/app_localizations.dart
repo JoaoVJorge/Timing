@@ -1912,6 +1912,36 @@ abstract class AppLocalizations {
   /// **'End the session on this device'**
   String get logOutSettingsSubtitle;
 
+  /// No description provided for @deleteAccountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountLabel;
+
+  /// No description provided for @deleteAccountSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request deletion of your account and data'**
+  String get deleteAccountSettingsSubtitle;
+
+  /// No description provided for @deleteAccountDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountDialogTitle;
+
+  /// No description provided for @deleteAccountDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing will open the official deletion page with instructions to request permanent deletion of your account and associated data.'**
+  String get deleteAccountDialogMessage;
+
+  /// No description provided for @deleteAccountRequestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Open request'**
+  String get deleteAccountRequestButton;
+
   /// No description provided for @logOutDialogTitle.
   ///
   /// In en, this message translates to:

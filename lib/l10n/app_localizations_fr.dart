@@ -1044,6 +1044,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get logOutSettingsSubtitle => 'Terminer la session sur cet appareil';
 
   @override
+  String get deleteAccountLabel => 'Supprimer le compte';
+
+  @override
+  String get deleteAccountSettingsSubtitle =>
+      'Demandez la suppression de votre compte et de vos données';
+
+  @override
+  String get deleteAccountDialogTitle => 'Supprimer votre compte ?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Timing ouvrira la page officielle de suppression avec les instructions pour demander la suppression définitive de votre compte et des données associées.';
+
+  @override
+  String get deleteAccountRequestButton => 'Ouvrir la demande';
+
+  @override
   String get logOutDialogTitle => 'Se déconnecter ?';
 
   @override

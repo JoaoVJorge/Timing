@@ -1022,6 +1022,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logOutSettingsSubtitle => 'End the session on this device';
 
   @override
+  String get deleteAccountLabel => 'Delete account';
+
+  @override
+  String get deleteAccountSettingsSubtitle =>
+      'Request deletion of your account and data';
+
+  @override
+  String get deleteAccountDialogTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'Timing will open the official deletion page with instructions to request permanent deletion of your account and associated data.';
+
+  @override
+  String get deleteAccountRequestButton => 'Open request';
+
+  @override
   String get logOutDialogTitle => 'Log out?';
 
   @override

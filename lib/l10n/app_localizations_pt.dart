@@ -1030,6 +1030,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get logOutSettingsSubtitle => 'Encerrar sessão neste dispositivo';
 
   @override
+  String get deleteAccountLabel => 'Excluir conta';
+
+  @override
+  String get deleteAccountSettingsSubtitle =>
+      'Solicite a exclusão da sua conta e dos seus dados';
+
+  @override
+  String get deleteAccountDialogTitle => 'Excluir sua conta?';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'O Timing abrirá a página oficial de exclusão com instruções para solicitar a remoção permanente da sua conta e dos dados associados.';
+
+  @override
+  String get deleteAccountRequestButton => 'Abrir solicitação';
+
+  @override
   String get logOutDialogTitle => 'Sair da conta?';
 
   @override

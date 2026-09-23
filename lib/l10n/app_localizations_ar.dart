@@ -1022,6 +1022,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logOutSettingsSubtitle => 'قم بإنهاء الجلسة على هذا الجهاز';
 
   @override
+  String get deleteAccountLabel => 'حذف الحساب';
+
+  @override
+  String get deleteAccountSettingsSubtitle => 'اطلب حذف حسابك وبياناتك';
+
+  @override
+  String get deleteAccountDialogTitle => 'هل تريد حذف حسابك؟';
+
+  @override
+  String get deleteAccountDialogMessage =>
+      'سيفتح Timing صفحة الحذف الرسمية التي تتضمن تعليمات لطلب الحذف الدائم لحسابك والبيانات المرتبطة به.';
+
+  @override
+  String get deleteAccountRequestButton => 'فتح الطلب';
+
+  @override
   String get logOutDialogTitle => 'تسجيل الخروج؟';
 
   @override
