@@ -1,42 +1,105 @@
 import "dart:async";
 
 import "package:connectivity_plus/connectivity_plus.dart";
+import "package:dio/dio.dart";
 import "package:get/get.dart";
+import "package:timing/env/environment_keys.dart";
 
 /// Reactive online/offline signal for the app.
 ///
-/// This reflects OS-level link reachability (Wi-Fi/cellular is connected),
-/// not proven backend reachability — a device can read "online" while on a
-/// Wi-Fi network with no real internet. Callers that need to know whether a
-/// specific write actually reached the backend should rely on
-/// [PendingSyncStore.onMarkedPending] instead; this service is meant for
-/// coarse UI state and for triggering a reconnect-flush attempt.
+/// A network link is only considered online after the configured backend's
+/// health endpoint responds. Periodic checks also detect a Wi-Fi connection
+/// that loses internet without changing its OS connectivity state.
 class ConnectivityService {
   ConnectivityService({
     Future<List<ConnectivityResult>> Function()? checkConnectivity,
     Stream<List<ConnectivityResult>>? connectivityChanges,
+    Future<bool> Function()? checkBackend,
+    this._checkInterval = const Duration(seconds: 20),
   }) : _checkConnectivity =
            checkConnectivity ?? Connectivity().checkConnectivity,
        _connectivityChanges =
-           connectivityChanges ?? Connectivity().onConnectivityChanged;
+           connectivityChanges ?? Connectivity().onConnectivityChanged,
+       _checkBackend = checkBackend ?? _probeConfiguredBackend;
 
   final Future<List<ConnectivityResult>> Function() _checkConnectivity;
   final Stream<List<ConnectivityResult>> _connectivityChanges;
+  final Future<bool> Function() _checkBackend;
+  final Duration _checkInterval;
 
-  final RxBool isOnline = true.obs;
+  final RxBool isOnline = false.obs;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
+  Timer? _timer;
+  int _checkRevision = 0;
 
   Future<void> initialize() async {
-    isOnline.value = _isOnline(await _checkConnectivity());
+    await refresh();
     _subscription = _connectivityChanges.listen((results) {
-      isOnline.value = _isOnline(results);
+      unawaited(_check(results));
     });
+    _timer = Timer.periodic(_checkInterval, (_) => unawaited(refresh()));
   }
 
-  bool _isOnline(List<ConnectivityResult> results) =>
-      results.any((result) => result != ConnectivityResult.none);
+  Future<void> refresh() async {
+    final int revision = ++_checkRevision;
+    try {
+      final results = await _checkConnectivity();
+      await _check(results, revision: revision);
+    } catch (_) {
+      if (revision == _checkRevision) isOnline.value = false;
+    }
+  }
+
+  Future<void> _check(List<ConnectivityResult> results, {int? revision}) async {
+    final int currentRevision = revision ?? ++_checkRevision;
+    if (!results.any((result) => result != ConnectivityResult.none)) {
+      isOnline.value = false;
+      return;
+    }
+    try {
+      final bool reachable = await _checkBackend();
+      if (currentRevision == _checkRevision) isOnline.value = reachable;
+    } catch (_) {
+      if (currentRevision == _checkRevision) isOnline.value = false;
+    }
+  }
+
+  static Future<bool> _probeConfiguredBackend() async {
+    if (!EnvironmentKeys.hasSupabaseConfig) return true;
+    final Uri uri = Uri.parse(
+      EnvironmentKeys.supabaseUrl,
+    ).resolve("/auth/v1/health");
+    return probeBackend(uri);
+  }
+
+  /// Any non-redirect HTTP response proves that the server was reached.
+  /// This endpoint may require authentication or be absent on a deployment;
+  /// 401 and 404 must not be mistaken for a missing internet connection.
+  static Future<bool> probeBackend(Uri uri) async {
+    final Dio client = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 3),
+        receiveTimeout: const Duration(seconds: 3),
+        followRedirects: false,
+        validateStatus: (_) => true,
+      ),
+    );
+    try {
+      final response = await client.getUri<dynamic>(uri);
+      final int? status = response.statusCode;
+      return status != null &&
+          status >= 200 &&
+          status < 600 &&
+          status ~/ 100 != 3;
+    } catch (_) {
+      return false;
+    } finally {
+      client.close();
+    }
+  }
 
   void dispose() {
+    _timer?.cancel();
     unawaited(_subscription?.cancel());
   }
 }

@@ -1,12 +1,15 @@
 import "dart:async";
 import "dart:io";
 
+import "package:connectivity_plus/connectivity_plus.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/services/auth/offline_grace_period.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -44,6 +47,39 @@ class _Logger implements AppLoggerService {
 }
 
 void main() {
+  test("offline access expires after seven days", () {
+    final now = DateTime.utc(2026, 9, 22);
+    const period = OfflineGracePeriod();
+    expect(
+      period.hasExpired(
+        lastVerifiedOnlineAt: now.subtract(const Duration(days: 7)),
+        now: now,
+      ),
+      isFalse,
+    );
+    expect(
+      period.hasExpired(
+        lastVerifiedOnlineAt: now.subtract(const Duration(days: 7, seconds: 1)),
+        now: now,
+      ),
+      isTrue,
+    );
+  });
+
+  test("Wi-Fi without backend access stays offline", () async {
+    bool reachable = false;
+    final service = ConnectivityService(
+      checkConnectivity: () async => [ConnectivityResult.wifi],
+      checkBackend: () async => reachable,
+    );
+    await service.refresh();
+    expect(service.isOnline.value, isFalse);
+    reachable = true;
+    await service.refresh();
+    expect(service.isOnline.value, isTrue);
+    service.dispose();
+  });
+
   late HttpServer server;
   late _Backend backend;
   late _Storage storage;
@@ -73,6 +109,20 @@ void main() {
       await request.response.close();
     };
     server.listen((request) => unawaited(respond(request)));
+  });
+
+  test("authentication responses still mean internet is available", () async {
+    for (final int status in [401, 404]) {
+      respond = (request) async {
+        await request.drain<void>();
+        request.response.statusCode = status;
+        await request.response.close();
+      };
+      final bool reachable = await ConnectivityService.probeBackend(
+        Uri.parse("http://127.0.0.1:${server.port}/auth/v1/health"),
+      );
+      expect(reachable, isTrue);
+    }
   });
 
   tearDown(() async {
@@ -166,5 +216,60 @@ void main() {
     expect(changes, hasLength(1));
     await source.flushPendingSync();
     expect(changes, hasLength(1));
+  });
+
+  test("group activity survives restart and syncs after reconnect", () async {
+    backend.offline = true;
+    final activity = ActivityDataSource(
+      supabaseService: backend,
+      localStorageService: storage,
+      pendingSyncStore: pending,
+      logger: _Logger(),
+      activityChangeBus: bus,
+    );
+    final goals = dailyTasks();
+
+    await activity.logActivity(
+      category: TimeCategoryType.studying,
+      subjectId: "group-subject",
+      subjectName: "Group study",
+      seconds: 600,
+    );
+    await goals.saveTasks([task]);
+    await goals.flushPendingSync();
+    expect(
+      pending.all,
+      containsAll([
+        PendingSyncDataset.activityEntries,
+        PendingSyncDataset.dailyTasks,
+      ]),
+    );
+
+    // New store and data sources simulate a fresh app process using the same
+    // persisted local storage.
+    final restoredPending = PendingSyncStore(localStorageService: storage);
+    await restoredPending.load();
+    final restoredActivity = ActivityDataSource(
+      supabaseService: backend,
+      localStorageService: storage,
+      pendingSyncStore: restoredPending,
+      logger: _Logger(),
+      activityChangeBus: bus,
+    );
+    final restoredGoals = DailyTasksDataSource(
+      localStorageService: storage,
+      supabaseService: backend,
+      logger: _Logger(),
+      pendingSyncStore: restoredPending,
+      activityChangeBus: bus,
+    );
+    backend.offline = false;
+    await restoredGoals.flushPendingSync();
+    await restoredActivity.flushPendingSync();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(restoredPending.all, isEmpty);
+    expect(storage.values[LocalStorageKeys.pendingActivityEntries], "[]");
+    expect(changes, isNotEmpty);
   });
 }

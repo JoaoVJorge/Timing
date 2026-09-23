@@ -4,7 +4,7 @@
 /// Extracted from [AppController] so it's testable without standing up the
 /// app's full DI graph.
 class OfflineGracePeriod {
-  const OfflineGracePeriod({this.duration = const Duration(days: 30)});
+  const OfflineGracePeriod({this.duration = const Duration(days: 7)});
 
   final Duration duration;
 
@@ -12,7 +12,10 @@ class OfflineGracePeriod {
   /// recorded a successful backend contact is not treated as expired here;
   /// callers decide what to do with that case (see the grandfather clause in
   /// `AppController._hasGracePeriodExpired`).
-  bool hasExpired({required DateTime? lastVerifiedOnlineAt, required DateTime now}) {
+  bool hasExpired({
+    required DateTime? lastVerifiedOnlineAt,
+    required DateTime now,
+  }) {
     if (lastVerifiedOnlineAt == null) {
       return false;
     }

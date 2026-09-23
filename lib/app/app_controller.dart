@@ -98,10 +98,14 @@ class AppController extends GetxController with WidgetsBindingObserver {
   final OfflineGracePeriod _offlineGracePeriod = const OfflineGracePeriod();
   StreamSubscription<String>? _pendingSyncSubscription;
   StreamSubscription<bool>? _connectivitySubscription;
+  Timer? _pendingSyncRetryTimer;
+  Future<void>? _reconciliationInProgress;
+  bool _hadQueuedOfflineChanges = false;
 
   static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
   static const Duration _presenceRequestTimeout = Duration(seconds: 2);
   static const Duration _presenceLogoutWait = Duration(milliseconds: 1500);
+  static const Duration _initialConfigLoadTimeout = Duration(seconds: 10);
 
   /// Decoded once per photo change and reused afterwards: `Image.memory` keys
   /// its cache by byte-list identity, so handing it a fresh list on every
@@ -131,23 +135,64 @@ class AppController extends GetxController with WidgetsBindingObserver {
     if (_supabaseService.hasSignedInUser) {
       _startPresenceTracking();
     }
+    _hadQueuedOfflineChanges = Get.find<PendingSyncStore>().all.isNotEmpty;
     _pendingSyncSubscription = Get.find<PendingSyncStore>().onMarkedPending
         .listen((_) {
           if (!Get.find<ConnectivityService>().isOnline.value) {
+            _hadQueuedOfflineChanges = true;
             _appNavigator.showOfflineSnackBar();
           }
         });
-    _connectivitySubscription = Get.find<ConnectivityService>().isOnline
-        .listen((online) {
-          if (online && _supabaseService.hasSignedInUser) {
-            unawaited(_syncReconciliationService.flushPending());
-          }
-        });
+    _connectivitySubscription = Get.find<ConnectivityService>().isOnline.listen(
+      (online) {
+        if (online && _supabaseService.hasSignedInUser) {
+          unawaited(_flushPendingAndNotify());
+        }
+      },
+    );
+    _pendingSyncRetryTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (_supabaseService.hasSignedInUser &&
+          Get.find<ConnectivityService>().isOnline.value &&
+          Get.find<PendingSyncStore>().all.isNotEmpty) {
+        unawaited(_flushPendingAndNotify());
+      }
+    });
+  }
+
+  Future<void> _flushPendingAndNotify() {
+    final Future<void>? current = _reconciliationInProgress;
+    if (current != null) return current;
+    final Future<void> work = _runReconciliation();
+    _reconciliationInProgress = work;
+    return work.whenComplete(() => _reconciliationInProgress = null);
+  }
+
+  Future<void> _runReconciliation() async {
+    if (!Get.find<ConnectivityService>().isOnline.value) return;
+    final bool hadPending = Get.find<PendingSyncStore>().all.isNotEmpty;
+    await _syncReconciliationService.flushPending();
+    if (!Get.find<ConnectivityService>().isOnline.value) return;
+    if (hadPending && Get.isRegistered<GroupsController>()) {
+      await Get.find<GroupsController>().loadGroups();
+    }
+    if (_hadQueuedOfflineChanges && Get.find<PendingSyncStore>().all.isEmpty) {
+      _hadQueuedOfflineChanges = false;
+      final BuildContext? context = Get.context;
+      if (context != null && context.mounted) {
+        _appNavigator.showSuccessSnackBar(
+          context.l10n.offlineSyncCompletedMessage,
+        );
+      }
+    }
   }
 
   Future<void> initialize() async {
+    // Bounded so a stalled network call (e.g. racing the OAuth deep-link
+    // session exchange right after a cold start) can never leave the splash
+    // screen stuck forever. The underlying calls keep running in the
+    // background and still apply their results whenever they resolve.
     await Future.wait([
-      _loadInitialConfig(),
+      _loadInitialConfig().timeout(_initialConfigLoadTimeout, onTimeout: () {}),
       Future.delayed(AppConstants.splashScreenDuration),
     ]);
     await _navigateAfterSplash();
@@ -208,7 +253,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     // with the OS notification permission can complete after navigation.
     unawaited(refreshNotificationsEnabledFromSystem());
     if (_supabaseService.hasSignedInUser) {
-      unawaited(_syncReconciliationService.flushPending());
+      unawaited(_flushPendingAndNotify());
     }
   }
 
@@ -219,7 +264,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   }
 
   /// Marks "the app just talked to the backend successfully while signed
-  /// in" — resets the 30-day offline grace clock. Called from every place
+  /// in" — resets the 7-day offline grace clock. Called from every place
   /// that confirms a real round-trip: a successful profile refresh here and
   /// a fresh sign-in in [LoginController].
   Future<void> recordSuccessfulBackendContact() => localStorageService.write(
@@ -604,6 +649,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       isAppInForeground.value = true;
       _startPresenceTracking();
+      unawaited(Get.find<ConnectivityService>().refresh());
       return;
     }
     if (state == AppLifecycleState.paused ||
@@ -618,6 +664,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   @override
   void onClose() {
     _presenceHeartbeat?.cancel();
+    _pendingSyncRetryTimer?.cancel();
     unawaited(_pendingSyncSubscription?.cancel());
     unawaited(_connectivitySubscription?.cancel());
     WidgetsBinding.instance.removeObserver(this);
