@@ -1,4 +1,5 @@
 import "package:get/get.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/data/data_sources/app_config_data_source.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
@@ -44,6 +45,8 @@ class DataSourcesBindings extends Bindings {
         supabaseService: Get.find(),
         logger: Get.find(),
         pendingSyncStore: Get.find(),
+        isBackendReachable: () =>
+            Get.find<ConnectivityService>().isOnline.value,
       ),
       permanent: true,
     );

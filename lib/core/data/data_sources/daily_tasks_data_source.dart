@@ -19,7 +19,13 @@ class DailyTasksDataSource {
     required this._logger,
     required this._pendingSyncStore,
     this._activityChangeBus,
+    this._isBackendReachable,
   });
+
+  /// Lets reads skip the remote refresh when the app already knows the backend
+  /// is unreachable, instead of waiting out [_remoteCallTimeout] on every
+  /// screen that reloads the daily tasks.
+  final bool Function()? _isBackendReachable;
 
   final ActivityChangeBus? _activityChangeBus;
 
@@ -255,7 +261,7 @@ class DailyTasksDataSource {
 
   Future<List<DailyTaskEntity>> _getRemoteTasks() async {
     final String? userId = _supabaseService.currentUserId;
-    if (userId == null) {
+    if (userId == null || !(_isBackendReachable?.call() ?? true)) {
       return const [];
     }
 
