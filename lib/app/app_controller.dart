@@ -387,6 +387,13 @@ class AppController extends GetxController with WidgetsBindingObserver {
   );
 
   Future<void> reloadUserScopedState() async {
+    // The pending-sync set is stored under the signed-in user's scope but only
+    // loaded once at startup. Without re-reading it after a sign-in or
+    // sign-out, a user's queued offline changes stay on disk but invisible to
+    // the flush logic (and a later write would even overwrite them).
+    await Get.find<PendingSyncStore>().load();
+    _hadQueuedOfflineChanges = Get.find<PendingSyncStore>().all.isNotEmpty;
+
     final List<Future<void>> reloads = [
       Get.find<LastActivityService>().load(),
       Get.find<DailyProgressService>().load(),
@@ -407,6 +414,9 @@ class AppController extends GetxController with WidgetsBindingObserver {
 
     await Future.wait(reloads);
     await _restoreActivityHistoryFromBackendIfNeeded();
+    if (_supabaseService.hasSignedInUser) {
+      unawaited(_flushPendingAndNotify());
+    }
   }
 
   /// Backfills local progress caches from `activity_entries` so a device
