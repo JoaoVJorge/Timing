@@ -8,12 +8,17 @@ class PhoneAuthDataSource {
   PhoneAuthDataSource({required this._supabaseService});
 
   final SupabaseService _supabaseService;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network instead of hanging on the platform's own (much longer) socket
+  // timeout — signOut() in particular must never leave a user unable to log
+  // out just because the network is degraded.
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   Future<Either<AppError, void>> requestCode(String emailAddress) async {
     try {
-      await _supabaseService.requireClient.auth.signInWithOtp(
-        email: _normalizedEmailAddress(emailAddress),
-      );
+      await _supabaseService.requireClient.auth
+          .signInWithOtp(email: _normalizedEmailAddress(emailAddress))
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -29,11 +34,13 @@ class PhoneAuthDataSource {
         return const Right(false);
       }
 
-      await _supabaseService.requireClient.auth.verifyOTP(
-        email: _normalizedEmailAddress(emailAddress),
-        token: code,
-        type: OtpType.email,
-      );
+      await _supabaseService.requireClient.auth
+          .verifyOTP(
+            email: _normalizedEmailAddress(emailAddress),
+            token: code,
+            type: OtpType.email,
+          )
+          .timeout(_remoteCallTimeout);
       return const Right(true);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -43,7 +50,9 @@ class PhoneAuthDataSource {
   Future<Either<AppError, void>> signOut() async {
     try {
       if (_supabaseService.isConfigured) {
-        await _supabaseService.requireClient.auth.signOut();
+        await _supabaseService.requireClient.auth.signOut().timeout(
+          _remoteCallTimeout,
+        );
       }
       return const Right(null);
     } catch (error, stackTrace) {
@@ -56,11 +65,13 @@ class PhoneAuthDataSource {
 
   Future<Either<AppError, void>> signInWithGoogle() async {
     try {
-      await _supabaseService.requireClient.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: SupabaseService.oauthRedirectUrl,
-        authScreenLaunchMode: LaunchMode.externalApplication,
-      );
+      await _supabaseService.requireClient.auth
+          .signInWithOAuth(
+            OAuthProvider.google,
+            redirectTo: SupabaseService.oauthRedirectUrl,
+            authScreenLaunchMode: LaunchMode.externalApplication,
+          )
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -70,7 +81,9 @@ class PhoneAuthDataSource {
   Future<Either<AppError, Set<String>>> getLinkedAuthProviders() async {
     try {
       final client = _supabaseService.requireClient;
-      final identities = await client.auth.getUserIdentities();
+      final identities = await client.auth.getUserIdentities().timeout(
+        _remoteCallTimeout,
+      );
       final Set<String> providers = {
         for (final identity in identities) identity.provider,
       };
@@ -89,7 +102,8 @@ class PhoneAuthDataSource {
             _oauthProvider(provider),
             redirectTo: SupabaseService.oauthRedirectUrl,
             authScreenLaunchMode: LaunchMode.externalApplication,
-          );
+          )
+          .timeout(_remoteCallTimeout);
       return Right(launched);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

@@ -12,6 +12,11 @@ class ProfileSyncDataSource {
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
+  // A remote call must fail fast on a "connected but no real internet"
+  // network instead of hanging on the platform's own (much longer) socket
+  // timeout — e.g. syncProfile() has no other timeout wrapping it when
+  // called from EditProfileController.onTapSave().
+  static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
   Future<Either<AppError, void>> syncProfile(AppConfigEntity config) async {
     try {
@@ -21,24 +26,27 @@ class ProfileSyncDataSource {
       }
       final user = _supabaseService.client?.auth.currentUser;
 
-      await _supabaseService.requireClient.from("profiles").upsert({
-        "id": userId,
-        "user_name": config.userName,
-        "nick_name": config.nickName,
-        "email": config.email ?? user?.email,
-        "phone_number": config.phoneNumber ?? user?.phone,
-        "birth_date": config.birthDate,
-        "profile_photo_base64": config.profilePhotoBase64,
-        "accent_color_value": config.accentColorValue,
-        "avatar_icon_index": config.avatarIconIndex,
-        "notifications_enabled": config.notificationsEnabled,
-        "language_code": config.languageCode,
-        "focus_lock_studying_enabled": config.focusLockStudyingEnabled,
-        "focus_lock_exercises_enabled": config.focusLockExercisesEnabled,
-        "focus_lock_reading_enabled": config.focusLockReadingEnabled,
-        "focus_lock_hobbies_enabled": config.focusLockHobbiesEnabled,
-        "updated_at": DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: "id");
+      await _supabaseService.requireClient
+          .from("profiles")
+          .upsert({
+            "id": userId,
+            "user_name": config.userName,
+            "nick_name": config.nickName,
+            "email": config.email ?? user?.email,
+            "phone_number": config.phoneNumber ?? user?.phone,
+            "birth_date": config.birthDate,
+            "profile_photo_base64": config.profilePhotoBase64,
+            "accent_color_value": config.accentColorValue,
+            "avatar_icon_index": config.avatarIconIndex,
+            "notifications_enabled": config.notificationsEnabled,
+            "language_code": config.languageCode,
+            "focus_lock_studying_enabled": config.focusLockStudyingEnabled,
+            "focus_lock_exercises_enabled": config.focusLockExercisesEnabled,
+            "focus_lock_reading_enabled": config.focusLockReadingEnabled,
+            "focus_lock_hobbies_enabled": config.focusLockHobbiesEnabled,
+            "updated_at": DateTime.now().toUtc().toIso8601String(),
+          }, onConflict: "id")
+          .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
@@ -56,7 +64,8 @@ class ProfileSyncDataSource {
           .from("profiles")
           .select()
           .eq("id", userId)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(_remoteCallTimeout);
       _logger.logResponse("select public.profiles", data);
 
       if (data == null) {
