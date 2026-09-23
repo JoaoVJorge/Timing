@@ -55,27 +55,27 @@ void main() {
       expect(draft.goalSeconds, 45 * 60);
     });
 
-    test("uses the activity name as the default group name", () {
+    test("uses the group name as the default activity name", () {
       final CreateGroupController controller = _buildController();
       controller.onInit();
       controller.onSelectTheme(GroupThemeType.dailyGoals);
+      controller.groupNameController.text = "Desafio da família";
 
       controller.onTapContinue();
-      controller.activityNameController.text = "Beber água";
 
       expect(controller.currentStep.value, 1);
-      expect(controller.groupNameController.text, "Beber água");
+      expect(controller.activityNameController.text, "Desafio da família");
       controller.onClose();
     });
 
-    test("preserves a custom group name when the activity name changes", () {
+    test("preserves a custom activity name when the group name changes", () {
       final CreateGroupController controller = _buildController();
       controller.onInit();
-      controller.groupNameController.text = "Desafio da família";
-
       controller.activityNameController.text = "Beber água";
 
-      expect(controller.groupNameController.text, "Desafio da família");
+      controller.groupNameController.text = "Desafio da família";
+
+      expect(controller.activityNameController.text, "Beber água");
       controller.onClose();
     });
   });

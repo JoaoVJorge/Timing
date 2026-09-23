@@ -5,63 +5,28 @@ class _ActivityStep extends StatelessWidget {
     required this.controller,
     required this.activityNameKey,
     required this.activityGoalKey,
-    required this.groupNameKey,
   });
 
   final CreateGroupController controller;
   final Key activityNameKey;
   final Key activityGoalKey;
-  final Key groupNameKey;
 
   @override
   Widget build(BuildContext context) {
     controller.initializeThemeColor(context.colorTokens.primary);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Obx(
-          () => controller.isDailyGoalsTheme
-              ? _DailyGoalActivityForm(
-                  controller: controller,
-                  nameKey: activityNameKey,
-                  goalKey: activityGoalKey,
-                )
-              : CreateSubjectFormContent(
-                  controller: controller,
-                  showHero: false,
-                  nameKey: activityNameKey,
-                  goalKey: activityGoalKey,
-                ),
-        ),
-        const Gap(16),
-        _SectionCard(
-          key: groupNameKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.groupNameLabel,
-                style: context.textStyles.bodySmall,
-              ),
-              const Gap(8),
-              TextField(
-                controller: controller.groupNameController,
-                onChanged: controller.onGroupNameChanged,
-                style: context.textStyles.inputText,
-                decoration: AppInputDecoration.withBorder(
-                  tokens: context.colorTokens,
-                  hintText: context.l10n.groupNameExampleHint,
-                  prefixIcon: AppIcon(
-                    "group",
-                    size: 20,
-                    color: context.colorTokens.textHint,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return Obx(
+      () => controller.isDailyGoalsTheme
+          ? _DailyGoalActivityForm(
+              controller: controller,
+              nameKey: activityNameKey,
+              goalKey: activityGoalKey,
+            )
+          : CreateSubjectFormContent(
+              controller: controller,
+              showHero: false,
+              nameKey: activityNameKey,
+              goalKey: activityGoalKey,
+            ),
     );
   }
 }

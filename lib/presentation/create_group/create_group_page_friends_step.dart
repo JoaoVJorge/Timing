@@ -200,10 +200,12 @@ class _FriendList extends StatelessWidget {
       separatorBuilder: (context, index) => const Gap(8),
       itemBuilder: (context, index) {
         final FriendOption friend = friends[index];
-        return FriendTile(
-          friend: friend,
-          isSelected: controller.selectedFriendIds.contains(friend.id),
-          onTap: () => controller.onToggleFriend(friend.id),
+        return Obx(
+          () => FriendTile(
+            friend: friend,
+            isSelected: controller.selectedFriendIds.contains(friend.id),
+            onTap: () => controller.onToggleFriend(friend.id),
+          ),
         );
       },
     );
