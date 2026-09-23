@@ -3188,6 +3188,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'La connexion a pris plus de temps que prévu. Vos groupes existent peut-être toujours, mais nous ne pouvons pas les charger maintenant.';
 
   @override
+  String get groupsOfflineTitle => 'Pas de connexion Internet';
+
+  @override
+  String get groupsOfflineDescription =>
+      'Connectez-vous à Internet pour accéder à vos groupes.';
+
+  @override
   String get personalInformationTitle => 'Informations personnelles';
 
   @override
@@ -3340,6 +3347,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get offlineChangesQueuedMessage =>
       'Vous êtes hors ligne. Cela sera enregistré dès que vous serez reconnecté(e).';
+
+  @override
+  String get offlineSyncCompletedMessage =>
+      'Vos modifications enregistrées ont bien été synchronisées.';
 
   @override
   String get offlineSessionExpiredMessage =>

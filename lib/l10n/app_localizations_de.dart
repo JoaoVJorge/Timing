@@ -3175,6 +3175,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Verbindung dauerte länger als erwartet. Deine Gruppen sind möglicherweise noch vorhanden, konnten aber gerade nicht geladen werden.';
 
   @override
+  String get groupsOfflineTitle => 'Keine Internetverbindung';
+
+  @override
+  String get groupsOfflineDescription =>
+      'Verbinde dich mit dem Internet, um auf deine Gruppen zuzugreifen.';
+
+  @override
   String get personalInformationTitle => 'Persönliche Informationen';
 
   @override
@@ -3327,6 +3334,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get offlineChangesQueuedMessage =>
       'Du bist offline. Das wird gespeichert, sobald du wieder verbunden bist.';
+
+  @override
+  String get offlineSyncCompletedMessage =>
+      'Deine gespeicherten Änderungen wurden synchronisiert.';
 
   @override
   String get offlineSessionExpiredMessage =>

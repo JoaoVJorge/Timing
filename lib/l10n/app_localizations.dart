@@ -5650,6 +5650,18 @@ abstract class AppLocalizations {
   /// **'The connection took longer than expected. Your groups may still exist, but we could not fetch them right now.'**
   String get groupsLoadErrorDescription;
 
+  /// No description provided for @groupsOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get groupsOfflineTitle;
+
+  /// No description provided for @groupsOfflineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to access your groups.'**
+  String get groupsOfflineDescription;
+
   /// No description provided for @personalInformationTitle.
   ///
   /// In en, this message translates to:
@@ -5907,6 +5919,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re offline. This will be saved once you reconnect.'**
   String get offlineChangesQueuedMessage;
+
+  /// No description provided for @offlineSyncCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your saved changes have synced successfully.'**
+  String get offlineSyncCompletedMessage;
 
   /// No description provided for @offlineSessionExpiredMessage.
   ///

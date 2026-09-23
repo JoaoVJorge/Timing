@@ -3122,6 +3122,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'استغرق الاتصال وقتًا أطول من المتوقع. قد تظل مجموعاتك موجودة، لكن تعذر جلبها الآن.';
 
   @override
+  String get groupsOfflineTitle => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get groupsOfflineDescription => 'اتصل بالإنترنت للوصول إلى مجموعاتك.';
+
+  @override
   String get personalInformationTitle => 'المعلومات الشخصية';
 
   @override
@@ -3271,6 +3277,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get offlineChangesQueuedMessage =>
       'أنت غير متصل بالإنترنت. سيتم حفظ هذا بمجرد إعادة الاتصال.';
+
+  @override
+  String get offlineSyncCompletedMessage =>
+      'تمت مزامنة تغييراتك المحفوظة بنجاح.';
 
   @override
   String get offlineSessionExpiredMessage =>

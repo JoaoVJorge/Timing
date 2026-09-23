@@ -3139,6 +3139,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The connection took longer than expected. Your groups may still exist, but we could not fetch them right now.';
 
   @override
+  String get groupsOfflineTitle => 'No internet connection';
+
+  @override
+  String get groupsOfflineDescription =>
+      'Connect to the internet to access your groups.';
+
+  @override
   String get personalInformationTitle => 'Personal information';
 
   @override
@@ -3289,6 +3296,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineChangesQueuedMessage =>
       'You\'re offline. This will be saved once you reconnect.';
+
+  @override
+  String get offlineSyncCompletedMessage =>
+      'Your saved changes have synced successfully.';
 
   @override
   String get offlineSessionExpiredMessage =>
