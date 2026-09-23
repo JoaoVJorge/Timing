@@ -100,6 +100,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   StreamSubscription<bool>? _connectivitySubscription;
   Timer? _pendingSyncRetryTimer;
   Future<void>? _reconciliationInProgress;
+  Future<bool>? _activityBackfillInProgress;
   bool _hadQueuedOfflineChanges = false;
 
   static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
@@ -147,6 +148,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       (online) {
         if (online && _supabaseService.hasSignedInUser) {
           unawaited(_flushPendingAndNotify());
+          unawaited(_restoreActivityHistoryFromBackendIfNeeded());
         }
       },
     );
@@ -415,7 +417,15 @@ class AppController extends GetxController with WidgetsBindingObserver {
   /// one session here the caches stop being empty even though older history
   /// logged on another device is still missing, which would otherwise close
   /// this backfill's only chance to run ever again.
-  Future<bool> _restoreActivityHistoryFromBackendIfNeeded() async {
+  Future<bool> _restoreActivityHistoryFromBackendIfNeeded() {
+    final Future<bool>? current = _activityBackfillInProgress;
+    if (current != null) return current;
+    final Future<bool> work = _runActivityHistoryBackfill();
+    _activityBackfillInProgress = work;
+    return work.whenComplete(() => _activityBackfillInProgress = null);
+  }
+
+  Future<bool> _runActivityHistoryBackfill() async {
     if (!_supabaseService.hasSignedInUser) {
       return false;
     }
