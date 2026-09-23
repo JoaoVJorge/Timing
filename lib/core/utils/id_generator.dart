@@ -40,3 +40,22 @@ class EntityIdGenerator {
 /// under the same millisecond. The result contains only `[0-9a-z-]`, so it
 /// stays safe inside the string-built `in (...)` filters the data sources use.
 String generateEntityId() => _entityIdGenerator.generate();
+
+final Random _uuidRandom = Random.secure();
+
+/// Generates a random RFC 4122 version 4 UUID.
+///
+/// Use this instead of [generateEntityId] for any row whose `id` column is a
+/// Postgres `uuid` (e.g. `activity_entries`) — [generateEntityId]'s
+/// timestamp-prefixed format is not valid UUID syntax and Postgrest rejects
+/// it with a `22P02` error.
+String generateUuidV4() {
+  final List<int> bytes = List<int>.generate(16, (_) => _uuidRandom.nextInt(256));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  String hex(int start, int end) => bytes
+      .sublist(start, end)
+      .map((byte) => byte.toRadixString(16).padLeft(2, "0"))
+      .join();
+  return "${hex(0, 4)}-${hex(4, 6)}-${hex(6, 8)}-${hex(8, 10)}-${hex(10, 16)}";
+}

@@ -71,4 +71,25 @@ void main() {
       expect(random.requestedBounds, [0x10000, 0x10000, 0x10000, 0x10000]);
     });
   });
+
+  group("generateUuidV4", () {
+    test("matches RFC 4122 version 4 syntax", () {
+      final RegExp uuidV4 = RegExp(
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      );
+
+      for (int i = 0; i < 1000; i++) {
+        expect(uuidV4.hasMatch(generateUuidV4()), isTrue);
+      }
+    });
+
+    test("produces unique ids even in a tight loop", () {
+      final ids = <String>{};
+      for (int i = 0; i < 10000; i++) {
+        ids.add(generateUuidV4());
+      }
+
+      expect(ids.length, 10000);
+    });
+  });
 }

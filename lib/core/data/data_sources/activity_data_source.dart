@@ -32,8 +32,10 @@ class ActivityDataSource {
   /// is an append-only log, not a "resync current state" entity, so a failed
   /// upload is queued individually (not replaced by the next write) and
   /// retried later via [flushPendingSync]. The row's `id` is generated on the
-  /// client (same [generateEntityId] used for subjects/schedule/dailyTasks)
-  /// so a retry can safely `upsert` instead of risking a duplicate `insert`.
+  /// client so a retry can safely `upsert` instead of risking a duplicate
+  /// `insert`. `activity_entries.id` is a Postgres `uuid` column (unlike the
+  /// text ids subjects/schedule/dailyTasks use), so it needs [generateUuidV4]
+  /// rather than [generateEntityId].
   Future<Either<AppError, void>> logActivity({
     required TimeCategoryType category,
     required String subjectId,
@@ -48,7 +50,7 @@ class ActivityDataSource {
     }
 
     final Map<String, dynamic> row = {
-      "id": generateEntityId(),
+      "id": generateUuidV4(),
       "user_id": userId,
       "category": category.name,
       "subject_id": subjectId,
