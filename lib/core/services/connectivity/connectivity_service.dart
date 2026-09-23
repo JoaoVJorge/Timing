@@ -53,7 +53,7 @@ class ConnectivityService {
   Future<void> _check(List<ConnectivityResult> results, {int? revision}) async {
     final int currentRevision = revision ?? ++_checkRevision;
     if (!results.any((result) => result != ConnectivityResult.none)) {
-      isOnline.value = false;
+      if (currentRevision == _checkRevision) isOnline.value = false;
       return;
     }
     try {
