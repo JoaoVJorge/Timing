@@ -53,18 +53,34 @@ class GroupsPage extends StatelessWidget {
     final GroupsController controller = Get.find();
 
     return Obx(() {
-      if (!controller.isOnline.value) {
+      final bool isOffline = !controller.isOnline.value;
+      // Offline with nothing saved there is nothing to show, and the empty
+      // "no groups yet" state would wrongly suggest the user has none.
+      if (isOffline && controller.groups.isEmpty) {
         return const AppScaffold(body: _GroupsOfflineState());
       }
 
+      final Widget content;
       if (showGroupFlowOnly) {
-        if (controller.isShowingMemberManagement.value) {
-          return AppScaffold(body: _ManageMembersView(controller: controller));
-        }
-        return AppScaffold(body: _GroupDetailsView(controller: controller));
+        content = controller.isShowingMemberManagement.value
+            ? _ManageMembersView(controller: controller)
+            : _GroupDetailsView(controller: controller);
+      } else {
+        content = _GroupsHomeView(controller: controller);
       }
 
-      return AppScaffold(body: _GroupsHomeView(controller: controller));
+      if (!isOffline) {
+        return AppScaffold(body: content);
+      }
+      return AppScaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _GroupsOfflineCachedNotice(),
+            Expanded(child: content),
+          ],
+        ),
+      );
     });
   }
 }

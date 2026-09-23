@@ -1319,6 +1319,7 @@
   "groupsLoadErrorDescription": "La conexión tardó más de lo esperado. Tus grupos pueden seguir existiendo, pero no pudimos cargarlos ahora.",
   "groupsOfflineTitle": "Sin conexión a internet",
   "groupsOfflineDescription": "Conéctate a internet para acceder a tus grupos.",
+  "groupsOfflineCachedNotice": "Estás sin conexión. Mostrando tus grupos guardados; algunas acciones necesitan conexión.",
   "personalInformationTitle": "Información personal",
   "editGroupInfoSection": "Información del grupo",
   "createGroupFocusGoalLabel": "Meta de concentración",

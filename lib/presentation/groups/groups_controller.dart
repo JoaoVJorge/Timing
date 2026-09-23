@@ -374,16 +374,13 @@ class GroupsController extends GetxController {
       loadGroups();
       unawaited(loadFriends());
     } else {
-      isLoading.value = false;
-      isLoadingFriends.value = false;
+      unawaited(_showCachedGroupsOffline());
+      unawaited(loadFriends());
     }
   }
 
+  /// Also runs offline: the data source falls back to its cached snapshot.
   Future<void> loadFriends() async {
-    if (!isOnline.value) {
-      isLoadingFriends.value = false;
-      return;
-    }
     isLoadingFriends.value = true;
     try {
       final Either<AppError, FriendsSocialEntity> result =
@@ -419,8 +416,7 @@ class GroupsController extends GetxController {
 
   Future<void> loadGroups({String? preferredGroupId}) async {
     if (!isOnline.value) {
-      isLoading.value = false;
-      didFailLoadingGroups.value = false;
+      await _showCachedGroupsOffline();
       return;
     }
     final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
@@ -474,6 +470,24 @@ class GroupsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Offline, the groups screen shows the last fetched list instead of
+  /// blocking. Groups already in memory are at least as fresh as the cache.
+  Future<void> _showCachedGroupsOffline() async {
+    didFailLoadingGroups.value = false;
+    if (groups.isEmpty) {
+      final Either<AppError, List<GroupEntity>> cached = await _groupsRepository
+          .getCachedGroups();
+      // A reconnect may have delivered fresh groups while the cache was read.
+      if (!isOnline.value && groups.isEmpty) {
+        cached.fold((_) {}, (value) {
+          groups.value = List.of(value);
+          selectedGroup.value = _preferredGroup(value, selectedGroup.value?.id);
+        });
+      }
+    }
+    isLoading.value = false;
   }
 
   GroupEntity? _preferredGroup(List<GroupEntity> value, String? groupId) {

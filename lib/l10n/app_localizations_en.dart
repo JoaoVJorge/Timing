@@ -3146,6 +3146,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connect to the internet to access your groups.';
 
   @override
+  String get groupsOfflineCachedNotice =>
+      'You\'re offline. Showing your saved groups; some actions need a connection.';
+
+  @override
   String get personalInformationTitle => 'Personal information';
 
   @override

@@ -5662,6 +5662,12 @@ abstract class AppLocalizations {
   /// **'Connect to the internet to access your groups.'**
   String get groupsOfflineDescription;
 
+  /// No description provided for @groupsOfflineCachedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Showing your saved groups; some actions need a connection.'**
+  String get groupsOfflineCachedNotice;
+
   /// No description provided for @personalInformationTitle.
   ///
   /// In en, this message translates to:

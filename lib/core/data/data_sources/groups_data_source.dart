@@ -88,6 +88,11 @@ class GroupsDataSource {
     }
   }
 
+  /// Last successfully fetched groups, without touching the network. Used to
+  /// keep the groups screen usable while the backend is unreachable.
+  Future<Either<AppError, List<GroupEntity>>> getCachedGroups() async =>
+      Right(await _readCachedGroups() ?? const []);
+
   Future<List<GroupEntity>> _fetchRemoteGroups(String userId) async {
     final List<Map<String, dynamic>> currentMemberships = await _selectRows(
       table: "group_members",

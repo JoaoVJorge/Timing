@@ -20,6 +20,9 @@ class GroupsRepository {
   Future<Either<AppError, List<GroupEntity>>> getGroups() =>
       _groupsDataSource.getGroups();
 
+  Future<Either<AppError, List<GroupEntity>>> getCachedGroups() =>
+      _groupsDataSource.getCachedGroups();
+
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() =>
       _groupsDataSource.getInvitableFriends();
 

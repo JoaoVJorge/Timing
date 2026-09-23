@@ -3195,6 +3195,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Connectez-vous à Internet pour accéder à vos groupes.';
 
   @override
+  String get groupsOfflineCachedNotice =>
+      'Vous êtes hors ligne. Affichage de vos groupes enregistrés ; certaines actions nécessitent une connexion.';
+
+  @override
   String get personalInformationTitle => 'Informations personnelles';
 
   @override

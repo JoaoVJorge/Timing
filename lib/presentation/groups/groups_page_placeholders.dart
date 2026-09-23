@@ -18,6 +18,42 @@ class _GroupsOfflineState extends StatelessWidget {
   );
 }
 
+class _GroupsOfflineCachedNotice extends StatelessWidget {
+  const _GroupsOfflineCachedNotice();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: AppSpacing.betweenRelated),
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.betweenRelated,
+      vertical: AppSpacing.titleToDescription,
+    ),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        Icon(
+          Icons.wifi_off_rounded,
+          size: 18,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const Gap(AppSpacing.titleToDescription),
+        Expanded(
+          child: Text(
+            context.l10n.groupsOfflineCachedNotice,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _GroupsEmptyState extends StatelessWidget {
   const _GroupsEmptyState({
     required this.onCreateGroup,

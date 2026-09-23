@@ -44,6 +44,7 @@ class _FakeGroupsRepository implements GroupsRepository {
   _FakeGroupsRepository(this.groupsResult);
 
   List<GroupEntity> groupsResult;
+  List<GroupEntity> cachedGroups = const [];
   Completer<List<GroupEntity>>? groupsCompleter;
   // When set, call N (1-indexed) awaits getGroupsCallCompleters[N-1] instead
   // of the single shared groupsCompleter, so a test can control the
@@ -78,6 +79,10 @@ class _FakeGroupsRepository implements GroupsRepository {
     }
     return Right(groupsResult);
   }
+
+  @override
+  Future<Either<AppError, List<GroupEntity>>> getCachedGroups() async =>
+      Right(cachedGroups);
 
   @override
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
@@ -296,9 +301,7 @@ void main() {
       // timing gives no guarantee call A resolves before call B.
       final GroupEntity staleGroup = _group("group-1", "Old Name");
       final GroupEntity freshGroup = _group("group-1", "New Name");
-      final _FakeGroupsRepository repository = _FakeGroupsRepository(
-        const [],
-      );
+      final _FakeGroupsRepository repository = _FakeGroupsRepository(const []);
       final Completer<List<GroupEntity>> staleCompleter =
           Completer<List<GroupEntity>>();
       final Completer<List<GroupEntity>> freshCompleter =
@@ -911,7 +914,9 @@ void main() {
     expect(controller.sentFriendRequestFor(member.id), isNull);
   });
 
-  testWidgets("blocks group content with an offline notice", (tester) async {
+  testWidgets("blocks the screen offline when no groups are saved", (
+    tester,
+  ) async {
     final ConnectivityService connectivityService = ConnectivityService();
     connectivityService.isOnline.value = false;
     final GroupsController controller = _controller(
@@ -937,6 +942,40 @@ void main() {
       findsOneWidget,
     );
     expect(find.text("Grupo"), findsNothing);
+  });
+  testWidgets("shows saved groups with a notice while offline", (tester) async {
+    final ConnectivityService connectivityService = ConnectivityService();
+    connectivityService.isOnline.value = false;
+    final _FakeGroupsRepository repository = _FakeGroupsRepository(const [])
+      ..cachedGroups = [_group("group-1", "Grupo salvo")];
+    final GroupsController controller = _controller(
+      repository,
+      connectivityService: connectivityService,
+    );
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("pt"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text("Grupo salvo"), findsOneWidget);
+    expect(
+      find.text(
+        "Você está offline. Mostrando seus grupos salvos; algumas ações "
+        "precisam de conexão.",
+      ),
+      findsOneWidget,
+    );
+    expect(find.text("Sem internet"), findsNothing);
+    expect(repository.getGroupsCalls, 0);
   });
 }
 

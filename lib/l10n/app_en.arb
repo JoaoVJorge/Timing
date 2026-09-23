@@ -1722,6 +1722,7 @@
   "groupsLoadErrorDescription": "The connection took longer than expected. Your groups may still exist, but we could not fetch them right now.",
   "groupsOfflineTitle": "No internet connection",
   "groupsOfflineDescription": "Connect to the internet to access your groups.",
+  "groupsOfflineCachedNotice": "You're offline. Showing your saved groups; some actions need a connection.",
   "personalInformationTitle": "Personal information",
   "editGroupInfoSection": "Group information",
   "createGroupFocusGoalLabel": "Focus goal",

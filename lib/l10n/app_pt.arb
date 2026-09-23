@@ -1319,6 +1319,7 @@
   "groupsLoadErrorDescription": "A conexão demorou mais do que o esperado. Seus grupos podem existir, mas não conseguimos buscar agora.",
   "groupsOfflineTitle": "Sem internet",
   "groupsOfflineDescription": "Conecte-se à internet para acessar seus grupos.",
+  "groupsOfflineCachedNotice": "Você está offline. Mostrando seus grupos salvos; algumas ações precisam de conexão.",
   "personalInformationTitle": "Informações pessoais",
   "editGroupInfoSection": "Informações do grupo",
   "createGroupFocusGoalLabel": "Meta de foco",

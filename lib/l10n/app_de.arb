@@ -1629,6 +1629,7 @@
   "groupsLoadErrorDescription": "Die Verbindung dauerte länger als erwartet. Deine Gruppen sind möglicherweise noch vorhanden, konnten aber gerade nicht geladen werden.",
   "groupsOfflineTitle": "Keine Internetverbindung",
   "groupsOfflineDescription": "Verbinde dich mit dem Internet, um auf deine Gruppen zuzugreifen.",
+  "groupsOfflineCachedNotice": "Du bist offline. Deine gespeicherten Gruppen werden angezeigt; einige Aktionen benötigen eine Verbindung.",
   "personalInformationTitle": "Persönliche Informationen",
   "editGroupInfoSection": "Gruppeninformationen",
   "createGroupFocusGoalLabel": "Fokusziel",

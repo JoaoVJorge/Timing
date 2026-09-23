@@ -1629,6 +1629,7 @@
   "groupsLoadErrorDescription": "La connexion a pris plus de temps que prévu. Vos groupes existent peut-être toujours, mais nous ne pouvons pas les charger maintenant.",
   "groupsOfflineTitle": "Pas de connexion Internet",
   "groupsOfflineDescription": "Connectez-vous à Internet pour accéder à vos groupes.",
+  "groupsOfflineCachedNotice": "Vous êtes hors ligne. Affichage de vos groupes enregistrés ; certaines actions nécessitent une connexion.",
   "personalInformationTitle": "Informations personnelles",
   "editGroupInfoSection": "Informations du groupe",
   "createGroupFocusGoalLabel": "Objectif de concentration",

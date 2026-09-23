@@ -3128,6 +3128,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupsOfflineDescription => 'اتصل بالإنترنت للوصول إلى مجموعاتك.';
 
   @override
+  String get groupsOfflineCachedNotice =>
+      'أنت غير متصل بالإنترنت. يتم عرض مجموعاتك المحفوظة، وبعض الإجراءات تتطلب اتصالاً.';
+
+  @override
   String get personalInformationTitle => 'المعلومات الشخصية';
 
   @override

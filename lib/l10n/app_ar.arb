@@ -1629,6 +1629,7 @@
   "groupsLoadErrorDescription": "استغرق الاتصال وقتًا أطول من المتوقع. قد تظل مجموعاتك موجودة، لكن تعذر جلبها الآن.",
   "groupsOfflineTitle": "لا يوجد اتصال بالإنترنت",
   "groupsOfflineDescription": "اتصل بالإنترنت للوصول إلى مجموعاتك.",
+  "groupsOfflineCachedNotice": "أنت غير متصل بالإنترنت. يتم عرض مجموعاتك المحفوظة، وبعض الإجراءات تتطلب اتصالاً.",
   "personalInformationTitle": "المعلومات الشخصية",
   "editGroupInfoSection": "معلومات المجموعة",
   "createGroupFocusGoalLabel": "هدف التركيز",
