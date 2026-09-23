@@ -146,6 +146,13 @@ class GroupsController extends GetxController {
   final Map<String, bool> _hasMoreImageMessagesByGroup = <String, bool>{};
   static const Duration _groupsLoadTimeout = Duration(seconds: 20);
   bool _hasLoadedGroups = false;
+  // loadGroups() can be triggered concurrently from more than one place (this
+  // controller's own connectivity listener and AppController's
+  // post-reconciliation reload both react to the same reconnect). Network
+  // timing gives no guarantee the call that started first finishes first, so
+  // an older call's result must not overwrite a newer one that already
+  // landed.
+  int _loadGroupsRevision = 0;
 
   /// Daily-goal groups are cumulative challenges, so their leaderboard never
   /// follows the date filter used by the other group themes.
@@ -417,12 +424,18 @@ class GroupsController extends GetxController {
       return;
     }
     final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
+    final int revision = ++_loadGroupsRevision;
     bool membershipChanged = false;
     isLoading.value = true;
     didFailLoadingGroups.value = false;
     try {
       final Either<AppError, List<GroupEntity>> result =
           await _getGroupsUseCase().timeout(_groupsLoadTimeout);
+      if (revision != _loadGroupsRevision) {
+        // A newer loadGroups() call already landed while this one was in
+        // flight; applying this stale result would revert it.
+        return;
+      }
       result.fold(
         (error) {
           didFailLoadingGroups.value = true;
@@ -454,8 +467,10 @@ class GroupsController extends GetxController {
         await _invalidateActivityCaches();
       }
     } on TimeoutException {
-      didFailLoadingGroups.value = true;
-      _appNavigator.showErrorSnackBar();
+      if (revision == _loadGroupsRevision) {
+        didFailLoadingGroups.value = true;
+        _appNavigator.showErrorSnackBar();
+      }
     } finally {
       isLoading.value = false;
     }

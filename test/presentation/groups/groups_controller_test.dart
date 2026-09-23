@@ -45,6 +45,10 @@ class _FakeGroupsRepository implements GroupsRepository {
 
   List<GroupEntity> groupsResult;
   Completer<List<GroupEntity>>? groupsCompleter;
+  // When set, call N (1-indexed) awaits getGroupsCallCompleters[N-1] instead
+  // of the single shared groupsCompleter, so a test can control the
+  // resolution order of multiple concurrent getGroups() calls independently.
+  List<Completer<List<GroupEntity>>>? getGroupsCallCompleters;
   int getGroupsCalls = 0;
   final Map<String, List<GroupActivityProgressEntity>> progressByGroup =
       <String, List<GroupActivityProgressEntity>>{};
@@ -63,6 +67,11 @@ class _FakeGroupsRepository implements GroupsRepository {
   @override
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     getGroupsCalls++;
+    final List<Completer<List<GroupEntity>>>? sequenced =
+        getGroupsCallCompleters;
+    if (sequenced != null && getGroupsCalls <= sequenced.length) {
+      return Right(await sequenced[getGroupsCalls - 1].future);
+    }
     final Completer<List<GroupEntity>>? completer = groupsCompleter;
     if (completer != null) {
       return Right(await completer.future);
@@ -275,6 +284,43 @@ void main() {
     expect(repository.getGroupsCalls, 1);
     controller.onClose();
   });
+
+  test(
+    "an older, slower loadGroups() call does not overwrite a newer one",
+    () async {
+      // Mirrors the real race: GroupsController's own connectivity listener
+      // calls loadGroups() immediately on reconnect (call A, sees stale
+      // server data because a queued edit hasn't been flushed yet), while
+      // AppController's post-reconciliation reload calls loadGroups() again
+      // right after the flush lands (call B, sees the synced data). Network
+      // timing gives no guarantee call A resolves before call B.
+      final GroupEntity staleGroup = _group("group-1", "Old Name");
+      final GroupEntity freshGroup = _group("group-1", "New Name");
+      final _FakeGroupsRepository repository = _FakeGroupsRepository(
+        const [],
+      );
+      final Completer<List<GroupEntity>> staleCompleter =
+          Completer<List<GroupEntity>>();
+      final Completer<List<GroupEntity>> freshCompleter =
+          Completer<List<GroupEntity>>();
+      repository.getGroupsCallCompleters = [staleCompleter, freshCompleter];
+      final GroupsController controller = _controller(repository);
+
+      final Future<void> callA = controller.loadGroups();
+      final Future<void> callB = controller.loadGroups();
+
+      freshCompleter.complete([freshGroup]);
+      await callB;
+      expect(controller.groups.single.name, "New Name");
+
+      staleCompleter.complete([staleGroup]);
+      await callA;
+
+      expect(controller.groups.single.name, "New Name");
+
+      controller.onClose();
+    },
+  );
 
   test(
     "leaving a group preserves personal and unrelated goals and activities",
