@@ -52,16 +52,20 @@ class GroupsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GroupsController controller = Get.find();
 
-    if (showGroupFlowOnly) {
-      return Obx(() {
+    return Obx(() {
+      if (!controller.isOnline.value) {
+        return const AppScaffold(body: _GroupsOfflineState());
+      }
+
+      if (showGroupFlowOnly) {
         if (controller.isShowingMemberManagement.value) {
           return AppScaffold(body: _ManageMembersView(controller: controller));
         }
         return AppScaffold(body: _GroupDetailsView(controller: controller));
-      });
-    }
+      }
 
-    return AppScaffold(body: _GroupsHomeView(controller: controller));
+      return AppScaffold(body: _GroupsHomeView(controller: controller));
+    });
   }
 }
 

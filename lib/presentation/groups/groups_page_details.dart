@@ -16,8 +16,8 @@ class _GroupDetailsHeader extends StatelessWidget {
   final VoidCallback onActions;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 72,
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(minHeight: 72),
     child: Row(
       children: [
         _DetailBackButton(onTap: onBack),

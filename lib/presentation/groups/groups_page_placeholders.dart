@@ -2,6 +2,22 @@ part of "groups_page.dart";
 
 // Empty, error and skeleton states for the groups home list.
 
+class _GroupsOfflineState extends StatelessWidget {
+  const _GroupsOfflineState();
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.betweenSections),
+      child: AppEmptyState(
+        icon: Icons.wifi_off_rounded,
+        title: context.l10n.groupsOfflineTitle,
+        description: context.l10n.groupsOfflineDescription,
+      ),
+    ),
+  );
+}
+
 class _GroupsEmptyState extends StatelessWidget {
   const _GroupsEmptyState({
     required this.onCreateGroup,

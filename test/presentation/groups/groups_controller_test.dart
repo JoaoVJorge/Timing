@@ -29,6 +29,7 @@ import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/l10n/app_localizations.dart";
@@ -251,6 +252,28 @@ void main() {
       controller.onClose();
       bus.dispose();
     });
+  });
+
+  test("does not load groups offline and reloads after reconnecting", () async {
+    final _FakeGroupsRepository repository = _FakeGroupsRepository(const []);
+    final ConnectivityService connectivityService = ConnectivityService();
+    connectivityService.isOnline.value = false;
+    final GroupsController controller = _controller(
+      repository,
+      connectivityService: connectivityService,
+    );
+
+    controller.onInit();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(repository.getGroupsCalls, 0);
+    expect(controller.isLoading.value, isFalse);
+
+    connectivityService.isOnline.value = true;
+    await Future<void>.delayed(Duration.zero);
+
+    expect(repository.getGroupsCalls, 1);
+    controller.onClose();
   });
 
   test(
@@ -841,6 +864,34 @@ void main() {
     expect(friendsRepository.canceledRequestIds, [member.id]);
     expect(controller.sentFriendRequestFor(member.id), isNull);
   });
+
+  testWidgets("blocks group content with an offline notice", (tester) async {
+    final ConnectivityService connectivityService = ConnectivityService();
+    connectivityService.isOnline.value = false;
+    final GroupsController controller = _controller(
+      _FakeGroupsRepository([_group("group-1", "Grupo")]),
+      connectivityService: connectivityService,
+    );
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("pt"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text("Sem internet"), findsOneWidget);
+    expect(
+      find.text("Conecte-se à internet para acessar seus grupos."),
+      findsOneWidget,
+    );
+    expect(find.text("Grupo"), findsNothing);
+  });
 }
 
 GroupsController _controller(
@@ -849,6 +900,7 @@ GroupsController _controller(
   List<FriendEntity> friends = const [],
   _FakeFriendsRepository? friendsRepository,
   AppLocalStorageService? localStorageService,
+  ConnectivityService? connectivityService,
 }) {
   final _FakeFriendsRepository effectiveFriendsRepository =
       friendsRepository ?? _FakeFriendsRepository(friends);
@@ -875,6 +927,7 @@ GroupsController _controller(
     supabaseService: _FakeSupabaseService(),
     localStorageService: localStorageService ?? _FakeLocalStorageService(),
     activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
+    connectivityService: connectivityService,
   );
 }
 

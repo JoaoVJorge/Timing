@@ -27,6 +27,7 @@ import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
 import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/main_tab_refresh_service.dart";
@@ -53,6 +54,7 @@ class GroupsController extends GetxController {
     required this._supabaseService,
     required this._localStorageService,
     required this._activityChangeBus,
+    this._connectivityService,
     MainTabRefreshService? mainTabRefreshService,
   }) : _mainTabRefreshService =
            mainTabRefreshService ?? MainTabRefreshService();
@@ -69,6 +71,7 @@ class GroupsController extends GetxController {
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
   final ActivityChangeBus _activityChangeBus;
+  final ConnectivityService? _connectivityService;
   final MainTabRefreshService _mainTabRefreshService;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -77,6 +80,7 @@ class GroupsController extends GetxController {
   /// refresh once the activity settles.
   static const Duration _activityChangeDebounce = Duration(seconds: 3);
   StreamSubscription<GroupActivityChange>? _activityChangeSubscription;
+  StreamSubscription<bool>? _connectivitySubscription;
   Timer? _activityChangeDebounceTimer;
   String? _pendingActivityChangeGroupId;
 
@@ -99,12 +103,15 @@ class GroupsController extends GetxController {
   final RxBool isSendingImage = false.obs;
   final RxBool isResettingGroup = false.obs;
   final RxBool didFailLoadingGroups = false.obs;
+  final RxBool _assumedOnline = true.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
   final RxList<GroupActivityProgressEntity> activityProgress =
       <GroupActivityProgressEntity>[].obs;
 
   String get currentUserId => _supabaseService.currentUserId ?? "";
+
+  RxBool get isOnline => _connectivityService?.isOnline ?? _assumedOnline;
 
   bool get isSelectedGroupOwner {
     final GroupEntity? group = selectedGroup.value;
@@ -350,11 +357,26 @@ class GroupsController extends GetxController {
     _activityChangeSubscription = _activityChangeBus.stream.listen(
       _onGroupActivityChanged,
     );
-    loadGroups();
-    unawaited(loadFriends());
+    _connectivitySubscription = isOnline.listen((online) {
+      if (online) {
+        unawaited(loadGroups());
+        unawaited(loadFriends());
+      }
+    });
+    if (isOnline.value) {
+      loadGroups();
+      unawaited(loadFriends());
+    } else {
+      isLoading.value = false;
+      isLoadingFriends.value = false;
+    }
   }
 
   Future<void> loadFriends() async {
+    if (!isOnline.value) {
+      isLoadingFriends.value = false;
+      return;
+    }
     isLoadingFriends.value = true;
     try {
       final Either<AppError, FriendsSocialEntity> result =
@@ -373,6 +395,7 @@ class GroupsController extends GetxController {
   void onClose() {
     _activityChangeDebounceTimer?.cancel();
     unawaited(_activityChangeSubscription?.cancel());
+    unawaited(_connectivitySubscription?.cancel());
     super.onClose();
   }
 
@@ -388,6 +411,11 @@ class GroupsController extends GetxController {
   }
 
   Future<void> loadGroups({String? preferredGroupId}) async {
+    if (!isOnline.value) {
+      isLoading.value = false;
+      didFailLoadingGroups.value = false;
+      return;
+    }
     final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
     bool membershipChanged = false;
     isLoading.value = true;
