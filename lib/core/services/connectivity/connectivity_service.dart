@@ -56,11 +56,22 @@ class ConnectivityService {
       if (currentRevision == _checkRevision) isOnline.value = false;
       return;
     }
+    final bool wasOnline = isOnline.value;
+    bool reachable = await _probe();
+    // One slow or dropped response on a weak connection is common and must not
+    // flash the offline state (banner, blocked Groups screen, suppressed sync),
+    // so an online device is only declared offline after a failed re-probe.
+    if (!reachable && wasOnline && currentRevision == _checkRevision) {
+      reachable = await _probe();
+    }
+    if (currentRevision == _checkRevision) isOnline.value = reachable;
+  }
+
+  Future<bool> _probe() async {
     try {
-      final bool reachable = await _checkBackend();
-      if (currentRevision == _checkRevision) isOnline.value = reachable;
+      return await _checkBackend();
     } catch (_) {
-      if (currentRevision == _checkRevision) isOnline.value = false;
+      return false;
     }
   }
 
