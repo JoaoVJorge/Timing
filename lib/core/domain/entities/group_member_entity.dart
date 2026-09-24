@@ -49,6 +49,25 @@ class GroupMemberEntity extends Equatable {
   final String role;
   final DateTime? joinedAt;
 
+  GroupMemberEntity withScores({
+    required int today,
+    required int week,
+    required int month,
+    required int total,
+  }) => GroupMemberEntity(
+    id: id,
+    name: name,
+    avatarColorValue: avatarColorValue,
+    todaySeconds: today,
+    weekSeconds: week,
+    monthSeconds: month,
+    totalSeconds: total,
+    avatar: avatar,
+    avatarIconIndex: avatarIconIndex,
+    role: role,
+    joinedAt: joinedAt,
+  );
+
   int get todayScore => todaySeconds;
 
   int get weekScore => weekSeconds;

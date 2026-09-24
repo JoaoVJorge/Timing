@@ -86,6 +86,20 @@ class _FakeGroupsRepository implements GroupsRepository {
   Future<Either<AppError, List<GroupEntity>>> getCachedGroups() async =>
       Right(cachedGroups);
 
+  int refreshGroupScoresCalls = 0;
+  bool scoresRefreshFails = false;
+
+  @override
+  Future<Either<AppError, List<GroupEntity>>> refreshGroupScores(
+    List<GroupEntity> groups,
+  ) async {
+    refreshGroupScoresCalls++;
+    if (scoresRefreshFails) {
+      return Left(GenericAppError(error: "down", stackTrace: StackTrace.empty));
+    }
+    return Right(groups);
+  }
+
   @override
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
   getGroupActivityProgress(String groupId, {String? localDate}) async {
@@ -258,16 +272,65 @@ void main() {
       async.elapse(const Duration(seconds: 1));
       bus.notifyGroupActivityChanged(groupId: "group-1");
 
-      expect(repository.getGroupsCalls, callsAfterInit);
+      expect(repository.refreshGroupScoresCalls, 0);
 
       async.elapse(const Duration(seconds: 3));
       async.flushMicrotasks();
 
-      expect(repository.getGroupsCalls, callsAfterInit + 1);
+      // One refresh of just the ranking; the groups themselves are not reread.
+      expect(repository.refreshGroupScoresCalls, 1);
+      expect(repository.getGroupsCalls, callsAfterInit);
 
       controller.onClose();
       bus.dispose();
     });
+  });
+
+  test("a failed scores refresh falls back to the full reload", () {
+    fakeAsync((async) {
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([
+        _group("group-1", "Primeiro"),
+      ])..scoresRefreshFails = true;
+      final GroupsController controller = _controller(repository);
+      controller.onInit();
+      async.flushMicrotasks();
+      final int callsAfterInit = repository.getGroupsCalls;
+
+      unawaited(controller.refreshAfterActivityChange(groupId: "group-1"));
+      async.flushMicrotasks();
+
+      expect(repository.refreshGroupScoresCalls, 1);
+      expect(repository.getGroupsCalls, callsAfterInit + 1);
+      controller.onClose();
+    });
+  });
+
+  test("applies refreshed scores to the groups on screen", () async {
+    final GroupEntity group = _group("group-1", "Primeiro");
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([group]);
+    final GroupsController controller = _controller(repository);
+    controller.onInit();
+    await Future<void>.delayed(Duration.zero);
+
+    await controller.refreshAfterActivityChange(groupId: "group-1");
+
+    expect(controller.groups.single.id, "group-1");
+    expect(controller.selectedGroup.value?.id, "group-1");
+    expect(repository.refreshGroupScoresCalls, 1);
+    controller.onClose();
+  });
+
+  test("reloads fully when no groups have been loaded yet", () async {
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([
+      _group("group-1", "Primeiro"),
+    ]);
+    final GroupsController controller = _controller(repository);
+
+    await controller.refreshAfterActivityChange(groupId: "group-1");
+
+    expect(repository.refreshGroupScoresCalls, 0);
+    expect(repository.getGroupsCalls, 1);
+    controller.onClose();
   });
 
   test("does not load groups offline and reloads after reconnecting", () async {

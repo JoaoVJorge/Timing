@@ -60,6 +60,19 @@ class GroupEntity extends Equatable {
     "createdActivityId": createdActivityId,
   };
 
+  GroupEntity copyWithMembers(List<GroupMemberEntity> members) => GroupEntity(
+    id: id,
+    name: name,
+    theme: theme,
+    members: members,
+    description: description,
+    ownerId: ownerId,
+    createdAt: createdAt,
+    inviteCode: inviteCode,
+    privacy: privacy,
+    createdActivityId: createdActivityId,
+  );
+
   String toJson() => jsonEncode(toMap());
 
   @override

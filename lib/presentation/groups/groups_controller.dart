@@ -483,6 +483,35 @@ class GroupsController extends GetxController {
     }
   }
 
+  /// A focus session or a goal check changes nothing but the ranking, so only
+  /// the leaderboard is re-read instead of repeating the whole groups fetch
+  /// (five requests, including every member's profile photo). Returns false
+  /// when there is no loaded list to update or the read failed, and the caller
+  /// falls back to the full reload.
+  Future<bool> _refreshScoresOnly() async {
+    if (!isOnline.value || !_hasLoadedGroups || groups.isEmpty) {
+      return false;
+    }
+    final int revision = ++_loadGroupsRevision;
+    try {
+      final Either<AppError, List<GroupEntity>> result = await _groupsRepository
+          .refreshGroupScores(groups.toList())
+          .timeout(_groupsLoadTimeout);
+      if (revision != _loadGroupsRevision) {
+        // A newer load or refresh started meanwhile and owns the outcome.
+        return true;
+      }
+      final bool applied = result.fold<bool>((_) => false, (updated) {
+        groups.value = List.of(updated);
+        selectedGroup.value = _preferredGroup(updated, selectedGroup.value?.id);
+        return true;
+      });
+      return applied;
+    } on TimeoutException {
+      return false;
+    }
+  }
+
   /// Marks the list as stale when the data source had to serve its saved copy
   /// while the app is online, and retries a couple of times on its own: such
   /// failures are usually a slow response that the next attempt gets through.
@@ -839,7 +868,9 @@ class GroupsController extends GetxController {
     final String? affectedGroupId = groupId ?? selectedGroup.value?.id;
     _activityProgressByCacheKey.clear();
     _activityProgressCacheKey = null;
-    await loadGroups(preferredGroupId: affectedGroupId);
+    if (!await _refreshScoresOnly()) {
+      await loadGroups(preferredGroupId: affectedGroupId);
+    }
     if (selectedGroup.value?.id == affectedGroupId &&
         selectedDetailsTab.value == GroupDetailsTab.goals) {
       activityProgress.clear();

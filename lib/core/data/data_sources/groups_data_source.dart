@@ -219,56 +219,23 @@ class GroupsDataSource {
     }
   }
 
+  /// Scores for the fetch that also loads the groups themselves: the
+  /// leaderboard is supplementary there, so a failure leaves every score at
+  /// zero instead of losing the groups and their members.
   Future<Map<String, Map<String, _PeriodScores>>> _leaderboardScoresForGroups(
     List<String> groupIds,
   ) async {
     if (groupIds.isEmpty) {
       return const {};
     }
-
     try {
-      final dynamic response = await _supabaseService.requireClient
-          .rpc(
-            "group_leaderboard_scores",
-            params: {
-              "target_group_ids": groupIds,
-              "today_start": _todayStart().toIso8601String(),
-              "week_start": _weekStart().toIso8601String(),
-              "month_start": _monthStart().toIso8601String(),
-            },
-          )
-          .timeout(_activityScoresTimeout);
-      _logger.logResponse("rpc public.group_leaderboard_scores", response);
-      final List<dynamic> rows = response as List<dynamic>? ?? const [];
-      final Map<String, Map<String, _PeriodScores>> scoresByGroup = {};
-      for (final dynamic value in rows) {
-        final Map<String, dynamic> row = Map<String, dynamic>.from(
-          value as Map,
-        );
-        final String? groupId = row["group_id"] as String?;
-        final String? userId = row["user_id"] as String?;
-        if (groupId == null || userId == null) {
-          continue;
-        }
-        scoresByGroup.putIfAbsent(
-          groupId,
-          () => <String, _PeriodScores>{},
-        )[userId] = _PeriodScores(
-          today: _intValue(row["today_score"]),
-          week: _intValue(row["week_score"]),
-          month: _intValue(row["month_score"]),
-          total: _intValue(row["total_score"] ?? row["month_score"]),
-        );
-      }
-      return scoresByGroup;
+      return await _fetchLeaderboardScores(groupIds);
     } on TimeoutException catch (error, stackTrace) {
       _logger.logError(
         "Timed out loading group leaderboard scores",
         error: error,
         stackTrace: stackTrace,
       );
-      // The leaderboard is supplementary data. Groups and their members must
-      // still be usable if score aggregation is temporarily unavailable.
       return const {};
     } catch (error, stackTrace) {
       _logger.logError(
@@ -278,6 +245,95 @@ class GroupsDataSource {
       );
       return const {};
     }
+  }
+
+  Future<Map<String, Map<String, _PeriodScores>>> _fetchLeaderboardScores(
+    List<String> groupIds,
+  ) async {
+    final dynamic response = await _supabaseService.requireClient
+        .rpc(
+          "group_leaderboard_scores",
+          params: {
+            "target_group_ids": groupIds,
+            "today_start": _todayStart().toIso8601String(),
+            "week_start": _weekStart().toIso8601String(),
+            "month_start": _monthStart().toIso8601String(),
+          },
+        )
+        .timeout(_activityScoresTimeout);
+    _logger.logResponse("rpc public.group_leaderboard_scores", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    final Map<String, Map<String, _PeriodScores>> scoresByGroup = {};
+    for (final dynamic value in rows) {
+      final Map<String, dynamic> row = Map<String, dynamic>.from(value as Map);
+      final String? groupId = row["group_id"] as String?;
+      final String? userId = row["user_id"] as String?;
+      if (groupId == null || userId == null) {
+        continue;
+      }
+      scoresByGroup.putIfAbsent(
+        groupId,
+        () => <String, _PeriodScores>{},
+      )[userId] = _PeriodScores(
+        today: _intValue(row["today_score"]),
+        week: _intValue(row["week_score"]),
+        month: _intValue(row["month_score"]),
+        total: _intValue(row["total_score"] ?? row["month_score"]),
+      );
+    }
+    return scoresByGroup;
+  }
+
+  /// Re-reads only the leaderboard and applies it to [groups], keeping their
+  /// members, names and photos as they are.
+  ///
+  /// A focus session or a goal check changes nothing but the ranking, yet a
+  /// full [getGroups] repeats five requests (memberships, groups, members,
+  /// every member's profile with its photo, then the leaderboard). Unlike that
+  /// fetch, a failure here is reported, not turned into zeros, so the caller
+  /// can fall back to the full reload.
+  Future<Either<AppError, List<GroupEntity>>> refreshGroupScores(
+    List<GroupEntity> groups,
+  ) async {
+    if (groups.isEmpty) {
+      return Right(groups);
+    }
+    try {
+      final Map<String, Map<String, _PeriodScores>> scores =
+          await _fetchLeaderboardScores(
+            groups.map((group) => group.id).toList(),
+          );
+      final List<GroupEntity> updated = [
+        for (final GroupEntity group in groups)
+          group.copyWithMembers([
+            for (final GroupMemberEntity member in group.members)
+              _withScores(member, scores[group.id]?[member.id]),
+          ]),
+      ];
+      await _cacheGroups(updated);
+      return Right(updated);
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to refresh group scores",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
+  GroupMemberEntity _withScores(
+    GroupMemberEntity member,
+    _PeriodScores? scores,
+  ) {
+    final _PeriodScores applied =
+        scores ?? const _PeriodScores(today: 0, week: 0, month: 0);
+    return member.withScores(
+      today: applied.today,
+      week: applied.week,
+      month: applied.month,
+      total: applied.total,
+    );
   }
 
   Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async {

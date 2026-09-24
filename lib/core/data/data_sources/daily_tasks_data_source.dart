@@ -41,6 +41,19 @@ class DailyTasksDataSource {
   int _latestRemoteSyncRevision = 0;
   String? _hydratedRemoteUserId;
 
+  /// Ids the backend is known to hold for the current user: those read from it,
+  /// plus those this device uploaded. Only these are ever deleted remotely, so
+  /// a goal another phone created after this one last read the account is
+  /// never mistaken for one the user removed.
+  Set<String> _remoteKnownIds = {};
+  DateTime? _lastRemoteReadAt;
+
+  /// Each screen that lists the goals asks for them again, and a read that
+  /// happened moments ago (or this device's own upload) makes another one
+  /// redundant. Cross-device changes reach the app at start-up and resume
+  /// anyway, so a short window only delays them slightly.
+  static const Duration _remoteReadFreshness = Duration(seconds: 45);
+
   bool get hasHydratedCurrentUserFromRemote {
     final String? userId = _supabaseService.currentUserId;
     return userId == null || _hydratedRemoteUserId == userId;
@@ -48,6 +61,13 @@ class DailyTasksDataSource {
 
   @visibleForTesting
   bool canDeleteRemoteTasks(String userId) => _hydratedRemoteUserId == userId;
+
+  bool get _hasFreshRemoteRead {
+    final DateTime? last = _lastRemoteReadAt;
+    return last != null &&
+        DateTime.now().difference(last) < _remoteReadFreshness &&
+        _hydratedRemoteUserId == _supabaseService.currentUserId;
+  }
 
   Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async {
     try {
@@ -78,7 +98,8 @@ class DailyTasksDataSource {
       }
 
       final List<DailyTaskEntity> localTasks = _decodeTasks(savedTasks);
-      if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks)) {
+      if (!_pendingSyncStore.contains(PendingSyncDataset.dailyTasks) &&
+          !_hasFreshRemoteRead) {
         final List<DailyTaskEntity> remoteTasks = await _getRemoteTasks();
         if (remoteTasks.isNotEmpty) {
           final List<DailyTaskEntity> mergedTasks = mergeTasks(
@@ -273,7 +294,15 @@ class DailyTasksDataSource {
           .order("created_at")
           .timeout(_remoteCallTimeout);
       _logger.logResponse("select public.daily_goals", rows);
+      if (_hydratedRemoteUserId != userId) {
+        _remoteKnownIds = {};
+      }
       _hydratedRemoteUserId = userId;
+      _lastRemoteReadAt = DateTime.now();
+      _remoteKnownIds = {
+        for (final dynamic row in rows)
+          (row as Map<String, dynamic>)["id"] as String,
+      };
 
       return rows
           .map((row) => _taskFromRow(row as Map<String, dynamic>))
@@ -308,6 +337,10 @@ class DailyTasksDataSource {
             .from("daily_goals")
             .upsert(rows, onConflict: "user_id,id")
             .timeout(_remoteCallTimeout);
+        _remoteKnownIds.addAll(tasks.map((task) => task.id));
+        // What was just uploaded is what the backend holds, so it also counts
+        // as a fresh read for the screens that reload the goals next.
+        _lastRemoteReadAt = DateTime.now();
         // Local saves return before this upload completes. Refresh shared
         // rankings only after the server has received the completed days.
         if (tasks.any((task) => task.isFromGroup)) {
@@ -322,13 +355,20 @@ class DailyTasksDataSource {
         return;
       }
 
-      final List<String> ids = tasks.map((task) => task.id).toList();
-      var delete = client.from("daily_goals").delete().eq("user_id", userId);
-      if (ids.isNotEmpty) {
-        delete = delete.not("id", "in", "(${ids.join(",")})");
+      final Set<String> localIds = tasks.map((task) => task.id).toSet();
+      final List<String> removed = _remoteKnownIds
+          .difference(localIds)
+          .toList();
+      if (removed.isNotEmpty) {
+        await client
+            .from("daily_goals")
+            .delete()
+            .eq("user_id", userId)
+            .inFilter("id", removed)
+            .timeout(_remoteCallTimeout);
+        _remoteKnownIds.removeAll(removed);
+        _activityChangeBus?.notifyGroupActivityChanged();
       }
-      await delete.timeout(_remoteCallTimeout);
-      _activityChangeBus?.notifyGroupActivityChanged();
       // A newer local snapshot may already be waiting behind this request.
       // Only the latest successful upload makes the dataset fully synced.
       if (revision == _latestRemoteSyncRevision) {
