@@ -1,4 +1,6 @@
 import "package:flutter/foundation.dart";
+import "package:http/http.dart" as http;
+import "package:timing/core/services/log/http_traffic_logger.dart";
 import "package:timing/env/environment_keys.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 
@@ -32,6 +34,7 @@ class SupabaseService {
     final Supabase supabase = await Supabase.initialize(
       url: projectUrl,
       publishableKey: EnvironmentKeys.supabasePublishableKey,
+      httpClient: kDebugMode ? LoggingHttpClient(http.Client()) : null,
     );
     return SupabaseService._(isConfigured: true, client: supabase.client);
   }
