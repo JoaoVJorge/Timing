@@ -8,10 +8,13 @@ class UpdateSubjectPagesUseCase {
 
   final SubjectsRepository _subjectsRepository;
 
+  /// Serialized with every other subject mutation: finishing a reading session
+  /// saves the pages while the timer is still flushing its seconds, and two
+  /// overlapping read-modify-write saves would drop one of the two changes.
   Future<Either<AppError, void>> call({
     required String subjectId,
     required int currentPages,
-  }) async {
+  }) => _subjectsRepository.runSerializedMutation(() async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
 
@@ -26,5 +29,5 @@ class UpdateSubjectPagesUseCase {
 
       return _subjectsRepository.saveSubjects(updatedSubjects);
     });
-  }
+  });
 }

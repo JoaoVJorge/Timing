@@ -25,7 +25,7 @@ class AddSubjectUseCase {
     String? groupId,
     String? groupActivityId,
     String? id,
-  }) async {
+  }) => _subjectsRepository.runSerializedMutation(() async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
 
@@ -84,5 +84,5 @@ class AddSubjectUseCase {
 
       return saveResult.fold(Left.new, (_) => Right(newSubject));
     });
-  }
+  });
 }

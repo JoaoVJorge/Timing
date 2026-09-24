@@ -8,15 +8,16 @@ class DeleteSubjectUseCase {
 
   final SubjectsRepository _subjectsRepository;
 
-  Future<Either<AppError, void>> call({required String subjectId}) async {
-    final Either<AppError, List<SubjectEntity>> getResult =
-        await _subjectsRepository.getSubjects();
+  Future<Either<AppError, void>> call({required String subjectId}) =>
+      _subjectsRepository.runSerializedMutation(() async {
+        final Either<AppError, List<SubjectEntity>> getResult =
+            await _subjectsRepository.getSubjects();
 
-    return getResult.fold(
-      (error) async => Left(error),
-      (subjects) => _subjectsRepository.saveSubjects(
-        subjects.where((subject) => subject.id != subjectId).toList(),
-      ),
-    );
-  }
+        return getResult.fold(
+          (error) async => Left(error),
+          (subjects) => _subjectsRepository.saveSubjects(
+            subjects.where((subject) => subject.id != subjectId).toList(),
+          ),
+        );
+      });
 }

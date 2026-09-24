@@ -11,7 +11,7 @@ class UpdateSubjectNotesUseCase {
   Future<Either<AppError, void>> call({
     required String subjectId,
     required String notes,
-  }) async {
+  }) => _subjectsRepository.runSerializedMutation(() async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
 
@@ -26,5 +26,5 @@ class UpdateSubjectNotesUseCase {
 
       return _subjectsRepository.saveSubjects(updatedSubjects);
     });
-  }
+  });
 }

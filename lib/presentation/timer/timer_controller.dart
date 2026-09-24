@@ -580,12 +580,11 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     if (sanitizedPages > 0) {
       final int nextPages = subject.currentPages + sanitizedPages;
       subject = subject.copyWith(currentPages: nextPages);
-      unawaited(
-        updateSubjectPagesUseCase(
-          subjectId: subject.id,
-          currentPages: nextPages,
-        ).then((_) => achievementUnlockService.checkForNewUnlocks()),
-      );
+      final Future<void> pagesSaved = updateSubjectPagesUseCase(
+        subjectId: subject.id,
+        currentPages: nextPages,
+      ).then((_) => achievementUnlockService.checkForNewUnlocks());
+      unawaited(pagesSaved);
       unawaited(
         dailyProgressService
             .addPages(sanitizedPages)
@@ -602,13 +601,20 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           pages: sanitizedPages,
         ),
       );
+      final Future<void> pagesLogged = logActivityUseCase(
+        category: subject.category,
+        subjectId: subject.id,
+        subjectName: subject.name,
+        pages: sanitizedPages,
+      );
+      // The group's progress reads the subject's saved page count while its
+      // ranking reads the logged entry, so refresh only once both reached the
+      // backend instead of right after the entry.
       unawaited(
-        logActivityUseCase(
-          category: subject.category,
-          subjectId: subject.id,
-          subjectName: subject.name,
-          pages: sanitizedPages,
-        ).then((_) => _notifyGroupActivityChanged()),
+        Future.wait<void>([
+          pagesSaved,
+          pagesLogged,
+        ]).then((_) => _notifyGroupActivityChanged()),
       );
     }
     _recordLastActivityIfNeeded();
