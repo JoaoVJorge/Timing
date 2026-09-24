@@ -9,7 +9,7 @@ String formatGroupScore(
   int value,
   GroupMetricUnit unit,
 ) => switch (unit) {
-  GroupMetricUnit.hours => formatDurationLong(Duration(seconds: value)),
+  GroupMetricUnit.hours => _formatFocusTime(value, formatDurationLong),
   GroupMetricUnit.days => context.l10n.metricDaysValue(value),
   GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
 };
@@ -19,10 +19,17 @@ String formatMetricValue(
   int value,
   GroupMetricUnit unit,
 ) => switch (unit) {
-  GroupMetricUnit.hours => formatDurationTotalMinutes(Duration(seconds: value)),
+  GroupMetricUnit.hours => _formatFocusTime(value, formatDurationTotalMinutes),
   GroupMetricUnit.days => context.l10n.metricDaysValue(value),
   GroupMetricUnit.pages => context.l10n.metricPagesValue(value),
 };
+
+/// The minute formats floor, so a short session would read "0 min" and look
+/// like the group ignored it. Below a minute the exact seconds are shown.
+String _formatFocusTime(int seconds, String Function(Duration) formatMinutes) =>
+    seconds > 0 && seconds < 60
+    ? formatDurationTotalSeconds(Duration(seconds: seconds))
+    : formatMinutes(Duration(seconds: seconds));
 
 String progressLabel(
   BuildContext context,
