@@ -32,9 +32,14 @@ class GroupsDataSource {
     required this._localStorageService,
     required this._pendingSyncStore,
     this._activityChangeBus,
+    this._isBackendReachable,
   });
 
   final ActivityChangeBus? _activityChangeBus;
+
+  /// The app's connectivity flag: the offline fallbacks below only apply when
+  /// it says offline or the failure is not a definitive server rejection.
+  final bool Function()? _isBackendReachable;
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
@@ -76,10 +81,16 @@ class GroupsDataSource {
       return Right(groups);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to refresh groups; trying the offline cache",
+        "Failed to refresh groups",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!shouldUseOfflineFallback(
+        error,
+        isBackendReachable: _isBackendReachable,
+      )) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       final List<GroupEntity>? cached = await _readCachedGroups();
       if (cached != null) {
         return Right(cached);
@@ -336,10 +347,7 @@ class GroupsDataSource {
       final dynamic response = await _supabaseService.requireClient
           .rpc(
             "invite_friend_to_group",
-            params: {
-              "target_group_id": groupId,
-              "target_friend_id": friendId,
-            },
+            params: {"target_group_id": groupId, "target_friend_id": friendId},
           )
           .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.invite_friend_to_group", response);
@@ -357,10 +365,7 @@ class GroupsDataSource {
       final dynamic response = await _supabaseService.requireClient
           .rpc(
             "cancel_group_invitation",
-            params: {
-              "target_group_id": groupId,
-              "target_friend_id": friendId,
-            },
+            params: {"target_group_id": groupId, "target_friend_id": friendId},
           )
           .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.cancel_group_invitation", response);
@@ -468,8 +473,9 @@ class GroupsDataSource {
   }
 
   /// Leaves the caller's own membership — safe to retry offline (deleting an
-  /// already-gone `group_members` row is a no-op), so a failure is queued
-  /// instead of surfaced as an error.
+  /// already-gone `group_members` row is a no-op), so a failure while offline
+  /// is queued instead of surfaced as an error. A definitive server rejection
+  /// while online is still reported.
   Future<Either<AppError, void>> leaveGroup(String groupId) async {
     final String? userId = _supabaseService.currentUserId;
     if (userId == null) {
@@ -487,10 +493,16 @@ class GroupsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to leave group $groupId, queueing for retry",
+        "Failed to leave group $groupId",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!shouldUseOfflineFallback(
+        error,
+        isBackendReachable: _isBackendReachable,
+      )) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _removeCachedGroup(groupId);
       await _enqueueGroupAction({"type": "leaveGroup", "groupId": groupId});
       return const Right(null);
@@ -999,10 +1011,22 @@ class GroupsDataSource {
       return Right(updated);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Supabase $operation failed, queueing for retry",
+        "Supabase $operation failed",
         error: SqlOperationAppError.describe(error),
         stackTrace: stackTrace,
       );
+      if (!shouldUseOfflineFallback(
+        error,
+        isBackendReachable: _isBackendReachable,
+      )) {
+        return Left(
+          SqlOperationAppError(
+            operation: operation,
+            error: error,
+            stackTrace: stackTrace,
+          ),
+        );
+      }
       final GroupEntity optimistic = GroupEntity(
         id: group.id,
         name: name,

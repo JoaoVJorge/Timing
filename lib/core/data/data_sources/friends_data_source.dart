@@ -21,7 +21,12 @@ class FriendsDataSource {
     required this._logger,
     required this._localStorageService,
     required this._pendingSyncStore,
+    this._isBackendReachable,
   });
+
+  /// The app's connectivity flag: the offline fallbacks below only apply when
+  /// it says offline or the failure is not a definitive server rejection.
+  final bool Function()? _isBackendReachable;
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
@@ -81,6 +86,9 @@ class FriendsDataSource {
       await _cacheSocial(social);
       return Right(social);
     } catch (error, stackTrace) {
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       final FriendsSocialEntity? cached = await _readCachedSocial();
       if (cached != null) {
         return Right(cached);
@@ -170,10 +178,13 @@ class FriendsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to send friend request, queueing for retry",
+        "Failed to send friend request",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _enqueueFriendAction({
         "type": "sendFriendRequest",
         "addresseeId": addresseeId,
@@ -224,10 +235,13 @@ class FriendsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to accept friend request, queueing for retry",
+        "Failed to accept friend request",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _updateCachedSocial(acceptInCache);
       await _enqueueFriendAction({
         "type": "acceptRequest",
@@ -262,10 +276,13 @@ class FriendsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to decline friend request, queueing for retry",
+        "Failed to decline friend request",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _updateCachedSocial(declineInCache);
       await _enqueueFriendAction({
         "type": "declineRequest",
@@ -298,8 +315,7 @@ class FriendsDataSource {
           sentRequests: social.sentRequests
               .where(
                 (item) =>
-                    item.friendshipId != friendshipId &&
-                    item.id != addresseeId,
+                    item.friendshipId != friendshipId && item.id != addresseeId,
               )
               .toList(),
           friends: social.friends,
@@ -314,10 +330,13 @@ class FriendsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to cancel friend request, queueing for retry",
+        "Failed to cancel friend request",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _updateCachedSocial(cancelInCache);
       await _enqueueFriendAction({
         "type": "cancelSentRequest",
@@ -380,10 +399,13 @@ class FriendsDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to remove friend, queueing for retry",
+        "Failed to remove friend",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!_canUseOfflineFallback(error)) {
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _updateCachedSocial(removeInCache);
       await _enqueueFriendAction({
         "type": "removeFriend",
@@ -473,10 +495,7 @@ class FriendsDataSource {
         if (userId == null) {
           throw StateError("User must be signed in to send a friend request.");
         }
-        await _sendFriendRequestRemote(
-          userId,
-          action["addresseeId"] as String,
-        );
+        await _sendFriendRequestRemote(userId, action["addresseeId"] as String);
       case "acceptRequest":
         await _acceptRequestRemote(action["friendshipId"] as String);
       case "declineRequest":
@@ -534,6 +553,9 @@ class FriendsDataSource {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
+
+  bool _canUseOfflineFallback(Object error) =>
+      shouldUseOfflineFallback(error, isBackendReachable: _isBackendReachable);
 
   Left<AppError, T> _signedOut<T>(String action) => Left(
     GenericAppError(
@@ -741,9 +763,7 @@ class FriendsDataSource {
     }
   }
 
-  Future<void> _writeFriendActionQueue(
-    List<Map<String, dynamic>> queue,
-  ) async {
+  Future<void> _writeFriendActionQueue(List<Map<String, dynamic>> queue) async {
     await _localStorageService.write(
       LocalStorageKeys.pendingFriendActions,
       jsonEncode(queue),

@@ -20,9 +20,14 @@ class ActivityDataSource {
     required this._pendingSyncStore,
     required this._logger,
     this._activityChangeBus,
+    this._isBackendReachable,
   });
 
   final ActivityChangeBus? _activityChangeBus;
+
+  /// The app's connectivity flag: a failed upload is only queued when it says
+  /// offline or the failure is not a definitive server rejection.
+  final bool Function()? _isBackendReachable;
 
   final SupabaseService _supabaseService;
   final AppLocalStorageService _localStorageService;
@@ -76,10 +81,18 @@ class ActivityDataSource {
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
-        "Failed to sync activity_entries row, queueing for retry",
+        "Failed to sync activity_entries row",
         error: error,
         stackTrace: stackTrace,
       );
+      if (!shouldUseOfflineFallback(
+        error,
+        isBackendReachable: _isBackendReachable,
+      )) {
+        // The server rejected the row for good; queueing it would only get it
+        // dropped later, so report the failure instead.
+        return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      }
       await _enqueuePending(row);
       // The session is durably queued locally, so callers that only care
       // about their own on-device stats (which are recorded separately and

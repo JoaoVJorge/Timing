@@ -15,6 +15,8 @@ import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 class DataSourcesBindings extends Bindings {
   @override
   void dependencies() {
+    bool isBackendReachable() => Get.find<ConnectivityService>().isOnline.value;
+
     Get.put<AppConfigDataSource>(
       AppConfigDataSource(localStorageService: Get.find()),
       permanent: true,
@@ -26,6 +28,7 @@ class DataSourcesBindings extends Bindings {
         localStorageService: Get.find(),
         pendingSyncStore: Get.find(),
         logger: Get.find(),
+        isBackendReachable: isBackendReachable,
       ),
       permanent: true,
     );
@@ -45,8 +48,7 @@ class DataSourcesBindings extends Bindings {
         supabaseService: Get.find(),
         logger: Get.find(),
         pendingSyncStore: Get.find(),
-        isBackendReachable: () =>
-            Get.find<ConnectivityService>().isOnline.value,
+        isBackendReachable: isBackendReachable,
       ),
       permanent: true,
     );
@@ -57,6 +59,7 @@ class DataSourcesBindings extends Bindings {
         logger: Get.find(),
         localStorageService: Get.find(),
         pendingSyncStore: Get.find(),
+        isBackendReachable: isBackendReachable,
       ),
       permanent: true,
     );
@@ -66,6 +69,7 @@ class DataSourcesBindings extends Bindings {
         logger: Get.find(),
         localStorageService: Get.find(),
         pendingSyncStore: Get.find(),
+        isBackendReachable: isBackendReachable,
       ),
       permanent: true,
     );
