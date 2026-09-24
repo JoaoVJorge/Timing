@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:math" as math;
 
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
@@ -89,30 +90,45 @@ class DailyProgressService {
     await _update(current.copyWith(pages: current.pages + pages));
   }
 
-  /// Fills in any day this device has no local record for, from [entries]
-  /// fetched off the backend. Days already present locally are left
-  /// untouched, so a local write that hasn't synced yet is never clobbered
-  /// or double counted against the same day's remote copy.
-  Future<bool> mergeMissingDaysFromActivityEntries(
+  /// Brings each day up to what the backend recorded for it, from [entries]
+  /// fetched off the backend.
+  ///
+  /// Another phone signed in to the same account only reaches this device
+  /// through those entries, so a day is raised to the backend's total for it.
+  /// It is never lowered: a session recorded here that has not uploaded yet
+  /// keeps the local figure, and because the totals are compared rather than
+  /// added, a session already synced is not counted twice. Session counts are
+  /// not derivable from entries and stay local.
+  Future<bool> reconcileWithActivityEntries(
     List<ActivityEntryEntity> entries,
   ) async {
-    final Map<String, DailyProgressEntity> missing = {};
+    final Map<String, DailyProgressEntity> remoteByDay = {};
     for (final ActivityEntryEntity entry in entries) {
       final String key = dateKey(entry.timestamp);
-      if (_byDate.containsKey(key)) {
-        continue;
-      }
       final DailyProgressEntity current =
-          missing[key] ?? const DailyProgressEntity();
-      missing[key] = current.copyWith(
+          remoteByDay[key] ?? const DailyProgressEntity();
+      remoteByDay[key] = current.copyWith(
         focusSeconds: current.focusSeconds + entry.seconds,
         pages: current.pages + entry.pages,
       );
     }
-    if (missing.isEmpty) {
+    bool changed = false;
+    remoteByDay.forEach((key, remote) {
+      final DailyProgressEntity local =
+          _byDate[key] ?? const DailyProgressEntity();
+      if (remote.focusSeconds <= local.focusSeconds &&
+          remote.pages <= local.pages) {
+        return;
+      }
+      _byDate[key] = local.copyWith(
+        focusSeconds: math.max(local.focusSeconds, remote.focusSeconds),
+        pages: math.max(local.pages, remote.pages),
+      );
+      changed = true;
+    });
+    if (!changed) {
       return false;
     }
-    _byDate.addAll(missing);
     _refreshToday();
     await _persist();
     return true;

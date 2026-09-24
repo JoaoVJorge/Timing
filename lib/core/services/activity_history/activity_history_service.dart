@@ -1,11 +1,13 @@
-import "dart:convert";
 import "dart:collection";
+import "dart:convert";
+import "dart:math" as math;
 
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/utils/id_generator.dart";
 
 /// Append-only local trail of every logged activity, kept so the app can answer
 /// time-and-category scoped questions ("studied yesterday", "pages read this
@@ -88,34 +90,70 @@ class ActivityHistoryService {
     await _persist();
   }
 
-  /// Fills in remote entries for any day this device has no local entry on,
-  /// so per-category/per-subject breakdowns cover the same history as
-  /// [DailyProgressService] once merged. Days already represented locally
-  /// are left untouched to avoid double counting a session that already
-  /// synced.
-  Future<bool> mergeMissingDaysFromActivityEntries(
+  /// Brings the per-subject, per-day totals up to what the backend recorded,
+  /// so category and subject breakdowns cover work done on another phone.
+  ///
+  /// Entries carry different ids on each side (the local trail predates the
+  /// backend's uuids), so they cannot be matched one to one. Totals per
+  /// (day, subject) are compared instead and only the shortfall is added, as
+  /// one synthetic entry. Nothing is ever removed or counted twice, and a
+  /// second pass over the same data adds nothing.
+  Future<bool> reconcileWithActivityEntries(
     List<ActivityEntryEntity> entries,
   ) async {
-    final Set<String> localDays = _entries
-        .map((entry) => _startOfDay(entry.timestamp).toIso8601String())
-        .toSet();
-    final List<ActivityEntryEntity> missing = entries
-        .where(
-          (entry) => !localDays.contains(
-            _startOfDay(entry.timestamp).toIso8601String(),
-          ),
-        )
-        .toList();
-    if (missing.isEmpty) {
+    final Map<String, List<ActivityEntryEntity>> remoteByKey = {};
+    for (final ActivityEntryEntity entry in entries) {
+      remoteByKey.putIfAbsent(_dayAndSubject(entry), () => []).add(entry);
+    }
+    final Map<String, _Totals> localByKey = {};
+    for (final ActivityEntryEntity entry in _entries) {
+      (localByKey[_dayAndSubject(entry)] ??= _Totals()).add(entry);
+    }
+
+    final List<ActivityEntryEntity> shortfalls = [];
+    remoteByKey.forEach((key, group) {
+      final _Totals remote = _Totals();
+      for (final ActivityEntryEntity entry in group) {
+        remote.add(entry);
+      }
+      final _Totals local = localByKey[key] ?? _Totals();
+      final int seconds = math.max(0, remote.seconds - local.seconds);
+      final int pages = math.max(0, remote.pages - local.pages);
+      final int tasks = math.max(
+        0,
+        remote.completedTasks - local.completedTasks,
+      );
+      if (seconds == 0 && pages == 0 && tasks == 0) {
+        return;
+      }
+      final ActivityEntryEntity latest = group.reduce(
+        (a, b) => b.timestamp.isAfter(a.timestamp) ? b : a,
+      );
+      shortfalls.add(
+        ActivityEntryEntity(
+          id: "reconciled-${generateEntityId()}",
+          category: latest.category,
+          subjectId: latest.subjectId,
+          subjectName: latest.subjectName,
+          timestamp: latest.timestamp,
+          seconds: seconds,
+          pages: pages,
+          completedTasks: tasks,
+        ),
+      );
+    });
+    if (shortfalls.isEmpty) {
       return false;
     }
-    final DateTime now = DateTime.now();
-    _entries.addAll(missing);
-    _pruneOldEntries(now);
+    _entries.addAll(shortfalls);
+    _pruneOldEntries(DateTime.now());
     _entries.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     await _persist();
     return true;
   }
+
+  static String _dayAndSubject(ActivityEntryEntity entry) =>
+      "${_startOfDay(entry.timestamp).toIso8601String()}|${entry.subjectId}";
 
   /// Entries whose timestamp falls in `[start, end)`, optionally filtered by
   /// [category] and/or [subjectId].
@@ -198,5 +236,17 @@ class ActivityHistoryService {
       LocalStorageKeys.activityHistory,
       jsonEncode(encoded),
     );
+  }
+}
+
+class _Totals {
+  int seconds = 0;
+  int pages = 0;
+  int completedTasks = 0;
+
+  void add(ActivityEntryEntity entry) {
+    seconds += entry.seconds;
+    pages += entry.pages;
+    completedTasks += entry.completedTasks;
   }
 }

@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:math" as math;
 
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
@@ -71,23 +72,19 @@ class SubjectDailyHistoryService {
     await _update(subjectId, current.copyWith(pages: current.pages + pages));
   }
 
-  /// Fills in any (subject, day) pair this device has no local record for,
-  /// from [entries] fetched off the backend. Pairs already present locally
-  /// are left untouched, mirroring [DailyProgressService.mergeMissingDaysFromActivityEntries].
-  Future<bool> mergeMissingDaysFromActivityEntries(
+  /// Per-subject version of [DailyProgressService.reconcileWithActivityEntries]:
+  /// raises each (subject, day) to the backend's total, never lowering it.
+  Future<bool> reconcileWithActivityEntries(
     List<ActivityEntryEntity> entries,
   ) async {
-    final Map<String, Map<String, DailyProgressEntity>> missing = {};
+    final Map<String, Map<String, DailyProgressEntity>> remote = {};
     for (final ActivityEntryEntity entry in entries) {
       if (entry.subjectId.isEmpty) {
         continue;
       }
       final String key = DailyProgressService.dateKey(entry.timestamp);
-      if (_bySubject[entry.subjectId]?.containsKey(key) ?? false) {
-        continue;
-      }
-      final Map<String, DailyProgressEntity> days =
-          missing[entry.subjectId] ??= {};
+      final Map<String, DailyProgressEntity> days = remote[entry.subjectId] ??=
+          {};
       final DailyProgressEntity current =
           days[key] ?? const DailyProgressEntity();
       days[key] = current.copyWith(
@@ -95,12 +92,25 @@ class SubjectDailyHistoryService {
         pages: current.pages + entry.pages,
       );
     }
-    if (missing.isEmpty) {
+    bool changed = false;
+    remote.forEach((subjectId, days) {
+      days.forEach((key, remoteDay) {
+        final DailyProgressEntity local =
+            _bySubject[subjectId]?[key] ?? const DailyProgressEntity();
+        if (remoteDay.focusSeconds <= local.focusSeconds &&
+            remoteDay.pages <= local.pages) {
+          return;
+        }
+        (_bySubject[subjectId] ??= {})[key] = local.copyWith(
+          focusSeconds: math.max(local.focusSeconds, remoteDay.focusSeconds),
+          pages: math.max(local.pages, remoteDay.pages),
+        );
+        changed = true;
+      });
+    });
+    if (!changed) {
       return false;
     }
-    missing.forEach((subjectId, days) {
-      (_bySubject[subjectId] ??= {}).addAll(days);
-    });
     await _persist();
     return true;
   }

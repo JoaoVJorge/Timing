@@ -28,6 +28,20 @@ class SubjectsRepository {
     return completer.future;
   }
 
+  /// Only the local merge is serialized with the other subject mutations (it
+  /// reads the stored list and writes the merged one back); the network read
+  /// stays outside so a slow connection never delays saving the timer.
+  Future<bool> reconcileWithRemote() async {
+    final List<SubjectEntity>? remote = await _subjectsDataSource
+        .fetchRemoteForReconcile();
+    if (remote == null) {
+      return false;
+    }
+    return runSerializedMutation(
+      () => _subjectsDataSource.applyRemoteSubjects(remote),
+    );
+  }
+
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() =>
       _subjectsDataSource.getSubjects();
 

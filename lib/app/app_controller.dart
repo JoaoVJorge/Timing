@@ -9,8 +9,8 @@ import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/route_arguments.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/app_config_entity.dart";
-import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_activity_entries_use_case.dart";
@@ -19,6 +19,7 @@ import "package:timing/core/domain/use_cases/get_current_profile_use_case.dart";
 import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
 import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
+import "package:timing/core/services/activity_history/activity_history_reconciler.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/auth/offline_grace_period.dart";
@@ -35,6 +36,7 @@ import "package:timing/core/services/sync/sync_reconciliation_service.dart";
 import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/l10n/app_localizations.dart";
+import "package:timing/presentation/category/category_controller.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/home/home_controller.dart";
 import "package:timing/presentation/progress/progress_controller.dart";
@@ -101,6 +103,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
   Timer? _pendingSyncRetryTimer;
   Future<void>? _reconciliationInProgress;
   Future<bool>? _activityBackfillInProgress;
+  DateTime? _lastSubjectsReconcileAt;
+  static const Duration _subjectsReconcileGap = Duration(minutes: 10);
   bool _hadQueuedOfflineChanges = false;
 
   static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
@@ -148,7 +152,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       (online) {
         if (online && _supabaseService.hasSignedInUser) {
           unawaited(_flushPendingAndNotify());
-          unawaited(_restoreActivityHistoryFromBackendIfNeeded());
+          unawaited(_reconcileActivityHistory());
         }
       },
     );
@@ -247,15 +251,15 @@ class AppController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _loadInitialConfig() async {
     await _loadAppConfig();
-    await Future.wait([
-      refreshProfileFromBackend(),
-      _restoreActivityHistoryFromBackendIfNeeded(),
-    ]);
+    await refreshProfileFromBackend();
     // The saved preference is enough to paint the first frame. Reconciling it
     // with the OS notification permission can complete after navigation.
     unawaited(refreshNotificationsEnabledFromSystem());
     if (_supabaseService.hasSignedInUser) {
       unawaited(_flushPendingAndNotify());
+      // Reads the account's history page by page, so it must not hold up the
+      // splash screen.
+      unawaited(_reconcileActivityHistory());
     }
   }
 
@@ -413,71 +417,75 @@ class AppController extends GetxController with WidgetsBindingObserver {
     }
 
     await Future.wait(reloads);
-    await _restoreActivityHistoryFromBackendIfNeeded();
     if (_supabaseService.hasSignedInUser) {
       unawaited(_flushPendingAndNotify());
+      unawaited(_reconcileActivityHistory());
     }
   }
 
-  /// Backfills local progress caches from `activity_entries` so a device
-  /// whose local history doesn't cover everything the account has logged
-  /// elsewhere (a reinstall, a new device, or a cache that only partially
-  /// rebuilt) catches up. Gated on a persisted flag rather than the caches
-  /// being empty: local storage is per-device, so as soon as the user logs
-  /// one session here the caches stop being empty even though older history
-  /// logged on another device is still missing, which would otherwise close
-  /// this backfill's only chance to run ever again.
-  Future<bool> _restoreActivityHistoryFromBackendIfNeeded() {
+  /// Brings the local progress caches up to the account's `activity_entries`,
+  /// so history logged on another phone (or that only reached the backend
+  /// later) shows up here. See [ActivityHistoryReconciler] for how often it
+  /// reads and why.
+  Future<bool> _reconcileActivityHistory({bool force = false}) {
     final Future<bool>? current = _activityBackfillInProgress;
     if (current != null) return current;
-    final Future<bool> work = _runActivityHistoryBackfill();
+    final Future<bool> work = _runActivityHistoryReconcile(force: force);
     _activityBackfillInProgress = work;
     return work.whenComplete(() => _activityBackfillInProgress = null);
   }
 
-  Future<bool> _runActivityHistoryBackfill() async {
-    if (!_supabaseService.hasSignedInUser) {
+  Future<bool> _runActivityHistoryReconcile({required bool force}) async {
+    if (!_supabaseService.hasSignedInUser ||
+        !Get.find<ConnectivityService>().isOnline.value) {
       return false;
     }
+    final List<bool> results = await Future.wait([
+      ActivityHistoryReconciler(
+        fetchEntries: _getActivityEntriesUseCase.call,
+        activityHistory: Get.find<ActivityHistoryService>(),
+        dailyProgress: Get.find<DailyProgressService>(),
+        subjectHistory: Get.find<SubjectDailyHistoryService>(),
+        localStorage: localStorageService,
+      ).reconcile(force: force),
+      _reconcileSubjects(force: force),
+    ]);
+    final bool changed = results.any((didChange) => didChange);
+    if (changed) {
+      _refreshProgressViews();
+    }
+    return changed;
+  }
 
-    final bool alreadyBackfilled =
-        await localStorageService.read<bool?>(
-          LocalStorageKeys.activityHistoryBackfillCompleted,
-        ) ??
-        false;
-    if (alreadyBackfilled) {
+  /// A small read of the account's activities, cheap enough to repeat on every
+  /// start, resume and reconnect but not on every one of a burst of them.
+  Future<bool> _reconcileSubjects({required bool force}) async {
+    final DateTime now = DateTime.now();
+    final DateTime? last = _lastSubjectsReconcileAt;
+    if (!force &&
+        last != null &&
+        now.difference(last) < _subjectsReconcileGap) {
       return false;
     }
+    _lastSubjectsReconcileAt = now;
+    return Get.find<SubjectsRepository>().reconcileWithRemote();
+  }
 
-    final ActivityHistoryService activityHistoryService =
-        Get.find<ActivityHistoryService>();
-    final DailyProgressService dailyProgressService =
-        Get.find<DailyProgressService>();
-    final SubjectDailyHistoryService subjectDailyHistoryService =
-        Get.find<SubjectDailyHistoryService>();
-
-    final Either<AppError, List<ActivityEntryEntity>> result =
-        await _getActivityEntriesUseCase(
-          retentionDays: ActivityHistoryService.retentionDays,
-        );
-    return await result.fold((error) async => false, (entries) async {
-      bool merged = false;
-      if (entries.isNotEmpty) {
-        final List<bool> results = await Future.wait([
-          activityHistoryService.mergeMissingDaysFromActivityEntries(entries),
-          dailyProgressService.mergeMissingDaysFromActivityEntries(entries),
-          subjectDailyHistoryService.mergeMissingDaysFromActivityEntries(
-            entries,
-          ),
-        ]);
-        merged = results.any((didMerge) => didMerge);
-      }
-      await localStorageService.write(
-        LocalStorageKeys.activityHistoryBackfillCompleted,
-        true,
+  void _refreshProgressViews() {
+    if (Get.isRegistered<CategoryController>()) {
+      unawaited(Get.find<CategoryController>().loadSubjects());
+    }
+    if (Get.isRegistered<ProgressController>()) {
+      unawaited(Get.find<ProgressController>().loadStats());
+    }
+    if (Get.isRegistered<HomeController>()) {
+      unawaited(
+        Get.find<HomeController>().load(
+          reloadSchedule: false,
+          reloadDailyTasks: false,
+        ),
       );
-      return merged;
-    });
+    }
   }
 
   Future<void> setDarkMode(bool value) async {
@@ -670,6 +678,9 @@ class AppController extends GetxController with WidgetsBindingObserver {
       isAppInForeground.value = true;
       _startPresenceTracking();
       unawaited(Get.find<ConnectivityService>().refresh());
+      // Picks up what the other phone logged while this app was in the
+      // background; throttled, so most resumes cost nothing.
+      unawaited(_reconcileActivityHistory());
       return;
     }
     if (state == AppLifecycleState.paused ||

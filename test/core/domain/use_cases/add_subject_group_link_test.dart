@@ -17,6 +17,9 @@ class _FakeSubjectsRepository implements SubjectsRepository {
       mutation();
 
   @override
+  Future<bool> reconcileWithRemote() async => false;
+
+  @override
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async =>
       Right(_subjects);
 

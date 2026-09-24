@@ -270,6 +270,13 @@ class ActivityDataSource {
     );
   }
 
+  /// The server caps a response at 1000 rows and the timer logs a row every
+  /// autosave, so a few hours of focus already exceed one page. Reading only
+  /// the first page (ordered oldest first) silently dropped the most recent
+  /// days, so the history is read page by page until a short page.
+  static const int _entriesPageSize = 1000;
+  static const int _maxEntryPages = 60;
+
   Future<Either<AppError, List<ActivityEntryEntity>>> getActivityEntries({
     int retentionDays = 400,
   }) async {
@@ -279,28 +286,42 @@ class ActivityDataSource {
         return const Right([]);
       }
 
-      final DateTime cutoff = DateTime.now().toUtc().subtract(
-        Duration(days: retentionDays),
-      );
-      final List<dynamic> rows = await _supabaseService.requireClient
-          .from("activity_entries")
-          .select()
-          .eq("user_id", userId)
-          .gte("occurred_at", cutoff.toIso8601String())
-          .order("occurred_at")
-          .timeout(_remoteCallTimeout);
-
-      return Right(
-        rows
-            .map((row) => _entryFromRow(row as Map<String, dynamic>))
-            .where(
-              (entry) =>
-                  entry.seconds > 0 ||
-                  entry.pages > 0 ||
-                  entry.completedTasks > 0,
+      final String cutoff = DateTime.now()
+          .toUtc()
+          .subtract(Duration(days: retentionDays))
+          .toIso8601String();
+      final List<ActivityEntryEntity> entries = [];
+      for (int page = 0; page < _maxEntryPages; page++) {
+        final int from = page * _entriesPageSize;
+        final List<dynamic> rows = await _supabaseService.requireClient
+            .from("activity_entries")
+            .select(
+              "id, category, subject_id, subject_name, occurred_at, "
+              "seconds, pages, completed_tasks",
             )
-            .toList(),
-      );
+            .eq("user_id", userId)
+            .gte("occurred_at", cutoff)
+            // id breaks ties so rows sharing a timestamp are never skipped or
+            // repeated across page boundaries.
+            .order("occurred_at")
+            .order("id")
+            .range(from, from + _entriesPageSize - 1)
+            .timeout(_remoteCallTimeout);
+        entries.addAll(
+          rows
+              .map((row) => _entryFromRow(row as Map<String, dynamic>))
+              .where(
+                (entry) =>
+                    entry.seconds > 0 ||
+                    entry.pages > 0 ||
+                    entry.completedTasks > 0,
+              ),
+        );
+        if (rows.length < _entriesPageSize) {
+          break;
+        }
+      }
+      return Right(entries);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
