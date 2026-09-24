@@ -96,6 +96,15 @@ void main() {
         final List<dynamic> queue = jsonDecode(saved!) as List<dynamic>;
         expect(queue, hasLength(1));
         expect(queue.single["seconds"], 1800);
+        // The session's own time must travel with the queued row: the column
+        // otherwise defaults to the (later) upload time.
+        final DateTime occurredAt = DateTime.parse(
+          queue.single["occurred_at"] as String,
+        );
+        expect(
+          DateTime.now().toUtc().difference(occurredAt).inSeconds.abs(),
+          lessThan(5),
+        );
       },
     );
 

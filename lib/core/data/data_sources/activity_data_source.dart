@@ -63,6 +63,10 @@ class ActivityDataSource {
       "seconds": seconds,
       "pages": pages,
       "completed_tasks": completedTasks,
+      // The column defaults to the insert time, so a session queued while
+      // offline would otherwise be dated at upload: shifting the group
+      // leaderboards' day/week/month buckets and passing their reset cutoff.
+      "occurred_at": DateTime.now().toUtc().toIso8601String(),
     };
     try {
       await _supabaseService.requireClient
