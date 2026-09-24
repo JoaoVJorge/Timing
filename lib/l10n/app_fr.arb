@@ -1630,6 +1630,7 @@
   "groupsOfflineTitle": "Pas de connexion Internet",
   "groupsOfflineDescription": "Connectez-vous à Internet pour accéder à vos groupes.",
   "groupsOfflineCachedNotice": "Vous êtes hors ligne. Affichage de vos groupes enregistrés ; certaines actions nécessitent une connexion.",
+  "groupsStaleNotice": "Impossible d'actualiser vos groupes. Affichage des dernières données enregistrées.",
   "personalInformationTitle": "Informations personnelles",
   "editGroupInfoSection": "Informations du groupe",
   "createGroupFocusGoalLabel": "Objectif de concentration",

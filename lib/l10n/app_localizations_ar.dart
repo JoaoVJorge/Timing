@@ -3132,6 +3132,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'أنت غير متصل بالإنترنت. يتم عرض مجموعاتك المحفوظة، وبعض الإجراءات تتطلب اتصالاً.';
 
   @override
+  String get groupsStaleNotice =>
+      'تعذّر تحديث مجموعاتك. يتم عرض آخر البيانات المحفوظة.';
+
+  @override
   String get personalInformationTitle => 'المعلومات الشخصية';
 
   @override

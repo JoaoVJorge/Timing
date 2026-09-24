@@ -3159,6 +3159,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Você está offline. Mostrando seus grupos salvos; algumas ações precisam de conexão.';
 
   @override
+  String get groupsStaleNotice =>
+      'Não foi possível atualizar seus grupos. Mostrando os últimos dados salvos.';
+
+  @override
   String get personalInformationTitle => 'Informações pessoais';
 
   @override

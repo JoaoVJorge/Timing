@@ -41,6 +41,13 @@ class GroupsDataSource {
   /// it says offline or the failure is not a definitive server rejection.
   final bool Function()? _isBackendReachable;
 
+  bool _lastGroupsFetchServedCache = false;
+
+  /// Whether the most recent [getGroups] could not reach the backend and
+  /// returned the cached list instead. While the app believes it is online
+  /// that means the data on screen is stale and the user should be told.
+  bool get lastGroupsFetchServedCache => _lastGroupsFetchServedCache;
+
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
   final AppLocalStorageService _localStorageService;
@@ -78,6 +85,7 @@ class GroupsDataSource {
         userId,
       ).timeout(_offlineFallbackTimeout);
       await _cacheGroups(groups);
+      _lastGroupsFetchServedCache = false;
       return Right(groups);
     } catch (error, stackTrace) {
       _logger.logError(
@@ -93,6 +101,7 @@ class GroupsDataSource {
       }
       final List<GroupEntity>? cached = await _readCachedGroups();
       if (cached != null) {
+        _lastGroupsFetchServedCache = true;
         return Right(cached);
       }
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

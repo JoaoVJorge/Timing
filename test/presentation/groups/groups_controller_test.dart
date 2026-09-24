@@ -45,6 +45,8 @@ class _FakeGroupsRepository implements GroupsRepository {
 
   List<GroupEntity> groupsResult;
   List<GroupEntity> cachedGroups = const [];
+  @override
+  bool lastGroupsFetchServedCache = false;
   Completer<List<GroupEntity>>? groupsCompleter;
   // When set, call N (1-indexed) awaits getGroupsCallCompleters[N-1] instead
   // of the single shared groupsCompleter, so a test can control the
@@ -976,6 +978,111 @@ void main() {
     );
     expect(find.text("Sem internet"), findsNothing);
     expect(repository.getGroupsCalls, 0);
+  });
+  test(
+    "flags stale groups when the saved copy was served while online",
+    () async {
+      final repository = _FakeGroupsRepository([_group("g1", "Grupo")])
+        ..lastGroupsFetchServedCache = true;
+      final controller = _controller(repository);
+
+      await controller.loadGroups();
+
+      expect(controller.isShowingStaleGroups.value, isTrue);
+      controller.onClose();
+    },
+  );
+
+  test("clears the stale flag once a refresh reaches the backend", () async {
+    final repository = _FakeGroupsRepository([_group("g1", "Grupo")])
+      ..lastGroupsFetchServedCache = true;
+    final controller = _controller(repository);
+    await controller.loadGroups();
+
+    repository.lastGroupsFetchServedCache = false;
+    await controller.loadGroups();
+
+    expect(controller.isShowingStaleGroups.value, isFalse);
+    controller.onClose();
+  });
+
+  test("retries a stale refresh on its own", () {
+    fakeAsync((async) {
+      final repository = _FakeGroupsRepository([_group("g1", "Grupo")])
+        ..lastGroupsFetchServedCache = true;
+      final controller = _controller(repository);
+      unawaited(controller.loadGroups());
+      async.flushMicrotasks();
+      expect(repository.getGroupsCalls, 1);
+
+      // The backend recovers before the automatic retry.
+      repository.lastGroupsFetchServedCache = false;
+      async.elapse(const Duration(seconds: 7));
+      async.flushMicrotasks();
+
+      expect(repository.getGroupsCalls, 2);
+      expect(controller.isShowingStaleGroups.value, isFalse);
+      controller.onClose();
+    });
+  });
+
+  test("gives up automatic retries after a few stale attempts", () {
+    fakeAsync((async) {
+      final repository = _FakeGroupsRepository([_group("g1", "Grupo")])
+        ..lastGroupsFetchServedCache = true;
+      final controller = _controller(repository);
+      unawaited(controller.loadGroups());
+      async.flushMicrotasks();
+
+      async.elapse(const Duration(minutes: 2));
+      async.flushMicrotasks();
+
+      // The first load plus two automatic retries.
+      expect(repository.getGroupsCalls, 3);
+      controller.onClose();
+    });
+  });
+
+  testWidgets("shows a retry notice above stale groups", (tester) async {
+    final repository = _FakeGroupsRepository([_group("g1", "Grupo salvo")])
+      ..lastGroupsFetchServedCache = true;
+    final controller = _controller(repository);
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("pt"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text("Grupo salvo"), findsOneWidget);
+    expect(
+      find.text(
+        "Não foi possível atualizar seus grupos. Mostrando os últimos dados "
+        "salvos.",
+      ),
+      findsOneWidget,
+    );
+
+    repository.lastGroupsFetchServedCache = false;
+    await tester.tap(find.text("Tentar novamente"));
+    await tester.pump();
+    await tester.pump();
+
+    expect(controller.isShowingStaleGroups.value, isFalse);
+    expect(
+      find.text(
+        "Não foi possível atualizar seus grupos. Mostrando os últimos dados "
+        "salvos.",
+      ),
+      findsNothing,
+    );
   });
 }
 

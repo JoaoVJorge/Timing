@@ -1723,6 +1723,7 @@
   "groupsOfflineTitle": "No internet connection",
   "groupsOfflineDescription": "Connect to the internet to access your groups.",
   "groupsOfflineCachedNotice": "You're offline. Showing your saved groups; some actions need a connection.",
+  "groupsStaleNotice": "Couldn't refresh your groups. Showing the last saved data.",
   "personalInformationTitle": "Personal information",
   "editGroupInfoSection": "Group information",
   "createGroupFocusGoalLabel": "Focus goal",

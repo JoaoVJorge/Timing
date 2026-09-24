@@ -74,6 +74,7 @@ void main() {
         expect(groups, hasLength(1));
         expect(groups.single.id, "g1");
       });
+      expect(dataSource.lastGroupsFetchServedCache, isTrue);
     });
 
     test("getGroups errors when remote fails and there is no cache", () async {
@@ -104,28 +105,27 @@ void main() {
           expect(group.name, "Novo nome");
         });
         expect(store.contains(PendingSyncDataset.groups), isTrue);
-        final String cached = storage.data[LocalStorageKeys.cachedGroups] as String;
+        final String cached =
+            storage.data[LocalStorageKeys.cachedGroups] as String;
         final List<dynamic> decoded = jsonDecode(cached) as List<dynamic>;
         expect(decoded.single["name"], "Novo nome");
       },
     );
 
-    test(
-      "leaveGroup removes the group from cache and queues it",
-      () async {
-        final (dataSource, store, storage) = await _build();
-        storage.data[LocalStorageKeys.cachedGroups] = jsonEncode([
-          _group().toMap(),
-        ]);
+    test("leaveGroup removes the group from cache and queues it", () async {
+      final (dataSource, store, storage) = await _build();
+      storage.data[LocalStorageKeys.cachedGroups] = jsonEncode([
+        _group().toMap(),
+      ]);
 
-        final result = await dataSource.leaveGroup("g1");
+      final result = await dataSource.leaveGroup("g1");
 
-        expect(result.isRight(), isTrue);
-        expect(store.contains(PendingSyncDataset.groups), isTrue);
-        final String cached = storage.data[LocalStorageKeys.cachedGroups] as String;
-        expect(jsonDecode(cached), isEmpty);
-      },
-    );
+      expect(result.isRight(), isTrue);
+      expect(store.contains(PendingSyncDataset.groups), isTrue);
+      final String cached =
+          storage.data[LocalStorageKeys.cachedGroups] as String;
+      expect(jsonDecode(cached), isEmpty);
+    });
 
     test("keeps the dataset pending while the retry still fails", () async {
       final (dataSource, store, _) = await _build();

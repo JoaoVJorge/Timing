@@ -3199,6 +3199,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous êtes hors ligne. Affichage de vos groupes enregistrés ; certaines actions nécessitent une connexion.';
 
   @override
+  String get groupsStaleNotice =>
+      'Impossible d\'actualiser vos groupes. Affichage des dernières données enregistrées.';
+
+  @override
   String get personalInformationTitle => 'Informations personnelles';
 
   @override

@@ -20,6 +20,9 @@ class GroupsRepository {
   Future<Either<AppError, List<GroupEntity>>> getGroups() =>
       _groupsDataSource.getGroups();
 
+  bool get lastGroupsFetchServedCache =>
+      _groupsDataSource.lastGroupsFetchServedCache;
+
   Future<Either<AppError, List<GroupEntity>>> getCachedGroups() =>
       _groupsDataSource.getCachedGroups();
 

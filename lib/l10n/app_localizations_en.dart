@@ -3150,6 +3150,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'re offline. Showing your saved groups; some actions need a connection.';
 
   @override
+  String get groupsStaleNotice =>
+      'Couldn\'t refresh your groups. Showing the last saved data.';
+
+  @override
   String get personalInformationTitle => 'Personal information';
 
   @override

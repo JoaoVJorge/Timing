@@ -1630,6 +1630,7 @@
   "groupsOfflineTitle": "لا يوجد اتصال بالإنترنت",
   "groupsOfflineDescription": "اتصل بالإنترنت للوصول إلى مجموعاتك.",
   "groupsOfflineCachedNotice": "أنت غير متصل بالإنترنت. يتم عرض مجموعاتك المحفوظة، وبعض الإجراءات تتطلب اتصالاً.",
+  "groupsStaleNotice": "تعذّر تحديث مجموعاتك. يتم عرض آخر البيانات المحفوظة.",
   "personalInformationTitle": "المعلومات الشخصية",
   "editGroupInfoSection": "معلومات المجموعة",
   "createGroupFocusGoalLabel": "هدف التركيز",

@@ -103,6 +103,10 @@ class GroupsController extends GetxController {
   final RxBool isSendingImage = false.obs;
   final RxBool isResettingGroup = false.obs;
   final RxBool didFailLoadingGroups = false.obs;
+
+  /// The last refresh could not reach the backend and the groups on screen are
+  /// the saved copy, even though the app believes it is online.
+  final RxBool isShowingStaleGroups = false.obs;
   final RxBool _assumedOnline = true.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
@@ -153,6 +157,10 @@ class GroupsController extends GetxController {
   // an older call's result must not overwrite a newer one that already
   // landed.
   int _loadGroupsRevision = 0;
+  static const Duration _staleRetryDelay = Duration(seconds: 6);
+  static const int _maxStaleRetries = 2;
+  Timer? _staleRetryTimer;
+  int _staleRetries = 0;
 
   /// Daily-goal groups are cumulative challenges, so their leaderboard never
   /// follows the date filter used by the other group themes.
@@ -398,6 +406,7 @@ class GroupsController extends GetxController {
   @override
   void onClose() {
     _activityChangeDebounceTimer?.cancel();
+    _staleRetryTimer?.cancel();
     unawaited(_activityChangeSubscription?.cancel());
     unawaited(_connectivitySubscription?.cancel());
     super.onClose();
@@ -439,6 +448,7 @@ class GroupsController extends GetxController {
         },
         (value) {
           didFailLoadingGroups.value = false;
+          _trackStaleness(selectedGroupId);
           final Set<String> previousGroupIds = groups
               .map((item) => item.id)
               .toSet();
@@ -465,6 +475,7 @@ class GroupsController extends GetxController {
     } on TimeoutException {
       if (revision == _loadGroupsRevision) {
         didFailLoadingGroups.value = true;
+        isShowingStaleGroups.value = groups.isNotEmpty;
         _appNavigator.showErrorSnackBar();
       }
     } finally {
@@ -472,10 +483,32 @@ class GroupsController extends GetxController {
     }
   }
 
+  /// Marks the list as stale when the data source had to serve its saved copy
+  /// while the app is online, and retries a couple of times on its own: such
+  /// failures are usually a slow response that the next attempt gets through.
+  void _trackStaleness(String? preferredGroupId) {
+    final bool stale = _groupsRepository.lastGroupsFetchServedCache;
+    isShowingStaleGroups.value = stale;
+    _staleRetryTimer?.cancel();
+    if (!stale) {
+      _staleRetries = 0;
+      return;
+    }
+    if (_staleRetries >= _maxStaleRetries) {
+      return;
+    }
+    _staleRetries++;
+    _staleRetryTimer = Timer(
+      _staleRetryDelay,
+      () => unawaited(loadGroups(preferredGroupId: preferredGroupId)),
+    );
+  }
+
   /// Offline, the groups screen shows the last fetched list instead of
   /// blocking. Groups already in memory are at least as fresh as the cache.
   Future<void> _showCachedGroupsOffline() async {
     didFailLoadingGroups.value = false;
+    isShowingStaleGroups.value = false;
     if (groups.isEmpty) {
       final Either<AppError, List<GroupEntity>> cached = await _groupsRepository
           .getCachedGroups();

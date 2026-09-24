@@ -5668,6 +5668,12 @@ abstract class AppLocalizations {
   /// **'You\'re offline. Showing your saved groups; some actions need a connection.'**
   String get groupsOfflineCachedNotice;
 
+  /// No description provided for @groupsStaleNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t refresh your groups. Showing the last saved data.'**
+  String get groupsStaleNotice;
+
   /// No description provided for @personalInformationTitle.
   ///
   /// In en, this message translates to:

@@ -1630,6 +1630,7 @@
   "groupsOfflineTitle": "Keine Internetverbindung",
   "groupsOfflineDescription": "Verbinde dich mit dem Internet, um auf deine Gruppen zuzugreifen.",
   "groupsOfflineCachedNotice": "Du bist offline. Deine gespeicherten Gruppen werden angezeigt; einige Aktionen benötigen eine Verbindung.",
+  "groupsStaleNotice": "Deine Gruppen konnten nicht aktualisiert werden. Die zuletzt gespeicherten Daten werden angezeigt.",
   "personalInformationTitle": "Persönliche Informationen",
   "editGroupInfoSection": "Gruppeninformationen",
   "createGroupFocusGoalLabel": "Fokusziel",

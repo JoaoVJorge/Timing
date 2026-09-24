@@ -3186,6 +3186,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du bist offline. Deine gespeicherten Gruppen werden angezeigt; einige Aktionen benötigen eine Verbindung.';
 
   @override
+  String get groupsStaleNotice =>
+      'Deine Gruppen konnten nicht aktualisiert werden. Die zuletzt gespeicherten Daten werden angezeigt.';
+
+  @override
   String get personalInformationTitle => 'Persönliche Informationen';
 
   @override

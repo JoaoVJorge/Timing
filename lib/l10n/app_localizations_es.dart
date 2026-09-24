@@ -3166,6 +3166,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Estás sin conexión. Mostrando tus grupos guardados; algunas acciones necesitan conexión.';
 
   @override
+  String get groupsStaleNotice =>
+      'No se pudieron actualizar tus grupos. Mostrando los últimos datos guardados.';
+
+  @override
   String get personalInformationTitle => 'Información personal';
 
   @override

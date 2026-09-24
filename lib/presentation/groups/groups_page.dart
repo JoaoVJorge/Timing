@@ -69,14 +69,21 @@ class GroupsPage extends StatelessWidget {
         content = _GroupsHomeView(controller: controller);
       }
 
-      if (!isOffline) {
+      final bool isStale =
+          !isOffline &&
+          controller.isShowingStaleGroups.value &&
+          controller.groups.isNotEmpty;
+      if (!isOffline && !isStale) {
         return AppScaffold(body: content);
       }
       return AppScaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _GroupsOfflineCachedNotice(),
+            if (isOffline)
+              const _GroupsOfflineCachedNotice()
+            else
+              _GroupsStaleNotice(onRetry: controller.loadGroups),
             Expanded(child: content),
           ],
         ),

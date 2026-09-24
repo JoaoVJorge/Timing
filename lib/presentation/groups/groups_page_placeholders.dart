@@ -22,6 +22,40 @@ class _GroupsOfflineCachedNotice extends StatelessWidget {
   const _GroupsOfflineCachedNotice();
 
   @override
+  Widget build(BuildContext context) => _GroupsNotice(
+    icon: Icons.wifi_off_rounded,
+    message: context.l10n.groupsOfflineCachedNotice,
+  );
+}
+
+class _GroupsStaleNotice extends StatelessWidget {
+  const _GroupsStaleNotice({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => _GroupsNotice(
+    icon: Icons.cloud_off_rounded,
+    message: context.l10n.groupsStaleNotice,
+    actionLabel: context.l10n.retryButton,
+    onAction: onRetry,
+  );
+}
+
+class _GroupsNotice extends StatelessWidget {
+  const _GroupsNotice({
+    required this.icon,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     margin: const EdgeInsets.only(bottom: AppSpacing.betweenRelated),
@@ -36,19 +70,23 @@ class _GroupsOfflineCachedNotice extends StatelessWidget {
     child: Row(
       children: [
         Icon(
-          Icons.wifi_off_rounded,
+          icon,
           size: 18,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         const Gap(AppSpacing.titleToDescription),
         Expanded(
           child: Text(
-            context.l10n.groupsOfflineCachedNotice,
+            message,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
+        if (actionLabel != null && onAction != null) ...[
+          const Gap(AppSpacing.titleToDescription),
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
+        ],
       ],
     ),
   );

@@ -1320,6 +1320,7 @@
   "groupsOfflineTitle": "Sin conexión a internet",
   "groupsOfflineDescription": "Conéctate a internet para acceder a tus grupos.",
   "groupsOfflineCachedNotice": "Estás sin conexión. Mostrando tus grupos guardados; algunas acciones necesitan conexión.",
+  "groupsStaleNotice": "No se pudieron actualizar tus grupos. Mostrando los últimos datos guardados.",
   "personalInformationTitle": "Información personal",
   "editGroupInfoSection": "Información del grupo",
   "createGroupFocusGoalLabel": "Meta de concentración",
