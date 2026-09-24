@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
+import "package:flutter/foundation.dart";
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -107,10 +108,17 @@ class ActivityDataSource {
     if (!_pendingSyncStore.contains(PendingSyncDataset.activityEntries)) {
       return;
     }
-    final List<Map<String, dynamic>> queue = await _readQueue();
+    List<Map<String, dynamic>> queue = await _readQueue();
     if (queue.isEmpty) {
       await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
       return;
+    }
+    // Saved before uploading so a retry reuses the repaired ids.
+    final ({List<Map<String, dynamic>> rows, bool changed}) repaired =
+        repairLegacyActivityRows(queue);
+    if (repaired.changed) {
+      queue = repaired.rows;
+      await _writeQueue(queue);
     }
     try {
       await _supabaseService.requireClient
@@ -130,6 +138,64 @@ class ActivityDataSource {
         await _flushRowByRow(queue);
       }
     }
+  }
+
+  static final RegExp _uuidPattern = RegExp(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+    r"[0-9a-fA-F]{12}$",
+  );
+  static final RegExp _legacyIdTimestamp = RegExp(r"^(\d{16})-");
+
+  /// Builds already queued with the old `<microseconds>-<random>` id were
+  /// rejected by the uuid column (`22P02`), which that build treated as
+  /// "offline" and queued, and the whole batch then failed on them forever.
+  /// The id is only an idempotency key and those rows never reached the
+  /// backend, so they get a fresh UUID. The old id embedded the moment of the
+  /// session, which is kept as `occurred_at` so the group rankings still date
+  /// the session correctly.
+  @visibleForTesting
+  static ({List<Map<String, dynamic>> rows, bool changed})
+  repairLegacyActivityRows(List<Map<String, dynamic>> rows) {
+    bool changed = false;
+    final List<Map<String, dynamic>> repaired = [];
+    for (final Map<String, dynamic> row in rows) {
+      if (_uuidPattern.hasMatch(row["id"]?.toString() ?? "")) {
+        repaired.add(row);
+      } else {
+        repaired.add(_repairedRow(row));
+        changed = true;
+      }
+    }
+    return (rows: repaired, changed: changed);
+  }
+
+  static Map<String, dynamic> _repairedRow(Map<String, dynamic> row) {
+    final Map<String, dynamic> fixed = Map<String, dynamic>.of(row)
+      ..["id"] = generateUuidV4();
+    if (fixed["occurred_at"] == null) {
+      final DateTime? sessionTime = _timeFromLegacyId(row["id"]?.toString());
+      if (sessionTime != null) {
+        fixed["occurred_at"] = sessionTime.toIso8601String();
+      }
+    }
+    return fixed;
+  }
+
+  static DateTime? _timeFromLegacyId(String? legacyId) {
+    final String? micros = _legacyIdTimestamp
+        .firstMatch(legacyId ?? "")
+        ?.group(1);
+    if (micros == null) {
+      return null;
+    }
+    final DateTime time = DateTime.fromMicrosecondsSinceEpoch(
+      int.parse(micros),
+      isUtc: true,
+    );
+    final DateTime now = DateTime.now().toUtc();
+    final bool plausible =
+        time.year >= 2020 && time.isBefore(now.add(const Duration(days: 1)));
+    return plausible ? time : null;
   }
 
   /// A single batch upsert fails as a whole, so one row the server rejects for

@@ -11,7 +11,8 @@ bool isPermanentSyncFailure(Object error) {
     return false;
   }
   final String code = error.code ?? "";
-  return code.startsWith("23") || // integrity violation (e.g. duplicate row)
+  return code.startsWith("22") || // data exception (e.g. a malformed uuid)
+      code.startsWith("23") || // integrity violation (e.g. duplicate row)
       code == "42501" || // row-level security / insufficient privilege
       code == "P0001"; // exception raised by an RPC function
 }

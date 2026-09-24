@@ -206,5 +206,78 @@ void main() {
         expect(jsonDecode(queue), isEmpty);
       },
     );
+
+    group("legacy rows queued with a non-UUID id", () {
+      const String legacyId = "1790089174647108-1y6ttt90k7u9f2";
+      final RegExp uuid = RegExp(
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      );
+
+      Map<String, dynamic> legacyRow() => {
+        "id": legacyId,
+        "user_id": "user-1",
+        "category": "hobbies",
+        "subject_id": "1786109071435686",
+        "subject_name": "Violão",
+        "seconds": 9,
+        "pages": 0,
+        "completed_tasks": 0,
+      };
+
+      test("get a valid id and their original time", () {
+        final repaired = ActivityDataSource.repairLegacyActivityRows([
+          legacyRow(),
+        ]);
+
+        expect(repaired.changed, isTrue);
+        final row = repaired.rows.single;
+        expect(uuid.hasMatch(row["id"] as String), isTrue);
+        // The id embedded the microsecond timestamp of the session.
+        expect(row["occurred_at"], "2026-09-22T14:59:34.647108Z");
+        expect(row["seconds"], 9);
+      });
+
+      test("keep an occurred_at they already carry", () {
+        final row = legacyRow()..["occurred_at"] = "2026-09-20T10:00:00.000Z";
+
+        final repaired = ActivityDataSource.repairLegacyActivityRows([row]);
+
+        expect(repaired.rows.single["occurred_at"], "2026-09-20T10:00:00.000Z");
+      });
+
+      test("leave valid rows untouched", () {
+        final valid = legacyRow()
+          ..["id"] = "5f1c9a20-1111-4a4a-8888-0e0e0e0e0e0e";
+
+        final repaired = ActivityDataSource.repairLegacyActivityRows([valid]);
+
+        expect(repaired.changed, isFalse);
+        expect(repaired.rows.single["id"], valid["id"]);
+        expect(repaired.rows.single.containsKey("occurred_at"), isFalse);
+      });
+
+      test("are repaired and persisted before the flush uploads them", () async {
+        final (dataSource, store, storage) = await _build(_OfflineSupabase());
+        storage.data[LocalStorageKeys.pendingActivityEntries] = jsonEncode([
+          legacyRow(),
+        ]);
+        await store.markPending(PendingSyncDataset.activityEntries);
+
+        // The upload itself fails (offline), but the repaired ids must already
+        // be saved so a retry reuses them instead of minting new ones.
+        await dataSource.flushPendingSync();
+
+        final queue =
+            jsonDecode(
+                  storage.data[LocalStorageKeys.pendingActivityEntries]
+                      as String,
+                )
+                as List<dynamic>;
+        expect(queue, hasLength(1));
+        expect(uuid.hasMatch(queue.single["id"] as String), isTrue);
+        expect(queue.single["occurred_at"], "2026-09-22T14:59:34.647108Z");
+        expect(store.contains(PendingSyncDataset.activityEntries), isTrue);
+      });
+    });
   });
 }

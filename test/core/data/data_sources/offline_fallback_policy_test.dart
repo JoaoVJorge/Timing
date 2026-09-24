@@ -114,6 +114,18 @@ void main() {
       );
     });
 
+    test("treats a data exception as a definitive rejection", () {
+      // 22P02: e.g. an id that is not valid uuid syntax. Retrying the same
+      // payload can never succeed.
+      const malformed = PostgrestException(
+        message: "invalid input syntax for type uuid",
+        code: "22P02",
+      );
+
+      expect(isPermanentSyncFailure(malformed), isTrue);
+      expect(shouldUseOfflineFallback(malformed), isFalse);
+    });
+
     test("allows transport failures while reachable", () {
       expect(shouldUseOfflineFallback(TimeoutException("slow")), isTrue);
       expect(shouldUseOfflineFallback(StateError("offline")), isTrue);
