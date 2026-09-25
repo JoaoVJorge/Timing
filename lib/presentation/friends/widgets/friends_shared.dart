@@ -51,6 +51,7 @@ class FriendNameBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Text(
         name,

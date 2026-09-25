@@ -94,10 +94,16 @@ class _GroupsNotice extends StatelessWidget {
 
 class _GroupsEmptyState extends StatelessWidget {
   const _GroupsEmptyState({
+    required this.friends,
+    required this.pendingCount,
+    required this.isLoadingFriends,
     required this.onCreateGroup,
     required this.onTapFriends,
   });
 
+  final List<FriendEntity> friends;
+  final int pendingCount;
+  final bool isLoadingFriends;
   final VoidCallback onCreateGroup;
   final VoidCallback onTapFriends;
 
@@ -107,8 +113,9 @@ class _GroupsEmptyState extends StatelessWidget {
     children: [
       _FriendsCard(
         groupCount: 0,
-        friends: const [],
-        isLoading: false,
+        friends: friends,
+        pendingCount: pendingCount,
+        isLoading: isLoadingFriends,
         onTap: onTapFriends,
       ),
       const Gap(AppSpacing.betweenRelated),
@@ -178,7 +185,7 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
     child: ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
       children: const [
-        _SkeletonGroupCard(isFriends: true),
+        _SkeletonFriendsCard(),
         Gap(AppSpacing.betweenRelated),
         _SkeletonGroupCard(),
         Gap(AppSpacing.betweenRelated),
@@ -190,21 +197,64 @@ class _GroupsLoadingSkeleton extends StatelessWidget {
   );
 }
 
-class _SkeletonGroupCard extends StatelessWidget {
-  const _SkeletonGroupCard({this.isFriends = false});
+/// Stands in for [_FriendsCard]: the icon, the title and the row of friends,
+/// with the same metrics so the card does not change height once loaded.
+class _SkeletonFriendsCard extends StatelessWidget {
+  const _SkeletonFriendsCard();
 
-  final bool isFriends;
+  @override
+  Widget build(BuildContext context) {
+    // The title is real text once loaded, so its bar is one line of it tall.
+    final TextStyle titleStyle = context.textStyles.cardTitle;
+    final double titleLineHeight = titleStyle.fontSize! * titleStyle.height!;
+
+    return Container(
+      key: const ValueKey<String>("friends-card-skeleton"),
+      constraints: const BoxConstraints(minHeight: 78),
+      padding: const EdgeInsets.all(14),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Row(
+        children: [
+          AppSkeletonCircle(
+            size: 46,
+            color: context.colorTokens.primaryVeryLight,
+          ),
+          const Gap(14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppSkeletonBox(
+                  key: const ValueKey<String>("friends-card-skeleton-title"),
+                  width: 72,
+                  height: titleLineHeight,
+                  radius: 8,
+                ),
+                const Gap(8),
+                const _SkeletonAvatarRow(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SkeletonGroupCard extends StatelessWidget {
+  const _SkeletonGroupCard();
 
   @override
   Widget build(BuildContext context) => Container(
-    constraints: BoxConstraints(minHeight: isFriends ? 78 : 124),
+    constraints: const BoxConstraints(minHeight: 124),
     padding: const EdgeInsets.all(14),
     decoration: AppSurfaces.content(context.colorTokens),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppSkeletonCircle(
-          size: isFriends ? 46 : 72,
+          size: 72,
           color: context.colorTokens.primaryVeryLight,
         ),
         const Gap(14),

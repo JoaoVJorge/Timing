@@ -72,6 +72,7 @@ class LeaderboardTile extends StatelessWidget {
             avatar: member.avatar,
             avatarIconIndex: member.avatarIconIndex,
             size: 50,
+            useSolidFallbackBackground: true,
           ),
           const Gap(14),
           Expanded(

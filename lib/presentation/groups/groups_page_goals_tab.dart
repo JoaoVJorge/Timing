@@ -63,9 +63,10 @@ class _GroupActivityDataView extends StatelessWidget {
       if (headers.isEmpty) {
         return const SizedBox.shrink();
       }
-      final Map<String, List<GroupActivityProgressEntity>> progressByActivityId =
-          {};
-      for (final GroupActivityProgressEntity item in controller.activityProgress) {
+      final Map<String, List<GroupActivityProgressEntity>>
+      progressByActivityId = {};
+      for (final GroupActivityProgressEntity item
+          in controller.activityProgress) {
         (progressByActivityId[item.activityId] ??= []).add(item);
       }
       return Column(
@@ -299,6 +300,18 @@ class _ActivityOverviewCard extends StatelessWidget {
                         ),
                       ),
                     ]
+                  : group.theme == GroupThemeType.reading
+                  ? [
+                      // Reading is counted in pages: it has no focus time,
+                      // pauses or sessions, only the page goal.
+                      Expanded(
+                        child: _ActivityDataTile(
+                          icon: Icons.menu_book_outlined,
+                          label: context.l10n.createSubjectPagesGoalLabel,
+                          value: context.l10n.metricPagesValue(header.target),
+                        ),
+                      ),
+                    ]
                   : [
                       Expanded(
                         child: _ActivityDataTile(
@@ -519,7 +532,11 @@ class _GroupStatisticsCard extends StatelessWidget {
               icon: Icons.trending_up_rounded,
               color: _groupDataAccent(context),
               value: completedSessions.toString(),
-              label: context.l10n.groupCompletedSessionsStatLabel,
+              // What this counts is the members who met the period's target;
+              // reading has no sessions to complete.
+              label: unit == GroupMetricUnit.pages
+                  ? context.l10n.groupGoalReachedStatLabel
+                  : context.l10n.groupCompletedSessionsStatLabel,
             ),
             _GroupStatItem(
               icon: Icons.groups_2_outlined,
@@ -762,6 +779,7 @@ class _ParticipantProgressRow extends StatelessWidget {
             avatar: member.avatar,
             avatarIconIndex: member.avatarIconIndex,
             size: 38,
+            useSolidFallbackBackground: true,
           ),
           const Gap(10),
           Expanded(
@@ -887,14 +905,13 @@ class _GroupStatItem extends StatelessWidget {
                     height: 1,
                   ),
                 ),
-                const Gap(1),
+                const Gap(4),
                 Text(
                   label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodySmall.copyWith(
                     color: context.colorTokens.textHint,
-                    fontSize: 12,
                     height: 1.05,
                   ),
                 ),

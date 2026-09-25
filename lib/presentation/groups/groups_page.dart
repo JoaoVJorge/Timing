@@ -117,6 +117,9 @@ class _GroupsHomeView extends StatelessWidget {
 
           if (controller.groups.isEmpty) {
             return _GroupsEmptyState(
+              friends: controller.friends,
+              pendingCount: controller.pendingSocialCount,
+              isLoadingFriends: controller.isLoadingFriends.value,
               onCreateGroup: controller.onTapCreateGroup,
               onTapFriends: controller.onTapFriends,
             );
@@ -125,6 +128,7 @@ class _GroupsHomeView extends StatelessWidget {
           return _GroupsList(
             groups: controller.groups,
             friends: controller.friends,
+            pendingCount: controller.pendingSocialCount,
             isLoading: controller.isLoading.value,
             isLoadingFriends: controller.isLoadingFriends.value,
             onTapFriends: controller.onTapFriends,
@@ -185,6 +189,7 @@ class _GroupsList extends StatelessWidget {
   const _GroupsList({
     required this.groups,
     required this.friends,
+    required this.pendingCount,
     required this.isLoading,
     required this.isLoadingFriends,
     required this.onTapFriends,
@@ -193,6 +198,7 @@ class _GroupsList extends StatelessWidget {
 
   final List<GroupEntity> groups;
   final List<FriendEntity> friends;
+  final int pendingCount;
   final bool isLoading;
   final bool isLoadingFriends;
   final VoidCallback onTapFriends;
@@ -208,6 +214,7 @@ class _GroupsList extends StatelessWidget {
         return _FriendsCard(
           groupCount: groups.length,
           friends: friends,
+          pendingCount: pendingCount,
           isLoading: isLoading || isLoadingFriends,
           onTap: onTapFriends,
         );
@@ -311,12 +318,16 @@ class _FriendsCard extends StatelessWidget {
   const _FriendsCard({
     required this.groupCount,
     required this.friends,
+    required this.pendingCount,
     required this.isLoading,
     required this.onTap,
   });
 
   final int groupCount;
   final List<FriendEntity> friends;
+
+  /// Friend requests plus group invitations waiting for an answer.
+  final int pendingCount;
   final bool isLoading;
   final VoidCallback onTap;
 
@@ -327,7 +338,7 @@ class _FriendsCard extends StatelessWidget {
     pressedScale: 0.98,
     child: Container(
       constraints: const BoxConstraints(minHeight: 78),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: AppSurfaces.content(context.colorTokens),
       child: Row(
         children: [
@@ -354,16 +365,14 @@ class _FriendsCard extends StatelessWidget {
                   context.l10n.groupsFriendsTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.cardTitle.copyWith(
+                  style: context.textStyles.sectionTitle.copyWith(
                     color: context.colorTokens.primary,
                   ),
                 ),
-                const Gap(3),
-                if (isLoading)
-                  const AppSkeleton(
-                    child: AppSkeletonBox(height: 14, width: 170, radius: 4),
-                  )
-                else
+                // The friends themselves say what the card is about; the text
+                // only steps in when there is nobody to show yet.
+                if (!isLoading && friends.isEmpty) ...[
+                  const Gap(3),
                   Text(
                     friendsCardSubtitle(context, groupCount),
                     key: const ValueKey<String>("friends-card-description"),
@@ -374,16 +383,15 @@ class _FriendsCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                ],
                 if (isLoading || friends.isNotEmpty) ...[
-                  const Gap(8),
+                  const Gap(5),
                   SizedBox(
                     key: const ValueKey<String>("friends-card-avatar-slot"),
                     width: 90,
                     height: 30,
                     child: isLoading
-                        ? const AppSkeleton(
-                            child: AppSkeletonBox(height: 30, radius: 999),
-                          )
+                        ? const AppSkeleton(child: _SkeletonAvatarRow())
                         : Align(
                             alignment: Alignment.centerLeft,
                             child: _OverlappingFriends(friends: friends),
@@ -394,12 +402,43 @@ class _FriendsCard extends StatelessWidget {
             ),
           ),
           const Gap(12),
+          if (pendingCount > 0) ...[
+            _PendingCountBadge(count: pendingCount),
+            const Gap(6),
+          ],
           Icon(
             Icons.chevron_right_rounded,
             size: 28,
             color: context.colorTokens.textHint,
           ),
         ],
+      ),
+    ),
+  );
+}
+
+/// The circle with the number of things waiting for an answer.
+class _PendingCountBadge extends StatelessWidget {
+  const _PendingCountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey<String>("friends-card-badge"),
+    constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+    padding: const EdgeInsets.symmetric(horizontal: 7),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: context.colorTokens.error,
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: Text(
+      count > 99 ? "99+" : "$count",
+      maxLines: 1,
+      style: context.textStyles.bodyTiny.copyWith(
+        color: context.colorTokens.white,
+        fontWeight: FontWeight.w900,
       ),
     ),
   );
@@ -510,6 +549,7 @@ class _OverlappingMembers extends StatelessWidget {
                 avatarIconIndex: visibleMembers[index].avatarIconIndex,
                 size: size,
                 borderColor: context.colorTokens.surface,
+                useSolidFallbackBackground: true,
               ),
             ),
           if (extraCount > 0)

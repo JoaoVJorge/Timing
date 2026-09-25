@@ -17,6 +17,7 @@ import "package:timing/core/domain/entities/group_activity_progress_entity.dart"
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
+import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
@@ -32,6 +33,7 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
+import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/groups/groups_page.dart";
@@ -66,6 +68,21 @@ class _FakeGroupsRepository implements GroupsRepository {
       Completer<GroupImageMessagesPage>();
   final List<String> leaveRequests = <String>[];
   final List<String> resetRequests = <String>[];
+  int pendingInvitationCount = 0;
+
+  @override
+  Future<Either<AppError, List<GroupInvitationEntity>>>
+  getPendingInvitations() async => Right([
+    for (int index = 0; index < pendingInvitationCount; index++)
+      GroupInvitationEntity(
+        id: "invite-$index",
+        groupId: "group-$index",
+        groupName: "Grupo $index",
+        theme: GroupThemeType.studying,
+        inviterId: "ana",
+        inviterName: "Ana",
+      ),
+  ]);
 
   @override
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
@@ -136,9 +153,10 @@ class _FakeGroupsRepository implements GroupsRepository {
 }
 
 class _FakeFriendsRepository implements FriendsRepository {
-  _FakeFriendsRepository(this.friends);
+  _FakeFriendsRepository(this.friends, {this.requests = const []});
 
   final List<FriendEntity> friends;
+  final List<FriendEntity> requests;
   final List<String> sentRequestIds = <String>[];
   final List<String> canceledRequestIds = <String>[];
 
@@ -146,7 +164,7 @@ class _FakeFriendsRepository implements FriendsRepository {
   Future<Either<AppError, FriendsSocialEntity>> getSocial() async => Right(
     FriendsSocialEntity(
       inviteCode: "",
-      requests: const [],
+      requests: requests,
       sentRequests: const [],
       friends: friends,
     ),
@@ -797,6 +815,100 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  group("goals tab activity data", () {
+    Future<AppLocalizations> pumpGoalsTab(
+      WidgetTester tester,
+      GroupThemeType theme,
+      GroupActivityProgressEntity activity,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 1800);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final GroupEntity group = _group("group-1", "Grupo", theme: theme);
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([group])
+        ..progressByGroup[group.id] = [activity];
+      final GroupsController controller = _controller(repository);
+      controller.selectedGroup.value = group;
+      controller.isShowingGroupDetails.value = true;
+      controller.selectedDetailsTab.value = GroupDetailsTab.goals;
+      Get.put<GroupsController>(controller);
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          locale: const Locale("en"),
+          theme: AppThemes.build(
+            seed: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const GroupsPage(showGroupFlowOnly: true),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      return lookupAppLocalizations(const Locale("en"));
+    }
+
+    testWidgets("a reading group shows its page goal, not sessions", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpGoalsTab(
+        tester,
+        GroupThemeType.reading,
+        const GroupActivityProgressEntity(
+          activityId: "activity-1",
+          kind: "subject",
+          name: "Livro",
+          memberId: "me",
+          progress: 0,
+          target: 10,
+          reached: false,
+        ),
+      );
+
+      expect(find.text(l10n.createSubjectPagesGoalLabel), findsOneWidget);
+      expect(find.text(l10n.metricPagesValue(10)), findsWidgets);
+      // Books have no focus time, pauses or sessions.
+      expect(find.text(l10n.groupActivityFocusDataLabel), findsNothing);
+      expect(find.text(l10n.groupActivityPauseDataLabel), findsNothing);
+      expect(find.text(l10n.groupActivitySessionsDataLabel), findsNothing);
+      expect(find.text(l10n.groupCompletedSessionsStatLabel), findsNothing);
+      expect(find.text(l10n.groupGoalReachedStatLabel), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets("a study group keeps focus, pause and sessions", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpGoalsTab(
+        tester,
+        GroupThemeType.studying,
+        const GroupActivityProgressEntity(
+          activityId: "activity-1",
+          kind: "subject",
+          name: "Matéria",
+          memberId: "me",
+          progress: 0,
+          target: 1800,
+          reached: false,
+          focusSeconds: 1800,
+          restMinutes: 5,
+          focusSessionCount: 3,
+        ),
+      );
+
+      expect(find.text(l10n.groupActivityFocusDataLabel), findsOneWidget);
+      expect(find.text(l10n.groupActivityPauseDataLabel), findsOneWidget);
+      expect(find.text(l10n.groupActivitySessionsDataLabel), findsOneWidget);
+      expect(find.text(l10n.groupCompletedSessionsStatLabel), findsOneWidget);
+      expect(find.text(l10n.groupGoalReachedStatLabel), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   testWidgets("groups home hides stale group count while loading", (
     tester,
   ) async {
@@ -892,22 +1004,318 @@ void main() {
         lookupAppLocalizations(const Locale("en")).groupsFriendsTitle,
       ),
     );
-    final Finder friendsDescription = find.byKey(
-      const ValueKey("friends-card-description"),
-    );
-    expect(friendsDescription, findsOneWidget);
+    // With friends to show, the avatars sit right under the title and the
+    // descriptive text is gone.
     expect(
-      tester.getTopLeft(friendsDescription).dy,
-      greaterThan(tester.getBottomLeft(friendsTitle).dy),
+      find.byKey(const ValueKey("friends-card-description")),
+      findsNothing,
     );
     expect(
       tester
           .getTopLeft(find.byKey(const ValueKey("friends-card-avatar-ana")))
           .dy,
-      greaterThan(tester.getBottomLeft(friendsDescription).dy),
+      greaterThan(tester.getBottomLeft(friendsTitle).dy),
     );
+    expect(find.byKey(const ValueKey("friends-card-badge")), findsNothing);
     expect(find.text("Descrição criada pelo usuário"), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  group("friends card", () {
+    const FriendEntity ana = FriendEntity(
+      id: "ana",
+      friendshipId: "friendship-1",
+      name: "Ana",
+      handle: "ana",
+      colorValue: 1,
+    );
+
+    FriendEntity request(int index) => FriendEntity(
+      id: "requester-$index",
+      friendshipId: "request-$index",
+      name: "Pessoa $index",
+      handle: "pessoa$index",
+      colorValue: 1,
+    );
+
+    Future<void> pumpGroupsHome(
+      WidgetTester tester, {
+      List<GroupEntity>? groups,
+      List<FriendEntity> friends = const [],
+      List<FriendEntity> requests = const [],
+      int invitations = 0,
+    }) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 900);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final _FakeGroupsRepository repository = _FakeGroupsRepository(
+        groups ?? [_group("group-1", "Grupo")],
+      )..pendingInvitationCount = invitations;
+      final GroupsController controller = _controller(
+        repository,
+        friends: friends,
+        incomingRequests: requests,
+      );
+      Get.put<GroupsController>(controller);
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          locale: const Locale("en"),
+          theme: AppThemes.build(
+            seed: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const GroupsPage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Finder badgeText(String text) => find.descendant(
+      of: find.byKey(const ValueKey("friends-card-badge")),
+      matching: find.text(text),
+    );
+
+    testWidgets("says what it is for only while there are no friends", (
+      tester,
+    ) async {
+      await pumpGroupsHome(tester);
+
+      final AppLocalizations l10n = lookupAppLocalizations(const Locale("en"));
+      final Finder description = find.byKey(
+        const ValueKey("friends-card-description"),
+      );
+      expect(description, findsOneWidget);
+      expect(find.text(l10n.groupsFriendsSubtitleWithCount(1)), findsOneWidget);
+      expect(
+        tester.getTopLeft(description).dy,
+        greaterThan(
+          tester
+              .getBottomLeft(
+                find.descendant(
+                  of: find.byKey(const ValueKey("friends-card")),
+                  matching: find.text(l10n.groupsFriendsTitle),
+                ),
+              )
+              .dy,
+        ),
+      );
+    });
+
+    testWidgets("has no circle when nothing is waiting for an answer", (
+      tester,
+    ) async {
+      await pumpGroupsHome(tester, friends: const [ana]);
+
+      expect(find.byKey(const ValueKey("friends-card-badge")), findsNothing);
+    });
+
+    testWidgets("counts friend requests and group invitations together", (
+      tester,
+    ) async {
+      await pumpGroupsHome(
+        tester,
+        friends: const [ana],
+        requests: [request(1), request(2)],
+        invitations: 1,
+      );
+
+      expect(badgeText("3"), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets("counts a lone group invitation", (tester) async {
+      await pumpGroupsHome(tester, invitations: 1);
+
+      expect(badgeText("1"), findsOneWidget);
+    });
+
+    testWidgets("caps a very large count", (tester) async {
+      await pumpGroupsHome(
+        tester,
+        requests: [for (int index = 0; index < 100; index++) request(index)],
+        invitations: 5,
+      );
+
+      expect(badgeText("99+"), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets("still shows the circle and the friends with no groups yet", (
+      tester,
+    ) async {
+      await pumpGroupsHome(
+        tester,
+        groups: const [],
+        friends: const [ana],
+        invitations: 2,
+      );
+
+      expect(badgeText("2"), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey("friends-card-avatar-ana")),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey("friends-card-description")),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group("friends card loading skeleton", () {
+    const FriendEntity ana = FriendEntity(
+      id: "ana",
+      friendshipId: "friendship-1",
+      name: "Ana",
+      handle: "ana",
+      colorValue: 1,
+    );
+
+    Future<_FakeGroupsRepository> pumpLoadingHome(
+      WidgetTester tester, {
+      List<GroupEntity> staleGroups = const [],
+    }) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 900);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([
+        _group("group-1", "Grupo"),
+      ])..groupsCompleter = Completer<List<GroupEntity>>();
+      final GroupsController controller = _controller(
+        repository,
+        friends: const [ana],
+      );
+      controller.groups.assignAll(staleGroups);
+      Get.put<GroupsController>(controller);
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          locale: const Locale("en"),
+          theme: AppThemes.build(
+            seed: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const GroupsPage(),
+        ),
+      );
+      await tester.pump();
+      return repository;
+    }
+
+    /// Lets the load finish so no shimmer timer outlives the test.
+    Future<void> finishLoading(
+      WidgetTester tester,
+      _FakeGroupsRepository repository,
+    ) async {
+      repository.groupsCompleter!.complete([_group("group-1", "Grupo")]);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets("is one title bar over a row of friends, no line of text", (
+      tester,
+    ) async {
+      final _FakeGroupsRepository repository = await pumpLoadingHome(tester);
+
+      final Finder skeleton = find.byKey(
+        const ValueKey("friends-card-skeleton"),
+      );
+      expect(skeleton, findsOneWidget);
+      // The old card had a second bar for a line of text under the title.
+      expect(
+        find.descendant(of: skeleton, matching: find.byType(AppSkeletonBox)),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey("friends-card-skeleton-title")),
+        findsOneWidget,
+      );
+
+      await finishLoading(tester, repository);
+      expect(skeleton, findsNothing);
+    });
+
+    testWidgets("its title bar is one line of the real title tall", (
+      tester,
+    ) async {
+      final _FakeGroupsRepository repository = await pumpLoadingHome(tester);
+
+      final Finder titleBar = find.byKey(
+        const ValueKey("friends-card-skeleton-title"),
+      );
+      final TextStyle titleStyle = tester
+          .element(titleBar)
+          .textStyles
+          .cardTitle;
+      expect(
+        tester.getSize(titleBar).height,
+        closeTo(titleStyle.fontSize! * titleStyle.height!, 0.01),
+      );
+
+      await finishLoading(tester, repository);
+    });
+
+    testWidgets("the card itself shows avatar circles while friends load", (
+      tester,
+    ) async {
+      final _FakeGroupsRepository repository = await pumpLoadingHome(
+        tester,
+        staleGroups: [_group("group-1", "Antigo")],
+      );
+
+      final Finder slot = find.byKey(
+        const ValueKey("friends-card-avatar-slot"),
+      );
+      expect(slot, findsOneWidget);
+      expect(
+        find.descendant(of: slot, matching: find.byType(AppSkeleton)),
+        findsOneWidget,
+      );
+      // Not the old pill: nothing in the slot is a rounded bar.
+      expect(
+        find.descendant(of: slot, matching: find.byType(AppSkeletonBox)),
+        findsNothing,
+      );
+
+      await finishLoading(tester, repository);
+    });
+  });
+
+  test("the friends card count follows what the backend still holds", () async {
+    final _FakeGroupsRepository repository = _FakeGroupsRepository(const [])
+      ..pendingInvitationCount = 2;
+    final GroupsController controller = _controller(
+      repository,
+      incomingRequests: [
+        const FriendEntity(
+          id: "requester",
+          friendshipId: "request",
+          name: "Pessoa",
+          handle: "pessoa",
+          colorValue: 1,
+        ),
+      ],
+    );
+
+    await controller.loadFriends();
+    await controller.loadPendingGroupInvitationCount();
+
+    expect(controller.pendingSocialCount, 3);
+
+    // Answering an invitation elsewhere lowers the count on the next load.
+    repository.pendingInvitationCount = 0;
+    await controller.loadPendingGroupInvitationCount();
+
+    expect(controller.pendingSocialCount, 1);
   });
 
   testWidgets("group cards grow with their descriptions", (tester) async {
@@ -1153,12 +1561,14 @@ GroupsController _controller(
   _FakeGroupsRepository repository, {
   ActivityChangeBus? activityChangeBus,
   List<FriendEntity> friends = const [],
+  List<FriendEntity> incomingRequests = const [],
   _FakeFriendsRepository? friendsRepository,
   AppLocalStorageService? localStorageService,
   ConnectivityService? connectivityService,
 }) {
   final _FakeFriendsRepository effectiveFriendsRepository =
-      friendsRepository ?? _FakeFriendsRepository(friends);
+      friendsRepository ??
+      _FakeFriendsRepository(friends, requests: incomingRequests);
   return GroupsController(
     getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
     getFriendsSocialUseCase: GetFriendsSocialUseCase(

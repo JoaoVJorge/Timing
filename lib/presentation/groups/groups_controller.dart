@@ -88,6 +88,16 @@ class GroupsController extends GetxController {
   final RxList<FriendEntity> friends = <FriendEntity>[].obs;
   final RxList<FriendEntity> incomingFriendRequests = <FriendEntity>[].obs;
   final RxList<FriendEntity> sentFriendRequests = <FriendEntity>[].obs;
+
+  /// Group invitations received and not answered yet. Only the count is kept:
+  /// it feeds the friends card, while the friends screen lists the invitations.
+  final RxInt pendingGroupInvitationCount = 0.obs;
+
+  /// Friend requests plus group invitations waiting for an answer, the number
+  /// shown on the friends card.
+  int get pendingSocialCount =>
+      incomingFriendRequests.length + pendingGroupInvitationCount.value;
+
   final RxSet<String> updatingFriendshipMemberIds = <String>{}.obs;
   final RxSet<String> updatingGroupMemberIds = <String>{}.obs;
   final Rx<GroupEntity?> selectedGroup = Rx<GroupEntity?>(null);
@@ -390,6 +400,9 @@ class GroupsController extends GetxController {
   /// Also runs offline: the data source falls back to its cached snapshot.
   Future<void> loadFriends() async {
     isLoadingFriends.value = true;
+    // Not awaited: on a slow connection the friends card should not wait on
+    // the badge count to stop showing its loading state.
+    unawaited(loadPendingGroupInvitationCount());
     try {
       final Either<AppError, FriendsSocialEntity> result =
           await _getFriendsSocialUseCase();
@@ -400,6 +413,24 @@ class GroupsController extends GetxController {
       });
     } finally {
       isLoadingFriends.value = false;
+    }
+  }
+
+  /// Counts the group invitations waiting for an answer. Keeps the last known
+  /// count when offline or when the request fails, so the badge does not blink
+  /// out on a bad connection.
+  Future<void> loadPendingGroupInvitationCount() async {
+    if (!isOnline.value) {
+      return;
+    }
+    try {
+      final result = await _groupsRepository.getPendingInvitations();
+      result.fold(
+        (_) {},
+        (invitations) => pendingGroupInvitationCount.value = invitations.length,
+      );
+    } catch (_) {
+      // The badge is a hint; a failed count is not worth an error message.
     }
   }
 

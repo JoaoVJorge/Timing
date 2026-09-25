@@ -187,6 +187,7 @@ class _MemberRow extends StatelessWidget {
           avatar: member.avatar,
           avatarIconIndex: member.avatarIconIndex,
           size: 44,
+          useSolidFallbackBackground: true,
         ),
         const Gap(12),
         Expanded(
