@@ -24,18 +24,19 @@ flutter build apk --release --dart-define-from-file=lib/env/prod.env
 A release build fails during startup when the Supabase configuration is
 missing, preventing a backendless binary from being published silently. The
 complete backend schema and security configuration are kept in `backend/schema/`,
-split into ordered sections (see [backend/README.md](backend/README.md)).
+split into ordered sections. The generated `backend/supabase-setup.sql` file is
+the single deployment bundle (see [backend/README.md](backend/README.md)).
 
 ## Backend security deployment
 
-Apply the `backend/schema/` sections, in order, after pulling schema changes.
-They are idempotent and include RLS, least-privilege grants, private profile
-data, validated activity writes, image limits, storage policies, and legacy
-data cleanup. They contain no credentials. To apply everything in one paste,
-copy the concatenated sections:
+Apply `backend/supabase-setup.sql` after pulling backend schema changes. It is
+generated from the ordered `backend/schema/` sections and includes RLS,
+least-privilege grants, private profile data, validated activity writes, image
+limits, storage policies, and legacy data cleanup. It contains no credentials.
+To copy it for the Supabase SQL editor:
 
 ```sh
-cat backend/schema/*.sql | pbcopy
+pbcopy < backend/supabase-setup.sql
 ```
 
 For mobile OAuth, add the following exact redirect URL to the Supabase Auth

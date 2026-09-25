@@ -26,12 +26,18 @@ across features on purpose, so all access rules stay in one place to audit.
 
 ## Applying
 
-Nothing deploys on its own. Paste the sections into the Supabase SQL editor,
-either one file at a time in order or all at once:
+Nothing deploys on its own. `supabase-setup.sql` is the generated, consolidated
+deployment file for the Supabase SQL editor. Its source of truth remains the
+numbered files in `schema/`.
+
+After changing a section, regenerate the deployment file with:
 
 ```sh
-cat backend/schema/*.sql | pbcopy
+awk 'FNR == 1 { print "\n-- " FILENAME } { print }' backend/schema/*.sql > backend/supabase-setup.sql
 ```
+
+Then paste `backend/supabase-setup.sql` into the Supabase SQL editor. You can
+still run individual numbered sections when deploying a focused change.
 
 Every statement is idempotent (`create or replace`, `if not exists`,
 `drop ... if exists`), so re-running everything is safe.
