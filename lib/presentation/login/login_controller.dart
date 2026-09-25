@@ -37,6 +37,11 @@ class LoginController extends GetxController {
   bool _isHandlingSignedInUser = false;
   bool _hasCompletedSignIn = false;
 
+  /// The auth stream replays its latest error to every new listener, so a
+  /// login page opened again after a failed OAuth callback would otherwise
+  /// report that same failure a second time.
+  static Object? _lastReportedAuthError;
+
   @override
   void onInit() {
     super.onInit();
@@ -48,7 +53,7 @@ class LoginController extends GetxController {
       if (data.event == AuthChangeEvent.signedIn) {
         unawaited(_handleSignedInUser());
       }
-    });
+    }, onError: _handleAuthError);
     // The OAuth deep-link session exchange can finish before this listener
     // is attached (e.g. a cold start that lands on the splash screen first,
     // where nothing is listening yet). If a session already exists by the
@@ -98,6 +103,21 @@ class LoginController extends GetxController {
     }
   }
 
+  // A failed OAuth callback (code exchange, access_denied, expired flow)
+  // arrives as a stream error; unhandled, it escaped to the zone handler.
+  void _handleAuthError(Object error, StackTrace stackTrace) {
+    if (identical(error, _lastReportedAuthError)) {
+      return;
+    }
+    _lastReportedAuthError = error;
+    logger.logError(
+      "Google sign in callback failed",
+      error: error,
+      stackTrace: stackTrace,
+    );
+    appNavigator.showErrorSnackBar();
+  }
+
   Future<void> _handleSignedInUser() async {
     if (_isHandlingSignedInUser || _hasCompletedSignIn) {
       return;
@@ -129,7 +149,9 @@ class LoginController extends GetxController {
     _hasCompletedSignIn = true;
     await appController.recordSuccessfulBackendContact();
     if (Get.currentRoute != AppRoutes.mainNavigation) {
-      await appNavigator.offAllNamed(AppRoutes.mainNavigation);
+      // This future completes when Home is removed, not when it opens.
+      // Awaiting it makes a successful login hit _postSignInTimeout.
+      unawaited(appNavigator.offAllNamed<void>(AppRoutes.mainNavigation));
     }
   }
 

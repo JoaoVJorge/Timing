@@ -36,6 +36,9 @@ migrate_working_dir/
 /test/**
 !/test/app/
 !/test/app/app_controller_timer_restore_test.dart
+!/test/presentation/
+!/test/presentation/login/
+!/test/presentation/login/login_controller_test.dart
 !/test/core/
 !/test/core/services/
 !/test/core/services/local_storage/
