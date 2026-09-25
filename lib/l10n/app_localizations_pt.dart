@@ -333,6 +333,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Quanto tempo você quer praticar no total?';
 
   @override
+  String get createSubjectTotalTimeGoalTitle => 'Tempo total';
+
+  @override
   String get createSubjectPagesGoalLabel => 'Meta de páginas';
 
   @override
@@ -1302,6 +1305,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get scheduleTitleHint => 'Título';
 
   @override
+  String get scheduleTitleExampleHint => 'Ex.: Aula de inglês';
+
+  @override
   String get startTimeLabel => 'Hora de início';
 
   @override
@@ -1449,6 +1455,23 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get progressDistributionTitle => 'Por atividade';
+
+  @override
+  String progressActivityTimeShare(int value) {
+    return '$value% do seu tempo neste período';
+  }
+
+  @override
+  String progressActivityPagesShare(int value) {
+    return '$value% das páginas deste período';
+  }
+
+  @override
+  String get progressActivityEmptyTitle => 'Nenhuma atividade neste período';
+
+  @override
+  String get progressActivityEmptyDescription =>
+      'Inicie uma sessão ou registre uma leitura para ver a distribuição aqui.';
 
   @override
   String homeTodayInline(String focus, int pages, int goals) {
@@ -1739,20 +1762,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get missedYesterdayCompletedButton => 'Fiz ontem';
-
-  @override
-  String get confirmGoalDoneTodayTitle => 'Você concluiu isso hoje?';
-
-  @override
-  String confirmGoalDoneTodayContent(String taskName) {
-    return 'Confirme que você concluiu \"$taskName\" hoje para contar no grupo.';
-  }
-
-  @override
-  String get confirmGoalDoneTodayConfirmButton => 'Sim, concluí';
-
-  @override
-  String get confirmGoalDoneTodayCancelButton => 'Ainda não';
 
   @override
   String get missedYesterdayMultiTitle => 'Quais você fez ontem?';
@@ -2297,6 +2306,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get groupCompletedSessionsStatLabel => 'Sessões concluídas';
 
   @override
+  String get groupGoalReachedStatLabel => 'Atingiram a meta';
+
+  @override
   String get groupParticipantsStatLabel => 'Participante no grupo';
 
   @override
@@ -2331,6 +2343,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get studiedTimeLabel => 'Tempo estudado';
 
   @override
+  String get exercisedTimeLabel => 'Tempo exercitado';
+
+  @override
+  String get practicedTimeLabel => 'Tempo praticado';
+
+  @override
   String get readingTimeLabel => 'Tempo lido';
 
   @override
@@ -2346,6 +2364,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sessionsLabel => 'Sessões';
 
   @override
+  String get goalStartLabel => 'Início da meta';
+
+  @override
   String get restLabel => 'Descanso';
 
   @override
@@ -2356,6 +2377,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get studiedUnit => 'estudados';
+
+  @override
+  String get exercisedUnit => 'exercitados';
+
+  @override
+  String get practicedUnit => 'praticados';
 
   @override
   String get readPagesUnit => 'lidas';
@@ -3064,7 +3091,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Arraste uma meta para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.';
+      'Arraste uma meta para a esquerda para editar ou apagar, e para a direita para apagar só o seu progresso. Metas de grupo podem ter algumas ações bloqueadas.';
+
+  @override
+  String get clearDataButtonLabel => 'Apagar dados';
+
+  @override
+  String get clearDataDialogTitle => 'Apagar dados?';
+
+  @override
+  String clearActivityDataMessage(String name) {
+    return 'Todo o seu progresso em \"$name\" será apagado: tempo, páginas e histórico. A atividade continua, mas volta do zero. Esta ação não poderá ser desfeita.';
+  }
+
+  @override
+  String clearGoalDataMessage(String name) {
+    return 'Todos os dias que você marcou em \"$name\" serão apagados e a meta volta do zero. Esta ação não poderá ser desfeita.';
+  }
+
+  @override
+  String get clearDataGroupNote =>
+      'Como faz parte de um grupo, seu progresso individual também sai do ranking. Você continua no grupo.';
+
+  @override
+  String get clearDataSuccessMessage => 'Dados apagados.';
 
   @override
   String get activitySwipeHintTitle => 'Gestos da atividade';

@@ -1,12 +1,14 @@
 import "dart:async";
 
 import "package:dartz/dartz.dart";
+import "package:flutter/widgets.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
@@ -14,6 +16,7 @@ import "package:timing/core/services/achievements/achievement_unlock_service.dar
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
+import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
@@ -61,6 +64,23 @@ class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
 
 class _RecordingNavigator implements AppNavigator {
   int errorCount = 0;
+  int dialogCount = 0;
+  final List<String> successMessages = <String>[];
+
+  @override
+  void showSuccessSnackBar(String text) {
+    successMessages.add(text);
+  }
+
+  @override
+  Future<T?> dialog<T>({
+    required Widget child,
+    bool barrierDismissible = true,
+    bool useSafeArea = true,
+  }) async {
+    dialogCount++;
+    return null;
+  }
 
   @override
   void showErrorSnackBar([String? text]) {
@@ -91,6 +111,8 @@ DailyGoalsController _controller(
   _ControllableDailyTasksDataSource dataSource,
   _RecordingNavigator navigator, {
   DeleteConfirmationCallback? confirmDelete,
+  ClearDataConfirmationCallback? confirmClearData,
+  ActivityChangeBus? activityChangeBus,
 }) {
   final DailyTasksRepository repository = DailyTasksRepository(
     dailyTasksDataSource: dataSource,
@@ -106,12 +128,22 @@ DailyGoalsController _controller(
     deleteDailyTaskUseCase: DeleteDailyTaskUseCase(
       dailyTasksRepository: repository,
     ),
+    clearDailyTaskDataUseCase: ClearDailyTaskDataUseCase(
+      dailyTasksRepository: repository,
+    ),
     lastActivityService: _NoopLastActivityService(),
     achievementUnlockService: _NoopAchievementUnlockService(),
-    activityChangeBus: ActivityChangeBus(),
+    activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
     confirmDelete:
         confirmDelete ??
         ({required String itemName, String? itemTypeName}) async => false,
+    confirmClearData:
+        confirmClearData ??
+        ({
+          required String itemName,
+          required bool isGoal,
+          required bool isFromGroup,
+        }) async => false,
   );
 }
 
@@ -186,6 +218,174 @@ void main() {
     dataSource.releaseFirstSave.complete();
     await first;
     expect(dataSource.saveCalls, 1);
+  });
+
+  test("marking a group goal done is immediate, with no dialog", () async {
+    const DailyTaskEntity groupGoal = DailyTaskEntity(
+      id: "grp_ga1",
+      name: "Meta do grupo",
+      colorValue: 1,
+      targetDays: 7,
+      completedDates: [],
+      groupId: "g1",
+      groupActivityId: "ga1",
+    );
+    final _ControllableDailyTasksDataSource dataSource =
+        _ControllableDailyTasksDataSource([groupGoal]);
+    final _RecordingNavigator navigator = _RecordingNavigator();
+    final DailyGoalsController controller = _controller(dataSource, navigator);
+    controller.tasks.value = [groupGoal];
+
+    final Future<void> check = controller.onToggleTask(groupGoal);
+    await dataSource.firstSaveStarted.future;
+    // Checked on screen before the save even finishes: nothing was asked.
+    expect(controller.tasks.single.isCheckedToday, isTrue);
+    dataSource.releaseFirstSave.complete();
+    await check;
+
+    expect(dataSource.tasks.single.isCheckedToday, isTrue);
+
+    await controller.onToggleTask(controller.tasks.single);
+
+    expect(dataSource.tasks.single.isCheckedToday, isFalse);
+    expect(navigator.dialogCount, 0);
+  });
+
+  group("clearing a goal's data", () {
+    DailyTaskEntity markedGoal({String? groupId}) => DailyTaskEntity(
+      id: groupId == null ? "personal" : "grp_ga1",
+      name: "Meta",
+      colorValue: 1,
+      targetDays: 7,
+      completedDates: const ["2026-09-20", "2026-09-21", "2026-09-22"],
+      groupId: groupId,
+      groupActivityId: groupId == null ? null : "ga1",
+    );
+
+    test("asks first, and does nothing when the user declines", () async {
+      final DailyTaskEntity goal = markedGoal();
+      final _ControllableDailyTasksDataSource dataSource =
+          _ControllableDailyTasksDataSource([goal]);
+      final _RecordingNavigator navigator = _RecordingNavigator();
+      final DailyGoalsController controller = _controller(
+        dataSource,
+        navigator,
+      );
+      controller.tasks.value = [goal];
+
+      await controller.onClearTaskData(goal);
+
+      expect(controller.tasks.single.completedDates, goal.completedDates);
+      expect(dataSource.saveCalls, 0);
+      expect(navigator.successMessages, isEmpty);
+    });
+
+    test("wipes the marked days but keeps the goal itself", () async {
+      final DailyTaskEntity goal = markedGoal();
+      final _ControllableDailyTasksDataSource dataSource =
+          _ControllableDailyTasksDataSource([goal]);
+      final _RecordingNavigator navigator = _RecordingNavigator();
+      String? askedAbout;
+      bool? askedIsGoal;
+      bool? askedIsFromGroup;
+      final DailyGoalsController controller = _controller(
+        dataSource,
+        navigator,
+        confirmClearData:
+            ({
+              required String itemName,
+              required bool isGoal,
+              required bool isFromGroup,
+            }) async {
+              askedAbout = itemName;
+              askedIsGoal = isGoal;
+              askedIsFromGroup = isFromGroup;
+              return true;
+            },
+      );
+      controller.tasks.value = [goal];
+
+      final Future<void> clearing = controller.onClearTaskData(goal);
+      await dataSource.firstSaveStarted.future;
+      // The screen shows it cleared before the save finishes.
+      expect(controller.tasks.single.completedDates, isEmpty);
+      dataSource.releaseFirstSave.complete();
+      await clearing;
+
+      expect(askedAbout, "Meta");
+      expect(askedIsGoal, isTrue);
+      expect(askedIsFromGroup, isFalse);
+      final DailyTaskEntity saved = dataSource.tasks.single;
+      expect(saved.completedDates, isEmpty);
+      expect(saved.id, goal.id);
+      expect(saved.name, goal.name);
+      expect(saved.targetDays, goal.targetDays);
+      // Newer than what was there, so a stale remote copy cannot win back.
+      expect(saved.updatedAt, isNotNull);
+      expect(navigator.successMessages, hasLength(1));
+      expect(navigator.dialogCount, 0);
+    });
+
+    test("tells the group when its own goal was cleared", () async {
+      final DailyTaskEntity goal = markedGoal(groupId: "g1");
+      final _ControllableDailyTasksDataSource dataSource =
+          _ControllableDailyTasksDataSource([goal]);
+      final ActivityChangeBus bus = ActivityChangeBus();
+      final List<GroupActivityChange> changes = <GroupActivityChange>[];
+      final StreamSubscription<GroupActivityChange> subscription = bus.stream
+          .listen(changes.add);
+      addTearDown(subscription.cancel);
+      bool? askedIsFromGroup;
+      final DailyGoalsController controller = _controller(
+        dataSource,
+        _RecordingNavigator(),
+        activityChangeBus: bus,
+        confirmClearData:
+            ({
+              required String itemName,
+              required bool isGoal,
+              required bool isFromGroup,
+            }) async {
+              askedIsFromGroup = isFromGroup;
+              return true;
+            },
+      );
+      controller.tasks.value = [goal];
+
+      final Future<void> clearing = controller.onClearTaskData(goal);
+      await dataSource.firstSaveStarted.future;
+      dataSource.releaseFirstSave.complete();
+      await clearing;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(askedIsFromGroup, isTrue);
+      expect(dataSource.tasks.single.completedDates, isEmpty);
+      expect(changes.map((change) => change.groupId), ["g1"]);
+    });
+
+    test("a failed save brings the days back and reports the error", () async {
+      final DailyTaskEntity goal = markedGoal();
+      final _ControllableDailyTasksDataSource dataSource =
+          _ControllableDailyTasksDataSource([goal], failSaves: true);
+      final _RecordingNavigator navigator = _RecordingNavigator();
+      final DailyGoalsController controller = _controller(
+        dataSource,
+        navigator,
+        confirmClearData:
+            ({
+              required String itemName,
+              required bool isGoal,
+              required bool isFromGroup,
+            }) async => true,
+      );
+      controller.tasks.value = [goal];
+
+      await controller.onClearTaskData(goal);
+
+      expect(controller.tasks.single.completedDates, goal.completedDates);
+      expect(navigator.errorCount, 1);
+      expect(navigator.successMessages, isEmpty);
+    });
   });
 
   test("failed optimistic delete restores the previous task list", () async {

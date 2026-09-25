@@ -333,6 +333,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wie lange möchtest du insgesamt üben?';
 
   @override
+  String get createSubjectTotalTimeGoalTitle => 'Gesamtzeit';
+
+  @override
   String get createSubjectPagesGoalLabel => 'Seitenziel';
 
   @override
@@ -1317,6 +1320,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scheduleTitleHint => 'Titel';
 
   @override
+  String get scheduleTitleExampleHint => 'Bsp.: Englischkurs';
+
+  @override
   String get startTimeLabel => 'Startzeit';
 
   @override
@@ -1466,6 +1472,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get progressDistributionTitle => 'Nach Aktivität';
+
+  @override
+  String progressActivityTimeShare(int value) {
+    return '$value% deiner Zeit in diesem Zeitraum';
+  }
+
+  @override
+  String progressActivityPagesShare(int value) {
+    return '$value% der Seiten in diesem Zeitraum';
+  }
+
+  @override
+  String get progressActivityEmptyTitle => 'Keine Aktivität in diesem Zeitraum';
+
+  @override
+  String get progressActivityEmptyDescription =>
+      'Starte eine Sitzung oder erfasse einen Leseeintrag, um die Verteilung hier zu sehen.';
 
   @override
   String homeTodayInline(String focus, int pages, int goals) {
@@ -1758,20 +1781,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get missedYesterdayCompletedButton => 'Ich habe es erledigt';
-
-  @override
-  String get confirmGoalDoneTodayTitle => 'Hast du das heute erledigt?';
-
-  @override
-  String confirmGoalDoneTodayContent(String taskName) {
-    return 'Bestätige, dass du \"$taskName\" heute erledigt hast, damit es für die Gruppe zählt.';
-  }
-
-  @override
-  String get confirmGoalDoneTodayConfirmButton => 'Ja, erledigt';
-
-  @override
-  String get confirmGoalDoneTodayCancelButton => 'Noch nicht';
 
   @override
   String get missedYesterdayMultiTitle => 'Welche hast du gestern erledigt?';
@@ -2317,6 +2326,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get groupCompletedSessionsStatLabel => 'Abgeschlossene Sitzungen';
 
   @override
+  String get groupGoalReachedStatLabel => 'Ziel erreicht';
+
+  @override
   String get groupParticipantsStatLabel => 'Teilnehmer in der Gruppe';
 
   @override
@@ -2351,6 +2363,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get studiedTimeLabel => 'Gelernte Zeit';
 
   @override
+  String get exercisedTimeLabel => 'Trainingszeit';
+
+  @override
+  String get practicedTimeLabel => 'Übungszeit';
+
+  @override
   String get readingTimeLabel => 'Lesezeit';
 
   @override
@@ -2366,6 +2384,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sessionsLabel => 'Sitzungen';
 
   @override
+  String get goalStartLabel => 'Start des Ziels';
+
+  @override
   String get restLabel => 'Pause';
 
   @override
@@ -2376,6 +2397,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get studiedUnit => 'gelernt';
+
+  @override
+  String get exercisedUnit => 'trainiert';
+
+  @override
+  String get practicedUnit => 'geübt';
 
   @override
   String get readPagesUnit => 'gelesen';
@@ -3091,7 +3118,30 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Wische über ein Ziel, um es zu bearbeiten oder zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.';
+      'Wische ein Ziel nach links, um es zu bearbeiten oder zu löschen, oder nach rechts, um nur deinen eigenen Fortschritt zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.';
+
+  @override
+  String get clearDataButtonLabel => 'Daten löschen';
+
+  @override
+  String get clearDataDialogTitle => 'Daten löschen?';
+
+  @override
+  String clearActivityDataMessage(String name) {
+    return 'Dein gesamter Fortschritt in \"$name\" wird gelöscht: Zeit, Seiten und Verlauf. Die Aktivität bleibt, beginnt aber bei null. Das kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String clearGoalDataMessage(String name) {
+    return 'Alle Tage, die du in \"$name\" abgehakt hast, werden gelöscht und das Ziel beginnt bei null. Das kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get clearDataGroupNote =>
+      'Da es zu einer Gruppe gehört, verschwindet dein persönlicher Fortschritt auch aus der Rangliste. Du bleibst in der Gruppe.';
+
+  @override
+  String get clearDataSuccessMessage => 'Daten gelöscht.';
 
   @override
   String get activitySwipeHintTitle => 'Aktivitätsgesten';

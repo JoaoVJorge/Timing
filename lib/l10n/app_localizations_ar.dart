@@ -328,6 +328,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'كم من الوقت تريد الممارسة إجمالا؟';
 
   @override
+  String get createSubjectTotalTimeGoalTitle => 'الوقت الإجمالي';
+
+  @override
   String get createSubjectPagesGoalLabel => 'هدف الصفحة';
 
   @override
@@ -1292,6 +1295,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scheduleTitleHint => 'العنوان';
 
   @override
+  String get scheduleTitleExampleHint => 'مثال: درس اللغة الإنجليزية';
+
+  @override
   String get startTimeLabel => 'وقت البدء';
 
   @override
@@ -1437,6 +1443,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get progressDistributionTitle => 'حسب النشاط';
+
+  @override
+  String progressActivityTimeShare(int value) {
+    return '$value% من وقتك في هذه الفترة';
+  }
+
+  @override
+  String progressActivityPagesShare(int value) {
+    return '$value% من صفحات هذه الفترة';
+  }
+
+  @override
+  String get progressActivityEmptyTitle => 'لا يوجد نشاط في هذه الفترة';
+
+  @override
+  String get progressActivityEmptyDescription =>
+      'ابدأ جلسة أو سجّل قراءة لرؤية التوزيع هنا.';
 
   @override
   String homeTodayInline(String focus, int pages, int goals) {
@@ -1724,20 +1747,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get missedYesterdayCompletedButton => '??????';
-
-  @override
-  String get confirmGoalDoneTodayTitle => 'هل أنجزت هذا اليوم؟';
-
-  @override
-  String confirmGoalDoneTodayContent(String taskName) {
-    return 'أكّد أنك أنجزت \"$taskName\" اليوم ليتم احتسابه للمجموعة.';
-  }
-
-  @override
-  String get confirmGoalDoneTodayConfirmButton => 'نعم، أنجزته';
-
-  @override
-  String get confirmGoalDoneTodayCancelButton => 'ليس بعد';
 
   @override
   String get missedYesterdayMultiTitle => 'ما الأهداف التي أنجزتها أمس؟';
@@ -2275,6 +2284,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get groupCompletedSessionsStatLabel => 'الجلسات المكتملة';
 
   @override
+  String get groupGoalReachedStatLabel => 'حققوا الهدف';
+
+  @override
   String get groupParticipantsStatLabel => 'مشارك في المجموعة';
 
   @override
@@ -2309,6 +2321,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get studiedTimeLabel => '??? ???????';
 
   @override
+  String get exercisedTimeLabel => 'وقت التمرين';
+
+  @override
+  String get practicedTimeLabel => 'وقت الممارسة';
+
+  @override
   String get readingTimeLabel => '??? ???????';
 
   @override
@@ -2324,6 +2342,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sessionsLabel => '???????';
 
   @override
+  String get goalStartLabel => 'بداية الهدف';
+
+  @override
   String get restLabel => '??????';
 
   @override
@@ -2334,6 +2355,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get studiedUnit => '??????';
+
+  @override
+  String get exercisedUnit => 'من التمرين';
+
+  @override
+  String get practicedUnit => 'من الممارسة';
 
   @override
   String get readPagesUnit => '??????';
@@ -3040,7 +3067,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'اسحب الهدف لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.';
+      'اسحب الهدف إلى اليسار لتعديله أو حذفه، أو إلى اليمين لحذف تقدمك أنت فقط. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.';
+
+  @override
+  String get clearDataButtonLabel => 'حذف البيانات';
+
+  @override
+  String get clearDataDialogTitle => 'حذف البيانات؟';
+
+  @override
+  String clearActivityDataMessage(String name) {
+    return 'سيتم حذف كل تقدمك في \"$name\": الوقت والصفحات والسجل. يبقى النشاط لكنه يبدأ من الصفر. لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String clearGoalDataMessage(String name) {
+    return 'سيتم حذف كل الأيام التي علّمت عليها في \"$name\" ويبدأ الهدف من الصفر. لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get clearDataGroupNote =>
+      'بما أنه جزء من مجموعة، فإن تقدمك الفردي يخرج أيضًا من الترتيب. تبقى في المجموعة.';
+
+  @override
+  String get clearDataSuccessMessage => 'تم حذف البيانات.';
 
   @override
   String get activitySwipeHintTitle => 'إيماءات النشاط';

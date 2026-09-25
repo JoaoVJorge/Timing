@@ -15,6 +15,9 @@ class SubjectStatsBindings extends Bindings {
       SubjectStatsController(
         subject: subject,
         subjectDailyHistoryService: Get.find(),
+        clearSubjectDataUseCase: Get.find(),
+        activityChangeBus: Get.find(),
+        appNavigator: Get.find(),
       ),
     );
   }

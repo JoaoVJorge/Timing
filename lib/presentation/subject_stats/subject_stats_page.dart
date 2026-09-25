@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:intl/intl.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -13,6 +14,7 @@ import "package:timing/shared/widgets/app_icon_badge.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
 
@@ -25,24 +27,81 @@ class SubjectStatsPage extends GetView<SubjectStatsController> {
 
     return AppScaffold(
       topBar: AppTopBar(title: _title(context), showBackButton: true),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
-        children: [
-          _SubjectStatsHero(
-            subject: controller.subject,
-            accent: accent,
-            progress: controller.progress,
-            progressLabel: context.l10n.periodTotal,
+      // Observing the activity redraws the page from zero once its data is
+      // deleted.
+      body: Obx(
+        () => ListView(
+          padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
+          children: [
+            _SubjectStatsHero(
+              subject: controller.subject,
+              accent: accent,
+              progress: controller.progress,
+              progressLabel: controller.isDaily
+                  ? context.l10n.periodToday
+                  : context.l10n.periodTotal,
+            ),
+            const Gap(AppSpacing.betweenSections),
+            AppSectionHeader(title: overviewTitle(context)),
+            const Gap(AppSpacing.betweenRelated),
+            _StatsGrid(controller: controller, accent: accent),
+            const Gap(AppSpacing.betweenSections),
+            AppSectionHeader(title: comparativesTitle(context)),
+            const Gap(AppSpacing.betweenRelated),
+            SubjectComparativesSection(accent: accent),
+            const Gap(AppSpacing.betweenSections),
+            _ClearDataButton(controller: controller),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The last thing on the page: deletes the user's own data on this activity,
+/// after asking. The activity stays; its numbers and history go.
+class _ClearDataButton extends StatelessWidget {
+  const _ClearDataButton({required this.controller});
+
+  final SubjectStatsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color danger = context.colorTokens.error;
+
+    return Obx(
+      () => AbsorbPointer(
+        absorbing: controller.isClearingData.value,
+        child: Opacity(
+          opacity: controller.isClearingData.value ? 0.6 : 1,
+          child: BounceTap(
+            key: const ValueKey<String>("clear-subject-data"),
+            onTap: controller.onClearData,
+            child: Container(
+              height: 56,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: danger.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: danger.withValues(alpha: 0.45)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.delete_sweep_rounded, color: danger, size: 22),
+                  const Gap(8),
+                  Text(
+                    context.l10n.clearDataButtonLabel,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: danger,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const Gap(AppSpacing.betweenSections),
-          AppSectionHeader(title: overviewTitle(context)),
-          const Gap(AppSpacing.betweenRelated),
-          _StatsGrid(controller: controller, accent: accent),
-          const Gap(AppSpacing.betweenSections),
-          AppSectionHeader(title: comparativesTitle(context)),
-          const Gap(AppSpacing.betweenRelated),
-          SubjectComparativesSection(accent: accent),
-        ],
+        ),
       ),
     );
   }
@@ -86,7 +145,7 @@ class _SubjectStatsHero extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.caption,
               ),
-              const Gap(12),
+              const Gap(8),
               Row(
                 children: [
                   Expanded(
@@ -96,6 +155,7 @@ class _SubjectStatsHero extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: context.textStyles.caption.copyWith(
                         fontWeight: FontWeight.w800,
+                        color: context.colorTokens.primary,
                       ),
                     ),
                   ),
@@ -138,6 +198,18 @@ class _StatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SubjectEntity subject = controller.subject;
+    final _StatItem goalStart = _StatItem(
+      icon: Icons.calendar_month_rounded,
+      value: _goalStartValue(context, controller.goalStartDate),
+      label: _goalStartLabel(context),
+    );
+    final _StatItem activityType = _StatItem(
+      icon: Icons.event_repeat_rounded,
+      value: controller.isDaily
+          ? context.l10n.activityTypeDailyLabel
+          : context.l10n.activityTypePermanentLabel,
+      label: context.l10n.activityTypeLabel,
+    );
     final List<_StatItem> items = controller.isReading
         ? [
             _StatItem(
@@ -145,24 +217,15 @@ class _StatsGrid extends StatelessWidget {
               value: formatDurationLong(
                 Duration(seconds: subject.totalSeconds),
               ),
-              label: _readingTimeLabel(context),
+              label: subject.category.spentTimeLabel(context),
             ),
             _StatItem(
               icon: Icons.auto_stories_rounded,
               value: context.l10n.metricPagesValue(subject.currentPages),
               label: _totalPagesReadLabel(context),
             ),
-            _StatItem(
-              icon: Icons.today_rounded,
-              value: context.l10n.metricPagesValue(controller.pagesReadToday),
-              label: _pagesReadTodayLabel(context),
-            ),
-            _StatItem(
-              icon: Icons.flag_rounded,
-              value:
-                  "${controller.goalPercent(subject.currentPages, subject.goalPages)}%",
-              label: _goalLabel(context),
-            ),
+            activityType,
+            goalStart,
           ]
         : [
             _StatItem(
@@ -170,26 +233,16 @@ class _StatsGrid extends StatelessWidget {
               value: formatDurationLong(
                 Duration(seconds: subject.totalSeconds),
               ),
-              label: _studiedTimeLabel(context),
+              label: subject.category.spentTimeLabel(context),
             ),
-            _StatItem(
-              icon: Icons.flag_rounded,
-              value:
-                  "${controller.goalPercent(subject.totalSeconds, subject.totalGoalSeconds)}%",
-              label: _goalLabel(context),
-            ),
-            if (!controller.isHobby) ...[
-              _StatItem(
-                icon: Icons.timer_rounded,
-                value: "${subject.focusSessionCount}",
-                label: _sessionsLabel(context),
-              ),
+            goalStart,
+            activityType,
+            if (!controller.isHobby)
               _StatItem(
                 icon: Icons.local_cafe_rounded,
                 value: _restValue(context, subject),
                 label: _restLabel(context),
               ),
-            ],
           ];
 
     return LayoutBuilder(
@@ -216,6 +269,12 @@ class _StatsGrid extends StatelessWidget {
       subject.category == TimeCategoryType.exercises
       ? "${subject.restSeconds}s"
       : formatDurationTotalMinutes(Duration(seconds: subject.restSeconds));
+
+  String _goalStartValue(BuildContext context, DateTime? start) => start == null
+      ? "—"
+      : DateFormat.yMd(
+          Localizations.localeOf(context).toString(),
+        ).format(start);
 }
 
 class _StatTile extends StatelessWidget {
@@ -268,18 +327,9 @@ class _StatItem {
 
 String _title(BuildContext context) => context.l10n.statisticsTitle;
 
-String _studiedTimeLabel(BuildContext context) => context.l10n.studiedTimeLabel;
-
-String _readingTimeLabel(BuildContext context) => context.l10n.readingTimeLabel;
-
 String _totalPagesReadLabel(BuildContext context) =>
     context.l10n.totalPagesReadLabel;
 
-String _pagesReadTodayLabel(BuildContext context) =>
-    context.l10n.pagesReadTodayLabel;
-
-String _goalLabel(BuildContext context) => context.l10n.goalLabel;
-
-String _sessionsLabel(BuildContext context) => context.l10n.sessionsLabel;
+String _goalStartLabel(BuildContext context) => context.l10n.goalStartLabel;
 
 String _restLabel(BuildContext context) => context.l10n.restLabel;

@@ -25,6 +25,11 @@ class ActivityRepository {
     completedTasks: completedTasks,
   );
 
+  /// Deletes every session logged for the subject (see
+  /// [ActivityDataSource.clearSubjectEntries]).
+  Future<Either<AppError, void>> clearSubjectEntries(String subjectId) =>
+      activityDataSource.clearSubjectEntries(subjectId);
+
   Future<Either<AppError, List<ActivityEntryEntity>>> getActivityEntries({
     int retentionDays = 400,
   }) => activityDataSource.getActivityEntries(retentionDays: retentionDays);

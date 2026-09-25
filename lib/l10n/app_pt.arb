@@ -95,6 +95,7 @@
   "createSubjectTotalTimeGoalLabelStudying": "Quanto tempo você quer estudar no total?",
   "createSubjectTotalTimeGoalLabelExercises": "Quanto tempo você quer se exercitar no total?",
   "createSubjectTotalTimeGoalLabelHobbies": "Quanto tempo você quer praticar no total?",
+  "createSubjectTotalTimeGoalTitle": "Tempo total",
   "createSubjectPagesGoalLabel": "Meta de páginas",
   "createSubjectTimeGoalHelp": "Quantos minutos você quer focar?",
   "createSubjectPagesGoalHelp": "Quantas páginas você quer registrar no total?",
@@ -444,6 +445,7 @@
     }
   },
   "scheduleTitleHint": "Título",
+  "scheduleTitleExampleHint": "Ex.: Aula de inglês",
   "startTimeLabel": "Hora de início",
   "endTimeOptionalLabel": "Hora de fim",
   "incompleteScheduleEntryError": "Cadastro incompleto — preencha o título, a hora de início e a hora de fim.",
@@ -510,6 +512,24 @@
   "progressStatMainReading": "Principal leitura",
   "progressStatGoalsDone": "Metas concluídas",
   "progressDistributionTitle": "Por atividade",
+  "progressActivityTimeShare": "{value}% do seu tempo neste período",
+  "@progressActivityTimeShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityPagesShare": "{value}% das páginas deste período",
+  "@progressActivityPagesShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityEmptyTitle": "Nenhuma atividade neste período",
+  "progressActivityEmptyDescription": "Inicie uma sessão ou registre uma leitura para ver a distribuição aqui.",
   "homeTodayInline": "Hoje: {focus} de foco · {pages} páginas · {goals} metas",
   "@homeTodayInline": {
     "placeholders": {
@@ -695,10 +715,6 @@
   "missedYesterdayDialogContent": "Você não marcou \"{taskName}\" ontem. Se tiver feito, podemos registrar agora.",
   "missedYesterdayMissedButton": "Não fiz",
   "missedYesterdayCompletedButton": "Fiz ontem",
-  "confirmGoalDoneTodayTitle": "Você concluiu isso hoje?",
-  "confirmGoalDoneTodayContent": "Confirme que você concluiu \"{taskName}\" hoje para contar no grupo.",
-  "confirmGoalDoneTodayConfirmButton": "Sim, concluí",
-  "confirmGoalDoneTodayCancelButton": "Ainda não",
   "missedYesterdayMultiTitle": "Quais você fez ontem?",
   "missedYesterdayMultiContent": "Você não marcou algumas metas ontem. Selecione as que você concluiu.",
   "missedYesterdayMultiConfirmButton": "Confirmar",
@@ -1013,6 +1029,7 @@
   "groupTodayTotalStatLabel": "Tempo total hoje",
   "groupPeriodTotalStatLabel": "Total no período",
   "groupCompletedSessionsStatLabel": "Sessões concluídas",
+  "groupGoalReachedStatLabel": "Atingiram a meta",
   "groupParticipantsStatLabel": "Participante no grupo",
   "currentUserRankCompleteFirstGoal": "Conclua sua primeira meta para entrar no ranking.",
   "currentUserRankTiedLead": "Empate na liderança.",
@@ -1030,15 +1047,20 @@
   "todayLabel": "Hoje",
   "statisticsTitle": "Estatísticas",
   "studiedTimeLabel": "Tempo estudado",
+  "exercisedTimeLabel": "Tempo exercitado",
+  "practicedTimeLabel": "Tempo praticado",
   "readingTimeLabel": "Tempo lido",
   "totalPagesReadLabel": "Total de páginas",
   "pagesReadTodayLabel": "Páginas hoje",
   "goalLabel": "Meta",
   "sessionsLabel": "Sessões",
+  "goalStartLabel": "Início da meta",
   "restLabel": "Descanso",
   "comparativesTitle": "Comparativos",
   "overviewTitle": "Visão geral",
   "studiedUnit": "estudados",
+  "exercisedUnit": "exercitados",
+  "practicedUnit": "praticados",
   "readPagesUnit": "lidas",
   "versusLastMonth": "vs mês passado",
   "versusLastWeek": "vs semana passada",
@@ -1293,7 +1315,13 @@
   "groupInvitationsSentEmptyDescription": "Os convites que você enviar para alguém entrar em um grupo aparecem aqui.",
   "swipeHintDismissLabel": "Entendi",
   "dailyGoalSwipeHintTitle": "Gestos da meta",
-  "dailyGoalSwipeHintMessage": "Arraste uma meta para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.",
+  "dailyGoalSwipeHintMessage": "Arraste uma meta para a esquerda para editar ou apagar, e para a direita para apagar só o seu progresso. Metas de grupo podem ter algumas ações bloqueadas.",
+  "clearDataButtonLabel": "Apagar dados",
+  "clearDataDialogTitle": "Apagar dados?",
+  "clearActivityDataMessage": "Todo o seu progresso em \"{name}\" será apagado: tempo, páginas e histórico. A atividade continua, mas volta do zero. Esta ação não poderá ser desfeita.",
+  "clearGoalDataMessage": "Todos os dias que você marcou em \"{name}\" serão apagados e a meta volta do zero. Esta ação não poderá ser desfeita.",
+  "clearDataGroupNote": "Como faz parte de um grupo, seu progresso individual também sai do ranking. Você continua no grupo.",
+  "clearDataSuccessMessage": "Dados apagados.",
   "activitySwipeHintTitle": "Gestos da atividade",
   "activitySwipeHintMessage": "Arraste uma atividade para ver notas, dados, editar ou apagar. Itens de grupo podem ter algumas ações bloqueadas.",
   "groupGoalEditBlockedMessage": "Esta meta é de um grupo. Edite pelo grupo para alterar.",

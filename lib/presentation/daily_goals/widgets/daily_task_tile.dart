@@ -12,6 +12,7 @@ class DailyTaskTile extends StatefulWidget {
     required this.onEdit,
     required this.onToggle,
     required this.onDelete,
+    required this.onClearData,
     super.key,
   });
 
@@ -20,11 +21,18 @@ class DailyTaskTile extends StatefulWidget {
   final Future<void> Function() onToggle;
   final VoidCallback onDelete;
 
+  /// Wipes the days marked on this goal, keeping the goal itself.
+  final VoidCallback onClearData;
+
   @override
   State<DailyTaskTile> createState() => _DailyTaskTileState();
 }
 
 class _DailyTaskTileState extends State<DailyTaskTile> {
+  /// The tile is 64 tall (16 of padding around the 32 check circle); squares
+  /// of 56 sit 4 clear of its top and bottom, the same on both sides.
+  static const double _actionSquareSize = 56;
+
   bool? _optimisticChecked;
   bool _isToggling = false;
 
@@ -55,6 +63,15 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
     final double contentOpacity = isCheckedToday ? 0.55 : 1;
 
     return SwipeRevealActions(
+      squareActionSize: _actionSquareSize,
+      leadingActions: [
+        SwipeRevealAction(
+          iconData: Icons.delete_sweep_rounded,
+          background: context.colorTokens.surface,
+          iconColor: context.colorTokens.error,
+          onTap: widget.onClearData,
+        ),
+      ],
       actions: [
         SwipeRevealAction(
           iconData: Icons.edit_rounded,

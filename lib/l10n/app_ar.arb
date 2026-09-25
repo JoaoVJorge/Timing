@@ -474,6 +474,7 @@
   "createSubjectTotalTimeGoalLabelStudying": "كم من الوقت تريد الدراسة إجمالا؟",
   "createSubjectTotalTimeGoalLabelExercises": "كم من الوقت تريد التمرن إجمالا؟",
   "createSubjectTotalTimeGoalLabelHobbies": "كم من الوقت تريد الممارسة إجمالا؟",
+  "createSubjectTotalTimeGoalTitle": "الوقت الإجمالي",
   "createSubjectPagesGoalLabel": "هدف الصفحة",
   "createSubjectTimeGoalHelp": "كم دقيقة تريد التركيز؟",
   "createSubjectPagesGoalHelp": "كم عدد الصفحات التي تريد تسجيل الدخول بها إجمالاً؟",
@@ -761,6 +762,7 @@
   "scheduleDurationHours": "{hours}h",
   "scheduleDurationHoursMinutes": "{hours}h {minutes} دقيقة",
   "scheduleTitleHint": "العنوان",
+  "scheduleTitleExampleHint": "مثال: درس اللغة الإنجليزية",
   "startTimeLabel": "وقت البدء",
   "endTimeOptionalLabel": "وقت الانتهاء",
   "incompleteScheduleEntryError": "إدخال غير مكتمل - املأ العنوان ووقت البدء ووقت الانتهاء.",
@@ -820,6 +822,24 @@
   "progressStatMainReading": "القراءة الرئيسية",
   "progressStatGoalsDone": "الأهداف المنجزة",
   "progressDistributionTitle": "حسب النشاط",
+  "progressActivityTimeShare": "{value}% من وقتك في هذه الفترة",
+  "@progressActivityTimeShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityPagesShare": "{value}% من صفحات هذه الفترة",
+  "@progressActivityPagesShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityEmptyTitle": "لا يوجد نشاط في هذه الفترة",
+  "progressActivityEmptyDescription": "ابدأ جلسة أو سجّل قراءة لرؤية التوزيع هنا.",
   "homeTodayInline": "اليوم: {focus} تركيز · {pages} صفحة · {goals} هدف",
   "@homeTodayInline": {
     "placeholders": {
@@ -1005,10 +1025,6 @@
   "missedYesterdayDialogContent": "?? ???? \"{taskName}\" ???. ?? ???? ?????",
   "missedYesterdayMissedButton": "???? ?????",
   "missedYesterdayCompletedButton": "??????",
-  "confirmGoalDoneTodayTitle": "هل أنجزت هذا اليوم؟",
-  "confirmGoalDoneTodayContent": "أكّد أنك أنجزت \"{taskName}\" اليوم ليتم احتسابه للمجموعة.",
-  "confirmGoalDoneTodayConfirmButton": "نعم، أنجزته",
-  "confirmGoalDoneTodayCancelButton": "ليس بعد",
   "missedYesterdayMultiTitle": "ما الأهداف التي أنجزتها أمس؟",
   "missedYesterdayMultiContent": "لم تسجّل بعض الأهداف أمس. حدّد الأهداف التي أنجزتها بالفعل.",
   "missedYesterdayMultiConfirmButton": "تأكيد",
@@ -1323,6 +1339,7 @@
   "groupTodayTotalStatLabel": "إجمالي الوقت اليوم",
   "groupPeriodTotalStatLabel": "إجمالي الفترة",
   "groupCompletedSessionsStatLabel": "الجلسات المكتملة",
+  "groupGoalReachedStatLabel": "حققوا الهدف",
   "groupParticipantsStatLabel": "مشارك في المجموعة",
   "currentUserRankCompleteFirstGoal": "أكمل هدفك الأول للدخول إلى الترتيب.",
   "currentUserRankTiedLead": "تعادل على الصدارة.",
@@ -1340,15 +1357,20 @@
   "todayLabel": "اليوم",
   "statisticsTitle": "?????????",
   "studiedTimeLabel": "??? ???????",
+  "exercisedTimeLabel": "وقت التمرين",
+  "practicedTimeLabel": "وقت الممارسة",
   "readingTimeLabel": "??? ???????",
   "totalPagesReadLabel": "?????? ???????",
   "pagesReadTodayLabel": "????? ?????",
   "goalLabel": "?????",
   "sessionsLabel": "???????",
+  "goalStartLabel": "بداية الهدف",
   "restLabel": "??????",
   "comparativesTitle": "?????????",
   "overviewTitle": "???? ????",
   "studiedUnit": "??????",
+  "exercisedUnit": "من التمرين",
+  "practicedUnit": "من الممارسة",
   "readPagesUnit": "??????",
   "versusLastMonth": "?????? ?????? ??????",
   "versusLastWeek": "?????? ???????? ??????",
@@ -1603,7 +1625,13 @@
   "groupInvitationsSentEmptyDescription": "الدعوات التي ترسلها للانضمام إلى مجموعة ستظهر هنا.",
   "swipeHintDismissLabel": "فهمت",
   "dailyGoalSwipeHintTitle": "إيماءات الهدف",
-  "dailyGoalSwipeHintMessage": "اسحب الهدف لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.",
+  "dailyGoalSwipeHintMessage": "اسحب الهدف إلى اليسار لتعديله أو حذفه، أو إلى اليمين لحذف تقدمك أنت فقط. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.",
+  "clearDataButtonLabel": "حذف البيانات",
+  "clearDataDialogTitle": "حذف البيانات؟",
+  "clearActivityDataMessage": "سيتم حذف كل تقدمك في \"{name}\": الوقت والصفحات والسجل. يبقى النشاط لكنه يبدأ من الصفر. لا يمكن التراجع عن هذا الإجراء.",
+  "clearGoalDataMessage": "سيتم حذف كل الأيام التي علّمت عليها في \"{name}\" ويبدأ الهدف من الصفر. لا يمكن التراجع عن هذا الإجراء.",
+  "clearDataGroupNote": "بما أنه جزء من مجموعة، فإن تقدمك الفردي يخرج أيضًا من الترتيب. تبقى في المجموعة.",
+  "clearDataSuccessMessage": "تم حذف البيانات.",
   "activitySwipeHintTitle": "إيماءات النشاط",
   "activitySwipeHintMessage": "اسحب النشاط لعرض الملاحظات والبيانات أو لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لعناصر المجموعة.",
   "groupGoalEditBlockedMessage": "هذا الهدف تابع لمجموعة. عدّله من داخل المجموعة.",

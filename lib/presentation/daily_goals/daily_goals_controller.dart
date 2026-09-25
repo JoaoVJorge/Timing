@@ -8,6 +8,7 @@ import "package:timing/app/app_routes.dart";
 import "package:timing/app/route_arguments.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
@@ -16,6 +17,7 @@ import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/daily_goals/widgets/missed_yesterday_multi_dialog.dart";
+import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class DailyGoalsController extends GetxController {
@@ -24,20 +26,24 @@ class DailyGoalsController extends GetxController {
     required this._getDailyTasksUseCase,
     required this._toggleDailyTaskCheckUseCase,
     required this._deleteDailyTaskUseCase,
+    required this._clearDailyTaskDataUseCase,
     required this._lastActivityService,
     required this._achievementUnlockService,
     required this._activityChangeBus,
     this._confirmDelete = showDeleteConfirmationDialog,
+    this._confirmClearData = showClearDataConfirmationDialog,
   });
 
   final AppNavigator _appNavigator;
   final GetDailyTasksUseCase _getDailyTasksUseCase;
   final ToggleDailyTaskCheckUseCase _toggleDailyTaskCheckUseCase;
   final DeleteDailyTaskUseCase _deleteDailyTaskUseCase;
+  final ClearDailyTaskDataUseCase _clearDailyTaskDataUseCase;
   final LastActivityService _lastActivityService;
   final AchievementUnlockService _achievementUnlockService;
   final ActivityChangeBus _activityChangeBus;
   final DeleteConfirmationCallback _confirmDelete;
+  final ClearDataConfirmationCallback _confirmClearData;
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
@@ -124,15 +130,6 @@ class DailyGoalsController extends GetxController {
         return;
       }
       final DailyTaskEntity originalTask = tasks[originalIndex];
-
-      // Group-linked goals feed a shared group ranking, so marking one done
-      // asks for confirmation instead of toggling instantly (unchecking it
-      // back off needs no confirmation).
-      if (!originalTask.isCheckedToday &&
-          originalTask.isFromGroup &&
-          !await _confirmGoalDoneToday(originalTask)) {
-        return;
-      }
 
       final DateTime toggleDate = DateTime.now();
       tasks[originalIndex] = originalTask.copyWith(
@@ -250,14 +247,6 @@ class DailyGoalsController extends GetxController {
     }
   }
 
-  Future<bool> _confirmGoalDoneToday(DailyTaskEntity task) async {
-    final bool? confirmed = await _appNavigator.dialog<bool>(
-      child: _ConfirmGoalDoneDialog(taskName: task.name),
-      barrierDismissible: false,
-    );
-    return confirmed ?? false;
-  }
-
   Future<Set<String>?> _askAboutSingleMissedTask(DailyTaskEntity task) async {
     final bool? didComplete = await _appNavigator.dialog<bool>(
       child: _MissedYesterdayDialog(taskName: task.name),
@@ -301,6 +290,58 @@ class DailyGoalsController extends GetxController {
       tasks.value = previousTasks;
       _appNavigator.showErrorSnackBar(error.message);
     }, (_) {});
+  }
+
+  /// Wipes the days marked on a goal but keeps the goal. For a group goal this
+  /// is also what takes the user's share out of the group ranking.
+  Future<void> onClearTaskData(DailyTaskEntity task) async {
+    if (!_togglingTaskIds.add(task.id)) {
+      return;
+    }
+
+    try {
+      final bool confirmed = await _confirmClearData(
+        itemName: task.name,
+        isGoal: true,
+        isFromGroup: task.isFromGroup,
+      );
+      final int index = tasks.indexWhere((item) => item.id == task.id);
+      if (!confirmed || index == -1) {
+        return;
+      }
+
+      final DailyTaskEntity previousTask = tasks[index];
+      tasks[index] = previousTask.copyWith(
+        completedDates: const [],
+        updatedAt: DateTime.now().toUtc(),
+      );
+      final Either<AppError, DailyTaskEntity> result =
+          await _clearDailyTaskDataUseCase(taskId: task.id);
+      result.fold(
+        (error) {
+          _restoreTask(previousTask);
+          _appNavigator.showErrorSnackBar(error.message);
+        },
+        (clearedTask) {
+          final int clearedIndex = tasks.indexWhere(
+            (item) => item.id == clearedTask.id,
+          );
+          if (clearedIndex != -1) {
+            tasks[clearedIndex] = clearedTask;
+          }
+          if (clearedTask.isFromGroup) {
+            _activityChangeBus.notifyGroupActivityChanged(
+              groupId: clearedTask.groupId,
+            );
+          }
+          _appNavigator.showSuccessSnackBar(
+            Get.context?.l10n.clearDataSuccessMessage ?? "Data deleted.",
+          );
+        },
+      );
+    } finally {
+      _togglingTaskIds.remove(task.id);
+    }
   }
 
   String? get _goalTypeName {
@@ -403,96 +444,6 @@ class _MissedYesterdayDialog extends StatelessWidget {
 
   void _appNavigatorBack(bool result) {
     appNavigator.back<bool>(result: result);
-  }
-}
-
-class _ConfirmGoalDoneDialog extends StatelessWidget {
-  const _ConfirmGoalDoneDialog({required this.taskName});
-
-  final String taskName;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color accent = context.colorTokens.primary;
-
-    return Dialog(
-      elevation: 0,
-      backgroundColor: context.colorTokens.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 34),
-      child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 390),
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-        decoration: BoxDecoration(
-          color: context.colorTokens.dialogSurface,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: context.colorTokens.black.withValues(alpha: 0.16),
-              blurRadius: 28,
-              offset: const Offset(0, 14),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.check_circle_outline_rounded, color: accent, size: 28),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              context.l10n.confirmGoalDoneTodayTitle,
-              textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(
-                color: context.colorTokens.dialogText,
-                fontSize: 21,
-                height: 1.12,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.confirmGoalDoneTodayContent(taskName),
-              textAlign: TextAlign.center,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.dialogTextMuted,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: 1.38,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: _MissedDialogButton(
-                    label: context.l10n.confirmGoalDoneTodayCancelButton,
-                    foreground: accent,
-                    borderColor: accent,
-                    onTap: () => appNavigator.back<bool>(result: false),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MissedDialogButton(
-                    label: context.l10n.confirmGoalDoneTodayConfirmButton,
-                    foreground: context.colorTokens.white,
-                    background: accent,
-                    onTap: () => appNavigator.back<bool>(result: true),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

@@ -115,6 +115,21 @@ class SubjectDailyHistoryService {
     return true;
   }
 
+  /// Forgets the subject's day-by-day trail and hands it back, so what it added
+  /// to the account-wide daily totals can be taken out of them too.
+  Future<Map<String, DailyProgressEntity>> removeSubject(
+    String subjectId,
+  ) async {
+    final Map<String, DailyProgressEntity>? removed = _bySubject.remove(
+      subjectId,
+    );
+    if (removed == null) {
+      return const {};
+    }
+    await _persist();
+    return removed;
+  }
+
   /// The subject's daily counters for the last [days] days, oldest first.
   List<DailyProgressEntity> historyForLastDays(String subjectId, int days) {
     final Map<String, DailyProgressEntity>? days$ = _bySubject[subjectId];

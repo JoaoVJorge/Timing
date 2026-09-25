@@ -155,6 +155,15 @@ class ActivityHistoryService {
   static String _dayAndSubject(ActivityEntryEntity entry) =>
       "${_startOfDay(entry.timestamp).toIso8601String()}|${entry.subjectId}";
 
+  /// Forgets everything recorded for [subjectId]: the activity's "delete data".
+  Future<void> removeSubject(String subjectId) async {
+    final int before = _entries.length;
+    _entries.removeWhere((entry) => entry.subjectId == subjectId);
+    if (_entries.length != before) {
+      await _persist();
+    }
+  }
+
   /// Entries whose timestamp falls in `[start, end)`, optionally filtered by
   /// [category] and/or [subjectId].
   List<ActivityEntryEntity> entriesBetween(

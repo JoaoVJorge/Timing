@@ -4,6 +4,8 @@ import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.da
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
+import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
+import "package:timing/core/domain/use_cases/clear_subject_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
@@ -116,6 +118,20 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<DeleteDailyTaskUseCase>(
       DeleteDailyTaskUseCase(dailyTasksRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<ClearSubjectDataUseCase>(
+      ClearSubjectDataUseCase(
+        subjectsRepository: Get.find(),
+        activityRepository: Get.find(),
+        activityHistoryService: Get.find(),
+        subjectDailyHistoryService: Get.find(),
+        dailyProgressService: Get.find(),
+      ),
+      permanent: true,
+    );
+    Get.put<ClearDailyTaskDataUseCase>(
+      ClearDailyTaskDataUseCase(dailyTasksRepository: Get.find()),
       permanent: true,
     );
     Get.put<GetGroupsUseCase>(

@@ -676,6 +676,12 @@ abstract class AppLocalizations {
   /// **'How long do you want to practice in total?'**
   String get createSubjectTotalTimeGoalLabelHobbies;
 
+  /// No description provided for @createSubjectTotalTimeGoalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total time'**
+  String get createSubjectTotalTimeGoalTitle;
+
   /// No description provided for @createSubjectPagesGoalLabel.
   ///
   /// In en, this message translates to:
@@ -2398,6 +2404,12 @@ abstract class AppLocalizations {
   /// **'Title'**
   String get scheduleTitleHint;
 
+  /// No description provided for @scheduleTitleExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g., English class'**
+  String get scheduleTitleExampleHint;
+
   /// No description provided for @startTimeLabel.
   ///
   /// In en, this message translates to:
@@ -2667,6 +2679,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By activity'**
   String get progressDistributionTitle;
+
+  /// No description provided for @progressActivityTimeShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}% of your time in this period'**
+  String progressActivityTimeShare(int value);
+
+  /// No description provided for @progressActivityPagesShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}% of the pages in this period'**
+  String progressActivityPagesShare(int value);
+
+  /// No description provided for @progressActivityEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity in this period'**
+  String get progressActivityEmptyTitle;
+
+  /// No description provided for @progressActivityEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a session or log some reading to see the breakdown here.'**
+  String get progressActivityEmptyDescription;
 
   /// No description provided for @homeTodayInline.
   ///
@@ -3141,30 +3177,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I completed it'**
   String get missedYesterdayCompletedButton;
-
-  /// No description provided for @confirmGoalDoneTodayTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Did you complete it today?'**
-  String get confirmGoalDoneTodayTitle;
-
-  /// No description provided for @confirmGoalDoneTodayContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm you completed \"{taskName}\" today to count it toward the group.'**
-  String confirmGoalDoneTodayContent(String taskName);
-
-  /// No description provided for @confirmGoalDoneTodayConfirmButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Yes, I did it'**
-  String get confirmGoalDoneTodayConfirmButton;
-
-  /// No description provided for @confirmGoalDoneTodayCancelButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Not yet'**
-  String get confirmGoalDoneTodayCancelButton;
 
   /// No description provided for @missedYesterdayMultiTitle.
   ///
@@ -4078,6 +4090,12 @@ abstract class AppLocalizations {
   /// **'Completed sessions'**
   String get groupCompletedSessionsStatLabel;
 
+  /// No description provided for @groupGoalReachedStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reached the goal'**
+  String get groupGoalReachedStatLabel;
+
   /// No description provided for @groupParticipantsStatLabel.
   ///
   /// In en, this message translates to:
@@ -4138,6 +4156,18 @@ abstract class AppLocalizations {
   /// **'Studied time'**
   String get studiedTimeLabel;
 
+  /// No description provided for @exercisedTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise time'**
+  String get exercisedTimeLabel;
+
+  /// No description provided for @practicedTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice time'**
+  String get practicedTimeLabel;
+
   /// No description provided for @readingTimeLabel.
   ///
   /// In en, this message translates to:
@@ -4168,6 +4198,12 @@ abstract class AppLocalizations {
   /// **'Sessions'**
   String get sessionsLabel;
 
+  /// No description provided for @goalStartLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal start'**
+  String get goalStartLabel;
+
   /// No description provided for @restLabel.
   ///
   /// In en, this message translates to:
@@ -4191,6 +4227,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'studied'**
   String get studiedUnit;
+
+  /// No description provided for @exercisedUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'exercised'**
+  String get exercisedUnit;
+
+  /// No description provided for @practicedUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'practiced'**
+  String get practicedUnit;
 
   /// No description provided for @readPagesUnit.
   ///
@@ -5509,8 +5557,44 @@ abstract class AppLocalizations {
   /// No description provided for @dailyGoalSwipeHintMessage.
   ///
   /// In en, this message translates to:
-  /// **'Swipe a goal to edit or delete it. Some actions may be unavailable for group goals.'**
+  /// **'Swipe a goal left to edit or delete it, or right to delete only your own progress. Some actions may be unavailable for group goals.'**
   String get dailyGoalSwipeHintMessage;
+
+  /// No description provided for @clearDataButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete data'**
+  String get clearDataButtonLabel;
+
+  /// No description provided for @clearDataDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete data?'**
+  String get clearDataDialogTitle;
+
+  /// No description provided for @clearActivityDataMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All your progress in \"{name}\" will be deleted: time, pages and history. The activity stays, but starts over from zero. This cannot be undone.'**
+  String clearActivityDataMessage(String name);
+
+  /// No description provided for @clearGoalDataMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day you marked in \"{name}\" will be deleted and the goal starts over from zero. This cannot be undone.'**
+  String clearGoalDataMessage(String name);
+
+  /// No description provided for @clearDataGroupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'It belongs to a group, so your individual progress also leaves the group ranking. You stay in the group.'**
+  String get clearDataGroupNote;
+
+  /// No description provided for @clearDataSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Data deleted.'**
+  String get clearDataSuccessMessage;
 
   /// No description provided for @activitySwipeHintTitle.
   ///

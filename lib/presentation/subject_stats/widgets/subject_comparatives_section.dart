@@ -4,6 +4,7 @@ import "package:get/get.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
 import "package:timing/presentation/subject_stats/subject_stats_controller.dart";
+import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
@@ -39,7 +40,7 @@ class SubjectComparativesSection extends StatelessWidget {
             const Gap(12),
             _Headline(
               valueLabel: _totalLabel(context, isReading, data.currentTotal),
-              unitLabel: _unitLabel(context, isReading),
+              unitLabel: controller.subject.category.periodTotalUnit(context),
               accent: accent,
             ),
             const Gap(6),
@@ -69,9 +70,6 @@ class SubjectComparativesSection extends StatelessWidget {
       isReading
       ? context.l10n.metricPagesValue(total)
       : formatDurationLong(Duration(seconds: total));
-
-  String _unitLabel(BuildContext context, bool isReading) =>
-      isReading ? _readPagesUnit(context) : _studiedUnit(context);
 }
 
 class _PeriodToggle extends StatelessWidget {
@@ -252,10 +250,6 @@ String comparativesTitle(BuildContext context) =>
     context.l10n.comparativesTitle;
 
 String overviewTitle(BuildContext context) => context.l10n.overviewTitle;
-
-String _studiedUnit(BuildContext context) => context.l10n.studiedUnit;
-
-String _readPagesUnit(BuildContext context) => context.l10n.readPagesUnit;
 
 String _versusLabel(BuildContext context, bool isMonth) =>
     isMonth ? context.l10n.versusLastMonth : context.l10n.versusLastWeek;

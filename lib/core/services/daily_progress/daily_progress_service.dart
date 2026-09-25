@@ -134,6 +134,32 @@ class DailyProgressService {
     return true;
   }
 
+  /// Takes out of the daily totals what an activity had added to them, keyed by
+  /// day, when that activity's data is deleted. A total never goes below zero.
+  /// Sessions are left alone: they cannot be attributed to one activity.
+  Future<void> subtract(Map<String, DailyProgressEntity> removedByDay) async {
+    bool changed = false;
+    removedByDay.forEach((key, removed) {
+      final DailyProgressEntity? current = _byDate[key];
+      if (current == null) {
+        return;
+      }
+      final DailyProgressEntity next = current.copyWith(
+        focusSeconds: math.max(0, current.focusSeconds - removed.focusSeconds),
+        pages: math.max(0, current.pages - removed.pages),
+      );
+      if (next != current) {
+        _byDate[key] = next;
+        changed = true;
+      }
+    });
+    if (!changed) {
+      return;
+    }
+    _refreshToday();
+    await _persist();
+  }
+
   List<DailyProgressEntity> progressForLastDays(int days) {
     final DateTime now = DateTime.now();
     final DateTime today = DateTime(now.year, now.month, now.day);

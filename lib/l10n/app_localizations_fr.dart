@@ -335,6 +335,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Combien de temps voulez-vous pratiquer au total ?';
 
   @override
+  String get createSubjectTotalTimeGoalTitle => 'Temps total';
+
+  @override
   String get createSubjectPagesGoalLabel => 'Objectif de la page';
 
   @override
@@ -1318,6 +1321,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scheduleTitleHint => 'Titre';
 
   @override
+  String get scheduleTitleExampleHint => 'Ex. : cours d’anglais';
+
+  @override
   String get startTimeLabel => 'Heure de début';
 
   @override
@@ -1468,6 +1474,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get progressDistributionTitle => 'Par activité';
+
+  @override
+  String progressActivityTimeShare(int value) {
+    return '$value% de votre temps sur cette période';
+  }
+
+  @override
+  String progressActivityPagesShare(int value) {
+    return '$value% des pages de cette période';
+  }
+
+  @override
+  String get progressActivityEmptyTitle => 'Aucune activité sur cette période';
+
+  @override
+  String get progressActivityEmptyDescription =>
+      'Démarrez une session ou enregistrez une lecture pour voir la répartition ici.';
 
   @override
   String homeTodayInline(String focus, int pages, int goals) {
@@ -1759,21 +1782,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get missedYesterdayCompletedButton => 'Je l?ai termin?';
-
-  @override
-  String get confirmGoalDoneTodayTitle =>
-      'Avez-vous accompli cela aujourd\'hui ?';
-
-  @override
-  String confirmGoalDoneTodayContent(String taskName) {
-    return 'Confirmez que vous avez accompli « $taskName » aujourd\'hui pour que cela compte dans le groupe.';
-  }
-
-  @override
-  String get confirmGoalDoneTodayConfirmButton => 'Oui, je l\'ai fait';
-
-  @override
-  String get confirmGoalDoneTodayCancelButton => 'Pas encore';
 
   @override
   String get missedYesterdayMultiTitle =>
@@ -2320,6 +2328,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get groupCompletedSessionsStatLabel => 'Sessions terminées';
 
   @override
+  String get groupGoalReachedStatLabel => 'Ont atteint l’objectif';
+
+  @override
   String get groupParticipantsStatLabel => 'Participant dans le groupe';
 
   @override
@@ -2351,7 +2362,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statisticsTitle => 'Statistiques';
 
   @override
-  String get studiedTimeLabel => 'Temps ?tudi?';
+  String get studiedTimeLabel => 'Temps étudié';
+
+  @override
+  String get exercisedTimeLabel => 'Temps d’exercice';
+
+  @override
+  String get practicedTimeLabel => 'Temps de pratique';
 
   @override
   String get readingTimeLabel => 'Temps de lecture';
@@ -2369,6 +2386,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sessionsLabel => 'Sessions';
 
   @override
+  String get goalStartLabel => 'Début de l’objectif';
+
+  @override
   String get restLabel => 'Pause';
 
   @override
@@ -2379,6 +2399,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get studiedUnit => 'étudiés';
+
+  @override
+  String get exercisedUnit => 'd’exercice';
+
+  @override
+  String get practicedUnit => 'de pratique';
 
   @override
   String get readPagesUnit => 'lues';
@@ -3104,7 +3130,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Faites glisser un objectif pour le modifier ou le supprimer. Certaines actions peuvent être bloquées pour les objectifs de groupe.';
+      'Faites glisser un objectif vers la gauche pour le modifier ou le supprimer, ou vers la droite pour effacer seulement votre progression. Certaines actions peuvent être bloquées pour les objectifs de groupe.';
+
+  @override
+  String get clearDataButtonLabel => 'Effacer les données';
+
+  @override
+  String get clearDataDialogTitle => 'Effacer les données ?';
+
+  @override
+  String clearActivityDataMessage(String name) {
+    return 'Toute votre progression dans « $name » sera effacée : temps, pages et historique. L’activité reste, mais repart de zéro. Cette action est irréversible.';
+  }
+
+  @override
+  String clearGoalDataMessage(String name) {
+    return 'Tous les jours que vous avez cochés dans « $name » seront effacés et l’objectif repart de zéro. Cette action est irréversible.';
+  }
+
+  @override
+  String get clearDataGroupNote =>
+      'Comme il fait partie d’un groupe, votre progression individuelle quitte aussi le classement. Vous restez dans le groupe.';
+
+  @override
+  String get clearDataSuccessMessage => 'Données effacées.';
 
   @override
   String get activitySwipeHintTitle => 'Gestes de l’activité';

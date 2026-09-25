@@ -474,6 +474,7 @@
   "createSubjectTotalTimeGoalLabelStudying": "Wie lange möchtest du insgesamt lernen?",
   "createSubjectTotalTimeGoalLabelExercises": "Wie lange möchtest du insgesamt trainieren?",
   "createSubjectTotalTimeGoalLabelHobbies": "Wie lange möchtest du insgesamt üben?",
+  "createSubjectTotalTimeGoalTitle": "Gesamtzeit",
   "createSubjectPagesGoalLabel": "Seitenziel",
   "createSubjectTimeGoalHelp": "Auf wie viele Minuten möchten Sie sich konzentrieren?",
   "createSubjectPagesGoalHelp": "Wie viele Seiten möchten Sie insgesamt anmelden?",
@@ -761,6 +762,7 @@
   "scheduleDurationHours": "{hours}h",
   "scheduleDurationHoursMinutes": "{hours}h {minutes} min",
   "scheduleTitleHint": "Titel",
+  "scheduleTitleExampleHint": "Bsp.: Englischkurs",
   "startTimeLabel": "Startzeit",
   "endTimeOptionalLabel": "Endzeit",
   "incompleteScheduleEntryError": "Unvollständiger Eintrag – geben Sie den Titel, die Startzeit und die Endzeit ein.",
@@ -820,6 +822,24 @@
   "progressStatMainReading": "Wichtigste Lektüre",
   "progressStatGoalsDone": "Erledigte Ziele",
   "progressDistributionTitle": "Nach Aktivität",
+  "progressActivityTimeShare": "{value}% deiner Zeit in diesem Zeitraum",
+  "@progressActivityTimeShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityPagesShare": "{value}% der Seiten in diesem Zeitraum",
+  "@progressActivityPagesShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityEmptyTitle": "Keine Aktivität in diesem Zeitraum",
+  "progressActivityEmptyDescription": "Starte eine Sitzung oder erfasse einen Leseeintrag, um die Verteilung hier zu sehen.",
   "homeTodayInline": "Heute: {focus} Fokus · {pages} Seiten · {goals} Ziele",
   "@homeTodayInline": {
     "placeholders": {
@@ -1005,10 +1025,6 @@
   "missedYesterdayDialogContent": "Du hast \"{taskName}\" gestern nicht erfasst. Hast du es wirklich verpasst?",
   "missedYesterdayMissedButton": "Ja, ich habe es verpasst",
   "missedYesterdayCompletedButton": "Ich habe es erledigt",
-  "confirmGoalDoneTodayTitle": "Hast du das heute erledigt?",
-  "confirmGoalDoneTodayContent": "Bestätige, dass du \"{taskName}\" heute erledigt hast, damit es für die Gruppe zählt.",
-  "confirmGoalDoneTodayConfirmButton": "Ja, erledigt",
-  "confirmGoalDoneTodayCancelButton": "Noch nicht",
   "missedYesterdayMultiTitle": "Welche hast du gestern erledigt?",
   "missedYesterdayMultiContent": "Du hast gestern einige Ziele nicht erfasst. Wähle die aus, die du wirklich erledigt hast.",
   "missedYesterdayMultiConfirmButton": "Bestätigen",
@@ -1323,6 +1339,7 @@
   "groupTodayTotalStatLabel": "Gesamtzeit heute",
   "groupPeriodTotalStatLabel": "Summe im Zeitraum",
   "groupCompletedSessionsStatLabel": "Abgeschlossene Sitzungen",
+  "groupGoalReachedStatLabel": "Ziel erreicht",
   "groupParticipantsStatLabel": "Teilnehmer in der Gruppe",
   "currentUserRankCompleteFirstGoal": "Schließe dein erstes Ziel ab, um in die Rangliste zu kommen.",
   "currentUserRankTiedLead": "Gleichstand an der Spitze.",
@@ -1340,15 +1357,20 @@
   "todayLabel": "Heute",
   "statisticsTitle": "Statistiken",
   "studiedTimeLabel": "Gelernte Zeit",
+  "exercisedTimeLabel": "Trainingszeit",
+  "practicedTimeLabel": "Übungszeit",
   "readingTimeLabel": "Lesezeit",
   "totalPagesReadLabel": "Seiten gesamt",
   "pagesReadTodayLabel": "Seiten heute",
   "goalLabel": "Ziel",
   "sessionsLabel": "Sitzungen",
+  "goalStartLabel": "Start des Ziels",
   "restLabel": "Pause",
   "comparativesTitle": "Vergleiche",
   "overviewTitle": "Übersicht",
   "studiedUnit": "gelernt",
+  "exercisedUnit": "trainiert",
+  "practicedUnit": "geübt",
   "readPagesUnit": "gelesen",
   "versusLastMonth": "vs letzten Monat",
   "versusLastWeek": "vs letzte Woche",
@@ -1603,7 +1625,13 @@
   "groupInvitationsSentEmptyDescription": "Einladungen, die du zum Beitritt einer Gruppe sendest, erscheinen hier.",
   "swipeHintDismissLabel": "Verstanden",
   "dailyGoalSwipeHintTitle": "Zielgesten",
-  "dailyGoalSwipeHintMessage": "Wische über ein Ziel, um es zu bearbeiten oder zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.",
+  "dailyGoalSwipeHintMessage": "Wische ein Ziel nach links, um es zu bearbeiten oder zu löschen, oder nach rechts, um nur deinen eigenen Fortschritt zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.",
+  "clearDataButtonLabel": "Daten löschen",
+  "clearDataDialogTitle": "Daten löschen?",
+  "clearActivityDataMessage": "Dein gesamter Fortschritt in \"{name}\" wird gelöscht: Zeit, Seiten und Verlauf. Die Aktivität bleibt, beginnt aber bei null. Das kann nicht rückgängig gemacht werden.",
+  "clearGoalDataMessage": "Alle Tage, die du in \"{name}\" abgehakt hast, werden gelöscht und das Ziel beginnt bei null. Das kann nicht rückgängig gemacht werden.",
+  "clearDataGroupNote": "Da es zu einer Gruppe gehört, verschwindet dein persönlicher Fortschritt auch aus der Rangliste. Du bleibst in der Gruppe.",
+  "clearDataSuccessMessage": "Daten gelöscht.",
   "activitySwipeHintTitle": "Aktivitätsgesten",
   "activitySwipeHintMessage": "Wische über eine Aktivität, um Notizen und Daten anzuzeigen, sie zu bearbeiten oder zu löschen. Bei Gruppenelementen können einige Aktionen gesperrt sein.",
   "groupGoalEditBlockedMessage": "Dieses Ziel gehört zu einer Gruppe. Bearbeite es in der Gruppe.",

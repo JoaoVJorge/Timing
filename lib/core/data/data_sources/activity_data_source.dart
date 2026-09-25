@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
@@ -75,10 +76,7 @@ class ActivityDataSource {
       "occurred_at": DateTime.now().toUtc().toIso8601String(),
     };
     try {
-      await _supabaseService.requireClient
-          .from("activity_entries")
-          .upsert(row, onConflict: "id")
-          .timeout(_remoteCallTimeout);
+      await _uploadRow(row);
       return const Right(null);
     } catch (error, stackTrace) {
       _logger.logError(
@@ -102,10 +100,37 @@ class ActivityDataSource {
     }
   }
 
+  /// Wipes everything logged for [subjectId], which is what "delete data" on an
+  /// activity needs so its history (and, for a group activity, the user's share
+  /// of the ranking) really goes.
+  ///
+  /// Sessions still waiting to upload are dropped at once. The delete on the
+  /// backend runs in the background: it is remembered first, with the moment it
+  /// was asked for, and retried by [flushPendingSync] until it goes through, so
+  /// a bad connection never holds the screen up. It only removes rows up to
+  /// that moment, so a session logged afterwards survives.
+  Future<Either<AppError, void>> clearSubjectEntries(String subjectId) async {
+    try {
+      await _dropQueuedEntriesFor(subjectId);
+      if (_supabaseService.currentUserId == null) {
+        return const Right(null);
+      }
+      await _enqueueClear(subjectId, DateTime.now().toUtc());
+      unawaited(flushPendingSync());
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   /// Re-attempts any focus sessions that failed to reach the backend
-  /// earlier. No-op when nothing is pending.
+  /// earlier, after the deletes waiting to reach it. No-op when nothing is
+  /// pending.
   Future<void> flushPendingSync() async {
     if (!_pendingSyncStore.contains(PendingSyncDataset.activityEntries)) {
+      return;
+    }
+    if (!await _flushPendingClears()) {
       return;
     }
     List<Map<String, dynamic>> queue = await _readQueue();
@@ -121,10 +146,9 @@ class ActivityDataSource {
       await _writeQueue(queue);
     }
     try {
-      await _supabaseService.requireClient
-          .from("activity_entries")
-          .upsert(queue, onConflict: "id")
-          .timeout(_remoteCallTimeout);
+      for (final Map<String, dynamic> row in queue) {
+        await _uploadRow(row);
+      }
       await _writeQueue(const []);
       await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
       _activityChangeBus?.notifyGroupActivityChanged();
@@ -207,10 +231,7 @@ class ActivityDataSource {
     try {
       for (final Map<String, dynamic> row in queue) {
         try {
-          await _supabaseService.requireClient
-              .from("activity_entries")
-              .upsert(row, onConflict: "id")
-              .timeout(_remoteCallTimeout);
+          await _uploadRow(row);
           uploaded++;
         } catch (error, stackTrace) {
           if (!isPermanentSyncFailure(error)) {
@@ -241,12 +262,115 @@ class ActivityDataSource {
     }
   }
 
+  Future<void> _dropQueuedEntriesFor(String subjectId) async {
+    final List<Map<String, dynamic>> queue = await _readQueue();
+    final List<Map<String, dynamic>> kept = [
+      for (final Map<String, dynamic> row in queue)
+        if (row["subject_id"] != subjectId) row,
+    ];
+    if (kept.length != queue.length) {
+      await _writeQueue(kept);
+    }
+  }
+
+  Future<Map<String, String>> _readClears() async {
+    final String? saved = await _localStorageService.read<String?>(
+      LocalStorageKeys.pendingActivityClears,
+    );
+    if (saved == null) {
+      return {};
+    }
+    try {
+      return (jsonDecode(saved) as Map<String, dynamic>).cast<String, String>();
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> _writeClears(Map<String, String> clears) => _localStorageService
+      .write(LocalStorageKeys.pendingActivityClears, jsonEncode(clears));
+
+  Future<void> _enqueueClear(String subjectId, DateTime clearedAt) async {
+    final Map<String, String> clears = await _readClears();
+    final DateTime? previous = DateTime.tryParse(clears[subjectId] ?? "");
+    if (previous == null || previous.isBefore(clearedAt)) {
+      clears[subjectId] = clearedAt.toIso8601String();
+    }
+    await _writeClears(clears);
+    await _pendingSyncStore.markPending(PendingSyncDataset.activityEntries);
+  }
+
+  /// Sends the deletes that are waiting. Returns whether none are left, so the
+  /// caller knows it can go on to the sessions queued after them; a transient
+  /// failure leaves the rest for the next attempt.
+  Future<bool> _flushPendingClears() async {
+    final Map<String, String> clears = await _readClears();
+    final String? userId = _supabaseService.currentUserId;
+    if (clears.isEmpty) {
+      return true;
+    }
+    if (userId == null) {
+      return false;
+    }
+
+    bool deletedAny = false;
+    for (final MapEntry<String, String> clear in Map.of(clears).entries) {
+      try {
+        await _supabaseService.requireClient
+            .from("activity_entries")
+            .delete()
+            .eq("user_id", userId)
+            .eq("subject_id", clear.key)
+            .lte("occurred_at", clear.value)
+            .timeout(_remoteCallTimeout);
+        clears.remove(clear.key);
+        deletedAny = true;
+      } catch (error, stackTrace) {
+        _logger.logError(
+          "Failed to delete activity_entries of ${clear.key}",
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (isPermanentSyncFailure(error)) {
+          // Retrying a delete the server refuses would block every session
+          // queued behind it.
+          clears.remove(clear.key);
+        } else {
+          await _writeClears(clears);
+          return false;
+        }
+      }
+    }
+    await _writeClears(clears);
+    if (deletedAny) {
+      _activityChangeBus?.notifyGroupActivityChanged();
+    }
+    return true;
+  }
+
   Future<void> _enqueuePending(Map<String, dynamic> row) async {
     final List<Map<String, dynamic>> queue = await _readQueue();
     queue.add(row);
     await _writeQueue(queue);
     await _pendingSyncStore.markPending(PendingSyncDataset.activityEntries);
   }
+
+  Future<void> _uploadRow(Map<String, dynamic> row) => _supabaseService
+      .requireClient
+      .rpc(
+        "record_activity_entry",
+        params: {
+          "entry_id": row["id"],
+          "entry_category": row["category"],
+          "entry_subject_id": row["subject_id"],
+          "entry_subject_name": row["subject_name"],
+          "entry_seconds": row["seconds"],
+          "entry_pages": row["pages"],
+          "entry_completed_tasks": row["completed_tasks"],
+          "entry_occurred_at": row["occurred_at"],
+        },
+      )
+      .timeout(_remoteCallTimeout);
 
   Future<List<Map<String, dynamic>>> _readQueue() async {
     final String? saved = await _localStorageService.read<String?>(

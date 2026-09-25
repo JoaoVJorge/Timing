@@ -117,6 +117,8 @@ class CategoryController extends GetxController {
 
   Future<void> onTapSubjectStats(SubjectEntity subject) async {
     await _appNavigator.toNamed(AppRoutes.subjectStats, arguments: subject);
+    // The stats screen can delete the activity's data.
+    await loadSubjects();
     await loadSubjects();
   }
 

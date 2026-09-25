@@ -39,10 +39,17 @@ class SwipeRevealActions extends StatefulWidget {
     required this.child,
     required this.actions,
     this.leadingActions = const [],
+    this.squareActionSize,
     super.key,
   });
 
   final Widget child;
+
+  /// When set, every revealed button is a square of this side, centered on
+  /// the row, instead of the default 58 wide button that stretches to the
+  /// row's height. Use it for rows of a known height so both sides of the
+  /// swipe show identical, symmetric squares.
+  final double? squareActionSize;
 
   /// Actions revealed when the row is pulled to the right.
   final List<SwipeRevealAction> leadingActions;
@@ -60,11 +67,13 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
   static const double _actionGap = 8;
   static const double _leadingGap = 8;
 
+  double get _buttonWidth => widget.squareActionSize ?? _actionWidth;
+
   double _revealWidthFor(List<SwipeRevealAction> actions) {
     if (actions.isEmpty) {
       return 0;
     }
-    return actions.length * _actionWidth +
+    return actions.length * _buttonWidth +
         (actions.length - 1) * _actionGap +
         _leadingGap;
   }
@@ -134,6 +143,7 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
                     if (index > 0) const SizedBox(width: _actionGap),
                     _RevealActionButton(
                       action: widget.actions[index],
+                      squareSize: widget.squareActionSize,
                       onTap: () => _onTapAction(widget.actions[index]),
                     ),
                   ],
@@ -156,6 +166,7 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
                     if (index > 0) const SizedBox(width: _actionGap),
                     _RevealActionButton(
                       action: widget.leadingActions[index],
+                      squareSize: widget.squareActionSize,
                       onTap: () => _onTapAction(widget.leadingActions[index]),
                     ),
                   ],
@@ -178,11 +189,16 @@ class _SwipeRevealActionsState extends State<SwipeRevealActions>
 }
 
 class _RevealActionButton extends StatelessWidget {
-  const _RevealActionButton({required this.action, required this.onTap});
+  const _RevealActionButton({
+    required this.action,
+    required this.onTap,
+    this.squareSize,
+  });
 
   static const double _width = _SwipeRevealActionsState._actionWidth;
   final SwipeRevealAction action;
   final VoidCallback onTap;
+  final double? squareSize;
 
   @override
   Widget build(BuildContext context) {
@@ -200,8 +216,11 @@ class _RevealActionButton extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: _width,
-            margin: const EdgeInsets.symmetric(vertical: 4),
+            width: squareSize ?? _width,
+            height: squareSize,
+            margin: squareSize == null
+                ? const EdgeInsets.symmetric(vertical: 4)
+                : null,
             decoration: BoxDecoration(
               color: background,
               borderRadius: BorderRadius.circular(14),

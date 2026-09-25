@@ -19,6 +19,24 @@ extension TimeCategoryTypeLocalizationX on TimeCategoryType {
     TimeCategoryType.reading => context.l10n.itemNounReading,
     TimeCategoryType.hobbies => context.l10n.itemNounHobbies,
   };
+
+  /// Caption for the time logged on an activity of this category, so a workout
+  /// or a hobby is never described as "studied".
+  String spentTimeLabel(BuildContext context) => switch (this) {
+    TimeCategoryType.studying => context.l10n.studiedTimeLabel,
+    TimeCategoryType.exercises => context.l10n.exercisedTimeLabel,
+    TimeCategoryType.reading => context.l10n.readingTimeLabel,
+    TimeCategoryType.hobbies => context.l10n.practicedTimeLabel,
+  };
+
+  /// The word that follows a period total: reading counts pages, every other
+  /// category counts time.
+  String periodTotalUnit(BuildContext context) => switch (this) {
+    TimeCategoryType.studying => context.l10n.studiedUnit,
+    TimeCategoryType.exercises => context.l10n.exercisedUnit,
+    TimeCategoryType.reading => context.l10n.readPagesUnit,
+    TimeCategoryType.hobbies => context.l10n.practicedUnit,
+  };
 }
 
 extension GroupThemeTypeLocalizationX on GroupThemeType {

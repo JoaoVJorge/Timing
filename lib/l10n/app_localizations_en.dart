@@ -330,6 +330,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'How long do you want to practice in total?';
 
   @override
+  String get createSubjectTotalTimeGoalTitle => 'Total time';
+
+  @override
   String get createSubjectPagesGoalLabel => 'Page goal';
 
   @override
@@ -1294,6 +1297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scheduleTitleHint => 'Title';
 
   @override
+  String get scheduleTitleExampleHint => 'E.g., English class';
+
+  @override
   String get startTimeLabel => 'Start time';
 
   @override
@@ -1441,6 +1447,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get progressDistributionTitle => 'By activity';
+
+  @override
+  String progressActivityTimeShare(int value) {
+    return '$value% of your time in this period';
+  }
+
+  @override
+  String progressActivityPagesShare(int value) {
+    return '$value% of the pages in this period';
+  }
+
+  @override
+  String get progressActivityEmptyTitle => 'No activity in this period';
+
+  @override
+  String get progressActivityEmptyDescription =>
+      'Start a session or log some reading to see the breakdown here.';
 
   @override
   String homeTodayInline(String focus, int pages, int goals) {
@@ -1731,20 +1754,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get missedYesterdayCompletedButton => 'I completed it';
-
-  @override
-  String get confirmGoalDoneTodayTitle => 'Did you complete it today?';
-
-  @override
-  String confirmGoalDoneTodayContent(String taskName) {
-    return 'Confirm you completed \"$taskName\" today to count it toward the group.';
-  }
-
-  @override
-  String get confirmGoalDoneTodayConfirmButton => 'Yes, I did it';
-
-  @override
-  String get confirmGoalDoneTodayCancelButton => 'Not yet';
 
   @override
   String get missedYesterdayMultiTitle =>
@@ -2290,6 +2299,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupCompletedSessionsStatLabel => 'Completed sessions';
 
   @override
+  String get groupGoalReachedStatLabel => 'Reached the goal';
+
+  @override
   String get groupParticipantsStatLabel => 'Participant in group';
 
   @override
@@ -2324,6 +2336,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studiedTimeLabel => 'Studied time';
 
   @override
+  String get exercisedTimeLabel => 'Exercise time';
+
+  @override
+  String get practicedTimeLabel => 'Practice time';
+
+  @override
   String get readingTimeLabel => 'Reading time';
 
   @override
@@ -2339,6 +2357,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionsLabel => 'Sessions';
 
   @override
+  String get goalStartLabel => 'Goal start';
+
+  @override
   String get restLabel => 'Rest';
 
   @override
@@ -2349,6 +2370,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studiedUnit => 'studied';
+
+  @override
+  String get exercisedUnit => 'exercised';
+
+  @override
+  String get practicedUnit => 'practiced';
 
   @override
   String get readPagesUnit => 'read';
@@ -3055,7 +3082,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Swipe a goal to edit or delete it. Some actions may be unavailable for group goals.';
+      'Swipe a goal left to edit or delete it, or right to delete only your own progress. Some actions may be unavailable for group goals.';
+
+  @override
+  String get clearDataButtonLabel => 'Delete data';
+
+  @override
+  String get clearDataDialogTitle => 'Delete data?';
+
+  @override
+  String clearActivityDataMessage(String name) {
+    return 'All your progress in \"$name\" will be deleted: time, pages and history. The activity stays, but starts over from zero. This cannot be undone.';
+  }
+
+  @override
+  String clearGoalDataMessage(String name) {
+    return 'Every day you marked in \"$name\" will be deleted and the goal starts over from zero. This cannot be undone.';
+  }
+
+  @override
+  String get clearDataGroupNote =>
+      'It belongs to a group, so your individual progress also leaves the group ranking. You stay in the group.';
+
+  @override
+  String get clearDataSuccessMessage => 'Data deleted.';
 
   @override
   String get activitySwipeHintTitle => 'Activity gestures';

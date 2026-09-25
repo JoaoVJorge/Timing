@@ -188,6 +188,7 @@
   "createSubjectTotalTimeGoalLabelStudying": "How long do you want to study in total?",
   "createSubjectTotalTimeGoalLabelExercises": "How long do you want to exercise in total?",
   "createSubjectTotalTimeGoalLabelHobbies": "How long do you want to practice in total?",
+  "createSubjectTotalTimeGoalTitle": "Total time",
   "createSubjectPagesGoalLabel": "Page goal",
   "createSubjectTimeGoalHelp": "How many minutes do you want to focus?",
   "createSubjectPagesGoalHelp": "How many pages do you want to log in total?",
@@ -754,6 +755,7 @@
     }
   },
   "scheduleTitleHint": "Title",
+  "scheduleTitleExampleHint": "E.g., English class",
   "startTimeLabel": "Start time",
   "endTimeOptionalLabel": "End time",
   "incompleteScheduleEntryError": "Incomplete entry — fill in the title, start time and end time.",
@@ -827,6 +829,24 @@
   "progressStatMainReading": "Main reading",
   "progressStatGoalsDone": "Goals done",
   "progressDistributionTitle": "By activity",
+  "progressActivityTimeShare": "{value}% of your time in this period",
+  "@progressActivityTimeShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityPagesShare": "{value}% of the pages in this period",
+  "@progressActivityPagesShare": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "progressActivityEmptyTitle": "No activity in this period",
+  "progressActivityEmptyDescription": "Start a session or log some reading to see the breakdown here.",
   "homeTodayInline": "Today: {focus} focus · {pages} pages · {goals} goals",
   "@homeTodayInline": {
     "placeholders": {
@@ -1033,17 +1053,6 @@
   "missedYesterdayDialogContent": "You did not register \"{taskName}\" yesterday. Did you really miss it?",
   "missedYesterdayMissedButton": "Yes, I missed it",
   "missedYesterdayCompletedButton": "I completed it",
-  "@confirmGoalDoneTodayContent": {
-    "placeholders": {
-      "taskName": {
-        "type": "String"
-      }
-    }
-  },
-  "confirmGoalDoneTodayTitle": "Did you complete it today?",
-  "confirmGoalDoneTodayContent": "Confirm you completed \"{taskName}\" today to count it toward the group.",
-  "confirmGoalDoneTodayConfirmButton": "Yes, I did it",
-  "confirmGoalDoneTodayCancelButton": "Not yet",
   "missedYesterdayMultiTitle": "Which ones did you complete yesterday?",
   "missedYesterdayMultiContent": "You did not register some goals yesterday. Check the ones you actually completed.",
   "missedYesterdayMultiConfirmButton": "Confirm",
@@ -1358,6 +1367,7 @@
   "groupTodayTotalStatLabel": "Total time today",
   "groupPeriodTotalStatLabel": "Period total",
   "groupCompletedSessionsStatLabel": "Completed sessions",
+  "groupGoalReachedStatLabel": "Reached the goal",
   "groupParticipantsStatLabel": "Participant in group",
   "currentUserRankCompleteFirstGoal": "Complete your first goal to enter the ranking.",
   "currentUserRankTiedLead": "Tied for the lead.",
@@ -1375,15 +1385,20 @@
   "todayLabel": "Today",
   "statisticsTitle": "Statistics",
   "studiedTimeLabel": "Studied time",
+  "exercisedTimeLabel": "Exercise time",
+  "practicedTimeLabel": "Practice time",
   "readingTimeLabel": "Reading time",
   "totalPagesReadLabel": "Total pages",
   "pagesReadTodayLabel": "Pages today",
   "goalLabel": "Goal",
   "sessionsLabel": "Sessions",
+  "goalStartLabel": "Goal start",
   "restLabel": "Rest",
   "comparativesTitle": "Comparisons",
   "overviewTitle": "Overview",
   "studiedUnit": "studied",
+  "exercisedUnit": "exercised",
+  "practicedUnit": "practiced",
   "readPagesUnit": "read",
   "versusLastMonth": "vs last month",
   "versusLastWeek": "vs last week",
@@ -1690,7 +1705,27 @@
   "groupInvitationsSentEmptyDescription": "Invitations you send for someone to join a group show up here.",
   "swipeHintDismissLabel": "Got it",
   "dailyGoalSwipeHintTitle": "Goal gestures",
-  "dailyGoalSwipeHintMessage": "Swipe a goal to edit or delete it. Some actions may be unavailable for group goals.",
+  "dailyGoalSwipeHintMessage": "Swipe a goal left to edit or delete it, or right to delete only your own progress. Some actions may be unavailable for group goals.",
+  "@clearActivityDataMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@clearGoalDataMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "clearDataButtonLabel": "Delete data",
+  "clearDataDialogTitle": "Delete data?",
+  "clearActivityDataMessage": "All your progress in \"{name}\" will be deleted: time, pages and history. The activity stays, but starts over from zero. This cannot be undone.",
+  "clearGoalDataMessage": "Every day you marked in \"{name}\" will be deleted and the goal starts over from zero. This cannot be undone.",
+  "clearDataGroupNote": "It belongs to a group, so your individual progress also leaves the group ranking. You stay in the group.",
+  "clearDataSuccessMessage": "Data deleted.",
   "activitySwipeHintTitle": "Activity gestures",
   "activitySwipeHintMessage": "Swipe an activity to see notes, stats, edit or delete it. Some actions may be unavailable for group items.",
   "groupGoalEditBlockedMessage": "This goal belongs to a group. Edit it from the group to make changes.",
