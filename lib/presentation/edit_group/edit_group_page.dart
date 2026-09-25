@@ -384,7 +384,6 @@ class _ColorSection extends StatelessWidget {
     () => CreationColorSection(
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
-      includePastelColors: true,
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );

@@ -13,6 +13,7 @@ import "package:timing/presentation/timer/timer_controller.dart";
 import "package:timing/presentation/timer/timer_visual_state.dart";
 import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
+import "package:timing/theme/subject_colors.dart";
 import "package:timing/theme/subject_icons.dart";
 import "package:timing/theme/timer_wallpapers.dart";
 
@@ -167,7 +168,9 @@ class _TimerScaffold extends StatelessWidget {
                               ),
                               const Gap(32),
                               if (chrome.state == TimerVisualState.resting)
-                                const _RestMessage()
+                                _RestMessage(
+                                  foregroundColor: chrome.foregroundColor,
+                                )
                               else
                                 Obx(
                                   () => _TimerStatsCard(
@@ -187,17 +190,20 @@ class _TimerScaffold extends StatelessWidget {
                                   _TimerActionButton(
                                     iconPath: "stop",
                                     label: context.l10n.timerEndActionLabel,
+                                    foregroundColor: chrome.foregroundColor,
                                     onTap: onEndTap,
                                   ),
                                   _TimerMainActionButton(
                                     icon: chrome.mainActionIcon,
                                     label: chrome.mainActionLabel,
                                     accentColor: chrome.accentColor,
+                                    foregroundColor: chrome.foregroundColor,
                                     onTap: onMainTap,
                                   ),
                                   _TimerActionButton(
                                     iconPath: "note",
                                     label: chrome.trailingLabel,
+                                    foregroundColor: chrome.foregroundColor,
                                     onTap: onTrailingTap,
                                   ),
                                 ],
@@ -236,11 +242,7 @@ class _TimerHeader extends StatelessWidget {
           child: IconButton(
             onPressed: onBackTap,
             tooltip: context.l10n.timerBackTooltip,
-            icon: AppIcon(
-              "left_back",
-              size: 22,
-              color: context.colorTokens.white,
-            ),
+            icon: AppIcon("left_back", size: 22, color: chrome.foregroundColor),
           ),
         ),
         Row(
@@ -277,7 +279,7 @@ class _TimerHeader extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: context.colorTokens.white,
+                    color: chrome.foregroundColor,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1,
@@ -287,7 +289,7 @@ class _TimerHeader extends StatelessWidget {
                 Text(
                   chrome.status,
                   style: TextStyle(
-                    color: context.colorTokens.white.withValues(alpha: 0.58),
+                    color: chrome.foregroundColor.withValues(alpha: 0.78),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     height: 1,
@@ -352,6 +354,7 @@ class _TimerProgressRing extends StatelessWidget {
                     value: tick.currentTime,
                     leadingUnit: tick.currentTimeLeadingUnit,
                     trailingUnit: tick.currentTimeTrailingUnit,
+                    foregroundColor: chrome.foregroundColor,
                     size: size,
                   ),
                 ],
@@ -369,12 +372,14 @@ class _TimerClockDisplay extends StatelessWidget {
     required this.value,
     required this.leadingUnit,
     required this.trailingUnit,
+    required this.foregroundColor,
     required this.size,
   });
 
   final String value;
   final String leadingUnit;
   final String trailingUnit;
+  final Color foregroundColor;
   final double size;
 
   @override
@@ -399,13 +404,14 @@ class _TimerClockDisplay extends StatelessWidget {
               unit: leadingUnit,
               fontSize: fontSize,
               unitFontSize: unitFontSize,
+              foregroundColor: foregroundColor,
             ),
             Text(
               ":",
               maxLines: 1,
               softWrap: false,
               style: TextStyle(
-                color: context.colorTokens.white,
+                color: foregroundColor,
                 fontSize: fontSize,
                 fontWeight: FontWeight.w300,
                 height: 0.96,
@@ -417,6 +423,7 @@ class _TimerClockDisplay extends StatelessWidget {
               unit: trailingUnit,
               fontSize: fontSize,
               unitFontSize: unitFontSize,
+              foregroundColor: foregroundColor,
             ),
           ],
         ),
@@ -431,12 +438,14 @@ class _TimerClockPart extends StatelessWidget {
     required this.unit,
     required this.fontSize,
     required this.unitFontSize,
+    required this.foregroundColor,
   });
 
   final String value;
   final String unit;
   final double fontSize;
   final double unitFontSize;
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -451,7 +460,7 @@ class _TimerClockPart extends StatelessWidget {
           softWrap: false,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: context.colorTokens.white,
+            color: foregroundColor,
             fontSize: fontSize,
             fontWeight: FontWeight.w300,
             height: 0.96,
@@ -465,7 +474,7 @@ class _TimerClockPart extends StatelessWidget {
           softWrap: false,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: context.colorTokens.white.withValues(alpha: 0.58),
+            color: foregroundColor.withValues(alpha: 0.78),
             fontSize: unitFontSize,
             fontWeight: FontWeight.w700,
             height: 1,
@@ -495,10 +504,10 @@ class _TimerStatsCard extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 480),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: context.colorTokens.white.withValues(alpha: 0.06),
+        color: chrome.foregroundColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: context.colorTokens.white.withValues(alpha: 0.12),
+          color: chrome.foregroundColor.withValues(alpha: 0.12),
         ),
       ),
       child: Row(
@@ -509,24 +518,27 @@ class _TimerStatsCard extends StatelessWidget {
               label: firstLabel,
               value: tick.nextBreak,
               accentColor: chrome.accentColor,
+              foregroundColor: chrome.foregroundColor,
             ),
           ),
-          _TimerStatDivider(),
+          _TimerStatDivider(color: chrome.foregroundColor),
           Expanded(
             child: _TimerStatItem(
               icon: Icons.repeat_rounded,
               label: context.l10n.sessionSection,
               value: tick.focusSectionLabel,
               accentColor: chrome.accentColor,
+              foregroundColor: chrome.foregroundColor,
             ),
           ),
-          _TimerStatDivider(),
+          _TimerStatDivider(color: chrome.foregroundColor),
           Expanded(
             child: _TimerStatItem(
               icon: Icons.bar_chart_rounded,
               label: context.l10n.todayLabel,
               value: tick.totalSubjectTimeLabel,
               accentColor: chrome.accentColor,
+              foregroundColor: chrome.foregroundColor,
             ),
           ),
         ],
@@ -541,12 +553,14 @@ class _TimerStatItem extends StatelessWidget {
     required this.label,
     required this.value,
     required this.accentColor,
+    required this.foregroundColor,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final Color accentColor;
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -560,7 +574,7 @@ class _TimerStatItem extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: context.colorTokens.white.withValues(alpha: 0.62),
+          color: foregroundColor.withValues(alpha: 0.78),
           fontSize: 14,
           fontWeight: FontWeight.w600,
           height: 1,
@@ -574,7 +588,7 @@ class _TimerStatItem extends StatelessWidget {
           maxLines: 1,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: context.colorTokens.white,
+            color: foregroundColor,
             fontSize: 16,
             fontWeight: FontWeight.w900,
             height: 1,
@@ -586,12 +600,16 @@ class _TimerStatItem extends StatelessWidget {
 }
 
 class _TimerStatDivider extends StatelessWidget {
+  const _TimerStatDivider({required this.color});
+
+  final Color color;
+
   @override
   Widget build(BuildContext context) => Container(
     width: 1,
     height: 58,
     margin: const EdgeInsets.symmetric(horizontal: 10),
-    color: context.colorTokens.white.withValues(alpha: 0.12),
+    color: color.withValues(alpha: 0.12),
   );
 }
 
@@ -599,11 +617,13 @@ class _TimerActionButton extends StatelessWidget {
   const _TimerActionButton({
     required this.iconPath,
     required this.label,
+    required this.foregroundColor,
     required this.onTap,
   });
 
   final String iconPath;
   final String label;
+  final Color foregroundColor;
   final VoidCallback onTap;
 
   static const double _buttonSize = 64;
@@ -627,15 +647,15 @@ class _TimerActionButton extends StatelessWidget {
                 height: _buttonSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: context.colorTokens.white.withValues(alpha: 0.08),
+                  color: foregroundColor.withValues(alpha: 0.08),
                   border: Border.all(
-                    color: context.colorTokens.white.withValues(alpha: 0.12),
+                    color: foregroundColor.withValues(alpha: 0.12),
                   ),
                 ),
                 alignment: Alignment.center,
                 child: AppIcon(
                   iconPath,
-                  color: context.colorTokens.white.withValues(alpha: 0.9),
+                  color: foregroundColor.withValues(alpha: 0.9),
                   size: _iconSize,
                 ),
               ),
@@ -647,7 +667,7 @@ class _TimerActionButton extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: context.colorTokens.white.withValues(alpha: 0.58),
+                color: foregroundColor.withValues(alpha: 0.78),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -664,12 +684,14 @@ class _TimerMainActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accentColor,
+    required this.foregroundColor,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final Color accentColor;
+  final Color foregroundColor;
   final VoidCallback onTap;
 
   @override
@@ -701,7 +723,7 @@ class _TimerMainActionButton extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: context.colorTokens.white.withValues(alpha: 0.88),
+                color: foregroundColor.withValues(alpha: 0.88),
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -714,7 +736,9 @@ class _TimerMainActionButton extends StatelessWidget {
 }
 
 class _RestMessage extends StatelessWidget {
-  const _RestMessage();
+  const _RestMessage({required this.foregroundColor});
+
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -723,7 +747,7 @@ class _RestMessage extends StatelessWidget {
         context.l10n.timerRestMessageTitle,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: context.colorTokens.white,
+          color: foregroundColor,
           fontSize: 16,
           fontWeight: FontWeight.w900,
         ),
@@ -733,7 +757,7 @@ class _RestMessage extends StatelessWidget {
         context.l10n.timerStateRestingDescription,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: context.colorTokens.white.withValues(alpha: 0.54),
+          color: foregroundColor.withValues(alpha: 0.78),
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
@@ -849,6 +873,7 @@ class _TimerChrome {
     required this.mainLabel,
     required this.isReading,
     required this.accentColor,
+    required this.foregroundColor,
     required this.headerIconColor,
     required this.subjectIcon,
     required this.subjectSvgIconName,
@@ -869,9 +894,23 @@ class _TimerChrome {
     final bool isResting = state == TimerVisualState.resting;
     final bool isReading =
         controller.subject.category == TimeCategoryType.reading;
+    final bool usesDarkForeground =
+        !isResting &&
+        TimerWallpapers.usesDarkForeground(controller.subject.wallpaperIndex);
+    final Color foregroundColor = usesDarkForeground
+        ? const Color(0xFF15171A)
+        : context.colorTokens.white;
+    final Color subjectAccent = Color(controller.subject.colorValue);
     final Color accent = isResting
         ? TimerRestPalette.accent
-        : Color(controller.subject.colorValue);
+        : usesDarkForeground
+        ? Color.lerp(subjectAccent, context.colorTokens.black, 0.7)!
+        : SubjectColors.resolveForTheme(subjectAccent, isDark: true);
+    final Color headerIconColor = Color.lerp(
+      isResting ? accent : subjectAccent,
+      context.colorTokens.black,
+      0.4,
+    )!;
     final String iconName = controller.subject.iconName.isEmpty
         ? controller.subject.category.iconName
         : controller.subject.iconName;
@@ -898,7 +937,8 @@ class _TimerChrome {
           : context.l10n.timerFocusLabel,
       isReading: isReading,
       accentColor: accent,
-      headerIconColor: accent.withValues(alpha: 0.82),
+      foregroundColor: foregroundColor,
+      headerIconColor: headerIconColor,
       subjectIcon:
           subjectIcon ??
           (isReading ? Icons.menu_book_rounded : Icons.school_rounded),
@@ -906,13 +946,15 @@ class _TimerChrome {
       backgroundGradient: isResting
           ? TimerRestPalette.backgroundGradient
           : TimerWallpapers.byIndex(controller.subject.wallpaperIndex),
-      trackColor: accent.withValues(alpha: isResting ? 0.3 : 0.24),
+      trackColor: accent.withValues(
+        alpha: isResting || usesDarkForeground ? 0.3 : 0.24,
+      ),
       ringGradientColors: isResting
           ? TimerRestPalette.ringGradientColors
           : [
               accent.withValues(alpha: 0.72),
               accent,
-              Color.lerp(accent, context.colorTokens.white, 0.2) ?? accent,
+              Color.lerp(accent, foregroundColor, 0.2) ?? accent,
             ],
       mainActionIcon: switch (state) {
         TimerVisualState.resting => Icons.play_arrow_rounded,
@@ -939,6 +981,7 @@ class _TimerChrome {
   final String mainLabel;
   final bool isReading;
   final Color accentColor;
+  final Color foregroundColor;
   final Color headerIconColor;
   final IconData subjectIcon;
   final String? subjectSvgIconName;

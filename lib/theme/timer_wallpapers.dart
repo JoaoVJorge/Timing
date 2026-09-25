@@ -4,36 +4,77 @@ class TimerWallpapers {
   const TimerWallpapers._();
 
   static const List<List<Color>> values = [
-    // Cinza claro e neutro
-    [Color(0xFF3A3B3F), Color(0xFF1C1D21)],
+    // Branco suave em três tons
+    [Color(0xFFFFFFFF), Color(0xFFF5F5F5), Color(0xFFE2E2E2)],
 
-    // Cinza levemente azulado
-    [Color(0xFF3D4148), Color(0xFF202329)],
+    // Branco predominante com queda perolada
+    [Color(0xFFFFFFFF), Color(0xFFFFFFFF), Color(0xFFD8DCE2)],
 
-    // Cinza suave
-    [Color(0xFF45464B), Color(0xFF24252A)],
+    // Prata de alto contraste em três tons
+    [Color(0xFFFAFAFA), Color(0xFFD0D0D0), Color(0xFFA0A0A0)],
 
-    // Grafite claro
-    [Color(0xFF4A4C52), Color(0xFF27292E)],
+    // Preto profundo
+    [Color(0xFF3C3C3C), Color(0xFF050505)],
 
-    // Cinza com toque frio
-    [Color(0xFF404751), Color(0xFF21262D)],
+    // Grafite metálico
+    [Color(0xFF464A4F), Color(0xFF17191C)],
 
-    // Cinza com toque roxo muito discreto
-    [Color(0xFF45424F), Color(0xFF25232B)],
+    // Azul cobalto
+    [Color(0xFF123B87), Color(0xFF071630)],
 
-    // Cinza quente
-    [Color(0xFF484541), Color(0xFF292725)],
+    // Magenta profundo
+    [Color(0xFF7B1E62), Color(0xFF2B0B25)],
 
-    // Cinza esverdeado bem sutil
-    [Color(0xFF414944), Color(0xFF222824)],
+    // Verde esmeralda
+    [Color(0xFF075039), Color(0xFF06281E)],
   ];
 
-  static LinearGradient byIndex(int index) => LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: values[index % values.length],
-  );
+  static const List<List<double>?> _stops = [
+    [0, 0.48, 1],
+    [0, 0.62, 1],
+    [0, 0.52, 1],
+    null,
+    null,
+    null,
+    null,
+    null,
+  ];
+
+  static const List<Alignment> _begins = [
+    Alignment.topLeft,
+    Alignment.topCenter,
+    Alignment.centerLeft,
+    Alignment.topRight,
+    Alignment.bottomLeft,
+    Alignment.topLeft,
+    Alignment.centerLeft,
+    Alignment.topCenter,
+  ];
+
+  static const List<Alignment> _ends = [
+    Alignment.bottomRight,
+    Alignment.bottomCenter,
+    Alignment.centerRight,
+    Alignment.bottomLeft,
+    Alignment.topRight,
+    Alignment.bottomRight,
+    Alignment.centerRight,
+    Alignment.bottomCenter,
+  ];
+
+  static bool usesDarkForeground(int index) => _normalizedIndex(index) < 3;
+
+  static LinearGradient byIndex(int index) {
+    final int normalizedIndex = _normalizedIndex(index);
+    return LinearGradient(
+      begin: _begins[normalizedIndex],
+      end: _ends[normalizedIndex],
+      colors: values[normalizedIndex],
+      stops: _stops[normalizedIndex],
+    );
+  }
+
+  static int _normalizedIndex(int index) => index % values.length;
 }
 
 class TimerRestPalette {

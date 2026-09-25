@@ -152,7 +152,7 @@ class CreationSectionHeader extends StatelessWidget {
           textStyle: context.textStyles.bodySmall.copyWith(
             color: context.colorTokens.dialogText,
             fontSize: 13,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w400,
             height: 1.25,
           ),
           child: Container(
@@ -379,61 +379,62 @@ class CreationColorChoice extends StatelessWidget {
   );
 }
 
-/// Full "pick a color" card: a header plus the row of [SubjectColors].
+/// The swatches of every color picker (activity, goal, schedule and group
+/// forms). They all render this widget, so the same colors always appear in the
+/// same order and layout, whichever screen the user picks from.
+class CreationColorPalette extends StatelessWidget {
+  const CreationColorPalette({
+    required this.selectedColor,
+    required this.onSelect,
+    super.key,
+  });
+
+  final Color selectedColor;
+  final ValueChanged<Color> onSelect;
+
+  static const List<Color> colors = [
+    ...SubjectColors.values,
+    ...SubjectColors.darkValues,
+  ];
+
+  @override
+  Widget build(BuildContext context) => CenteredBalancedRows(
+    spacing: 10,
+    runSpacing: 10,
+    children: [
+      for (final Color color in colors)
+        CreationColorChoice(
+          color: color,
+          isSelected: color.toARGB32() == selectedColor.toARGB32(),
+          onTap: () => onSelect(color),
+        ),
+    ],
+  );
+}
+
+/// Full "pick a color" card: a header plus the [CreationColorPalette].
 class CreationColorSection extends StatelessWidget {
   const CreationColorSection({
     required this.accent,
     required this.label,
     required this.onSelect,
-    this.extraColors = const [],
-    this.includePastelColors = false,
     super.key,
   });
 
   final Color accent;
   final String label;
   final ValueChanged<Color> onSelect;
-  final List<Color> extraColors;
-  final bool includePastelColors;
 
   @override
-  Widget build(BuildContext context) {
-    final List<Color> colors = _dedupedColors([
-      ...extraColors.map(SubjectColors.normalize),
-      ...SubjectColors.values,
-      if (includePastelColors) ...SubjectColors.darkValues,
-    ]);
-
-    return CreationConfigCard(
+  Widget build(BuildContext context) => CreationConfigCard(
+    accent: accent,
+    header: CreationSectionHeader(
+      icon: Icons.palette_outlined,
+      label: label,
       accent: accent,
-      header: CreationSectionHeader(
-        icon: Icons.palette_outlined,
-        label: label,
-        accent: accent,
-      ),
-      child: CenteredBalancedRows(
-        spacing: 10,
-        runSpacing: 10,
-        children: colors
-            .map(
-              (color) => CreationColorChoice(
-                color: color,
-                isSelected: color.toARGB32() == accent.toARGB32(),
-                onTap: () => onSelect(color),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  List<Color> _dedupedColors(List<Color> colors) {
-    final Set<int> seen = <int>{};
-    return [
-      for (final Color color in colors)
-        if (seen.add(color.toARGB32())) color,
-    ];
-  }
+    ),
+    child: CreationColorPalette(selectedColor: accent, onSelect: onSelect),
+  );
 }
 
 /// Gradient pill submit button pinned to the bottom of a creation form.

@@ -256,10 +256,12 @@ class _GoalSection extends StatelessWidget {
         label: controller.isPageBased
             ? context.l10n.createSubjectPagesGoalLabel
             : isPermanent
-            ? _totalTimeGoalLabel(context)
+            ? context.l10n.createSubjectTotalTimeGoalTitle
             : context.l10n.createSubjectTimeGoalLabel,
-        description: controller.isPageBased || isPermanent
+        description: controller.isPageBased
             ? null
+            : isPermanent
+            ? _totalTimeGoalDescription(context)
             : context.l10n.subjectSectionDurationDescription,
         accent: accent,
       ),
@@ -290,7 +292,7 @@ class _GoalSection extends StatelessWidget {
     );
   });
 
-  String _totalTimeGoalLabel(BuildContext context) =>
+  String _totalTimeGoalDescription(BuildContext context) =>
       switch (controller.category) {
         TimeCategoryType.exercises =>
           context.l10n.createSubjectTotalTimeGoalLabelExercises,
@@ -536,8 +538,6 @@ class _ColorSection extends StatelessWidget {
     () => CreationColorSection(
       accent: controller.selectedColor.value,
       label: context.l10n.colorLabel,
-      extraColors: [context.colorTokens.primary],
-      includePastelColors: true,
       onSelect: (color) => controller.selectedColor.value = color,
     ),
   );
@@ -665,11 +665,13 @@ class _WallpaperSelector extends StatelessWidget {
                     ),
                   ),
                   child: isSelected
-                      ? const Center(
+                      ? Center(
                           child: AppIcon(
                             "check",
                             size: 18,
-                            color: Colors.white,
+                            color: TimerWallpapers.usesDarkForeground(index)
+                                ? Colors.black
+                                : Colors.white,
                           ),
                         )
                       : null,
