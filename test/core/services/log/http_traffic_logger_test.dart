@@ -28,7 +28,6 @@ void main() {
         startsWith("┌ ✓ GET    select  group_members?select=group_id"),
       );
       expect(block, contains("200 · 96 ms"));
-      expect(block, contains("│ ← 3 rows · "));
       expect(block, endsWith("\n└"));
     });
 
@@ -55,7 +54,7 @@ void main() {
       );
     });
 
-    test("shows the request body of a write", () {
+    test("never shows REST request or response bodies", () {
       final block = formatHttpExchange(
         method: "POST",
         uri: _rest("activity_entries"),
@@ -64,8 +63,9 @@ void main() {
         requestBody: jsonEncode({"seconds": 60, "pages": 0}),
       );
 
-      expect(block, contains('│ → {"seconds":60,"pages":0}'));
-      expect(block, contains("│ ← (empty)"));
+      expect(block, isNot(contains("seconds")));
+      expect(block, isNot(contains("│ →")));
+      expect(block, isNot(contains("│ ←")));
     });
 
     test("marks failures and prints the server's error", () {
@@ -78,7 +78,7 @@ void main() {
       );
 
       expect(block, startsWith("┌ ✗ POST"));
-      expect(block, contains("23505"));
+      expect(block, isNot(contains("23505")));
     });
 
     test("reports a request that never got a response", () {
@@ -90,10 +90,10 @@ void main() {
       );
 
       expect(block, contains("no response"));
-      expect(block, contains("│ ✗ TimeoutException"));
+      expect(block, contains("│ ✗ String"));
     });
 
-    test("shortens photo blobs and hides secrets", () {
+    test("does not log profile blobs or secrets", () {
       final block = formatHttpExchange(
         method: "POST",
         uri: _rest("profiles"),
@@ -105,8 +105,7 @@ void main() {
         }),
       );
 
-      expect(block, contains("(5000 chars)"));
-      expect(block, contains("‹hidden›"));
+      expect(block, isNot(contains("5000")));
       expect(block, isNot(contains("super-secret")));
       expect(block.length, lessThan(500));
     });
@@ -148,8 +147,8 @@ void main() {
       expect(response.body, '[{"a":1}]');
       expect(logged, hasLength(1));
       expect(logged.single, contains("POST   upsert  activity_entries"));
-      expect(logged.single, contains('│ → {"seconds":5}'));
-      expect(logged.single, contains("│ ← 1 row"));
+      expect(logged.single, isNot(contains("seconds")));
+      expect(logged.single, isNot(contains("│ ←")));
     });
 
     test("logs a failed request and rethrows", () async {

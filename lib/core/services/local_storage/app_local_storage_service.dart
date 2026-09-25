@@ -1,3 +1,6 @@
+import "dart:convert";
+
+import "package:cryptography/cryptography.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -13,11 +16,20 @@ class AppLocalStorageService {
   final SharedPreferences localStorage;
   final FlutterSecureStorage secureStorage;
   final SupabaseService supabaseService;
+  static const String _encryptedPrefix = "enc.v1:";
+  static const String _encryptionKeyName = "timing.local-data-key.v1";
+  final Cipher _cipher = AesGcm.with256bits();
+  SecretKey? _cachedEncryptionKey;
 
   Future<void> write<T>(LocalStorageKeys key, T value) async {
     final String storageKey = _storageKey(key);
     if (key.hasSensitiveData) {
       await secureStorage.write(key: storageKey, value: value.toString());
+      return;
+    }
+
+    if (key.encryptAtRest) {
+      await _writeLocalValue(storageKey, await _encrypt(value.toString()));
       return;
     }
 
@@ -44,6 +56,16 @@ class AppLocalStorageService {
     }
 
     final Object? value = localStorage.get(storageKey);
+    if (key.encryptAtRest && value is String) {
+      if (value.startsWith(_encryptedPrefix)) {
+        return await _decrypt(value) as T?;
+      }
+
+      // Transparently migrates caches created by older builds. The plaintext
+      // is replaced only after it has been read successfully.
+      await _writeLocalValue(storageKey, await _encrypt(value));
+      return value as T?;
+    }
     if (value != null ||
         !key.isUserScoped ||
         !supabaseService.hasSignedInUser) {
@@ -55,7 +77,10 @@ class AppLocalStorageService {
       return null;
     }
 
-    await _writeLocalValue(storageKey, legacyValue);
+    await _writeLocalValue(
+      storageKey,
+      key.encryptAtRest ? await _encrypt(legacyValue.toString()) : legacyValue,
+    );
     await localStorage.remove(key.name);
     return _castValue<T>(legacyValue);
   }
@@ -78,6 +103,14 @@ class AppLocalStorageService {
     }
 
     await localStorage.remove(storageKey);
+  }
+
+  Future<void> deleteCurrentUserData() async {
+    await Future.wait(
+      LocalStorageKeys.values
+          .where((key) => key.isUserScoped)
+          .map((key) => delete(key)),
+    );
   }
 
   String _storageKey(LocalStorageKeys key) {
@@ -104,5 +137,52 @@ class AppLocalStorageService {
       default:
         await localStorage.setString(storageKey, value.toString());
     }
+  }
+
+  Future<String> _encrypt(String clearText) async {
+    final SecretBox box = await _cipher.encrypt(
+      utf8.encode(clearText),
+      secretKey: await _encryptionKey(),
+    );
+    final Map<String, String> envelope = {
+      "nonce": base64Encode(box.nonce),
+      "cipherText": base64Encode(box.cipherText),
+      "mac": base64Encode(box.mac.bytes),
+    };
+    return "$_encryptedPrefix${base64Encode(utf8.encode(jsonEncode(envelope)))}";
+  }
+
+  Future<String> _decrypt(String encoded) async {
+    final String payload = encoded.substring(_encryptedPrefix.length);
+    final Map<String, dynamic> envelope =
+        jsonDecode(utf8.decode(base64Decode(payload))) as Map<String, dynamic>;
+    final SecretBox box = SecretBox(
+      base64Decode(envelope["cipherText"] as String),
+      nonce: base64Decode(envelope["nonce"] as String),
+      mac: Mac(base64Decode(envelope["mac"] as String)),
+    );
+    final List<int> clearBytes = await _cipher.decrypt(
+      box,
+      secretKey: await _encryptionKey(),
+    );
+    return utf8.decode(clearBytes);
+  }
+
+  Future<SecretKey> _encryptionKey() async {
+    final SecretKey? cached = _cachedEncryptionKey;
+    if (cached != null) return cached;
+
+    final String? stored = await secureStorage.read(key: _encryptionKeyName);
+    if (stored != null) {
+      return _cachedEncryptionKey = SecretKey(base64Decode(stored));
+    }
+
+    final SecretKey generated = await _cipher.newSecretKey();
+    final List<int> bytes = await generated.extractBytes();
+    await secureStorage.write(
+      key: _encryptionKeyName,
+      value: base64Encode(bytes),
+    );
+    return _cachedEncryptionKey = SecretKey(bytes);
   }
 }

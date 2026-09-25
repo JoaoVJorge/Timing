@@ -617,6 +617,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     await _writePresence(
       isOnline: false,
     ).timeout(_presenceLogoutWait, onTimeout: () {});
+    await localStorageService.deleteCurrentUserData();
     await _signOutUseCase();
     userName.value = "";
     nickName.value = "";

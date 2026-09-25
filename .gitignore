@@ -36,6 +36,10 @@ migrate_working_dir/
 /test/**
 !/test/app/
 !/test/app/app_controller_timer_restore_test.dart
+!/test/core/
+!/test/core/services/
+!/test/core/services/local_storage/
+!/test/core/services/local_storage/app_local_storage_service_test.dart
 
 # Local AI assistant settings
 .claude/settings.local.json
@@ -54,9 +58,7 @@ android/*.keystore
 /docs/play-store/*.png
 /docs/timing_feature_graphic_1024x500.png
 
-# Supabase configuration stays local; keep a single canonical setup file.
-backend/supabase-setup.sql
-backend/migrations/
+# The canonical Supabase schema is the ordered sections in backend/schema/.
 
 # Symbolication related
 app.*.symbols

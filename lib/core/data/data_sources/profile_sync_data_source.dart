@@ -32,9 +32,6 @@ class ProfileSyncDataSource {
             "id": userId,
             "user_name": config.userName,
             "nick_name": config.nickName,
-            "email": config.email ?? user?.email,
-            "phone_number": config.phoneNumber ?? user?.phone,
-            "birth_date": config.birthDate,
             "profile_photo_base64": config.profilePhotoBase64,
             "accent_color_value": config.accentColorValue,
             "avatar_icon_index": config.avatarIconIndex,
@@ -44,8 +41,16 @@ class ProfileSyncDataSource {
             "focus_lock_exercises_enabled": config.focusLockExercisesEnabled,
             "focus_lock_reading_enabled": config.focusLockReadingEnabled,
             "focus_lock_hobbies_enabled": config.focusLockHobbiesEnabled,
-            "updated_at": DateTime.now().toUtc().toIso8601String(),
           }, onConflict: "id")
+          .timeout(_remoteCallTimeout);
+      await _supabaseService.requireClient
+          .from("profile_private_data")
+          .upsert({
+            "user_id": userId,
+            "email": config.email ?? user?.email,
+            "phone_number": config.phoneNumber ?? user?.phone,
+            "birth_date": config.birthDate,
+          }, onConflict: "user_id")
           .timeout(_remoteCallTimeout);
       return const Right(null);
     } catch (error, stackTrace) {
@@ -62,7 +67,13 @@ class ProfileSyncDataSource {
 
       final Map<String, dynamic>? data = await _supabaseService.requireClient
           .from("profiles")
-          .select()
+          .select(
+            "id, friend_code, is_dark_mode, user_name, nick_name, "
+            "profile_photo_base64, accent_color_value, avatar_icon_index, "
+            "notifications_enabled, language_code, "
+            "focus_lock_studying_enabled, focus_lock_exercises_enabled, "
+            "focus_lock_reading_enabled, focus_lock_hobbies_enabled",
+          )
           .eq("id", userId)
           .maybeSingle()
           .timeout(_remoteCallTimeout);
@@ -72,7 +83,15 @@ class ProfileSyncDataSource {
         return const Right(null);
       }
 
-      return Right(_profileFromRow(data));
+      final Map<String, dynamic>? privateData = await _supabaseService
+          .requireClient
+          .from("profile_private_data")
+          .select("email, phone_number, birth_date")
+          .eq("user_id", userId)
+          .maybeSingle()
+          .timeout(_remoteCallTimeout);
+
+      return Right(_profileFromRow({...data, ...?privateData}));
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }

@@ -7,7 +7,8 @@ import "package:supabase_flutter/supabase_flutter.dart";
 class SupabaseService {
   SupabaseService._({required this.isConfigured, this.client});
 
-  static const String oauthRedirectUrl = "timing://login-callback";
+  static const String oauthRedirectUrl =
+      "com.moonstone.timing://login-callback";
 
   final bool isConfigured;
   final SupabaseClient? client;
