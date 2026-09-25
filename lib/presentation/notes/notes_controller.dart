@@ -64,7 +64,7 @@ class NotesController extends GetxController {
       focusNodes[currentPageIndex.value].unfocus();
     }
     currentPageIndex.value = index;
-    _applyFormattingState(activeNotesController);
+    _applyFormattingState(activeNotesController, requestKeyboard: false);
   }
 
   bool isFormattingActive(Attribute<dynamic> attribute) =>
@@ -186,18 +186,36 @@ class NotesController extends GetxController {
     return controller;
   }
 
-  void _applyFormattingState(QuillController controller) {
-    controller.forceToggledStyle(
-      Style.attr({
-        for (final Attribute<dynamic> attribute in _formattingAttributes)
-          attribute.key: isFormattingActive(attribute)
-              ? attribute
-              : Attribute.clone(attribute, null),
-        Attribute.background.key: _activeHighlightColor == null
-            ? Attribute.background
-            : BackgroundAttribute(_toHex(_activeHighlightColor!)),
-      }),
-    );
+  /// Carries the toolbar's formatting state over to [controller].
+  ///
+  /// The editor answers every controller notification that is not flagged with
+  /// `ignoreFocusOnTextChange` by requesting focus, and with it the keyboard,
+  /// whenever the keyboard is hidden. Passing `requestKeyboard: false` flags
+  /// this notification so restyling a page the user has only navigated to does
+  /// not bring the keyboard up.
+  void _applyFormattingState(
+    QuillController controller, {
+    bool requestKeyboard = true,
+  }) {
+    final bool previousIgnoreFocus = controller.ignoreFocusOnTextChange;
+    if (!requestKeyboard) {
+      controller.ignoreFocusOnTextChange = true;
+    }
+    try {
+      controller.forceToggledStyle(
+        Style.attr({
+          for (final Attribute<dynamic> attribute in _formattingAttributes)
+            attribute.key: isFormattingActive(attribute)
+                ? attribute
+                : Attribute.clone(attribute, null),
+          Attribute.background.key: _activeHighlightColor == null
+              ? Attribute.background
+              : BackgroundAttribute(_toHex(_activeHighlightColor!)),
+        }),
+      );
+    } finally {
+      controller.ignoreFocusOnTextChange = previousIgnoreFocus;
+    }
   }
 
   static String _toHex(Color color) =>

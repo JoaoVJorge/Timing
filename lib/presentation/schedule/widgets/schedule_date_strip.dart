@@ -12,6 +12,7 @@ class ScheduleDateStrip extends StatefulWidget {
     required this.onSelectDate,
     required this.hasEntryForDate,
     required this.eventColorsForDate,
+    this.visibleMonth,
     this.onMonthChanged,
     super.key,
   });
@@ -20,6 +21,11 @@ class ScheduleDateStrip extends StatefulWidget {
   final ValueChanged<DateTime> onSelectDate;
   final bool Function(DateTime date) hasEntryForDate;
   final List<Color> Function(DateTime date) eventColorsForDate;
+
+  /// The month to show. Defaults to the month of [selectedDate]; pass it when
+  /// paging months must not move the selection, so only the selected date
+  /// itself is marked and no day is marked in the other months.
+  final DateTime? visibleMonth;
   final ValueChanged<int>? onMonthChanged;
 
   @override
@@ -45,10 +51,12 @@ class _ScheduleDateStripState extends State<ScheduleDateStrip> {
 
   static int _ordinal(DateTime date) => date.year * 12 + (date.month - 1);
 
+  DateTime get _shownMonth => widget.visibleMonth ?? widget.selectedDate;
+
   @override
   void initState() {
     super.initState();
-    _anchorOrdinal = _ordinal(widget.selectedDate);
+    _anchorOrdinal = _ordinal(_shownMonth);
     _currentPage = _basePage;
     _pageController = PageController(initialPage: _basePage);
   }
@@ -56,8 +64,7 @@ class _ScheduleDateStripState extends State<ScheduleDateStrip> {
   @override
   void didUpdateWidget(ScheduleDateStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final int targetPage =
-        _basePage + (_ordinal(widget.selectedDate) - _anchorOrdinal);
+    final int targetPage = _basePage + (_ordinal(_shownMonth) - _anchorOrdinal);
     if (targetPage == _currentPage) {
       return;
     }
@@ -109,6 +116,7 @@ class _ScheduleDateStripState extends State<ScheduleDateStrip> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Gap(10),
         Row(
           children: [
             for (
@@ -328,11 +336,15 @@ class _EventDots extends StatelessWidget {
                     math.sin(angles[index]) * radius -
                     dotSize / 2,
                 child: Container(
-                  width: 5,
-                  height: 5,
+                  width: 7,
+                  height: 7,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: visibleColors[index].withValues(alpha: 0.9),
+                    border: Border.all(
+                      width: 1,
+                      color: context.colorTokens.scaffold,
+                    ),
                   ),
                 ),
               ),

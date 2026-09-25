@@ -46,10 +46,129 @@ class _FakeAppNavigator implements AppNavigator {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+SubjectEntity _notesSubject(String notes) => SubjectEntity(
+  id: "subject-1",
+  name: "Study",
+  category: TimeCategoryType.studying,
+  colorValue: 1,
+  totalSeconds: 0,
+  goalSeconds: 0,
+  currentPages: 0,
+  goalPages: 0,
+  notes: notes,
+  iconName: "",
+  restMinutes: 5,
+  focusSessionCount: 1,
+  wallpaperIndex: 0,
+);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   tearDown(Get.reset);
+
+  // flutter_quill's editor answers every controller notification that is not
+  // flagged with `ignoreFocusOnTextChange` by requesting the keyboard whenever
+  // it is hidden (and it treats `flutter test` as a keyboard OS, so the real
+  // keyboard cannot be observed here). Recording that flag is therefore the
+  // way to assert that a page change does not bring the keyboard up.
+  test("changing page does not ask the new page's editor for the keyboard", () {
+    final NotesController controller = NotesController(
+      updateSubjectNotesUseCase: _FakeUpdateSubjectNotesUseCase(),
+      appNavigator: _FakeAppNavigator(),
+      subject: _notesSubject(
+        NotesPagesCodec.encode(["First page", "Second page"]),
+      ),
+    );
+    Get.put<NotesController>(controller);
+
+    final QuillController secondPage = controller.notesControllers[1];
+    final List<bool> requestedKeyboard = [];
+    secondPage.addListener(
+      () => requestedKeyboard.add(!secondPage.ignoreFocusOnTextChange),
+    );
+
+    controller.onPageChanged(1);
+
+    expect(requestedKeyboard, isNotEmpty);
+    expect(requestedKeyboard, everyElement(isFalse));
+    // The flag must not stay on, or typing on that page would stop scrolling
+    // the caret into view.
+    expect(secondPage.ignoreFocusOnTextChange, isFalse);
+  });
+
+  testWidgets("moving between pages never asks an editor for the keyboard", (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(430, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final NotesController controller = NotesController(
+      updateSubjectNotesUseCase: _FakeUpdateSubjectNotesUseCase(),
+      appNavigator: _FakeAppNavigator(),
+      subject: _notesSubject(NotesPagesCodec.encode(["First page", "Second"])),
+    );
+    Get.put<NotesController>(controller);
+
+    final List<bool> requestedKeyboard = [];
+    final Set<QuillController> observed = {};
+    void observeAll() {
+      for (final QuillController page in controller.notesControllers) {
+        if (observed.add(page)) {
+          page.addListener(
+            () => requestedKeyboard.add(!page.ignoreFocusOnTextChange),
+          );
+        }
+      }
+    }
+
+    observeAll();
+    ever(controller.notesControllers, (_) => observeAll());
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("pt"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          FlutterQuillLocalizations.delegate,
+        ],
+        home: const NotesPage(),
+      ),
+    );
+    await tester.pump();
+
+    final Finder nextButton = find.widgetWithIcon(
+      IconButton,
+      Icons.chevron_right_rounded,
+    );
+    final Finder previousButton = find.widgetWithIcon(
+      IconButton,
+      Icons.chevron_left_rounded,
+    );
+
+    // Existing page, then a brand new one past the end, then back again.
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+    expect(find.text("2 / 2"), findsOneWidget);
+
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+    expect(find.text("3 / 3"), findsOneWidget);
+
+    await tester.tap(previousButton);
+    await tester.pumpAndSettle();
+
+    expect(requestedKeyboard, isNotEmpty);
+    expect(requestedKeyboard, everyElement(isFalse));
+    for (final FocusNode node in controller.focusNodes) {
+      expect(node.hasFocus, isFalse);
+    }
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets("formats selected note text with toolbar actions", (
     tester,

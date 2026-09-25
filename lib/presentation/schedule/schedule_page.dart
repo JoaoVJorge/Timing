@@ -23,11 +23,11 @@ class SchedulePage extends StatelessWidget {
 
     return AppScaffold(
       topBar: Obx(() {
-        final DateTime selectedDate = controller.selectedDate.value;
+        final DateTime visibleMonth = controller.visibleMonth.value;
         return AppTopBar(
           title: formatStackedMonthYearTitle(
             Localizations.localeOf(context).toString(),
-            selectedDate,
+            visibleMonth,
           ),
           showBackButton: true,
           onTitleTap: () => _showMonthYearPicker(context, controller),
@@ -47,6 +47,7 @@ class SchedulePage extends StatelessWidget {
                 controller.entries.length;
                 return ScheduleDateStrip(
                   selectedDate: controller.selectedDate.value,
+                  visibleMonth: controller.visibleMonth.value,
                   onSelectDate: controller.onSelectDate,
                   onMonthChanged: controller.onChangeMonth,
                   hasEntryForDate: controller.hasEntriesForDate,
@@ -82,12 +83,12 @@ class SchedulePage extends StatelessWidget {
     BuildContext context,
     ScheduleController controller,
   ) async {
-    final DateTime selectedDate = controller.selectedDate.value;
+    final DateTime visibleMonth = controller.visibleMonth.value;
     final ({int year, int month})? result =
         await showDialog<({int year, int month})>(
           context: context,
           builder: (context) =>
-              _MonthYearPickerDialog(initialDate: selectedDate),
+              _MonthYearPickerDialog(initialDate: visibleMonth),
         );
     if (result == null) {
       return;

@@ -40,6 +40,19 @@ class ScheduleEntryEntity extends Equatable {
   final DateTime activeFrom;
   final DateTime? activeUntil;
 
+  /// Whether two rows are occurrences created from the same schedule form.
+  ///
+  /// Schedule entries are stored one row per weekday. Older persisted data has
+  /// no explicit series id, so all values except [id] and [weekday] make up the
+  /// series identity.
+  bool belongsToSameSeriesAs(ScheduleEntryEntity other) =>
+      title == other.title &&
+      startMinutes == other.startMinutes &&
+      endMinutes == other.endMinutes &&
+      colorValue == other.colorValue &&
+      _isSameDate(activeFrom, other.activeFrom) &&
+      _isSameNullableDate(activeUntil, other.activeUntil);
+
   Map<String, dynamic> toMap() => {
     "id": id,
     "title": title,
@@ -94,4 +107,16 @@ class ScheduleEntryEntity extends Equatable {
 
   static DateTime _dateOnly(DateTime value) =>
       DateTime(value.year, value.month, value.day);
+
+  static bool _isSameDate(DateTime left, DateTime right) =>
+      left.year == right.year &&
+      left.month == right.month &&
+      left.day == right.day;
+
+  static bool _isSameNullableDate(DateTime? left, DateTime? right) {
+    if (left == null || right == null) {
+      return left == right;
+    }
+    return _isSameDate(left, right);
+  }
 }

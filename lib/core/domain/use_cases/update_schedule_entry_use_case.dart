@@ -9,10 +9,9 @@ class UpdateScheduleEntryUseCase {
 
   final ScheduleRepository _scheduleRepository;
 
-  /// Replaces the entry identified by [entryId] with the edited values. The
-  /// first weekday keeps the original id (so a plain edit stays the same row),
-  /// while any extra weekdays are materialized as new entries — matching how
-  /// the add flow spreads a single form across several days.
+  /// Replaces every weekday occurrence belonging to the same schedule series
+  /// as [entryId]. Existing ids are retained whenever their weekday remains;
+  /// newly selected weekdays are materialized as new entries.
   Future<Either<AppError, List<ScheduleEntryEntity>>> call({
     required String entryId,
     required String title,
@@ -36,6 +35,18 @@ class UpdateScheduleEntryUseCase {
         await _scheduleRepository.getEntries();
 
     return getResult.fold((error) async => Left(error), (entries) async {
+      final ScheduleEntryEntity? original = entries
+          .where((entry) => entry.id == entryId)
+          .firstOrNull;
+      if (original == null) {
+        return Left(
+          GenericAppError(
+            error: "Schedule entry $entryId was not found",
+            stackTrace: StackTrace.current,
+          ),
+        );
+      }
+
       final DateTime normalizedFrom = DateTime(
         activeFrom.year,
         activeFrom.month,
@@ -56,16 +67,41 @@ class UpdateScheduleEntryUseCase {
         activeUntil: normalizedUntil,
       );
 
+      final List<ScheduleEntryEntity> seriesEntries = entries
+          .where(original.belongsToSameSeriesAs)
+          .toList();
+      final Map<int, String> idsByWeekday = {
+        for (final ScheduleEntryEntity entry in seriesEntries)
+          entry.weekday: entry.id,
+      };
+      final List<int> normalizedWeekdays = weekdays.toSet().toList()..sort();
+      bool reusedOriginalId = false;
+      String idFor(int weekday) {
+        final String? existingId = idsByWeekday[weekday];
+        if (existingId != null) {
+          if (existingId == entryId) {
+            reusedOriginalId = true;
+          }
+          return existingId;
+        }
+        if (!reusedOriginalId &&
+            !normalizedWeekdays.any((item) => idsByWeekday[item] == entryId)) {
+          reusedOriginalId = true;
+          return entryId;
+        }
+        return generateEntityId();
+      }
+
       final List<ScheduleEntryEntity> replacements = [
-        build(entryId, weekdays.first),
-        for (final int weekday in weekdays.skip(1))
-          build(generateEntityId(), weekday),
+        for (final int weekday in normalizedWeekdays)
+          build(idFor(weekday), weekday),
       ];
 
       final List<ScheduleEntryEntity> updatedEntries = [
         for (final ScheduleEntryEntity entry in entries)
-          if (entry.id == entryId) replacements.first else entry,
-        ...replacements.skip(1),
+          if (!seriesEntries.any((seriesEntry) => seriesEntry.id == entry.id))
+            entry,
+        ...replacements,
       ];
 
       final Either<AppError, void> saveResult = await _scheduleRepository

@@ -1,30 +1,5 @@
 part of "add_schedule_entry_page.dart";
 
-class _ScheduleColorSelector extends StatelessWidget {
-  const _ScheduleColorSelector({
-    required this.selectedColor,
-    required this.onSelected,
-  });
-
-  final Color selectedColor;
-  final ValueChanged<Color> onSelected;
-
-  @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: 10,
-    runSpacing: 10,
-    children: [...SubjectColors.values, ...SubjectColors.darkValues]
-        .map(
-          (color) => CreationColorChoice(
-            color: color,
-            isSelected: color.toARGB32() == selectedColor.toARGB32(),
-            onTap: () => onSelected(color),
-          ),
-        )
-        .toList(),
-  );
-}
-
 class _FormSection extends StatelessWidget {
   const _FormSection({
     required this.title,

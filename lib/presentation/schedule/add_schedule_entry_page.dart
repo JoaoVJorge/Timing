@@ -34,6 +34,16 @@ typedef AddScheduleEntryResult = ({
   DateTime? activeUntil,
 });
 
+class ScheduleEntryEditArguments {
+  const ScheduleEntryEditArguments({
+    required this.entry,
+    required this.weekdays,
+  });
+
+  final ScheduleEntryEntity entry;
+  final List<int> weekdays;
+}
+
 class AddScheduleEntryPage extends StatefulWidget {
   const AddScheduleEntryPage({super.key});
 
@@ -48,8 +58,10 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   final FocusNode _startTimeFocusNode = FocusNode();
   final FocusNode _endTimeFocusNode = FocusNode();
 
-  final ScheduleEntryEntity? _editingEntry =
-      RouteArguments.maybeOf<ScheduleEntryEntity>();
+  final ScheduleEntryEditArguments? _editingArguments =
+      RouteArguments.maybeOf<ScheduleEntryEditArguments>();
+  late final ScheduleEntryEntity? _editingEntry =
+      _editingArguments?.entry ?? RouteArguments.maybeOf<ScheduleEntryEntity>();
 
   late DateTime _activeFrom = _initialDate();
   DateTime? _activeUntil;
@@ -105,7 +117,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     }
     _selectedWeekdays
       ..clear()
-      ..add(entry.weekday);
+      ..addAll(_editingArguments?.weekdays ?? [entry.weekday]);
     _activeFrom = DateTime(
       entry.activeFrom.year,
       entry.activeFrom.month,
@@ -252,7 +264,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
                   textInputAction: TextInputAction.next,
                   decoration: AppInputDecoration.withBorder(
                     tokens: context.colorTokens,
-                    hintText: context.l10n.scheduleTitleHint,
+                    hintText: context.l10n.scheduleTitleExampleHint,
                   ),
                 ),
               ],
@@ -331,9 +343,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
           _FormSection(
             title: context.l10n.scheduleColorSection,
             icon: Icons.palette_rounded,
-            child: _ScheduleColorSelector(
+            child: CreationColorPalette(
               selectedColor: _selectedColor,
-              onSelected: (color) => setState(() => _selectedColor = color),
+              onSelect: (color) => setState(() => _selectedColor = color),
             ),
           ),
           const Gap(AppSpacing.page),

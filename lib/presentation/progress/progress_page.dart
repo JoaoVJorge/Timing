@@ -306,117 +306,86 @@ class _ProgressHeader extends StatelessWidget {
   );
 }
 
-class _DistributionCard extends StatelessWidget {
+class _DistributionCard extends StatefulWidget {
   const _DistributionCard({required this.controller});
 
   final ProgressController controller;
 
   @override
+  State<_DistributionCard> createState() => _DistributionCardState();
+}
+
+class _DistributionCardState extends State<_DistributionCard> {
+  static const int _collapsedItemCount = 3;
+
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
-    final int studyingSeconds = controller.selectedPeriodSecondsFor(
-      TimeCategoryType.studying,
-    );
-    final int exerciseSeconds = controller.selectedPeriodSecondsFor(
-      TimeCategoryType.exercises,
-    );
-    final int readingPages = controller.selectedPeriodReadingPages;
-    final int hobbySeconds = controller.selectedPeriodSecondsFor(
-      TimeCategoryType.hobbies,
-    );
+    final List<ProgressActivitySummary> activities =
+        widget.controller.selectedPeriodActivities;
+    final List<ProgressActivitySummary> visibleActivities = _showAll
+        ? activities
+        : activities.take(_collapsedItemCount).toList();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: AppSurfaces.content(context.colorTokens),
-      child: Column(
-        children: [
-          _DistributionRow(
-            icon: Icons.school_rounded,
-            label: context.l10n.statHoursStudied,
-            value: formatDurationLong(Duration(seconds: studyingSeconds)),
-            progress: _ratio(
-              studyingSeconds,
-              controller.selectedPeriodGoalSecondsFor(
-                TimeCategoryType.studying,
-              ),
+      child: activities.isEmpty
+          ? const _DistributionEmptyState()
+          : Column(
+              children: [
+                for (int index = 0; index < visibleActivities.length; index++)
+                  _DistributionRow(
+                    activity: visibleActivities[index],
+                    isLast:
+                        index == visibleActivities.length - 1 &&
+                        (activities.length <= _collapsedItemCount || _showAll),
+                  ),
+                if (activities.length > _collapsedItemCount && !_showAll)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => setState(() => _showAll = true),
+                      child: Text(context.l10n.profileSeeAll),
+                    ),
+                  ),
+              ],
             ),
-            color: TimeCategoryType.studying.accentColor,
-            hasActivity: controller.hasActivityFor(TimeCategoryType.studying),
-          ),
-          _DistributionRow(
-            icon: Icons.fitness_center_rounded,
-            label: context.l10n.statHoursExercised,
-            value: formatDurationLong(Duration(seconds: exerciseSeconds)),
-            progress: _ratio(
-              exerciseSeconds,
-              controller.selectedPeriodGoalSecondsFor(
-                TimeCategoryType.exercises,
-              ),
-            ),
-            color: TimeCategoryType.exercises.accentColor,
-            hasActivity: controller.hasActivityFor(
-              TimeCategoryType.exercises,
-            ),
-          ),
-          _DistributionRow(
-            icon: Icons.auto_stories_rounded,
-            label: context.l10n.statPagesRead,
-            value: context.l10n.metricPagesValue(readingPages),
-            progress: _ratio(
-              readingPages,
-              controller.selectedPeriodReadingGoalPages,
-            ),
-            color: TimeCategoryType.reading.accentColor,
-            hasActivity: controller.hasActivityFor(TimeCategoryType.reading),
-          ),
-          _DistributionRow(
-            icon: Icons.palette_rounded,
-            label: context.l10n.categoryHobbies,
-            value: formatDurationLong(Duration(seconds: hobbySeconds)),
-            progress: hobbySeconds > 0 ? 1 : 0,
-            color: TimeCategoryType.hobbies.accentColor,
-            hasActivity: controller.hasActivityFor(TimeCategoryType.hobbies),
-            isLast: true,
-          ),
-        ],
-      ),
     );
   }
-
-  double _ratio(int current, int goal) =>
-      goal <= 0 ? 0 : (current / goal).clamp(0, 1);
 }
 
 class _DistributionRow extends StatelessWidget {
-  const _DistributionRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.progress,
-    required this.color,
-    required this.hasActivity,
-    this.isLast = false,
-  });
+  const _DistributionRow({required this.activity, this.isLast = false});
 
-  final IconData icon;
-  final String label;
-  final String value;
-  final double progress;
-  final Color color;
-  final bool hasActivity;
+  final ProgressActivitySummary activity;
   final bool isLast;
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveColor = hasActivity
-        ? color
-        : Color.lerp(color, context.colorTokens.textHint, 0.6)!;
-    final double effectiveProgress = hasActivity ? progress : 1;
+    final Color color = activity.category.accentColor;
+    final String value = activity.isReading
+        ? context.l10n.metricPagesValue(activity.pages)
+        : formatDurationLong(Duration(seconds: activity.seconds));
+    final String share = activity.isReading
+        ? context.l10n.progressActivityPagesShare(
+            (activity.share * 100).round(),
+          )
+        : context.l10n.progressActivityTimeShare(
+            (activity.share * 100).round(),
+          );
 
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.betweenRelated),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppIconBadge(icon: icon, color: effectiveColor, size: 32),
+          AppIconBadge(
+            icon: _categoryIcon(activity.category),
+            color: color,
+            size: 36,
+          ),
           const Gap(AppSpacing.betweenRelated),
           Expanded(
             child: Column(
@@ -426,7 +395,7 @@ class _DistributionRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        label,
+                        activity.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.textStyles.bodySmall.copyWith(
@@ -438,6 +407,7 @@ class _DistributionRow extends StatelessWidget {
                       value,
                       style: context.textStyles.caption.copyWith(
                         fontSize: 12,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -446,12 +416,14 @@ class _DistributionRow extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
-                    value: effectiveProgress,
+                    value: activity.share.clamp(0, 1),
                     minHeight: 6,
-                    backgroundColor: effectiveColor.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
+                    backgroundColor: color.withValues(alpha: 0.12),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
                   ),
                 ),
+                const Gap(5),
+                Text(share, style: context.textStyles.caption),
               ],
             ),
           ),
@@ -460,3 +432,42 @@ class _DistributionRow extends StatelessWidget {
     );
   }
 }
+
+class _DistributionEmptyState extends StatelessWidget {
+  const _DistributionEmptyState();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 12),
+    child: Column(
+      children: [
+        AppIconBadge(
+          icon: Icons.insights_rounded,
+          color: context.colorTokens.textHint,
+          size: 40,
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        Text(
+          context.l10n.progressActivityEmptyTitle,
+          textAlign: TextAlign.center,
+          style: context.textStyles.bodySmall.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const Gap(AppSpacing.titleToDescription),
+        Text(
+          context.l10n.progressActivityEmptyDescription,
+          textAlign: TextAlign.center,
+          style: context.textStyles.caption,
+        ),
+      ],
+    ),
+  );
+}
+
+IconData _categoryIcon(TimeCategoryType category) => switch (category) {
+  TimeCategoryType.studying => Icons.school_rounded,
+  TimeCategoryType.exercises => Icons.fitness_center_rounded,
+  TimeCategoryType.reading => Icons.auto_stories_rounded,
+  TimeCategoryType.hobbies => Icons.palette_rounded,
+};

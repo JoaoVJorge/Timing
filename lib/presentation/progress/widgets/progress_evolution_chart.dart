@@ -320,6 +320,9 @@ class _EvolutionBarChartPainter extends CustomPainter {
         chartLeft,
         chartLeft + slotWidth * safeValues.length,
         chartTop,
+        // With a single day there is nothing to tell apart, so the tooltip
+        // alone is enough; the dot only helps pick a day out of several.
+        showPointDot: safeValues.length > 1,
       );
     }
   }
@@ -356,8 +359,9 @@ class _EvolutionBarChartPainter extends CustomPainter {
     _HighlightedBar bar,
     double chartLeft,
     double chartRight,
-    double chartTop,
-  ) {
+    double chartTop, {
+    required bool showPointDot,
+  }) {
     final Paint markerOuterPaint = Paint()
       ..color = barColor
       ..style = PaintingStyle.fill;
@@ -404,6 +408,9 @@ class _EvolutionBarChartPainter extends CustomPainter {
       ),
     );
 
+    if (!showPointDot) {
+      return;
+    }
     canvas.drawCircle(Offset(bar.centerX, bar.topY), 5.5, markerOuterPaint);
     canvas.drawCircle(Offset(bar.centerX, bar.topY), 3, markerInnerPaint);
     canvas.drawCircle(Offset(bar.centerX, bar.topY), 2, markerOuterPaint);

@@ -41,7 +41,7 @@ ScheduleEntryEntity _entry({
 
 void main() {
   group("UpdateScheduleEntryUseCase", () {
-    test("edits in place and preserves the id for a single weekday", () async {
+    test("edits every equal occurrence across weekdays", () async {
       final repository = _FakeScheduleRepository([
         _entry(id: "a", weekday: DateTime.monday),
         _entry(id: "b", weekday: DateTime.tuesday),
@@ -62,16 +62,12 @@ void main() {
       );
 
       final entries = result.getOrElse(() => []);
-      expect(entries.length, 2);
+      expect(entries.length, 1);
       final ScheduleEntryEntity edited = entries.firstWhere((e) => e.id == "a");
       expect(edited.title, "Physics");
       expect(edited.weekday, DateTime.wednesday);
       expect(edited.colorValue, 42);
-      // The other entry is untouched.
-      expect(
-        entries.any((e) => e.id == "b" && e.weekday == DateTime.tuesday),
-        isTrue,
-      );
+      expect(entries.any((e) => e.id == "b"), isFalse);
     });
 
     test(
@@ -110,6 +106,31 @@ void main() {
         expect(entries.every((e) => e.title == "Gym"), isTrue);
       },
     );
+
+    test("does not edit a different series", () async {
+      final repository = _FakeScheduleRepository([
+        _entry(id: "a", weekday: DateTime.monday),
+        _entry(id: "b", weekday: DateTime.tuesday, title: "Physics"),
+      ]);
+      final useCase = UpdateScheduleEntryUseCase(
+        scheduleRepository: repository,
+      );
+
+      final result = await useCase(
+        entryId: "a",
+        title: "Gym",
+        weekdays: const [DateTime.wednesday],
+        startMinutes: null,
+        endMinutes: null,
+        colorValue: 7,
+        activeFrom: DateTime(2026, 1, 1),
+        activeUntil: null,
+      );
+
+      final entries = result.getOrElse(() => []);
+      expect(entries.length, 2);
+      expect(entries.any((e) => e.id == "b" && e.title == "Physics"), isTrue);
+    });
 
     test("fails when no weekday is provided", () async {
       final repository = _FakeScheduleRepository([_entry(id: "a")]);

@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/profile_stats_entity.dart";
@@ -15,6 +16,89 @@ import "package:timing/core/services/activity_history/activity_history_service.d
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 
 enum ProgressPeriod { day, week, month }
+
+class ProgressActivitySummary {
+  const ProgressActivitySummary({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.seconds,
+    required this.pages,
+    required this.share,
+  });
+
+  final String id;
+  final String name;
+  final TimeCategoryType category;
+  final int seconds;
+  final int pages;
+
+  /// Share of all comparable work in the selected period. Timed activities
+  /// are compared with other timed activities and readings with other
+  /// readings, so pages are never treated as if they were minutes.
+  final double share;
+
+  bool get isReading => category == TimeCategoryType.reading;
+}
+
+List<ProgressActivitySummary> buildProgressActivitySummaries({
+  required List<ActivityEntryEntity> entries,
+  required List<SubjectEntity> subjects,
+}) {
+  if (entries.isEmpty) {
+    return const [];
+  }
+
+  final Map<String, SubjectEntity> subjectsById = {
+    for (final subject in subjects) subject.id: subject,
+  };
+  final Map<String, _ActivityTotals> totalsById = {};
+  for (final entry in entries) {
+    final SubjectEntity? subject = subjectsById[entry.subjectId];
+    if (subject == null) {
+      continue;
+    }
+    final _ActivityTotals totals = totalsById.putIfAbsent(
+      subject.id,
+      () => _ActivityTotals(
+        id: subject.id,
+        name: subject.name,
+        category: subject.category,
+      ),
+    );
+    totals.seconds += entry.seconds;
+    totals.pages += entry.pages;
+  }
+
+  final int totalSeconds = totalsById.values
+      .where((activity) => activity.category != TimeCategoryType.reading)
+      .fold(0, (total, activity) => total + activity.seconds);
+  final int totalPages = totalsById.values.fold(
+    0,
+    (total, activity) => total + activity.pages,
+  );
+  final List<ProgressActivitySummary> result = totalsById.values
+      .where((activity) => activity.seconds > 0 || activity.pages > 0)
+      .map((activity) {
+        final bool isReading = activity.category == TimeCategoryType.reading;
+        final int comparableTotal = isReading ? totalPages : totalSeconds;
+        final int value = isReading ? activity.pages : activity.seconds;
+        return ProgressActivitySummary(
+          id: activity.id,
+          name: activity.name,
+          category: activity.category,
+          seconds: activity.seconds,
+          pages: activity.pages,
+          share: comparableTotal == 0 ? 0 : value / comparableTotal,
+        );
+      })
+      .toList();
+  result.sort((a, b) {
+    final int byShare = b.share.compareTo(a.share);
+    return byShare != 0 ? byShare : a.name.compareTo(b.name);
+  });
+  return result;
+}
 
 class ProgressController extends GetxController {
   ProgressController({
@@ -83,6 +167,14 @@ class ProgressController extends GetxController {
 
   int get selectedPeriodSessions =>
       _currentPeriod.fold(0, (total, progress) => total + progress.sessions);
+
+  List<ProgressActivitySummary> get selectedPeriodActivities {
+    final (DateTime start, DateTime end) = _selectedPeriodWindow;
+    return buildProgressActivitySummaries(
+      entries: _activityHistoryService.entriesBetween(start, end),
+      subjects: subjects,
+    );
+  }
 
   int selectedPeriodSecondsFor(TimeCategoryType category) {
     final (DateTime start, DateTime end) = _selectedPeriodWindow;
@@ -290,6 +382,20 @@ class ProgressController extends GetxController {
     await (_appNavigator.toNamed(route, arguments: arguments) ??
         Future<void>.value());
   }
+}
+
+class _ActivityTotals {
+  _ActivityTotals({
+    required this.id,
+    required this.name,
+    required this.category,
+  });
+
+  final String id;
+  final String name;
+  final TimeCategoryType category;
+  int seconds = 0;
+  int pages = 0;
 }
 
 extension ProgressPeriodX on ProgressPeriod {

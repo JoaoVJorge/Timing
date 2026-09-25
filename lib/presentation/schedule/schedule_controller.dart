@@ -31,6 +31,11 @@ class ScheduleController extends GetxController {
   final RxBool isLoading = true.obs;
   final Rx<DateTime> selectedDate = _todayDate().obs;
 
+  /// The month whose grid is on screen (always the first of the month). It
+  /// moves on its own: paging to another month must not select a day there, or
+  /// the selected day number (today's) would look marked in every month.
+  late final Rx<DateTime> visibleMonth = _monthOf(selectedDate.value).obs;
+
   Map<int, List<ScheduleEntryEntity>>? _weekdayIndexCache;
 
   Map<int, List<ScheduleEntryEntity>> get _weekdayIndex {
@@ -57,6 +62,8 @@ class ScheduleController extends GetxController {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
   }
+
+  static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
 
   ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
     final DateTime viewedDate = selectedDate.value;
@@ -98,8 +105,10 @@ class ScheduleController extends GetxController {
           .map((entry) => _nextDateForWeekday(entry.weekday, entry.activeFrom))
           .reduce((a, b) => a.isBefore(b) ? a : b);
 
-  bool hasEntriesForDate(DateTime date) => (_weekdayIndex[date.weekday] ?? const [])
-      .any((entry) => _isEntryActiveOn(entry, date));
+  bool hasEntriesForDate(DateTime date) =>
+      (_weekdayIndex[date.weekday] ?? const []).any(
+        (entry) => _isEntryActiveOn(entry, date),
+      );
 
   Color? firstEntryColorForDate(DateTime date) {
     final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForDate(date);
@@ -149,24 +158,18 @@ class ScheduleController extends GetxController {
     loadEntries();
   }
 
-  void onSelectDate(DateTime date) =>
-      selectedDate.value = DateTime(date.year, date.month, date.day);
-
-  void onSelectMonth(int year, int month) {
-    final int clampedDay = selectedDate.value.day.clamp(
-      1,
-      DateUtils.getDaysInMonth(year, month),
-    );
-    selectedDate.value = DateTime(year, month, clampedDay);
+  void onSelectDate(DateTime date) {
+    selectedDate.value = DateTime(date.year, date.month, date.day);
+    visibleMonth.value = _monthOf(date);
   }
 
+  /// Shows [month] of [year] without selecting a day in it.
+  void onSelectMonth(int year, int month) =>
+      visibleMonth.value = DateTime(year, month);
+
   void onChangeMonth(int monthDelta) {
-    final DateTime current = selectedDate.value;
-    final DateTime monthStart = DateTime(
-      current.year,
-      current.month + monthDelta,
-    );
-    onSelectMonth(monthStart.year, monthStart.month);
+    final DateTime current = visibleMonth.value;
+    visibleMonth.value = DateTime(current.year, current.month + monthDelta);
   }
 
   Future<void> loadEntries() async {
@@ -225,14 +228,24 @@ class ScheduleController extends GetxController {
 
     entries.value = [...entries, ...addedEntries];
     _invalidateWeekdayIndex();
-    selectedDate.value = _firstOccurrenceDate(addedEntries);
+    onSelectDate(_firstOccurrenceDate(addedEntries));
     entries.refresh();
   }
 
   Future<void> onEditEntry(ScheduleEntryEntity entry) async {
+    final List<int> seriesWeekdays =
+        entries
+            .where(entry.belongsToSameSeriesAs)
+            .map((item) => item.weekday)
+            .toSet()
+            .toList()
+          ..sort();
     final dynamic rawResult = await _appNavigator.toNamed<dynamic>(
       AppRoutes.addScheduleEntry,
-      arguments: entry,
+      arguments: ScheduleEntryEditArguments(
+        entry: entry,
+        weekdays: seriesWeekdays,
+      ),
     );
     final AddScheduleEntryResult? result = rawResult as AddScheduleEntryResult?;
     if (result == null) {

@@ -114,8 +114,8 @@ class NotesPage extends StatelessWidget {
                                               child: QuillEditor.basic(
                                                 controller: controller
                                                     .notesControllers[index],
-                                                focusNode:
-                                                    controller.focusNodes[index],
+                                                focusNode: controller
+                                                    .focusNodes[index],
                                                 config: QuillEditorConfig(
                                                   expands: true,
                                                   showCursor: true,
