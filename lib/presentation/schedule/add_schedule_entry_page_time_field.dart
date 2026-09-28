@@ -29,8 +29,10 @@ class _TimeTextField extends StatelessWidget {
     required this.focusNode,
     required this.onPickTime,
     this.onCompleted,
+    this.leadingIcon = false,
   });
 
+  final bool leadingIcon;
   final String label;
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -38,44 +40,59 @@ class _TimeTextField extends StatelessWidget {
   final VoidCallback? onCompleted;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _FieldLabel(text: label),
-      const Gap(8),
-      TextField(
-        controller: controller,
-        focusNode: focusNode,
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          _TimeInputFormatter(),
-        ],
-        onChanged: (value) {
-          if (value.length == 5) {
-            onCompleted?.call();
-          }
-        },
-        decoration:
-            AppInputDecoration.withBorder(
-              tokens: context.colorTokens,
-              hintText: "00:00",
-            ).copyWith(
-              suffixIcon: IconButton(
-                onPressed: onPickTime,
-                tooltip: label,
-                icon: Icon(
-                  Icons.schedule_rounded,
-                  size: 20,
-                  color: context.colorTokens.primary,
-                ),
+  Widget build(BuildContext context) {
+    final Widget clock = IconButton(
+      onPressed: onPickTime,
+      tooltip: label,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 48),
+      icon: Icon(
+        Icons.schedule_rounded,
+        size: 22,
+        color: context.colorTokens.primary,
+      ),
+    );
+    return Row(
+      children: [
+        if (leadingIcon) clock,
+        Expanded(
+          child: Semantics(
+            label: label,
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              textAlign: TextAlign.center,
+              style: context.textStyles.bodyLarge.copyWith(
+                fontWeight: FontWeight.w500,
               ),
-              suffixIconConstraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 40,
+              keyboardType: TextInputType.number,
+              textInputAction: onCompleted == null
+                  ? TextInputAction.done
+                  : TextInputAction.next,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                _TimeInputFormatter(),
+              ],
+              onChanged: (value) {
+                if (value.length == 5) onCompleted?.call();
+              },
+              onSubmitted: (_) => onCompleted?.call(),
+              decoration: InputDecoration(
+                hintText: "00:00",
+                hintStyle: context.textStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
-      ),
-    ],
-  );
+          ),
+        ),
+        if (!leadingIcon) clock,
+      ],
+    );
+  }
 }

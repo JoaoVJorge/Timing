@@ -46,15 +46,42 @@ class _FormSection extends StatelessWidget {
                     ),
             ),
             const Gap(12),
-            Text(
-              title,
-              style: context.textStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w900,
+            Expanded(
+              child: Text(
+                title,
+                style: context.textStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
           ],
         ),
         const Gap(12),
+        child,
+      ],
+    ),
+  );
+}
+
+class _ScheduleFieldGroup extends StatelessWidget {
+  const _ScheduleFieldGroup({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: context.colorTokens.scaffold.withValues(alpha: 0.55),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FieldLabel(text: label),
+        const Gap(8),
         child,
       ],
     ),
@@ -82,7 +109,7 @@ class _WeekdayMultiSelector extends StatelessWidget {
           weekday <= DateTime.sunday;
           weekday++
         ) ...[
-          if (weekday > DateTime.monday) const Gap(6),
+          if (weekday > DateTime.monday) const Gap(5),
           Expanded(
             child: _WeekdayToggleChip(
               label: DateFormat.E(locale)
@@ -115,31 +142,36 @@ class _WeekdayToggleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BounceTap(
     onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      height: 42,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isSelected
-            ? context.colorTokens.primary
-            : context.colorTokens.scaffold.withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
+    child: Semantics(
+      button: true,
+      selected: isSelected,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        constraints: const BoxConstraints(minHeight: 40),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
           color: isSelected
               ? context.colorTokens.primary
-              : context.colorTokens.borderUnfocused,
+              : context.colorTokens.scaffold.withValues(alpha: 0.42),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? context.colorTokens.primary
+                : context.colorTokens.borderUnfocused,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodySmall.copyWith(
-          color: isSelected
-              ? context.colorTokens.white
-              : context.colorTokens.textBody,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textStyles.bodySmall.copyWith(
+            color: isSelected
+                ? context.colorTokens.white
+                : context.colorTokens.textBody,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     ),
@@ -246,6 +278,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     text,
     style: context.textStyles.bodySmall.copyWith(
+      fontSize: 14,
       color: context.colorTokens.textBody,
       fontWeight: FontWeight.w800,
     ),

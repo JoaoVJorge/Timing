@@ -66,16 +66,16 @@ class _DateChip extends StatelessWidget {
     pressedScale: 0.98,
     child: Container(
       constraints: const BoxConstraints(minHeight: 58),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
       decoration: BoxDecoration(
-        color: context.colorTokens.scaffold.withValues(alpha: 0.42),
+        color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: context.colorTokens.borderUnfocused),
       ),
       child: Row(
         children: [
           Icon(icon, color: context.colorTokens.primary, size: 20),
-          const Gap(8),
+          const Gap(6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,13 +90,16 @@ class _DateChip extends StatelessWidget {
                   ),
                 ),
                 const Gap(2),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.textBody,
-                    fontWeight: FontWeight.w900,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: context.colorTokens.textBody,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],

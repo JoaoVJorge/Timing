@@ -277,42 +277,67 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _WeekdayMultiSelector(
-                  selectedWeekdays: _selectedWeekdays,
-                  onToggle: _toggleWeekday,
+                _ScheduleFieldGroup(
+                  label: context.l10n.scheduleWeeklyRepetitionLabel,
+                  child: _WeekdayMultiSelector(
+                    selectedWeekdays: _selectedWeekdays,
+                    onToggle: _toggleWeekday,
+                  ),
                 ),
-                const Gap(14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _TimeTextField(
-                        label: context.l10n.startTimeLabel,
-                        controller: _startTimeController,
-                        focusNode: _startTimeFocusNode,
-                        onPickTime: () => _pickTime(_startTimeController),
-                        onCompleted: () => FocusScope.of(
-                          context,
-                        ).requestFocus(_endTimeFocusNode),
+                const Gap(8),
+                _ScheduleFieldGroup(
+                  label: context.l10n.scheduleTimeRangeLabel,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.colorTokens.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: context.colorTokens.borderUnfocused,
                       ),
                     ),
-                    const Gap(AppSpacing.betweenRelated),
-                    Expanded(
-                      child: _TimeTextField(
-                        label: context.l10n.endTimeOptionalLabel,
-                        controller: _endTimeController,
-                        focusNode: _endTimeFocusNode,
-                        onPickTime: () => _pickTime(_endTimeController),
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _TimeTextField(
+                            label: context.l10n.startTimeLabel,
+                            controller: _startTimeController,
+                            focusNode: _startTimeFocusNode,
+                            leadingIcon: true,
+                            onPickTime: () => _pickTime(_startTimeController),
+                            onCompleted: () => FocusScope.of(
+                              context,
+                            ).requestFocus(_endTimeFocusNode),
+                          ),
+                        ),
+                        Text(
+                          "–",
+                          style: context.textStyles.bodyLarge.copyWith(
+                            color: context.colorTokens.borderUnfocused,
+                            fontSize: 24,
+                          ),
+                        ),
+                        Expanded(
+                          child: _TimeTextField(
+                            label: context.l10n.endTimeOptionalLabel,
+                            controller: _endTimeController,
+                            focusNode: _endTimeFocusNode,
+                            onPickTime: () => _pickTime(_endTimeController),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-                const Gap(14),
-                _DateRangeSelector(
-                  activeFrom: _activeFrom,
-                  activeUntil: _activeUntil,
-                  onPickStart: () => _pickActiveDate(isStart: true),
-                  onPickEnd: () => _pickActiveDate(isStart: false),
-                  onClearEnd: () => setState(() => _activeUntil = null),
+                const Gap(8),
+                _ScheduleFieldGroup(
+                  label: context.l10n.schedulePeriodLabel,
+                  child: _DateRangeSelector(
+                    activeFrom: _activeFrom,
+                    activeUntil: _activeUntil,
+                    onPickStart: () => _pickActiveDate(isStart: true),
+                    onPickEnd: () => _pickActiveDate(isStart: false),
+                    onClearEnd: () => setState(() => _activeUntil = null),
+                  ),
                 ),
                 if (_durationLabel(context) != null) ...[
                   const Gap(AppSpacing.betweenRelated),

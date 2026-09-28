@@ -1274,6 +1274,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scheduleInfoSection => 'Information';
 
   @override
+  String get scheduleWeeklyRepetitionLabel => 'Weekly repetition';
+
+  @override
+  String get scheduleTimeRangeLabel => 'Time';
+
+  @override
+  String get schedulePeriodLabel => 'Period';
+
+  @override
   String get scheduleWhenSection => 'When?';
 
   @override

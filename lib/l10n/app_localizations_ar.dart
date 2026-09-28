@@ -1272,6 +1272,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scheduleInfoSection => 'معلومات';
 
   @override
+  String get scheduleWeeklyRepetitionLabel => 'التكرار الأسبوعي';
+
+  @override
+  String get scheduleTimeRangeLabel => 'الوقت';
+
+  @override
+  String get schedulePeriodLabel => 'الفترة';
+
+  @override
   String get scheduleWhenSection => 'متى؟';
 
   @override

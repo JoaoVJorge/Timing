@@ -2368,6 +2368,24 @@ abstract class AppLocalizations {
   /// **'Information'**
   String get scheduleInfoSection;
 
+  /// No description provided for @scheduleWeeklyRepetitionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly repetition'**
+  String get scheduleWeeklyRepetitionLabel;
+
+  /// No description provided for @scheduleTimeRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get scheduleTimeRangeLabel;
+
+  /// No description provided for @schedulePeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get schedulePeriodLabel;
+
   /// No description provided for @scheduleWhenSection.
   ///
   /// In en, this message translates to:
