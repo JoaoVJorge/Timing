@@ -33,10 +33,10 @@ import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart"
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
-import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
 import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
+import "package:timing/core/domain/use_cases/delete_account_use_case.dart";
 import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_notes_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_use_case.dart";
@@ -90,10 +90,6 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<UpdateSubjectUseCase>(
       UpdateSubjectUseCase(subjectsRepository: Get.find()),
-      permanent: true,
-    );
-    Get.put<PinSubjectToStartUseCase>(
-      PinSubjectToStartUseCase(subjectsRepository: Get.find()),
       permanent: true,
     );
     Get.put<GetProfileStatsUseCase>(
@@ -192,6 +188,10 @@ class UseCasesBindings extends Bindings {
     );
     Get.put<SyncProfileToBackendUseCase>(
       SyncProfileToBackendUseCase(profileSyncRepository: Get.find()),
+      permanent: true,
+    );
+    Get.put<DeleteAccountUseCase>(
+      DeleteAccountUseCase(profileSyncRepository: Get.find()),
       permanent: true,
     );
     Get.put<GetCurrentProfileUseCase>(

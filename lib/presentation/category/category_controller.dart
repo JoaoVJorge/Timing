@@ -8,7 +8,6 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
-import "package:timing/core/domain/use_cases/pin_subject_to_start_use_case.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -18,7 +17,6 @@ class CategoryController extends GetxController {
   CategoryController({
     required this._getSubjectsUseCase,
     required this._deleteSubjectUseCase,
-    required this._pinSubjectToStartUseCase,
     required this._subjectDailyHistoryService,
     required this._appNavigator,
     required this.category,
@@ -26,7 +24,6 @@ class CategoryController extends GetxController {
 
   final GetSubjectsUseCase _getSubjectsUseCase;
   final DeleteSubjectUseCase _deleteSubjectUseCase;
-  final PinSubjectToStartUseCase _pinSubjectToStartUseCase;
   final SubjectDailyHistoryService _subjectDailyHistoryService;
   final AppNavigator _appNavigator;
 
@@ -171,23 +168,6 @@ class CategoryController extends GetxController {
       subjects.value = previousSubjects;
       _handleError(error);
     }, (_) {});
-  }
-
-  Future<void> onPinSubjectToStart(SubjectEntity subject) async {
-    final int index = subjects.indexWhere((item) => item.id == subject.id);
-    if (index > 0) {
-      subjects
-        ..removeAt(index)
-        ..insert(0, subject);
-    }
-
-    final Either<AppError, void> result = await _pinSubjectToStartUseCase(
-      subjectId: subject.id,
-    );
-    await result.fold((error) async {
-      _handleError(error);
-      await loadSubjects();
-    }, (_) => loadSubjects());
   }
 
   Future<void> onTapAddSubject() => _openCreateSubject();

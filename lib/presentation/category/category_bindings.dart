@@ -15,7 +15,6 @@ class CategoryBindings extends Bindings {
       CategoryController(
         getSubjectsUseCase: Get.find(),
         deleteSubjectUseCase: Get.find(),
-        pinSubjectToStartUseCase: Get.find(),
         subjectDailyHistoryService: Get.find(),
         appNavigator: Get.find(),
         category: category,

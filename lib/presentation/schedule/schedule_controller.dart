@@ -110,14 +110,6 @@ class ScheduleController extends GetxController {
         (entry) => _isEntryActiveOn(entry, date),
       );
 
-  Color? firstEntryColorForDate(DateTime date) {
-    final List<ScheduleEntryEntity> dayEntries = _sortedEntriesForDate(date);
-    if (dayEntries.isEmpty) {
-      return null;
-    }
-    return Color(dayEntries.first.colorValue);
-  }
-
   List<Color> entryColorsForDate(DateTime date) => [
     for (final ScheduleEntryEntity entry in _sortedEntriesForDate(date))
       Color(entry.colorValue),

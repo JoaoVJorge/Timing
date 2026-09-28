@@ -176,22 +176,6 @@ class ProgressController extends GetxController {
     );
   }
 
-  int selectedPeriodSecondsFor(TimeCategoryType category) {
-    final (DateTime start, DateTime end) = _selectedPeriodWindow;
-    final int historyValue = _activityHistoryService.secondsBetween(
-      start,
-      end,
-      category: category,
-    );
-    if (historyValue > 0) {
-      return historyValue;
-    }
-    if (category == TimeCategoryType.studying) {
-      return selectedPeriodFocusSeconds;
-    }
-    return 0;
-  }
-
   int get selectedPeriodReadingPages {
     final (DateTime start, DateTime end) = _selectedPeriodWindow;
     final int historyValue = _activityHistoryService.pagesBetween(
@@ -200,21 +184,6 @@ class ProgressController extends GetxController {
       category: TimeCategoryType.reading,
     );
     return historyValue > 0 ? historyValue : selectedPeriodPages;
-  }
-
-  bool hasActivityFor(TimeCategoryType category) =>
-      subjects.any((subject) => subject.category == category);
-
-  int selectedPeriodGoalSecondsFor(TimeCategoryType category) {
-    final List<SubjectEntity> categorySubjects = subjects
-        .where((subject) => subject.category == category)
-        .toList();
-    return categorySubjects.fold(
-      0,
-      (total, subject) =>
-          total +
-          subject.totalGoalSeconds * _activeDaysInSelectedPeriod(subject),
-    );
   }
 
   int get selectedPeriodReadingGoalPages {

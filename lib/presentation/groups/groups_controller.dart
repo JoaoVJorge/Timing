@@ -682,15 +682,6 @@ class GroupsController extends GetxController {
     return headers;
   }
 
-  GroupActivityProgressEntity? progressFor(String memberId, String activityId) {
-    for (final GroupActivityProgressEntity item in activityProgress) {
-      if (item.memberId == memberId && item.activityId == activityId) {
-        return item;
-      }
-    }
-    return null;
-  }
-
   String _todayKey() {
     final DateTime now = DateTime.now();
     return "${now.year.toString().padLeft(4, "0")}-"

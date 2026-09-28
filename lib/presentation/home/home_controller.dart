@@ -162,21 +162,6 @@ class HomeController extends GetxController {
     return context.l10n.homeCategoryEmptyValue(item);
   }
 
-  /// Most-tracked subject of a category, used as the tile's "what you were
-  /// working on" line.
-  SubjectEntity? topSubjectIn(TimeCategoryType category) {
-    final List<SubjectEntity> inCategory = subjects
-        .where((s) => s.category == category)
-        .toList();
-    if (inCategory.isEmpty) {
-      return null;
-    }
-    return inCategory.reduce(
-      (best, current) =>
-          current.totalSeconds > best.totalSeconds ? current : best,
-    );
-  }
-
   int _focusSecondsForTodayCard(SubjectEntity subject) =>
       _subjectDailyHistoryService.todayForSubject(subject.id).focusSeconds;
 
