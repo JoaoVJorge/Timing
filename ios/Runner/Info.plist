@@ -29,6 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>helpout</string>
 				<string>com.moonstone.timing</string>
 			</array>
 		</dict>

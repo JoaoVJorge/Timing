@@ -49,6 +49,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="helpout" android:host="login-callback" />
                 <data android:scheme="com.moonstone.timing" android:host="login-callback" />
             </intent-filter>
         </activity>

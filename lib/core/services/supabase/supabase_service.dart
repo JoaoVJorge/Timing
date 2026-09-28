@@ -7,8 +7,11 @@ import "package:supabase_flutter/supabase_flutter.dart";
 class SupabaseService {
   SupabaseService._({required this.isConfigured, this.client});
 
-  static const String oauthRedirectUrl =
-      "com.moonstone.timing://login-callback";
+  // The Supabase project still authorizes the app's original callback scheme.
+  // Keep using it until the dashboard allow-list is migrated; otherwise
+  // Supabase falls back to this URL after Google sign-in and the browser cannot
+  // return to the app.
+  static const String oauthRedirectUrl = "helpout://login-callback";
 
   final bool isConfigured;
   final SupabaseClient? client;

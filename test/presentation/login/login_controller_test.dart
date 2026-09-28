@@ -10,6 +10,7 @@ import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/presentation/login/login_controller.dart";
+import "package:timing/presentation/login/sign_in_step.dart";
 
 class _Stub extends Fake {}
 
@@ -21,6 +22,19 @@ class _AuthClient extends _Stub implements GoTrueClient {
 class _Client extends _Stub implements SupabaseClient {
   @override
   final GoTrueClient auth = _AuthClient();
+}
+
+class _ControllableAuthClient extends _Stub implements GoTrueClient {
+  final StreamController<AuthState> events =
+      StreamController<AuthState>.broadcast();
+
+  @override
+  Stream<AuthState> get onAuthStateChange => events.stream;
+}
+
+class _ControllableClient extends _Stub implements SupabaseClient {
+  @override
+  final _ControllableAuthClient auth = _ControllableAuthClient();
 }
 
 class _SignedInService extends _Stub implements SupabaseService {
@@ -42,11 +56,17 @@ class _SignedOutService extends _Stub implements SupabaseService {
 }
 
 class _AppController extends _Stub implements AppController {
+  _AppController({this.profileLoaded});
+
+  final Future<void>? profileLoaded;
   int reloads = 0;
   int verifiedContacts = 0;
 
   @override
-  Future<bool> refreshProfileFromBackend() async => true;
+  Future<bool> refreshProfileFromBackend() async {
+    await profileLoaded;
+    return true;
+  }
 
   @override
   Future<void> reloadUserScopedState() async {
@@ -152,5 +172,117 @@ void main() {
     second.onClose();
     unawaited(client.dispose());
     Get.reset();
+  });
+
+  group("sign-in progress", () {
+    late StreamController<Uri> callbacks;
+    late _ControllableClient client;
+    late _Navigator navigator;
+
+    setUp(() {
+      Get.testMode = true;
+      callbacks = StreamController<Uri>.broadcast();
+      client = _ControllableClient();
+      navigator = _Navigator();
+    });
+
+    tearDown(() async {
+      await callbacks.close();
+      await client.auth.events.close();
+      Get.reset();
+    });
+
+    LoginController openLoginPage({_AppController? app}) => LoginController(
+      signInWithGoogleUseCase: _SignIn(),
+      appController: app ?? _AppController(),
+      appNavigator: navigator,
+      supabaseService: _SignedOutService(client),
+      logger: AppLoggerService(),
+      oauthCallbacks: callbacks.stream,
+    )..onInit();
+
+    final Uri oauthCallback = Uri.parse("helpout://login-callback?code=abc");
+
+    testWidgets("shows up as soon as the OAuth callback reaches the app", (
+      tester,
+    ) async {
+      final LoginController controller = openLoginPage();
+
+      callbacks.add(oauthCallback);
+      await tester.pump();
+
+      expect(controller.signInStep.value, SignInStep.confirmingAccount);
+      controller.onClose();
+    });
+
+    testWidgets("ignores app links that carry no OAuth code", (tester) async {
+      final LoginController controller = openLoginPage();
+
+      callbacks.add(Uri.parse("helpout://login-callback"));
+      await tester.pump();
+
+      expect(controller.signInStep.value, isNull);
+      controller.onClose();
+    });
+
+    testWidgets("advances through every step and stays up until Home opens", (
+      tester,
+    ) async {
+      final Completer<void> profileLoaded = Completer<void>();
+      final LoginController controller = openLoginPage(
+        app: _AppController(profileLoaded: profileLoaded.future),
+      );
+
+      callbacks.add(oauthCallback);
+      await tester.pump();
+      client.auth.events.add(const AuthState(AuthChangeEvent.signedIn, null));
+      await tester.pump();
+      expect(controller.signInStep.value, SignInStep.loadingProfile);
+
+      profileLoaded.complete();
+      await tester.pump();
+      expect(navigator.routes, [AppRoutes.mainNavigation]);
+      expect(controller.signInStep.value, SignInStep.preparingHome);
+
+      await tester.pump(const Duration(seconds: 31));
+      expect(navigator.errors, 0);
+      expect(controller.signInStep.value, SignInStep.preparingHome);
+
+      controller.onClose();
+      navigator.routeClosed.complete();
+    });
+
+    testWidgets("gives up with an error when the callback never completes", (
+      tester,
+    ) async {
+      final LoginController controller = openLoginPage();
+
+      callbacks.add(oauthCallback);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 30));
+
+      expect(controller.signInStep.value, isNull);
+      expect(navigator.errors, 1);
+      controller.onClose();
+    });
+
+    testWidgets("a failed code exchange hides it and reports once", (
+      tester,
+    ) async {
+      final LoginController controller = openLoginPage();
+
+      callbacks.add(oauthCallback);
+      await tester.pump();
+      client.auth.events.addError(
+        const AuthException("Code exchange failed"),
+      );
+      await tester.pump();
+      expect(controller.signInStep.value, isNull);
+      expect(navigator.errors, 1);
+
+      await tester.pump(const Duration(seconds: 31));
+      expect(navigator.errors, 1);
+      controller.onClose();
+    });
   });
 }

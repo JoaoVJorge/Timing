@@ -10,6 +10,7 @@ import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/login/sign_in_step.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 
 class LoginController extends GetxController {
@@ -19,21 +20,27 @@ class LoginController extends GetxController {
     required this.appNavigator,
     required this.supabaseService,
     required this.logger,
+    this.oauthCallbacks,
   });
 
   static const bool isAppleSignInComplete = false;
   static const Duration _googleSignInTimeout = Duration(seconds: 20);
   static const Duration _postSignInTimeout = Duration(seconds: 15);
+  static const Duration _callbackTimeout = Duration(seconds: 30);
 
   final SignInWithGoogleUseCase signInWithGoogleUseCase;
   final AppController appController;
   final AppNavigator appNavigator;
   final SupabaseService supabaseService;
   final AppLoggerService logger;
+  final Stream<Uri>? oauthCallbacks;
 
   final RxBool isGoogleSubmitting = false.obs;
+  final Rx<SignInStep?> signInStep = Rx<SignInStep?>(null);
 
   StreamSubscription<AuthState>? _authSubscription;
+  StreamSubscription<Uri>? _callbackSubscription;
+  Timer? _callbackTimer;
   bool _isHandlingSignedInUser = false;
   bool _hasCompletedSignIn = false;
 
@@ -49,6 +56,7 @@ class LoginController extends GetxController {
     if (client == null) {
       return;
     }
+    _callbackSubscription = oauthCallbacks?.listen(_handleOAuthCallback);
     _authSubscription = client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn) {
         unawaited(_handleSignedInUser());
@@ -103,9 +111,33 @@ class LoginController extends GetxController {
     }
   }
 
+  void _handleOAuthCallback(Uri uri) {
+    if (_hasCompletedSignIn ||
+        _isHandlingSignedInUser ||
+        !uri.queryParameters.containsKey("code")) {
+      return;
+    }
+    signInStep.value = SignInStep.confirmingAccount;
+    _callbackTimer?.cancel();
+    _callbackTimer = Timer(_callbackTimeout, () {
+      if (signInStep.value != SignInStep.confirmingAccount) {
+        return;
+      }
+      signInStep.value = null;
+      logger.logError(
+        "Google sign in callback did not finish after $_callbackTimeout",
+      );
+      appNavigator.showErrorSnackBar();
+    });
+  }
+
   // A failed OAuth callback (code exchange, access_denied, expired flow)
   // arrives as a stream error; unhandled, it escaped to the zone handler.
   void _handleAuthError(Object error, StackTrace stackTrace) {
+    if (signInStep.value == SignInStep.confirmingAccount) {
+      _callbackTimer?.cancel();
+      signInStep.value = null;
+    }
     if (identical(error, _lastReportedAuthError)) {
       return;
     }
@@ -124,9 +156,12 @@ class LoginController extends GetxController {
     }
 
     _isHandlingSignedInUser = true;
+    _callbackTimer?.cancel();
+    signInStep.value = SignInStep.loadingProfile;
     try {
       await _completeSignIn().timeout(_postSignInTimeout);
     } catch (error, stackTrace) {
+      signInStep.value = null;
       logger.logError(
         "Failed to finish Google sign in",
         error: error,
@@ -145,6 +180,7 @@ class LoginController extends GetxController {
       await _syncProfileFromAuthUser();
       await appController.refreshProfileFromBackend();
     }
+    signInStep.value = SignInStep.preparingHome;
     await appController.reloadUserScopedState();
     _hasCompletedSignIn = true;
     await appController.recordSuccessfulBackendContact();
@@ -194,6 +230,8 @@ class LoginController extends GetxController {
   @override
   void onClose() {
     _authSubscription?.cancel();
+    _callbackSubscription?.cancel();
+    _callbackTimer?.cancel();
     super.onClose();
   }
 }

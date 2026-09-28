@@ -5,13 +5,16 @@ import "package:get/get.dart";
 import "package:timing/app/app_constants.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/login/login_controller.dart";
+import "package:timing/presentation/login/login_palette.dart";
+import "package:timing/presentation/login/sign_in_step.dart";
+import "package:timing/presentation/login/widgets/sign_in_progress_overlay.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 
-const Color _authBlue = Color(0xFF2F6FF2);
+const Color _authBlue = LoginPalette.blue;
 const Color _authBlueLight = Color(0xFF67A2FF);
-const Color _authNavy = Color(0xFF082A5F);
-const Color _authMuted = Color(0xFF67748E);
+const Color _authNavy = LoginPalette.navy;
+const Color _authMuted = LoginPalette.muted;
 const Color _authCardShadow = Color(0x332F6FF2);
 const LinearGradient _authBlueGradient = LinearGradient(
   colors: [_authBlueLight, _authBlue],
@@ -27,7 +30,7 @@ class LoginPage extends StatelessWidget {
     final LoginController controller = Get.find();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFF),
+      backgroundColor: LoginPalette.background,
       body: Stack(
         children: [
           const _LoginBackground(),
@@ -45,6 +48,20 @@ class LoginPage extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          Positioned.fill(
+            child: Obx(() {
+              final SignInStep? step = controller.signInStep.value;
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 240),
+                child: step == null
+                    ? const SizedBox.shrink()
+                    : SignInProgressOverlay(
+                        key: const ValueKey("signInProgress"),
+                        step: step,
+                      ),
+              );
+            }),
           ),
         ],
       ),
