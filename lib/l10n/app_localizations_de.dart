@@ -1056,10 +1056,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deleteAccountDialogMessage =>
-      'Timing öffnet die offizielle Löschseite mit Anweisungen, um die dauerhafte Löschung Ihres Kontos und der zugehörigen Daten zu beantragen.';
+      'Ihr Konto und alle zugehörigen Daten werden dauerhaft gelöscht.';
 
   @override
-  String get deleteAccountRequestButton => 'Anfrage öffnen';
+  String get deleteAccountFinalDialogTitle => 'Sind Sie absolut sicher?';
+
+  @override
+  String get deleteAccountFinalDialogMessage =>
+      'Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden. Ihr Konto, Ihre Freunde, Gruppen und Ihr Verlauf werden sofort gelöscht.';
+
+  @override
+  String deleteAccountWaitButton(int seconds) {
+    return 'Warten Sie ${seconds}s';
+  }
 
   @override
   String get logOutDialogTitle => 'Abmelden?';
@@ -3429,4 +3438,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get editGroupTipLabel => 'Tipp';
+
+  @override
+  String get signInProgressTitle => 'Du wirst angemeldet';
+
+  @override
+  String get signInProgressConfirmingAccount =>
+      'Dein Google-Konto wird bestätigt...';
+
+  @override
+  String get signInProgressLoadingProfile => 'Dein Profil wird geladen...';
+
+  @override
+  String get signInProgressPreparingHome => 'Alles wird vorbereitet...';
 }

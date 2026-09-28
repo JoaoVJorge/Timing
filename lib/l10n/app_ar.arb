@@ -684,8 +684,10 @@
   "deleteAccountLabel": "حذف الحساب",
   "deleteAccountSettingsSubtitle": "اطلب حذف حسابك وبياناتك",
   "deleteAccountDialogTitle": "هل تريد حذف حسابك؟",
-  "deleteAccountDialogMessage": "سيفتح Timing صفحة الحذف الرسمية التي تتضمن تعليمات لطلب الحذف الدائم لحسابك والبيانات المرتبطة به.",
-  "deleteAccountRequestButton": "فتح الطلب",
+  "deleteAccountDialogMessage": "سيتم حذف حسابك وجميع البيانات المرتبطة به بشكل دائم.",
+  "deleteAccountFinalDialogTitle": "هل أنت متأكد تمامًا؟",
+  "deleteAccountFinalDialogMessage": "هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم مسح حسابك وأصدقائك ومجموعاتك وسجلك فورًا.",
+  "deleteAccountWaitButton": "انتظر {seconds}ث",
   "logOutDialogTitle": "تسجيل الخروج؟",
   "logOutDialogContent": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى هذا الحساب على هذا الجهاز. سيتم الاحتفاظ ببيانات الدراسة المحلية الخاصة بك.",
   "logOutConfirmButton": "تسجيل الخروج",
@@ -1714,5 +1716,9 @@
   "editGroupActivityTip": "حدد هدفًا واقعيًا للحفاظ على الاستمرارية!",
   "editGroupMoreOptions": "خيارات إضافية",
   "editGroupSaveContinue": "حفظ ومتابعة",
-  "editGroupTipLabel": "نصيحة"
+  "editGroupTipLabel": "نصيحة",
+  "signInProgressTitle": "جارٍ تسجيل دخولك",
+  "signInProgressConfirmingAccount": "جارٍ تأكيد حسابك على جوجل...",
+  "signInProgressLoadingProfile": "جارٍ تحميل ملفك الشخصي...",
+  "signInProgressPreparingHome": "جارٍ تجهيز كل شيء لك..."
 }

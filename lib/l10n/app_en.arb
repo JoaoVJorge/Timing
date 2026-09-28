@@ -611,8 +611,17 @@
   "deleteAccountLabel": "Delete account",
   "deleteAccountSettingsSubtitle": "Request deletion of your account and data",
   "deleteAccountDialogTitle": "Delete your account?",
-  "deleteAccountDialogMessage": "Timing will open the official deletion page with instructions to request permanent deletion of your account and associated data.",
-  "deleteAccountRequestButton": "Open request",
+  "deleteAccountDialogMessage": "Your account and all associated data will be permanently deleted.",
+  "deleteAccountFinalDialogTitle": "Are you absolutely sure?",
+  "deleteAccountFinalDialogMessage": "This action is permanent and cannot be undone. Your account, friends, groups and history will be erased right away.",
+  "deleteAccountWaitButton": "Wait {seconds}s",
+  "@deleteAccountWaitButton": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "logOutDialogTitle": "Log out?",
   "logOutDialogContent": "You will need to sign in again to access this account on this device. Your local study data will be kept.",
   "logOutConfirmButton": "Log out",
@@ -1829,5 +1838,9 @@
   "editGroupActivityTip": "Set a realistic goal to stay consistent!",
   "editGroupMoreOptions": "More options",
   "editGroupSaveContinue": "Save and continue",
-  "editGroupTipLabel": "Tip"
+  "editGroupTipLabel": "Tip",
+  "signInProgressTitle": "Signing you in",
+  "signInProgressConfirmingAccount": "Confirming your Google account...",
+  "signInProgressLoadingProfile": "Loading your profile...",
+  "signInProgressPreparingHome": "Getting everything ready..."
 }

@@ -1058,10 +1058,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deleteAccountDialogMessage =>
-      'Timing ouvrira la page officielle de suppression avec les instructions pour demander la suppression définitive de votre compte et des données associées.';
+      'Votre compte et toutes les données associées seront supprimés définitivement.';
 
   @override
-  String get deleteAccountRequestButton => 'Ouvrir la demande';
+  String get deleteAccountFinalDialogTitle => 'Êtes-vous absolument sûr ?';
+
+  @override
+  String get deleteAccountFinalDialogMessage =>
+      'Cette action est définitive et irréversible. Votre compte, vos amis, vos groupes et votre historique seront effacés immédiatement.';
+
+  @override
+  String deleteAccountWaitButton(int seconds) {
+    return 'Patientez ${seconds}s';
+  }
 
   @override
   String get logOutDialogTitle => 'Se déconnecter ?';
@@ -3441,4 +3450,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get editGroupTipLabel => 'Conseil';
+
+  @override
+  String get signInProgressTitle => 'Connexion en cours';
+
+  @override
+  String get signInProgressConfirmingAccount =>
+      'Confirmation de votre compte Google...';
+
+  @override
+  String get signInProgressLoadingProfile => 'Chargement de votre profil...';
+
+  @override
+  String get signInProgressPreparingHome => 'Préparation de votre espace...';
 }

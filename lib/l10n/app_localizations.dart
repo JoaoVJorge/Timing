@@ -1939,14 +1939,26 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountDialogMessage.
   ///
   /// In en, this message translates to:
-  /// **'Timing will open the official deletion page with instructions to request permanent deletion of your account and associated data.'**
+  /// **'Your account and all associated data will be permanently deleted.'**
   String get deleteAccountDialogMessage;
 
-  /// No description provided for @deleteAccountRequestButton.
+  /// No description provided for @deleteAccountFinalDialogTitle.
   ///
   /// In en, this message translates to:
-  /// **'Open request'**
-  String get deleteAccountRequestButton;
+  /// **'Are you absolutely sure?'**
+  String get deleteAccountFinalDialogTitle;
+
+  /// No description provided for @deleteAccountFinalDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent and cannot be undone. Your account, friends, groups and history will be erased right away.'**
+  String get deleteAccountFinalDialogMessage;
+
+  /// No description provided for @deleteAccountWaitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait {seconds}s'**
+  String deleteAccountWaitButton(int seconds);
 
   /// No description provided for @logOutDialogTitle.
   ///
@@ -6075,6 +6087,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tip'**
   String get editGroupTipLabel;
+
+  /// No description provided for @signInProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing you in'**
+  String get signInProgressTitle;
+
+  /// No description provided for @signInProgressConfirmingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your Google account...'**
+  String get signInProgressConfirmingAccount;
+
+  /// No description provided for @signInProgressLoadingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your profile...'**
+  String get signInProgressLoadingProfile;
+
+  /// No description provided for @signInProgressPreparingHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting everything ready...'**
+  String get signInProgressPreparingHome;
 }
 
 class _AppLocalizationsDelegate

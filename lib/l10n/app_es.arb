@@ -322,8 +322,10 @@
   "deleteAccountLabel": "Eliminar cuenta",
   "deleteAccountSettingsSubtitle": "Solicita la eliminación de tu cuenta y tus datos",
   "deleteAccountDialogTitle": "¿Eliminar tu cuenta?",
-  "deleteAccountDialogMessage": "Timing abrirá la página oficial de eliminación con instrucciones para solicitar la eliminación permanente de tu cuenta y los datos asociados.",
-  "deleteAccountRequestButton": "Abrir solicitud",
+  "deleteAccountDialogMessage": "Tu cuenta y todos los datos asociados se eliminarán de forma permanente.",
+  "deleteAccountFinalDialogTitle": "¿Estás completamente seguro?",
+  "deleteAccountFinalDialogMessage": "Esta acción es permanente y no se puede deshacer. Tu cuenta, amigos, grupos e historial se borrarán de inmediato.",
+  "deleteAccountWaitButton": "Espera {seconds}s",
   "logOutDialogTitle": "¿Cerrar sesión?",
   "logOutDialogContent": "Tendrás que iniciar sesión de nuevo para acceder a esta cuenta en este dispositivo. Tus datos locales de estudio se mantendrán.",
   "logOutConfirmButton": "Cerrar sesión",
@@ -1404,5 +1406,9 @@
   "editGroupActivityTip": "¡Define una meta realista para mantener la constancia!",
   "editGroupMoreOptions": "Más opciones",
   "editGroupSaveContinue": "Guardar y continuar",
-  "editGroupTipLabel": "Consejo"
+  "editGroupTipLabel": "Consejo",
+  "signInProgressTitle": "Iniciando sesión",
+  "signInProgressConfirmingAccount": "Confirmando tu cuenta de Google...",
+  "signInProgressLoadingProfile": "Cargando tu perfil...",
+  "signInProgressPreparingHome": "Preparando todo para ti..."
 }

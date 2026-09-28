@@ -1035,10 +1035,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get deleteAccountDialogMessage =>
-      'سيفتح Timing صفحة الحذف الرسمية التي تتضمن تعليمات لطلب الحذف الدائم لحسابك والبيانات المرتبطة به.';
+      'سيتم حذف حسابك وجميع البيانات المرتبطة به بشكل دائم.';
 
   @override
-  String get deleteAccountRequestButton => 'فتح الطلب';
+  String get deleteAccountFinalDialogTitle => 'هل أنت متأكد تمامًا؟';
+
+  @override
+  String get deleteAccountFinalDialogMessage =>
+      'هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم مسح حسابك وأصدقائك ومجموعاتك وسجلك فورًا.';
+
+  @override
+  String deleteAccountWaitButton(int seconds) {
+    return 'انتظر $secondsث';
+  }
 
   @override
   String get logOutDialogTitle => 'تسجيل الخروج؟';
@@ -3369,4 +3378,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editGroupTipLabel => 'نصيحة';
+
+  @override
+  String get signInProgressTitle => 'جارٍ تسجيل دخولك';
+
+  @override
+  String get signInProgressConfirmingAccount => 'جارٍ تأكيد حسابك على جوجل...';
+
+  @override
+  String get signInProgressLoadingProfile => 'جارٍ تحميل ملفك الشخصي...';
+
+  @override
+  String get signInProgressPreparingHome => 'جارٍ تجهيز كل شيء لك...';
 }

@@ -684,8 +684,10 @@
   "deleteAccountLabel": "Konto löschen",
   "deleteAccountSettingsSubtitle": "Löschung Ihres Kontos und Ihrer Daten beantragen",
   "deleteAccountDialogTitle": "Ihr Konto löschen?",
-  "deleteAccountDialogMessage": "Timing öffnet die offizielle Löschseite mit Anweisungen, um die dauerhafte Löschung Ihres Kontos und der zugehörigen Daten zu beantragen.",
-  "deleteAccountRequestButton": "Anfrage öffnen",
+  "deleteAccountDialogMessage": "Ihr Konto und alle zugehörigen Daten werden dauerhaft gelöscht.",
+  "deleteAccountFinalDialogTitle": "Sind Sie absolut sicher?",
+  "deleteAccountFinalDialogMessage": "Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden. Ihr Konto, Ihre Freunde, Gruppen und Ihr Verlauf werden sofort gelöscht.",
+  "deleteAccountWaitButton": "Warten Sie {seconds}s",
   "logOutDialogTitle": "Abmelden?",
   "logOutDialogContent": "Sie müssen sich erneut anmelden, um auf diesem Gerät auf dieses Konto zuzugreifen. Ihre lokalen Studiendaten bleiben erhalten.",
   "logOutConfirmButton": "Abmelden",
@@ -1714,5 +1716,9 @@
   "editGroupActivityTip": "Setze ein realistisches Ziel, um dranzubleiben!",
   "editGroupMoreOptions": "Weitere Optionen",
   "editGroupSaveContinue": "Speichern und weiter",
-  "editGroupTipLabel": "Tipp"
+  "editGroupTipLabel": "Tipp",
+  "signInProgressTitle": "Du wirst angemeldet",
+  "signInProgressConfirmingAccount": "Dein Google-Konto wird bestätigt...",
+  "signInProgressLoadingProfile": "Dein Profil wird geladen...",
+  "signInProgressPreparingHome": "Alles wird vorbereitet..."
 }
