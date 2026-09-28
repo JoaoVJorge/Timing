@@ -7,6 +7,7 @@ import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_widget.dart";
 import "package:timing/app/bindings/app_bindings.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
 
 Future<void> main() async {
   await runZonedGuarded(() async {
@@ -21,10 +22,17 @@ Future<void> main() async {
     };
     await AppBindings().dependencies();
     runApp(const AppWidget());
-  }, (error, stack) => _showError(error));
+  }, _showError);
 }
 
-void _showError(Object error) {
+void _showError(Object error, [StackTrace? stackTrace]) {
+  if (stackTrace != null && Get.isRegistered<AppLoggerService>()) {
+    Get.find<AppLoggerService>().logError(
+      "Unhandled error",
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
   if (!Get.isRegistered<AppNavigator>()) {
     return;
   }
