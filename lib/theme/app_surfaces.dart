@@ -28,11 +28,4 @@ class AppSurfaces {
     borderRadius: BorderRadius.circular(groupRadius),
     border: Border.all(color: tokens.borderUnfocused.withValues(alpha: 0.55)),
   );
-
-  static BoxDecoration of(AppColorTokens tokens, AppSurfaceLevel level) =>
-      switch (level) {
-        AppSurfaceLevel.primary => primary(tokens),
-        AppSurfaceLevel.content => content(tokens),
-        AppSurfaceLevel.row => rowGroup(tokens),
-      };
 }

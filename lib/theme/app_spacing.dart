@@ -24,16 +24,3 @@ class AppSpacing {
     horizontal: page,
   );
 }
-
-/// The three visual levels a surface can take. Keeping them explicit avoids the
-/// "everything is a white rounded card" flattening.
-enum AppSurfaceLevel {
-  /// Priority action. Filled with the accent gradient.
-  primary,
-
-  /// Regular content: agenda, progress, ranking.
-  content,
-
-  /// Secondary navigation rows grouped inside a single container.
-  row,
-}
