@@ -10,10 +10,10 @@ one only depends on the sections before it.
 | `01_profiles.sql` | `profiles`, owner-only `profile_private_data`, presence view, sign-up trigger |
 | `02_friends.sql` | `friendships`, `are_friends()`, friend search RPCs |
 | `03_groups.sql` | Group tables, membership helpers (`is_group_member`, `owns_group`, ...), integrity triggers |
-| `04_tracking.sql` | `activity_entries`, `user_subjects`, `daily_goals`, `schedule_entries`, progress metrics, `record_activity_entry` |
+| `04_tracking.sql` | `activity_entries`, `user_subjects`, `daily_goals`, `schedule_entries`, progress metrics, `record_activity_entry`, `activity_entry_totals` |
 | `05_group_activities.sql` | Fan-out of a group's activity to each member, and protection of those group-owned copies |
 | `06_group_ranking.sql` | `group_leaderboard_scores`, `group_activity_progress` |
-| `07_group_management.sql` | Create, join, edit, reset and transfer a group |
+| `07_group_management.sql` | Create, join, edit, reset and transfer a group, and `delete_my_account` |
 | `08_group_invitations.sql` | Invite, cancel, accept and decline |
 | `09_policies.sql` | Row level security for every table |
 | `10_storage.sql` | Image buckets and their `storage.objects` policies |

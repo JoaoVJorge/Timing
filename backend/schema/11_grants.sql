@@ -59,6 +59,8 @@ revoke all on function public.decline_group_invitation(uuid) from public;
 revoke all on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) from public;
+revoke all on function public.activity_entry_totals(timestamptz) from public;
+revoke all on function public.delete_my_account() from public;
 
 grant execute on function public.generate_friend_code() to authenticated;
 grant execute on function public.are_friends(uuid, uuid) to authenticated;
@@ -98,6 +100,9 @@ grant execute on function public.decline_group_invitation(uuid)
 grant execute on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) to authenticated;
+grant execute on function public.activity_entry_totals(timestamptz)
+  to authenticated;
+grant execute on function public.delete_my_account() to authenticated;
 
 -- -----------------------------------------------------------------------------
 -- Table privileges

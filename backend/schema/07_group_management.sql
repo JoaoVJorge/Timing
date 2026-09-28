@@ -410,3 +410,30 @@ $$;
 revoke all on function public.transfer_group_ownership(uuid, uuid) from public;
 grant execute on function public.transfer_group_ownership(uuid, uuid)
   to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Account deletion
+-- -----------------------------------------------------------------------------
+
+-- Erases the caller's account and every row that hangs off it. Leaving each
+-- group first lets trg_cleanup_group_activities_on_leave hand ownership to the
+-- earliest remaining member, or drop the group when nobody is left. Removing
+-- the auth user then cascades through profiles to all remaining personal data.
+drop function if exists public.delete_my_account();
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  current_user_id uuid := auth.uid();
+begin
+  if current_user_id is null then
+    raise exception 'Not authenticated' using errcode = '28000';
+  end if;
+
+  delete from public.group_members where user_id = current_user_id;
+  delete from auth.users where id = current_user_id;
+end;
+$$;

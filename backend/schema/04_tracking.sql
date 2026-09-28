@@ -434,3 +434,41 @@ begin
   on conflict (id) do nothing;
 end;
 $$;
+
+drop function if exists public.activity_entry_totals(timestamptz);
+create or replace function public.activity_entry_totals(period_start timestamptz)
+returns table (
+  category text,
+  subject_id text,
+  subject_name text,
+  occurred_at timestamptz,
+  seconds bigint,
+  pages bigint,
+  completed_tasks bigint
+)
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  select
+    a.category,
+    a.subject_id,
+    a.subject_name,
+    max(a.occurred_at),
+    sum(a.seconds),
+    sum(a.pages),
+    sum(a.completed_tasks)
+  from public.activity_entries a
+  where a.user_id = (select auth.uid())
+    and a.occurred_at >= period_start
+  group by
+    date_bin(
+      interval '15 minutes',
+      a.occurred_at,
+      timestamptz '2000-01-01 00:00:00+00'
+    ),
+    a.category,
+    a.subject_id,
+    a.subject_name;
+$$;
