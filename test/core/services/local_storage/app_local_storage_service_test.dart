@@ -43,6 +43,52 @@ void main() {
     expect(preferences.getString("user.guest.subjects"), startsWith("enc.v1:"));
   });
 
+  test("round-trips a string list through an encrypted key", () async {
+    await storage.write<List<String>>(
+      LocalStorageKeys.announcedAchievementIds,
+      ["1", "12"],
+    );
+
+    expect(
+      preferences.getString("user.guest.announcedAchievementIds"),
+      startsWith("enc.v1:"),
+    );
+    expect(
+      await storage.read<List<String>?>(
+        LocalStorageKeys.announcedAchievementIds,
+      ),
+      ["1", "12"],
+    );
+  });
+
+  test("reads a list an earlier build saved as its toString()", () async {
+    await storage.write<String>(
+      LocalStorageKeys.announcedAchievementIds,
+      "[1, 12, 45]",
+    );
+
+    expect(
+      await storage.read<List<String>?>(
+        LocalStorageKeys.announcedAchievementIds,
+      ),
+      ["1", "12", "45"],
+    );
+  });
+
+  test("an unreadable list reads as missing instead of throwing", () async {
+    await storage.write<String>(
+      LocalStorageKeys.announcedAchievementIds,
+      "not a list",
+    );
+
+    expect(
+      await storage.read<List<String>?>(
+        LocalStorageKeys.announcedAchievementIds,
+      ),
+      isNull,
+    );
+  });
+
   test("deletes all data scoped to the current user", () async {
     await storage.write(LocalStorageKeys.appConfig, "profile");
     await storage.write(LocalStorageKeys.subjects, "notes");

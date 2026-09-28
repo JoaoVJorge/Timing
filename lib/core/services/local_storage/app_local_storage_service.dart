@@ -29,7 +29,7 @@ class AppLocalStorageService {
     }
 
     if (key.encryptAtRest) {
-      await _writeLocalValue(storageKey, await _encrypt(value.toString()));
+      await _writeLocalValue(storageKey, await _encrypt(_clearText(value)));
       return;
     }
 
@@ -58,13 +58,13 @@ class AppLocalStorageService {
     final Object? value = localStorage.get(storageKey);
     if (key.encryptAtRest && value is String) {
       if (value.startsWith(_encryptedPrefix)) {
-        return await _decrypt(value) as T?;
+        return _fromClearText<T>(await _decrypt(value));
       }
 
       // Transparently migrates caches created by older builds. The plaintext
       // is replaced only after it has been read successfully.
       await _writeLocalValue(storageKey, await _encrypt(value));
-      return value as T?;
+      return _fromClearText<T>(value);
     }
     if (value != null ||
         !key.isUserScoped ||
@@ -79,10 +79,31 @@ class AppLocalStorageService {
 
     await _writeLocalValue(
       storageKey,
-      key.encryptAtRest ? await _encrypt(legacyValue.toString()) : legacyValue,
+      key.encryptAtRest ? await _encrypt(_clearText(legacyValue)) : legacyValue,
     );
     await localStorage.remove(key.name);
     return _castValue<T>(legacyValue);
+  }
+
+  String _clearText(Object? value) =>
+      value is List ? jsonEncode(value) : value.toString();
+
+  T? _fromClearText<T>(String clearText) {
+    if (clearText is T || <String>[] is! T) {
+      return clearText as T?;
+    }
+    final Object? decoded = _tryDecodeJson(clearText);
+    return decoded is List
+        ? decoded.map((item) => "$item").toList() as T?
+        : null;
+  }
+
+  Object? _tryDecodeJson(String text) {
+    try {
+      return jsonDecode(text);
+    } on FormatException {
+      return null;
+    }
   }
 
   // Some shared_preferences backends decode stored string lists as
