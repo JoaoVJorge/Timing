@@ -3,6 +3,8 @@ import "dart:convert";
 
 import "package:dartz/dartz.dart";
 import "package:flutter/foundation.dart";
+import "package:supabase_flutter/supabase_flutter.dart"
+    show PostgrestException, PostgrestList;
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -400,6 +402,7 @@ class ActivityDataSource {
   /// days, so the history is read page by page until a short page.
   static const int _entriesPageSize = 1000;
   static const int _maxEntryPages = 60;
+  static const String _missingFunctionCode = "PGRST202";
 
   Future<Either<AppError, List<ActivityEntryEntity>>> getActivityEntries({
     int retentionDays = 400,
@@ -414,42 +417,89 @@ class ActivityDataSource {
           .toUtc()
           .subtract(Duration(days: retentionDays))
           .toIso8601String();
-      final List<ActivityEntryEntity> entries = [];
-      for (int page = 0; page < _maxEntryPages; page++) {
-        final int from = page * _entriesPageSize;
-        final List<dynamic> rows = await _supabaseService.requireClient
-            .from("activity_entries")
-            .select(
-              "id, category, subject_id, subject_name, occurred_at, "
-              "seconds, pages, completed_tasks",
-            )
-            .eq("user_id", userId)
-            .gte("occurred_at", cutoff)
-            // id breaks ties so rows sharing a timestamp are never skipped or
-            // repeated across page boundaries.
-            .order("occurred_at")
-            .order("id")
-            .range(from, from + _entriesPageSize - 1)
-            .timeout(_remoteCallTimeout);
-        entries.addAll(
-          rows
-              .map((row) => _entryFromRow(row as Map<String, dynamic>))
-              .where(
-                (entry) =>
-                    entry.seconds > 0 ||
-                    entry.pages > 0 ||
-                    entry.completedTasks > 0,
-              ),
-        );
-        if (rows.length < _entriesPageSize) {
-          break;
+      try {
+        return Right(await _readEntryTotals(cutoff));
+      } on PostgrestException catch (error) {
+        if (error.code != _missingFunctionCode) {
+          rethrow;
         }
       }
-      return Right(entries);
+      return Right(await _readEntryRows(userId, cutoff));
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
   }
+
+  Future<List<ActivityEntryEntity>> _readEntryTotals(String cutoff) =>
+      _readPages(
+        (from, to) => _supabaseService.requireClient
+            .rpc<PostgrestList>(
+              "activity_entry_totals",
+              params: {"period_start": cutoff},
+            )
+            .order("occurred_at")
+            .order("category")
+            .order("subject_id")
+            .order("subject_name")
+            .range(from, to),
+        _entryFromTotalsRow,
+      );
+
+  Future<List<ActivityEntryEntity>> _readEntryRows(
+    String userId,
+    String cutoff,
+  ) => _readPages(
+    (from, to) => _supabaseService.requireClient
+        .from("activity_entries")
+        .select(
+          "id, category, subject_id, subject_name, occurred_at, "
+          "seconds, pages, completed_tasks",
+        )
+        .eq("user_id", userId)
+        .gte("occurred_at", cutoff)
+        // id breaks ties so rows sharing a timestamp are never skipped or
+        // repeated across page boundaries.
+        .order("occurred_at")
+        .order("id")
+        .range(from, to),
+    _entryFromRow,
+  );
+
+  Future<List<ActivityEntryEntity>> _readPages(
+    Future<PostgrestList> Function(int from, int to) readPage,
+    ActivityEntryEntity Function(Map<String, dynamic> row) toEntry,
+  ) async {
+    final List<ActivityEntryEntity> entries = [];
+    for (int page = 0; page < _maxEntryPages; page++) {
+      final int from = page * _entriesPageSize;
+      final PostgrestList rows = await readPage(
+        from,
+        from + _entriesPageSize - 1,
+      ).timeout(_remoteCallTimeout);
+      entries.addAll(
+        rows
+            .map(toEntry)
+            .where(
+              (entry) =>
+                  entry.seconds > 0 ||
+                  entry.pages > 0 ||
+                  entry.completedTasks > 0,
+            ),
+      );
+      if (rows.length < _entriesPageSize) {
+        break;
+      }
+    }
+    return entries;
+  }
+
+  ActivityEntryEntity _entryFromTotalsRow(Map<String, dynamic> row) =>
+      _entryFromRow({
+        ...row,
+        "id":
+            "${row["category"]}|${row["subject_id"] ?? ""}|"
+            "${row["occurred_at"]}",
+      });
 
   ActivityEntryEntity _entryFromRow(Map<String, dynamic> row) =>
       ActivityEntryEntity(
