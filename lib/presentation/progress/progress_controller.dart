@@ -25,10 +25,12 @@ class ProgressActivitySummary {
     required this.seconds,
     required this.pages,
     required this.share,
+    this.iconName = "",
   });
 
   final String id;
   final String name;
+  final String iconName;
   final TimeCategoryType category;
   final int seconds;
   final int pages;
@@ -86,6 +88,7 @@ List<ProgressActivitySummary> buildProgressActivitySummaries({
         return ProgressActivitySummary(
           id: activity.id,
           name: activity.name,
+          iconName: subjectsById[activity.id]!.iconName,
           category: activity.category,
           seconds: activity.seconds,
           pages: activity.pages,
@@ -284,6 +287,14 @@ class ProgressController extends GetxController {
 
   Future<void> onTapAchievements() =>
       _navigateAndRefresh(AppRoutes.achievements);
+
+  Future<void> onTapActivity(ProgressActivitySummary activity) async {
+    final SubjectEntity? subject = subjects.firstWhereOrNull(
+      (item) => item.id == activity.id,
+    );
+    if (subject == null) return;
+    await _navigateAndRefresh(AppRoutes.subjectStats, arguments: subject);
+  }
 
   void onSelectPeriod(ProgressPeriod period) {
     if (selectedPeriod.value == period) {

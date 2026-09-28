@@ -8,6 +8,7 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/progress/progress_category_style.dart";
 import "package:timing/presentation/progress/progress_controller.dart";
 import "package:timing/presentation/progress/widgets/progress_achievements_section.dart";
+import "package:timing/presentation/progress/widgets/progress_activity_card.dart";
 import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
 import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
 import "package:timing/presentation/progress/widgets/progress_period_tabs.dart";
@@ -243,47 +244,17 @@ class _DistributionSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(12),
     decoration: AppSurfaces.content(context.colorTokens),
     child: const Column(
       children: [
-        _DistributionRowSkeleton(),
-        Gap(AppSpacing.betweenRelated),
-        _DistributionRowSkeleton(),
-        Gap(AppSpacing.betweenRelated),
-        _DistributionRowSkeleton(),
-        Gap(AppSpacing.betweenRelated),
-        _DistributionRowSkeleton(),
+        AppSkeletonBox(height: 82, radius: 16),
+        Gap(8),
+        AppSkeletonBox(height: 82, radius: 16),
+        Gap(8),
+        AppSkeletonBox(height: 82, radius: 16),
       ],
     ),
-  );
-}
-
-class _DistributionRowSkeleton extends StatelessWidget {
-  const _DistributionRowSkeleton();
-
-  @override
-  Widget build(BuildContext context) => const Row(
-    children: [
-      AppSkeletonCircle(size: 32),
-      Gap(AppSpacing.betweenRelated),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: AppSkeletonBox(height: 14, radius: 6)),
-                Gap(20),
-                AppSkeletonBox(width: 48, height: 12, radius: 6),
-              ],
-            ),
-            Gap(AppSpacing.titleToDescription),
-            AppSkeletonBox(height: 6, radius: 999),
-          ],
-        ),
-      ),
-    ],
   );
 }
 
@@ -306,129 +277,38 @@ class _ProgressHeader extends StatelessWidget {
   );
 }
 
-class _DistributionCard extends StatefulWidget {
+class _DistributionCard extends StatelessWidget {
   const _DistributionCard({required this.controller});
 
   final ProgressController controller;
 
   @override
-  State<_DistributionCard> createState() => _DistributionCardState();
-}
-
-class _DistributionCardState extends State<_DistributionCard> {
-  static const int _collapsedItemCount = 3;
-
-  bool _showAll = false;
-
-  @override
   Widget build(BuildContext context) {
     final List<ProgressActivitySummary> activities =
-        widget.controller.selectedPeriodActivities;
-    final List<ProgressActivitySummary> visibleActivities = _showAll
-        ? activities
-        : activities.take(_collapsedItemCount).toList();
-
+        controller.selectedPeriodActivities;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: AppSurfaces.content(context.colorTokens),
       child: activities.isEmpty
           ? const _DistributionEmptyState()
           : Column(
               children: [
-                for (int index = 0; index < visibleActivities.length; index++)
-                  _DistributionRow(
-                    activity: visibleActivities[index],
-                    isLast:
-                        index == visibleActivities.length - 1 &&
-                        (activities.length <= _collapsedItemCount || _showAll),
-                  ),
-                if (activities.length > _collapsedItemCount && !_showAll)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: () => setState(() => _showAll = true),
-                      child: Text(context.l10n.profileSeeAll),
-                    ),
-                  ),
-              ],
-            ),
-    );
-  }
-}
-
-class _DistributionRow extends StatelessWidget {
-  const _DistributionRow({required this.activity, this.isLast = false});
-
-  final ProgressActivitySummary activity;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color color = activity.category.accentColor;
-    final String value = activity.isReading
-        ? context.l10n.metricPagesValue(activity.pages)
-        : formatDurationLong(Duration(seconds: activity.seconds));
-    final String share = activity.isReading
-        ? context.l10n.progressActivityPagesShare(
-            (activity.share * 100).round(),
-          )
-        : context.l10n.progressActivityTimeShare(
-            (activity.share * 100).round(),
-          );
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.betweenRelated),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppIconBadge(
-            icon: _categoryIcon(activity.category),
-            color: color,
-            size: 36,
-          ),
-          const Gap(AppSpacing.betweenRelated),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        activity.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                for (int index = 0; index < activities.length; index++) ...[
+                  if (index > 0)
+                    Divider(
+                      height: 1,
+                      color: context.colorTokens.borderUnfocused.withValues(
+                        alpha: 0.4,
                       ),
                     ),
-                    Text(
-                      value,
-                      style: context.textStyles.caption.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const Gap(AppSpacing.titleToDescription),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: activity.share.clamp(0, 1),
-                    minHeight: 6,
-                    backgroundColor: color.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ProgressActivityCard(
+                    activity: activities[index],
+                    rank: index + 1,
+                    onTap: () => controller.onTapActivity(activities[index]),
                   ),
-                ),
-                const Gap(5),
-                Text(share, style: context.textStyles.caption),
+                ],
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -464,10 +344,3 @@ class _DistributionEmptyState extends StatelessWidget {
     ),
   );
 }
-
-IconData _categoryIcon(TimeCategoryType category) => switch (category) {
-  TimeCategoryType.studying => Icons.school_rounded,
-  TimeCategoryType.exercises => Icons.fitness_center_rounded,
-  TimeCategoryType.reading => Icons.auto_stories_rounded,
-  TimeCategoryType.hobbies => Icons.palette_rounded,
-};
