@@ -56,10 +56,7 @@ class ServicesBindings extends Bindings {
     Get.put<FocusFeedbackService>(FocusFeedbackService(), permanent: true);
     Get.put<FocusGuardService>(FocusGuardService(), permanent: true);
     Get.put<HomeWidgetService>(HomeWidgetService(), permanent: true);
-    Get.put<TimerForegroundService>(
-      TimerForegroundService(),
-      permanent: true,
-    );
+    Get.put<TimerForegroundService>(TimerForegroundService(), permanent: true);
 
     final SupabaseService supabaseService = await SupabaseService.initialize();
     Get.put<SupabaseService>(supabaseService, permanent: true);

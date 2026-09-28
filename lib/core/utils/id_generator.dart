@@ -50,7 +50,10 @@ final Random _uuidRandom = Random.secure();
 /// timestamp-prefixed format is not valid UUID syntax and Postgrest rejects
 /// it with a `22P02` error.
 String generateUuidV4() {
-  final List<int> bytes = List<int>.generate(16, (_) => _uuidRandom.nextInt(256));
+  final List<int> bytes = List<int>.generate(
+    16,
+    (_) => _uuidRandom.nextInt(256),
+  );
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
   String hex(int start, int end) => bytes

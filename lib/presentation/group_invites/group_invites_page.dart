@@ -44,8 +44,7 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
         );
       }
 
-      final List<GroupInviteOptionEntity> options = controller.options
-          .toList();
+      final List<GroupInviteOptionEntity> options = controller.options.toList();
       final Set<String> updatingFriendIds = controller.updatingFriendIds
           .toSet();
 

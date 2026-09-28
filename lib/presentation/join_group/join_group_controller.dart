@@ -30,9 +30,8 @@ class JoinGroupController extends GetxController {
     isLoading.value = false;
 
     await result.fold(
-      (error) async => _appNavigator.showErrorOrOfflineSnackBar(
-        context.l10n.joinGroupError,
-      ),
+      (error) async =>
+          _appNavigator.showErrorOrOfflineSnackBar(context.l10n.joinGroupError),
       (group) async {
         if (Get.isRegistered<GroupsController>()) {
           await Get.find<GroupsController>().upsertJoinedGroup(group);

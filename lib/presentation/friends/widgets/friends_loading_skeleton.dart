@@ -22,13 +22,7 @@ class FriendsLoadingSkeleton extends StatelessWidget {
         Gap(18),
         AppSkeletonBox(width: 120, height: 15, radius: 6),
         Gap(12),
-        Column(
-          children: [
-            _FriendSkeletonRow(),
-            Gap(10),
-            _FriendSkeletonRow(),
-          ],
-        ),
+        Column(children: [_FriendSkeletonRow(), Gap(10), _FriendSkeletonRow()]),
       ],
     ),
   );

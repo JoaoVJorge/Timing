@@ -121,7 +121,8 @@ class EditGroupController extends GetxController {
   Future<void> _prefillColorAndSequence(
     GroupActivityProgressEntity? header,
   ) async {
-    final String? activityId = header?.activityId ?? group.value?.createdActivityId;
+    final String? activityId =
+        header?.activityId ?? group.value?.createdActivityId;
     if (activityId == null || activityId.isEmpty) {
       return;
     }

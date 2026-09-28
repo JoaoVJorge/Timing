@@ -52,16 +52,14 @@ class _RejectingSupabase implements SupabaseService {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-FriendEntity _friend({
-  String id = "friend-1",
-  String friendshipId = "fs-1",
-}) => FriendEntity(
-  id: id,
-  friendshipId: friendshipId,
-  name: "Amigo",
-  handle: "@amigo",
-  colorValue: 0xFF000000,
-);
+FriendEntity _friend({String id = "friend-1", String friendshipId = "fs-1"}) =>
+    FriendEntity(
+      id: id,
+      friendshipId: friendshipId,
+      name: "Amigo",
+      handle: "@amigo",
+      colorValue: 0xFF000000,
+    );
 
 Future<(FriendsDataSource, PendingSyncStore, _MemStorage)> _build() async {
   final storage = _MemStorage();
@@ -180,28 +178,25 @@ void main() {
       expect(store.contains(PendingSyncDataset.friends), isTrue);
     });
 
-    test(
-      "drops an action the server permanently rejects instead of blocking "
-      "the queue",
-      () async {
-        final (offlineSource, store, storage) = await _build();
-        await offlineSource.sendFriendRequest("friend-2");
-        await offlineSource.sendFriendRequest("friend-3");
-        expect(store.contains(PendingSyncDataset.friends), isTrue);
+    test("drops an action the server permanently rejects instead of blocking "
+        "the queue", () async {
+      final (offlineSource, store, storage) = await _build();
+      await offlineSource.sendFriendRequest("friend-2");
+      await offlineSource.sendFriendRequest("friend-3");
+      expect(store.contains(PendingSyncDataset.friends), isTrue);
 
-        final rejecting = FriendsDataSource(
-          supabaseService: _RejectingSupabase(),
-          logger: AppLoggerService(),
-          localStorageService: storage,
-          pendingSyncStore: store,
-        );
-        await rejecting.flushPendingSync();
+      final rejecting = FriendsDataSource(
+        supabaseService: _RejectingSupabase(),
+        logger: AppLoggerService(),
+        localStorageService: storage,
+        pendingSyncStore: store,
+      );
+      await rejecting.flushPendingSync();
 
-        expect(store.contains(PendingSyncDataset.friends), isFalse);
-        final String queue =
-            storage.data[LocalStorageKeys.pendingFriendActions] as String;
-        expect(jsonDecode(queue), isEmpty);
-      },
-    );
+      expect(store.contains(PendingSyncDataset.friends), isFalse);
+      final String queue =
+          storage.data[LocalStorageKeys.pendingFriendActions] as String;
+      expect(jsonDecode(queue), isEmpty);
+    });
   });
 }
