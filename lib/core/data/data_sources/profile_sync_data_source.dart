@@ -58,6 +58,25 @@ class ProfileSyncDataSource {
     }
   }
 
+  Future<Either<AppError, void>> deleteAccount() async {
+    try {
+      if (_supabaseService.currentUserId == null) {
+        return Left(
+          GenericAppError(
+            error: StateError("Not signed in"),
+            stackTrace: StackTrace.current,
+          ),
+        );
+      }
+      await _supabaseService.requireClient
+          .rpc("delete_my_account")
+          .timeout(_remoteCallTimeout);
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   Future<Either<AppError, AppConfigEntity?>> getCurrentProfile() async {
     try {
       final String? userId = _supabaseService.currentUserId;
@@ -65,31 +84,33 @@ class ProfileSyncDataSource {
         return const Right(null);
       }
 
-      final Map<String, dynamic>? data = await _supabaseService.requireClient
-          .from("profiles")
-          .select(
-            "id, friend_code, is_dark_mode, user_name, nick_name, "
-            "profile_photo_base64, accent_color_value, avatar_icon_index, "
-            "notifications_enabled, language_code, "
-            "focus_lock_studying_enabled, focus_lock_exercises_enabled, "
-            "focus_lock_reading_enabled, focus_lock_hobbies_enabled",
-          )
-          .eq("id", userId)
-          .maybeSingle()
-          .timeout(_remoteCallTimeout);
+      final List<Map<String, dynamic>?> rows = await Future.wait([
+        _supabaseService.requireClient
+            .from("profiles")
+            .select(
+              "id, friend_code, is_dark_mode, user_name, nick_name, "
+              "profile_photo_base64, accent_color_value, avatar_icon_index, "
+              "notifications_enabled, language_code, "
+              "focus_lock_studying_enabled, focus_lock_exercises_enabled, "
+              "focus_lock_reading_enabled, focus_lock_hobbies_enabled",
+            )
+            .eq("id", userId)
+            .maybeSingle()
+            .timeout(_remoteCallTimeout),
+        _supabaseService.requireClient
+            .from("profile_private_data")
+            .select("email, phone_number, birth_date")
+            .eq("user_id", userId)
+            .maybeSingle()
+            .timeout(_remoteCallTimeout),
+      ]);
+      final Map<String, dynamic>? data = rows.first;
+      final Map<String, dynamic>? privateData = rows.last;
       _logger.logResponse("select public.profiles", data);
 
       if (data == null) {
         return const Right(null);
       }
-
-      final Map<String, dynamic>? privateData = await _supabaseService
-          .requireClient
-          .from("profile_private_data")
-          .select("email, phone_number, birth_date")
-          .eq("user_id", userId)
-          .maybeSingle()
-          .timeout(_remoteCallTimeout);
 
       return Right(_profileFromRow({...data, ...?privateData}));
     } catch (error, stackTrace) {

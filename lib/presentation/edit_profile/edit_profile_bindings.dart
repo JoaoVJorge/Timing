@@ -10,6 +10,7 @@ class EditProfileBindings extends Bindings {
         appNavigator: Get.find(),
         getLinkedAuthProvidersUseCase: Get.find(),
         linkAuthProviderUseCase: Get.find(),
+        deleteAccountUseCase: Get.find(),
       ),
     );
   }

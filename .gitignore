@@ -43,6 +43,9 @@ migrate_working_dir/
 !/test/core/services/
 !/test/core/services/local_storage/
 !/test/core/services/local_storage/app_local_storage_service_test.dart
+!/test/core/data/
+!/test/core/data/data_sources/
+!/test/core/data/data_sources/profile_sync_requests_test.dart
 
 # Local AI assistant settings
 .claude/settings.local.json

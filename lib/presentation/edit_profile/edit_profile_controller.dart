@@ -11,7 +11,9 @@ import "package:timing/core/domain/enums/auth_identity_provider.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/get_linked_auth_providers_use_case.dart";
 import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
+import "package:timing/core/domain/use_cases/delete_account_use_case.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:timing/shared/widgets/profile_photo_crop_dialog.dart";
 import "package:image_picker/image_picker.dart";
@@ -22,12 +24,14 @@ class EditProfileController extends GetxController {
     required this._appNavigator,
     required this._getLinkedAuthProvidersUseCase,
     required this._linkAuthProviderUseCase,
+    required this._deleteAccountUseCase,
   });
 
   final AppController _appController;
   final AppNavigator _appNavigator;
   final GetLinkedAuthProvidersUseCase _getLinkedAuthProvidersUseCase;
   final LinkAuthProviderUseCase _linkAuthProviderUseCase;
+  final DeleteAccountUseCase _deleteAccountUseCase;
 
   late final TextEditingController nameController = TextEditingController(
     text: _appController.userName.value,
@@ -48,6 +52,7 @@ class EditProfileController extends GetxController {
 
   Uint8List? get profilePhotoBytes => _appController.profilePhotoBytes;
   final RxBool isSaving = false.obs;
+  final RxBool isDeletingAccount = false.obs;
   final RxBool isGoogleLinked = false.obs;
   final RxBool isAppleLinked = false.obs;
   final RxBool isLinkingGoogle = false.obs;
@@ -209,6 +214,39 @@ class EditProfileController extends GetxController {
       (_) => _appNavigator.showSuccessSnackBar(
         Get.context!.l10n.profileSavedMessage,
       ),
+    );
+  }
+
+  Future<void> onTapDeleteAccount() async {
+    final BuildContext context = Get.context!;
+    final bool firstConfirmed = await showAppConfirmationDialog(
+      title: context.l10n.deleteAccountDialogTitle,
+      message: context.l10n.deleteAccountDialogMessage,
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.confirmButton,
+      icon: Icons.person_remove_rounded,
+      isDestructive: true,
+    );
+    if (!firstConfirmed || isDeletingAccount.value) return;
+
+    final BuildContext? finalContext = Get.context;
+    if (finalContext == null || !finalContext.mounted) return;
+    final bool finalConfirmed = await showCountdownConfirmationDialog(
+      title: finalContext.l10n.deleteAccountFinalDialogTitle,
+      message: finalContext.l10n.deleteAccountFinalDialogMessage,
+      cancelLabel: finalContext.l10n.cancelButton,
+      confirmLabel: finalContext.l10n.deleteButton,
+      waitLabelBuilder: finalContext.l10n.deleteAccountWaitButton,
+      icon: Icons.delete_forever_rounded,
+    );
+    if (!finalConfirmed) return;
+
+    isDeletingAccount.value = true;
+    final result = await _deleteAccountUseCase();
+    isDeletingAccount.value = false;
+    await result.fold(
+      (error) async => _appNavigator.showErrorSnackBar(),
+      (_) => _appController.logOut(),
     );
   }
 

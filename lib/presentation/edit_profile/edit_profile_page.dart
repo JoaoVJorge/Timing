@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/config/widgets/settings_tile.dart";
 import "package:timing/presentation/edit_profile/edit_profile_controller.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
@@ -169,6 +170,19 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ],
             ),
+            const Gap(16),
+            _ProfileSection(
+              title: context.l10n.sessionSection,
+              children: [
+                SettingsTile.danger(
+                  icon: Icons.person_remove_rounded,
+                  title: context.l10n.deleteAccountLabel,
+                  subtitle: context.l10n.deleteAccountSettingsSubtitle,
+                  onTap: controller.onTapDeleteAccount,
+                ),
+              ],
+            ),
+            const Gap(16),
           ],
         ),
       ),

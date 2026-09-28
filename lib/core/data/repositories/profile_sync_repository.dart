@@ -11,6 +11,9 @@ class ProfileSyncRepository {
   Future<Either<AppError, void>> syncProfile(AppConfigEntity config) =>
       _profileSyncDataSource.syncProfile(config);
 
+  Future<Either<AppError, void>> deleteAccount() =>
+      _profileSyncDataSource.deleteAccount();
+
   Future<Either<AppError, AppConfigEntity?>> getCurrentProfile() =>
       _profileSyncDataSource.getCurrentProfile();
 }
