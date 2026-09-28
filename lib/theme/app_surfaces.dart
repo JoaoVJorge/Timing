@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/colors.dart";
 
 /// Decorations for the three surface levels. Content cards keep a hairline
