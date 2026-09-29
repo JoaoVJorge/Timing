@@ -116,7 +116,9 @@ class _EditGroupPageState extends State<EditGroupPage> {
                         _IntensitySection(controller: controller),
                         const Gap(16),
                       ],
-                      _ColorSection(controller: controller),
+                      ObservedCreationColorSection(
+                        selectedColor: controller.selectedColor,
+                      ),
                     ],
                     if (!information) ...[
                       const Gap(16),
@@ -372,21 +374,6 @@ class _IntensitySection extends StatelessWidget {
       ),
     );
   });
-}
-
-class _ColorSection extends StatelessWidget {
-  const _ColorSection({required this.controller});
-
-  final EditGroupController controller;
-
-  @override
-  Widget build(BuildContext context) => Obx(
-    () => CreationColorSection(
-      accent: controller.selectedColor.value,
-      label: context.l10n.colorLabel,
-      onSelect: (color) => controller.selectedColor.value = color,
-    ),
-  );
 }
 
 class _ActivityForm extends StatelessWidget {

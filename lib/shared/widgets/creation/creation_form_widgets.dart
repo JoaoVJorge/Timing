@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
+import "package:get/get.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
@@ -434,6 +435,22 @@ class CreationColorSection extends StatelessWidget {
       accent: accent,
     ),
     child: CreationColorPalette(selectedColor: accent, onSelect: onSelect),
+  );
+}
+
+/// [CreationColorSection] bound to a controller's [selectedColor].
+class ObservedCreationColorSection extends StatelessWidget {
+  const ObservedCreationColorSection({required this.selectedColor, super.key});
+
+  final Rx<Color> selectedColor;
+
+  @override
+  Widget build(BuildContext context) => Obx(
+    () => CreationColorSection(
+      accent: selectedColor.value,
+      label: context.l10n.colorLabel,
+      onSelect: (color) => selectedColor.value = color,
+    ),
   );
 }
 

@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:timing/core/data/repositories/schedule_repository.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/core/utils/id_generator.dart";
 
 class UpdateScheduleEntryUseCase {
@@ -47,14 +48,8 @@ class UpdateScheduleEntryUseCase {
         );
       }
 
-      final DateTime normalizedFrom = DateTime(
-        activeFrom.year,
-        activeFrom.month,
-        activeFrom.day,
-      );
-      final DateTime? normalizedUntil = activeUntil == null
-          ? null
-          : DateTime(activeUntil.year, activeUntil.month, activeUntil.day);
+      final DateTime normalizedFrom = activeFrom.dateOnly;
+      final DateTime? normalizedUntil = activeUntil?.dateOnly;
 
       ScheduleEntryEntity build(String id, int weekday) => ScheduleEntryEntity(
         id: id,

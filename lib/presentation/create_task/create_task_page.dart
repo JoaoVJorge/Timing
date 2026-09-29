@@ -48,7 +48,7 @@ class CreateTaskPage extends StatelessWidget {
         const Gap(12),
         _TargetDaysSection(controller: controller),
         const Gap(12),
-        _ColorSection(controller: controller),
+        ObservedCreationColorSection(selectedColor: controller.selectedColor),
       ],
     );
   }
@@ -248,21 +248,6 @@ class _CustomDaysInput extends StatelessWidget {
           ),
         ),
       ],
-    ),
-  );
-}
-
-class _ColorSection extends StatelessWidget {
-  const _ColorSection({required this.controller});
-
-  final CreateTaskController controller;
-
-  @override
-  Widget build(BuildContext context) => Obx(
-    () => CreationColorSection(
-      accent: controller.selectedColor.value,
-      label: context.l10n.colorLabel,
-      onSelect: (color) => controller.selectedColor.value = color,
     ),
   );
 }

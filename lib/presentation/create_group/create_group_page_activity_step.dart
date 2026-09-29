@@ -99,13 +99,7 @@ class _DailyGoalActivityForm extends StatelessWidget {
           ),
         ),
         const Gap(12),
-        Obx(
-          () => CreationColorSection(
-            accent: controller.selectedColor.value,
-            label: context.l10n.colorLabel,
-            onSelect: (color) => controller.selectedColor.value = color,
-          ),
-        ),
+        ObservedCreationColorSection(selectedColor: controller.selectedColor),
       ],
     );
   });

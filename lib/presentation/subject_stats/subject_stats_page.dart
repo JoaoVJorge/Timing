@@ -10,6 +10,7 @@ import "package:timing/presentation/subject_stats/subject_stats_controller.dart"
 import "package:timing/presentation/subject_stats/widgets/subject_comparatives_section.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/widgets/app_icon_badge.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
@@ -266,9 +267,11 @@ class _StatsGrid extends StatelessWidget {
   }
 
   String _restValue(BuildContext context, SubjectEntity subject) =>
-      subject.category == TimeCategoryType.exercises
-      ? "${subject.restSeconds}s"
-      : formatDurationTotalMinutes(Duration(seconds: subject.restSeconds));
+      formatRestDuration(
+        context,
+        Duration(seconds: subject.restSeconds),
+        usesSeconds: subject.category == TimeCategoryType.exercises,
+      );
 
   String _goalStartValue(BuildContext context, DateTime? start) => start == null
       ? "—"

@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:equatable/equatable.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 
 class ScheduleEntryEntity extends Equatable {
   const ScheduleEntryEntity({
@@ -27,7 +28,7 @@ class ScheduleEntryEntity extends Equatable {
         colorValue: map["colorValue"] as int,
         activeFrom:
             DateTime.tryParse(map["activeFrom"] as String? ?? "") ??
-            _todayDate(),
+            DateTime.now().dateOnly,
         activeUntil: DateTime.tryParse(map["activeUntil"] as String? ?? ""),
       );
 
@@ -50,7 +51,7 @@ class ScheduleEntryEntity extends Equatable {
       startMinutes == other.startMinutes &&
       endMinutes == other.endMinutes &&
       colorValue == other.colorValue &&
-      _isSameDate(activeFrom, other.activeFrom) &&
+      activeFrom.isSameDay(other.activeFrom) &&
       _isSameNullableDate(activeUntil, other.activeUntil);
 
   Map<String, dynamic> toMap() => {
@@ -60,10 +61,8 @@ class ScheduleEntryEntity extends Equatable {
     "startMinutes": startMinutes,
     "endMinutes": endMinutes,
     "colorValue": colorValue,
-    "activeFrom": _dateOnly(activeFrom).toIso8601String(),
-    "activeUntil": activeUntil == null
-        ? null
-        : _dateOnly(activeUntil!).toIso8601String(),
+    "activeFrom": activeFrom.dateOnly.toIso8601String(),
+    "activeUntil": activeUntil?.dateOnly.toIso8601String(),
   };
 
   String toJson() => jsonEncode(toMap());
@@ -100,23 +99,10 @@ class ScheduleEntryEntity extends Equatable {
     activeUntil,
   ];
 
-  static DateTime _todayDate() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
-
-  static DateTime _dateOnly(DateTime value) =>
-      DateTime(value.year, value.month, value.day);
-
-  static bool _isSameDate(DateTime left, DateTime right) =>
-      left.year == right.year &&
-      left.month == right.month &&
-      left.day == right.day;
-
   static bool _isSameNullableDate(DateTime? left, DateTime? right) {
     if (left == null || right == null) {
       return left == right;
     }
-    return _isSameDate(left, right);
+    return left.isSameDay(right);
   }
 }

@@ -7,6 +7,7 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/core/utils/id_generator.dart";
 
 /// Append-only local trail of every logged activity, kept so the app can answer
@@ -153,7 +154,7 @@ class ActivityHistoryService {
   }
 
   static String _dayAndSubject(ActivityEntryEntity entry) =>
-      "${_startOfDay(entry.timestamp).toIso8601String()}|${entry.subjectId}";
+      "${entry.timestamp.dateOnly.toIso8601String()}|${entry.subjectId}";
 
   /// Forgets everything recorded for [subjectId]: the activity's "delete data".
   Future<void> removeSubject(String subjectId) async {
@@ -227,13 +228,10 @@ class ActivityHistoryService {
     return total;
   }
 
-  static DateTime _startOfDay(DateTime date) =>
-      DateTime(date.year, date.month, date.day);
-
   void _pruneOldEntries(DateTime now) {
-    final DateTime cutoff = _startOfDay(
-      now,
-    ).subtract(const Duration(days: retentionDays));
+    final DateTime cutoff = now.dateOnly.subtract(
+      const Duration(days: retentionDays),
+    );
     _entries.removeWhere((entry) => entry.timestamp.isBefore(cutoff));
   }
 

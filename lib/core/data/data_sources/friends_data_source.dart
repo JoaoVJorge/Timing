@@ -13,6 +13,7 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/sync/sync_error_classifier.dart";
+import "package:timing/core/utils/profile_display_name.dart";
 import "package:timing/theme/group_colors.dart";
 
 class FriendsDataSource {
@@ -601,7 +602,7 @@ class FriendsDataSource {
   }) => FriendEntity(
     id: userId,
     friendshipId: friendshipId,
-    name: _displayName(profileRow),
+    name: profileDisplayName(profileRow, fallback: "Timing User"),
     handle: _handleFor(userId, profileRow),
     colorValue: _colorFor(userId, profileRow),
     avatarIconIndex: (profileRow?["avatar_icon_index"] as num?)?.toInt(),
@@ -615,24 +616,12 @@ class FriendsDataSource {
     final String id = row["id"] as String;
     return FriendSuggestionEntity(
       id: id,
-      name: _displayName(row),
+      name: profileDisplayName(row, fallback: "Timing User"),
       handle: _handleFor(id, row),
       colorValue: _colorFor(id, row),
       avatarIconIndex: (row["avatar_icon_index"] as num?)?.toInt(),
       profilePhotoBase64: (row["profile_photo_base64"] as String? ?? "").trim(),
     );
-  }
-
-  String _displayName(Map<String, dynamic>? row) {
-    final String userName = (row?["user_name"] as String? ?? "").trim();
-    if (userName.isNotEmpty) {
-      return userName;
-    }
-    final String nickName = (row?["nick_name"] as String? ?? "").trim();
-    if (nickName.isNotEmpty) {
-      return nickName;
-    }
-    return "Timing User";
   }
 
   String _handleFor(String userId, Map<String, dynamic>? row) {

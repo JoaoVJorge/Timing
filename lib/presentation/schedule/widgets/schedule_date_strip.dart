@@ -3,6 +3,7 @@ import "dart:math" as math;
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:intl/intl.dart";
 
@@ -209,7 +210,7 @@ class _MonthGrid extends StatelessWidget {
         }
         return _CalendarDay(
           date: date,
-          isSelected: _isSameDate(date, selectedDate),
+          isSelected: date.isSameDay(selectedDate),
           hasEntry: hasEntryForDate(date),
           eventColors: eventColorsForDate(date),
           onTap: () => onSelectDate(date),
@@ -217,9 +218,6 @@ class _MonthGrid extends StatelessWidget {
       },
     );
   }
-
-  bool _isSameDate(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 class _CalendarDay extends StatelessWidget {

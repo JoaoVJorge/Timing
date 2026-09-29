@@ -21,6 +21,8 @@ import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/sync_error_classifier.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
+import "package:timing/core/utils/profile_display_name.dart";
 import "package:timing/theme/group_colors.dart";
 import "package:supabase_flutter/supabase_flutter.dart"
     show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
@@ -255,7 +257,7 @@ class GroupsDataSource {
           "group_leaderboard_scores",
           params: {
             "target_group_ids": groupIds,
-            "today_start": _todayStart().toIso8601String(),
+            "today_start": DateTime.now().dateOnly.toUtc().toIso8601String(),
             "week_start": _weekStart().toIso8601String(),
             "month_start": _monthStart().toIso8601String(),
           },
@@ -366,7 +368,7 @@ class GroupsDataSource {
           final Map<String, dynamic>? profile = profilesById[id];
           return (
             id: id,
-            name: _displayName(profile, fallback: "Friend"),
+            name: profileDisplayName(profile, fallback: "Friend"),
             colorValue:
                 (profile?["accent_color_value"] as num?)?.toInt() ??
                 GroupAvatarColors.byIndex(id.hashCode.abs()),
@@ -737,7 +739,7 @@ class GroupsDataSource {
             groupName: groupRow?["name"] as String? ?? "Grupo",
             theme: GroupThemeType.byName(groupRow?["theme"] as String?),
             inviteeId: inviteeId,
-            inviteeName: _displayName(profileRow, fallback: "Amigo"),
+            inviteeName: profileDisplayName(profileRow, fallback: "Amigo"),
             inviteeColorValue:
                 (profileRow?["accent_color_value"] as num?)?.toInt() ??
                 GroupAvatarColors.byIndex(inviteeId.hashCode.abs()),
@@ -1298,7 +1300,7 @@ class GroupsDataSource {
 
     return GroupMemberEntity(
       id: userId,
-      name: _displayName(profileRow, fallback: "User"),
+      name: profileDisplayName(profileRow, fallback: "User"),
       avatarColorValue:
           (profileRow?["accent_color_value"] as num?)?.toInt() ??
           GroupAvatarColors.byIndex(userId.hashCode.abs()),
@@ -1326,7 +1328,7 @@ class GroupsDataSource {
       createdAt:
           DateTime.tryParse(row["created_at"] as String? ?? "") ??
           DateTime.now(),
-      senderName: _displayName(profileRow, fallback: "Membro"),
+      senderName: profileDisplayName(profileRow, fallback: "Membro"),
       senderAvatar: profileRow?["profile_photo_base64"] as String? ?? "",
       senderAvatarIconIndex: (profileRow?["avatar_icon_index"] as num?)
           ?.toInt(),
@@ -1338,28 +1340,8 @@ class GroupsDataSource {
 
   int _intValue(Object? value) => value is num ? value.toInt() : 0;
 
-  String _displayName(Map<String, dynamic>? row, {required String fallback}) {
-    if (row == null) {
-      return fallback;
-    }
-    final String nickName = row["nick_name"] as String? ?? "";
-    if (nickName.trim().isNotEmpty) {
-      return nickName.trim();
-    }
-    final String userName = row["user_name"] as String? ?? "";
-    if (userName.trim().isNotEmpty) {
-      return userName.trim();
-    }
-    return fallback;
-  }
-
-  DateTime _todayStart() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day).toUtc();
-  }
-
   DateTime _weekStart() {
-    final DateTime today = _todayStart();
+    final DateTime today = DateTime.now().dateOnly.toUtc();
     return today.subtract(Duration(days: today.weekday - 1));
   }
 

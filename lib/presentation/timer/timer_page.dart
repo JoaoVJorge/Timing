@@ -12,6 +12,7 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/timer/timer_controller.dart";
 import "package:timing/presentation/timer/timer_visual_state.dart";
 import "package:timing/shared/functions/format_duration.dart";
+import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/theme/subject_colors.dart";
 import "package:timing/theme/subject_icons.dart";
@@ -160,6 +161,7 @@ class _TimerScaffold extends StatelessWidget {
                                 () => _TimerProgressRing(
                                   chrome: chrome,
                                   tick: _TimerTick.fromController(
+                                    context: context,
                                     controller: controller,
                                     state: chrome.state,
                                   ),
@@ -176,6 +178,7 @@ class _TimerScaffold extends StatelessWidget {
                                   () => _TimerStatsCard(
                                     chrome: chrome,
                                     tick: _TimerTick.fromController(
+                                      context: context,
                                       controller: controller,
                                       state: chrome.state,
                                     ),
@@ -1008,6 +1011,7 @@ class _TimerTick {
   });
 
   factory _TimerTick.fromController({
+    required BuildContext context,
     required TimerController controller,
     required TimerVisualState state,
   }) {
@@ -1043,9 +1047,11 @@ class _TimerTick {
       currentTimeTrailingUnit: currentTimeUsesHours ? "min" : "s",
       nextBreak: isReading
           ? "${controller.currentActivityPages}"
-          : _formatRestDuration(
+          : formatRestDuration(
+              context,
               Duration(seconds: controller.restIntervalSeconds),
-              controller.subject.category,
+              usesSeconds:
+                  controller.subject.category == TimeCategoryType.exercises,
             ),
       focusSectionLabel: "${controller.currentFocusSection}",
       totalSubjectTimeLabel: formatDurationLong(
@@ -1054,13 +1060,6 @@ class _TimerTick {
       progress: progress.clamp(0, 1).toDouble(),
     );
   }
-
-  static String _formatRestDuration(
-    Duration duration,
-    TimeCategoryType category,
-  ) => category == TimeCategoryType.exercises
-      ? formatDurationTotalSeconds(duration)
-      : formatDurationTotalMinutes(duration);
 
   final String currentTime;
   final String currentTimeLeadingUnit;

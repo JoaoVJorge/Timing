@@ -14,6 +14,7 @@ import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 
 enum ProgressPeriod { day, week, month }
 
@@ -246,7 +247,7 @@ class ProgressController extends GetxController {
 
   (DateTime start, DateTime end) get _selectedPeriodWindow {
     final DateTime now = DateTime.now();
-    final DateTime todayStart = DateTime(now.year, now.month, now.day);
+    final DateTime todayStart = now.dateOnly;
     final DateTime start = todayStart.subtract(
       Duration(days: selectedPeriod.value.dayCount - 1),
     );
@@ -330,9 +331,11 @@ class ProgressController extends GetxController {
 
   int _activeDaysInSelectedPeriod(SubjectEntity subject) {
     final (DateTime periodStart, DateTime periodEnd) = _selectedPeriodWindow;
-    final DateTime subjectStart = _startOfDay(
-      subject.createdAt ?? _firstEntryDateForSubject(subject.id) ?? periodStart,
-    );
+    final DateTime subjectStart =
+        (subject.createdAt ??
+                _firstEntryDateForSubject(subject.id) ??
+                periodStart)
+            .dateOnly;
     final DateTime activeStart = subjectStart.isAfter(periodStart)
         ? subjectStart
         : periodStart;
@@ -354,9 +357,6 @@ class ProgressController extends GetxController {
     }
     return first;
   }
-
-  DateTime _startOfDay(DateTime date) =>
-      DateTime(date.year, date.month, date.day);
 
   Future<void> _navigateAndRefresh(String route, {Object? arguments}) async {
     await (_appNavigator.toNamed(route, arguments: arguments) ??

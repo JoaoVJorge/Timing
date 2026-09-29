@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/theme/app_surfaces.dart";
 import "package:intl/intl.dart" hide TextDirection;
 
@@ -580,7 +581,7 @@ class _HighlightedBar {
 /// the rightmost bar is always the current day.
 List<DateTime> _datesEndingToday(int count) {
   final DateTime now = DateTime.now();
-  final DateTime today = DateTime(now.year, now.month, now.day);
+  final DateTime today = now.dateOnly;
   return [
     for (int index = 0; index < count; index++)
       today.subtract(Duration(days: count - 1 - index)),

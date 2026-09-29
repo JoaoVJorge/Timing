@@ -9,6 +9,7 @@ import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:timing/core/domain/use_cases/update_schedule_entry_use_case.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 
@@ -29,7 +30,7 @@ class ScheduleController extends GetxController {
 
   final RxList<ScheduleEntryEntity> entries = <ScheduleEntryEntity>[].obs;
   final RxBool isLoading = true.obs;
-  final Rx<DateTime> selectedDate = _todayDate().obs;
+  final Rx<DateTime> selectedDate = DateTime.now().dateOnly.obs;
 
   /// The month whose grid is on screen (always the first of the month). It
   /// moves on its own: paging to another month must not select a day there, or
@@ -56,18 +57,13 @@ class ScheduleController extends GetxController {
       _sortedEntriesForDate(selectedDate.value);
 
   List<ScheduleEntryEntity> get todayEntries =>
-      _sortedEntriesForDate(_todayDate());
-
-  static DateTime _todayDate() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
+      _sortedEntriesForDate(DateTime.now().dateOnly);
 
   static DateTime _monthOf(DateTime date) => DateTime(date.year, date.month);
 
   ScheduleEntryStatus statusOf(ScheduleEntryEntity entry) {
     final DateTime viewedDate = selectedDate.value;
-    final DateTime today = _todayDate();
+    final DateTime today = DateTime.now().dateOnly;
     if (viewedDate.isBefore(today)) {
       return ScheduleEntryStatus.past;
     }
@@ -92,7 +88,7 @@ class ScheduleController extends GetxController {
   }
 
   DateTime _nextDateForWeekday(int weekday, DateTime activeFrom) {
-    final DateTime today = _todayDate();
+    final DateTime today = DateTime.now().dateOnly;
     final DateTime firstAllowed = activeFrom.isAfter(today)
         ? activeFrom
         : today;
@@ -126,19 +122,9 @@ class ScheduleController extends GetxController {
         });
 
   bool _isEntryActiveOn(ScheduleEntryEntity entry, DateTime date) {
-    final DateTime dateOnly = DateTime(date.year, date.month, date.day);
-    final DateTime start = DateTime(
-      entry.activeFrom.year,
-      entry.activeFrom.month,
-      entry.activeFrom.day,
-    );
-    final DateTime? end = entry.activeUntil == null
-        ? null
-        : DateTime(
-            entry.activeUntil!.year,
-            entry.activeUntil!.month,
-            entry.activeUntil!.day,
-          );
+    final DateTime dateOnly = date.dateOnly;
+    final DateTime start = entry.activeFrom.dateOnly;
+    final DateTime? end = entry.activeUntil?.dateOnly;
     return entry.weekday == dateOnly.weekday &&
         !dateOnly.isBefore(start) &&
         (end == null || !dateOnly.isAfter(end));
@@ -151,7 +137,7 @@ class ScheduleController extends GetxController {
   }
 
   void onSelectDate(DateTime date) {
-    selectedDate.value = DateTime(date.year, date.month, date.day);
+    selectedDate.value = date.dateOnly;
     visibleMonth.value = _monthOf(date);
   }
 

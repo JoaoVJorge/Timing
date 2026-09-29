@@ -7,6 +7,7 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_subject/create_subject_controller.dart";
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
+import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/centered_wrap_grid.dart";
@@ -110,7 +111,7 @@ class CreateSubjectFormContent extends StatelessWidget {
       ),
       _FocusRoutineSections(controller: controller),
       const Gap(12),
-      _ColorSection(controller: controller),
+      ObservedCreationColorSection(selectedColor: controller.selectedColor),
       const Gap(12),
       _IconSection(controller: controller),
       const Gap(12),
@@ -454,9 +455,11 @@ class _RestSection extends StatelessWidget {
             children: controller.restMinutesOptions
                 .map(
                   (value) => CreationSelectableChip(
-                    label: _formatRestValue(
+                    label: formatRestDuration(
                       context,
-                      value,
+                      usesSeconds
+                          ? Duration(seconds: value)
+                          : Duration(minutes: value),
                       usesSeconds: usesSeconds,
                     ),
                     isSelected: controller.restMinutes.value == value,
@@ -471,12 +474,6 @@ class _RestSection extends StatelessWidget {
     );
   });
 }
-
-String _formatRestValue(
-  BuildContext context,
-  int value, {
-  required bool usesSeconds,
-}) => usesSeconds ? "${value}s" : context.l10n.restMinutesChip(value);
 
 class _RestInput extends StatelessWidget {
   const _RestInput({required this.controller, required this.accent});
@@ -524,21 +521,6 @@ class _RestInput extends StatelessWidget {
           ),
         ),
       ],
-    ),
-  );
-}
-
-class _ColorSection extends StatelessWidget {
-  const _ColorSection({required this.controller});
-
-  final SubjectCreationFormController controller;
-
-  @override
-  Widget build(BuildContext context) => Obx(
-    () => CreationColorSection(
-      accent: controller.selectedColor.value,
-      label: context.l10n.colorLabel,
-      onSelect: (color) => controller.selectedColor.value = color,
     ),
   );
 }

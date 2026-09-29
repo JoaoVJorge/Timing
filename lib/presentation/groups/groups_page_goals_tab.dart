@@ -356,10 +356,18 @@ class _ActivityOverviewCard extends StatelessWidget {
 String _formatRestValue(BuildContext context, GroupThemeType theme, int value) {
   if (theme == GroupThemeType.exercises) {
     final int seconds = value <= 20 ? value * 60 : value;
-    return "${seconds}s";
+    return formatRestDuration(
+      context,
+      Duration(seconds: seconds),
+      usesSeconds: true,
+    );
   }
   final int minutes = value > 0 ? value : SubjectEntity.defaultRestMinutes;
-  return context.l10n.restMinutesChip(minutes);
+  return formatRestDuration(
+    context,
+    Duration(minutes: minutes),
+    usesSeconds: false,
+  );
 }
 
 class _ParticipantsProgressCard extends StatelessWidget {
@@ -938,11 +946,7 @@ int _elapsedDaysForPeriod(LeaderboardPeriodType period, {DateTime? since}) {
     if (since == null) {
       return 1;
     }
-    final int elapsedDays = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).difference(DateTime(since.year, since.month, since.day)).inDays;
+    final int elapsedDays = now.dateOnly.difference(since.dateOnly).inDays;
     return elapsedDays < 0 ? 1 : elapsedDays + 1;
   }
   return switch (period) {

@@ -15,7 +15,7 @@ class _ScheduleDatePickerDialog extends StatefulWidget {
 }
 
 class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
-  late DateTime _selectedDate = _dateOnly(widget.initialDate);
+  late DateTime _selectedDate = widget.initialDate.dateOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
                 Expanded(
                   child: _DialogSecondaryButton(
                     label: context.l10n.periodToday,
-                    onTap: () => _onSelectDate(_todayDate()),
+                    onTap: () => _onSelectDate(DateTime.now().dateOnly),
                   ),
                 ),
                 const Gap(14),
@@ -101,8 +101,8 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
 
   void _onPreviousMonth() {
     final DateTime previous = _clampedMonth(_selectedDate, -1);
-    if (previous.isBefore(_dateOnly(widget.firstDate))) {
-      setState(() => _selectedDate = _dateOnly(widget.firstDate));
+    if (previous.isBefore(widget.firstDate.dateOnly)) {
+      setState(() => _selectedDate = widget.firstDate.dateOnly);
       return;
     }
     setState(() => _selectedDate = previous);
@@ -113,16 +113,16 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
 
   void _onChangeMonth(int monthDelta) {
     final DateTime next = _clampedMonth(_selectedDate, monthDelta);
-    if (next.isBefore(_dateOnly(widget.firstDate))) {
-      setState(() => _selectedDate = _dateOnly(widget.firstDate));
+    if (next.isBefore(widget.firstDate.dateOnly)) {
+      setState(() => _selectedDate = widget.firstDate.dateOnly);
       return;
     }
     setState(() => _selectedDate = next);
   }
 
   void _onSelectDate(DateTime date) {
-    final DateTime normalized = _dateOnly(date);
-    if (normalized.isBefore(_dateOnly(widget.firstDate))) {
+    final DateTime normalized = date.dateOnly;
+    if (normalized.isBefore(widget.firstDate.dateOnly)) {
       return;
     }
     setState(() => _selectedDate = normalized);
@@ -135,14 +135,6 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
       DateUtils.getDaysInMonth(monthStart.year, monthStart.month),
     );
     return DateTime(monthStart.year, monthStart.month, day);
-  }
-
-  static DateTime _dateOnly(DateTime value) =>
-      DateTime(value.year, value.month, value.day);
-
-  static DateTime _todayDate() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
   }
 }
 

@@ -2,6 +2,7 @@ import "package:dartz/dartz.dart";
 import "package:timing/core/data/repositories/schedule_repository.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/core/utils/id_generator.dart";
 
 class AddScheduleEntryUseCase {
@@ -29,10 +30,8 @@ class AddScheduleEntryUseCase {
         startMinutes: startMinutes,
         endMinutes: endMinutes,
         colorValue: colorValue,
-        activeFrom: DateTime(activeFrom.year, activeFrom.month, activeFrom.day),
-        activeUntil: activeUntil == null
-            ? null
-            : DateTime(activeUntil.year, activeUntil.month, activeUntil.day),
+        activeFrom: activeFrom.dateOnly,
+        activeUntil: activeUntil?.dateOnly,
       );
 
       final Either<AppError, void> saveResult = await _scheduleRepository

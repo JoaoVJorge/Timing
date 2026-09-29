@@ -5,6 +5,7 @@ import "package:timing/app/app_navigator.dart";
 import "package:timing/app/route_arguments.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:timing/shared/functions/format_calendar_labels.dart";
@@ -118,18 +119,8 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     _selectedWeekdays
       ..clear()
       ..addAll(_editingArguments?.weekdays ?? [entry.weekday]);
-    _activeFrom = DateTime(
-      entry.activeFrom.year,
-      entry.activeFrom.month,
-      entry.activeFrom.day,
-    );
-    _activeUntil = entry.activeUntil == null
-        ? null
-        : DateTime(
-            entry.activeUntil!.year,
-            entry.activeUntil!.month,
-            entry.activeUntil!.day,
-          );
+    _activeFrom = entry.activeFrom.dateOnly;
+    _activeUntil = entry.activeUntil?.dateOnly;
     _selectedColor = Color(entry.colorValue);
     // Keep the entry's own color instead of overriding it with the theme accent.
     _hasInitializedThemeColor = true;
@@ -447,17 +438,12 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     return time == null ? null : time.hour * 60 + time.minute;
   }
 
-  static DateTime _todayDate() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
-
   static DateTime _initialDate() {
     final DateTime? selectedDate = RouteArguments.maybeOf<DateTime>();
     if (selectedDate == null) {
-      return _todayDate();
+      return DateTime.now().dateOnly;
     }
-    return DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    return selectedDate.dateOnly;
   }
 
   Future<void> _pickActiveDate({required bool isStart}) async {
@@ -476,7 +462,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       return;
     }
     setState(() {
-      final DateTime date = DateTime(picked.year, picked.month, picked.day);
+      final DateTime date = picked.dateOnly;
       if (isStart) {
         _activeFrom = date;
         if (_activeUntil != null && _activeUntil!.isBefore(date)) {
