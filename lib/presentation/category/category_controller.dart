@@ -172,10 +172,13 @@ class CategoryController extends GetxController {
 
   Future<void> onTapAddSubject() => _openCreateSubject();
 
-  Future<void> onTapSuggestion(String suggestion) =>
-      _openCreateSubject(initialName: suggestion);
+  Future<void> onTapSuggestion(String suggestion, {String? iconName}) =>
+      _openCreateSubject(initialName: suggestion, initialIconName: iconName);
 
-  Future<void> _openCreateSubject({String? initialName}) {
+  Future<void> _openCreateSubject({
+    String? initialName,
+    String? initialIconName,
+  }) {
     final Future<dynamic>? route = _appNavigator.toNamed(
       AppRoutes.createSubject,
       arguments: initialName == null
@@ -183,6 +186,7 @@ class CategoryController extends GetxController {
           : CreateSubjectRouteArguments(
               category: category,
               initialName: initialName,
+              initialIconName: initialIconName,
             ),
     );
 

@@ -26,10 +26,15 @@ class RouteArguments {
 }
 
 class CreateSubjectRouteArguments {
-  const CreateSubjectRouteArguments({required this.category, this.initialName});
+  const CreateSubjectRouteArguments({
+    required this.category,
+    this.initialName,
+    this.initialIconName,
+  });
 
   final TimeCategoryType category;
   final String? initialName;
+  final String? initialIconName;
 }
 
 class CreateTaskRouteArguments {

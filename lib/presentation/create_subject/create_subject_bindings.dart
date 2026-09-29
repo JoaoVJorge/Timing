@@ -28,6 +28,7 @@ class CreateSubjectBindings extends Bindings {
         category: category,
         editingSubject: subject,
         initialName: createArguments?.initialName,
+        initialIconName: createArguments?.initialIconName,
       ),
     );
   }

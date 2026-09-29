@@ -26,6 +26,7 @@ class CreateSubjectController extends GetxController
     required this.category,
     this.editingSubject,
     this.initialName,
+    this.initialIconName,
   });
 
   final AddSubjectUseCase _addSubjectUseCase;
@@ -38,6 +39,7 @@ class CreateSubjectController extends GetxController
   final TimeCategoryType category;
   final SubjectEntity? editingSubject;
   final String? initialName;
+  final String? initialIconName;
 
   @override
   final TextEditingController nameController = TextEditingController();
@@ -51,9 +53,7 @@ class CreateSubjectController extends GetxController
   @override
   late final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   @override
-  late final RxString selectedIconName = SubjectIcons.suggestionsFor(
-    category,
-  ).first.obs;
+  late final RxString selectedIconName = _initialIconName.obs;
 
   bool _hasInitializedThemeColor = false;
 
@@ -88,6 +88,11 @@ class CreateSubjectController extends GetxController
   int get _defaultRestValue => category == TimeCategoryType.exercises
       ? SubjectEntity.defaultRestSeconds
       : SubjectEntity.defaultRestMinutes;
+
+  String get _initialIconName {
+    final List<String> options = SubjectIcons.suggestionsFor(category);
+    return options.contains(initialIconName) ? initialIconName! : options.first;
+  }
 
   @override
   List<String> get iconSuggestions => SubjectIcons.suggestionsFor(category);

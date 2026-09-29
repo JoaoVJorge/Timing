@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/subject_icons.dart";
 
 class IllustratedEmptyState extends StatelessWidget {
   const IllustratedEmptyState({
@@ -11,6 +13,7 @@ class IllustratedEmptyState extends StatelessWidget {
     required this.onTapAction,
     required this.suggestionsTitle,
     required this.suggestions,
+    this.suggestionIconNames,
     this.onTapSuggestion,
     super.key,
   });
@@ -21,6 +24,9 @@ class IllustratedEmptyState extends StatelessWidget {
   final VoidCallback onTapAction;
   final String suggestionsTitle;
   final List<String> suggestions;
+
+  /// Icon names aligned by index with [suggestions]; null skips the icon.
+  final List<String>? suggestionIconNames;
   final ValueChanged<String>? onTapSuggestion;
 
   @override
@@ -120,12 +126,13 @@ class IllustratedEmptyState extends StatelessWidget {
           spacing: 10,
           runSpacing: 10,
           children: [
-            for (final String suggestion in suggestions)
+            for (int index = 0; index < suggestions.length; index++)
               _SuggestionChip(
-                label: suggestion,
+                label: suggestions[index],
+                iconName: suggestionIconNames?[index],
                 onTap: onTapSuggestion == null
                     ? null
-                    : () => onTapSuggestion!(suggestion),
+                    : () => onTapSuggestion!(suggestions[index]),
               ),
           ],
         ),
@@ -191,9 +198,10 @@ class _Line extends StatelessWidget {
 }
 
 class _SuggestionChip extends StatelessWidget {
-  const _SuggestionChip({required this.label, this.onTap});
+  const _SuggestionChip({required this.label, this.iconName, this.onTap});
 
   final String label;
+  final String? iconName;
   final VoidCallback? onTap;
 
   @override
@@ -207,15 +215,23 @@ class _SuggestionChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: context.colorTokens.primary),
       ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodyMedium.copyWith(
-          color: context.colorTokens.primary,
-          fontSize: 13,
-          fontWeight: FontWeight.w800,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (iconName != null) ...[_SuggestionIcon(iconName!), const Gap(8)],
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: context.colorTokens.primary,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
@@ -224,5 +240,21 @@ class _SuggestionChip extends StatelessWidget {
     }
 
     return BounceTap(onTap: onTap!, child: chip);
+  }
+}
+
+class _SuggestionIcon extends StatelessWidget {
+  const _SuggestionIcon(this.iconName);
+
+  final String iconName;
+
+  @override
+  Widget build(BuildContext context) {
+    final IconData? icon = SubjectIcons.byName(iconName);
+    final Color color = context.colorTokens.primary;
+
+    return icon == null
+        ? AppIcon(iconName, size: 18, color: color)
+        : Icon(icon, size: 18, color: color);
   }
 }

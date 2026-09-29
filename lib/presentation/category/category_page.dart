@@ -62,7 +62,19 @@ class CategoryPage extends StatelessWidget {
                   onTapAction: controller.onTapAddSubject,
                   suggestionsTitle: _suggestionsTitle(context),
                   suggestions: _suggestionsFor(context, controller.category),
-                  onTapSuggestion: controller.onTapSuggestion,
+                  suggestionIconNames: _suggestionIconNames(
+                    controller.category,
+                  ),
+                  onTapSuggestion: (suggestion) => controller.onTapSuggestion(
+                    suggestion,
+                    iconName:
+                        _suggestionIconNames(
+                          controller.category,
+                        )[_suggestionsFor(
+                          context,
+                          controller.category,
+                        ).indexOf(suggestion)],
+                  ),
                 ),
               ),
             );
@@ -223,6 +235,14 @@ String _emptyDescription(
 
 String _suggestionsTitle(BuildContext context) =>
     context.l10n.dailyGoalsSuggestionsTitle;
+
+List<String> _suggestionIconNames(TimeCategoryType category) =>
+    switch (category) {
+      TimeCategoryType.studying => const ["calculate", "translate", "article"],
+      TimeCategoryType.exercises => const ["run", "fitness", "yoga"],
+      TimeCategoryType.reading => const ["stories", "science", "article"],
+      TimeCategoryType.hobbies => const ["music", "brush", "cutlery"],
+    };
 
 List<String> _suggestionsFor(BuildContext context, TimeCategoryType category) =>
     switch (category) {
