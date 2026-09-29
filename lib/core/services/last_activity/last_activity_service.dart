@@ -35,4 +35,14 @@ class LastActivityService {
       activity.toJson(),
     );
   }
+
+  /// Drops the last activity when it came from [subjectId], so Home stops
+  /// offering to resume an activity whose data was deleted.
+  Future<void> forgetSubject(String subjectId) async {
+    if (lastActivity.value?.subjectId != subjectId) {
+      return;
+    }
+    lastActivity.value = null;
+    await _localStorageService.delete(LocalStorageKeys.lastActivity);
+  }
 }

@@ -106,7 +106,13 @@ class _FakeSubjectDailyHistoryService extends _Noop
   ]);
 
   final DailyProgressEntity progress;
+  int registeredSessions = 0;
   int addedSeconds = 0;
+
+  @override
+  Future<void> registerSession(String subjectId) async {
+    registeredSessions++;
+  }
 
   @override
   DailyProgressEntity todayForSubject(String subjectId) => progress;
@@ -976,30 +982,27 @@ void main() {
       },
     );
 
-    test(
-      "requests screen pinning again after a pause/resume cycle",
-      () async {
-        final guard = _FakeFocusGuardService();
-        final controller = _controller(
-          _subject(),
-          focusGuardService: guard,
-          appController: _FakeAppController(focusLockEnabled: true),
-        );
+    test("requests screen pinning again after a pause/resume cycle", () async {
+      final guard = _FakeFocusGuardService();
+      final controller = _controller(
+        _subject(),
+        focusGuardService: guard,
+        appController: _FakeAppController(focusLockEnabled: true),
+      );
 
-        controller.onInit();
-        controller.onReady();
-        await Future<void>.delayed(Duration.zero);
-        expect(guard.pinRequests, 1);
+      controller.onInit();
+      controller.onReady();
+      await Future<void>.delayed(Duration.zero);
+      expect(guard.pinRequests, 1);
 
-        controller.togglePause();
-        await Future<void>.delayed(Duration.zero);
-        controller.togglePause();
-        await Future<void>.delayed(Duration.zero);
+      controller.togglePause();
+      await Future<void>.delayed(Duration.zero);
+      controller.togglePause();
+      await Future<void>.delayed(Duration.zero);
 
-        expect(guard.pinRequests, 2);
-        controller.onClose();
-      },
-    );
+      expect(guard.pinRequests, 2);
+      controller.onClose();
+    });
 
     test(
       "does not request screen pinning when concentration is disabled",
@@ -1489,19 +1492,22 @@ void main() {
       expect(liveActivity.isReading, isFalse);
     });
 
-    test("reports the section count and total time for a multi-section goal", () {
-      final foregroundService = _FakeTimerForegroundService();
-      final controller = _controller(
-        _subject(goalSeconds: 10 * 60, focusSessionCount: 3),
-        timerForegroundService: foregroundService,
-      );
+    test(
+      "reports the section count and total time for a multi-section goal",
+      () {
+        final foregroundService = _FakeTimerForegroundService();
+        final controller = _controller(
+          _subject(goalSeconds: 10 * 60, focusSessionCount: 3),
+          timerForegroundService: foregroundService,
+        );
 
-      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+        controller.didChangeAppLifecycleState(AppLifecycleState.paused);
 
-      expect(foregroundService.lastCurrentSection, 1);
-      expect(foregroundService.lastTotalSections, 3);
-      expect(foregroundService.lastTotalSeconds, 10 * 60 * 3);
-    });
+        expect(foregroundService.lastCurrentSection, 1);
+        expect(foregroundService.lastTotalSections, 3);
+        expect(foregroundService.lastTotalSeconds, 10 * 60 * 3);
+      },
+    );
 
     test("matches the app's accumulated value for a daily hobby", () {
       final foregroundService = _FakeTimerForegroundService();

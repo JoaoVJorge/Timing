@@ -123,6 +123,7 @@ class UseCasesBindings extends Bindings {
         activityHistoryService: Get.find(),
         subjectDailyHistoryService: Get.find(),
         dailyProgressService: Get.find(),
+        lastActivityService: Get.find(),
       ),
       permanent: true,
     );

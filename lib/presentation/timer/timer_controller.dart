@@ -390,6 +390,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         (_) => achievementUnlockService.checkForNewUnlocks(),
       ),
     );
+    unawaited(subjectDailyHistoryService.registerSession(subject.id));
     if (_isAppInForeground && !_isCatchingUpAfterBackground) {
       unawaited(focusFeedbackService.playFocusFinishedFeedback());
     }

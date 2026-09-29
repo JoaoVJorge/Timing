@@ -64,6 +64,11 @@ class SubjectDailyHistoryService {
     );
   }
 
+  Future<void> registerSession(String subjectId) async {
+    final DailyProgressEntity current = _current(subjectId);
+    await _update(subjectId, current.copyWith(sessions: current.sessions + 1));
+  }
+
   Future<void> addPages(String subjectId, int pages) async {
     if (pages <= 0) {
       return;

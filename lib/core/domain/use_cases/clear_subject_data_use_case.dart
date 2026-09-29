@@ -7,6 +7,7 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/services/last_activity/last_activity_service.dart";
 
 /// Deletes the user's own data on an activity — time, pages and every session
 /// logged for it — and keeps the activity itself, its settings and its notes.
@@ -21,6 +22,7 @@ class ClearSubjectDataUseCase {
     required this._activityHistoryService,
     required this._subjectDailyHistoryService,
     required this._dailyProgressService,
+    required this._lastActivityService,
   });
 
   final SubjectsRepository _subjectsRepository;
@@ -28,6 +30,7 @@ class ClearSubjectDataUseCase {
   final ActivityHistoryService _activityHistoryService;
   final SubjectDailyHistoryService _subjectDailyHistoryService;
   final DailyProgressService _dailyProgressService;
+  final LastActivityService _lastActivityService;
 
   /// Returns the activity as it is once cleared.
   Future<Either<AppError, SubjectEntity>> call({
@@ -78,6 +81,7 @@ class ClearSubjectDataUseCase {
     final Map<String, DailyProgressEntity> removedByDay =
         await _subjectDailyHistoryService.removeSubject(subjectId);
     await _dailyProgressService.subtract(removedByDay);
+    await _lastActivityService.forgetSubject(subjectId);
     return subjectResult;
   }
 }
