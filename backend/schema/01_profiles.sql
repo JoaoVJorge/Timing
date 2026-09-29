@@ -45,7 +45,7 @@ create table if not exists public.profiles (
   phone_number text,
   birth_date date,
   profile_photo_base64 text,
-  accent_color_value bigint not null default 4294940679,
+  accent_color_value bigint not null default 4279858898,
   avatar_icon_index integer not null default 0,
   is_online boolean not null default false,
   last_seen_at timestamptz,
@@ -66,6 +66,10 @@ alter table public.profiles
   add column if not exists focus_lock_hobbies_enabled boolean not null default false,
   add column if not exists is_online boolean not null default false,
   add column if not exists last_seen_at timestamptz;
+
+-- New profiles start on the app's default blue accent (0xFF1976D2).
+alter table public.profiles
+  alter column accent_color_value set default 4279858898;
 
 -- Personally identifiable fields are kept in an owner-only table. Keeping
 -- them on profiles would expose them whenever the public profile row is made
