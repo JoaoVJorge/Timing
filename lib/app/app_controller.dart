@@ -58,9 +58,11 @@ class AppController extends GetxController with WidgetsBindingObserver {
     required this._syncReconciliationService,
     required this.localStorageService,
     int? initialAccentColorValue,
+    bool initialIsDarkMode = false,
   }) : accentColor = Color(
          initialAccentColorValue ?? AppAccentPresets.defaultAccentValue,
-       ).obs;
+       ).obs,
+       isDarkMode = initialIsDarkMode.obs;
 
   final GetAppConfigUseCase _getAppConfigUseCase;
   final GetActivityEntriesUseCase _getActivityEntriesUseCase;
@@ -75,7 +77,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   final SyncReconciliationService _syncReconciliationService;
   final AppLocalStorageService localStorageService;
 
-  final RxBool isDarkMode = false.obs;
+  final RxBool isDarkMode;
   final Rx<Color> accentColor;
   final RxString userName = "".obs;
   final RxString nickName = "".obs;

@@ -38,6 +38,8 @@ class AppBindings extends Bindings {
         initialAccentColorValue:
             localStorage.getInt(LocalStorageKeys.cachedAccentColorValue.name) ??
             AppAccentPresets.defaultAccentValue,
+        initialIsDarkMode:
+            localStorage.getBool(LocalStorageKeys.isDarkMode.name) ?? false,
       ),
       permanent: true,
     );

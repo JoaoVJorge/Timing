@@ -11,7 +11,7 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<Color?>(
     tween: ColorTween(
-      begin: context.colorTokens.surfaceInnerLayer,
+      begin: context.colorTokens.scaffold,
       end: context.colorTokens.primary,
     ),
     duration: AppConstants.splashScreenDuration,
