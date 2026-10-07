@@ -9,7 +9,9 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/home/home_controller.dart";
 import "package:timing/presentation/home/home_page.dart";
+import "package:timing/presentation/home/widgets/home_action_card.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/theme.dart";
 
 class _FakeHomeController extends GetxController implements HomeController {
@@ -25,6 +27,9 @@ class _FakeHomeController extends GetxController implements HomeController {
   final RxList<SubjectEntity> subjects = <SubjectEntity>[].obs;
 
   final Rx<ScheduleEntryEntity?> nextEntry = Rx<ScheduleEntryEntity?>(null);
+  int dailyGoalsTaps = 0;
+  int scheduleTaps = 0;
+  final List<TimeCategoryType> categoryTaps = [];
 
   @override
   ScheduleEntryEntity? get nextTodayEntry => nextEntry.value;
@@ -43,13 +48,12 @@ class _FakeHomeController extends GetxController implements HomeController {
       "Empty";
 
   @override
-  Future<void> onCreateFirstSubject() async {}
+  Future<void> onTapDailyGoals() async => dailyGoalsTaps++;
   @override
-  Future<void> onTapDailyGoals() async {}
+  Future<void> onTapSchedule() async => scheduleTaps++;
   @override
-  Future<void> onTapSchedule() async {}
-  @override
-  Future<void> onTapCategory(TimeCategoryType category) async {}
+  Future<void> onTapCategory(TimeCategoryType category) async =>
+      categoryTaps.add(category);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -59,6 +63,73 @@ void main() {
   tearDown(Get.reset);
 
   for (final Brightness brightness in Brightness.values) {
+    testWidgets("home rows accept taps across their full area ($brightness)", (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400, 1400);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final controller = _FakeHomeController()..isLoading.value = false;
+      Get.put<HomeController>(controller);
+      await tester.pumpWidget(
+        GetMaterialApp(
+          theme: AppThemes.build(seed: Colors.blue, brightness: brightness),
+          locale: const Locale("en"),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const HomePage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final rows = find.byType(BounceTap);
+      expect(rows, findsNWidgets(7));
+      for (int index = 1; index < 7; index++) {
+        await _tapAcrossArea(tester, rows.at(index));
+      }
+
+      expect(controller.dailyGoalsTaps, 5);
+      expect(controller.scheduleTaps, 5);
+      for (final category in TimeCategoryType.values) {
+        expect(
+          controller.categoryTaps.where((value) => value == category),
+          hasLength(5),
+        );
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      "home action card accepts taps across its full area ($brightness)",
+      (tester) async {
+        int taps = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppThemes.build(seed: Colors.blue, brightness: brightness),
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 360,
+                  child: HomeActionCard(
+                    eyebrow: "Continue",
+                    title: "Study",
+                    actionIconName: "play",
+                    onTap: () => taps++,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await _tapAcrossArea(tester, find.byType(BounceTap));
+        expect(taps, 5);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets("planning subtitles shimmer only while loading ($brightness)", (
       tester,
     ) async {
@@ -103,5 +174,19 @@ void main() {
       expect(find.text(l10n.dailyGoalsEmptyTitle), findsNothing);
       expect(tester.takeException(), isNull);
     });
+  }
+}
+
+Future<void> _tapAcrossArea(WidgetTester tester, Finder target) async {
+  final Rect rect = tester.getRect(target);
+  for (final Offset point in [
+    rect.topLeft + const Offset(2, 2),
+    rect.topRight + const Offset(-2, 2),
+    rect.bottomLeft + const Offset(2, -2),
+    rect.bottomRight - const Offset(2, 2),
+    rect.center,
+  ]) {
+    await tester.tapAt(point);
+    await tester.pumpAndSettle();
   }
 }
