@@ -28,17 +28,23 @@ class HomeActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BounceTap(
     pressedScale: 0.98,
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            context.colorTokens.primary,
+            Color.lerp(
+                  context.colorTokens.primary,
+                  Colors.black,
+                  context.isDarkMode ? 0.32 : 0.24,
+                ) ??
+                context.colorTokens.primary,
             Color.lerp(
                   context.colorTokens.primary,
                   Colors.white,
-                  context.isDarkMode ? 0.08 : 0.16,
+                  context.isDarkMode ? 0.16 : 0.22,
                 ) ??
                 context.colorTokens.primary,
           ],

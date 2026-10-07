@@ -224,12 +224,6 @@ class HomeController extends GetxController {
     );
   }
 
-  Future<void> onCreateFirstSubject() => _navigateAndRefresh(
-    AppRoutes.category,
-    arguments: TimeCategoryType.studying,
-    reloadSchedule: false,
-  );
-
   Future<void> onTapSchedule() => _navigateAndRefresh(AppRoutes.schedule);
 
   /// The schedule only changes on the routes that can edit it, so screens that

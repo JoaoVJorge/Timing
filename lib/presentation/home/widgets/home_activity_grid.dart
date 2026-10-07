@@ -53,6 +53,7 @@ class _ActivityTile extends StatelessWidget {
 
     return BounceTap(
       pressedScale: 0.985,
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         constraints: const BoxConstraints(minHeight: 78),

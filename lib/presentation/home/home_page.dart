@@ -19,8 +19,27 @@ import "package:timing/theme/app_spacing.dart";
 
 /// Answers "what should I do now?" and, right below it, "what am I doing
 /// today?". Historical statistics live on Progress.
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey _activitiesKey = GlobalKey();
+
+  void _scrollToActivities() {
+    final BuildContext? target = _activitiesKey.currentContext;
+    if (target == null) {
+      return;
+    }
+    Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeInOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) => AppScaffold(
@@ -34,11 +53,14 @@ class HomePage extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
             children: [
-              const _HomeActionCardSection(),
+              _HomeActionCardSection(onCreateActivity: _scrollToActivities),
               const Gap(AppSpacing.betweenSections),
               const _PlanDayRows(),
               const Gap(AppSpacing.betweenSections),
-              AppSectionHeader(title: context.l10n.homeCategoriesSection),
+              AppSectionHeader(
+                key: _activitiesKey,
+                title: context.l10n.homeCategoriesSection,
+              ),
               const Gap(AppSpacing.betweenRelated),
               const _HomeActivitiesSection(),
             ],
@@ -146,7 +168,9 @@ class _StreakChip extends StatelessWidget {
 }
 
 class _HomeActionCardSection extends StatelessWidget {
-  const _HomeActionCardSection();
+  const _HomeActionCardSection({required this.onCreateActivity});
+
+  final VoidCallback onCreateActivity;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -182,7 +206,7 @@ class _HomeActionCardSection extends StatelessWidget {
       eyebrow: context.l10n.homeActionStartEyebrow,
       title: context.l10n.homeActionCreateBody,
       actionIconName: "plus",
-      onTap: controller.onCreateFirstSubject,
+      onTap: onCreateActivity,
     );
   });
 }
@@ -298,6 +322,7 @@ class _PlanDayRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BounceTap(
     pressedScale: 0.99,
+    behavior: HitTestBehavior.opaque,
     onTap: onTap,
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
