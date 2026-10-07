@@ -440,15 +440,17 @@ void main() {
               as List<dynamic>;
       expect(
         retainedGoals.map((item) => (item as Map<String, dynamic>)["id"]),
-        ["personal", "other-group"],
+        ["personal", "departing", "other-group"],
       );
       final List<dynamic> retainedActivities =
           jsonDecode(storage.values[LocalStorageKeys.subjects]! as String)
               as List<dynamic>;
       expect(
         retainedActivities.map((item) => (item as Map<String, dynamic>)["id"]),
-        ["personal-activity", "other-group-activity"],
+        ["personal-activity", "departing-activity", "other-group-activity"],
       );
+      expect(retainedGoals[1]["groupId"], isNull);
+      expect(retainedActivities[1]["groupId"], isNull);
       expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.subjects)));
       expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.dailyTasks)));
       expect(repository.leaveRequests, ["group-1"]);

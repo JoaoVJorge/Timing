@@ -1,3 +1,4 @@
+import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "package:dartz/dartz.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
@@ -33,6 +34,7 @@ class JoinGroupController extends GetxController {
       (error) async =>
           _appNavigator.showErrorOrOfflineSnackBar(context.l10n.joinGroupError),
       (group) async {
+        await showGroupActivityLinks(group);
         if (Get.isRegistered<GroupsController>()) {
           await Get.find<GroupsController>().upsertJoinedGroup(group);
         }

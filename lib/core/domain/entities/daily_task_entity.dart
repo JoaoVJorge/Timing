@@ -81,8 +81,8 @@ class DailyTaskEntity extends Equatable {
   final String? lastResolvedMissedDate;
   final DailyTaskGoalType goalType;
 
-  /// Non-null when this goal was handed out by a group. Such goals can't be
-  /// deleted directly — the user has to leave the group to remove them.
+  /// Legacy ownership metadata, cleared when the backend migrates group
+  /// copies to personal activities with independent contribution links.
   final String? groupId;
   final String? groupActivityId;
 
@@ -162,6 +162,7 @@ class DailyTaskEntity extends Equatable {
     String? lastResolvedMissedDate,
     DailyTaskGoalType? goalType,
     DateTime? updatedAt,
+    bool clearGroupLink = false,
     String? groupId,
     String? groupActivityId,
   }) => DailyTaskEntity(
@@ -175,8 +176,10 @@ class DailyTaskEntity extends Equatable {
         lastResolvedMissedDate ?? this.lastResolvedMissedDate,
     goalType: goalType ?? this.goalType,
     updatedAt: updatedAt ?? this.updatedAt,
-    groupId: groupId ?? this.groupId,
-    groupActivityId: groupActivityId ?? this.groupActivityId,
+    groupId: clearGroupLink ? null : groupId ?? this.groupId,
+    groupActivityId: clearGroupLink
+        ? null
+        : groupActivityId ?? this.groupActivityId,
   );
 
   int _currentIntenseSequence() {

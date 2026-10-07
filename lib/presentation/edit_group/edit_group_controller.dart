@@ -115,34 +115,25 @@ class EditGroupController extends GetxController {
     await _prefillColorAndSequence(header);
   }
 
-  /// The `group_activity_progress` RPC doesn't return the activity's color or
-  /// intensity, so fall back to the owner's own local copy of the linked goal
-  /// (stamped with `groupActivityId` when the group activity was created).
   Future<void> _prefillColorAndSequence(
     GroupActivityProgressEntity? header,
   ) async {
-    final String? activityId =
-        header?.activityId ?? group.value?.createdActivityId;
-    if (activityId == null || activityId.isEmpty) {
-      return;
-    }
-
-    final Either<AppError, List<DailyTaskEntity>> result =
-        await dailyTasksRepository.getTasks();
-    result.fold((_) {}, (tasks) {
-      DailyTaskEntity? match;
-      for (final DailyTaskEntity task in tasks) {
-        if (task.groupActivityId == activityId) {
-          match = task;
-          break;
-        }
-      }
-      final DailyTaskEntity? linkedTask = match;
-      if (linkedTask != null) {
-        selectedColor.value = Color(linkedTask.colorValue);
-        sequenceType.value = linkedTask.sequenceType;
+    final currentGroup = group.value;
+    if (currentGroup == null) return;
+    final result = await groupsRepository.getActivityLinkOptions(
+      currentGroup.id,
+    );
+    result.fold((_) {}, (options) {
+      if (options.isEmpty) return;
+      final payload = options.first.payload;
+      final color = payload["color_value"] as num?;
+      if (color != null) {
+        selectedColor.value = Color(color.toInt());
         _hasInitializedThemeColor = true;
       }
+      sequenceType.value = DailyTaskSequenceType.fromName(
+        payload["sequence_type"] as String?,
+      );
     });
   }
 

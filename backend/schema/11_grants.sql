@@ -166,7 +166,6 @@ grant update (
   is_online,
   last_seen_at,
   notifications_enabled,
-  language_code,
   focus_lock_studying_enabled,
   focus_lock_exercises_enabled,
   focus_lock_reading_enabled,
@@ -176,3 +175,11 @@ grant update (
 -- Activity history is append-only through the validating RPC above. Users may
 -- still remove their own history through the owner-scoped delete policy.
 grant select, delete on table public.activity_entries to authenticated;
+
+revoke all on public.group_activity_links, public.group_goal_contributions from public, anon, authenticated;
+grant select on public.group_activity_links to authenticated;
+revoke all on function public.capture_group_goal_contributions() from public, anon, authenticated;
+revoke all on function public.set_group_activity_links(uuid, text[], boolean, date) from public, anon;
+revoke all on function public.group_activity_link_options(uuid) from public, anon;
+grant execute on function public.set_group_activity_links(uuid, text[], boolean, date) to authenticated;
+grant execute on function public.group_activity_link_options(uuid) to authenticated;

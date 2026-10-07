@@ -41,7 +41,6 @@ declare
   new_group_id uuid;
   new_invite_code text;
   new_activity_id uuid;
-  member_row record;
 begin
   if current_user_id is null then
     raise exception 'User must be authenticated to create a group.'
@@ -96,19 +95,16 @@ begin
   if activity_kind is not null then
     insert into public.group_activities (group_id, kind, payload)
     values (
-      new_group_id, activity_kind, coalesce(activity_payload, '{}'::jsonb)
+      new_group_id, activity_kind, coalesce(activity_payload, '{}'::jsonb) - 'source_ids' - 'local_date'
     )
     returning group_activities.id into new_activity_id;
 
-    for member_row in
-      select gm.user_id
-      from public.group_members gm
-      where gm.group_id = new_group_id
-    loop
-      perform public.materialize_group_activities_for_user(
-        new_group_id, member_row.user_id
-      );
-    end loop;
+    perform public.set_group_activity_links(
+      new_activity_id,
+      array(select jsonb_array_elements_text(coalesce(activity_payload->'source_ids', '[]'::jsonb))),
+      not (coalesce(activity_payload, '{}'::jsonb) ? 'source_ids'),
+      coalesce((activity_payload->>'local_date')::date, current_date)
+    );
   end if;
 
   return query

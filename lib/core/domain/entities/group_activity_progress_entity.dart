@@ -15,6 +15,7 @@ class GroupActivityProgressEntity extends Equatable {
     this.focusSeconds = 0,
     this.restMinutes = 60,
     this.focusSessionCount = 1,
+    this.colorValue,
   });
 
   factory GroupActivityProgressEntity.fromMap(Map<String, dynamic> map) =>
@@ -38,6 +39,7 @@ class GroupActivityProgressEntity extends Equatable {
             (map["focus_session_count"] as num?)?.toInt() ??
             (map["focusSessionCount"] as num?)?.toInt() ??
             1,
+        colorValue: (map["color_value"] as num?)?.toInt(),
       );
 
   final String activityId;
@@ -50,6 +52,7 @@ class GroupActivityProgressEntity extends Equatable {
   final int focusSeconds;
   final int restMinutes;
   final int focusSessionCount;
+  final int? colorValue;
 
   bool get isGoal => kind == "goal";
 
@@ -65,5 +68,6 @@ class GroupActivityProgressEntity extends Equatable {
     focusSeconds,
     restMinutes,
     focusSessionCount,
+    colorValue,
   ];
 }

@@ -109,6 +109,28 @@ class _Rig {
 }
 
 void main() {
+  test("migration releases group ownership while preserving local history", () {
+    final legacy = SubjectEntity.fromMap(const {
+      "id": "legacy",
+      "name": "Personal",
+      "category": "exercises",
+      "colorValue": 1,
+      "totalSeconds": 500,
+      "goalSeconds": 600,
+      "groupId": "group",
+      "groupActivityId": "activity",
+    });
+    final merged = SubjectsDataSource.mergeSubjects(
+      local: [legacy],
+      remote: [legacy.copyWith(clearGroupLink: true, totalSeconds: 300)],
+      deletions: {},
+      syncedIds: {"legacy"},
+    );
+    expect(merged.single.isFromGroup, isFalse);
+    expect(merged.single.totalSeconds, 500);
+    expect(merged.single.goalSeconds, 600);
+  });
+
   late _Rig rig;
   setUp(() => rig = _Rig());
   tearDown(() => rig.backend.dispose());

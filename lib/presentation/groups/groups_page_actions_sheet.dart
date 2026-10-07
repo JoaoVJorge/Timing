@@ -11,6 +11,10 @@ Future<void> _showGroupActionsSheet(
   barrierColor: context.colorTokens.black.withValues(alpha: 0.42),
   builder: (sheetContext) => _GroupActionsSheet(
     isOwner: controller.isSelectedGroupOwner,
+    onManageActivities: () {
+      Navigator.of(sheetContext).pop();
+      controller.onManageActivityLinks();
+    },
     onManageMembers: () {
       Navigator.of(sheetContext).pop();
       controller.onManageMembers();
@@ -34,6 +38,7 @@ Future<void> _showGroupActionsSheet(
 class _GroupActionsSheet extends StatelessWidget {
   const _GroupActionsSheet({
     required this.isOwner,
+    required this.onManageActivities,
     required this.onManageMembers,
     required this.onEditGroup,
     required this.onResetGroup,
@@ -42,6 +47,7 @@ class _GroupActionsSheet extends StatelessWidget {
   });
 
   final bool isOwner;
+  final VoidCallback onManageActivities;
   final VoidCallback onManageMembers;
   final VoidCallback onEditGroup;
   final VoidCallback onResetGroup;
@@ -74,6 +80,12 @@ class _GroupActionsSheet extends StatelessWidget {
               icon: Icons.groups_2_outlined,
               label: context.l10n.viewMembersLabel,
               onTap: onManageMembers,
+            ),
+            const Gap(8),
+            _GroupActionRow(
+              icon: Icons.link_rounded,
+              label: context.l10n.groupLinksTitle,
+              onTap: onManageActivities,
             ),
             const Gap(8),
             if (isOwner) ...[

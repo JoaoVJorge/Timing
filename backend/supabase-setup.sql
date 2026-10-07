@@ -87,7 +87,6 @@ create table if not exists public.profiles (
   is_online boolean not null default false,
   last_seen_at timestamptz,
   notifications_enabled boolean not null default true,
-  language_code text,
   focus_lock_studying_enabled boolean not null default false,
   focus_lock_exercises_enabled boolean not null default false,
   focus_lock_reading_enabled boolean not null default false,
@@ -107,6 +106,10 @@ alter table public.profiles
 -- New profiles start on the app's default blue accent (0xFF1976D2).
 alter table public.profiles
   alter column accent_color_value set default 4279858898;
+
+-- The UI language is a device preference kept only in local storage.
+alter table public.profiles
+  drop column if exists language_code;
 
 -- Personally identifiable fields are kept in an owner-only table. Keeping
 -- them on profiles would expose them whenever the public profile row is made
@@ -482,9 +485,9 @@ create table if not exists public.group_image_messages (
   created_at timestamptz not null default now()
 );
 
--- The activity template chosen when a group is created. Each row is fanned out
--- into a per-member copy in user_subjects / daily_goals (see
--- materialize_group_activities_for_user), so every member tracks their own.
+-- The shared target chosen when a group is created. Each member selects
+-- personal sources via group_activity_links (05), without giving the group
+-- ownership of personal names, settings, goals or history.
 create table if not exists public.group_activities (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -765,10 +768,8 @@ begin
   end if;
 end $$;
 
--- Group-owned copies: a non-null group_id marks a subject/goal handed out by a
--- group. They cannot be deleted manually while the user is still a member (see
--- the delete policies) and are removed automatically when the membership ends
--- (see cleanup_group_activities_on_leave).
+-- Legacy ownership columns retained for old cached clients. Section 05 migrates
+-- these copies to ordinary personal sources plus independent link periods.
 alter table public.user_subjects
   add column if not exists group_id uuid
     references public.groups(id) on delete set null;
@@ -1139,8 +1140,8 @@ $$;
 -- backend/schema/05_group_activities.sql
 -- =============================================================================
 -- 05 · Group activities
--- Fans a group's activity template out to each member and keeps those
--- group-owned copies consistent when members join, leave or edit them.
+-- Links each member's personal sources to shared activity targets.
+-- Link periods preserve past contributions without importing prior history.
 -- Requires: 03_groups.sql, 04_tracking.sql
 -- =============================================================================
 
@@ -1148,113 +1149,14 @@ $$;
 -- Fan-out
 -- -----------------------------------------------------------------------------
 
--- Creates a per-user copy of every activity template attached to a group.
--- Reused by group creation (once per member) and by joining via invite code
--- (once for the joining user), so every member ends up with their own
--- group-linked subject/goal. Idempotent via the (user_id, id) conflict key.
+-- New memberships wait for the member's explicit selection. Kept as an
+-- internal no-op for older join RPCs; opening progress must never create copies.
 create or replace function public.materialize_group_activities_for_user(
-  target_group_id uuid,
-  target_user_id uuid
-)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  ga record;
-begin
-  for ga in
-    select * from public.group_activities where group_id = target_group_id
-  loop
-    if ga.kind = 'subject' then
-      insert into public.user_subjects (
-        id, user_id, name, category, color_value,
-        goal_seconds, goal_pages, notes, icon_name,
-        rest_minutes, focus_session_count, wallpaper_index, activity_type,
-        group_id, group_activity_id
-      ) values (
-        'grp_' || ga.id::text,
-        target_user_id,
-        coalesce(nullif(ga.payload->>'name', ''), 'Atividade'),
-        coalesce(nullif(ga.payload->>'category', ''), 'studying'),
-        coalesce((ga.payload->>'color_value')::bigint, 4280391411),
-        coalesce((ga.payload->>'goal_seconds')::integer, 0),
-        coalesce((ga.payload->>'goal_pages')::integer, 0),
-        coalesce(ga.payload->>'notes', ''),
-        coalesce(ga.payload->>'icon_name', ''),
-        coalesce((ga.payload->>'rest_minutes')::integer, 5),
-        coalesce((ga.payload->>'focus_session_count')::integer, 1),
-        coalesce((ga.payload->>'wallpaper_index')::integer, 0),
-        coalesce(nullif(ga.payload->>'activity_type', ''), 'daily'),
-        target_group_id,
-        ga.id
-      )
-      on conflict (user_id, id) do nothing;
-    elsif ga.kind = 'goal' then
-      insert into public.daily_goals (
-        id, user_id, name, color_value, target_days,
-        sequence_type, goal_type,
-        group_id, group_activity_id
-      ) values (
-        'grp_' || ga.id::text,
-        target_user_id,
-        coalesce(nullif(ga.payload->>'name', ''), 'Meta'),
-        coalesce((ga.payload->>'color_value')::bigint, 4280391411),
-        coalesce((ga.payload->>'target_days')::integer, 0),
-        coalesce(nullif(ga.payload->>'sequence_type', ''), 'casual'),
-        coalesce(nullif(ga.payload->>'goal_type', ''), 'total'),
-        target_group_id,
-        ga.id
-      )
-      on conflict (user_id, id) do update
-      set
-        name = excluded.name,
-        color_value = excluded.color_value,
-        target_days = excluded.target_days,
-        sequence_type = excluded.sequence_type,
-        goal_type = excluded.goal_type,
-        group_id = excluded.group_id,
-        group_activity_id = excluded.group_activity_id
-      where
-        daily_goals.name is distinct from excluded.name
-        or daily_goals.color_value is distinct from excluded.color_value
-        or daily_goals.target_days is distinct from excluded.target_days
-        or daily_goals.sequence_type is distinct from excluded.sequence_type
-        or daily_goals.goal_type is distinct from excluded.goal_type
-        or daily_goals.group_id is distinct from excluded.group_id
-        or daily_goals.group_activity_id
-          is distinct from excluded.group_activity_id;
+  target_group_id uuid, target_user_id uuid
+) returns void language plpgsql security definer set search_path = public
+as $$ begin return; end; $$;
 
-      -- Older clients could reuse a local goal with a different id and stamp
-      -- the same group_activity_id on it. Preserve any dates recorded on that
-      -- legacy copy by folding them into the canonical grp_<activity-id> row.
-      update public.daily_goals canonical_goal
-      set completed_dates = coalesce((
-        select array_agg(distinct completed.value order by completed.value)
-        from public.daily_goals source_goal
-        cross join lateral unnest(source_goal.completed_dates)
-          as completed(value)
-        where source_goal.user_id = target_user_id
-          and (
-            source_goal.id = 'grp_' || ga.id::text
-            or source_goal.group_activity_id = ga.id
-          )
-      ), '{}'::text[])
-      where canonical_goal.user_id = target_user_id
-        and canonical_goal.id = 'grp_' || ga.id::text;
-    end if;
-  end loop;
-end;
-$$;
-
--- Fans the group's activities out to a member the moment their membership row
--- is created, no matter which path created it: the accept/join RPCs, or the
--- client-side fallback (_acceptInvitationDirectly) that inserts the membership
--- directly and cannot call materialize itself. Idempotent — the materialize
--- inserts use `on conflict do nothing`, so the explicit calls in the RPCs stay
--- harmless. (Group creation still needs its own explicit call: the owner's
--- membership is inserted before the group_activities row exists.)
+-- Compatibility hook: selection happens after joining, never automatically.
 create or replace function public.materialize_group_activities_on_join()
 returns trigger
 language plpgsql
@@ -1276,14 +1178,40 @@ create trigger trg_materialize_group_activities_on_join
   for each row
   execute function public.materialize_group_activities_on_join();
 
+-- A source may contribute during several disjoint periods. Closed periods stay
+-- queryable, so unlinking/relinking neither erases scores nor imports the gap.
+create table if not exists public.group_activity_links (
+  id uuid primary key default gen_random_uuid(),
+  activity_id uuid not null references public.group_activities(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  source_id text not null,
+  started_at timestamptz not null default clock_timestamp(),
+  ended_at timestamptz,
+  start_date date not null default current_date,
+  excluded_dates text[] not null default '{}',
+  check (ended_at is null or ended_at >= started_at)
+);
+create unique index if not exists group_activity_links_active_idx
+  on public.group_activity_links(activity_id, user_id, source_id)
+  where ended_at is null;
+create index if not exists group_activity_links_user_idx
+  on public.group_activity_links(user_id, source_id, started_at);
+
+-- Daily goals only store dates. Snapshot newly checked dates while linked,
+-- rather than treating an already-completed day as a new contribution.
+create table if not exists public.group_goal_contributions (
+  link_id uuid not null references public.group_activity_links(id) on delete cascade,
+  completed_date date not null,
+  recorded_at timestamptz not null default clock_timestamp(),
+  primary key (link_id, completed_date)
+);
+
 -- -----------------------------------------------------------------------------
 -- Membership changes
 -- -----------------------------------------------------------------------------
 
--- When a membership row goes away because the user leaves (or is removed),
--- their group-linked copies are removed. When the group itself is deleted,
--- the copies are kept and unlinked so they become ordinary activities/goals
--- that the user can edit or delete.
+-- Leaving closes contribution periods and preserves all personal sources.
+-- Any remaining legacy group-owned rows are detached without losing history.
 -- If the last member leaves, the group is deleted so all group-owned rows that
 -- cascade from public.groups are removed. If the owner leaves while members
 -- remain, ownership is handed to the earliest remaining member.
@@ -1297,6 +1225,10 @@ declare
   next_owner_id uuid;
   leaving_user_was_owner boolean;
 begin
+  update public.group_activity_links l set ended_at = clock_timestamp()
+  from public.group_activities ga
+  where l.activity_id = ga.id and ga.group_id = old.group_id
+    and l.user_id = old.user_id and l.ended_at is null;
   if not exists (
     select 1
     from public.groups g
@@ -1334,9 +1266,9 @@ begin
     return old;
   end if;
 
-  delete from public.user_subjects
+  update public.user_subjects set group_id = null, group_activity_id = null
    where user_id = old.user_id and group_id = old.group_id;
-  delete from public.daily_goals
+  update public.daily_goals set group_id = null, group_activity_id = null
    where user_id = old.user_id and group_id = old.group_id;
 
   if pg_trigger_depth() > 1 then
@@ -1389,6 +1321,20 @@ language plpgsql
 set search_path = public
 as $$
 begin
+  -- Older cached clients may still upload the former ownership columns.
+  -- Normalize known migrated sources, and require the dedicated RPC for new
+  -- links. Generic personal writes must never reintroduce group ownership.
+  if current_user in ('authenticated', 'anon')
+     and (new.group_id is not null or new.group_activity_id is not null) then
+    if exists (select 1 from public.group_activity_links l
+      where l.activity_id = new.group_activity_id and l.user_id = new.user_id
+        and l.source_id = new.id) then
+      new.group_id := null;
+      new.group_activity_id := null;
+    else
+      raise exception 'use group activity links' using errcode = '42501';
+    end if;
+  end if;
   if new.group_id is not null or new.group_activity_id is not null then
     if new.group_id is null or new.group_activity_id is null
        or new.id <> 'grp_' || new.group_activity_id::text
@@ -1457,6 +1403,20 @@ begin
       using errcode = '23514';
   end if;
 
+  -- Older cached clients may still upload the former ownership columns.
+  -- Normalize known migrated sources, and require the dedicated RPC for new
+  -- links. Generic personal writes must never reintroduce group ownership.
+  if current_user in ('authenticated', 'anon')
+     and (new.group_id is not null or new.group_activity_id is not null) then
+    if exists (select 1 from public.group_activity_links l
+      where l.activity_id = new.group_activity_id and l.user_id = new.user_id
+        and l.source_id = new.id) then
+      new.group_id := null;
+      new.group_activity_id := null;
+    else
+      raise exception 'use group activity links' using errcode = '42501';
+    end if;
+  end if;
   if new.group_id is not null or new.group_activity_id is not null then
     if new.group_id is null or new.group_activity_id is null
        or new.id <> 'grp_' || new.group_activity_id::text
@@ -1495,6 +1455,170 @@ drop trigger if exists trg_protect_group_goal on public.daily_goals;
 create trigger trg_protect_group_goal
   before insert or update on public.daily_goals
   for each row execute function public.protect_group_goal();
+
+-- Upgrade existing copies in place: retain ids/history and initial scoring
+-- boundary, then release personal metadata from group ownership. Repeat-safe.
+insert into public.group_activity_links(activity_id, user_id, source_id, started_at, start_date)
+select ga.id, s.user_id, s.id, greatest(ga.created_at, gm.joined_at),
+  (greatest(ga.created_at, gm.joined_at) at time zone 'utc')::date
+from public.user_subjects s
+join public.group_activities ga on ga.id = s.group_activity_id
+join public.group_members gm on gm.group_id = ga.group_id and gm.user_id = s.user_id
+where not exists (select 1 from public.group_activity_links l
+  where l.activity_id = ga.id and l.user_id = s.user_id and l.source_id = s.id);
+insert into public.group_activity_links(activity_id, user_id, source_id, started_at, start_date)
+select ga.id, d.user_id, d.id, greatest(ga.created_at, gm.joined_at),
+  (greatest(ga.created_at, gm.joined_at) at time zone 'utc')::date
+from public.daily_goals d
+join public.group_activities ga on ga.id = d.group_activity_id
+join public.group_members gm on gm.group_id = ga.group_id and gm.user_id = d.user_id
+where not exists (select 1 from public.group_activity_links l
+  where l.activity_id = ga.id and l.user_id = d.user_id and l.source_id = d.id);
+insert into public.group_goal_contributions(link_id, completed_date, recorded_at)
+select l.id, value::date, value::date::timestamptz
+from public.daily_goals d
+join public.group_activity_links l on l.activity_id = d.group_activity_id
+  and l.user_id = d.user_id and l.source_id = d.id
+cross join lateral unnest(d.completed_dates) value
+where value::date >= l.start_date
+on conflict do nothing;
+update public.user_subjects set group_id = null, group_activity_id = null
+where group_id is not null or group_activity_id is not null;
+update public.daily_goals set group_id = null, group_activity_id = null
+where group_id is not null or group_activity_id is not null;
+
+create or replace function public.capture_group_goal_contributions()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+begin
+  delete from public.group_goal_contributions c
+  using public.group_activity_links l, public.group_activities ga
+  where c.link_id = l.id and l.activity_id = ga.id and ga.kind = 'goal'
+    and l.user_id = new.user_id and l.source_id = new.id and l.ended_at is null
+    and not (c.completed_date::text = any(new.completed_dates));
+  insert into public.group_goal_contributions(link_id, completed_date)
+  select l.id, value::date
+  from public.group_activity_links l
+  join public.group_activities ga on ga.id = l.activity_id and ga.kind = 'goal'
+  cross join lateral unnest(new.completed_dates) value
+  where l.user_id = new.user_id and l.source_id = new.id and l.ended_at is null
+    and value::date >= l.start_date
+    and not (value = any(l.excluded_dates))
+    and (tg_op = 'INSERT' or not (value = any(old.completed_dates)))
+  on conflict do nothing;
+  return new;
+end; $$;
+drop trigger if exists trg_capture_group_goal_contributions on public.daily_goals;
+create trigger trg_capture_group_goal_contributions after insert or update of completed_dates
+on public.daily_goals for each row execute function public.capture_group_goal_contributions();
+
+-- Atomic replacement under the membership lock. Unchanged selections retain
+-- their original start; retries do not start new intervals or create new rows.
+create or replace function public.set_group_activity_links(
+  target_activity_id uuid,
+  source_ids text[] default '{}',
+  create_new boolean default false,
+  local_date date default current_date
+) returns void language plpgsql security definer set search_path = public
+as $$
+declare
+  ga public.group_activities;
+  selected_ids text[] := coalesce(source_ids, '{}'::text[]);
+  source text;
+  change_at timestamptz;
+begin
+  select * into ga from public.group_activities where id = target_activity_id;
+  perform 1 from public.group_members
+  where group_id = ga.group_id and user_id = auth.uid() for update;
+  if not found then raise exception 'not a group member' using errcode = '42501'; end if;
+  change_at := clock_timestamp();
+  if abs(local_date - current_date) > 1 or local_date is null then
+    raise exception 'invalid local date' using errcode = '23514';
+  end if;
+  if cardinality(selected_ids) > 100 or array_position(selected_ids, null) is not null then
+    raise exception 'invalid sources' using errcode = '23514';
+  end if;
+  if create_new then
+    if cardinality(selected_ids) <> 0 then
+      raise exception 'choose existing sources or create one' using errcode = '23514';
+    end if;
+    source := 'grp_' || ga.id::text;
+    if ga.kind = 'subject' then
+      insert into public.user_subjects(id, user_id, name, category, color_value,
+        goal_seconds, goal_pages, icon_name, rest_minutes, focus_session_count,
+        wallpaper_index, activity_type)
+      values (source, auth.uid(), coalesce(ga.payload->>'name', 'Atividade'),
+        ga.payload->>'category', coalesce((ga.payload->>'color_value')::bigint, 4280391411),
+        coalesce((ga.payload->>'goal_seconds')::integer, 0),
+        coalesce((ga.payload->>'goal_pages')::integer, 0),
+        coalesce(ga.payload->>'icon_name', ''),
+        coalesce((ga.payload->>'rest_minutes')::integer, 5),
+        coalesce((ga.payload->>'focus_session_count')::integer, 1),
+        coalesce((ga.payload->>'wallpaper_index')::integer, 0),
+        coalesce(ga.payload->>'activity_type', 'daily'))
+      on conflict (user_id, id) do nothing;
+    else
+      insert into public.daily_goals(id, user_id, name, color_value, target_days,
+        sequence_type, goal_type)
+      values (source, auth.uid(), coalesce(ga.payload->>'name', 'Meta'),
+        coalesce((ga.payload->>'color_value')::bigint, 4280391411),
+        coalesce((ga.payload->>'target_days')::integer, 0),
+        coalesce(ga.payload->>'sequence_type', 'casual'),
+        coalesce(ga.payload->>'goal_type', 'total'))
+      on conflict (user_id, id) do nothing;
+    end if;
+    selected_ids := array[source];
+  end if;
+  foreach source in array selected_ids loop
+    if ga.kind = 'subject' then
+      perform 1 from public.user_subjects s where s.user_id = auth.uid()
+        and s.id = source and s.category = ga.payload->>'category'
+        and s.group_id is null;
+    else
+      perform 1 from public.daily_goals d where d.user_id = auth.uid()
+        and d.id = source and d.group_id is null for update;
+    end if;
+    if not found then
+      raise exception 'source is missing or incompatible' using errcode = '23514';
+    end if;
+  end loop;
+  update public.group_activity_links set ended_at = change_at
+  where activity_id = ga.id and user_id = auth.uid() and ended_at is null
+    and not (source_id = any(selected_ids));
+  insert into public.group_activity_links(activity_id, user_id, source_id,
+    started_at, start_date, excluded_dates)
+  select ga.id, auth.uid(), chosen, change_at, local_date,
+    case when ga.kind = 'goal' then coalesce((select d.completed_dates
+      from public.daily_goals d where d.user_id = auth.uid() and d.id = chosen), '{}')
+      else '{}'::text[] end
+  from (select distinct unnest(selected_ids) chosen) selected
+  where not exists (select 1 from public.group_activity_links l
+    where l.activity_id = ga.id and l.user_id = auth.uid()
+      and l.source_id = chosen and l.ended_at is null);
+end; $$;
+
+-- Only the caller's sources are returned. A peer can see aggregate scores,
+-- never another member's list of personal activities or notes.
+create or replace function public.group_activity_link_options(target_group_id uuid)
+returns jsonb language plpgsql stable security definer set search_path = public
+as $$
+begin
+  if not public.is_group_member(target_group_id, auth.uid()) then
+    raise exception 'not a group member' using errcode = '42501';
+  end if;
+  return coalesce((select jsonb_agg(jsonb_build_object(
+    'id', ga.id, 'kind', ga.kind, 'payload', ga.payload,
+    'selected_ids', coalesce((select jsonb_agg(l.source_id)
+      from public.group_activity_links l where l.activity_id = ga.id
+        and l.user_id = auth.uid() and l.ended_at is null), '[]'::jsonb),
+    'options', case when ga.kind = 'subject' then coalesce((
+      select jsonb_agg(jsonb_build_object('id', s.id, 'name', s.name) order by s.name)
+      from public.user_subjects s where s.user_id = auth.uid() and s.group_id is null
+        and s.category = ga.payload->>'category'), '[]'::jsonb)
+    else coalesce((select jsonb_agg(jsonb_build_object('id', d.id, 'name', d.name) order by d.name)
+      from public.daily_goals d where d.user_id = auth.uid() and d.group_id is null), '[]'::jsonb) end
+  ) order by ga.created_at) from public.group_activities ga where ga.group_id = target_group_id), '[]'::jsonb);
+end; $$;
 
 -- backend/schema/06_group_ranking.sql
 -- =============================================================================
@@ -1557,22 +1681,17 @@ as $$
         else activity.seconds
       end::bigint as score
     from member_scope member
-    join public.user_subjects subject
-      on subject.user_id = member.user_id
-     and subject.group_id = member.group_id
-     and subject.group_activity_id is not null
-    join public.group_activities group_activity
-      on group_activity.id = subject.group_activity_id
-     and group_activity.group_id = member.group_id
-     and group_activity.kind = 'subject'
-    join public.activity_entries activity
-      on activity.user_id = member.user_id
-     and activity.subject_id = subject.id
-     and activity.occurred_at >= coalesce(
-       group_activity.score_reset_at,
-       group_activity.created_at
-     )
-    where member.category <> 'dailyGoals'
+    join public.activity_entries activity on activity.user_id = member.user_id
+    where exists (
+      select 1 from public.group_activity_links link
+      join public.group_activities ga on ga.id = link.activity_id
+      where ga.group_id = member.group_id and ga.kind = 'subject'
+        and link.user_id = member.user_id and link.source_id = activity.subject_id
+        and activity.category = member.category
+        and activity.occurred_at >= greatest(link.started_at, coalesce(ga.score_reset_at, ga.created_at))
+        and (link.ended_at is null or activity.occurred_at < link.ended_at)
+    )
+      and member.category <> 'dailyGoals'
   ), activity_scores as (
     select
       scored.group_id,
@@ -1599,30 +1718,13 @@ as $$
     join public.group_activities activity
       on activity.group_id = member.group_id
      and activity.kind = 'goal'
-    join public.daily_goals goal
-      on goal.user_id = member.user_id
-     and goal.group_activity_id = activity.id
-    cross join lateral unnest(goal.completed_dates) as raw_date(value)
-    cross join lateral (
-      select case
-        when raw_date.value ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
-          then raw_date.value::date
-        else null
-      end as completed_date
-    ) completed
+    join public.group_activity_links link on link.activity_id = activity.id
+      and link.user_id = member.user_id
+    join public.group_goal_contributions completed on completed.link_id = link.id
     where member.category = 'dailyGoals'
-      and completed.completed_date is not null
-      and completed.completed_date >=
-        (activity.created_at at time zone 'utc')::date
-      and (
-        activity.score_reset_at is null
-        -- Goals have date-only history, so the reset day is excluded in full;
-        -- completions before and after the reset cannot be distinguished.
-        or completed.completed_date >
-          (activity.score_reset_at at time zone 'utc')::date
-      )
-      and completed.completed_date <=
-        (today_start at time zone 'utc')::date
+      and (activity.score_reset_at is null
+        or completed.completed_date > (activity.score_reset_at at time zone 'utc')::date)
+      and completed.completed_date <= (today_start at time zone 'utc')::date
   ), goal_scores as (
     select
       goal_date.group_id,
@@ -1696,14 +1798,6 @@ begin
     raise exception 'not a group member' using errcode = '42501';
   end if;
 
-  -- Self-heal groups created before the fan-out trigger existed, as well as
-  -- canonical rows whose group link or target metadata was left incomplete.
-  perform public.materialize_group_activities_for_user(
-    target_group_id, member.user_id
-  )
-  from public.group_members member
-  where member.group_id = target_group_id;
-
   return query
   select
     ga.id,
@@ -1730,8 +1824,6 @@ begin
     coalesce((ga.payload->>'focus_session_count')::integer, 1)
   from public.group_activities ga
   join public.group_members gm on gm.group_id = ga.group_id
-  left join public.user_subjects us
-    on us.group_activity_id = ga.id and us.user_id = gm.user_id
   left join lateral (
     select coalesce(sum(
       case
@@ -1742,10 +1834,14 @@ begin
     ), 0)::integer as progress
     from public.activity_entries entry
     where entry.user_id = gm.user_id
-      and entry.subject_id = us.id
-      and entry.occurred_at >= coalesce(
-        ga.score_reset_at,
-        ga.created_at
+      and entry.category = ga.payload->>'category'
+      and entry.occurred_at >= coalesce(ga.score_reset_at, ga.created_at)
+      and exists (
+        select 1 from public.group_activity_links link
+        where link.activity_id = ga.id and link.user_id = gm.user_id
+          and link.source_id = entry.subject_id
+          and entry.occurred_at >= link.started_at
+          and (link.ended_at is null or entry.occurred_at < link.ended_at)
       )
   ) reset_subject on true
   where ga.group_id = target_group_id and ga.kind = 'subject'
@@ -1779,18 +1875,15 @@ begin
     1
   from public.group_activities ga
   join public.group_members gm on gm.group_id = ga.group_id
-  left join public.daily_goals dg
-    on dg.id = 'grp_' || ga.id::text and dg.user_id = gm.user_id
   left join lateral (
-    select
-      count(*)::integer as completed_count,
-      coalesce(bool_or(completed.value = today_key), false) as completed_today
-    from unnest(coalesce(dg.completed_dates, '{}'::text[]))
-      as completed(value)
-    where ga.score_reset_at is null
-      -- Keep the same date-only reset boundary as the leaderboard.
-      or completed.value >
-        to_char(ga.score_reset_at at time zone 'utc', 'YYYY-MM-DD')
+    select count(distinct completed.completed_date)::integer as completed_count,
+      coalesce(bool_or(completed.completed_date::text = today_key), false) as completed_today
+    from public.group_activity_links link
+    join public.group_goal_contributions completed on completed.link_id = link.id
+    where link.activity_id = ga.id and link.user_id = gm.user_id
+      and completed.completed_date <= today_key::date
+      and (ga.score_reset_at is null or completed.completed_date >
+        (ga.score_reset_at at time zone 'utc')::date)
   ) goal_progress on true
   where ga.group_id = target_group_id and ga.kind = 'goal';
 end;
@@ -1843,7 +1936,6 @@ declare
   new_group_id uuid;
   new_invite_code text;
   new_activity_id uuid;
-  member_row record;
 begin
   if current_user_id is null then
     raise exception 'User must be authenticated to create a group.'
@@ -1898,19 +1990,16 @@ begin
   if activity_kind is not null then
     insert into public.group_activities (group_id, kind, payload)
     values (
-      new_group_id, activity_kind, coalesce(activity_payload, '{}'::jsonb)
+      new_group_id, activity_kind, coalesce(activity_payload, '{}'::jsonb) - 'source_ids' - 'local_date'
     )
     returning group_activities.id into new_activity_id;
 
-    for member_row in
-      select gm.user_id
-      from public.group_members gm
-      where gm.group_id = new_group_id
-    loop
-      perform public.materialize_group_activities_for_user(
-        new_group_id, member_row.user_id
-      );
-    end loop;
+    perform public.set_group_activity_links(
+      new_activity_id,
+      array(select jsonb_array_elements_text(coalesce(activity_payload->'source_ids', '[]'::jsonb))),
+      not (coalesce(activity_payload, '{}'::jsonb) ? 'source_ids'),
+      coalesce((activity_payload->>'local_date')::date, current_date)
+    );
   end if;
 
   return query
@@ -2830,6 +2919,14 @@ with check (
   and public.is_group_member(group_image_messages.group_id, auth.uid())
 );
 
+-- Link periods and goal snapshots are server-owned; only aggregate RPCs expose
+-- peer progress. The member may inspect their own periods.
+alter table public.group_activity_links enable row level security;
+alter table public.group_goal_contributions enable row level security;
+drop policy if exists group_activity_links_self on public.group_activity_links;
+create policy group_activity_links_self on public.group_activity_links
+for select to authenticated using (user_id = auth.uid());
+
 -- backend/schema/10_storage.sql
 -- =============================================================================
 -- 10 · Storage
@@ -3096,7 +3193,6 @@ grant update (
   is_online,
   last_seen_at,
   notifications_enabled,
-  language_code,
   focus_lock_studying_enabled,
   focus_lock_exercises_enabled,
   focus_lock_reading_enabled,
@@ -3106,6 +3202,54 @@ grant update (
 -- Activity history is append-only through the validating RPC above. Users may
 -- still remove their own history through the owner-scoped delete policy.
 grant select, delete on table public.activity_entries to authenticated;
+
+revoke all on public.group_activity_links, public.group_goal_contributions from public, anon, authenticated;
+grant select on public.group_activity_links to authenticated;
+revoke all on function public.capture_group_goal_contributions() from public, anon, authenticated;
+revoke all on function public.set_group_activity_links(uuid, text[], boolean, date) from public, anon;
+revoke all on function public.group_activity_link_options(uuid) from public, anon;
+grant execute on function public.set_group_activity_links(uuid, text[], boolean, date) to authenticated;
+grant execute on function public.group_activity_link_options(uuid) to authenticated;
+
+-- backend/schema/12_google_calendar.sql
+-- Google Calendar credentials and OAuth state are accessible only to the Edge
+-- Function's service role. Never grant these tables to authenticated clients.
+create table if not exists public.google_calendar_connections (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  refresh_token_encrypted text not null,
+  calendar_id text not null,
+  time_zone text not null,
+  generation uuid not null default gen_random_uuid(),
+  events jsonb not null default '{}',
+  lease_until timestamptz,
+  lease_id uuid,
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.google_calendar_oauth_states (
+  state text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  expires_at timestamptz not null default now() + interval '10 minutes'
+);
+alter table public.google_calendar_connections enable row level security;
+alter table public.google_calendar_oauth_states enable row level security;
+revoke all on public.google_calendar_connections from public, anon, authenticated;
+revoke all on public.google_calendar_oauth_states from public, anon, authenticated;
+grant all on public.google_calendar_connections to service_role;
+grant all on public.google_calendar_oauth_states to service_role;
+
+-- Serialize reconciliation across devices/functions. A crashed worker's lease
+-- expires; lease_id prevents it from releasing a newer worker's lease.
+create or replace function public.claim_google_calendar_sync(owner uuid, worker uuid)
+returns boolean language sql security definer set search_path = '' as $$
+  with claimed as (
+    update public.google_calendar_connections
+      set lease_until = now() + interval '180 seconds', lease_id = worker
+      where user_id = owner and (lease_until is null or lease_until < now())
+      returning user_id
+  ) select exists(select 1 from claimed);
+$$;
+revoke all on function public.claim_google_calendar_sync(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.claim_google_calendar_sync(uuid, uuid) to service_role;
 
 -- backend/schema/12_maintenance.sql
 -- =============================================================================

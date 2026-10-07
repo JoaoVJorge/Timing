@@ -69,6 +69,11 @@ class DailyTasksDataSource {
         _hydratedRemoteUserId == _supabaseService.currentUserId;
   }
 
+  Future<void> refreshAfterGroupLinkChange() async {
+    _lastRemoteReadAt = null;
+    await getTasks();
+  }
+
   Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async {
     try {
       final String? savedTasks = await _localStorageService.read<String?>(
@@ -216,6 +221,8 @@ class DailyTasksDataSource {
       // that hasn't finished syncing is not clobbered by a stale remote read.
       if (local == null || _isNewer(remote, local)) {
         byId[remote.id] = remote;
+      } else if (local.isFromGroup && !remote.isFromGroup) {
+        byId[remote.id] = local.copyWith(clearGroupLink: true);
       }
     }
     return byId.values.toList();
@@ -343,9 +350,7 @@ class DailyTasksDataSource {
         _lastRemoteReadAt = DateTime.now();
         // Local saves return before this upload completes. Refresh shared
         // rankings only after the server has received the completed days.
-        if (tasks.any((task) => task.isFromGroup)) {
-          _activityChangeBus?.notifyGroupActivityChanged();
-        }
+        _activityChangeBus?.notifyGroupActivityChanged();
       }
 
       if (!canDeleteRemoteTasks(userId)) {

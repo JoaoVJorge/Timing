@@ -15,18 +15,43 @@ class _ActivityStep extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.initializeThemeColor(context.colorTokens.primary);
     return Obx(
-      () => controller.isDailyGoalsTheme
-          ? _DailyGoalActivityForm(
-              controller: controller,
-              nameKey: activityNameKey,
-              goalKey: activityGoalKey,
-            )
-          : CreateSubjectFormContent(
-              controller: controller,
-              showHero: false,
-              nameKey: activityNameKey,
-              goalKey: activityGoalKey,
+      () => Column(
+        children: [
+          if (controller.isLoadingSources.value)
+            const LinearProgressIndicator(),
+          if (controller.sourcesLoadFailed.value)
+            TextButton(
+              onPressed: controller.loadPersonalActivities,
+              child: Text(context.l10n.groupLinksRetry),
             ),
+          ActivitySourceSelector(
+            useExisting: controller.useExistingActivities.value,
+            options: controller.compatibleSources,
+            selectedIds: controller.selectedSourceIds.toSet(),
+            onModeChanged: controller.setUseExistingActivities,
+            onToggle: controller.toggleSource,
+            isReading: controller.isPageBased,
+          ),
+          const Gap(16),
+          Text(
+            context.l10n.groupLinksSharedTarget,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const Gap(12),
+          controller.isDailyGoalsTheme
+              ? _DailyGoalActivityForm(
+                  controller: controller,
+                  nameKey: activityNameKey,
+                  goalKey: activityGoalKey,
+                )
+              : CreateSubjectFormContent(
+                  controller: controller,
+                  showHero: false,
+                  nameKey: activityNameKey,
+                  goalKey: activityGoalKey,
+                ),
+        ],
+      ),
     );
   }
 }

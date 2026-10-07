@@ -1,3 +1,4 @@
+import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "dart:async";
 import "dart:convert";
 
@@ -76,6 +77,65 @@ class GroupsDataSource {
   /// values let the outer timeout win the race before the RPC's own timeout
   /// ever fires, silently serving stale cached groups after every real
   /// activity update instead of the fresh ranking.
+  Future<Either<AppError, List<GroupActivityLinkOptions>>>
+  getActivityLinkOptions(String groupId) async {
+    try {
+      final dynamic result = await _supabaseService.requireClient
+          .rpc(
+            "group_activity_link_options",
+            params: {"target_group_id": groupId},
+          )
+          .timeout(_remoteCallTimeout);
+      return Right(
+        (result as List)
+            .map(
+              (item) => GroupActivityLinkOptions.fromMap(
+                Map<String, dynamic>.from(item as Map),
+              ),
+            )
+            .toList(),
+      );
+    } catch (error, stackTrace) {
+      return Left(
+        SqlOperationAppError(
+          operation: "group_activity_link_options",
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
+  Future<Either<AppError, void>> setActivityLinks({
+    required String activityId,
+    required List<String> sourceIds,
+    bool createNew = false,
+  }) async {
+    try {
+      await _supabaseService.requireClient
+          .rpc(
+            "set_group_activity_links",
+            params: {
+              "target_activity_id": activityId,
+              "source_ids": sourceIds,
+              "create_new": createNew,
+              "local_date": DateTime.now().toIso8601String().substring(0, 10),
+            },
+          )
+          .timeout(_remoteCallTimeout);
+      _activityChangeBus?.notifyGroupActivityChanged();
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(
+        SqlOperationAppError(
+          operation: "set_group_activity_links",
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
+    }
+  }
+
   Future<Either<AppError, List<GroupEntity>>> getGroups() async {
     final String? userId = _supabaseService.currentUserId;
     if (userId == null) {
@@ -194,6 +254,9 @@ class GroupsDataSource {
   Future<Either<AppError, List<GroupActivityProgressEntity>>>
   getGroupActivityProgress(String groupId, {String? localDate}) async {
     try {
+      // The progress RPC omits the activity's saved appearance. Load its
+      // payload alongside progress so every member sees the group's color.
+      final optionsFuture = getActivityLinkOptions(groupId);
       final dynamic response = await _supabaseService.requireClient
           .rpc(
             "group_activity_progress",
@@ -202,12 +265,23 @@ class GroupsDataSource {
           .timeout(_remoteCallTimeout);
       _logger.logResponse("rpc public.group_activity_progress", response);
       final List<dynamic> rows = response as List<dynamic>? ?? const [];
+      final optionsResult = await optionsFuture;
+      final Map<String, int> colorsByActivity = optionsResult.fold(
+        (_) => <String, int>{},
+        (options) => {
+          for (final option in options)
+            if (option.payload["color_value"] is num)
+              option.activityId: (option.payload["color_value"] as num).toInt(),
+        },
+      );
       return Right(
         rows
             .map(
-              (row) => GroupActivityProgressEntity.fromMap(
-                Map<String, dynamic>.from(row as Map),
-              ),
+              (row) => GroupActivityProgressEntity.fromMap({
+                ...Map<String, dynamic>.from(row as Map),
+                if (colorsByActivity.containsKey(row["activity_id"]))
+                  "color_value": colorsByActivity[row["activity_id"]],
+              }),
             )
             .toList(),
       );
@@ -993,7 +1067,12 @@ class GroupsDataSource {
             .toList(),
         "group_description": description,
         "activity_kind": activity?.kindName,
-        "activity_payload": activity?.toPayload(),
+        "activity_payload": activity == null
+            ? null
+            : {
+                ...activity.toPayload(),
+                "local_date": DateTime.now().toIso8601String().substring(0, 10),
+              },
       };
       _logger.logRequest(operation, createGroupPayload);
       final dynamic response = await _supabaseService.requireClient

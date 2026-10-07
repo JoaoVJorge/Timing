@@ -318,3 +318,11 @@ with check (
   sender_id = auth.uid()
   and public.is_group_member(group_image_messages.group_id, auth.uid())
 );
+
+-- Link periods and goal snapshots are server-owned; only aggregate RPCs expose
+-- peer progress. The member may inspect their own periods.
+alter table public.group_activity_links enable row level security;
+alter table public.group_goal_contributions enable row level security;
+drop policy if exists group_activity_links_self on public.group_activity_links;
+create policy group_activity_links_self on public.group_activity_links
+for select to authenticated using (user_id = auth.uid());

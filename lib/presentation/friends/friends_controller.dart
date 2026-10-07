@@ -1,3 +1,4 @@
+import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "dart:async";
 
 import "package:flutter/services.dart";
@@ -209,6 +210,7 @@ class FriendsController extends GetxController {
       await result.fold(
         (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
         (group) async {
+          await showGroupActivityLinks(group);
           if (Get.isRegistered<GroupsController>()) {
             await Get.find<GroupsController>().upsertJoinedGroup(group);
           }
@@ -274,12 +276,32 @@ class FriendsController extends GetxController {
     }
     try {
       final result = await _acceptFriendRequestUseCase(profile.friendshipId);
-      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-        requests.removeWhere((request) => request.id == profile.id);
-        if (!friends.any((friend) => friend.id == profile.id)) {
-          friends.insert(0, profile);
-        }
-      });
+      await result.fold<Future<void>>(
+        (error) async {
+          _appNavigator.showErrorSnackBar();
+        },
+        (_) async {
+          // Pending requests may have no visible profile under RLS. Acceptance
+          // grants access, so hydrate the friend before reusing the placeholder.
+          final socialResult = await _getFriendsSocialUseCase();
+          final FriendEntity acceptedProfile = socialResult.fold(
+            (_) => profile,
+            (social) => social.friends.firstWhere(
+              (friend) => friend.id == profile.id,
+              orElse: () => profile,
+            ),
+          );
+          requests.removeWhere((request) => request.id == profile.id);
+          final int existingIndex = friends.indexWhere(
+            (friend) => friend.id == profile.id,
+          );
+          if (existingIndex < 0) {
+            friends.insert(0, acceptedProfile);
+          } else {
+            friends[existingIndex] = acceptedProfile;
+          }
+        },
+      );
     } finally {
       acceptingFriendRequestIds.remove(profile.id);
     }

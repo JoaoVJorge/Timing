@@ -81,9 +81,8 @@ class SubjectEntity extends Equatable {
   final SubjectActivityType activityType;
   final DateTime? createdAt;
 
-  /// Non-null when this subject is a copy handed out by a group. Such copies
-  /// cannot be deleted while the user is still a member (enforced by the
-  /// backend delete policy) and are removed on leaving the group.
+  /// Legacy ownership metadata. The backend migration clears these columns;
+  /// new group participation uses independent links to personal activities.
   final String? groupId;
   final String? groupActivityId;
 
@@ -155,6 +154,7 @@ class SubjectEntity extends Equatable {
     int? wallpaperIndex,
     SubjectActivityType? activityType,
     DateTime? createdAt,
+    bool clearGroupLink = false,
     String? groupId,
     String? groupActivityId,
   }) => SubjectEntity(
@@ -173,8 +173,10 @@ class SubjectEntity extends Equatable {
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
     activityType: activityType ?? this.activityType,
     createdAt: createdAt ?? this.createdAt,
-    groupId: groupId ?? this.groupId,
-    groupActivityId: groupActivityId ?? this.groupActivityId,
+    groupId: clearGroupLink ? null : groupId ?? this.groupId,
+    groupActivityId: clearGroupLink
+        ? null
+        : groupActivityId ?? this.groupActivityId,
   );
 
   @override

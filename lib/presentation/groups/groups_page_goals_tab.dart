@@ -72,11 +72,16 @@ class _GroupActivityDataView extends StatelessWidget {
       return Column(
         children: [
           for (final GroupActivityProgressEntity header in headers) ...[
-            _activityData(
-              context,
-              controller,
-              header,
-              progressByActivityId[header.activityId] ?? const [],
+            _GroupActivityColorScope(
+              colorValue: header.colorValue,
+              child: Builder(
+                builder: (context) => _activityData(
+                  context,
+                  controller,
+                  header,
+                  progressByActivityId[header.activityId] ?? const [],
+                ),
+              ),
             ),
             const Gap(AppSpacing.betweenSections),
           ],
@@ -206,6 +211,43 @@ class _GroupActivityDataView extends StatelessWidget {
           goalTarget: fallbackTarget,
         ),
       ],
+    );
+  }
+}
+
+class _GroupActivityColorScope extends StatelessWidget {
+  const _GroupActivityColorScope({
+    required this.colorValue,
+    required this.child,
+  });
+
+  final int? colorValue;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final AppColorTokens activityTokens = AppColorTokens.fromSeed(
+      seed: colorValue == null
+          ? SubjectColors.values.first
+          : Color(colorValue!),
+      isDark: theme.brightness == Brightness.dark,
+    );
+    final AppColorTokens tokens = context.colorTokens.copyWith(
+      primary: activityTokens.primary,
+      primaryPastel: activityTokens.primaryPastel,
+      primaryVeryLight: activityTokens.primaryVeryLight,
+    );
+
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(primary: tokens.primary),
+        extensions: [
+          ...theme.extensions.values.where((value) => value is! AppColorTokens),
+          tokens,
+        ],
+      ),
+      child: child,
     );
   }
 }

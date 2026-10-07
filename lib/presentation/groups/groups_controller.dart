@@ -1,3 +1,5 @@
+import "package:timing/core/services/sync/group_activity_link_sync.dart";
+import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "dart:async";
 import "dart:convert";
 
@@ -838,6 +840,15 @@ class GroupsController extends GetxController {
     isSendingImage.value = false;
   }
 
+  Future<void> onManageActivityLinks() async {
+    final group = selectedGroup.value;
+    if (group == null) return;
+    await showGroupActivityLinks(group);
+    await _reloadVisibleActivityControllers();
+    _mainTabRefreshService.markGroupsChanged();
+    await refreshAfterActivityChange(groupId: group.id);
+  }
+
   Future<void> onTapCreateGroup() async {
     // Get.toNamed<T> with a concrete type crashes at runtime (GetX types the
     // route result future as dynamic internally), so await dynamic and cast.
@@ -859,13 +870,7 @@ class GroupsController extends GetxController {
     activityProgress.clear();
     groups.refresh();
     _mainTabRefreshService.markGroupsChanged();
-    // CreateGroupController already writes the owner's local copy of the
-    // group activity. Keep that cache intact so the activity appears in "mine"
-    // immediately instead of waiting for a remote refetch.
-    if (newGroup.theme == GroupThemeType.dailyGoals &&
-        Get.isRegistered<DailyGoalsController>()) {
-      await Get.find<DailyGoalsController>().loadTasks();
-    }
+    await _reloadVisibleActivityControllers();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
 
@@ -900,20 +905,14 @@ class GroupsController extends GetxController {
     }
   }
 
-  /// Creating, joining, or editing a group changes the member's group-owned
-  /// subjects and goals server-side (fan-out / cleanup trigger). Dropping the
-  /// local caches makes the next Category / Daily Goals load refetch them.
+  /// Merge server-created personal sources without discarding offline work.
   Future<void> _invalidateActivityCaches() async {
-    await _localStorageService.delete(LocalStorageKeys.subjects);
-    await _localStorageService.delete(LocalStorageKeys.dailyTasks);
+    await refreshPersonalActivitiesAfterLinking();
     await _reloadVisibleActivityControllers();
   }
 
-  /// Leaving a group must not drop the complete activity caches. A remote
-  /// reload can fail or briefly return no rows immediately after the membership
-  /// is removed; deleting the caches first would then make every personal goal
-  /// and subject disappear from the UI. Remove only the departing group's local
-  /// copies and keep all personal items available while the server catches up.
+  /// Legacy cached copies become personal activities when membership ends.
+  /// Preserve their history while the next reconciliation updates metadata.
   Future<void> _removeDepartedGroupActivityCaches(String groupId) async {
     await Future.wait([
       _removeGroupItemsFromCache(LocalStorageKeys.subjects, groupId),
@@ -937,9 +936,15 @@ class GroupsController extends GetxController {
           decodedItems.any((item) => item is! Map<String, dynamic>)) {
         return;
       }
-      final List<dynamic> retainedItems = decodedItems.where((item) {
-        final Map<String, dynamic> cachedItem = item as Map<String, dynamic>;
-        return cachedItem["groupId"] != groupId;
+      final List<dynamic> retainedItems = decodedItems.map((item) {
+        final Map<String, dynamic> cachedItem = Map<String, dynamic>.from(
+          item as Map,
+        );
+        if (cachedItem["groupId"] == groupId) {
+          cachedItem["groupId"] = null;
+          cachedItem["groupActivityId"] = null;
+        }
+        return cachedItem;
       }).toList();
       await _localStorageService.write(key, jsonEncode(retainedItems));
     } on FormatException {

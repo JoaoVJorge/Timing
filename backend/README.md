@@ -11,7 +11,7 @@ one only depends on the sections before it.
 | `02_friends.sql` | `friendships`, `are_friends()`, friend search RPCs |
 | `03_groups.sql` | Group tables, membership helpers (`is_group_member`, `owns_group`, ...), integrity triggers |
 | `04_tracking.sql` | `activity_entries`, `user_subjects`, `daily_goals`, `schedule_entries`, progress metrics, `record_activity_entry`, `activity_entry_totals` |
-| `05_group_activities.sql` | Fan-out of a group's activity to each member, and protection of those group-owned copies |
+| `05_group_activities.sql` | Personal activity link periods, goal contributions, selection RPCs and legacy migration |
 | `06_group_ranking.sql` | `group_leaderboard_scores`, `group_activity_progress` |
 | `07_group_management.sql` | Create, join, edit, reset and transfer a group, and `delete_my_account` |
 | `08_group_invitations.sql` | Invite, cancel, accept and decline |
@@ -55,3 +55,5 @@ Every statement is idempotent (`create or replace`, `if not exists`,
   new section is needed, pick a number that keeps that order.
 - `11_grants.sql` must stay after every function and table is defined:
   it revokes the broad default grants only from objects that already exist.
+
+See [group activity linking](../docs/GROUP_ACTIVITY_LINKS.md) for the member flows, migration and SQL integration tests.

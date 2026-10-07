@@ -102,10 +102,8 @@ begin
   end if;
 end $$;
 
--- Group-owned copies: a non-null group_id marks a subject/goal handed out by a
--- group. They cannot be deleted manually while the user is still a member (see
--- the delete policies) and are removed automatically when the membership ends
--- (see cleanup_group_activities_on_leave).
+-- Legacy ownership columns retained for old cached clients. Section 05 migrates
+-- these copies to ordinary personal sources plus independent link periods.
 alter table public.user_subjects
   add column if not exists group_id uuid
     references public.groups(id) on delete set null;

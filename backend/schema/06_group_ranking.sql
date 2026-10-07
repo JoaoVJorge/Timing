@@ -58,22 +58,17 @@ as $$
         else activity.seconds
       end::bigint as score
     from member_scope member
-    join public.user_subjects subject
-      on subject.user_id = member.user_id
-     and subject.group_id = member.group_id
-     and subject.group_activity_id is not null
-    join public.group_activities group_activity
-      on group_activity.id = subject.group_activity_id
-     and group_activity.group_id = member.group_id
-     and group_activity.kind = 'subject'
-    join public.activity_entries activity
-      on activity.user_id = member.user_id
-     and activity.subject_id = subject.id
-     and activity.occurred_at >= coalesce(
-       group_activity.score_reset_at,
-       group_activity.created_at
-     )
-    where member.category <> 'dailyGoals'
+    join public.activity_entries activity on activity.user_id = member.user_id
+    where exists (
+      select 1 from public.group_activity_links link
+      join public.group_activities ga on ga.id = link.activity_id
+      where ga.group_id = member.group_id and ga.kind = 'subject'
+        and link.user_id = member.user_id and link.source_id = activity.subject_id
+        and activity.category = member.category
+        and activity.occurred_at >= greatest(link.started_at, coalesce(ga.score_reset_at, ga.created_at))
+        and (link.ended_at is null or activity.occurred_at < link.ended_at)
+    )
+      and member.category <> 'dailyGoals'
   ), activity_scores as (
     select
       scored.group_id,
@@ -100,30 +95,13 @@ as $$
     join public.group_activities activity
       on activity.group_id = member.group_id
      and activity.kind = 'goal'
-    join public.daily_goals goal
-      on goal.user_id = member.user_id
-     and goal.group_activity_id = activity.id
-    cross join lateral unnest(goal.completed_dates) as raw_date(value)
-    cross join lateral (
-      select case
-        when raw_date.value ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
-          then raw_date.value::date
-        else null
-      end as completed_date
-    ) completed
+    join public.group_activity_links link on link.activity_id = activity.id
+      and link.user_id = member.user_id
+    join public.group_goal_contributions completed on completed.link_id = link.id
     where member.category = 'dailyGoals'
-      and completed.completed_date is not null
-      and completed.completed_date >=
-        (activity.created_at at time zone 'utc')::date
-      and (
-        activity.score_reset_at is null
-        -- Goals have date-only history, so the reset day is excluded in full;
-        -- completions before and after the reset cannot be distinguished.
-        or completed.completed_date >
-          (activity.score_reset_at at time zone 'utc')::date
-      )
-      and completed.completed_date <=
-        (today_start at time zone 'utc')::date
+      and (activity.score_reset_at is null
+        or completed.completed_date > (activity.score_reset_at at time zone 'utc')::date)
+      and completed.completed_date <= (today_start at time zone 'utc')::date
   ), goal_scores as (
     select
       goal_date.group_id,
@@ -197,14 +175,6 @@ begin
     raise exception 'not a group member' using errcode = '42501';
   end if;
 
-  -- Self-heal groups created before the fan-out trigger existed, as well as
-  -- canonical rows whose group link or target metadata was left incomplete.
-  perform public.materialize_group_activities_for_user(
-    target_group_id, member.user_id
-  )
-  from public.group_members member
-  where member.group_id = target_group_id;
-
   return query
   select
     ga.id,
@@ -231,8 +201,6 @@ begin
     coalesce((ga.payload->>'focus_session_count')::integer, 1)
   from public.group_activities ga
   join public.group_members gm on gm.group_id = ga.group_id
-  left join public.user_subjects us
-    on us.group_activity_id = ga.id and us.user_id = gm.user_id
   left join lateral (
     select coalesce(sum(
       case
@@ -243,10 +211,14 @@ begin
     ), 0)::integer as progress
     from public.activity_entries entry
     where entry.user_id = gm.user_id
-      and entry.subject_id = us.id
-      and entry.occurred_at >= coalesce(
-        ga.score_reset_at,
-        ga.created_at
+      and entry.category = ga.payload->>'category'
+      and entry.occurred_at >= coalesce(ga.score_reset_at, ga.created_at)
+      and exists (
+        select 1 from public.group_activity_links link
+        where link.activity_id = ga.id and link.user_id = gm.user_id
+          and link.source_id = entry.subject_id
+          and entry.occurred_at >= link.started_at
+          and (link.ended_at is null or entry.occurred_at < link.ended_at)
       )
   ) reset_subject on true
   where ga.group_id = target_group_id and ga.kind = 'subject'
@@ -280,18 +252,15 @@ begin
     1
   from public.group_activities ga
   join public.group_members gm on gm.group_id = ga.group_id
-  left join public.daily_goals dg
-    on dg.id = 'grp_' || ga.id::text and dg.user_id = gm.user_id
   left join lateral (
-    select
-      count(*)::integer as completed_count,
-      coalesce(bool_or(completed.value = today_key), false) as completed_today
-    from unnest(coalesce(dg.completed_dates, '{}'::text[]))
-      as completed(value)
-    where ga.score_reset_at is null
-      -- Keep the same date-only reset boundary as the leaderboard.
-      or completed.value >
-        to_char(ga.score_reset_at at time zone 'utc', 'YYYY-MM-DD')
+    select count(distinct completed.completed_date)::integer as completed_count,
+      coalesce(bool_or(completed.completed_date::text = today_key), false) as completed_today
+    from public.group_activity_links link
+    join public.group_goal_contributions completed on completed.link_id = link.id
+    where link.activity_id = ga.id and link.user_id = gm.user_id
+      and completed.completed_date <= today_key::date
+      and (ga.score_reset_at is null or completed.completed_date >
+        (ga.score_reset_at at time zone 'utc')::date)
   ) goal_progress on true
   where ga.group_id = target_group_id and ga.kind = 'goal';
 end;

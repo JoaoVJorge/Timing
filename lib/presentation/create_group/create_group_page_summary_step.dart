@@ -73,6 +73,19 @@ class _SummaryStep extends StatelessWidget {
               ),
             ),
           ],
+          const Gap(10),
+          Text(
+            controller.useExistingActivities.value
+                ? controller.compatibleSources
+                      .where(
+                        (source) =>
+                            controller.selectedSourceIds.contains(source.id),
+                      )
+                      .map((source) => source.name)
+                      .join(" + ")
+                : context.l10n.groupLinksCreateNew,
+            style: context.textStyles.bodyLarge,
+          ),
           if (activityName.isNotEmpty) ...[
             const Gap(10),
             _SummaryRow(

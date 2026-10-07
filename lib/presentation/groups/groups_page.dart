@@ -34,6 +34,8 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/swipe_reveal_actions.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
+import "package:timing/theme/colors.dart";
+import "package:timing/theme/subject_colors.dart";
 
 part "groups_page_ranking.dart";
 part "groups_page_manage_members.dart";

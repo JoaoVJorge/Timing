@@ -1,3 +1,4 @@
+import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "package:dartz/dartz.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
@@ -16,6 +17,20 @@ class GroupsRepository {
   GroupsRepository({required this._groupsDataSource});
 
   final GroupsDataSource _groupsDataSource;
+
+  Future<Either<AppError, List<GroupActivityLinkOptions>>>
+  getActivityLinkOptions(String groupId) =>
+      _groupsDataSource.getActivityLinkOptions(groupId);
+
+  Future<Either<AppError, void>> setActivityLinks({
+    required String activityId,
+    required List<String> sourceIds,
+    bool createNew = false,
+  }) => _groupsDataSource.setActivityLinks(
+    activityId: activityId,
+    sourceIds: sourceIds,
+    createNew: createNew,
+  );
 
   Future<Either<AppError, List<GroupEntity>>> getGroups() =>
       _groupsDataSource.getGroups();

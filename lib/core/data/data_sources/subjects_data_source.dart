@@ -282,7 +282,7 @@ class SubjectsDataSource {
       currentPages: math.max(local.currentPages, remote.currentPages),
     );
     if (!(remote.groupActivityId?.isNotEmpty ?? false)) {
-      return grown;
+      return grown.copyWith(clearGroupLink: true);
     }
     return grown.copyWith(
       name: remote.name,

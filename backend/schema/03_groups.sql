@@ -52,9 +52,9 @@ create table if not exists public.group_image_messages (
   created_at timestamptz not null default now()
 );
 
--- The activity template chosen when a group is created. Each row is fanned out
--- into a per-member copy in user_subjects / daily_goals (see
--- materialize_group_activities_for_user), so every member tracks their own.
+-- The shared target chosen when a group is created. Each member selects
+-- personal sources via group_activity_links (05), without giving the group
+-- ownership of personal names, settings, goals or history.
 create table if not exists public.group_activities (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
