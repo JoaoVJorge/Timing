@@ -10,6 +10,7 @@ class PendingSyncDataset {
   const PendingSyncDataset._();
 
   static const String subjects = "subjects";
+  static const String googleCalendar = "googleCalendar";
   static const String schedule = "schedule";
   static const String dailyTasks = "dailyTasks";
   static const String activityEntries = "activityEntries";

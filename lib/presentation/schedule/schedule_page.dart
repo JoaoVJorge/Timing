@@ -4,14 +4,15 @@ import "package:get/get.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/schedule/schedule_controller.dart";
+import "package:timing/presentation/schedule/widgets/google_calendar_connection_tile.dart";
 import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
+import "package:timing/shared/functions/format_calendar_labels.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/swipe_reveal_actions.dart";
-import "package:timing/shared/functions/format_calendar_labels.dart";
 import "package:timing/theme/app_spacing.dart";
 
 class SchedulePage extends StatelessWidget {
@@ -163,6 +164,7 @@ class _DayEventsPanel extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const GoogleCalendarConnectionTile(),
                         const Gap(20),
                         _DayEventsHeader(
                           dateLabel: formatFullDateLabel(locale, selectedDate),

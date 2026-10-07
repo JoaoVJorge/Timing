@@ -76,3 +76,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Group activity linking regression tests and isolated SQL test dependencies.
+!/test/presentation/group_activity_links/
+!/test/presentation/group_activity_links/*.dart
+/backend/tests/node_modules/
+
+# Google Calendar regression tests.
+!/test/core/services/google_calendar/
+!/test/core/services/google_calendar/*.dart

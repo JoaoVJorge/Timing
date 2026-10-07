@@ -4,6 +4,7 @@ import "package:timing/core/data/data_sources/friends_data_source.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
 import "package:timing/core/data/data_sources/schedule_data_source.dart";
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
+import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 
 /// Flushes datasets whose remote sync failed earlier (tracked by
 /// [PendingSyncStore]) by re-pushing the current local state. Meant to run
@@ -17,8 +18,10 @@ class SyncReconciliationService {
     required this._activityDataSource,
     required this._groupsDataSource,
     required this._friendsDataSource,
-  });
+    GoogleCalendarService? googleCalendarService,
+  }) : _googleCalendar = googleCalendarService;
 
+  final GoogleCalendarService? _googleCalendar;
   final SubjectsDataSource _subjectsDataSource;
   final ScheduleDataSource _scheduleDataSource;
   final DailyTasksDataSource _dailyTasksDataSource;
@@ -29,6 +32,7 @@ class SyncReconciliationService {
   Future<void> flushPending() async {
     await _subjectsDataSource.flushPendingSync();
     await _scheduleDataSource.flushPendingSync();
+    await _googleCalendar?.refresh();
     await _dailyTasksDataSource.flushPendingSync();
     await _activityDataSource.flushPendingSync();
     await _groupsDataSource.flushPendingSync();

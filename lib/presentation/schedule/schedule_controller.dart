@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
@@ -9,6 +11,7 @@ import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:timing/core/domain/use_cases/update_schedule_entry_use_case.dart";
+import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/presentation/schedule/add_schedule_entry_page.dart";
 import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
@@ -134,6 +137,9 @@ class ScheduleController extends GetxController {
   void onInit() {
     super.onInit();
     loadEntries();
+    if (Get.isRegistered<GoogleCalendarService>()) {
+      unawaited(Get.find<GoogleCalendarService>().refresh());
+    }
   }
 
   void onSelectDate(DateTime date) {

@@ -1,0 +1,4 @@
+[functions.google-calendar]
+# OAuth callback has no Supabase JWT. Every POST validates the current user
+# through /auth/v1/user; GET validates a single-use random OAuth state.
+verify_jwt = false

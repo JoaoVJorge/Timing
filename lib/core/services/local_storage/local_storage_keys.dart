@@ -27,6 +27,7 @@ enum LocalStorageKeys {
     isUserScoped: true,
     encryptAtRest: true,
   ),
+  googleCalendarEnabled(hasSensitiveData: false, isUserScoped: true),
   scheduleEntries(
     hasSensitiveData: false,
     isUserScoped: true,

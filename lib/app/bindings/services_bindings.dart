@@ -1,6 +1,7 @@
 import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/analytics/analytics_service.dart";
 import "package:timing/core/services/analytics/logging_analytics_service.dart";
@@ -10,6 +11,7 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
 import "package:timing/core/services/foreground/timer_foreground_service.dart";
+import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 import "package:timing/core/services/home_widget/home_widget_service.dart";
 import "package:timing/core/services/http/http_client_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
@@ -23,7 +25,6 @@ import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/timer/active_timer_session_service.dart";
 import "package:timing/env/environment_keys.dart";
-import "package:shared_preferences/shared_preferences.dart";
 
 class ServicesBindings extends Bindings {
   @override
@@ -79,6 +80,14 @@ class ServicesBindings extends Bindings {
     );
     await pendingSyncStore.load();
     Get.put<PendingSyncStore>(pendingSyncStore, permanent: true);
+
+    final GoogleCalendarService googleCalendar = GoogleCalendarService(
+      supabaseService: Get.find(),
+      localStorageService: Get.find(),
+      pendingSyncStore: Get.find(),
+    );
+    await googleCalendar.initialize();
+    Get.put<GoogleCalendarService>(googleCalendar, permanent: true);
 
     final LastActivityService lastActivityService = LastActivityService(
       localStorageService: Get.find(),

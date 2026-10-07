@@ -1,8 +1,10 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:dartz/dartz.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -15,8 +17,10 @@ class ScheduleDataSource {
     required this._supabaseService,
     required this._logger,
     required this._pendingSyncStore,
-  });
+    GoogleCalendarService? googleCalendarService,
+  }) : _googleCalendar = googleCalendarService;
 
+  final GoogleCalendarService? _googleCalendar;
   final AppLocalStorageService _localStorageService;
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
@@ -67,6 +71,7 @@ class ScheduleDataSource {
         encoded,
       );
       await _syncRemoteEntries(entries);
+      unawaited(_googleCalendar?.sync());
       return const Right(null);
     } catch (error, stackTrace) {
       return Left(GenericAppError(error: error, stackTrace: stackTrace));

@@ -1,5 +1,6 @@
 import "package:get/get.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
+import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 import "package:timing/core/data/data_sources/app_config_data_source.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
@@ -83,6 +84,7 @@ class DataSourcesBindings extends Bindings {
     );
     Get.put<ScheduleDataSource>(
       ScheduleDataSource(
+        googleCalendarService: Get.find<GoogleCalendarService>(),
         localStorageService: Get.find(),
         supabaseService: Get.find(),
         logger: Get.find(),
@@ -94,6 +96,7 @@ class DataSourcesBindings extends Bindings {
     Get.put<SyncReconciliationService>(
       SyncReconciliationService(
         subjectsDataSource: Get.find(),
+        googleCalendarService: Get.find<GoogleCalendarService>(),
         scheduleDataSource: Get.find(),
         dailyTasksDataSource: Get.find(),
         activityDataSource: Get.find(),

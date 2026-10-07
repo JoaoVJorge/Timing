@@ -1,0 +1,12 @@
+{
+  "name": "timing-backend-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node group_activity_links_test.mjs",
+    "test:calendar": "node google_calendar_test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  }
+}
