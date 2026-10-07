@@ -366,6 +366,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   AppConfigEntity _withLocalDevicePreferences(AppConfigEntity config) =>
       config.copyWith(
         isDarkMode: isDarkMode.value,
+        accentColorValue: accentColor.value.toARGB32(),
         languageCode: languageCode.value,
         focusLockStudyingEnabled: focusLockStudyingEnabled.value,
         focusLockExercisesEnabled: focusLockExercisesEnabled.value,

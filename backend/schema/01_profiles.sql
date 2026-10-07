@@ -50,7 +50,6 @@ create table if not exists public.profiles (
   is_online boolean not null default false,
   last_seen_at timestamptz,
   notifications_enabled boolean not null default true,
-  language_code text,
   focus_lock_studying_enabled boolean not null default false,
   focus_lock_exercises_enabled boolean not null default false,
   focus_lock_reading_enabled boolean not null default false,
@@ -70,6 +69,10 @@ alter table public.profiles
 -- New profiles start on the app's default blue accent (0xFF1976D2).
 alter table public.profiles
   alter column accent_color_value set default 4279858898;
+
+-- The UI language is a device preference kept only in local storage.
+alter table public.profiles
+  drop column if exists language_code;
 
 -- Personally identifiable fields are kept in an owner-only table. Keeping
 -- them on profiles would expose them whenever the public profile row is made

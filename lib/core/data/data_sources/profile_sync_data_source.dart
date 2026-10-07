@@ -33,10 +33,8 @@ class ProfileSyncDataSource {
             "user_name": config.userName,
             "nick_name": config.nickName,
             "profile_photo_base64": config.profilePhotoBase64,
-            "accent_color_value": config.accentColorValue,
             "avatar_icon_index": config.avatarIconIndex,
             "notifications_enabled": config.notificationsEnabled,
-            "language_code": config.languageCode,
             "focus_lock_studying_enabled": config.focusLockStudyingEnabled,
             "focus_lock_exercises_enabled": config.focusLockExercisesEnabled,
             "focus_lock_reading_enabled": config.focusLockReadingEnabled,
@@ -89,8 +87,8 @@ class ProfileSyncDataSource {
             .from("profiles")
             .select(
               "id, friend_code, is_dark_mode, user_name, nick_name, "
-              "profile_photo_base64, accent_color_value, avatar_icon_index, "
-              "notifications_enabled, language_code, "
+              "profile_photo_base64, avatar_icon_index, "
+              "notifications_enabled, "
               "focus_lock_studying_enabled, focus_lock_exercises_enabled, "
               "focus_lock_reading_enabled, focus_lock_hobbies_enabled",
             )
@@ -127,16 +125,12 @@ class ProfileSyncDataSource {
       phoneNumber: row["phone_number"] as String?,
       birthDate: row["birth_date"] as String?,
       profilePhotoBase64: row["profile_photo_base64"] as String?,
-      accentColorValue:
-          (row["accent_color_value"] as num?)?.toInt() ??
-          fallback.accentColorValue,
       avatarIconIndex:
           (row["avatar_icon_index"] as num?)?.toInt() ??
           fallback.avatarIconIndex,
       notificationsEnabled:
           row["notifications_enabled"] as bool? ??
           fallback.notificationsEnabled,
-      languageCode: row["language_code"] as String?,
       friendCode: row["friend_code"] as String? ?? "",
       focusLockStudyingEnabled:
           row["focus_lock_studying_enabled"] as bool? ??
