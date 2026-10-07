@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Bundle
 import android.widget.RemoteViews
 
 class FocusTodayWidgetProvider : AppWidgetProvider() {
@@ -17,6 +18,15 @@ class FocusTodayWidgetProvider : AppWidgetProvider() {
     ) {
         val widgetData = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         updateWidgets(context, appWidgetManager, appWidgetIds, widgetData)
+    }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 
     companion object {
@@ -47,26 +57,41 @@ class FocusTodayWidgetProvider : AppWidgetProvider() {
             widgetData: SharedPreferences
         ) {
             appWidgetIds.forEach { widgetId ->
-                val views = RemoteViews(context.packageName, R.layout.widget_focus_today)
+                val options = appWidgetManager.getAppWidgetOptions(widgetId)
+                // Hosts report landscape's height as min and portrait's as max.
+                // Supply both so rotation does not reuse an oversized layout.
+                val landscape = widgetViews(context, widgetData,
+                    options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 70))
+                val portrait = widgetViews(context, widgetData,
+                    options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 70))
+                val views = RemoteViews(landscape, portrait)
+                appWidgetManager.updateAppWidget(widgetId, views)
+            }
+        }
 
-                val focusValue = widgetData.getString(FOCUS_TODAY_KEY, null) ?: "0 min"
-                val goalsValue = widgetData.getString(GOALS_PROGRESS_KEY, null) ?: "Metas 0/0"
-
-                views.setTextViewText(R.id.widget_focus_value, focusValue)
-                views.setTextViewText(R.id.widget_goals_value, goalsValue)
-
+        private fun widgetViews(
+            context: Context,
+            widgetData: SharedPreferences,
+            heightDp: Int
+        ): RemoteViews {
+            val expandedMinHeight = 160 * context.resources.configuration.fontScale.coerceAtLeast(1f)
+            val layout = if (heightDp >= expandedMinHeight) {
+                R.layout.widget_focus_today_expanded
+            } else {
+                R.layout.widget_focus_today
+            }
+            return RemoteViews(context.packageName, layout).apply {
+                setTextViewText(R.id.widget_focus_value,
+                    widgetData.getString(FOCUS_TODAY_KEY, null) ?: "0 min")
+                setTextViewText(R.id.widget_goals_value,
+                    widgetData.getString(GOALS_PROGRESS_KEY, null) ?: "Metas 0/0")
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    launchIntent,
+                setOnClickPendingIntent(R.id.widget_root, PendingIntent.getActivity(
+                    context, 0, launchIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
-
-                appWidgetManager.updateAppWidget(widgetId, views)
+                ))
             }
         }
     }

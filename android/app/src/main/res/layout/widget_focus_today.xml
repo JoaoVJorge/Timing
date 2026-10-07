@@ -1,44 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- A 2x1 widget must fit in 70dp, including padding. Weighted rows keep
+     every value inside the host bounds, even in the launcher's preview. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/widget_background"
-    android:padding="16dp">
+    android:paddingHorizontal="10dp"
+    android:paddingVertical="6dp">
 
     <TextView
         android:id="@+id/widget_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="11sp"
+        android:autoSizeStepGranularity="1sp"
         android:text="Foco de hoje"
+        android:textAllCaps="true"
         android:textColor="#B9A9D9"
-        android:textSize="12sp"
-        android:letterSpacing="0.04"
-        android:textAllCaps="true" />
+        android:textSize="11sp" />
 
     <TextView
         android:id="@+id/widget_focus_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="24sp"
+        android:autoSizeStepGranularity="1sp"
         android:text="0 min"
         android:textColor="#FFFFFF"
-        android:textSize="28sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/widget_goals_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:background="@drawable/widget_progress_pill"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="11sp"
+        android:autoSizeStepGranularity="1sp"
         android:text="Metas 0/0"
         android:textColor="#C9BEF0"
-        android:textSize="13sp" />
-
+        android:textSize="11sp" />
 </LinearLayout>

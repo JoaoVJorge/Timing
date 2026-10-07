@@ -15,9 +15,6 @@ import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.media.MediaMetadata
-import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -41,28 +38,12 @@ import java.util.Locale
 /// the Activity and its Dart isolate, the durable timer checkpoint remains the
 /// source of truth and the elapsed wall time is recovered on the next launch.
 ///
-/// The ongoing notification is built with `Notification.MediaStyle` bound to a
-/// `MediaSession`, which is what makes Android render it as an interactive
-/// mini player on the lock screen (like a music app), with the pause/resume
-/// action tappable without unlocking. The lock screen's dedicated media card
-/// reads its title/art/elapsed-time from the MediaSession's metadata and
-/// playback state, kept in sync with the notification's own text below.
-/// A plain notification action, by contrast, is
-/// generally hidden or requires unlocking on most OEMs. Because of this, this
-/// service is now the sole owner of the ongoing notification —
-/// TimerNotificationService (flutter_local_notifications) no longer posts to
-/// the same id, since flutter_local_notifications has no MediaStyle support
-/// and would otherwise clobber this richer presentation on every tick.
-///
-/// The custom card's Chronometer views tick inside System UI on their own,
-/// without reposting. The lock screen's media widget is not one of them: it
-/// paints from the last *posted* Notification, not from MediaSession pushes
-/// alone, so it stays frozen unless the notification is actually reposted.
-/// A partial wake lock keeps that once-a-second repost loop running even
-/// with the screen off, where Doze would otherwise stall it.
+/// This is a stopwatch notification, not media playback. Registering a media
+/// session here competes with music apps for the system's active media controls.
+/// Samsung ongoing-activity extras and Android Live Updates provide the timer
+/// surface independently; pause/resume uses a service PendingIntent.
 class TimerForegroundService : Service() {
 
-    private var mediaSession: MediaSession? = null
     private var cachedTitle: String = ""
     private var cachedActionLabel: String = ""
     private var cachedIsRunning: Boolean = true
@@ -87,13 +68,8 @@ class TimerForegroundService : Service() {
     private var isTickScheduled = false
     private val tickRunnable = object : Runnable {
         override fun run() {
-            updateMediaSession()
-            // The lock screen's media widget is system-drawn from the last
-            // *posted* Notification, not just from MediaSession pushes — it
-            // does not repaint on setMetadata()/setPlaybackState() alone. A
-            // real repost every second is what makes its elapsed time move;
-            // our own Chronometer-based cards keep ticking natively in
-            // between, so this doesn't reset or flicker them.
+            // Custom chronometers tick in System UI; refresh snapshot text and
+            // progress for surfaces that do not render those views.
             refreshNotification()
             tickHandler.postDelayed(this, 1_000L)
         }
@@ -112,13 +88,6 @@ class TimerForegroundService : Service() {
             @Suppress("DEPRECATION")
             registerReceiver(screenReceiver, screenEvents)
         }
-        val session = MediaSession(this, "TimerFocusSession")
-        session.setCallback(object : MediaSession.Callback() {
-            override fun onPause() = handleToggleFromLockScreen()
-            override fun onPlay() = handleToggleFromLockScreen()
-        })
-        session.isActive = true
-        mediaSession = session
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
@@ -159,7 +128,6 @@ class TimerForegroundService : Service() {
         }
 
         hasSession = true
-        updateMediaSession()
         startForegroundCompat()
         applyTickingState()
         return START_NOT_STICKY
@@ -175,9 +143,6 @@ class TimerForegroundService : Service() {
             @Suppress("DEPRECATION")
             stopForeground(true)
         }
-        mediaSession?.isActive = false
-        mediaSession?.release()
-        mediaSession = null
         super.onDestroy()
     }
 
@@ -194,7 +159,7 @@ class TimerForegroundService : Service() {
 
     private fun startTicking() {
         // Without a wake lock, Doze can suspend this Handler loop once the
-        // screen locks, so the lock screen media card's time text stops
+        // screen locks, so snapshot-only timer surfaces stop
         // advancing even though the foreground service is still alive.
         wakeLock?.acquire(WAKE_LOCK_TIMEOUT_MS)
         if (isTickScheduled) {
@@ -215,8 +180,8 @@ class TimerForegroundService : Service() {
         manager.notify(NOTIFICATION_ID, buildNotification())
     }
 
-    /// A tap on the lock screen's mini player arrives here (via MediaSession's
-    /// transport controls). It flips the cached playback state immediately so
+    /// A notification action arrives here through its service PendingIntent.
+    /// It flips the cached timer state immediately so
     /// the icon responds without delay, then flags the request for Dart to
     /// consume and apply the real pause/resume side effects on its next poll.
     private fun handleToggleFromLockScreen() {
@@ -228,7 +193,6 @@ class TimerForegroundService : Service() {
         cachedIsTicking = cachedIsRunning && cachedTicksWhenRunning
         elapsedAnchorAtMilliseconds =
             SystemClock.elapsedRealtime() - cachedElapsedSeconds.toLong() * 1_000L
-        updateMediaSession()
         startForegroundCompat()
         applyTickingState()
     }
@@ -251,43 +215,6 @@ class TimerForegroundService : Service() {
         } else {
             String.format("%02d:%02d", minutes, seconds)
         }
-    }
-
-    private fun updateMediaSession() {
-        val session = mediaSession ?: return
-        val elapsedSeconds = liveElapsedSeconds()
-        val positionMilliseconds = elapsedSeconds.toLong() * 1_000L
-        val state = if (cachedIsRunning) PlaybackState.STATE_PLAYING else PlaybackState.STATE_PAUSED
-        val speed = if (cachedIsTicking) 1f else 0f
-        session.setPlaybackState(
-            PlaybackState.Builder()
-                .setActions(PlaybackState.ACTION_PLAY_PAUSE)
-                .setState(state, positionMilliseconds, speed, SystemClock.elapsedRealtime())
-                .build()
-        )
-        updateMediaMetadata(elapsedSeconds)
-    }
-
-    private fun updateMediaMetadata(elapsedSeconds: Int) {
-        val session = mediaSession ?: return
-        val timeLabel = formatElapsed(elapsedSeconds)
-        val metadata = MediaMetadata.Builder()
-            .putString(MediaMetadata.METADATA_KEY_TITLE, cachedTitle)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, cachedTitle)
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, timeLabel)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, timeLabel)
-            .putString(MediaMetadata.METADATA_KEY_ALBUM, phaseLabel())
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
-                "${phaseLabel()} • ${sessionLabel()}")
-            .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, buildActivityArtwork())
-        // Keep the real target; the custom chronometers continue into overtime.
-        if (cachedTotalSeconds > 0) {
-            metadata.putLong(
-                MediaMetadata.METADATA_KEY_DURATION,
-                cachedTotalSeconds.toLong() * 1_000L
-            )
-        }
-        session.setMetadata(metadata.build())
     }
 
     private fun sessionLabel(): String = getString(
@@ -515,11 +442,6 @@ class TimerForegroundService : Service() {
             .setOnlyAlertOnce(true)
             .setCategory(Notification.CATEGORY_STOPWATCH)
             .setVisibility(Notification.VISIBILITY_PUBLIC)
-            .setStyle((if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Notification.DecoratedMediaCustomViewStyle()
-            } else Notification.MediaStyle())
-                .setMediaSession(mediaSession?.sessionToken)
-                .setShowActionsInCompactView(0))
             .addAction(
                 Notification.Action.Builder(
                     android.graphics.drawable.Icon.createWithResource(this, toggleIcon),
@@ -527,16 +449,14 @@ class TimerForegroundService : Service() {
                     togglePendingIntent
                 ).build()
             )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Media/Now Bar surfaces that ignore the custom RemoteViews use
-            // this color for their own background.
-            builder.setColorized(true)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // OEM Now Bar/media players may render their own surface from the
-            // MediaSession. These layouts cover the notification surfaces that
-            // accept custom content. Use the compact layout while locked, even
-            // when the system requests the expanded notification presentation.
+        if (Build.VERSION.SDK_INT >= 36) {
+            // Live Updates require standard content and no colorized/custom
+            // views. The system decides promotion based on user/OEM settings.
+            builder.addExtras(Bundle().apply {
+                putBoolean("android.requestPromotedOngoing", true)
+            })
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setStyle(Notification.DecoratedCustomViewStyle())
             val compact = timerContent(false, togglePendingIntent, elapsedSeconds)
             val locked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isKeyguardLocked
             val expanded = if (locked) compact else timerContent(true, togglePendingIntent, elapsedSeconds)
@@ -545,6 +465,8 @@ class TimerForegroundService : Service() {
                 // Heads-up slots can be limited to 88dp. The full card belongs
                 // in the expanded notification / Samsung live-activity surface.
                 .setCustomHeadsUpContentView(compact)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             if (Build.MANUFACTURER.equals("samsung", ignoreCase = true)) {
                 // Best-effort One UI extension, gated by Samsung's own app
                 // eligibility. Standard RemoteViews alone do not configure Now Bar.
@@ -555,7 +477,8 @@ class TimerForegroundService : Service() {
                     putString("android.ongoingActivityNoti.secondaryInfo", "$contentText • ${sessionLabel()}")
                     putString("android.ongoingActivityNoti.chipExpandedText", elapsedLabel)
                     putInt("android.ongoingActivityNoti.chipBgColor", cachedColor)
-                    putParcelable("android.ongoingActivityNoti.chronometerRemoteView", expanded)
+                    putParcelable("android.ongoingActivityNoti.chronometerRemoteView",
+                        timerContent(false, togglePendingIntent, elapsedSeconds))
                     putInt("android.ongoingActivityNoti.chronometerRemoteViewPosition", 1)
                     putString("android.ongoingActivityNoti.chronometerRemoteViewTag", "timing_timer")
                     putInt("android.ongoingActivityNoti.nowbarChronometerPosition", 1)
@@ -597,19 +520,19 @@ class TimerForegroundService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Focus timer",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_LOW
         )
         channel.description = "Ongoing focus session shown on the lockscreen"
+        channel.setSound(null, null)
+        channel.enableVibration(false)
         channel.setShowBadge(false)
         manager.createNotificationChannel(channel)
     }
 
     companion object {
-        // Must match TimerNotificationService's channel/notification ids on the
-        // Dart side so both sides update the same notification slot — the
-        // importance must match too, since Android channels are immutable
-        // once created and whichever side runs first otherwise locks it in.
-        private const val CHANNEL_ID = "focus_timer_v2"
+        // A new silent channel also fixes installations with the old audible
+        // channel: Android preserves channel settings once created.
+        private const val CHANNEL_ID = "focus_timer_v3"
         private const val NOTIFICATION_ID = 1001
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_ACTION_LABEL = "actionLabel"
@@ -628,8 +551,8 @@ class TimerForegroundService : Service() {
         // the wake lock forever; startTicking() renews it long before this.
         private const val WAKE_LOCK_TIMEOUT_MS = 6 * 60 * 60 * 1_000L
 
-        /// Set from the MediaSession callback when the user taps pause/resume
-        /// on the lock screen mini player. Polled and reset from Dart, mirroring
+        /// Set from the notification action when the user taps pause/resume
+        /// on the timer card. Polled and reset from Dart, mirroring
         /// how TimerNotificationService surfaces its own pending toggle.
         @Volatile
         private var pendingToggleRequested: Boolean = false

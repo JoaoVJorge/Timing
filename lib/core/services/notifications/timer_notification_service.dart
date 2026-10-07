@@ -9,12 +9,9 @@ import "package:timezone/timezone.dart" as tz;
 /// Schedules the one-shot "focus/rest finished" alarms and timeline
 /// reminders for a focus session.
 ///
-/// The ongoing, lockscreen-visible mini player (chronometer, pause/resume)
-/// is now owned entirely by the native TimerForegroundService, since it
-/// needs a MediaSession + MediaStyle notification that this plugin cannot
-/// build; posting to the same notification id from both sides would race and
-/// the plain notification would win, dropping the media-style lock screen
-/// controls.
+/// The ongoing timer notification (chronometer, pause/resume) is owned by
+/// the native TimerForegroundService. Posting to its notification id from
+/// both sides would replace its native timer controls and live-update metadata.
 class TimerNotificationService {
   TimerNotificationService({AppLoggerService? logger})
     : _logger = logger ?? AppLoggerService();

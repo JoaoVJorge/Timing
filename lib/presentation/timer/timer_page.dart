@@ -334,6 +334,7 @@ class _TimerProgressRing extends StatelessWidget {
                   size: Size.square(size),
                   painter: _TimerRingPainter(
                     progress: tick.progress,
+                    dotProgress: tick.dotProgress,
                     trackColor: chrome.trackColor,
                     ringGradientColors: chrome.ringGradientColors,
                     accentColor: chrome.accentColor,
@@ -772,6 +773,7 @@ class _RestMessage extends StatelessWidget {
 class _TimerRingPainter extends CustomPainter {
   const _TimerRingPainter({
     required this.progress,
+    required this.dotProgress,
     required this.trackColor,
     required this.ringGradientColors,
     required this.accentColor,
@@ -779,6 +781,7 @@ class _TimerRingPainter extends CustomPainter {
   });
 
   final double progress;
+  final double dotProgress;
   final Color trackColor;
   final List<Color> ringGradientColors;
   final Color accentColor;
@@ -812,7 +815,7 @@ class _TimerRingPainter extends CustomPainter {
       ..drawCircle(center, radius, trackPaint)
       ..drawArc(rect, startAngle, sweepAngle, false, progressPaint);
 
-    if (showStartDot) {
+    if (showStartDot && progress < 1) {
       _drawDot(
         canvas,
         center,
@@ -821,24 +824,15 @@ class _TimerRingPainter extends CustomPainter {
         accentColor,
         strokeWidth * 0.9,
       );
-      _drawDot(
-        canvas,
-        center,
-        radius,
-        startAngle + sweepAngle,
-        accentColor,
-        strokeWidth * 0.56,
-      );
-    } else {
-      _drawDot(
-        canvas,
-        center,
-        radius,
-        startAngle + sweepAngle,
-        accentColor,
-        strokeWidth * 0.84,
-      );
     }
+    _drawDot(
+      canvas,
+      center,
+      radius,
+      startAngle + math.pi * 2 * dotProgress,
+      accentColor,
+      strokeWidth * (showStartDot ? 0.56 : 0.84),
+    );
   }
 
   void _drawDot(
@@ -859,6 +853,7 @@ class _TimerRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _TimerRingPainter oldDelegate) =>
       oldDelegate.progress != progress ||
+      oldDelegate.dotProgress != dotProgress ||
       oldDelegate.trackColor != trackColor ||
       oldDelegate.accentColor != accentColor ||
       oldDelegate.showStartDot != showStartDot ||
@@ -1008,6 +1003,7 @@ class _TimerTick {
     required this.focusSectionLabel,
     required this.totalSubjectTimeLabel,
     required this.progress,
+    required this.dotProgress,
   });
 
   factory _TimerTick.fromController({
@@ -1029,6 +1025,15 @@ class _TimerTick {
         ? controller.currentActivitySeconds
         : controller.sessionSeconds.value;
     final bool currentTimeUsesHours = currentSeconds >= 3600;
+    final int activitySeconds =
+        controller.subject.activityType == SubjectActivityType.daily
+        ? controller.currentActivitySeconds
+        : controller.totalSeconds;
+    // Filling and orbiting are independent: after the first completed lap,
+    // keep the entire ring painted while the marker follows later laps.
+    final bool hasCompletedLap =
+        activitySeconds >= controller.focusIntervalSeconds ||
+        controller.completedFocusSections.value > 0;
     final double progress = state == TimerVisualState.finished
         ? 1
         : isReading
@@ -1037,6 +1042,15 @@ class _TimerTick {
         ? 1 -
               (controller.restCountdownSeconds.value /
                   controller.restIntervalSeconds)
+        : hasCompletedLap
+        ? 1
+        : controller.focusProgress;
+    final double dotProgress =
+        state == TimerVisualState.finished || isReading || isResting
+        ? progress
+        : controller.isHobby
+        ? (activitySeconds % controller.focusIntervalSeconds) /
+              controller.focusIntervalSeconds
         : controller.focusProgress;
 
     return _TimerTick(
@@ -1058,6 +1072,7 @@ class _TimerTick {
         Duration(seconds: controller.currentActivitySeconds),
       ),
       progress: progress.clamp(0, 1).toDouble(),
+      dotProgress: dotProgress.clamp(0, 1).toDouble(),
     );
   }
 
@@ -1068,4 +1083,5 @@ class _TimerTick {
   final String focusSectionLabel;
   final String totalSubjectTimeLabel;
   final double progress;
+  final double dotProgress;
 }

@@ -140,8 +140,7 @@ class TimerForegroundService {
     }
   }
 
-  /// Consumes a pause/resume tap made on the lock screen's mini player
-  /// (MediaSession transport controls), if any.
+  /// Consumes a pause/resume tap made on the native timer notification, if any.
   Future<bool> consumePendingToggleRequest() async {
     if (!_isSupported) {
       return false;
