@@ -398,7 +398,7 @@
   "homeActionStartEyebrow": "Beginnen Sie mit der Konzentration",
   "homeActionStartButton": "Starten",
   "homeActionSuggestedMeta": "Ihr am häufigsten verfolgtes Thema",
-  "homeActionCreateBody": "Erstellen Sie Ihr erstes Thema, um eine Fokussitzung zu starten.",
+  "homeActionCreateBody": "Erstelle eine Aktivität, um zu beginnen",
   "homeActionCreateButton": "Betreff erstellen",
   "homeSummaryTitle": "Die heutige Zusammenfassung",
   "homeSummaryFocus": "Konzentrieren Sie sich",
@@ -1723,5 +1723,42 @@
   "signInProgressTitle": "Du wirst angemeldet",
   "signInProgressConfirmingAccount": "Dein Google-Konto wird bestätigt...",
   "signInProgressLoadingProfile": "Dein Profil wird geladen...",
-  "signInProgressPreparingHome": "Alles wird vorbereitet..."
+  "signInProgressPreparingHome": "Alles wird vorbereitet...",
+  "groupLinksTitle": "Meine verknüpften Aktivitäten",
+  "groupLinksUseExisting": "Meine Aktivitäten verwenden",
+  "groupLinksCreateNew": "Aktivität erstellen",
+  "groupLinksEmpty": "Keine passenden Aktivitäten verfügbar.",
+  "groupLinksSelected": "{count, plural, =0{Keine Aktivitäten ausgewählt.} =1{1 Aktivität ausgewählt.} other{{count} Aktivitäten ausgewählt.}}",
+  "groupLinksExplanation": "Nur neue Einträge ab der Verknüpfung zählen. Dein Verlauf und deine persönlichen Ziele bleiben erhalten. Abwählen stoppt neue Beiträge; ohne Auswahl pausiert deine Teilnahme.",
+  "groupLinksReadingHint": "Wenn die Gruppe ein bestimmtes Buch verfolgt, wähle nur Aktivitäten für dieses Buch.",
+  "groupLinksSelectRequired": "Wähle mindestens eine Aktivität aus.",
+  "groupLinksSyncError": "Aktivitäten konnten nicht geladen oder synchronisiert werden. Prüfe deine Verbindung und versuche es erneut.",
+  "groupLinksSaveError": "Verknüpfungen konnten nicht gespeichert werden. Deine Auswahl bleibt erhalten; versuche es erneut.",
+  "groupLinksRetry": "Erneut versuchen",
+  "groupLinksSave": "Verknüpfungen speichern",
+  "groupLinksSharedTarget": "Gruppenaktivität und Ziel",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "Timing-Termine automatisch zu Google Calendar hinzufügen.",
+  "googleCalendarConnect": "Verbinden",
+  "googleCalendarConnected": "Verbunden · Zeitzone: {timeZone}",
+  "googleCalendarConnecting": "Schließe die Autorisierung im Browser ab und kehre zu Timing zurück.",
+  "googleCalendarPending": "Änderungen warten auf Synchronisierung.",
+  "googleCalendarReconnect": "Verbinde Google erneut, um die Synchronisierung zu erlauben.",
+  "googleCalendarError": "Synchronisierung fehlgeschlagen. Versuche es erneut.",
+  "googleCalendarSync": "Jetzt synchronisieren",
+  "googleCalendarDisconnect": "Trennen",
+  "googleCalendarActions": "Google Calendar-Optionen",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }

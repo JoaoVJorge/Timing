@@ -72,7 +72,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeActionSuggestedMeta => 'الموضوع الأكثر متابعة لديك';
 
   @override
-  String get homeActionCreateBody => 'أنشئ موضوعك الأول لبدء جلسة التركيز.';
+  String get homeActionCreateBody => 'أنشئ نشاطًا لنبدأ';
 
   @override
   String get homeActionCreateButton => 'إنشاء الموضوع';
@@ -3399,4 +3399,91 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get signInProgressPreparingHome => 'جارٍ تجهيز كل شيء لك...';
+
+  @override
+  String get groupLinksTitle => 'أنشطتي المرتبطة';
+
+  @override
+  String get groupLinksUseExisting => 'استخدام أنشطتي';
+
+  @override
+  String get groupLinksCreateNew => 'إنشاء نشاط';
+
+  @override
+  String get groupLinksEmpty => 'لا توجد أنشطة متوافقة.';
+
+  @override
+  String groupLinksSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اختيار $count من الأنشطة.',
+      one: 'تم اختيار نشاط واحد.',
+      zero: 'لم يتم اختيار أي نشاط.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupLinksExplanation =>
+      'تُحتسب السجلات الجديدة فقط منذ الربط. يبقى سجلك وأهدافك الشخصية محفوظين. إلغاء الاختيار يوقف المساهمات الجديدة؛ وعدم اختيار أي نشاط يوقف مشاركتك مؤقتًا.';
+
+  @override
+  String get groupLinksReadingHint =>
+      'إذا كانت المجموعة تتابع كتابًا محددًا، فاختر أنشطة ذلك الكتاب فقط.';
+
+  @override
+  String get groupLinksSelectRequired => 'اختر نشاطًا واحدًا على الأقل.';
+
+  @override
+  String get groupLinksSyncError =>
+      'تعذر تحميل أنشطتك أو مزامنتها. تحقق من الاتصال وحاول مجددًا.';
+
+  @override
+  String get groupLinksSaveError =>
+      'تعذر حفظ الروابط. تم الاحتفاظ باختيارك؛ حاول مجددًا.';
+
+  @override
+  String get groupLinksRetry => 'إعادة المحاولة';
+
+  @override
+  String get groupLinksSave => 'حفظ الروابط';
+
+  @override
+  String get groupLinksSharedTarget => 'نشاط المجموعة وهدفها';
+
+  @override
+  String get googleCalendarDescription =>
+      'أضف جدول Timing تلقائيًا إلى Google Calendar.';
+
+  @override
+  String get googleCalendarConnect => 'اتصال';
+
+  @override
+  String googleCalendarConnected(String timeZone) {
+    return 'متصل · المنطقة الزمنية: $timeZone';
+  }
+
+  @override
+  String get googleCalendarConnecting =>
+      'أكمل التفويض في المتصفح ثم عُد إلى Timing.';
+
+  @override
+  String get googleCalendarPending => 'تغييرات تنتظر المزامنة.';
+
+  @override
+  String get googleCalendarReconnect =>
+      'أعد الاتصال بـ Google للسماح بالمزامنة.';
+
+  @override
+  String get googleCalendarError => 'تعذرت المزامنة. حاول مرة أخرى.';
+
+  @override
+  String get googleCalendarSync => 'مزامنة الآن';
+
+  @override
+  String get googleCalendarDisconnect => 'قطع الاتصال';
+
+  @override
+  String get googleCalendarActions => 'خيارات Google Calendar';
 }

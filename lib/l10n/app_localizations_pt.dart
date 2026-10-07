@@ -74,8 +74,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeActionSuggestedMeta => 'Sua matéria com mais tempo';
 
   @override
-  String get homeActionCreateBody =>
-      'Crie sua primeira matéria para iniciar uma sessão de foco.';
+  String get homeActionCreateBody => 'Crie uma atividade para começarmos';
 
   @override
   String get homeActionCreateButton => 'Criar matéria';
@@ -3432,4 +3431,92 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get signInProgressPreparingHome => 'Preparando tudo para você...';
+
+  @override
+  String get groupLinksTitle => 'Minhas atividades vinculadas';
+
+  @override
+  String get groupLinksUseExisting => 'Usar minhas atividades';
+
+  @override
+  String get groupLinksCreateNew => 'Criar atividade';
+
+  @override
+  String get groupLinksEmpty => 'Nenhuma atividade compatível disponível.';
+
+  @override
+  String groupLinksSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count atividades selecionadas.',
+      one: '1 atividade selecionada.',
+      zero: 'Nenhuma atividade selecionada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupLinksExplanation =>
+      'Somente novos registros contam a partir do vínculo. Seu histórico e suas metas pessoais são preservados. Desmarcar interrompe novas contribuições; com nenhuma selecionada, a participação fica pausada.';
+
+  @override
+  String get groupLinksReadingHint =>
+      'Se o grupo acompanha um livro específico, selecione apenas atividades desse livro.';
+
+  @override
+  String get groupLinksSelectRequired => 'Selecione pelo menos uma atividade.';
+
+  @override
+  String get groupLinksSyncError =>
+      'Não foi possível carregar ou sincronizar suas atividades. Verifique a conexão e tente novamente.';
+
+  @override
+  String get groupLinksSaveError =>
+      'Não foi possível salvar os vínculos. Sua seleção foi mantida; tente novamente.';
+
+  @override
+  String get groupLinksRetry => 'Tentar novamente';
+
+  @override
+  String get groupLinksSave => 'Salvar vínculos';
+
+  @override
+  String get groupLinksSharedTarget => 'Atividade e meta do grupo';
+
+  @override
+  String get googleCalendarDescription =>
+      'Criar automaticamente no Google os horários salvos no Timing.';
+
+  @override
+  String get googleCalendarConnect => 'Conectar';
+
+  @override
+  String googleCalendarConnected(String timeZone) {
+    return 'Conectado · fuso: $timeZone';
+  }
+
+  @override
+  String get googleCalendarConnecting =>
+      'Conclua a autorização no navegador e volte ao Timing.';
+
+  @override
+  String get googleCalendarPending => 'Alterações aguardando sincronização.';
+
+  @override
+  String get googleCalendarReconnect =>
+      'Reconecte o Google para autorizar a sincronização.';
+
+  @override
+  String get googleCalendarError =>
+      'Não foi possível sincronizar. Tente novamente.';
+
+  @override
+  String get googleCalendarSync => 'Sincronizar agora';
+
+  @override
+  String get googleCalendarDisconnect => 'Desconectar';
+
+  @override
+  String get googleCalendarActions => 'Opções do Google Calendar';
 }

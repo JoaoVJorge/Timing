@@ -74,8 +74,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeActionSuggestedMeta => 'Ihr am häufigsten verfolgtes Thema';
 
   @override
-  String get homeActionCreateBody =>
-      'Erstellen Sie Ihr erstes Thema, um eine Fokussitzung zu starten.';
+  String get homeActionCreateBody => 'Erstelle eine Aktivität, um zu beginnen';
 
   @override
   String get homeActionCreateButton => 'Betreff erstellen';
@@ -3460,4 +3459,92 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get signInProgressPreparingHome => 'Alles wird vorbereitet...';
+
+  @override
+  String get groupLinksTitle => 'Meine verknüpften Aktivitäten';
+
+  @override
+  String get groupLinksUseExisting => 'Meine Aktivitäten verwenden';
+
+  @override
+  String get groupLinksCreateNew => 'Aktivität erstellen';
+
+  @override
+  String get groupLinksEmpty => 'Keine passenden Aktivitäten verfügbar.';
+
+  @override
+  String groupLinksSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Aktivitäten ausgewählt.',
+      one: '1 Aktivität ausgewählt.',
+      zero: 'Keine Aktivitäten ausgewählt.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupLinksExplanation =>
+      'Nur neue Einträge ab der Verknüpfung zählen. Dein Verlauf und deine persönlichen Ziele bleiben erhalten. Abwählen stoppt neue Beiträge; ohne Auswahl pausiert deine Teilnahme.';
+
+  @override
+  String get groupLinksReadingHint =>
+      'Wenn die Gruppe ein bestimmtes Buch verfolgt, wähle nur Aktivitäten für dieses Buch.';
+
+  @override
+  String get groupLinksSelectRequired => 'Wähle mindestens eine Aktivität aus.';
+
+  @override
+  String get groupLinksSyncError =>
+      'Aktivitäten konnten nicht geladen oder synchronisiert werden. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get groupLinksSaveError =>
+      'Verknüpfungen konnten nicht gespeichert werden. Deine Auswahl bleibt erhalten; versuche es erneut.';
+
+  @override
+  String get groupLinksRetry => 'Erneut versuchen';
+
+  @override
+  String get groupLinksSave => 'Verknüpfungen speichern';
+
+  @override
+  String get groupLinksSharedTarget => 'Gruppenaktivität und Ziel';
+
+  @override
+  String get googleCalendarDescription =>
+      'Timing-Termine automatisch zu Google Calendar hinzufügen.';
+
+  @override
+  String get googleCalendarConnect => 'Verbinden';
+
+  @override
+  String googleCalendarConnected(String timeZone) {
+    return 'Verbunden · Zeitzone: $timeZone';
+  }
+
+  @override
+  String get googleCalendarConnecting =>
+      'Schließe die Autorisierung im Browser ab und kehre zu Timing zurück.';
+
+  @override
+  String get googleCalendarPending => 'Änderungen warten auf Synchronisierung.';
+
+  @override
+  String get googleCalendarReconnect =>
+      'Verbinde Google erneut, um die Synchronisierung zu erlauben.';
+
+  @override
+  String get googleCalendarError =>
+      'Synchronisierung fehlgeschlagen. Versuche es erneut.';
+
+  @override
+  String get googleCalendarSync => 'Jetzt synchronisieren';
+
+  @override
+  String get googleCalendarDisconnect => 'Trennen';
+
+  @override
+  String get googleCalendarActions => 'Google Calendar-Optionen';
 }

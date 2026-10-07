@@ -398,7 +398,7 @@
   "homeActionStartEyebrow": "ابدأ بالتركيز",
   "homeActionStartButton": "ابدأ",
   "homeActionSuggestedMeta": "الموضوع الأكثر متابعة لديك",
-  "homeActionCreateBody": "أنشئ موضوعك الأول لبدء جلسة التركيز.",
+  "homeActionCreateBody": "أنشئ نشاطًا لنبدأ",
   "homeActionCreateButton": "إنشاء الموضوع",
   "homeSummaryTitle": "ملخص اليوم",
   "homeSummaryFocus": "التركيز",
@@ -1723,5 +1723,42 @@
   "signInProgressTitle": "جارٍ تسجيل دخولك",
   "signInProgressConfirmingAccount": "جارٍ تأكيد حسابك على جوجل...",
   "signInProgressLoadingProfile": "جارٍ تحميل ملفك الشخصي...",
-  "signInProgressPreparingHome": "جارٍ تجهيز كل شيء لك..."
+  "signInProgressPreparingHome": "جارٍ تجهيز كل شيء لك...",
+  "groupLinksTitle": "أنشطتي المرتبطة",
+  "groupLinksUseExisting": "استخدام أنشطتي",
+  "groupLinksCreateNew": "إنشاء نشاط",
+  "groupLinksEmpty": "لا توجد أنشطة متوافقة.",
+  "groupLinksSelected": "{count, plural, =0{لم يتم اختيار أي نشاط.} =1{تم اختيار نشاط واحد.} other{تم اختيار {count} من الأنشطة.}}",
+  "groupLinksExplanation": "تُحتسب السجلات الجديدة فقط منذ الربط. يبقى سجلك وأهدافك الشخصية محفوظين. إلغاء الاختيار يوقف المساهمات الجديدة؛ وعدم اختيار أي نشاط يوقف مشاركتك مؤقتًا.",
+  "groupLinksReadingHint": "إذا كانت المجموعة تتابع كتابًا محددًا، فاختر أنشطة ذلك الكتاب فقط.",
+  "groupLinksSelectRequired": "اختر نشاطًا واحدًا على الأقل.",
+  "groupLinksSyncError": "تعذر تحميل أنشطتك أو مزامنتها. تحقق من الاتصال وحاول مجددًا.",
+  "groupLinksSaveError": "تعذر حفظ الروابط. تم الاحتفاظ باختيارك؛ حاول مجددًا.",
+  "groupLinksRetry": "إعادة المحاولة",
+  "groupLinksSave": "حفظ الروابط",
+  "groupLinksSharedTarget": "نشاط المجموعة وهدفها",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "أضف جدول Timing تلقائيًا إلى Google Calendar.",
+  "googleCalendarConnect": "اتصال",
+  "googleCalendarConnected": "متصل · المنطقة الزمنية: {timeZone}",
+  "googleCalendarConnecting": "أكمل التفويض في المتصفح ثم عُد إلى Timing.",
+  "googleCalendarPending": "تغييرات تنتظر المزامنة.",
+  "googleCalendarReconnect": "أعد الاتصال بـ Google للسماح بالمزامنة.",
+  "googleCalendarError": "تعذرت المزامنة. حاول مرة أخرى.",
+  "googleCalendarSync": "مزامنة الآن",
+  "googleCalendarDisconnect": "قطع الاتصال",
+  "googleCalendarActions": "خيارات Google Calendar",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -398,7 +398,7 @@
   "homeActionStartEyebrow": "Commencer à se concentrer",
   "homeActionStartButton": "Commencer",
   "homeActionSuggestedMeta": "Votre sujet le plus suivi",
-  "homeActionCreateBody": "Créez votre premier sujet pour démarrer une session de mise au point.",
+  "homeActionCreateBody": "Créez une activité pour commencer",
   "homeActionCreateButton": "Créer un sujet",
   "homeSummaryTitle": "Le résumé du jour",
   "homeSummaryFocus": "Concentrez-vous",
@@ -1723,5 +1723,42 @@
   "signInProgressTitle": "Connexion en cours",
   "signInProgressConfirmingAccount": "Confirmation de votre compte Google...",
   "signInProgressLoadingProfile": "Chargement de votre profil...",
-  "signInProgressPreparingHome": "Préparation de votre espace..."
+  "signInProgressPreparingHome": "Préparation de votre espace...",
+  "groupLinksTitle": "Mes activités associées",
+  "groupLinksUseExisting": "Utiliser mes activités",
+  "groupLinksCreateNew": "Créer une activité",
+  "groupLinksEmpty": "Aucune activité compatible disponible.",
+  "groupLinksSelected": "{count, plural, =0{Aucune activité sélectionnée.} =1{1 activité sélectionnée.} other{{count} activités sélectionnées.}}",
+  "groupLinksExplanation": "Seuls les nouveaux enregistrements comptent à partir de l’association. Votre historique et vos objectifs personnels sont conservés. Désélectionner arrête les nouvelles contributions ; sans sélection, votre participation est suspendue.",
+  "groupLinksReadingHint": "Si le groupe suit un livre précis, sélectionnez uniquement les activités de ce livre.",
+  "groupLinksSelectRequired": "Sélectionnez au moins une activité.",
+  "groupLinksSyncError": "Impossible de charger ou synchroniser vos activités. Vérifiez votre connexion et réessayez.",
+  "groupLinksSaveError": "Impossible de sauvegarder les associations. Votre sélection est conservée ; réessayez.",
+  "groupLinksRetry": "Réessayer",
+  "groupLinksSave": "Enregistrer les associations",
+  "groupLinksSharedTarget": "Activité et objectif du groupe",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "Ajoutez automatiquement votre planning Timing à Google Calendar.",
+  "googleCalendarConnect": "Connecter",
+  "googleCalendarConnected": "Connecté · fuseau horaire : {timeZone}",
+  "googleCalendarConnecting": "Terminez l’autorisation dans le navigateur et revenez à Timing.",
+  "googleCalendarPending": "Modifications en attente de synchronisation.",
+  "googleCalendarReconnect": "Reconnectez Google pour autoriser la synchronisation.",
+  "googleCalendarError": "Synchronisation impossible. Réessayez.",
+  "googleCalendarSync": "Synchroniser maintenant",
+  "googleCalendarDisconnect": "Déconnecter",
+  "googleCalendarActions": "Options Google Calendar",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -223,7 +223,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeActionCreateBody.
   ///
   /// In en, this message translates to:
-  /// **'Create your first subject to start a focus session.'**
+  /// **'Create an activity to get started'**
   String get homeActionCreateBody;
 
   /// No description provided for @homeActionCreateButton.
@@ -6129,6 +6129,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Getting everything ready...'**
   String get signInProgressPreparingHome;
+
+  /// No description provided for @groupLinksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My linked activities'**
+  String get groupLinksTitle;
+
+  /// No description provided for @groupLinksUseExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my activities'**
+  String get groupLinksUseExisting;
+
+  /// No description provided for @groupLinksCreateNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create activity'**
+  String get groupLinksCreateNew;
+
+  /// No description provided for @groupLinksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No compatible activities available.'**
+  String get groupLinksEmpty;
+
+  /// No description provided for @groupLinksSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No activities selected.} =1{1 activity selected.} other{{count} activities selected.}}'**
+  String groupLinksSelected(int count);
+
+  /// No description provided for @groupLinksExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Only new records count from the time you link. Your personal history and goals are preserved. Deselecting stops new contributions; selecting none pauses your participation.'**
+  String get groupLinksExplanation;
+
+  /// No description provided for @groupLinksReadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If the group tracks a specific book, select only activities for that book.'**
+  String get groupLinksReadingHint;
+
+  /// No description provided for @groupLinksSelectRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one activity.'**
+  String get groupLinksSelectRequired;
+
+  /// No description provided for @groupLinksSyncError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load or sync your activities. Check your connection and try again.'**
+  String get groupLinksSyncError;
+
+  /// No description provided for @groupLinksSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save links. Your selection was kept; try again.'**
+  String get groupLinksSaveError;
+
+  /// No description provided for @groupLinksRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get groupLinksRetry;
+
+  /// No description provided for @groupLinksSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save links'**
+  String get groupLinksSave;
+
+  /// No description provided for @groupLinksSharedTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Group activity and target'**
+  String get groupLinksSharedTarget;
+
+  /// No description provided for @googleCalendarDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically add your Timing schedule to Google Calendar.'**
+  String get googleCalendarDescription;
+
+  /// No description provided for @googleCalendarConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get googleCalendarConnect;
+
+  /// No description provided for @googleCalendarConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected · time zone: {timeZone}'**
+  String googleCalendarConnected(String timeZone);
+
+  /// No description provided for @googleCalendarConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish authorization in your browser and return to Timing.'**
+  String get googleCalendarConnecting;
+
+  /// No description provided for @googleCalendarPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes waiting to sync.'**
+  String get googleCalendarPending;
+
+  /// No description provided for @googleCalendarReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect Google to authorize synchronization.'**
+  String get googleCalendarReconnect;
+
+  /// No description provided for @googleCalendarError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sync. Please try again.'**
+  String get googleCalendarError;
+
+  /// No description provided for @googleCalendarSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get googleCalendarSync;
+
+  /// No description provided for @googleCalendarDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get googleCalendarDisconnect;
+
+  /// No description provided for @googleCalendarActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Calendar options'**
+  String get googleCalendarActions;
 }
 
 class _AppLocalizationsDelegate

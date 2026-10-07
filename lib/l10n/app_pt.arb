@@ -19,7 +19,7 @@
   "homeActionStartEyebrow": "Começar foco",
   "homeActionStartButton": "Começar",
   "homeActionSuggestedMeta": "Sua matéria com mais tempo",
-  "homeActionCreateBody": "Crie sua primeira matéria para iniciar uma sessão de foco.",
+  "homeActionCreateBody": "Crie uma atividade para começarmos",
   "homeActionCreateButton": "Criar matéria",
   "homeSummaryTitle": "Resumo de hoje",
   "homeSummaryFocus": "Foco",
@@ -1413,5 +1413,42 @@
   "signInProgressTitle": "Entrando na sua conta",
   "signInProgressConfirmingAccount": "Confirmando sua conta Google...",
   "signInProgressLoadingProfile": "Carregando seu perfil...",
-  "signInProgressPreparingHome": "Preparando tudo para você..."
+  "signInProgressPreparingHome": "Preparando tudo para você...",
+  "groupLinksTitle": "Minhas atividades vinculadas",
+  "groupLinksUseExisting": "Usar minhas atividades",
+  "groupLinksCreateNew": "Criar atividade",
+  "groupLinksEmpty": "Nenhuma atividade compatível disponível.",
+  "groupLinksSelected": "{count, plural, =0{Nenhuma atividade selecionada.} =1{1 atividade selecionada.} other{{count} atividades selecionadas.}}",
+  "groupLinksExplanation": "Somente novos registros contam a partir do vínculo. Seu histórico e suas metas pessoais são preservados. Desmarcar interrompe novas contribuições; com nenhuma selecionada, a participação fica pausada.",
+  "groupLinksReadingHint": "Se o grupo acompanha um livro específico, selecione apenas atividades desse livro.",
+  "groupLinksSelectRequired": "Selecione pelo menos uma atividade.",
+  "groupLinksSyncError": "Não foi possível carregar ou sincronizar suas atividades. Verifique a conexão e tente novamente.",
+  "groupLinksSaveError": "Não foi possível salvar os vínculos. Sua seleção foi mantida; tente novamente.",
+  "groupLinksRetry": "Tentar novamente",
+  "groupLinksSave": "Salvar vínculos",
+  "groupLinksSharedTarget": "Atividade e meta do grupo",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "Criar automaticamente no Google os horários salvos no Timing.",
+  "googleCalendarConnect": "Conectar",
+  "googleCalendarConnected": "Conectado · fuso: {timeZone}",
+  "googleCalendarConnecting": "Conclua a autorização no navegador e volte ao Timing.",
+  "googleCalendarPending": "Alterações aguardando sincronização.",
+  "googleCalendarReconnect": "Reconecte o Google para autorizar a sincronização.",
+  "googleCalendarError": "Não foi possível sincronizar. Tente novamente.",
+  "googleCalendarSync": "Sincronizar agora",
+  "googleCalendarDisconnect": "Desconectar",
+  "googleCalendarActions": "Opções do Google Calendar",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }

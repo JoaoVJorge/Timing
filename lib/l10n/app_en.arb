@@ -43,7 +43,7 @@
   "homeActionStartEyebrow": "Start focus",
   "homeActionStartButton": "Start",
   "homeActionSuggestedMeta": "Your most-tracked subject",
-  "homeActionCreateBody": "Create your first subject to start a focus session.",
+  "homeActionCreateBody": "Create an activity to get started",
   "homeActionCreateButton": "Create subject",
   "homeSummaryTitle": "Today's summary",
   "homeSummaryFocus": "Focus",
@@ -1845,5 +1845,42 @@
   "signInProgressTitle": "Signing you in",
   "signInProgressConfirmingAccount": "Confirming your Google account...",
   "signInProgressLoadingProfile": "Loading your profile...",
-  "signInProgressPreparingHome": "Getting everything ready..."
+  "signInProgressPreparingHome": "Getting everything ready...",
+  "groupLinksTitle": "My linked activities",
+  "groupLinksUseExisting": "Use my activities",
+  "groupLinksCreateNew": "Create activity",
+  "groupLinksEmpty": "No compatible activities available.",
+  "groupLinksSelected": "{count, plural, =0{No activities selected.} =1{1 activity selected.} other{{count} activities selected.}}",
+  "groupLinksExplanation": "Only new records count from the time you link. Your personal history and goals are preserved. Deselecting stops new contributions; selecting none pauses your participation.",
+  "groupLinksReadingHint": "If the group tracks a specific book, select only activities for that book.",
+  "groupLinksSelectRequired": "Select at least one activity.",
+  "groupLinksSyncError": "Could not load or sync your activities. Check your connection and try again.",
+  "groupLinksSaveError": "Could not save links. Your selection was kept; try again.",
+  "groupLinksRetry": "Try again",
+  "groupLinksSave": "Save links",
+  "groupLinksSharedTarget": "Group activity and target",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "Automatically add your Timing schedule to Google Calendar.",
+  "googleCalendarConnect": "Connect",
+  "googleCalendarConnected": "Connected · time zone: {timeZone}",
+  "googleCalendarConnecting": "Finish authorization in your browser and return to Timing.",
+  "googleCalendarPending": "Changes waiting to sync.",
+  "googleCalendarReconnect": "Reconnect Google to authorize synchronization.",
+  "googleCalendarError": "Could not sync. Please try again.",
+  "googleCalendarSync": "Sync now",
+  "googleCalendarDisconnect": "Disconnect",
+  "googleCalendarActions": "Google Calendar options",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }

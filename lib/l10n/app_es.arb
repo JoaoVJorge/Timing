@@ -19,7 +19,7 @@
   "homeActionStartEyebrow": "Comenzar enfoque",
   "homeActionStartButton": "Comenzar",
   "homeActionSuggestedMeta": "Tu materia con más tiempo",
-  "homeActionCreateBody": "Crea tu primera materia para iniciar una sesión de enfoque.",
+  "homeActionCreateBody": "Crea una actividad para empezar",
   "homeActionCreateButton": "Crear materia",
   "homeSummaryTitle": "Resumen de hoy",
   "homeSummaryFocus": "Enfoque",
@@ -1413,5 +1413,42 @@
   "signInProgressTitle": "Iniciando sesión",
   "signInProgressConfirmingAccount": "Confirmando tu cuenta de Google...",
   "signInProgressLoadingProfile": "Cargando tu perfil...",
-  "signInProgressPreparingHome": "Preparando todo para ti..."
+  "signInProgressPreparingHome": "Preparando todo para ti...",
+  "groupLinksTitle": "Mis actividades vinculadas",
+  "groupLinksUseExisting": "Usar mis actividades",
+  "groupLinksCreateNew": "Crear actividad",
+  "groupLinksEmpty": "No hay actividades compatibles.",
+  "groupLinksSelected": "{count, plural, =0{Ninguna actividad seleccionada.} =1{1 actividad seleccionada.} other{{count} actividades seleccionadas.}}",
+  "groupLinksExplanation": "Solo cuentan los nuevos registros desde la vinculación. Se conservan tu historial y tus metas personales. Desmarcar detiene nuevas contribuciones; sin selección, tu participación queda pausada.",
+  "groupLinksReadingHint": "Si el grupo sigue un libro específico, selecciona solo actividades de ese libro.",
+  "groupLinksSelectRequired": "Selecciona al menos una actividad.",
+  "groupLinksSyncError": "No se pudieron cargar o sincronizar tus actividades. Revisa la conexión e inténtalo de nuevo.",
+  "groupLinksSaveError": "No se pudieron guardar los vínculos. Se conservó tu selección; inténtalo de nuevo.",
+  "groupLinksRetry": "Reintentar",
+  "groupLinksSave": "Guardar vínculos",
+  "groupLinksSharedTarget": "Actividad y meta del grupo",
+  "@groupLinksSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "googleCalendarDescription": "Añade automáticamente tu agenda de Timing a Google Calendar.",
+  "googleCalendarConnect": "Conectar",
+  "googleCalendarConnected": "Conectado · zona horaria: {timeZone}",
+  "googleCalendarConnecting": "Completa la autorización en el navegador y vuelve a Timing.",
+  "googleCalendarPending": "Cambios pendientes de sincronización.",
+  "googleCalendarReconnect": "Vuelve a conectar Google para autorizar la sincronización.",
+  "googleCalendarError": "No se pudo sincronizar. Inténtalo de nuevo.",
+  "googleCalendarSync": "Sincronizar ahora",
+  "googleCalendarDisconnect": "Desconectar",
+  "googleCalendarActions": "Opciones de Google Calendar",
+  "@googleCalendarConnected": {
+    "placeholders": {
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  }
 }
