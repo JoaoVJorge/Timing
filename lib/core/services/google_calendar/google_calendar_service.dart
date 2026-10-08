@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
+import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -100,9 +101,9 @@ class GoogleCalendarService extends GetxService with WidgetsBindingObserver {
           await (_launchOverride?.call(url) ??
               launchUrl(url, mode: LaunchMode.externalApplication));
       if (!launched) throw StateError("Browser unavailable");
-    } catch (_) {
+    } catch (error) {
       connecting.value = false;
-      errorCode.value = "connect_failed";
+      errorCode.value = _errorCode(error, "connect_failed");
     } finally {
       busy.value = false;
     }
@@ -182,9 +183,14 @@ class GoogleCalendarService extends GetxService with WidgetsBindingObserver {
       needsReconnect.value =
           text.contains("reconnect_required") ||
           text.contains("permission_required");
-      errorCode.value = "sync_failed";
+      errorCode.value = _errorCode(error, "sync_failed");
     }
   }
+
+  static String _errorCode(Object error, String fallback) =>
+      error is FunctionException && error.status == 404
+      ? "function_unavailable"
+      : fallback;
 
   @override
   void onClose() {

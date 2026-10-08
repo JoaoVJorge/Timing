@@ -1,6 +1,6 @@
 # Sincronização Timing → Google Calendar
 
-Na tela da agenda, toque em **Google Calendar → Conectar**. Autorize no
+Na tela da agenda, toque no **ícone no canto superior direito → Conectar**. Autorize no
 navegador e volte ao Timing. A conexão é independente do método de login no
 Timing: usuários de email e Apple também podem conectar um calendário Google.
 Após conectar, a agenda existente e os próximos horários são enviados ao
@@ -57,6 +57,18 @@ Supabase. IDs determinísticos e checkpoints por evento evitam duplicações em
 retries, e uma lease no banco serializa os envios entre dispositivos. Não há
 worker independente enquanto o app está fechado: os envios pendentes continuam
 quando ele retorna. Um refresh token revogado exige reconexão.
+
+## Erro 404 ao conectar
+
+Se `POST /functions/v1/google-calendar` retornar `404` com
+`{"code":"NOT_FOUND","message":"Requested function was not found"}`, a função
+não está disponível no projeto configurado no app. Confira se `supabaseUrl`
+do arquivo de ambiente aponta para o projeto correto e conclua os passos de
+ativação acima, incluindo schema, segredos e publicação da função. O login
+Google do Supabase não publica essa integração automaticamente.
+
+O app informa a indisponibilidade e preserva os horários e a fila de
+sincronização. Reconectar a conta não substitui a publicação da função.
 
 ## Verificação
 

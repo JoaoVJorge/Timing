@@ -31,6 +31,7 @@ class SchedulePage extends StatelessWidget {
             visibleMonth,
           ),
           showBackButton: true,
+          trailing: const GoogleCalendarConnectionButton(),
           onTitleTap: () => _showMonthYearPicker(context, controller),
         );
       }),
@@ -164,7 +165,6 @@ class _DayEventsPanel extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const GoogleCalendarConnectionTile(),
                         const Gap(20),
                         _DayEventsHeader(
                           dateLabel: formatFullDateLabel(locale, selectedDate),
@@ -261,9 +261,8 @@ class _DayEventsHeader extends StatelessWidget {
               context.l10n.scheduleDayEventsTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.caption.copyWith(
+              style: context.textStyles.captionSmall.copyWith(
                 color: context.colorTokens.textBody,
-                fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -284,7 +283,7 @@ class _InlineAddScheduleButton extends StatelessWidget {
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,
@@ -330,7 +329,7 @@ class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
       backgroundColor: context.colorTokens.dialogSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        padding: const EdgeInsets.all(18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -474,7 +473,6 @@ class _MonthPickerConfirmButton extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.textPrimaryButton.copyWith(
-          color: context.colorTokens.primaryForeground,
           fontWeight: FontWeight.w900,
         ),
       ),

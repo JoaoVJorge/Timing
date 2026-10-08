@@ -49,6 +49,22 @@ void main() {
   });
   tearDown(() => service.onClose());
 
+  test("missing deployed function reports integration unavailable", () async {
+    handler = (_) async =>
+        throw FunctionException(status: 404, details: {"code": "NOT_FOUND"});
+
+    await service.connect();
+
+    expect(service.errorCode.value, "function_unavailable");
+    expect(service.connecting.value, isFalse);
+    expect(service.busy.value, isFalse);
+
+    await service.sync();
+    expect(service.errorCode.value, "function_unavailable");
+    expect(service.pending.value, isTrue);
+    expect(outbox.contains(PendingSyncDataset.googleCalendar), isTrue);
+  });
+
   test(
     "failed Calendar request remains pending and succeeds on retry",
     () async {
