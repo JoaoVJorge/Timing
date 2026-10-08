@@ -14,7 +14,6 @@ import "package:timing/presentation/timer/timer_visual_state.dart";
 import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
-import "package:timing/theme/subject_colors.dart";
 import "package:timing/theme/subject_icons.dart";
 import "package:timing/theme/timer_wallpapers.dart";
 
@@ -905,16 +904,10 @@ class _TimerChrome {
         ? const Color(0xFF15171A)
         : context.colorTokens.white;
     final Color subjectAccent = Color(controller.subject.colorValue);
-    final Color accent = isResting
-        ? TimerRestPalette.accent
-        : usesDarkForeground
-        ? Color.lerp(subjectAccent, context.colorTokens.black, 0.7)!
-        : SubjectColors.resolveForTheme(subjectAccent, isDark: true);
-    final Color headerIconColor = Color.lerp(
-      isResting ? accent : subjectAccent,
-      context.colorTokens.black,
-      0.4,
-    )!;
+    final Color accent = isResting ? TimerRestPalette.accent : subjectAccent;
+    final Color headerIconColor = isResting
+        ? Color.lerp(accent, context.colorTokens.black, 0.4)!
+        : subjectAccent;
     final String iconName = controller.subject.iconName.isEmpty
         ? controller.subject.category.iconName
         : controller.subject.iconName;
@@ -955,11 +948,7 @@ class _TimerChrome {
       ),
       ringGradientColors: isResting
           ? TimerRestPalette.ringGradientColors
-          : [
-              accent.withValues(alpha: 0.72),
-              accent,
-              Color.lerp(accent, foregroundColor, 0.2) ?? accent,
-            ],
+          : [accent, accent, accent],
       mainActionIcon: switch (state) {
         TimerVisualState.resting => Icons.play_arrow_rounded,
         TimerVisualState.paused => Icons.play_arrow_rounded,

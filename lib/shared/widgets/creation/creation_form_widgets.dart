@@ -386,10 +386,7 @@ class CreationColorPalette extends StatelessWidget {
   final Color selectedColor;
   final ValueChanged<Color> onSelect;
 
-  static const List<Color> colors = [
-    ...SubjectColors.values,
-    ...SubjectColors.darkValues,
-  ];
+  static const List<Color> colors = SubjectColors.values;
 
   @override
   Widget build(BuildContext context) => CenteredBalancedRows(

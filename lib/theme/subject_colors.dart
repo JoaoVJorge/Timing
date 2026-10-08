@@ -4,7 +4,14 @@ import "package:timing/theme/accent_presets.dart";
 class SubjectColors {
   const SubjectColors._();
 
-  static const List<Color> values = AppAccentPresets.values;
+  static const List<Color> values = [
+    ...AppAccentPresets.values,
+    Color(0xFF4657B8), // Índigo
+    Color(0xFF218559), // Esmeralda
+    Color(0xFFD04452), // Coral
+    Color(0xFF087F83), // Verde-petróleo
+    Color(0xFFB65732), // Terracota
+  ];
 
   static const List<Color> veryLightValues = [
     Color(0xFFCDE4F9), // Azul
@@ -24,6 +31,11 @@ class SubjectColors {
     Color(0xFF66E3EC), // Ciano
     Color(0xFFFFD84D), // Amarelo
     Color(0xFFFFBE64), // Laranja
+    Color(0xFF929FE8), // Índigo
+    Color(0xFF68C99A), // Esmeralda
+    Color(0xFFF0808C), // Coral
+    Color(0xFF58C4C7), // Verde-petróleo
+    Color(0xFFE69776), // Terracota
   ];
 
   static Color byIndex(int index) => values[index % values.length];
