@@ -77,10 +77,7 @@ class _ProfilePhotoCropDialogState extends State<_ProfilePhotoCropDialog> {
           Text(
             context.l10n.cropProfilePhotoTitle,
             textAlign: TextAlign.center,
-            style: context.textStyles.extraBold24.copyWith(
-              color: context.colorTokens.dialogText,
-              fontSize: 22,
-            ),
+            style: context.textStyles.dialogTitle,
           ),
           const Gap(8),
           Text(
@@ -252,10 +249,8 @@ class _CropDialogButton extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyLarge.copyWith(
+                  style: context.textStyles.dialogButtonLabel.copyWith(
                     color: foreground,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
                   ),
                 ),
         ),

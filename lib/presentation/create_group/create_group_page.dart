@@ -19,6 +19,7 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/theme/decoration.dart";
 
+import "package:timing/theme/app_spacing.dart";
 part "create_group_page_step_progress.dart";
 part "create_group_page_information_step.dart";
 part "create_group_page_activity_step.dart";

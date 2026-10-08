@@ -84,9 +84,8 @@ class HomeActionCard extends StatelessWidget {
                         title,
                         maxLines: 4,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.extraBold24.copyWith(
+                        style: context.textStyles.extraBold20.copyWith(
                           color: Colors.white,
-                          fontSize: 20,
                         ),
                       ),
                     ),

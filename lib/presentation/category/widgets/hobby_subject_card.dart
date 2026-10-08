@@ -191,9 +191,8 @@ class _HobbyOptionsSheet extends StatelessWidget {
                         subject.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.extraBold24.copyWith(
+                        style: context.textStyles.extraBold20.copyWith(
                           color: context.colorTokens.dialogText,
-                          fontSize: 20,
                         ),
                       ),
                       const Gap(2),

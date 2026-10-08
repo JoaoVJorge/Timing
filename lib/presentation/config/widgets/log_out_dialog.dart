@@ -3,6 +3,8 @@ import "package:gap/gap.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class LogOutDialog extends StatelessWidget {
   const LogOutDialog({super.key});
 
@@ -11,7 +13,7 @@ class LogOutDialog extends StatelessWidget {
     final Color danger = context.colorTokens.error;
 
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      insetPadding: AppSpacing.dialogInset,
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),

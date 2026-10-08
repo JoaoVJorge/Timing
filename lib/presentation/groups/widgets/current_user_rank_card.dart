@@ -131,7 +131,7 @@ class CurrentUserRankCard extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: context.textStyles.caption.copyWith(fontSize: 12),
+            style: context.textStyles.captionSmall,
           ),
         ],
       ),

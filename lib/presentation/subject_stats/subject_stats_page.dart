@@ -288,7 +288,7 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+    padding: AppSpacing.tile,
     decoration: AppSurfaces.content(context.colorTokens),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +309,7 @@ class _StatTile extends StatelessWidget {
           item.label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textStyles.caption.copyWith(fontSize: 13),
+          style: context.textStyles.caption,
         ),
       ],
     ),

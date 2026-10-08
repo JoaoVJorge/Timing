@@ -18,6 +18,8 @@ import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:timing/shared/widgets/profile_photo_crop_dialog.dart";
 import "package:image_picker/image_picker.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class EditProfileController extends GetxController {
   EditProfileController({
     required this._appController,
@@ -277,11 +279,11 @@ class _RemoveProfilePhotoDialog extends StatelessWidget {
   Widget build(BuildContext context) => Dialog(
     elevation: 0,
     backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+    insetPadding: AppSpacing.dialogInset,
     child: Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: AppSpacing.illustratedDialog,
       decoration: BoxDecoration(
         color: context.colorTokens.dialogSurface,
         borderRadius: BorderRadius.circular(28),
@@ -307,23 +309,13 @@ class _RemoveProfilePhotoDialog extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogText,
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
-              height: 1.08,
-            ),
+            style: context.textStyles.dialogTitleLarge,
           ),
           const Gap(18),
           Text(
             content,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogTextMuted,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-            ),
+            style: context.textStyles.dialogBodyLarge,
           ),
           const Gap(24),
           Divider(color: context.colorTokens.divider),
@@ -386,11 +378,7 @@ class _RemoveProfilePhotoButton extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        ),
+        style: context.textStyles.dialogButtonLabel.copyWith(color: textColor),
       ),
     ),
   );

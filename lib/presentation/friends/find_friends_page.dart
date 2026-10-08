@@ -13,6 +13,8 @@ import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class FindFriendsPage extends StatefulWidget {
   const FindFriendsPage({super.key});
 
@@ -126,7 +128,7 @@ class _InviteLookupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+    padding: AppSpacing.tile,
     decoration: friendsSurfaceDecoration(context, radius: 18),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,10 +154,7 @@ class _InviteLookupCard extends StatelessWidget {
                 context.l10n.friendInviteCodeTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.extraBold24.copyWith(
-                  color: context.colorTokens.textBody,
-                  fontSize: 15,
-                ),
+                style: context.textStyles.extraBold24.copyWith(fontSize: 15),
               ),
             ),
           ],
@@ -215,7 +214,7 @@ class _InviteLookupCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.content_paste_rounded,
-                        color: context.colorTokens.primary,
+                        color: context.colorTokens.textHint,
                         size: 18,
                       ),
                       const Gap(6),
@@ -280,10 +279,7 @@ class _FoundUserSection extends StatelessWidget {
                 context.l10n.friendUserFoundTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.extraBold24.copyWith(
-                  color: context.colorTokens.textBody,
-                  fontSize: 18,
-                ),
+                style: context.textStyles.extraBold24.copyWith(fontSize: 18),
               ),
             ),
           ],
@@ -340,10 +336,7 @@ class _FoundUserInfo extends StatelessWidget {
         profile.name,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.extraBold24.copyWith(
-          color: context.colorTokens.textBody,
-          fontSize: 18,
-        ),
+        style: context.textStyles.extraBold24.copyWith(fontSize: 18),
       ),
       const Gap(2),
       Text(
@@ -360,7 +353,7 @@ class _FoundUserInfo extends StatelessWidget {
       Align(
         alignment: Alignment.centerLeft,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: const Color(0xFFE5F4E8),
             borderRadius: BorderRadius.circular(999),
@@ -429,7 +422,7 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
     pressedScale: 0.98,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.all(14),
+      padding: AppSpacing.tile,
       decoration: friendsSurfaceDecoration(context, radius: 16),
       child: Column(
         children: [
@@ -510,7 +503,6 @@ class _HowStep extends StatelessWidget {
             child: Text(
               text,
               style: context.textStyles.bodyMedium.copyWith(
-                color: context.colorTokens.textBody,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

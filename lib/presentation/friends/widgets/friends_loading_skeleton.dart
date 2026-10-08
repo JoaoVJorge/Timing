@@ -34,7 +34,7 @@ class _FriendSkeletonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     height: 72,
-    padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+    padding: const EdgeInsets.all(10),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(16),

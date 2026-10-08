@@ -16,7 +16,7 @@ class ProgressEvolutionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     height: 232,
-    padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+    padding: const EdgeInsets.all(16),
     decoration: AppSurfaces.content(context.colorTokens),
     child: EvolutionBarChart(values: values),
   );
@@ -80,14 +80,11 @@ class _EvolutionBarChartState extends State<EvolutionBarChart> {
                   barColor: context.colorTokens.primary,
                   gridColor: context.colorTokens.divider,
                   axisColor: context.colorTokens.textHint,
-                  axisTextStyle: context.textStyles.caption.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontSize: 12,
+                  axisTextStyle: context.textStyles.captionSmall.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
-                  tooltipTextStyle: context.textStyles.caption.copyWith(
+                  tooltipTextStyle: context.textStyles.captionSmall.copyWith(
                     color: context.colorTokens.white,
-                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                   axisLabels: _axisLabels(context, dates),

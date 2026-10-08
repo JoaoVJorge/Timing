@@ -22,7 +22,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
     final String locale = Localizations.localeOf(context).toString();
     return Dialog(
       elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      insetPadding: AppSpacing.dialogInset,
       backgroundColor: context.colorTokens.dialogSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       child: Padding(
@@ -46,7 +46,7 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
             const Gap(16),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: context.colorTokens.surfaceInnerLayer,
                 borderRadius: BorderRadius.circular(999),
@@ -257,7 +257,6 @@ class _DialogPrimaryButton extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.textPrimaryButton.copyWith(
-          color: context.colorTokens.primaryForeground,
           fontWeight: FontWeight.w900,
         ),
       ),

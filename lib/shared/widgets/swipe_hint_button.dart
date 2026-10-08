@@ -3,6 +3,8 @@ import "package:gap/gap.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class SwipeHintButton extends StatelessWidget {
   const SwipeHintButton({
     required this.title,
@@ -61,11 +63,11 @@ class _SwipeHintDialog extends StatelessWidget {
   Widget build(BuildContext context) => Dialog(
     elevation: 0,
     backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+    insetPadding: AppSpacing.dialogInset,
     child: Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: AppSpacing.illustratedDialog,
       decoration: BoxDecoration(
         color: context.colorTokens.dialogSurface,
         borderRadius: BorderRadius.circular(28),
@@ -91,23 +93,13 @@ class _SwipeHintDialog extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogText,
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              height: 1.08,
-            ),
+            style: context.textStyles.dialogTitleLarge,
           ),
           const Gap(14),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogTextMuted,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-            ),
+            style: context.textStyles.dialogBodyLarge,
           ),
           const Gap(24),
           _SwipeHintDialogButton(
@@ -150,11 +142,7 @@ class _SwipeHintDialogButton extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        ),
+        style: context.textStyles.dialogButtonLabel.copyWith(color: textColor),
       ),
     ),
   );

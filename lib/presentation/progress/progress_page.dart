@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:timing/app/app_ui_constants.dart";
 import "package:timing/core/domain/entities/profile_stats_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -34,9 +33,9 @@ class ProgressPage extends StatelessWidget {
       padding: EdgeInsets.zero,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
-          AppUiConstants.pagePadding,
+          AppSpacing.page,
           16,
-          AppUiConstants.pagePadding,
+          AppSpacing.page,
           AppSpacing.betweenSections,
         ),
         child: Obx(() {
@@ -213,7 +212,7 @@ class _ProgressStatSkeletonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+    padding: AppSpacing.tile,
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(22),

@@ -118,7 +118,6 @@ class FriendWidePrimaryButton extends StatelessWidget {
           Text(
             label,
             style: context.textStyles.textPrimaryButton.copyWith(
-              color: context.colorTokens.primaryForeground,
               fontSize: 15,
               fontWeight: FontWeight.w900,
             ),
@@ -270,7 +269,7 @@ class FriendShareButton extends StatelessWidget {
     pressedScale: 0.96,
     child: Container(
       height: 42,
-      padding: const EdgeInsets.symmetric(horizontal: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         border: Border.all(color: context.colorTokens.primary),
         borderRadius: BorderRadius.circular(999),

@@ -20,7 +20,7 @@ class ProgressHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     decoration: AppSurfaces.primary(context.colorTokens),
     child: Row(
       children: [
@@ -73,7 +73,6 @@ class ProgressHeroCard extends StatelessWidget {
                         overflow: TextOverflow.visible,
                         style: context.textStyles.bodySmall.copyWith(
                           color: Colors.white,
-                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                         ),
                       ),

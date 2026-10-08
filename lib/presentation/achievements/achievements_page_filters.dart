@@ -159,7 +159,6 @@ class _CategoryMenuRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textStyles.bodySmall.copyWith(
-              color: context.colorTokens.textBody,
               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
             ),
           ),

@@ -7,6 +7,8 @@ import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/subject_icons.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class ReadingSubjectTile extends StatelessWidget {
   const ReadingSubjectTile({
     required this.subject,
@@ -31,7 +33,7 @@ class ReadingSubjectTile extends StatelessWidget {
     final int percent = (progress * 100).round();
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(22),
@@ -59,8 +61,7 @@ class ReadingSubjectTile extends StatelessWidget {
                         subject.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.extraBold24.copyWith(
-                          fontSize: 20,
+                        style: context.textStyles.extraBold20.copyWith(
                           height: 1.1,
                         ),
                       ),
@@ -218,7 +219,6 @@ class _ReadingMetric extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: context.textStyles.bodyMedium.copyWith(
-          color: context.colorTokens.textBody,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),

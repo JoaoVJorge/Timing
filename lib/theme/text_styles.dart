@@ -25,6 +25,13 @@ class AppTextStyles {
     height: 1.25,
   );
 
+  TextStyle get black18 => TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w900,
+    color: _tokens.primary,
+    height: 1.25,
+  );
+
   TextStyle get extraBold24 => TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w800,
@@ -78,6 +85,14 @@ class AppTextStyles {
     height: 1.25,
   );
 
+  /// Supporting copy, one step down: chips, legends, dense meta rows.
+  TextStyle get captionSmall => TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: _tokens.textHint,
+    height: 1.25,
+  );
+
   TextStyle get bodyLarge => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
@@ -119,5 +134,58 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: _tokens.textBody,
+  );
+
+  /// Value typed into a borderless field inside a creation form.
+  TextStyle get inputValue => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    color: _tokens.textBody,
+  );
+
+  /// Placeholder of a borderless field: same metrics as [inputValue], faded.
+  TextStyle get inputHint => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: _tokens.textHint.withValues(alpha: 0.62),
+  );
+
+  /// Headline of a confirmation dialog.
+  TextStyle get dialogTitle => TextStyle(
+    fontSize: 21,
+    fontWeight: FontWeight.w800,
+    color: _tokens.dialogText,
+    height: 1.12,
+  );
+
+  /// Headline of a full-bleed dialog that carries an illustration.
+  TextStyle get dialogTitleLarge => TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.w800,
+    color: _tokens.dialogText,
+    height: 1.08,
+  );
+
+  /// Explanatory copy under a [dialogTitle].
+  TextStyle get dialogBody => TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: _tokens.dialogTextMuted,
+    height: 1.38,
+  );
+
+  /// Explanatory copy under a [dialogTitleLarge].
+  TextStyle get dialogBodyLarge => TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: _tokens.dialogTextMuted,
+    height: 1.35,
+  );
+
+  /// Label of a dialog action button; callers set the matching foreground.
+  TextStyle get dialogButtonLabel => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    color: _tokens.dialogText,
   );
 }

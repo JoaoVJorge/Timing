@@ -262,7 +262,7 @@ class _ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.circular(20),
@@ -465,10 +465,7 @@ class _LinkedAuthRow extends StatelessWidget {
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.caption.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontSize: 13,
-                  ),
+                  style: context.textStyles.caption,
                 ),
               ],
             ),
@@ -492,7 +489,7 @@ class _LinkedAuthRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.end,
-                style: context.textStyles.caption.copyWith(fontSize: 13),
+                style: context.textStyles.caption,
               ),
             )
           else

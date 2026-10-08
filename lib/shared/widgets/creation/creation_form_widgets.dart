@@ -7,6 +7,8 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/centered_wrap_grid.dart";
 import "package:timing/theme/subject_colors.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 /// Rounded name field used at the top of every creation form: a tinted icon
 /// box followed by a borderless text field.
 class CreationNameField extends StatelessWidget {
@@ -48,11 +50,7 @@ class CreationNameField extends StatelessWidget {
           child: TextField(
             controller: controller,
             autofocus: autofocus,
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: context.textStyles.inputValue,
             decoration: InputDecoration(
               hintText: hintText,
               border: InputBorder.none,
@@ -60,11 +58,7 @@ class CreationNameField extends StatelessWidget {
               focusedBorder: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              hintStyle: context.textStyles.inputHint,
             ),
           ),
         ),
@@ -257,7 +251,7 @@ class CreationOptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         width: double.infinity,
-        padding: const EdgeInsets.all(14),
+        padding: AppSpacing.tile,
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -305,7 +299,6 @@ class CreationOptionCard extends StatelessWidget {
                   Text(
                     description,
                     style: context.textStyles.bodySmall.copyWith(
-                      color: context.colorTokens.textBody,
                       fontWeight: FontWeight.w700,
                       height: 1.24,
                     ),

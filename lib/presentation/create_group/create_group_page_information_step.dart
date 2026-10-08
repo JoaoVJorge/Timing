@@ -112,7 +112,7 @@ class _ThemeRow extends StatelessWidget {
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: isSelected
             ? context.colorTokens.primaryVeryLight

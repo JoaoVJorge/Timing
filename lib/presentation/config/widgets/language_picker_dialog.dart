@@ -5,6 +5,8 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_languages.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class LanguagePickerDialog extends StatelessWidget {
   const LanguagePickerDialog({required this.currentCode, super.key});
 
@@ -15,7 +17,7 @@ class LanguagePickerDialog extends StatelessWidget {
     heightFactor: 0.82,
     child: SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+        padding: AppSpacing.bottomSheet,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -135,7 +137,7 @@ class _LanguageOption extends StatelessWidget {
     onTap: onTap,
     child: Container(
       constraints: const BoxConstraints(minHeight: 78),
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: isSelected
             ? context.colorTokens.primaryVeryLight

@@ -48,7 +48,7 @@ class _StatTile extends StatelessWidget {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(22),
@@ -82,7 +82,7 @@ class _StatTile extends StatelessWidget {
             stat.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textStyles.caption.copyWith(fontSize: 13),
+            style: context.textStyles.caption,
           ),
         ],
       ),

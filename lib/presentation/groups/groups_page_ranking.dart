@@ -122,7 +122,6 @@ class _LeaderboardPeriodFilter extends StatelessWidget {
                     child: Text(
                       period.localizedLabel(context),
                       style: context.textStyles.bodySmall.copyWith(
-                        color: context.colorTokens.textBody,
                         fontWeight: period == selected
                             ? FontWeight.w800
                             : FontWeight.w600,

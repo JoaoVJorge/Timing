@@ -8,6 +8,7 @@ import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+import "package:timing/theme/app_spacing.dart";
 
 part "achievements_page_filters.dart";
 part "achievements_page_grid.dart";
@@ -138,7 +139,7 @@ class _LevelCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
+    padding: AppSpacing.tile,
     decoration: _cardDecoration(context, radius: 22),
     child: Column(
       children: [

@@ -24,7 +24,7 @@ class SettingsSection extends StatelessWidget {
         title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.sectionTitle.copyWith(fontSize: 16),
+        style: context.textStyles.cardTitle,
       ),
       const Gap(AppSpacing.betweenRelated),
       Container(

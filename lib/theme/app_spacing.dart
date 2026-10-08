@@ -23,4 +23,34 @@ class AppSpacing {
   static const EdgeInsets pageHorizontal = EdgeInsets.symmetric(
     horizontal: page,
   );
+
+  /// Padding of a card or tile that holds a single row of content.
+  static const EdgeInsets tile = EdgeInsets.all(14);
+
+  /// Gap each side of a dialog, leaving it as wide as the screen allows.
+  static const EdgeInsets dialogInset = EdgeInsets.symmetric(horizontal: 28);
+
+  /// Gap each side of a confirmation dialog, which sits narrower on purpose.
+  static const EdgeInsets confirmationDialogInset = EdgeInsets.symmetric(
+    horizontal: 34,
+  );
+
+  /// Inside a dialog that opens with an illustration above the title.
+  static const EdgeInsets illustratedDialog = EdgeInsets.fromLTRB(
+    24,
+    30,
+    24,
+    24,
+  );
+
+  /// Inside a confirmation dialog: title, message, then a row of buttons.
+  static const EdgeInsets confirmationDialog = EdgeInsets.fromLTRB(
+    20,
+    22,
+    20,
+    20,
+  );
+
+  /// Inside a bottom sheet, below its drag handle.
+  static const EdgeInsets bottomSheet = EdgeInsets.fromLTRB(20, 14, 20, 22);
 }

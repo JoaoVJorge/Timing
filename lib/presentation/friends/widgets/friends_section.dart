@@ -142,7 +142,7 @@ class _FriendRowState extends State<_FriendRow>
     child: Container(
       height: 72,
       decoration: friendsSurfaceDecoration(context, radius: 16),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: [
           GroupMemberAvatar(
@@ -234,10 +234,7 @@ class _EmptyFriendsCard extends StatelessWidget {
         Text(
           context.l10n.friendsEmptyTitle,
           textAlign: TextAlign.center,
-          style: context.textStyles.extraBold20.copyWith(
-            color: context.colorTokens.textBody,
-            fontSize: 17,
-          ),
+          style: context.textStyles.extraBold20.copyWith(fontSize: 17),
         ),
         const Gap(6),
         Text(

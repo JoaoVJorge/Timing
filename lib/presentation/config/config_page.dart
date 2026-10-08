@@ -169,7 +169,7 @@ class ConfigPage extends StatelessWidget {
         child: SafeArea(
           child: Obx(
             () => SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+              padding: AppSpacing.bottomSheet,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -329,7 +329,7 @@ class _ConcentrationActivityTile extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(minHeight: 78),
-      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: tokens.surface,
         borderRadius: BorderRadius.circular(18),

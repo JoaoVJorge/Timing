@@ -4,6 +4,8 @@ import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:image_picker/image_picker.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 Future<ImageSource?> showPhotoSourceBottomSheet({
   required BuildContext context,
   required String title,
@@ -42,7 +44,7 @@ class _PhotoSourceBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SafeArea(
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+      padding: AppSpacing.bottomSheet,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +157,7 @@ class _PhotoSourceAction extends StatelessWidget {
       pressedScale: 0.98,
       child: Container(
         constraints: const BoxConstraints(minHeight: 78),
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        padding: AppSpacing.tile,
         decoration: BoxDecoration(
           color: context.colorTokens.surface,
           borderRadius: BorderRadius.circular(18),
@@ -187,9 +189,7 @@ class _PhotoSourceAction extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.cardTitle.copyWith(
-                  color: context.colorTokens.textBody,
-                ),
+                style: context.textStyles.cardTitle,
               ),
             ),
             const Gap(10),

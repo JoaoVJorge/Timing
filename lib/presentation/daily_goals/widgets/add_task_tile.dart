@@ -16,7 +16,7 @@ class AddTaskTile extends StatelessWidget {
     onTap: onTap,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
           color: context.colorTokens.borderUnfocused,

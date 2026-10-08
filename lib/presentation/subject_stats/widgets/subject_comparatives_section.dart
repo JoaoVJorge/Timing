@@ -174,10 +174,7 @@ class _Headline extends StatelessWidget {
       children: [
         TextSpan(
           text: valueLabel,
-          style: context.textStyles.metricValue.copyWith(
-            color: accent,
-            fontSize: 26,
-          ),
+          style: context.textStyles.metricValue.copyWith(color: accent),
         ),
         TextSpan(
           text: " $unitLabel",

@@ -291,9 +291,8 @@ class _ActivityOverviewCard extends StatelessWidget {
                       : localizedGroupName(context, group),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.black20.copyWith(
+                  style: context.textStyles.black18.copyWith(
                     color: context.colorTokens.textBody,
-                    fontSize: 18,
                   ),
                 ),
               ),
@@ -547,9 +546,8 @@ class _GroupStatisticsCard extends StatelessWidget {
                 context.l10n.groupStatisticsTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(
+                style: context.textStyles.black18.copyWith(
                   color: context.colorTokens.textBody,
-                  fontSize: 18,
                 ),
               ),
             ),
@@ -710,9 +708,8 @@ class _ActivityDataTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: context.textStyles.black20.copyWith(
+            style: context.textStyles.black18.copyWith(
               color: context.colorTokens.textBody,
-              fontSize: 18,
               height: 1.05,
             ),
           ),
@@ -753,7 +750,7 @@ class _ParticipantsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.32),
       borderRadius: BorderRadius.circular(18),
@@ -894,7 +891,7 @@ class _StatusPill extends StatelessWidget {
     final Color accent = _groupDataAccent(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: isCompleted
             ? context.colorTokens.primaryVeryLight
@@ -930,7 +927,7 @@ class _GroupStatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(18),
@@ -949,9 +946,8 @@ class _GroupStatItem extends StatelessWidget {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.black20.copyWith(
+                  style: context.textStyles.black18.copyWith(
                     color: color,
-                    fontSize: 18,
                     height: 1,
                   ),
                 ),

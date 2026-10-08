@@ -43,7 +43,7 @@ class AppSectionHeader extends StatelessWidget {
               badge!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textStyles.caption.copyWith(fontSize: 12),
+              style: context.textStyles.captionSmall,
             ),
           ],
           if (actionLabel != null && onTapAction != null) ...[

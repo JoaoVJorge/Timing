@@ -113,7 +113,7 @@ class _InviteCodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+    padding: const EdgeInsets.all(12),
     child: Row(
       children: [
         const FriendsPinkBadge(
@@ -140,11 +140,7 @@ class _InviteCodeCard extends StatelessWidget {
                 code,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(
-                  color: context.colorTokens.primary,
-                  fontSize: 18,
-                  letterSpacing: 0,
-                ),
+                style: context.textStyles.black18.copyWith(letterSpacing: 0),
               ),
             ],
           ),

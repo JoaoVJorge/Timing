@@ -1,7 +1,8 @@
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
-import "package:timing/app/app_ui_constants.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+
+import "package:timing/theme/app_spacing.dart";
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -46,9 +47,9 @@ class AppScaffold extends StatelessWidget {
           if (bottomBar != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppUiConstants.pagePadding,
+                AppSpacing.page,
                 12,
-                AppUiConstants.pagePadding,
+                AppSpacing.page,
                 16,
               ),
               child: bottomBar!,
@@ -59,10 +60,9 @@ class AppScaffold extends StatelessWidget {
   );
 
   EdgeInsetsGeometry get _bodyPadding =>
-      padding ??
-      const EdgeInsets.symmetric(horizontal: AppUiConstants.pagePadding);
+      padding ?? const EdgeInsets.symmetric(horizontal: AppSpacing.page);
 
   static const EdgeInsetsGeometry _topBarPadding = EdgeInsets.symmetric(
-    horizontal: AppUiConstants.pagePadding,
+    horizontal: AppSpacing.page,
   );
 }

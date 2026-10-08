@@ -132,11 +132,10 @@ class SettingsTile extends StatelessWidget {
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.caption.copyWith(
+                  style: context.textStyles.captionSmall.copyWith(
                     color: context.isDarkMode
                         ? context.colorTokens.textHint
                         : const Color(0xFF777A7E),
-                    fontSize: 12,
                   ),
                 ),
               ],
@@ -229,7 +228,7 @@ class _Trailing extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.end,
-          style: context.textStyles.caption.copyWith(fontSize: 12),
+          style: context.textStyles.captionSmall,
         ),
       );
     }
@@ -257,7 +256,7 @@ class _Trailing extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
-              style: context.textStyles.caption.copyWith(fontSize: 12),
+              style: context.textStyles.captionSmall,
             ),
           ),
           const Gap(AppSpacing.titleToDescription),

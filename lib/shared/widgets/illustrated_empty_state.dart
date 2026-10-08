@@ -58,7 +58,6 @@ class IllustratedEmptyState extends StatelessWidget {
           title,
           textAlign: TextAlign.center,
           style: context.textStyles.extraBold24.copyWith(
-            color: context.colorTokens.textBody,
             fontSize: 25,
             fontWeight: FontWeight.w900,
             height: 1.15,
@@ -101,7 +100,6 @@ class IllustratedEmptyState extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.textPrimaryButton.copyWith(
-                color: context.colorTokens.primaryForeground,
                 fontSize: 17,
                 fontWeight: FontWeight.w900,
               ),

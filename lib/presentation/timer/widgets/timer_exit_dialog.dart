@@ -4,6 +4,8 @@ import "package:gap/gap.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 Future<bool?> showTimerExitDialog({
   required BuildContext context,
   required Color accentColor,
@@ -67,11 +69,11 @@ class _TimerExitDialog extends StatelessWidget {
   Widget build(BuildContext context) => Dialog(
     elevation: 0,
     backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+    insetPadding: AppSpacing.dialogInset,
     child: Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: AppSpacing.illustratedDialog,
       decoration: BoxDecoration(
         color: context.colorTokens.dialogSurface,
         borderRadius: BorderRadius.circular(28),
@@ -101,23 +103,13 @@ class _TimerExitDialog extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colorTokens.dialogText,
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                height: 1.08,
-              ),
+              style: context.textStyles.dialogTitleLarge,
             ),
             const Gap(18),
             Text(
               content,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colorTokens.dialogTextMuted,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
+              style: context.textStyles.dialogBodyLarge,
             ),
             const Gap(12),
             Text(
@@ -187,11 +179,11 @@ class _ReadingExitDialogState extends State<_ReadingExitDialog> {
   Widget build(BuildContext context) => Dialog(
     elevation: 0,
     backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+    insetPadding: AppSpacing.dialogInset,
     child: Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 420),
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: AppSpacing.illustratedDialog,
       decoration: BoxDecoration(
         color: context.colorTokens.dialogSurface,
         borderRadius: BorderRadius.circular(28),
@@ -225,23 +217,13 @@ class _ReadingExitDialogState extends State<_ReadingExitDialog> {
             Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colorTokens.dialogText,
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                height: 1.08,
-              ),
+              style: context.textStyles.dialogTitleLarge,
             ),
             const Gap(18),
             Text(
               widget.content,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.colorTokens.dialogTextMuted,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
+              style: context.textStyles.dialogBodyLarge,
             ),
             const Gap(18),
             TextField(
@@ -304,11 +286,11 @@ class _TimerSessionEndedDialog extends StatelessWidget {
   Widget build(BuildContext context) => Dialog(
     elevation: 0,
     backgroundColor: context.colorTokens.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 30),
+    insetPadding: AppSpacing.dialogInset,
     child: Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 390),
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: AppSpacing.illustratedDialog,
       decoration: BoxDecoration(
         color: context.colorTokens.dialogSurface,
         borderRadius: BorderRadius.circular(28),
@@ -330,23 +312,13 @@ class _TimerSessionEndedDialog extends StatelessWidget {
           Text(
             context.l10n.timerSessionEndedTitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogText,
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              height: 1.08,
-            ),
+            style: context.textStyles.dialogTitleLarge,
           ),
           const Gap(12),
           Text(
             context.l10n.timerSessionEndedMessage(subjectName),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.colorTokens.dialogTextMuted,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-            ),
+            style: context.textStyles.dialogBodyLarge,
           ),
           const Gap(24),
           _TimerExitDialogButton(
@@ -392,11 +364,7 @@ class _TimerExitDialogButton extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        ),
+        style: context.textStyles.dialogButtonLabel.copyWith(color: textColor),
       ),
     ),
   );

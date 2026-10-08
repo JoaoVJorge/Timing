@@ -34,7 +34,6 @@ class JoinGroupPage extends GetView<JoinGroupController> {
               Text(
                 context.l10n.joinGroupInviteCodeLabel,
                 style: context.textStyles.bodyLarge.copyWith(
-                  color: context.colorTokens.textBody,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -104,7 +103,6 @@ class _JoinButton extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.textPrimaryButton.copyWith(
-                color: context.colorTokens.primaryForeground,
                 fontWeight: FontWeight.w900,
               ),
             ),

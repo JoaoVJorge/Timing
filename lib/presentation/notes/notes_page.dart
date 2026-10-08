@@ -256,7 +256,7 @@ class _NotesFormattingToolbar extends StatelessWidget {
     child: Container(
       key: const ValueKey("notes-formatting-toolbar"),
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(16),
@@ -551,7 +551,6 @@ class _PageControls extends StatelessWidget {
               "$currentPage / $pageCount",
               textAlign: TextAlign.center,
               style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.textBody,
                 fontWeight: FontWeight.w700,
               ),
             ),

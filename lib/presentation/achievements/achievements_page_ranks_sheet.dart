@@ -12,7 +12,7 @@ class _RanksSheet extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+        padding: AppSpacing.bottomSheet,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -38,9 +38,7 @@ class _RanksSheet extends StatelessWidget {
                     children: [
                       Text(
                         context.l10n.allLevelsTitle,
-                        style: context.textStyles.extraBold24.copyWith(
-                          color: context.colorTokens.textBody,
-                        ),
+                        style: context.textStyles.extraBold24,
                       ),
                       const Gap(8),
                       Text(
@@ -166,7 +164,6 @@ class _RankRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.textBody,
                     fontWeight: FontWeight.w900,
                   ),
                 ),

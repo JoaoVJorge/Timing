@@ -42,7 +42,7 @@ class _LevelCard extends StatelessWidget {
       pressedScale: 0.98,
       onTap: () => _showRanksSheet(context, controller),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: AppSpacing.tile,
         decoration: _cardDecoration(context, radius: 22),
         child: Column(
           children: [
@@ -87,9 +87,7 @@ class _LevelCard extends StatelessWidget {
                               tier.learnerLabel(context),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: context.textStyles.extraBold20.copyWith(
-                                color: context.colorTokens.textBody,
-                              ),
+                              style: context.textStyles.extraBold20,
                             ),
                           ),
                           const Gap(6),

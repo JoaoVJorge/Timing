@@ -34,7 +34,7 @@ class ScheduleEntryTile extends StatelessWidget {
       opacity: isPast ? 0.55 : 1,
       child: Container(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTapTarget),
-        padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+        padding: AppSpacing.tile,
         decoration: BoxDecoration(
           color: context.colorTokens.surface,
           borderRadius: BorderRadius.circular(18),
@@ -94,7 +94,6 @@ class ScheduleEntryTile extends StatelessWidget {
                       color: context.colorTokens.textBody.withValues(
                         alpha: 0.72,
                       ),
-                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

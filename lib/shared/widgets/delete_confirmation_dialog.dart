@@ -3,6 +3,8 @@ import "package:gap/gap.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 typedef DeleteConfirmationCallback =
     Future<bool> Function({required String itemName, String? itemTypeName});
 
@@ -39,11 +41,11 @@ class DeleteConfirmationDialog extends StatelessWidget {
     return Dialog(
       elevation: 0,
       backgroundColor: context.colorTokens.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 34),
+      insetPadding: AppSpacing.confirmationDialogInset,
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(maxWidth: 390),
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+        padding: AppSpacing.confirmationDialog,
         decoration: BoxDecoration(
           color: context.colorTokens.dialogSurface,
           borderRadius: BorderRadius.circular(24),
@@ -75,22 +77,13 @@ class DeleteConfirmationDialog extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: context.textStyles.extraBold24.copyWith(
-                color: context.colorTokens.dialogText,
-                fontSize: 21,
-                height: 1.12,
-              ),
+              style: context.textStyles.dialogTitle,
             ),
             const Gap(20),
             Text(
               context.l10n.deleteConfirmationContent(itemName),
               textAlign: TextAlign.center,
-              style: context.textStyles.bodyLarge.copyWith(
-                color: context.colorTokens.dialogTextMuted,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: 1.38,
-              ),
+              style: context.textStyles.dialogBody,
             ),
             const Gap(16),
             Container(
@@ -111,7 +104,6 @@ class DeleteConfirmationDialog extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: context.textStyles.bodyMedium.copyWith(
                         color: context.colorTokens.dialogTextMuted,
-                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         height: 1.3,
                       ),
@@ -185,11 +177,7 @@ class _DeleteDialogButton extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: context.textStyles.bodyLarge.copyWith(
-          color: foreground,
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-        ),
+        style: context.textStyles.dialogButtonLabel.copyWith(color: foreground),
       ),
     ),
   );

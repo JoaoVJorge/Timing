@@ -13,6 +13,8 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/theme/decoration.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 const Color _fireSequenceColor = Color(0xFFFF6A00);
 
 enum _EditGroupStep { overview, information, activity }
@@ -492,10 +494,7 @@ class _LabeledField extends StatelessWidget {
               prefixIcon: prefixIcon,
             ).copyWith(
               suffixText: suffixText,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
+              contentPadding: AppSpacing.tile,
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: context.colorTokens.primary),

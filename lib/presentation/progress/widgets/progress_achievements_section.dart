@@ -172,7 +172,7 @@ class _NextMilestoneCard extends StatelessWidget {
             context.l10n.progressAchievementsNextTitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textStyles.caption.copyWith(fontSize: 12),
+            style: context.textStyles.captionSmall,
           ),
           const Gap(2),
           Text(

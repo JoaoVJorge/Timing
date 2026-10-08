@@ -18,6 +18,8 @@ import "package:timing/theme/subject_colors.dart";
 import "package:timing/theme/subject_icons.dart";
 import "package:timing/theme/timer_wallpapers.dart";
 
+import "package:timing/theme/app_spacing.dart";
+
 class TimerPage extends StatelessWidget {
   const TimerPage({super.key});
 
@@ -506,7 +508,7 @@ class _TimerStatsCard extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 480),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: AppSpacing.tile,
       decoration: BoxDecoration(
         color: chrome.foregroundColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(24),

@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/app/app_ui_constants.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/presentation/friends/widgets/friends_activity_shortcuts.dart";
@@ -11,6 +10,8 @@ import "package:timing/presentation/friends/widgets/friends_loading_skeleton.dar
 import "package:timing/presentation/friends/widgets/friends_section.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+
+import "package:timing/theme/app_spacing.dart";
 
 class FriendsPage extends GetView<FriendsController> {
   const FriendsPage({super.key});
@@ -32,9 +33,9 @@ class FriendsPage extends GetView<FriendsController> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
-          AppUiConstants.pagePadding,
+          AppSpacing.page,
           0,
-          AppUiConstants.pagePadding,
+          AppSpacing.page,
           18,
         ),
         child: Column(

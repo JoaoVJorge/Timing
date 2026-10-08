@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/app/app_ui_constants.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/group_invites/group_invites_controller.dart";
@@ -11,6 +10,8 @@ import "package:timing/shared/widgets/app_empty_state.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
+
+import "package:timing/theme/app_spacing.dart";
 
 class GroupInvitesPage extends GetView<GroupInvitesController> {
   const GroupInvitesPage({super.key});
@@ -33,9 +34,7 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
 
       if (controller.options.isEmpty) {
         return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppUiConstants.pagePadding,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
           child: AppEmptyState(
             icon: Icons.person_add_alt_1_rounded,
             title: context.l10n.groupInvitesNoFriendsTitle,
@@ -54,9 +53,9 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
-            AppUiConstants.pagePadding,
+            AppSpacing.page,
             0,
-            AppUiConstants.pagePadding,
+            AppSpacing.page,
             20,
           ),
           itemCount: options.length,

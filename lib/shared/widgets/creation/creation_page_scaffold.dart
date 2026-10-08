@@ -90,7 +90,6 @@ class CreationHeroHeader extends StatelessWidget {
                   title,
                   style: context.textStyles.black32.copyWith(
                     color: accent,
-                    fontSize: 32,
                     height: 1.05,
                   ),
                 ),
@@ -101,7 +100,6 @@ class CreationHeroHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: context.textStyles.bodyMedium.copyWith(
                     color: context.colorTokens.textBody.withValues(alpha: 0.78),
-                    fontSize: 14,
                     height: 1.35,
                   ),
                 ),

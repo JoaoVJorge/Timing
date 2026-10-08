@@ -122,7 +122,7 @@ class _ImageMessageBubbleState extends State<_ImageMessageBubble> {
         ],
         Flexible(
           child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isMine
                   ? context.colorTokens.primaryVeryLight

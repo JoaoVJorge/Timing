@@ -211,7 +211,7 @@ class _SkeletonFriendsCard extends StatelessWidget {
     return Container(
       key: const ValueKey<String>("friends-card-skeleton"),
       constraints: const BoxConstraints(minHeight: 78),
-      padding: const EdgeInsets.all(14),
+      padding: AppSpacing.tile,
       decoration: AppSurfaces.content(context.colorTokens),
       child: Row(
         children: [
@@ -248,7 +248,7 @@ class _SkeletonGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(minHeight: 124),
-    padding: const EdgeInsets.all(14),
+    padding: AppSpacing.tile,
     decoration: AppSurfaces.content(context.colorTokens),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,

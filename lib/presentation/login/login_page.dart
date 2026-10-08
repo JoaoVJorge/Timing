@@ -119,11 +119,7 @@ class _Brand extends StatelessWidget {
       const Gap(10),
       Text(
         AppConstants.appTitle,
-        style: context.textStyles.black28.copyWith(
-          color: _authNavy,
-          fontSize: 28,
-          height: 1,
-        ),
+        style: context.textStyles.black28.copyWith(color: _authNavy, height: 1),
       ),
     ],
   );
@@ -242,7 +238,7 @@ class _AuthCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(30),

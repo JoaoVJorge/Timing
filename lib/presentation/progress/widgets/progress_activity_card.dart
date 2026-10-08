@@ -45,7 +45,7 @@ class ProgressActivityCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 12),
             child: Row(
               children: [
                 Text(

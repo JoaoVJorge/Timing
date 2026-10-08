@@ -26,7 +26,7 @@ class SubjectTile extends StatelessWidget {
         : 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(18),
@@ -51,7 +51,7 @@ class SubjectTile extends StatelessWidget {
                       : formatDurationLong(Duration(seconds: currentSeconds)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.caption.copyWith(fontSize: 12),
+                  style: context.textStyles.captionSmall,
                 ),
                 if (hasGoal) ...[
                   const SizedBox(height: 8),
