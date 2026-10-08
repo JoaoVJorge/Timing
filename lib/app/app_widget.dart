@@ -34,11 +34,11 @@ class AppWidget extends StatelessWidget {
         builder: (context, child) => Directionality(
           textDirection: TextDirection.ltr,
           child: Obx(() {
-            final bool isOnline =
-                Get.find<ConnectivityService>().isOnline.value;
+            final bool showOfflineNotice =
+                Get.find<ConnectivityService>().showOfflineNotice.value;
             return Column(
               children: [
-                if (!isOnline)
+                if (showOfflineNotice)
                   Material(
                     color: Theme.of(context).colorScheme.errorContainer,
                     child: SafeArea(
@@ -67,7 +67,7 @@ class AppWidget extends StatelessWidget {
                 Expanded(
                   child: MediaQuery.removePadding(
                     context: context,
-                    removeTop: !isOnline,
+                    removeTop: showOfflineNotice,
                     child: child ?? const SizedBox.shrink(),
                   ),
                 ),

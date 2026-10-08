@@ -28,8 +28,13 @@ class ConnectivityService {
   final Duration _checkInterval;
 
   final RxBool isOnline = false.obs;
+
+  /// Only the global notice is delayed; offline services use [isOnline].
+  final RxBool showOfflineNotice = false.obs;
+  static const Duration offlineNoticeDelay = Duration(seconds: 5);
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _timer;
+  Timer? _offlineNoticeTimer;
   int _checkRevision = 0;
 
   Future<void> initialize() async {
@@ -46,14 +51,14 @@ class ConnectivityService {
       final results = await _checkConnectivity();
       await _check(results, revision: revision);
     } catch (_) {
-      if (revision == _checkRevision) isOnline.value = false;
+      if (revision == _checkRevision) _setOnline(false);
     }
   }
 
   Future<void> _check(List<ConnectivityResult> results, {int? revision}) async {
     final int currentRevision = revision ?? ++_checkRevision;
     if (!results.any((result) => result != ConnectivityResult.none)) {
-      if (currentRevision == _checkRevision) isOnline.value = false;
+      if (currentRevision == _checkRevision) _setOnline(false);
       return;
     }
     final bool wasOnline = isOnline.value;
@@ -64,7 +69,33 @@ class ConnectivityService {
     if (!reachable && wasOnline && currentRevision == _checkRevision) {
       reachable = await _probe();
     }
-    if (currentRevision == _checkRevision) isOnline.value = reachable;
+    if (currentRevision == _checkRevision) _setOnline(reachable);
+  }
+
+  void _setOnline(bool online) {
+    isOnline.value = online;
+    if (online) {
+      _offlineNoticeTimer?.cancel();
+      _offlineNoticeTimer = null;
+      showOfflineNotice.value = false;
+      return;
+    }
+    if (showOfflineNotice.value || _offlineNoticeTimer != null) return;
+    final Timer timer = Timer(offlineNoticeDelay, () {
+      unawaited(_confirmOfflineNotice());
+    });
+    _offlineNoticeTimer = timer;
+  }
+
+  Future<void> _confirmOfflineNotice() async {
+    final Timer? timer = _offlineNoticeTimer;
+    // Recheck before displaying: the connection may have recovered without
+    // an OS event while the regular 20-second poll is still pending.
+    await refresh();
+    if (timer != null && identical(_offlineNoticeTimer, timer)) {
+      _offlineNoticeTimer = null;
+      showOfflineNotice.value = !isOnline.value;
+    }
   }
 
   Future<bool> _probe() async {
@@ -110,6 +141,9 @@ class ConnectivityService {
   }
 
   void dispose() {
+    ++_checkRevision;
+    _offlineNoticeTimer?.cancel();
+    _offlineNoticeTimer = null;
     _timer?.cancel();
     unawaited(_subscription?.cancel());
   }

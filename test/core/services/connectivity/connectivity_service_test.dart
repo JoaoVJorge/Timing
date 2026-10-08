@@ -1,11 +1,99 @@
 import "dart:async";
 
 import "package:connectivity_plus/connectivity_plus.dart";
+import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 
 void main() {
   group("ConnectivityService", () {
+    test("delays the notice while offline services activate immediately", () {
+      fakeAsync((async) {
+        bool online = false;
+        final service = ConnectivityService(
+          checkConnectivity: () async => [
+            online ? ConnectivityResult.wifi : ConnectivityResult.none,
+          ],
+          connectivityChanges: const Stream.empty(),
+          checkBackend: () async => true,
+        );
+        unawaited(service.initialize());
+        async.flushMicrotasks();
+        expect(service.isOnline.value, isFalse);
+        expect(service.showOfflineNotice.value, isFalse);
+        async.elapse(const Duration(seconds: 4));
+        expect(service.showOfflineNotice.value, isFalse);
+        async.elapse(const Duration(seconds: 1));
+        expect(service.showOfflineNotice.value, isTrue);
+
+        online = true;
+        unawaited(service.refresh());
+        async.flushMicrotasks();
+        expect(service.showOfflineNotice.value, isFalse);
+        service.dispose();
+      });
+    });
+
+    test("cancels brief outages and restarts the delay for a new outage", () {
+      fakeAsync((async) {
+        bool online = false;
+        final service = ConnectivityService(
+          checkConnectivity: () async => [
+            online ? ConnectivityResult.wifi : ConnectivityResult.none,
+          ],
+          connectivityChanges: const Stream.empty(),
+          checkBackend: () async => true,
+        );
+        unawaited(service.initialize());
+        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 3));
+        online = true;
+        unawaited(service.refresh());
+        async.flushMicrotasks();
+        online = false;
+        unawaited(service.refresh());
+        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 2));
+        expect(service.showOfflineNotice.value, isFalse);
+        async.elapse(const Duration(seconds: 3));
+        expect(service.showOfflineNotice.value, isTrue);
+        service.dispose();
+      });
+    });
+
+    test("rechecks recovery before showing the notice without an OS event", () {
+      fakeAsync((async) {
+        bool reachable = false;
+        final service = ConnectivityService(
+          checkConnectivity: () async => [ConnectivityResult.wifi],
+          connectivityChanges: const Stream.empty(),
+          checkBackend: () async => reachable,
+        );
+        unawaited(service.initialize());
+        async.flushMicrotasks();
+        reachable = true;
+        async.elapse(ConnectivityService.offlineNoticeDelay);
+        expect(service.isOnline.value, isTrue);
+        expect(service.showOfflineNotice.value, isFalse);
+        service.dispose();
+      });
+    });
+
+    test("disposing cancels a pending offline notice", () {
+      fakeAsync((async) {
+        final service = ConnectivityService(
+          checkConnectivity: () async => [ConnectivityResult.none],
+          connectivityChanges: const Stream.empty(),
+        );
+        unawaited(service.initialize());
+        async.flushMicrotasks();
+        service.dispose();
+        async.elapse(ConnectivityService.offlineNoticeDelay);
+        expect(service.showOfflineNotice.value, isFalse);
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
+
     test("starts online when the initial check reports a connection", () async {
       final controller = StreamController<List<ConnectivityResult>>.broadcast();
       final service = ConnectivityService(
