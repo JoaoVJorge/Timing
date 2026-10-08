@@ -7,11 +7,11 @@ import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/presentation/friends/widgets/friends_shared.dart";
+import "package:timing/presentation/friends/widgets/friends_request_widgets.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/shared/widgets/app_icon.dart";
-import "package:timing/shared/widgets/app_scaffold.dart";
-import "package:timing/shared/widgets/app_top_bar.dart";
-import "package:timing/shared/widgets/bounce_tap.dart";
+
+import "package:timing/theme/app_spacing.dart";
 
 enum GroupInvitationsMode { incoming, sent }
 
@@ -27,126 +27,29 @@ class _GroupInvitationsPageState extends State<GroupInvitationsPage> {
   GroupInvitationsMode selectedMode = GroupInvitationsMode.incoming;
 
   @override
-  Widget build(BuildContext context) => AppScaffold(
-    topBar: AppTopBar(
-      title: context.l10n.groupInvitationsTitle,
-      showBackButton: true,
-      onBack: () => Navigator.of(context).maybePop(),
-    ),
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _GroupInvitationTabs(
-          selectedMode: selectedMode,
-          onSelect: (mode) => setState(() => selectedMode = mode),
-        ),
-        const Gap(18),
-        Expanded(
-          child: Obx(
-            () => switch (selectedMode) {
-              GroupInvitationsMode.incoming => _IncomingInvitationsList(
-                invitations: controller.groupInvitations.toList(),
-                acceptingInvitationIds: controller.acceptingGroupInvitationIds
-                    .toSet(),
-                onAccept: controller.acceptGroupInvitation,
-                onDecline: controller.declineGroupInvitation,
-              ),
-              GroupInvitationsMode.sent => _SentInvitationsList(
-                invitations: controller.sentGroupInvitations.toList(),
-                onCancel: controller.cancelGroupInvitation,
-              ),
-            },
-          ),
-        ),
-        const Gap(18),
-      ],
-    ),
-  );
-}
-
-class _GroupInvitationTabs extends StatelessWidget {
-  const _GroupInvitationTabs({
-    required this.selectedMode,
-    required this.onSelect,
-  });
-
-  final GroupInvitationsMode selectedMode;
-  final ValueChanged<GroupInvitationsMode> onSelect;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(
-        child: _GroupInvitationTab(
-          icon: Icons.inbox_rounded,
-          label: context.l10n.receivedTab,
-          isSelected: selectedMode == GroupInvitationsMode.incoming,
-          onTap: () => onSelect(GroupInvitationsMode.incoming),
-        ),
-      ),
-      const Gap(10),
-      Expanded(
-        child: _GroupInvitationTab(
-          icon: Icons.send_rounded,
-          label: context.l10n.sentLabel,
-          isSelected: selectedMode == GroupInvitationsMode.sent,
-          onTap: () => onSelect(GroupInvitationsMode.sent),
-        ),
-      ),
-    ],
-  );
-}
-
-class _GroupInvitationTab extends StatelessWidget {
-  const _GroupInvitationTab({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => BounceTap(
-    onTap: onTap,
-    pressedScale: 0.96,
-    child: Container(
-      height: 38,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: isSelected ? context.colorTokens.primaryGradient : null,
-        color: isSelected ? null : context.colorTokens.surfaceInnerLayer,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isSelected
-                ? context.colorTokens.primaryForeground
-                : context.colorTokens.textHint,
-          ),
-          const Gap(7),
-          Text(
-            label,
-            style: context.textStyles.bodySmall.copyWith(
-              color: isSelected
-                  ? context.colorTokens.primaryForeground
-                  : context.colorTokens.textHint,
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
+  Widget build(BuildContext context) =>
+      FriendsRequestLayout<GroupInvitationsMode>(
+        title: context.l10n.groupInvitationsTitle,
+        selectedMode: selectedMode,
+        incomingMode: GroupInvitationsMode.incoming,
+        sentMode: GroupInvitationsMode.sent,
+        onSelect: (mode) => setState(() => selectedMode = mode),
+        child: Obx(
+          () => switch (selectedMode) {
+            GroupInvitationsMode.incoming => _IncomingInvitationsList(
+              invitations: controller.groupInvitations.toList(),
+              acceptingInvitationIds: controller.acceptingGroupInvitationIds
+                  .toSet(),
+              onAccept: controller.acceptGroupInvitation,
+              onDecline: controller.declineGroupInvitation,
             ),
-          ),
-        ],
-      ),
-    ),
-  );
+            GroupInvitationsMode.sent => _SentInvitationsList(
+              invitations: controller.sentGroupInvitations.toList(),
+              onCancel: controller.cancelGroupInvitation,
+            ),
+          },
+        ),
+      );
 }
 
 class _IncomingInvitationsList extends StatelessWidget {
@@ -165,7 +68,7 @@ class _IncomingInvitationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (invitations.isEmpty) {
-      return _GroupInvitationEmptyState(
+      return FriendsRequestEmptyState(
         icon: Icons.inbox_rounded,
         title: context.l10n.groupInvitationsReceivedEmptyTitle,
         description: context.l10n.groupInvitationsReceivedEmptyDescription,
@@ -203,9 +106,7 @@ class _IncomingInvitationCard extends StatelessWidget {
   final VoidCallback onDecline;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-    decoration: friendsSurfaceDecoration(context, radius: 18),
+  Widget build(BuildContext context) => FriendsRequestCard(
     child: Column(
       children: [
         _GroupInvitationHeader(
@@ -214,26 +115,10 @@ class _IncomingInvitationCard extends StatelessWidget {
           subtitle: context.l10n.groupInvitationFrom(invitation.inviterName),
         ),
         const Gap(14),
-        Row(
-          children: [
-            Expanded(
-              child: FriendRequestActionButton(
-                label: context.l10n.declineButton,
-                isPrimary: false,
-                isEnabled: !isAccepting,
-                onTap: onDecline,
-              ),
-            ),
-            const Gap(10),
-            Expanded(
-              child: FriendRequestActionButton(
-                label: context.l10n.acceptButton,
-                isPrimary: true,
-                isLoading: isAccepting,
-                onTap: onAccept,
-              ),
-            ),
-          ],
+        FriendsRequestActions(
+          isAccepting: isAccepting,
+          onAccept: onAccept,
+          onDecline: onDecline,
         ),
       ],
     ),
@@ -252,7 +137,7 @@ class _SentInvitationsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (invitations.isEmpty) {
-      return _GroupInvitationEmptyState(
+      return FriendsRequestEmptyState(
         icon: Icons.send_rounded,
         title: context.l10n.groupInvitationsSentEmptyTitle,
         description: context.l10n.groupInvitationsSentEmptyDescription,
@@ -282,9 +167,8 @@ class _SentGroupInvitationCard extends StatelessWidget {
   final ValueChanged<SentGroupInvitationEntity> onCancel;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-    decoration: friendsSurfaceDecoration(context, radius: 18),
+  Widget build(BuildContext context) => FriendsRequestCard(
+    padding: AppSpacing.tile,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -403,53 +287,6 @@ class _SentInviteeRow extends StatelessWidget {
           onTap: onCancel,
         ),
       ],
-    ),
-  );
-}
-
-class _GroupInvitationEmptyState extends StatelessWidget {
-  const _GroupInvitationEmptyState({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 28),
-      decoration: friendsSurfaceDecoration(context, radius: 18),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FriendsPinkBadge(icon: icon, size: 64, iconSize: 34),
-          const Gap(14),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: context.textStyles.extraBold20.copyWith(
-              color: context.colorTokens.textBody,
-              fontSize: 17,
-            ),
-          ),
-          const Gap(6),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: context.textStyles.bodyMedium.copyWith(
-              color: context.colorTokens.textHint,
-              fontSize: 13,
-              height: 1.25,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
     ),
   );
 }
