@@ -687,6 +687,15 @@ create table if not exists public.activity_entries (
   occurred_at timestamptz not null default now()
 );
 
+-- One row per "remove time" request, so a request that is sent again after a
+-- lost answer is not applied twice. Only remove_activity_seconds() touches it.
+create table if not exists public.activity_time_removals (
+  id uuid not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, id)
+);
+
 create table if not exists public.user_subjects (
   id text not null,
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -1096,6 +1105,77 @@ begin
     entry_seconds, entry_pages, entry_completed_tasks, entry_occurred_at
   )
   on conflict (id) do nothing;
+end;
+$$;
+
+-- Takes time back off an activity, newest sessions first: the correction for
+-- a timer that was left running. Entries stay immutable to clients; this is
+-- the only way one gets shorter, and it only ever shortens the caller's own.
+-- Pages and completed tasks logged with a session are kept.
+drop function if exists public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+);
+create or replace function public.remove_activity_seconds(
+  removal_id uuid,
+  entry_subject_id text,
+  seconds_to_remove integer,
+  removed_at timestamptz
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_user_id uuid := auth.uid();
+  remaining integer := seconds_to_remove;
+  entry record;
+begin
+  if current_user_id is null then
+    raise exception 'authentication required' using errcode = '28000';
+  end if;
+  if removal_id is null or coalesce(entry_subject_id, '') = ''
+     or coalesce(seconds_to_remove, 0) <= 0 then
+    return;
+  end if;
+
+  insert into public.activity_time_removals (id, user_id)
+  values (removal_id, current_user_id)
+  on conflict (user_id, id) do nothing;
+  if not found then
+    return;
+  end if;
+  -- A request is only ever repeated within moments of being made.
+  delete from public.activity_time_removals
+  where user_id = current_user_id
+    and created_at < now() - interval '30 days';
+
+  for entry in
+    select a.id, a.seconds, a.pages, a.completed_tasks
+    from public.activity_entries a
+    where a.user_id = current_user_id
+      and a.subject_id = entry_subject_id
+      and a.seconds > 0
+      and a.occurred_at <= removed_at
+      -- Older entries can no longer be rewritten (validate_activity_entry).
+      and a.occurred_at > now() - interval '399 days'
+    order by a.occurred_at desc, a.id desc
+    for update
+  loop
+    exit when remaining <= 0;
+    if entry.seconds > remaining then
+      update public.activity_entries
+      set seconds = seconds - remaining
+      where id = entry.id;
+      remaining := 0;
+    elsif entry.pages > 0 or entry.completed_tasks > 0 then
+      update public.activity_entries set seconds = 0 where id = entry.id;
+      remaining := remaining - entry.seconds;
+    else
+      delete from public.activity_entries where id = entry.id;
+      remaining := remaining - entry.seconds;
+    end if;
+  end loop;
 end;
 $$;
 
@@ -2616,6 +2696,8 @@ alter table public.group_members enable row level security;
 alter table public.group_invitations enable row level security;
 alter table public.group_activities enable row level security;
 alter table public.activity_entries enable row level security;
+-- No policies: remove_activity_seconds() is its only reader and writer.
+alter table public.activity_time_removals enable row level security;
 alter table public.user_subjects enable row level security;
 alter table public.daily_goals enable row level security;
 alter table public.schedule_entries enable row level security;
@@ -3086,6 +3168,9 @@ revoke all on function public.decline_group_invitation(uuid) from public;
 revoke all on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) from public;
+revoke all on function public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+) from public;
 revoke all on function public.activity_entry_totals(timestamptz) from public;
 revoke all on function public.delete_my_account() from public;
 
@@ -3127,6 +3212,9 @@ grant execute on function public.decline_group_invitation(uuid)
 grant execute on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) to authenticated;
+grant execute on function public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+) to authenticated;
 grant execute on function public.activity_entry_totals(timestamptz)
   to authenticated;
 grant execute on function public.delete_my_account() to authenticated;
@@ -3152,6 +3240,7 @@ revoke all on table public.group_members from authenticated;
 revoke all on table public.group_invitations from authenticated;
 revoke all on table public.group_activities from authenticated;
 revoke all on table public.activity_entries from authenticated;
+revoke all on table public.activity_time_removals from authenticated;
 revoke all on table public.user_subjects from authenticated;
 revoke all on table public.daily_goals from authenticated;
 revoke all on table public.schedule_entries from authenticated;

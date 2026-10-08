@@ -125,9 +125,42 @@ class ActivityDataSource {
     }
   }
 
+  /// Takes [seconds] back off the newest sessions logged for [subjectId], so
+  /// the group rankings and the user's other devices stop counting time that
+  /// was removed by hand.
+  ///
+  /// Like a delete, the request is remembered first and sent by
+  /// [flushPendingSync], after every session still waiting to upload: the
+  /// backend can only shorten sessions it has. It carries an id, so a request
+  /// repeated after a lost answer is applied once, and the moment it was made,
+  /// so a session logged afterwards is left alone.
+  Future<Either<AppError, void>> removeSubjectSeconds({
+    required String subjectId,
+    required int seconds,
+  }) async {
+    try {
+      if (_supabaseService.currentUserId == null || seconds <= 0) {
+        return const Right(null);
+      }
+      final List<Map<String, dynamic>> removals = await _readRemovals();
+      removals.add({
+        "id": generateUuidV4(),
+        "subject_id": subjectId,
+        "seconds": seconds,
+        "removed_at": DateTime.now().toUtc().toIso8601String(),
+      });
+      await _writeRemovals(removals);
+      await _pendingSyncStore.markPending(PendingSyncDataset.activityEntries);
+      unawaited(flushPendingSync());
+      return const Right(null);
+    } catch (error, stackTrace) {
+      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    }
+  }
+
   /// Re-attempts any focus sessions that failed to reach the backend
-  /// earlier, after the deletes waiting to reach it. No-op when nothing is
-  /// pending.
+  /// earlier, after the deletes waiting to reach it, and then the time removed
+  /// by hand. No-op when nothing is pending.
   Future<void> flushPendingSync() async {
     if (!_pendingSyncStore.contains(PendingSyncDataset.activityEntries)) {
       return;
@@ -137,7 +170,7 @@ class ActivityDataSource {
     }
     List<Map<String, dynamic>> queue = await _readQueue();
     if (queue.isEmpty) {
-      await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
+      await _flushRemovalsAndFinish();
       return;
     }
     // Saved before uploading so a retry reuses the repaired ids.
@@ -152,8 +185,8 @@ class ActivityDataSource {
         await _uploadRow(row);
       }
       await _writeQueue(const []);
-      await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
       _activityChangeBus?.notifyGroupActivityChanged();
+      await _flushRemovalsAndFinish();
     } catch (error, stackTrace) {
       _logger.logError(
         "Failed to flush queued activity_entries",
@@ -260,9 +293,97 @@ class ActivityDataSource {
       _activityChangeBus?.notifyGroupActivityChanged();
     }
     if (remaining.isEmpty) {
+      await _flushRemovalsAndFinish();
+    }
+  }
+
+  /// The last step of a flush, once every queued session is on the backend.
+  /// Nothing is left waiting only when the removed time went through too.
+  Future<void> _flushRemovalsAndFinish() async {
+    if (await _flushPendingRemovals()) {
       await _pendingSyncStore.clear(PendingSyncDataset.activityEntries);
     }
   }
+
+  /// Sends the removed time that is waiting, oldest request first. Returns
+  /// whether none is left; a transient failure keeps the rest for the next
+  /// attempt.
+  Future<bool> _flushPendingRemovals() async {
+    final List<Map<String, dynamic>> removals = await _readRemovals();
+    if (removals.isEmpty) {
+      return true;
+    }
+
+    final Set<String> handled = <String>{};
+    try {
+      for (final Map<String, dynamic> removal in removals) {
+        try {
+          await _supabaseService.requireClient
+              .rpc(
+                "remove_activity_seconds",
+                params: {
+                  "removal_id": removal["id"],
+                  "entry_subject_id": removal["subject_id"],
+                  "seconds_to_remove": removal["seconds"],
+                  "removed_at": removal["removed_at"],
+                },
+              )
+              .timeout(_remoteCallTimeout);
+        } catch (error, stackTrace) {
+          if (!isPermanentSyncFailure(error)) {
+            rethrow;
+          }
+          // Retrying a request the server refuses would hold back every one
+          // queued behind it.
+          _logger.logError(
+            "Dropping a removed-time request the server rejected",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+        handled.add(removal["id"] as String);
+      }
+    } catch (error, stackTrace) {
+      _logger.logError(
+        "Failed to send removed activity time",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // Read again rather than writing back what was read: a removal asked for
+    // while these were being sent must not be lost.
+    final List<Map<String, dynamic>> remaining = [
+      for (final Map<String, dynamic> removal in await _readRemovals())
+        if (!handled.contains(removal["id"])) removal,
+    ];
+    await _writeRemovals(remaining);
+    if (handled.isNotEmpty) {
+      _activityChangeBus?.notifyGroupActivityChanged();
+    }
+    return remaining.isEmpty;
+  }
+
+  Future<List<Map<String, dynamic>>> _readRemovals() async {
+    final String? saved = await _localStorageService.read<String?>(
+      LocalStorageKeys.pendingActivityRemovals,
+    );
+    if (saved == null) {
+      return [];
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
+      return decoded.map((item) => item as Map<String, dynamic>).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _writeRemovals(List<Map<String, dynamic>> removals) =>
+      _localStorageService.write(
+        LocalStorageKeys.pendingActivityRemovals,
+        jsonEncode(removals),
+      );
 
   Future<void> _dropQueuedEntriesFor(String subjectId) async {
     final List<Map<String, dynamic>> queue = await _readQueue();

@@ -120,6 +120,42 @@ class SubjectDailyHistoryService {
     return true;
   }
 
+  /// Takes [seconds] of focus time back off the subject, newest days first, and
+  /// hands back what came off each day so the account-wide daily totals can
+  /// follow. Stops when the trail runs out.
+  Future<Map<String, DailyProgressEntity>> removeFocusSeconds(
+    String subjectId,
+    int seconds,
+  ) async {
+    final Map<String, DailyProgressEntity>? days = _bySubject[subjectId];
+    if (days == null || seconds <= 0) {
+      return const {};
+    }
+    // Day keys are zero-padded dates, so text order is date order.
+    final List<String> newestFirst = days.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+    final Map<String, DailyProgressEntity> removedByDay = {};
+    int remaining = seconds;
+    for (final String key in newestFirst) {
+      if (remaining <= 0) {
+        break;
+      }
+      final DailyProgressEntity day = days[key]!;
+      final int taken = math.min(day.focusSeconds, remaining);
+      if (taken <= 0) {
+        continue;
+      }
+      days[key] = day.copyWith(focusSeconds: day.focusSeconds - taken);
+      removedByDay[key] = DailyProgressEntity(focusSeconds: taken);
+      remaining -= taken;
+    }
+    if (removedByDay.isEmpty) {
+      return const {};
+    }
+    await _persist();
+    return removedByDay;
+  }
+
   /// Forgets the subject's day-by-day trail and hands it back, so what it added
   /// to the account-wide daily totals can be taken out of them too.
   Future<Map<String, DailyProgressEntity>> removeSubject(

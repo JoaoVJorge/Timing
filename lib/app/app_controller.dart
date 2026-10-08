@@ -443,6 +443,16 @@ class AppController extends GetxController with WidgetsBindingObserver {
         !Get.find<ConnectivityService>().isOnline.value) {
       return false;
     }
+    // Deleted data and time removed by hand only lower the backend once they
+    // are sent. Raising the caches to the backend's totals before that would
+    // bring them back on this device, so a flush under way is waited for and
+    // anything still queued leaves the pass for the next trigger.
+    await _reconciliationInProgress?.catchError((Object _) {});
+    if (Get.find<PendingSyncStore>().contains(
+      PendingSyncDataset.activityEntries,
+    )) {
+      return false;
+    }
     final List<bool> results = await Future.wait([
       ActivityHistoryReconciler(
         fetchEntries: _getActivityEntriesUseCase.call,

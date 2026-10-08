@@ -30,6 +30,16 @@ class ActivityRepository {
   Future<Either<AppError, void>> clearSubjectEntries(String subjectId) =>
       activityDataSource.clearSubjectEntries(subjectId);
 
+  /// Takes time back off the subject's newest sessions (see
+  /// [ActivityDataSource.removeSubjectSeconds]).
+  Future<Either<AppError, void>> removeSubjectSeconds({
+    required String subjectId,
+    required int seconds,
+  }) => activityDataSource.removeSubjectSeconds(
+    subjectId: subjectId,
+    seconds: seconds,
+  );
+
   Future<Either<AppError, List<ActivityEntryEntity>>> getActivityEntries({
     int retentionDays = 400,
   }) => activityDataSource.getActivityEntries(retentionDays: retentionDays);

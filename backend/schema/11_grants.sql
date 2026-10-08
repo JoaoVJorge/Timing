@@ -59,6 +59,9 @@ revoke all on function public.decline_group_invitation(uuid) from public;
 revoke all on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) from public;
+revoke all on function public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+) from public;
 revoke all on function public.activity_entry_totals(timestamptz) from public;
 revoke all on function public.delete_my_account() from public;
 
@@ -100,6 +103,9 @@ grant execute on function public.decline_group_invitation(uuid)
 grant execute on function public.record_activity_entry(
   uuid, text, text, text, integer, integer, integer, timestamptz
 ) to authenticated;
+grant execute on function public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+) to authenticated;
 grant execute on function public.activity_entry_totals(timestamptz)
   to authenticated;
 grant execute on function public.delete_my_account() to authenticated;
@@ -125,6 +131,7 @@ revoke all on table public.group_members from authenticated;
 revoke all on table public.group_invitations from authenticated;
 revoke all on table public.group_activities from authenticated;
 revoke all on table public.activity_entries from authenticated;
+revoke all on table public.activity_time_removals from authenticated;
 revoke all on table public.user_subjects from authenticated;
 revoke all on table public.daily_goals from authenticated;
 revoke all on table public.schedule_entries from authenticated;

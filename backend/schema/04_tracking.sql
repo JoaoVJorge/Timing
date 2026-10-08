@@ -21,6 +21,15 @@ create table if not exists public.activity_entries (
   occurred_at timestamptz not null default now()
 );
 
+-- One row per "remove time" request, so a request that is sent again after a
+-- lost answer is not applied twice. Only remove_activity_seconds() touches it.
+create table if not exists public.activity_time_removals (
+  id uuid not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, id)
+);
+
 create table if not exists public.user_subjects (
   id text not null,
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -430,6 +439,77 @@ begin
     entry_seconds, entry_pages, entry_completed_tasks, entry_occurred_at
   )
   on conflict (id) do nothing;
+end;
+$$;
+
+-- Takes time back off an activity, newest sessions first: the correction for
+-- a timer that was left running. Entries stay immutable to clients; this is
+-- the only way one gets shorter, and it only ever shortens the caller's own.
+-- Pages and completed tasks logged with a session are kept.
+drop function if exists public.remove_activity_seconds(
+  uuid, text, integer, timestamptz
+);
+create or replace function public.remove_activity_seconds(
+  removal_id uuid,
+  entry_subject_id text,
+  seconds_to_remove integer,
+  removed_at timestamptz
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_user_id uuid := auth.uid();
+  remaining integer := seconds_to_remove;
+  entry record;
+begin
+  if current_user_id is null then
+    raise exception 'authentication required' using errcode = '28000';
+  end if;
+  if removal_id is null or coalesce(entry_subject_id, '') = ''
+     or coalesce(seconds_to_remove, 0) <= 0 then
+    return;
+  end if;
+
+  insert into public.activity_time_removals (id, user_id)
+  values (removal_id, current_user_id)
+  on conflict (user_id, id) do nothing;
+  if not found then
+    return;
+  end if;
+  -- A request is only ever repeated within moments of being made.
+  delete from public.activity_time_removals
+  where user_id = current_user_id
+    and created_at < now() - interval '30 days';
+
+  for entry in
+    select a.id, a.seconds, a.pages, a.completed_tasks
+    from public.activity_entries a
+    where a.user_id = current_user_id
+      and a.subject_id = entry_subject_id
+      and a.seconds > 0
+      and a.occurred_at <= removed_at
+      -- Older entries can no longer be rewritten (validate_activity_entry).
+      and a.occurred_at > now() - interval '399 days'
+    order by a.occurred_at desc, a.id desc
+    for update
+  loop
+    exit when remaining <= 0;
+    if entry.seconds > remaining then
+      update public.activity_entries
+      set seconds = seconds - remaining
+      where id = entry.id;
+      remaining := 0;
+    elsif entry.pages > 0 or entry.completed_tasks > 0 then
+      update public.activity_entries set seconds = 0 where id = entry.id;
+      remaining := remaining - entry.seconds;
+    else
+      delete from public.activity_entries where id = entry.id;
+      remaining := remaining - entry.seconds;
+    end if;
+  end loop;
 end;
 $$;
 

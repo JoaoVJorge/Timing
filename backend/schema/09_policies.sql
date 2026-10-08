@@ -16,6 +16,8 @@ alter table public.group_members enable row level security;
 alter table public.group_invitations enable row level security;
 alter table public.group_activities enable row level security;
 alter table public.activity_entries enable row level security;
+-- No policies: remove_activity_seconds() is its only reader and writer.
+alter table public.activity_time_removals enable row level security;
 alter table public.user_subjects enable row level security;
 alter table public.daily_goals enable row level security;
 alter table public.schedule_entries enable row level security;

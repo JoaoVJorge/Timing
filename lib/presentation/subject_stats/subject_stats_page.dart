@@ -51,12 +51,111 @@ class SubjectStatsPage extends GetView<SubjectStatsController> {
             const Gap(AppSpacing.betweenRelated),
             SubjectComparativesSection(accent: accent),
             const Gap(AppSpacing.betweenSections),
+            AppSectionHeader(title: context.l10n.adjustTimeSectionTitle),
+            const Gap(AppSpacing.betweenRelated),
+            _AdjustTimeButtons(controller: controller, accent: accent),
+            const Gap(AppSpacing.betweenSections),
             _ClearDataButton(controller: controller),
           ],
         ),
       ),
     );
   }
+}
+
+/// Adds time done without the timer, or takes back time it counted by mistake.
+class _AdjustTimeButtons extends StatelessWidget {
+  const _AdjustTimeButtons({required this.controller, required this.accent});
+
+  final SubjectStatsController controller;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final bool isBusy = controller.isAdjustingTime.value;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _AdjustTimeButton(
+            key: const ValueKey<String>("add-subject-time"),
+            icon: Icons.add_rounded,
+            label: context.l10n.addTimeButtonLabel,
+            color: accent,
+            isEnabled: !isBusy,
+            onTap: controller.onAddTime,
+          ),
+        ),
+        const Gap(AppSpacing.betweenRelated),
+        Expanded(
+          child: _AdjustTimeButton(
+            key: const ValueKey<String>("remove-subject-time"),
+            icon: Icons.remove_rounded,
+            label: context.l10n.removeTimeButtonLabel,
+            color: accent,
+            isEnabled: !isBusy && controller.canRemoveTime,
+            onTap: controller.onRemoveTime,
+          ),
+        ),
+      ],
+    );
+  });
+}
+
+class _AdjustTimeButton extends StatelessWidget {
+  const _AdjustTimeButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.isEnabled,
+    required this.onTap,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool isEnabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => AbsorbPointer(
+    absorbing: !isEnabled,
+    child: Opacity(
+      opacity: isEnabled ? 1 : 0.45,
+      child: BounceTap(
+        onTap: onTap,
+        child: Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: color.withValues(alpha: 0.45)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 22),
+              const Gap(6),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// The last thing on the page: deletes the user's own data on this activity,

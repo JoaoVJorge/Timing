@@ -1,12 +1,20 @@
+import "dart:async";
+
+import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
+import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/domain/use_cases/add_subject_time_use_case.dart";
 import "package:timing/core/domain/use_cases/clear_subject_data_use_case.dart";
+import "package:timing/core/domain/use_cases/remove_subject_time_use_case.dart";
+import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/presentation/subject_stats/widgets/time_adjustment_dialog.dart";
 import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 
 typedef SubjectComparatives = ({
@@ -20,24 +28,37 @@ class SubjectStatsController extends GetxController {
     required SubjectEntity subject,
     required SubjectDailyHistoryService subjectDailyHistoryService,
     required this._clearSubjectDataUseCase,
+    required this._addSubjectTimeUseCase,
+    required this._removeSubjectTimeUseCase,
+    required this._achievementUnlockService,
     required this._activityChangeBus,
     required this._appNavigator,
     this._confirmClearData = showClearDataConfirmationDialog,
+    this._pickTimeAmount = showTimeAdjustmentDialog,
   }) : _subject = subject.obs,
        _history = subjectDailyHistoryService;
 
   final Rx<SubjectEntity> _subject;
   final SubjectDailyHistoryService _history;
   final ClearSubjectDataUseCase _clearSubjectDataUseCase;
+  final AddSubjectTimeUseCase _addSubjectTimeUseCase;
+  final RemoveSubjectTimeUseCase _removeSubjectTimeUseCase;
+  final AchievementUnlockService _achievementUnlockService;
   final ActivityChangeBus _activityChangeBus;
   final AppNavigator _appNavigator;
   final ClearDataConfirmationCallback _confirmClearData;
+  final TimeAmountPicker _pickTimeAmount;
 
   /// The activity being shown. Observable, so the screen redraws from zero
   /// when its data is deleted.
   SubjectEntity get subject => _subject.value;
 
   final RxBool isClearingData = false.obs;
+
+  final RxBool isAdjustingTime = false.obs;
+
+  /// There is nothing to take back off an activity with no time on it.
+  bool get canRemoveTime => subject.totalSeconds > 0;
 
   final RxBool isMonth = false.obs;
 
@@ -140,6 +161,65 @@ class SubjectStatsController extends GetxController {
       });
     } finally {
       isClearingData.value = false;
+    }
+  }
+
+  /// Adds time done without the timer, after asking how much.
+  Future<void> onAddTime() => _adjustTime(isRemoving: false);
+
+  /// Takes back time the timer counted by mistake, after asking how much.
+  Future<void> onRemoveTime() => _adjustTime(isRemoving: true);
+
+  Future<void> _adjustTime({required bool isRemoving}) async {
+    if (isAdjustingTime.value || isClearingData.value) {
+      return;
+    }
+    if (isRemoving && !canRemoveTime) {
+      return;
+    }
+    final SubjectEntity current = subject;
+    final int? seconds = await _pickTimeAmount(
+      isRemoving: isRemoving,
+      maxSeconds: isRemoving
+          ? current.totalSeconds
+          : AddSubjectTimeUseCase.maxSeconds,
+    );
+    if (seconds == null || seconds <= 0 || isClosed) {
+      return;
+    }
+
+    isAdjustingTime.value = true;
+    try {
+      final Either<AppError, SubjectEntity> result = isRemoving
+          ? await _removeSubjectTimeUseCase(
+              subjectId: current.id,
+              seconds: seconds,
+            )
+          : await _addSubjectTimeUseCase(
+              subjectId: current.id,
+              seconds: seconds,
+            );
+      result.fold((error) => _appNavigator.showErrorSnackBar(error.message), (
+        updated,
+      ) {
+        _subject.value = updated;
+        if (updated.isFromGroup) {
+          _activityChangeBus.notifyGroupActivityChanged(
+            groupId: updated.groupId,
+          );
+        }
+        if (!isRemoving) {
+          unawaited(_achievementUnlockService.checkForNewUnlocks());
+        }
+        final String? message = isRemoving
+            ? Get.context?.l10n.timeRemovedMessage
+            : Get.context?.l10n.timeAddedMessage;
+        if (message != null) {
+          _appNavigator.showSuccessSnackBar(message);
+        }
+      });
+    } finally {
+      isAdjustingTime.value = false;
     }
   }
 

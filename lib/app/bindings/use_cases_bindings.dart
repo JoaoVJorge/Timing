@@ -3,6 +3,7 @@ import "package:timing/core/services/achievements/achievement_unlock_service.dar
 import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
+import "package:timing/core/domain/use_cases/add_subject_time_use_case.dart";
 import "package:timing/core/domain/use_cases/add_subject_use_case.dart";
 import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/clear_subject_data_use_case.dart";
@@ -33,6 +34,7 @@ import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart"
 import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
+import "package:timing/core/domain/use_cases/remove_subject_time_use_case.dart";
 import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
 import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
@@ -124,6 +126,27 @@ class UseCasesBindings extends Bindings {
         subjectDailyHistoryService: Get.find(),
         dailyProgressService: Get.find(),
         lastActivityService: Get.find(),
+      ),
+      permanent: true,
+    );
+    Get.put<AddSubjectTimeUseCase>(
+      AddSubjectTimeUseCase(
+        subjectsRepository: Get.find(),
+        activityRepository: Get.find(),
+        activityHistoryService: Get.find(),
+        subjectDailyHistoryService: Get.find(),
+        dailyProgressService: Get.find(),
+        activityChangeBus: Get.find(),
+      ),
+      permanent: true,
+    );
+    Get.put<RemoveSubjectTimeUseCase>(
+      RemoveSubjectTimeUseCase(
+        subjectsRepository: Get.find(),
+        activityRepository: Get.find(),
+        activityHistoryService: Get.find(),
+        subjectDailyHistoryService: Get.find(),
+        dailyProgressService: Get.find(),
       ),
       permanent: true,
     );

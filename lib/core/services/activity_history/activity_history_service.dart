@@ -156,6 +156,43 @@ class ActivityHistoryService {
   static String _dayAndSubject(ActivityEntryEntity entry) =>
       "${entry.timestamp.dateOnly.toIso8601String()}|${entry.subjectId}";
 
+  /// Takes [seconds] back off what was recorded for [subjectId], newest
+  /// entries first. An entry left with nothing is dropped; pages and tasks
+  /// recorded with one are kept.
+  Future<void> removeSeconds(String subjectId, int seconds) async {
+    int remaining = seconds;
+    for (int index = _entries.length - 1; index >= 0; index--) {
+      if (remaining <= 0) {
+        break;
+      }
+      final ActivityEntryEntity entry = _entries[index];
+      if (entry.subjectId != subjectId || entry.seconds <= 0) {
+        continue;
+      }
+      final int taken = math.min(entry.seconds, remaining);
+      remaining -= taken;
+      if (taken == entry.seconds &&
+          entry.pages <= 0 &&
+          entry.completedTasks <= 0) {
+        _entries.removeAt(index);
+      } else {
+        _entries[index] = ActivityEntryEntity(
+          id: entry.id,
+          category: entry.category,
+          subjectId: entry.subjectId,
+          subjectName: entry.subjectName,
+          timestamp: entry.timestamp,
+          seconds: entry.seconds - taken,
+          pages: entry.pages,
+          completedTasks: entry.completedTasks,
+        );
+      }
+    }
+    if (remaining != seconds) {
+      await _persist();
+    }
+  }
+
   /// Forgets everything recorded for [subjectId]: the activity's "delete data".
   Future<void> removeSubject(String subjectId) async {
     final int before = _entries.length;

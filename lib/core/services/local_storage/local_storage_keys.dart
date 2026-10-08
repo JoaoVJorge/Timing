@@ -58,6 +58,11 @@ enum LocalStorageKeys {
     isUserScoped: true,
     encryptAtRest: true,
   ),
+  pendingActivityRemovals(
+    hasSensitiveData: false,
+    isUserScoped: true,
+    encryptAtRest: true,
+  ),
   pendingSubjectDeletions(
     hasSensitiveData: false,
     isUserScoped: true,

@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node group_activity_links_test.mjs",
-    "test:calendar": "node google_calendar_test.mjs"
+    "test:calendar": "node google_calendar_test.mjs",
+    "test:time": "node activity_time_removal_test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8"
