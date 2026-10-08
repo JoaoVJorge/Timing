@@ -22,7 +22,7 @@ class _GroupDetailsHeader extends StatelessWidget {
       children: [
         _DetailBackButton(onTap: onBack),
         const Gap(8),
-        _GroupIcon(theme: group.theme, size: 56, iconSize: 27),
+        _GroupIcon(group: group, size: 56, iconSize: 27),
         const Gap(12),
         Expanded(
           child: Column(

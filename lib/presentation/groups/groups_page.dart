@@ -253,7 +253,6 @@ class _GroupSectionTitle extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.textStyles.sectionTitle.copyWith(
-            color: context.colorTokens.textBody,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -278,12 +277,12 @@ class _GroupCard extends StatelessWidget {
       onTap: onTap,
       pressedScale: 0.98,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: AppSpacing.tile,
         decoration: AppSurfaces.content(context.colorTokens),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _GroupIcon(theme: group.theme, size: 72, iconSize: 34),
+            _GroupIcon(group: group, size: 72, iconSize: 34),
             const Gap(14),
             Expanded(
               child: Column(
@@ -293,7 +292,10 @@ class _GroupCard extends StatelessWidget {
                     localizedGroupName(context, group),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.black20.copyWith(fontSize: 22),
+                    style: context.textStyles.black20.copyWith(
+                      fontSize: 22,
+                      color: _groupColorTokens(context, group).primary,
+                    ),
                   ),
                   if (description.isNotEmpty) ...[
                     const Gap(4),
@@ -383,7 +385,6 @@ class _FriendsCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodySmall.copyWith(
-                      color: context.colorTokens.textBody,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -431,7 +432,7 @@ class _PendingCountBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     key: const ValueKey<String>("friends-card-badge"),
     constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-    padding: const EdgeInsets.symmetric(horizontal: 7),
+    padding: const EdgeInsets.symmetric(horizontal: 8),
     alignment: Alignment.center,
     decoration: BoxDecoration(
       color: context.colorTokens.error,
@@ -589,30 +590,46 @@ class _OverlappingMembers extends StatelessWidget {
 
 class _GroupIcon extends StatelessWidget {
   const _GroupIcon({
-    required this.theme,
+    required this.group,
     required this.size,
     required this.iconSize,
   });
 
-  final GroupThemeType theme;
+  final GroupEntity group;
   final double size;
   final double iconSize;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      gradient: context.colorTokens.primaryGradient,
-      shape: BoxShape.circle,
-    ),
-    child: Center(
-      child: AppIcon(
-        theme.iconName,
-        size: iconSize,
-        color: context.colorTokens.primaryForeground,
+  Widget build(BuildContext context) {
+    final AppColorTokens tokens = _groupColorTokens(context, group);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: tokens.primaryGradient,
+        shape: BoxShape.circle,
       ),
-    ),
+      child: Center(
+        child: AppIcon(
+          group.theme.iconName,
+          size: iconSize,
+          color: tokens.primaryForeground,
+        ),
+      ),
+    );
+  }
+}
+
+/// Color tokens seeded from the group's activity color, so a group keeps its
+/// own look instead of inheriting the viewer's accent.
+AppColorTokens _groupColorTokens(BuildContext context, GroupEntity group) {
+  final int? colorValue = group.colorValue;
+  if (colorValue == null) {
+    return context.colorTokens;
+  }
+  return AppColorTokens.fromSeed(
+    seed: Color(colorValue),
+    isDark: Theme.of(context).brightness == Brightness.dark,
   );
 }
 

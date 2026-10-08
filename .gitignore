@@ -46,6 +46,7 @@ migrate_working_dir/
 !/test/core/data/
 !/test/core/data/data_sources/
 !/test/core/data/data_sources/profile_sync_requests_test.dart
+!/test/core/data/data_sources/groups_colors_test.dart
 
 # Local AI assistant settings
 .claude/settings.local.json

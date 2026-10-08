@@ -16,6 +16,7 @@ class GroupEntity extends Equatable {
     this.inviteCode = "",
     this.privacy = "inviteOnly",
     this.createdActivityId,
+    this.colorValue,
   });
 
   factory GroupEntity.fromJson(String source) =>
@@ -34,6 +35,7 @@ class GroupEntity extends Equatable {
     inviteCode: map["inviteCode"] as String? ?? "",
     privacy: map["privacy"] as String? ?? "inviteOnly",
     createdActivityId: map["createdActivityId"] as String?,
+    colorValue: (map["colorValue"] as num?)?.toInt(),
   );
 
   final String id;
@@ -46,6 +48,7 @@ class GroupEntity extends Equatable {
   final String inviteCode;
   final String privacy;
   final String? createdActivityId;
+  final int? colorValue;
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -58,6 +61,7 @@ class GroupEntity extends Equatable {
     "inviteCode": inviteCode,
     "privacy": privacy,
     "createdActivityId": createdActivityId,
+    "colorValue": colorValue,
   };
 
   GroupEntity copyWithMembers(List<GroupMemberEntity> members) => GroupEntity(
@@ -71,6 +75,7 @@ class GroupEntity extends Equatable {
     inviteCode: inviteCode,
     privacy: privacy,
     createdActivityId: createdActivityId,
+    colorValue: colorValue,
   );
 
   String toJson() => jsonEncode(toMap());
@@ -87,5 +92,6 @@ class GroupEntity extends Equatable {
     inviteCode,
     privacy,
     createdActivityId,
+    colorValue,
   ];
 }

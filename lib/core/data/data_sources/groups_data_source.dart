@@ -195,6 +195,25 @@ class GroupsDataSource {
           "invite_code, privacy",
       filters: (query) => query.inFilter("id", groupIds),
     );
+    // Fetch appearance for every group before caching the list, including groups
+    // the user has never opened. Keep the first saved activity color per group.
+    final List<Map<String, dynamic>> activityRows = await _selectRows(
+      table: "group_activities",
+      columns: "group_id, payload",
+      filters: (query) => query
+          .inFilter("group_id", groupIds)
+          .order("created_at", ascending: true),
+    );
+    final Map<String, int> colorsByGroup = {};
+    for (final row in activityRows) {
+      final dynamic color = (row["payload"] as Map?)?["color_value"];
+      if (color is num) {
+        colorsByGroup.putIfAbsent(
+          row["group_id"] as String,
+          () => color.toInt(),
+        );
+      }
+    }
     final List<Map<String, dynamic>> memberRows = await _selectRows(
       table: "group_members",
       columns: "group_id, user_id, role, joined_at",
@@ -238,6 +257,7 @@ class GroupsDataSource {
 
       return GroupEntity(
         id: groupId,
+        colorValue: colorsByGroup[groupId],
         name: row["name"] as String? ?? "",
         theme: theme,
         members: members,
@@ -1117,6 +1137,7 @@ class GroupsDataSource {
           inviteCode: groupRow["invite_code"] as String? ?? "",
           privacy: groupRow["privacy"] as String? ?? "inviteOnly",
           createdActivityId: groupRow["activity_id"] as String?,
+          colorValue: activity?.colorValue,
         ),
       );
     } catch (error, stackTrace) {
@@ -1184,6 +1205,9 @@ class GroupsDataSource {
         inviteCode: group.inviteCode,
         privacy: group.privacy,
         createdActivityId: group.createdActivityId,
+        colorValue:
+            (activityPayload["color_value"] as num?)?.toInt() ??
+            group.colorValue,
       );
       await _updateCachedGroup(optimistic);
       await _enqueueGroupAction({
@@ -1230,6 +1254,9 @@ class GroupsDataSource {
       name: row["name"] as String? ?? name,
       theme: GroupThemeType.byName(row["theme"] as String?),
       members: fallbackGroup.members,
+      colorValue:
+          (activityPayload["color_value"] as num?)?.toInt() ??
+          fallbackGroup.colorValue,
       description: row["description"] as String? ?? description,
       ownerId: row["owner_id"] as String? ?? fallbackGroup.ownerId,
       createdAt:

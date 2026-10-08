@@ -103,7 +103,7 @@ class _ManageGroupSummaryCard extends StatelessWidget {
     decoration: AppSurfaces.content(context.colorTokens),
     child: Row(
       children: [
-        _GroupIcon(theme: group.theme, size: 54, iconSize: 26),
+        _GroupIcon(group: group, size: 54, iconSize: 26),
         const Gap(12),
         Expanded(
           child: Column(
@@ -113,7 +113,7 @@ class _ManageGroupSummaryCard extends StatelessWidget {
                 localizedGroupName(context, group),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textStyles.black20.copyWith(fontSize: 20),
+                style: context.textStyles.black20,
               ),
               const Gap(3),
               Text(
@@ -166,7 +166,7 @@ class _MemberRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(minHeight: 64),
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
       borderRadius: BorderRadius.vertical(
