@@ -50,6 +50,7 @@ class DailyGoalsController extends GetxController {
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
   final Set<String> _togglingTaskIds = <String>{};
+  bool _isAskingAboutMissedYesterday = false;
 
   List<DailyTaskEntity> get pendingTasks =>
       tasks.where((task) => !task.isDoneForCurrentCycle).toList();
@@ -196,6 +197,12 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> _askAboutMissedYesterday() async {
+    // A reload behind the open question would stack a second one for the same
+    // goals, and answering it again would toggle yesterday back off.
+    if (_isAskingAboutMissedYesterday) {
+      return;
+    }
+
     final BuildContext? context = Get.context;
     if (context == null) {
       return;
@@ -212,40 +219,49 @@ class DailyGoalsController extends GetxController {
     final DateTime yesterday = now.subtract(const Duration(days: 1));
     final String missedDate = DailyTaskEntity.dateKey(yesterday);
 
-    final Set<String>? completedTaskIds = missedTasks.length == 1
-        ? await _askAboutSingleMissedTask(missedTasks.first)
-        : await _askAboutMultipleMissedTasks(missedTasks);
-    if (completedTaskIds == null) {
-      return;
-    }
+    _isAskingAboutMissedYesterday = true;
+    try {
+      final Set<String>? completedTaskIds = missedTasks.length == 1
+          ? await _askAboutSingleMissedTask(missedTasks.first)
+          : await _askAboutMultipleMissedTasks(missedTasks);
+      if (completedTaskIds == null) {
+        return;
+      }
 
-    bool didUnlockCheck = false;
-    for (final DailyTaskEntity missedTask in missedTasks) {
-      final bool didComplete = completedTaskIds.contains(missedTask.id);
-      final Either<AppError, DailyTaskEntity> result =
-          await _toggleDailyTaskCheckUseCase(
-            taskId: missedTask.id,
-            date: didComplete ? yesterday : null,
-            resolvedMissedDate: missedDate,
-            toggleDate: didComplete,
+      bool didUnlockCheck = false;
+      for (final DailyTaskEntity missedTask in missedTasks) {
+        final bool didComplete = completedTaskIds.contains(missedTask.id);
+        final Either<AppError, DailyTaskEntity> result =
+            await _toggleDailyTaskCheckUseCase(
+              taskId: missedTask.id,
+              date: didComplete ? yesterday : null,
+              resolvedMissedDate: missedDate,
+              toggleDate: didComplete,
+            );
+
+        result.fold((error) => _appNavigator.showErrorSnackBar(), (
+          updatedTask,
+        ) {
+          final int index = tasks.indexWhere(
+            (item) => item.id == updatedTask.id,
           );
+          if (index != -1) {
+            tasks[index] = updatedTask;
+          }
+          if (updatedTask.isFromGroup) {
+            _activityChangeBus.notifyGroupActivityChanged(
+              groupId: updatedTask.groupId,
+            );
+          }
+          didUnlockCheck = true;
+        });
+      }
 
-      result.fold((error) => _appNavigator.showErrorSnackBar(), (updatedTask) {
-        final int index = tasks.indexWhere((item) => item.id == updatedTask.id);
-        if (index != -1) {
-          tasks[index] = updatedTask;
-        }
-        if (updatedTask.isFromGroup) {
-          _activityChangeBus.notifyGroupActivityChanged(
-            groupId: updatedTask.groupId,
-          );
-        }
-        didUnlockCheck = true;
-      });
-    }
-
-    if (didUnlockCheck) {
-      unawaited(_achievementUnlockService.checkForNewUnlocks());
+      if (didUnlockCheck) {
+        unawaited(_achievementUnlockService.checkForNewUnlocks());
+      }
+    } finally {
+      _isAskingAboutMissedYesterday = false;
     }
   }
 
