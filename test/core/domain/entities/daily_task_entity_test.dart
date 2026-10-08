@@ -86,4 +86,88 @@ void main() {
       expect(task.isCompleted, false);
     });
   });
+
+  group("DailyTaskEntity reminder", () {
+    DailyTaskEntity goal({int? reminder, List<String> done = const []}) =>
+        DailyTaskEntity(
+          id: "1",
+          name: "Beber água",
+          colorValue: 1,
+          targetDays: 0,
+          completedDates: done,
+          reminderMinutes: reminder,
+        );
+
+    final DateTime morning = DateTime(2026, 10, 7, 9);
+    final String today = DailyTaskEntity.dateKey(morning);
+
+    test("a goal without a reminder time is never due", () {
+      expect(goal().nextReminderAt(morning), isNull);
+    });
+
+    test("is due today while unchecked and the time is still ahead", () {
+      expect(
+        goal(reminder: 12 * 60).nextReminderAt(morning),
+        DateTime(2026, 10, 7, 12),
+      );
+    });
+
+    test("moves to tomorrow once the goal is checked today", () {
+      expect(
+        goal(reminder: 12 * 60, done: [today]).nextReminderAt(morning),
+        DateTime(2026, 10, 8, 12),
+      );
+    });
+
+    test("moves to tomorrow once today's time has passed", () {
+      expect(
+        goal(reminder: 12 * 60).nextReminderAt(DateTime(2026, 10, 7, 12)),
+        DateTime(2026, 10, 8, 12),
+      );
+    });
+
+    test("a check from another day does not skip today", () {
+      expect(
+        goal(reminder: 12 * 60, done: ["2026-10-06"]).nextReminderAt(morning),
+        DateTime(2026, 10, 7, 12),
+      );
+    });
+
+    test("rolls over the end of a month", () {
+      expect(
+        goal(reminder: 8 * 60 + 30).nextReminderAt(DateTime(2026, 10, 31, 20)),
+        DateTime(2026, 11, 1, 8, 30),
+      );
+    });
+
+    test("survives a map round-trip and can be cleared", () {
+      final DailyTaskEntity withReminder = goal(reminder: 7 * 60 + 15);
+
+      expect(
+        DailyTaskEntity.fromMap(withReminder.toMap()).reminderMinutes,
+        7 * 60 + 15,
+      );
+      expect(withReminder.copyWith(name: "Outra").reminderMinutes, 7 * 60 + 15);
+      expect(withReminder.copyWith(clearReminder: true).reminderMinutes, null);
+    });
+
+    test("ignores a stored time outside the day", () {
+      final Map<String, dynamic> map = goal().toMap();
+
+      expect(
+        DailyTaskEntity.fromMap({
+          ...map,
+          "reminderMinutes": 1440,
+        }).reminderMinutes,
+        isNull,
+      );
+      expect(
+        DailyTaskEntity.fromMap({
+          ...map,
+          "reminderMinutes": -1,
+        }).reminderMinutes,
+        isNull,
+      );
+    });
+  });
 }

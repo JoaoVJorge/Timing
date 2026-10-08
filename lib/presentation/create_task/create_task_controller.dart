@@ -16,16 +16,23 @@ class CreateTaskController extends GetxController {
     required this._updateDailyTaskUseCase,
     required this._appNavigator,
     required this._achievementUnlockService,
+    this._ensureNotificationsEnabled,
     this.editingTask,
     this.initialName,
   });
 
   static const List<int> targetDaysOptions = [5, 14, 30];
+  static const int defaultReminderMinutes = 12 * 60;
 
   final AddDailyTaskUseCase _addDailyTaskUseCase;
   final UpdateDailyTaskUseCase _updateDailyTaskUseCase;
   final AppNavigator _appNavigator;
   final AchievementUnlockService _achievementUnlockService;
+
+  /// Asks for the notifications permission when it is missing and tells
+  /// whether reminders can be shown. Null where the app has no notifications
+  /// at all, which leaves the reminder out of the form.
+  final Future<bool> Function()? _ensureNotificationsEnabled;
   final DailyTaskEntity? editingTask;
   final String? initialName;
 
@@ -38,10 +45,15 @@ class CreateTaskController extends GetxController {
   final RxInt targetDays = targetDaysOptions.first.obs;
   final Rx<DailyTaskSequenceType> sequenceType =
       DailyTaskSequenceType.casual.obs;
+  final RxBool reminderEnabled = false.obs;
+  final RxInt reminderMinutes = defaultReminderMinutes.obs;
   final RxBool isSaving = false.obs;
   bool _hasInitializedThemeColor = false;
+  bool _isEnablingReminder = false;
 
   bool get isEditing => editingTask != null;
+
+  bool get supportsReminders => _ensureNotificationsEnabled != null;
 
   @override
   void onInit() {
@@ -59,6 +71,8 @@ class CreateTaskController extends GetxController {
     selectedColor.value = Color(task.colorValue);
     targetDays.value = task.targetDays;
     sequenceType.value = task.sequenceType;
+    reminderEnabled.value = task.reminderMinutes != null;
+    reminderMinutes.value = task.reminderMinutes ?? defaultReminderMinutes;
     customDaysController.text = task.targetDays > 0
         ? task.targetDays.toString()
         : "";
@@ -88,6 +102,43 @@ class CreateTaskController extends GetxController {
     }
   }
 
+  Future<void> onToggleReminder(bool value) async {
+    if (!value) {
+      reminderEnabled.value = false;
+      return;
+    }
+    final Future<bool> Function()? ensureNotificationsEnabled =
+        _ensureNotificationsEnabled;
+    if (ensureNotificationsEnabled == null || _isEnablingReminder) {
+      return;
+    }
+
+    _isEnablingReminder = true;
+    try {
+      // A reminder that could never be shown must not look turned on.
+      final bool allowed = await ensureNotificationsEnabled();
+      if (isClosed) {
+        return;
+      }
+      reminderEnabled.value = allowed;
+      if (!allowed) {
+        _appNavigator.showErrorSnackBar(
+          Get.context?.l10n.goalReminderPermissionDenied,
+        );
+      }
+    } finally {
+      _isEnablingReminder = false;
+    }
+  }
+
+  /// Choosing a time is also a way of asking for the reminder.
+  Future<void> onPickReminderTime(int minutes) async {
+    reminderMinutes.value = minutes;
+    if (!reminderEnabled.value) {
+      await onToggleReminder(true);
+    }
+  }
+
   Future<void> onSubmit() async {
     if (isSaving.value) {
       return;
@@ -105,12 +156,14 @@ class CreateTaskController extends GetxController {
 
     isSaving.value = true;
     final DailyTaskEntity? task = editingTask;
+    final int? reminder = reminderEnabled.value ? reminderMinutes.value : null;
     final Either<AppError, DailyTaskEntity> result = task == null
         ? await _addDailyTaskUseCase(
             name: name,
             colorValue: selectedColor.value.toARGB32(),
             targetDays: normalizedTargetDays,
             sequenceType: sequenceType.value,
+            reminderMinutes: reminder,
           )
         : await _updateDailyTaskUseCase(
             task: task,
@@ -118,6 +171,7 @@ class CreateTaskController extends GetxController {
             colorValue: selectedColor.value.toARGB32(),
             targetDays: normalizedTargetDays,
             sequenceType: sequenceType.value,
+            reminderMinutes: reminder,
           );
     isSaving.value = false;
 

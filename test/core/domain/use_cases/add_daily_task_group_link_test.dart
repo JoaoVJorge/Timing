@@ -17,6 +17,10 @@ class _FakeDailyTasksRepository implements DailyTasksRepository {
       mutation();
 
   @override
+  Stream<List<DailyTaskEntity>> get onLocalTasksChanged =>
+      const Stream<List<DailyTaskEntity>>.empty();
+
+  @override
   Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async =>
       Right(_tasks);
 

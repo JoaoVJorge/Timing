@@ -133,6 +133,11 @@ alter table public.daily_goals
     check (sequence_type in ('intense', 'casual'));
 alter table public.daily_goals
   add column if not exists last_resolved_missed_date text;
+-- Minute of the day (device local time) the goal's daily reminder is shown;
+-- null when the goal has no reminder.
+alter table public.daily_goals
+  add column if not exists reminder_minutes integer
+    check (reminder_minutes between 0 and 1439);
 
 -- -----------------------------------------------------------------------------
 -- Constraints

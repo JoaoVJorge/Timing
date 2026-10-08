@@ -1,5 +1,7 @@
 import "package:get/get.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
+import "package:timing/core/services/notifications/goal_reminder_notifications.dart";
+import "package:timing/core/services/notifications/goal_reminder_service.dart";
 import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
@@ -249,6 +251,14 @@ class UseCasesBindings extends Bindings {
         dailyProgressService: Get.find(),
         localStorageService: Get.find(),
       ),
+      permanent: true,
+    );
+    Get.put<GoalReminderService>(
+      GoalReminderService(
+        dailyTasksRepository: Get.find(),
+        notifications: LocalGoalReminderNotifications(),
+        logger: Get.find(),
+      )..start(),
       permanent: true,
     );
     Get.put<AddScheduleEntryUseCase>(

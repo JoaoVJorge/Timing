@@ -42,6 +42,7 @@ class DailyTaskEntity extends Equatable {
     this.updatedAt,
     this.groupId,
     this.groupActivityId,
+    this.reminderMinutes,
   });
 
   factory DailyTaskEntity.fromMap(Map<String, dynamic> map) => DailyTaskEntity(
@@ -63,6 +64,7 @@ class DailyTaskEntity extends Equatable {
     groupActivityId: (map["groupActivityId"] as String?)?.isEmpty ?? true
         ? null
         : map["groupActivityId"] as String?,
+    reminderMinutes: _parseReminderMinutes(map["reminderMinutes"]),
   );
 
   static DateTime? _parseUpdatedAt(dynamic value) {
@@ -70,6 +72,16 @@ class DailyTaskEntity extends Equatable {
       return DateTime.tryParse(value)?.toUtc();
     }
     return null;
+  }
+
+  static const int minutesPerDay = 24 * 60;
+
+  static int? _parseReminderMinutes(dynamic value) {
+    if (value is! num) {
+      return null;
+    }
+    final int minutes = value.toInt();
+    return minutes < 0 || minutes >= minutesPerDay ? null : minutes;
   }
 
   final String id;
@@ -87,6 +99,10 @@ class DailyTaskEntity extends Equatable {
   final String? groupActivityId;
 
   bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
+
+  /// Minute of the day (local time) a reminder is shown while the goal is
+  /// still unchecked that day. Null when the goal has no reminder.
+  final int? reminderMinutes;
 
   /// When this task was last mutated. Drives last-write-wins reconciliation
   /// between the local copy and a possibly-stale remote copy, so a change that
@@ -139,6 +155,32 @@ class DailyTaskEntity extends Equatable {
         lastResolvedMissedDate != yesterday;
   }
 
+  /// The next moment the reminder is due: today at [reminderMinutes] while the
+  /// goal is unchecked and that time is still ahead, otherwise tomorrow.
+  /// Checking the goal is what moves its reminder off today.
+  DateTime? nextReminderAt(DateTime now) {
+    final int? minutes = reminderMinutes;
+    if (minutes == null) {
+      return null;
+    }
+    final bool isDueToday =
+        !completedDates.contains(dateKey(now)) &&
+        DateTime(
+          now.year,
+          now.month,
+          now.day,
+          minutes ~/ 60,
+          minutes % 60,
+        ).isAfter(now);
+    return DateTime(
+      now.year,
+      now.month,
+      isDueToday ? now.day : now.day + 1,
+      minutes ~/ 60,
+      minutes % 60,
+    );
+  }
+
   Map<String, dynamic> toMap() => {
     "id": id,
     "name": name,
@@ -151,6 +193,7 @@ class DailyTaskEntity extends Equatable {
     "updatedAt": updatedAt?.toUtc().toIso8601String(),
     "groupId": groupId,
     "groupActivityId": groupActivityId,
+    "reminderMinutes": reminderMinutes,
   };
 
   DailyTaskEntity copyWith({
@@ -165,6 +208,8 @@ class DailyTaskEntity extends Equatable {
     bool clearGroupLink = false,
     String? groupId,
     String? groupActivityId,
+    bool clearReminder = false,
+    int? reminderMinutes,
   }) => DailyTaskEntity(
     id: id,
     name: name ?? this.name,
@@ -180,6 +225,9 @@ class DailyTaskEntity extends Equatable {
     groupActivityId: clearGroupLink
         ? null
         : groupActivityId ?? this.groupActivityId,
+    reminderMinutes: clearReminder
+        ? null
+        : reminderMinutes ?? this.reminderMinutes,
   );
 
   int _currentIntenseSequence() {
@@ -218,5 +266,6 @@ class DailyTaskEntity extends Equatable {
     updatedAt,
     groupId,
     groupActivityId,
+    reminderMinutes,
   ];
 }

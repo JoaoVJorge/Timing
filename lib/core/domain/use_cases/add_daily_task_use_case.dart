@@ -18,6 +18,7 @@ class AddDailyTaskUseCase {
     String? groupId,
     String? groupActivityId,
     String? id,
+    int? reminderMinutes,
   }) => _dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await _dailyTasksRepository.getTasksForMutation();
@@ -69,6 +70,7 @@ class AddDailyTaskUseCase {
         updatedAt: DateTime.now().toUtc(),
         groupId: groupId,
         groupActivityId: groupActivityId,
+        reminderMinutes: reminderMinutes,
       );
 
       final Either<AppError, void> saveResult = await _dailyTasksRepository

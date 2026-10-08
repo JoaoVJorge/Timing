@@ -54,6 +54,15 @@ class DailyTasksDataSource {
   /// anyway, so a short window only delays them slightly.
   static const Duration _remoteReadFreshness = Duration(seconds: 45);
 
+  final StreamController<List<DailyTaskEntity>> _localTasksChanges =
+      StreamController<List<DailyTaskEntity>>.broadcast();
+
+  /// The goals as they were just written to this device, whether by a user
+  /// action or by merging in the account's copy. Goal reminders follow it so
+  /// they are rescheduled from wherever the goals change.
+  Stream<List<DailyTaskEntity>> get onLocalTasksChanged =>
+      _localTasksChanges.stream;
+
   bool get hasHydratedCurrentUserFromRemote {
     final String? userId = _supabaseService.currentUserId;
     return userId == null || _hydratedRemoteUserId == userId;
@@ -162,6 +171,7 @@ class DailyTasksDataSource {
         tasks.map((task) => task.toMap()).toList(),
       );
       await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
+      _localTasksChanges.add(List.unmodifiable(tasks));
       if (shouldSync) {
         unawaited(_enqueueRemoteSync(tasks));
       }
@@ -176,6 +186,7 @@ class DailyTasksDataSource {
       tasks.map((task) => task.toMap()).toList(),
     );
     await _localStorageService.write(LocalStorageKeys.dailyTasks, encoded);
+    _localTasksChanges.add(List.unmodifiable(tasks));
   }
 
   List<DailyTaskEntity> _decodeTasks(String encoded) {
@@ -414,6 +425,7 @@ class DailyTasksDataSource {
         "updatedAt": row["updated_at"],
         "groupId": row["group_id"],
         "groupActivityId": row["group_activity_id"],
+        "reminderMinutes": row["reminder_minutes"],
       });
 
   Map<String, dynamic> _taskToRow(DailyTaskEntity task, String userId) => {
@@ -428,6 +440,7 @@ class DailyTasksDataSource {
     "goal_type": task.goalType.name,
     "group_id": task.groupId,
     "group_activity_id": task.groupActivityId,
+    "reminder_minutes": task.reminderMinutes,
     "updated_at": (task.updatedAt ?? DateTime.now().toUtc())
         .toUtc()
         .toIso8601String(),

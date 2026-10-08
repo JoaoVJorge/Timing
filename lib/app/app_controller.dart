@@ -29,6 +29,7 @@ import "package:timing/core/services/daily_progress/subject_daily_history_servic
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/notifications/goal_reminder_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
@@ -54,6 +55,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     required this._appNavigator,
     required this._supabaseService,
     required this._timerNotificationService,
+    required this._goalReminderService,
     required this._activeTimerSessionService,
     required this._syncReconciliationService,
     required this.localStorageService,
@@ -73,6 +75,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final TimerNotificationService _timerNotificationService;
+  final GoalReminderService _goalReminderService;
   final ActiveTimerSessionService _activeTimerSessionService;
   final SyncReconciliationService _syncReconciliationService;
   final AppLocalStorageService localStorageService;
@@ -341,6 +344,18 @@ class AppController extends GetxController with WidgetsBindingObserver {
     // build (see the comment in setLanguageCode), so it must be applied
     // explicitly too, not just left to the `locale:` constructor param.
     Get.updateLocale(_resolvedLocale(config.languageCode));
+    _configureGoalReminders();
+  }
+
+  /// Goal reminders follow the notifications preference and carry text in the
+  /// app language, so both are handed over whenever either may have changed.
+  void _configureGoalReminders() {
+    unawaited(
+      _goalReminderService.configure(
+        enabled: notificationsEnabled.value,
+        locale: selectedLocale,
+      ),
+    );
   }
 
   Future<bool> refreshProfileFromBackend() async {
@@ -420,6 +435,9 @@ class AppController extends GetxController with WidgetsBindingObserver {
     }
 
     await Future.wait(reloads);
+    // The goals on this device now belong to whoever is signed in (or to
+    // nobody), and so must the reminders.
+    unawaited(_goalReminderService.refresh());
     if (_supabaseService.hasSignedInUser) {
       unawaited(_flushPendingAndNotify());
       unawaited(_reconcileActivityHistory());
@@ -527,6 +545,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       await _timerNotificationService.disableNotifications();
       notificationsEnabled.value = false;
       Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
+      _configureGoalReminders();
       await _saveAppConfigUseCase(_currentConfig);
       return;
     }
@@ -535,6 +554,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
         .requestNotificationsEnabled();
     notificationsEnabled.value = allowed;
     Get.find<AchievementUnlockService>().setNotificationsEnabled(allowed);
+    _configureGoalReminders();
     await _saveAppConfigUseCase(_currentConfig);
   }
 
@@ -546,6 +566,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     }
     notificationsEnabled.value = false;
     Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
+    _configureGoalReminders();
     await _saveAppConfigUseCase(_currentConfig);
   }
 
@@ -557,6 +578,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     // ignored. Get.updateLocale is GetX's own API for propagating a runtime
     // locale change and forcing the app to rebuild with it.
     await Get.updateLocale(_resolvedLocale(value));
+    _configureGoalReminders();
     await _saveAppConfigUseCase(_currentConfig);
   }
 
@@ -695,6 +717,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
       // Picks up what the other phone logged while this app was in the
       // background; throttled, so most resumes cost nothing.
       unawaited(_reconcileActivityHistory());
+      // A new day, or a system clock change, moves when reminders are due.
+      unawaited(_goalReminderService.refresh());
       return;
     }
     if (state == AppLifecycleState.paused ||

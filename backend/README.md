@@ -42,6 +42,17 @@ still run individual numbered sections when deploying a focused change.
 Every statement is idempotent (`create or replace`, `if not exists`,
 `drop ... if exists`), so re-running everything is safe.
 
+## Updating existing installations
+
+If goal sync fails with `PGRST204` mentioning `reminder_minutes`, run
+[`migrations/20261008_daily_goal_reminders.sql`](migrations/20261008_daily_goal_reminders.sql)
+in the affected project's Supabase SQL editor. It adds the nullable reminder
+column and requests a PostgREST schema cache reload. It is safe to repeat,
+including when the column exists but the API cache is stale.
+
+These focused scripts are applied manually; nothing deploys them automatically.
+After the update, reopen the app to retry pending goal synchronization.
+
 ## Adding to it
 
 - A new table goes in the section of the feature it belongs to, next to its

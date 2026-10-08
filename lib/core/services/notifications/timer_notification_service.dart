@@ -3,6 +3,7 @@ import "dart:typed_data";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:get/get_utils/get_utils.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/notifications/local_notifications_settings.dart";
 import "package:timezone/data/latest_all.dart" as tz;
 import "package:timezone/timezone.dart" as tz;
 
@@ -36,7 +37,7 @@ class TimerNotificationService {
   static const String _finishChannelDescription =
       "Alerts when a focus section ends";
   static const String _finishSound = "finish_focus_alarm";
-  static const String _notificationIcon = "ic_notification";
+  static const String _notificationIcon = localNotificationIcon;
   static final Int64List _alarmVibrationPattern = Int64List.fromList(<int>[
     0,
     600,
@@ -52,18 +53,24 @@ class TimerNotificationService {
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
+  /// The timer's own alerts only exist on Android; on iOS the session lives
+  /// in a Live Activity instead.
   bool get _isSupported => GetPlatform.isAndroid;
+
+  /// Whether the timer has alerts to ask the notifications permission for.
+  bool get supportsTimerAlerts => _isSupported;
+
+  /// The notifications permission is the app's, not just the timer's: goal
+  /// reminders rely on it on iOS as well.
+  bool get _hasNotifications => GetPlatform.isAndroid || GetPlatform.isIOS;
 
   Future<void> _ensureInitialized() async {
     if (_initialized) {
       return;
     }
 
-    const InitializationSettings settings = InitializationSettings(
-      android: AndroidInitializationSettings(_notificationIcon),
-    );
     tz.initializeTimeZones();
-    await _plugin.initialize(settings: settings);
+    await _plugin.initialize(settings: localNotificationsSettings);
     _initialized = true;
   }
 
@@ -72,13 +79,21 @@ class TimerNotificationService {
         AndroidFlutterLocalNotificationsPlugin
       >();
 
+  IOSFlutterLocalNotificationsPlugin? get _iosPlugin => _plugin
+      .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin
+      >();
+
   Future<bool> areNotificationsEnabled() async {
-    if (!_isSupported) {
+    if (!_hasNotifications) {
       return false;
     }
 
     try {
       await _ensureInitialized();
+      if (GetPlatform.isIOS) {
+        return (await _iosPlugin?.checkPermissions())?.isEnabled ?? false;
+      }
       return await _androidPlugin?.areNotificationsEnabled() ?? false;
     } catch (error, stackTrace) {
       _logFailure("areNotificationsEnabled", error, stackTrace);
@@ -87,12 +102,16 @@ class TimerNotificationService {
   }
 
   Future<bool> requestNotificationsEnabled() async {
-    if (!_isSupported) {
+    if (!_hasNotifications) {
       return false;
     }
 
     try {
       await _ensureInitialized();
+      if (GetPlatform.isIOS) {
+        return await _iosPlugin?.requestPermissions(alert: true, sound: true) ??
+            false;
+      }
       final bool allowed =
           await _androidPlugin?.requestNotificationsPermission() ?? false;
       if (allowed) {
@@ -107,7 +126,7 @@ class TimerNotificationService {
   }
 
   Future<void> disableNotifications() async {
-    if (!_isSupported) {
+    if (!_hasNotifications) {
       return;
     }
 

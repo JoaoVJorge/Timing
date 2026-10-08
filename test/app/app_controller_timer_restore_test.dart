@@ -19,6 +19,7 @@ import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.da
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
+import "package:timing/core/services/notifications/goal_reminder_service.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/sync_reconciliation_service.dart";
@@ -47,6 +48,15 @@ class _FakeTimerNotificationService extends _Noop
     implements TimerNotificationService {
   @override
   Future<bool> areNotificationsEnabled() async => true;
+}
+
+class _FakeGoalReminderService extends _Noop implements GoalReminderService {
+  @override
+  Future<void> configure({required bool enabled, required Locale locale}) =>
+      Future<void>.value();
+
+  @override
+  Future<void> refresh() => Future<void>.value();
 }
 
 class _FakeActiveTimerSessionService extends _Noop
@@ -157,6 +167,7 @@ void main() {
       appNavigator: AppNavigator(),
       supabaseService: _FakeSupabaseService(),
       timerNotificationService: _FakeTimerNotificationService(),
+      goalReminderService: _FakeGoalReminderService(),
       activeTimerSessionService: _FakeActiveTimerSessionService(session),
       syncReconciliationService: _FakeSyncReconciliationService(),
       localStorageService: _FakeLocalStorageService(),

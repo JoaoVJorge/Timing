@@ -32,6 +32,7 @@ class AppBindings extends Bindings {
         appNavigator: Get.find(),
         supabaseService: Get.find(),
         timerNotificationService: Get.find(),
+        goalReminderService: Get.find(),
         activeTimerSessionService: Get.find(),
         syncReconciliationService: Get.find(),
         localStorageService: Get.find(),

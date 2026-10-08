@@ -144,6 +144,9 @@ class _FakeTimerNotificationService extends _Noop
   Duration? reminderInterval;
 
   @override
+  bool get supportsTimerAlerts => true;
+
+  @override
   Future<void> cancelFocusFinished() async {
     cancelFocusFinishedCount++;
   }

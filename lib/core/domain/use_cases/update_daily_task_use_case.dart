@@ -14,6 +14,7 @@ class UpdateDailyTaskUseCase {
     required int colorValue,
     required int targetDays,
     required DailyTaskSequenceType sequenceType,
+    required int? reminderMinutes,
   }) => dailyTasksRepository.runSerializedMutation(() async {
     final Either<AppError, List<DailyTaskEntity>> getResult =
         await dailyTasksRepository.getTasksForMutation();
@@ -37,6 +38,8 @@ class UpdateDailyTaskUseCase {
         goalType: sequenceType == DailyTaskSequenceType.intense
             ? DailyTaskGoalType.daily
             : DailyTaskGoalType.total,
+        reminderMinutes: reminderMinutes,
+        clearReminder: reminderMinutes == null,
         updatedAt: DateTime.now().toUtc(),
       );
       final List<DailyTaskEntity> updatedTasks = [...tasks]

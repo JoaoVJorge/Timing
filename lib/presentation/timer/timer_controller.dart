@@ -753,7 +753,10 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> _ensureTimerNotifications() async {
-    if (!appController.notificationsEnabled.value) {
+    // Where the timer has no alerts of its own, asking here would spend the
+    // system's one permission prompt on nothing.
+    if (timerNotificationService.supportsTimerAlerts &&
+        !appController.notificationsEnabled.value) {
       await appController.setNotificationsEnabled(true);
     }
     if (isSessionFinished.value) {

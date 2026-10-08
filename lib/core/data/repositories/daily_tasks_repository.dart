@@ -29,6 +29,9 @@ class DailyTasksRepository {
   Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() =>
       _dailyTasksDataSource.getLocalTasks();
 
+  Stream<List<DailyTaskEntity>> get onLocalTasksChanged =>
+      _dailyTasksDataSource.onLocalTasksChanged;
+
   /// Must be called from inside [runSerializedMutation].
   Future<Either<AppError, List<DailyTaskEntity>>> getTasksForMutation() =>
       _dailyTasksDataSource.getTasksForMutation();

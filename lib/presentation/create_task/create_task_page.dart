@@ -5,6 +5,7 @@ import "package:get/get.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_task/create_task_controller.dart";
+import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/shared/widgets/creation/creation_page_scaffold.dart";
 
@@ -48,6 +49,10 @@ class CreateTaskPage extends StatelessWidget {
         const Gap(12),
         _TargetDaysSection(controller: controller),
         const Gap(12),
+        if (controller.supportsReminders) ...[
+          _ReminderSection(controller: controller),
+          const Gap(12),
+        ],
         ObservedCreationColorSection(selectedColor: controller.selectedColor),
       ],
     );
@@ -187,6 +192,97 @@ class _TargetDaysSection extends StatelessWidget {
                 onTap: () => controller.onSelectTargetDays(0),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  });
+}
+
+class _ReminderSection extends StatelessWidget {
+  const _ReminderSection({required this.controller});
+
+  final CreateTaskController controller;
+
+  Future<void> _pickTime(BuildContext context) async {
+    final int current = controller.reminderMinutes.value;
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: current ~/ 60, minute: current % 60),
+    );
+    if (picked == null) {
+      return;
+    }
+    await controller.onPickReminderTime(picked.hour * 60 + picked.minute);
+  }
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final Color accent = controller.selectedColor.value;
+    final bool isEnabled = controller.reminderEnabled.value;
+
+    return CreationConfigCard(
+      accent: accent,
+      header: CreationSectionHeader(
+        icon: Icons.notifications_active_outlined,
+        label: context.l10n.goalReminderLabel,
+        accent: accent,
+        description: context.l10n.goalReminderDescription,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _pickTime(context),
+              child: Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: context.colorTokens.scaffold.withValues(alpha: 0.36),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: context.colorTokens.borderUnfocused,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.schedule_rounded,
+                      color: isEnabled ? accent : context.colorTokens.textHint,
+                      size: 19,
+                    ),
+                    const Gap(12),
+                    Text(
+                      formatMinutesOfDay(
+                        context,
+                        controller.reminderMinutes.value,
+                      ),
+                      style: TextStyle(
+                        color: isEnabled
+                            ? context.colorTokens.textBody
+                            : context.colorTokens.textHint,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Gap(12),
+          Switch(
+            value: isEnabled,
+            onChanged: controller.onToggleReminder,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            activeThumbColor: context.colorTokens.white,
+            activeTrackColor: accent,
+            inactiveThumbColor: context.colorTokens.white,
+            inactiveTrackColor: const Color(0xFFD7D9DC),
+            trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
+              (states) => context.colorTokens.transparent,
+            ),
           ),
         ],
       ),
