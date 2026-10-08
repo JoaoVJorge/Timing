@@ -3,6 +3,9 @@ import "package:flutter/material.dart";
 class TimerWallpapers {
   const TimerWallpapers._();
 
+  // Preserve stored indices while showing only the remaining choices.
+  static const List<int> selectableIndices = [0, 2, 3, 4];
+
   static const List<List<Color>> values = [
     // Branco suave em três tons
     [Color(0xFFFFFFFF), Color(0xFFF5F5F5), Color(0xFFE2E2E2)],

@@ -255,8 +255,8 @@ class CreateSubjectController extends GetxController
         nameController.text = normalizedInitialName;
         name.value = normalizedInitialName;
       }
-      if (!isPageBased && goalController.text.trim().isEmpty) {
-        goalController.text = "30";
+      if (goalController.text.trim().isEmpty) {
+        goalController.text = isPageBased ? "10" : "30";
         goal.value = goalController.text;
       }
       restMinutes.value = _defaultRestValue;

@@ -91,36 +91,9 @@ class _DailyGoalActivityForm extends StatelessWidget {
             label: context.l10n.targetDaysLabel,
             accent: accent,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              KeyedSubtree(
-                key: goalKey,
-                child: _DailyGoalTargetInput(
-                  controller: controller,
-                  accent: accent,
-                ),
-              ),
-              const Gap(12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final int days
-                      in CreateGroupController.dailyGoalTargetDaysOptions)
-                    Obx(
-                      () => CreationSelectableChip(
-                        label: context.l10n.targetDaysChip(days),
-                        isSelected:
-                            controller.activityGoal.value.trim() ==
-                            days.toString(),
-                        accent: accent,
-                        onTap: () => controller.setGoalPreset(days),
-                      ),
-                    ),
-                ],
-              ),
-            ],
+          child: KeyedSubtree(
+            key: goalKey,
+            child: _DailyGoalTargetInput(controller: controller),
           ),
         ),
         const Gap(12),
@@ -131,10 +104,9 @@ class _DailyGoalActivityForm extends StatelessWidget {
 }
 
 class _DailyGoalTargetInput extends StatelessWidget {
-  const _DailyGoalTargetInput({required this.controller, required this.accent});
+  const _DailyGoalTargetInput({required this.controller});
 
   final CreateGroupController controller;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -147,18 +119,18 @@ class _DailyGoalTargetInput extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Icon(Icons.calendar_today_rounded, color: accent, size: 19),
+        Icon(
+          Icons.calendar_today_rounded,
+          color: context.colorTokens.textHint,
+          size: 19,
+        ),
         const Gap(12),
         Expanded(
           child: TextField(
             controller: controller.activityGoalController,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: context.textStyles.inputValue,
             decoration: InputDecoration(
               hintText: context.l10n.targetDaysHint,
               suffixText: context.daysSuffix,
@@ -167,11 +139,7 @@ class _DailyGoalTargetInput extends StatelessWidget {
               focusedBorder: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              hintStyle: context.textStyles.inputHint,
             ),
           ),
         ),

@@ -7,7 +7,6 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_subject/create_subject_controller.dart";
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
-import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/centered_wrap_grid.dart";
@@ -244,11 +243,6 @@ class _GoalSection extends StatelessWidget {
     final Color accent = controller.selectedColor.value;
     final SubjectActivityType activityType = controller.activityType.value;
     final bool isPermanent = activityType == SubjectActivityType.permanent;
-    final List<int> presets = controller.isPageBased
-        ? controller.pageGoalPresets
-        : isPermanent
-        ? controller.totalTimeGoalPresets
-        : controller.timeGoalPresets;
 
     return CreationConfigCard(
       accent: accent,
@@ -266,30 +260,7 @@ class _GoalSection extends StatelessWidget {
             : context.l10n.subjectSectionDurationDescription,
         accent: accent,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _GoalInput(controller: controller, accent: accent),
-          const Gap(12),
-          _PresetRow(
-            children: presets
-                .map(
-                  (value) => CreationSelectableChip(
-                    label: controller.isPageBased
-                        ? value.toString()
-                        : isPermanent
-                        ? context.l10n.createSubjectHoursValue(value)
-                        : context.l10n.restMinutesChip(value),
-                    isSelected:
-                        controller.goal.value.trim() == value.toString(),
-                    accent: accent,
-                    onTap: () => controller.setGoalPreset(value),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
+      child: _GoalInput(controller: controller),
     );
   });
 
@@ -304,10 +275,9 @@ class _GoalSection extends StatelessWidget {
 }
 
 class _GoalInput extends StatelessWidget {
-  const _GoalInput({required this.controller, required this.accent});
+  const _GoalInput({required this.controller});
 
   final SubjectCreationFormController controller;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) => Obx(() {
@@ -325,19 +295,23 @@ class _GoalInput extends StatelessWidget {
       child: Row(
         children: [
           controller.isPageBased
-              ? AppIcon("open-book", color: accent, size: 20)
-              : Icon(Icons.access_time_rounded, color: accent, size: 20),
+              ? AppIcon(
+                  "open-book",
+                  color: context.colorTokens.textHint,
+                  size: 20,
+                )
+              : Icon(
+                  Icons.access_time_rounded,
+                  color: context.colorTokens.textHint,
+                  size: 20,
+                ),
           const Gap(12),
           Expanded(
             child: TextField(
               controller: controller.goalController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: TextStyle(
-                color: context.colorTokens.textBody,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
+              style: context.textStyles.inputValue,
               decoration: InputDecoration(
                 hintText: controller.isPageBased
                     ? context.l10n.goalPagesHint
@@ -354,11 +328,7 @@ class _GoalInput extends StatelessWidget {
                 focusedBorder: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
-                hintStyle: TextStyle(
-                  color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                hintStyle: context.textStyles.inputHint,
               ),
             ),
           ),
@@ -437,7 +407,6 @@ class _RestSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final Color accent = controller.selectedColor.value;
-    final bool usesSeconds = controller.category == TimeCategoryType.exercises;
 
     return CreationConfigCard(
       accent: accent,
@@ -447,42 +416,15 @@ class _RestSection extends StatelessWidget {
         description: context.l10n.subjectRestDurationDescription,
         accent: accent,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (usesSeconds) ...[
-            _RestInput(controller: controller, accent: accent),
-            const Gap(12),
-          ],
-          _PresetRow(
-            children: controller.restMinutesOptions
-                .map(
-                  (value) => CreationSelectableChip(
-                    label: formatRestDuration(
-                      context,
-                      usesSeconds
-                          ? Duration(seconds: value)
-                          : Duration(minutes: value),
-                      usesSeconds: usesSeconds,
-                    ),
-                    isSelected: controller.restMinutes.value == value,
-                    accent: accent,
-                    onTap: () => controller.setRestMinutes(value),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
+      child: _RestInput(controller: controller),
     );
   });
 }
 
 class _RestInput extends StatelessWidget {
-  const _RestInput({required this.controller, required this.accent});
+  const _RestInput({required this.controller});
 
   final SubjectCreationFormController controller;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -495,31 +437,29 @@ class _RestInput extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Icon(Icons.hourglass_bottom_rounded, color: accent, size: 20),
+        Icon(
+          Icons.hourglass_bottom_rounded,
+          color: context.colorTokens.textHint,
+          size: 20,
+        ),
         const Gap(12),
         Expanded(
           child: TextField(
             controller: controller.restMinutesController,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: context.textStyles.inputValue,
             decoration: InputDecoration(
               hintText: context.l10n.createSubjectPauseDurationHint,
-              suffixText: "s",
+              suffixText: controller.category == TimeCategoryType.exercises
+                  ? "s"
+                  : context.l10n.timeUnitMinutesSuffix,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              hintStyle: context.textStyles.inputHint,
             ),
           ),
         ),
@@ -621,17 +561,19 @@ class _WallpaperSelector extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       const double gap = 8;
+      const wallpaperIndices = TimerWallpapers.selectableIndices;
       final double itemWidth =
-          (constraints.maxWidth - gap * (TimerWallpapers.values.length - 1)) /
-          TimerWallpapers.values.length;
+          (constraints.maxWidth - gap * (wallpaperIndices.length - 1)) /
+          wallpaperIndices.length;
 
       return Obx(() {
         return Row(
-          children: List.generate(TimerWallpapers.values.length, (index) {
+          children: List.generate(wallpaperIndices.length, (position) {
+            final int index = wallpaperIndices[position];
             final bool isSelected = index == controller.wallpaperIndex.value;
             return Padding(
               padding: EdgeInsets.only(
-                right: index == TimerWallpapers.values.length - 1 ? 0 : gap,
+                right: position == wallpaperIndices.length - 1 ? 0 : gap,
               ),
               child: BounceTap(
                 onTap: () => controller.wallpaperIndex.value = index,

@@ -16,8 +16,8 @@ class AppInputDecoration {
     isDense: true,
     prefixIcon: prefixIcon == null
         ? null
-        : Opacity(
-            opacity: 0.5,
+        : ColorFiltered(
+            colorFilter: ColorFilter.mode(tokens.textHint, BlendMode.srcIn),
             child: Container(
               margin: const EdgeInsets.only(left: 4),
               alignment: Alignment.center,

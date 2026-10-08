@@ -174,19 +174,12 @@ class _TargetDaysSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CustomDaysInput(controller: controller, accent: accent),
+          _CustomDaysInput(controller: controller),
           const Gap(12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final int days in CreateTaskController.targetDaysOptions)
-                CreationSelectableChip(
-                  label: context.l10n.targetDaysChip(days),
-                  isSelected: days == controller.targetDays.value,
-                  accent: accent,
-                  onTap: () => controller.onSelectTargetDays(days),
-                ),
               CreationSelectableChip(
                 label: context.l10n.targetDaysInfinite,
                 isSelected: controller.targetDays.value == 0,
@@ -202,10 +195,9 @@ class _TargetDaysSection extends StatelessWidget {
 }
 
 class _CustomDaysInput extends StatelessWidget {
-  const _CustomDaysInput({required this.controller, required this.accent});
+  const _CustomDaysInput({required this.controller});
 
   final CreateTaskController controller;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -218,7 +210,11 @@ class _CustomDaysInput extends StatelessWidget {
     ),
     child: Row(
       children: [
-        Icon(Icons.calendar_today_rounded, color: accent, size: 19),
+        Icon(
+          Icons.calendar_today_rounded,
+          color: context.colorTokens.textHint,
+          size: 19,
+        ),
         const Gap(12),
         Expanded(
           child: TextField(
@@ -226,11 +222,7 @@ class _CustomDaysInput extends StatelessWidget {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: controller.onCustomDaysChanged,
-            style: TextStyle(
-              color: context.colorTokens.textBody,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: context.textStyles.inputValue,
             decoration: InputDecoration(
               hintText: context.l10n.targetDaysHint,
               suffixText: context.daysSuffix,
@@ -239,11 +231,7 @@ class _CustomDaysInput extends StatelessWidget {
               focusedBorder: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(
-                color: context.colorTokens.textHint.withValues(alpha: 0.62),
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              hintStyle: context.textStyles.inputHint,
             ),
           ),
         ),

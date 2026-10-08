@@ -30,7 +30,9 @@ class CreateTaskController extends GetxController {
   final String? initialName;
 
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController customDaysController = TextEditingController();
+  final TextEditingController customDaysController = TextEditingController(
+    text: targetDaysOptions.first.toString(),
+  );
 
   final Rx<Color> selectedColor = SubjectColors.values.first.obs;
   final RxInt targetDays = targetDaysOptions.first.obs;
@@ -57,9 +59,9 @@ class CreateTaskController extends GetxController {
     selectedColor.value = Color(task.colorValue);
     targetDays.value = task.targetDays;
     sequenceType.value = task.sequenceType;
-    if (!targetDaysOptions.contains(task.targetDays) && task.targetDays > 0) {
-      customDaysController.text = task.targetDays.toString();
-    }
+    customDaysController.text = task.targetDays > 0
+        ? task.targetDays.toString()
+        : "";
   }
 
   void initializeThemeColor(Color color) {

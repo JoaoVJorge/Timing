@@ -49,7 +49,7 @@ class _TimeTextField extends StatelessWidget {
       icon: Icon(
         Icons.schedule_rounded,
         size: 22,
-        color: context.colorTokens.primary,
+        color: context.colorTokens.textHint,
       ),
     );
     return Row(
