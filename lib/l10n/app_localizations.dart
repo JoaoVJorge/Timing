@@ -313,7 +313,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Goal name'**
+  /// **'Ex.: Drink water'**
   String get taskNameHint;
 
   /// No description provided for @targetDaysLabel.
@@ -625,25 +625,25 @@ abstract class AppLocalizations {
   /// No description provided for @createSubjectNameHintStudying.
   ///
   /// In en, this message translates to:
-  /// **'Ex.: Biology, Math, English'**
+  /// **'Ex.: Math'**
   String get createSubjectNameHintStudying;
 
   /// No description provided for @createSubjectNameHintReading.
   ///
   /// In en, this message translates to:
-  /// **'Ex.: History book, Dom Casmurro'**
+  /// **'Ex.: Dom Casmurro'**
   String get createSubjectNameHintReading;
 
   /// No description provided for @createSubjectNameHintExercises.
   ///
   /// In en, this message translates to:
-  /// **'Ex.: Gym, Running, Stretching'**
+  /// **'Ex.: Gym'**
   String get createSubjectNameHintExercises;
 
   /// No description provided for @createSubjectNameHintHobbies.
   ///
   /// In en, this message translates to:
-  /// **'Ex.: Guitar, Drawing, Programming'**
+  /// **'Ex.: Guitar'**
   String get createSubjectNameHintHobbies;
 
   /// No description provided for @createSubjectTimeGoalLabel.
@@ -1725,6 +1725,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Alerts are off on this device'**
   String get notificationsDisabledSubtitle;
+
+  /// No description provided for @goalReminderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder'**
+  String get goalReminderLabel;
+
+  /// No description provided for @goalReminderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You get a notification at this time on the days the goal is still unchecked.'**
+  String get goalReminderDescription;
+
+  /// No description provided for @goalReminderPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications to turn on reminders.'**
+  String get goalReminderPermissionDenied;
+
+  /// No description provided for @goalReminderNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t checked off this goal today.'**
+  String get goalReminderNotificationBody;
+
+  /// No description provided for @goalReminderChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal reminders'**
+  String get goalReminderChannelName;
 
   /// No description provided for @language.
   ///
@@ -5626,6 +5656,54 @@ abstract class AppLocalizations {
   /// **'Data deleted.'**
   String get clearDataSuccessMessage;
 
+  /// No description provided for @adjustTimeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust time'**
+  String get adjustTimeSectionTitle;
+
+  /// No description provided for @addTimeButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time'**
+  String get addTimeButtonLabel;
+
+  /// No description provided for @removeTimeButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove time'**
+  String get removeTimeButtonLabel;
+
+  /// No description provided for @addTimeDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The time counts as done today on this activity.'**
+  String get addTimeDialogMessage;
+
+  /// No description provided for @removeTimeDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The time comes off this activity\'s most recent sessions.'**
+  String get removeTimeDialogMessage;
+
+  /// No description provided for @removeTimeConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeTimeConfirmLabel;
+
+  /// No description provided for @timeAddedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Time added.'**
+  String get timeAddedMessage;
+
+  /// No description provided for @timeRemovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Time removed.'**
+  String get timeRemovedMessage;
+
   /// No description provided for @activitySwipeHintTitle.
   ///
   /// In en, this message translates to:
@@ -6243,6 +6321,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reconnect Google to authorize synchronization.'**
   String get googleCalendarReconnect;
+
+  /// No description provided for @googleCalendarUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The Google Calendar connection is currently unavailable. Please try again later. Your schedule remains saved in Timing.'**
+  String get googleCalendarUnavailable;
 
   /// No description provided for @googleCalendarError.
   ///

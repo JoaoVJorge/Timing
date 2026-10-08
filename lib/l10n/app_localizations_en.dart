@@ -121,7 +121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createTaskTitle => 'New goal';
 
   @override
-  String get taskNameHint => 'Goal name';
+  String get taskNameHint => 'Ex.: Drink water';
 
   @override
   String get targetDaysLabel => 'Target (days)';
@@ -297,17 +297,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'Hobby name';
 
   @override
-  String get createSubjectNameHintStudying => 'Ex.: Biology, Math, English';
+  String get createSubjectNameHintStudying => 'Ex.: Math';
 
   @override
-  String get createSubjectNameHintReading => 'Ex.: History book, Dom Casmurro';
+  String get createSubjectNameHintReading => 'Ex.: Dom Casmurro';
 
   @override
-  String get createSubjectNameHintExercises => 'Ex.: Gym, Running, Stretching';
+  String get createSubjectNameHintExercises => 'Ex.: Gym';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'Ex.: Guitar, Drawing, Programming';
+  String get createSubjectNameHintHobbies => 'Ex.: Guitar';
 
   @override
   String get createSubjectTimeGoalLabel => 'Duration of each section';
@@ -917,6 +916,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsDisabledSubtitle => 'Alerts are off on this device';
+
+  @override
+  String get goalReminderLabel => 'Daily reminder';
+
+  @override
+  String get goalReminderDescription =>
+      'You get a notification at this time on the days the goal is still unchecked.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'Allow notifications to turn on reminders.';
+
+  @override
+  String get goalReminderNotificationBody =>
+      'You haven\'t checked off this goal today.';
+
+  @override
+  String get goalReminderChannelName => 'Goal reminders';
 
   @override
   String get language => 'Language';
@@ -3125,6 +3142,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearDataSuccessMessage => 'Data deleted.';
 
   @override
+  String get adjustTimeSectionTitle => 'Adjust time';
+
+  @override
+  String get addTimeButtonLabel => 'Add time';
+
+  @override
+  String get removeTimeButtonLabel => 'Remove time';
+
+  @override
+  String get addTimeDialogMessage =>
+      'The time counts as done today on this activity.';
+
+  @override
+  String get removeTimeDialogMessage =>
+      'The time comes off this activity\'s most recent sessions.';
+
+  @override
+  String get removeTimeConfirmLabel => 'Remove';
+
+  @override
+  String get timeAddedMessage => 'Time added.';
+
+  @override
+  String get timeRemovedMessage => 'Time removed.';
+
+  @override
   String get activitySwipeHintTitle => 'Activity gestures';
 
   @override
@@ -3495,6 +3538,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'Reconnect Google to authorize synchronization.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'The Google Calendar connection is currently unavailable. Please try again later. Your schedule remains saved in Timing.';
 
   @override
   String get googleCalendarError => 'Could not sync. Please try again.';

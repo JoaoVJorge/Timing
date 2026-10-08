@@ -121,7 +121,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get createTaskTitle => 'Nueva meta';
 
   @override
-  String get taskNameHint => 'Nombre de la meta';
+  String get taskNameHint => 'Ej.: Beber agua';
 
   @override
   String get targetDaysLabel => 'Objetivo (días)';
@@ -297,20 +297,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'Nombre del hobby';
 
   @override
-  String get createSubjectNameHintStudying =>
-      'Ej.: Biología, Matemáticas, Inglés';
+  String get createSubjectNameHintStudying => 'Ej.: Matemáticas';
 
   @override
-  String get createSubjectNameHintReading =>
-      'Ej.: Libro de Historia, Dom Casmurro';
+  String get createSubjectNameHintReading => 'Ej.: Dom Casmurro';
 
   @override
-  String get createSubjectNameHintExercises =>
-      'Ej.: Gimnasio, Carrera, Estiramiento';
+  String get createSubjectNameHintExercises => 'Ej.: Gimnasio';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'Ej.: Guitarra, Dibujo, Programación';
+  String get createSubjectNameHintHobbies => 'Ej.: Guitarra';
 
   @override
   String get createSubjectTimeGoalLabel => 'Duración de cada sección';
@@ -926,6 +922,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationsDisabledSubtitle =>
       'Alertas apagadas en este dispositivo';
+
+  @override
+  String get goalReminderLabel => 'Recordatorio diario';
+
+  @override
+  String get goalReminderDescription =>
+      'Recibes una notificación a esta hora los días en que la meta sigue sin marcar.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'Permite las notificaciones para activar recordatorios.';
+
+  @override
+  String get goalReminderNotificationBody =>
+      'Aún no has marcado esta meta hoy.';
+
+  @override
+  String get goalReminderChannelName => 'Recordatorios de metas';
 
   @override
   String get language => 'Idioma';
@@ -3141,6 +3155,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get clearDataSuccessMessage => 'Datos borrados.';
 
   @override
+  String get adjustTimeSectionTitle => 'Ajustar tiempo';
+
+  @override
+  String get addTimeButtonLabel => 'Agregar tiempo';
+
+  @override
+  String get removeTimeButtonLabel => 'Quitar tiempo';
+
+  @override
+  String get addTimeDialogMessage =>
+      'El tiempo cuenta como hecho hoy en esta actividad.';
+
+  @override
+  String get removeTimeDialogMessage =>
+      'El tiempo sale de las sesiones más recientes de esta actividad.';
+
+  @override
+  String get removeTimeConfirmLabel => 'Quitar';
+
+  @override
+  String get timeAddedMessage => 'Tiempo agregado.';
+
+  @override
+  String get timeRemovedMessage => 'Tiempo quitado.';
+
+  @override
   String get activitySwipeHintTitle => 'Gestos de la actividad';
 
   @override
@@ -3513,6 +3553,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'Vuelve a conectar Google para autorizar la sincronización.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'La conexión con Google Calendar no está disponible en este momento. Inténtalo de nuevo más tarde. Tus horarios siguen guardados en Timing.';
 
   @override
   String get googleCalendarError =>

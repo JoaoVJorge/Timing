@@ -121,7 +121,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createTaskTitle => 'Neues Ziel';
 
   @override
-  String get taskNameHint => 'Zielname';
+  String get taskNameHint => 'Bsp.: Wasser trinken';
 
   @override
   String get targetDaysLabel => 'Ziel (Tage)';
@@ -297,20 +297,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'Hobbyname';
 
   @override
-  String get createSubjectNameHintStudying =>
-      'Bsp.: Biologie, Mathematik, Englisch';
+  String get createSubjectNameHintStudying => 'Bsp.: Mathematik';
 
   @override
-  String get createSubjectNameHintReading =>
-      'Bsp.: Geschichtsbuch, Dom Casmurro';
+  String get createSubjectNameHintReading => 'Bsp.: Dom Casmurro';
 
   @override
-  String get createSubjectNameHintExercises =>
-      'Bsp.: Fitnessstudio, Laufen, Stretching';
+  String get createSubjectNameHintExercises => 'Bsp.: Fitnessstudio';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'Bsp.: Gitarre, Zeichnen, Programmieren';
+  String get createSubjectNameHintHobbies => 'Bsp.: Gitarre';
 
   @override
   String get createSubjectTimeGoalLabel => 'Dauer jedes Abschnitts';
@@ -934,6 +930,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get notificationsDisabledSubtitle =>
       'Auf diesem Gerät sind Benachrichtigungen deaktiviert';
+
+  @override
+  String get goalReminderLabel => 'Tägliche Erinnerung';
+
+  @override
+  String get goalReminderDescription =>
+      'Du erhältst zu dieser Uhrzeit eine Benachrichtigung, solange das Ziel an dem Tag noch nicht abgehakt ist.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'Erlaube Benachrichtigungen, um Erinnerungen zu aktivieren.';
+
+  @override
+  String get goalReminderNotificationBody =>
+      'Du hast dieses Ziel heute noch nicht abgehakt.';
+
+  @override
+  String get goalReminderChannelName => 'Zielerinnerungen';
 
   @override
   String get language => 'Sprache';
@@ -3161,6 +3175,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get clearDataSuccessMessage => 'Daten gelöscht.';
 
   @override
+  String get adjustTimeSectionTitle => 'Zeit anpassen';
+
+  @override
+  String get addTimeButtonLabel => 'Zeit hinzufügen';
+
+  @override
+  String get removeTimeButtonLabel => 'Zeit entfernen';
+
+  @override
+  String get addTimeDialogMessage =>
+      'Die Zeit zählt als heute für diese Aktivität erledigt.';
+
+  @override
+  String get removeTimeDialogMessage =>
+      'Die Zeit wird von den letzten Sitzungen dieser Aktivität abgezogen.';
+
+  @override
+  String get removeTimeConfirmLabel => 'Entfernen';
+
+  @override
+  String get timeAddedMessage => 'Zeit hinzugefügt.';
+
+  @override
+  String get timeRemovedMessage => 'Zeit entfernt.';
+
+  @override
   String get activitySwipeHintTitle => 'Aktivitätsgesten';
 
   @override
@@ -3534,6 +3574,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'Verbinde Google erneut, um die Synchronisierung zu erlauben.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'Die Verbindung zu Google Calendar ist derzeit nicht verfügbar. Versuche es später erneut. Deine Termine bleiben in Timing gespeichert.';
 
   @override
   String get googleCalendarError =>

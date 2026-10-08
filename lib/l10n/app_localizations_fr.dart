@@ -122,7 +122,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createTaskTitle => 'Nouvel objectif';
 
   @override
-  String get taskNameHint => 'Nom de l\'objectif';
+  String get taskNameHint => 'Ex. : Boire de l’eau';
 
   @override
   String get targetDaysLabel => 'Cible (jours)';
@@ -299,20 +299,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'Nom du passe-temps';
 
   @override
-  String get createSubjectNameHintStudying =>
-      'Ex. : Biologie, Mathématiques, Anglais';
+  String get createSubjectNameHintStudying => 'Ex. : Mathématiques';
 
   @override
-  String get createSubjectNameHintReading =>
-      'Ex. : Livre d\'histoire, Dom Casmurro';
+  String get createSubjectNameHintReading => 'Ex. : Dom Casmurro';
 
   @override
-  String get createSubjectNameHintExercises =>
-      'Ex. : Gym, course à pied, étirements';
+  String get createSubjectNameHintExercises => 'Ex. : Gym';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'Ex. : Guitare, Dessin, Programmation';
+  String get createSubjectNameHintHobbies => 'Ex. : Guitare';
 
   @override
   String get createSubjectTimeGoalLabel => 'Durée de chaque section';
@@ -933,6 +929,24 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get notificationsDisabledSubtitle =>
       'Les alertes sont désactivées sur cet appareil';
+
+  @override
+  String get goalReminderLabel => 'Rappel quotidien';
+
+  @override
+  String get goalReminderDescription =>
+      'Vous recevez une notification à cette heure les jours où l\'objectif n\'est pas encore coché.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'Autorisez les notifications pour activer les rappels.';
+
+  @override
+  String get goalReminderNotificationBody =>
+      'Vous n\'avez pas encore coché cet objectif aujourd\'hui.';
+
+  @override
+  String get goalReminderChannelName => 'Rappels d\'objectifs';
 
   @override
   String get language => 'Langue';
@@ -3173,6 +3187,32 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clearDataSuccessMessage => 'Données effacées.';
 
   @override
+  String get adjustTimeSectionTitle => 'Ajuster le temps';
+
+  @override
+  String get addTimeButtonLabel => 'Ajouter du temps';
+
+  @override
+  String get removeTimeButtonLabel => 'Retirer du temps';
+
+  @override
+  String get addTimeDialogMessage =>
+      'Le temps compte comme fait aujourd\'hui pour cette activité.';
+
+  @override
+  String get removeTimeDialogMessage =>
+      'Le temps est retiré des séances les plus récentes de cette activité.';
+
+  @override
+  String get removeTimeConfirmLabel => 'Retirer';
+
+  @override
+  String get timeAddedMessage => 'Temps ajouté.';
+
+  @override
+  String get timeRemovedMessage => 'Temps retiré.';
+
+  @override
   String get activitySwipeHintTitle => 'Gestes de l’activité';
 
   @override
@@ -3547,6 +3587,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'Reconnectez Google pour autoriser la synchronisation.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'La connexion à Google Calendar est indisponible pour le moment. Réessayez plus tard. Vos horaires restent enregistrés dans Timing.';
 
   @override
   String get googleCalendarError => 'Synchronisation impossible. Réessayez.';

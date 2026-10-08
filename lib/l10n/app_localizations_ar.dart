@@ -119,7 +119,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createTaskTitle => 'هدف جديد';
 
   @override
-  String get taskNameHint => 'اسم الهدف';
+  String get taskNameHint => 'مثال: شرب الماء';
 
   @override
   String get targetDaysLabel => 'الهدف (الأيام)';
@@ -293,20 +293,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'اسم الهواية';
 
   @override
-  String get createSubjectNameHintStudying =>
-      'على سبيل المثال: الأحياء، الرياضيات، اللغة الإنجليزية';
+  String get createSubjectNameHintStudying => 'مثال: الرياضيات';
 
   @override
-  String get createSubjectNameHintReading =>
-      'على سبيل المثال: كتاب التاريخ، دوم كاسمورو';
+  String get createSubjectNameHintReading => 'مثال: دوم كاسمورو';
 
   @override
-  String get createSubjectNameHintExercises =>
-      'على سبيل المثال: صالة الألعاب الرياضية، الجري، التمدد';
+  String get createSubjectNameHintExercises => 'مثال: صالة الألعاب الرياضية';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'على سبيل المثال: الجيتار، الرسم، البرمجة';
+  String get createSubjectNameHintHobbies => 'مثال: الجيتار';
 
   @override
   String get createSubjectTimeGoalLabel => 'مدة كل قسم';
@@ -916,6 +912,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get notificationsDisabledSubtitle => 'التنبيهات متوقفة على هذا الجهاز';
+
+  @override
+  String get goalReminderLabel => 'تذكير يومي';
+
+  @override
+  String get goalReminderDescription =>
+      'يصلك إشعار في هذا الوقت في الأيام التي لم يُحدَّد فيها الهدف بعد.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'اسمح بالإشعارات لتفعيل التذكيرات.';
+
+  @override
+  String get goalReminderNotificationBody => 'لم تحدد هذا الهدف اليوم بعد.';
+
+  @override
+  String get goalReminderChannelName => 'تذكيرات الأهداف';
 
   @override
   String get language => 'اللغة';
@@ -3111,6 +3124,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get clearDataSuccessMessage => 'تم حذف البيانات.';
 
   @override
+  String get adjustTimeSectionTitle => 'تعديل الوقت';
+
+  @override
+  String get addTimeButtonLabel => 'إضافة وقت';
+
+  @override
+  String get removeTimeButtonLabel => 'إزالة وقت';
+
+  @override
+  String get addTimeDialogMessage =>
+      'يُحتسب الوقت كأنه أُنجز اليوم في هذا النشاط.';
+
+  @override
+  String get removeTimeDialogMessage => 'يُخصم الوقت من أحدث جلسات هذا النشاط.';
+
+  @override
+  String get removeTimeConfirmLabel => 'إزالة';
+
+  @override
+  String get timeAddedMessage => 'تمت إضافة الوقت.';
+
+  @override
+  String get timeRemovedMessage => 'تمت إزالة الوقت.';
+
+  @override
   String get activitySwipeHintTitle => 'إيماءات النشاط';
 
   @override
@@ -3474,6 +3512,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'أعد الاتصال بـ Google للسماح بالمزامنة.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'الاتصال بتقويم Google غير متاح حاليًا. حاول مرة أخرى لاحقًا. تظل مواعيدك محفوظة في Timing.';
 
   @override
   String get googleCalendarError => 'تعذرت المزامنة. حاول مرة أخرى.';

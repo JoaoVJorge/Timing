@@ -121,7 +121,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createTaskTitle => 'Nova meta';
 
   @override
-  String get taskNameHint => 'Nome da meta';
+  String get taskNameHint => 'Ex.: Beber água';
 
   @override
   String get targetDaysLabel => 'Alvo (dias)';
@@ -297,20 +297,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createSubjectNameLabelHobbies => 'Nome do hobby';
 
   @override
-  String get createSubjectNameHintStudying =>
-      'Ex.: Biologia, Matemática, Inglês';
+  String get createSubjectNameHintStudying => 'Ex.: Matemática';
 
   @override
-  String get createSubjectNameHintReading =>
-      'Ex.: Livro de História, Dom Casmurro';
+  String get createSubjectNameHintReading => 'Ex.: Dom Casmurro';
 
   @override
-  String get createSubjectNameHintExercises =>
-      'Ex.: Academia, Corrida, Alongamento';
+  String get createSubjectNameHintExercises => 'Ex.: Academia';
 
   @override
-  String get createSubjectNameHintHobbies =>
-      'Ex.: Violão, Desenho, Programação';
+  String get createSubjectNameHintHobbies => 'Ex.: Violão';
 
   @override
   String get createSubjectTimeGoalLabel => 'Duração de cada seção';
@@ -924,6 +920,24 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get notificationsDisabledSubtitle =>
       'Alertas desligados neste dispositivo';
+
+  @override
+  String get goalReminderLabel => 'Lembrete diário';
+
+  @override
+  String get goalReminderDescription =>
+      'Você recebe uma notificação nesse horário nos dias em que a meta ainda não foi marcada.';
+
+  @override
+  String get goalReminderPermissionDenied =>
+      'Permita as notificações para ativar lembretes.';
+
+  @override
+  String get goalReminderNotificationBody =>
+      'Você ainda não marcou essa meta hoje.';
+
+  @override
+  String get goalReminderChannelName => 'Lembretes de metas';
 
   @override
   String get language => 'Idioma';
@@ -1641,7 +1655,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Mais flexível. Dias perdidos não reiniciam sua sequência.';
 
   @override
-  String get targetDaysInfinite => 'Infinito';
+  String get targetDaysInfinite => 'Sem fim';
 
   @override
   String get deleteConfirmationDefaultTypeName => 'item';
@@ -1794,10 +1808,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get scheduleTitleRequiredError => 'Preencha o título para continuar';
 
   @override
-  String get scheduleActiveFromLabel => 'Começa em';
+  String get scheduleActiveFromLabel => 'Início';
 
   @override
-  String get scheduleActiveUntilLabel => 'Termina em';
+  String get scheduleActiveUntilLabel => 'Fim';
 
   @override
   String get selectDateTitle => 'Selecionar data';
@@ -2037,45 +2051,45 @@ class AppLocalizationsPt extends AppLocalizations {
       'Entrar com Apple ainda não está completo.';
 
   @override
-  String get activityTypeLabel => 'Frequência da atividade';
+  String get activityTypeLabel => 'Tipo de meta';
 
   @override
-  String get activityTypeDailyLabel => 'Diária';
+  String get activityTypeDailyLabel => 'Meta por dia';
 
   @override
   String get activityTypeDailyDescription =>
-      'Use seções de foco com pausas e defina quantas sessões quer cumprir por dia.';
+      'Defina quantas sessões de foco fazer por dia, com pausas entre elas.';
 
   @override
   String get activityTypeDailyDescriptionStudying =>
-      'Use seções de estudo com pausas e defina quantas sessões quer cumprir por dia.';
+      'Defina quantas sessões de estudo fazer por dia, com pausas entre elas.';
 
   @override
   String get activityTypeDailyDescriptionExercises =>
-      'Use seções de exercício com pausas e defina quantas sessões quer cumprir por dia.';
+      'Defina quantas sessões de exercício fazer por dia, com pausas entre elas.';
 
   @override
   String get activityTypeDailyDescriptionHobbies =>
-      'Use seções de prática com pausas e defina quantas sessões quer cumprir por dia.';
+      'Defina quantas sessões de prática fazer por dia, com pausas entre elas.';
 
   @override
-  String get activityTypePermanentLabel => 'Permanente';
+  String get activityTypePermanentLabel => 'Meta total';
 
   @override
   String get activityTypePermanentDescription =>
-      'Defina o tempo total de estudo. A atividade permanece ativa até você concluir tudo.';
+      'Acumule tempo de estudo até atingir sua meta.';
 
   @override
   String get activityTypePermanentDescriptionStudying =>
-      'Defina o tempo total de estudo. A atividade permanece ativa até você concluir tudo.';
+      'Acumule tempo de estudo até atingir sua meta.';
 
   @override
   String get activityTypePermanentDescriptionExercises =>
-      'Defina o tempo total de exercício. A atividade permanece ativa até você concluir tudo.';
+      'Acumule tempo de exercício até atingir sua meta.';
 
   @override
   String get activityTypePermanentDescriptionHobbies =>
-      'Defina o tempo total de prática. A atividade permanece ativa até você concluir tudo.';
+      'Acumule tempo de prática até atingir sua meta.';
 
   @override
   String get pagesSuffix => 'páginas';
@@ -3134,6 +3148,32 @@ class AppLocalizationsPt extends AppLocalizations {
   String get clearDataSuccessMessage => 'Dados apagados.';
 
   @override
+  String get adjustTimeSectionTitle => 'Ajustar tempo';
+
+  @override
+  String get addTimeButtonLabel => 'Adicionar tempo';
+
+  @override
+  String get removeTimeButtonLabel => 'Remover tempo';
+
+  @override
+  String get addTimeDialogMessage =>
+      'O tempo entra como feito hoje nesta atividade.';
+
+  @override
+  String get removeTimeDialogMessage =>
+      'O tempo sai das sessões mais recentes desta atividade.';
+
+  @override
+  String get removeTimeConfirmLabel => 'Remover';
+
+  @override
+  String get timeAddedMessage => 'Tempo adicionado.';
+
+  @override
+  String get timeRemovedMessage => 'Tempo removido.';
+
+  @override
   String get activitySwipeHintTitle => 'Gestos da atividade';
 
   @override
@@ -3506,6 +3546,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get googleCalendarReconnect =>
       'Reconecte o Google para autorizar a sincronização.';
+
+  @override
+  String get googleCalendarUnavailable =>
+      'A conexão com o Google Calendar está indisponível no momento. Tente novamente mais tarde. Seus horários continuam salvos no Timing.';
 
   @override
   String get googleCalendarError =>
