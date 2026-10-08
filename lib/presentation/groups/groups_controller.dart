@@ -461,7 +461,6 @@ class GroupsController extends GetxController {
       await _showCachedGroupsOffline();
       return;
     }
-    final String? selectedGroupId = preferredGroupId ?? selectedGroup.value?.id;
     final int revision = ++_loadGroupsRevision;
     bool membershipChanged = false;
     isLoading.value = true;
@@ -481,7 +480,7 @@ class GroupsController extends GetxController {
         },
         (value) {
           didFailLoadingGroups.value = false;
-          _trackStaleness(selectedGroupId);
+          _trackStaleness();
           final Set<String> previousGroupIds = groups
               .map((item) => item.id)
               .toSet();
@@ -498,7 +497,12 @@ class GroupsController extends GetxController {
           // store — otherwise a created group appears in both the store add and the
           // controller add below, showing up twice.
           groups.value = List.of(value);
-          selectedGroup.value = _preferredGroup(value, selectedGroupId);
+          // A reload updates data, not navigation. The user may have opened
+          // another group while the request was in flight; keep that selection.
+          selectedGroup.value = _preferredGroup(
+            value,
+            selectedGroup.value?.id ?? preferredGroupId,
+          );
           _hasLoadedGroups = true;
         },
       );
@@ -548,7 +552,7 @@ class GroupsController extends GetxController {
   /// Marks the list as stale when the data source had to serve its saved copy
   /// while the app is online, and retries a couple of times on its own: such
   /// failures are usually a slow response that the next attempt gets through.
-  void _trackStaleness(String? preferredGroupId) {
+  void _trackStaleness() {
     final bool stale = _groupsRepository.lastGroupsFetchServedCache;
     isShowingStaleGroups.value = stale;
     _staleRetryTimer?.cancel();
@@ -560,10 +564,7 @@ class GroupsController extends GetxController {
       return;
     }
     _staleRetries++;
-    _staleRetryTimer = Timer(
-      _staleRetryDelay,
-      () => unawaited(loadGroups(preferredGroupId: preferredGroupId)),
-    );
+    _staleRetryTimer = Timer(_staleRetryDelay, () => unawaited(loadGroups()));
   }
 
   /// Offline, the groups screen shows the last fetched list instead of
@@ -896,7 +897,7 @@ class GroupsController extends GetxController {
     _activityProgressByCacheKey.clear();
     _activityProgressCacheKey = null;
     if (!await _refreshScoresOnly()) {
-      await loadGroups(preferredGroupId: affectedGroupId);
+      await loadGroups();
     }
     if (selectedGroup.value?.id == affectedGroupId &&
         selectedDetailsTab.value == GroupDetailsTab.goals) {

@@ -351,6 +351,74 @@ void main() {
     controller.onClose();
   });
 
+  for (final bool hasPreferredGroup in [false, true]) {
+    test(
+      "reload preserves a newer selection (preferred: $hasPreferredGroup)",
+      () async {
+        final first = _group("group-1", "Primeiro");
+        final second = _group("group-2", "Segundo");
+        final updatedSecond = _group("group-2", "Segundo atualizado");
+        final repository = _FakeGroupsRepository([first, second]);
+        final controller = _controller(repository);
+        await controller.loadGroups();
+
+        final response = Completer<List<GroupEntity>>();
+        repository.groupsCompleter = response;
+        final reload = controller.loadGroups(
+          preferredGroupId: hasPreferredGroup ? first.id : null,
+        );
+        controller.selectedGroup.value = second;
+        response.complete([first, updatedSecond]);
+        await reload;
+
+        expect(controller.selectedGroup.value, same(updatedSecond));
+        controller.onClose();
+      },
+    );
+  }
+
+  test(
+    "activity refresh for another group preserves the visible group",
+    () async {
+      final first = _group("group-1", "Primeiro");
+      final second = _group("group-2", "Segundo");
+      final repository = _FakeGroupsRepository([first, second])
+        ..scoresRefreshFails = true;
+      final controller = _controller(repository);
+      await controller.loadGroups();
+      controller.selectedGroup.value = second;
+
+      await controller.refreshAfterActivityChange(groupId: first.id);
+
+      expect(repository.refreshGroupScoresCalls, 1);
+      expect(repository.getGroupsCalls, 2);
+      expect(controller.selectedGroup.value?.id, second.id);
+      controller.onClose();
+    },
+  );
+
+  test("automatic retry preserves selection made after a cached response", () {
+    fakeAsync((async) {
+      final first = _group("group-1", "Primeiro");
+      final second = _group("group-2", "Segundo");
+      final repository = _FakeGroupsRepository([first, second])
+        ..lastGroupsFetchServedCache = true;
+      final controller = _controller(repository);
+      controller.selectedGroup.value = first;
+      unawaited(controller.loadGroups());
+      async.flushMicrotasks();
+      controller.selectedGroup.value = second;
+
+      repository.lastGroupsFetchServedCache = false;
+      async.elapse(const Duration(seconds: 7));
+      async.flushMicrotasks();
+
+      expect(repository.getGroupsCalls, 2);
+      expect(controller.selectedGroup.value?.id, second.id);
+      controller.onClose();
+    });
+  });
+
   test("does not load groups offline and reloads after reconnecting", () async {
     final _FakeGroupsRepository repository = _FakeGroupsRepository(const []);
     final ConnectivityService connectivityService = ConnectivityService();
