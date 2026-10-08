@@ -191,31 +191,45 @@ class _LevelCardSkeleton extends StatelessWidget {
   );
 }
 
-/// Placeholder twin of [_AchievementCard]: same fixed height, radius, padding
-/// and the badge / status circles top and bottom.
+/// Placeholder twin of [_AchievementCard], with matching text slots and padding.
 class _AchievementCardSkeleton extends StatelessWidget {
   const _AchievementCardSkeleton();
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 130,
-    padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
-    decoration: _cardDecoration(context, radius: 12),
-    child: const Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppSkeletonCircle(size: 34),
-        Gap(6),
-        AppSkeletonBox(width: 64, height: 11, radius: 5),
-        Gap(4),
-        AppSkeletonBox(width: 48, height: 11, radius: 5),
-        Gap(4),
-        AppSkeletonBox(width: 72, height: 9, radius: 5),
-        Spacer(),
-        AppSkeletonCircle(size: 18),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final metrics = _AchievementCardMetrics(context);
+    return Container(
+      height: metrics.height,
+      padding: const EdgeInsets.all(10),
+      decoration: _cardDecoration(context, radius: 12),
+      child: Column(
+        children: [
+          const AppSkeletonCircle(size: 34),
+          const Gap(8),
+          SizedBox(
+            height: metrics.titleHeight,
+            child: const Center(
+              child: AppSkeletonBox(width: 64, height: 11, radius: 5),
+            ),
+          ),
+          const Gap(4),
+          SizedBox(
+            height: metrics.descriptionHeight,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                AppSkeletonBox(width: 72, height: 9, radius: 5),
+                AppSkeletonBox(width: 48, height: 9, radius: 5),
+              ],
+            ),
+          ),
+          const Gap(8),
+          const Spacer(),
+          const AppSkeletonCircle(size: 18),
+        ],
+      ),
+    );
+  }
 }
 
 IconData _categoryIcon(AchievementCategory category) => switch (category) {
@@ -454,7 +468,8 @@ class _AchievementCloseButton extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: context.colorTokens.primaryForeground,
               shape: RoundedRectangleBorder(borderRadius: radius),
-              textStyle: context.textStyles.bodyLarge.copyWith(
+              textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontSize: context.textStyles.bodyLarge.fontSize,
                 fontWeight: FontWeight.w900,
               ),
             ),

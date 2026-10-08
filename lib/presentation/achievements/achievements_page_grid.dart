@@ -34,69 +34,116 @@ class _AchievementsGrid extends StatelessWidget {
 class _AchievementCard extends StatelessWidget {
   const _AchievementCard({required this.achievement, super.key});
 
-  static const double _height = 130;
-
   final AchievementDefinition achievement;
 
   @override
   Widget build(BuildContext context) {
+    final metrics = _AchievementCardMetrics(context);
     final Color effectiveColor = achievement.isUnlocked
         ? achievement.color
         : context.colorTokens.iconDisabled;
 
-    final TextStyle titleStyle = context.textStyles.bodyTiny.copyWith(
-      color: context.colorTokens.textBody,
-      fontSize: 11,
-      fontWeight: FontWeight.w900,
-      height: 1.08,
-    );
-    final TextStyle descriptionStyle = context.textStyles.bodyTiny.copyWith(
-      color: context.colorTokens.textHint,
-      height: 1.1,
-    );
-
     return BounceTap(
       onTap: () => _showAchievementDetailsDialog(context, achievement),
       pressedScale: 0.97,
-      child: SizedBox(
-        height: _height,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
-          decoration: _cardDecoration(context, radius: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _SmallBadge(
-                icon: achievement.icon,
-                color: effectiveColor,
-                isUnlocked: achievement.isUnlocked,
-                size: 34,
-                iconSize: 18,
-              ),
-              const Gap(8),
-              Text(
+      child: Container(
+        height: metrics.height,
+        padding: const EdgeInsets.all(10),
+        decoration: _cardDecoration(context, radius: 12),
+        child: Column(
+          children: [
+            _SmallBadge(
+              icon: achievement.icon,
+              color: effectiveColor,
+              isUnlocked: achievement.isUnlocked,
+              size: 34,
+              iconSize: 18,
+            ),
+            const Gap(8),
+            SizedBox(
+              height: metrics.titleHeight,
+              width: double.infinity,
+              child: Text(
                 achievement.title,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: titleStyle,
+                style: metrics.titleStyle,
+                strutStyle: StrutStyle.fromTextStyle(
+                  metrics.titleStyle,
+                  forceStrutHeight: true,
+                ),
               ),
-              const Gap(4),
-              Text(
+            ),
+            const Gap(4),
+            SizedBox(
+              height: metrics.descriptionHeight,
+              width: double.infinity,
+              child: Text(
                 achievement.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: descriptionStyle,
+                style: metrics.descriptionStyle,
+                strutStyle: StrutStyle.fromTextStyle(
+                  metrics.descriptionStyle,
+                  forceStrutHeight: true,
+                ),
               ),
-              const Spacer(),
-              _StatusBadge(isUnlocked: achievement.isUnlocked),
-            ],
-          ),
+            ),
+            const Gap(8),
+            const Spacer(),
+            _StatusBadge(isUnlocked: achievement.isUnlocked),
+          ],
         ),
       ),
     );
   }
+}
+
+/// Reserve the same text slots in every card, including at larger system fonts.
+class _AchievementCardMetrics {
+  _AchievementCardMetrics(BuildContext context) {
+    titleStyle = DefaultTextStyle.of(context).style.merge(
+      context.textStyles.bodyTiny.copyWith(
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        height: 1.08,
+      ),
+    );
+    descriptionStyle = DefaultTextStyle.of(context).style.merge(
+      context.textStyles.bodyTiny.copyWith(
+        color: context.colorTokens.textHint,
+        height: 1.1,
+      ),
+    );
+    double lineHeight(TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(text: "Ag", style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        strutStyle: StrutStyle.fromTextStyle(style, forceStrutHeight: true),
+      )..layout();
+      final height = painter.height.ceilToDouble();
+      painter.dispose();
+      return height;
+    }
+
+    titleHeight = lineHeight(titleStyle);
+    descriptionHeight = lineHeight(descriptionStyle) * 2;
+  }
+
+  late final TextStyle titleStyle;
+  late final TextStyle descriptionStyle;
+  late final double titleHeight;
+  late final double descriptionHeight;
+
+  // Padding + border, badge, gaps, and status indicator stay fixed.
+  double get height =>
+      (22 + 34 + 8 + titleHeight + 4 + descriptionHeight + 8 + 18).clamp(
+        130.0,
+        double.infinity,
+      );
 }
 
 class _AchievementInfoPill extends StatelessWidget {
@@ -114,7 +161,7 @@ class _AchievementInfoPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     decoration: BoxDecoration(
       color: emphasizeIcon
           ? color.withValues(alpha: 0.10)
