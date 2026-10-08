@@ -386,8 +386,11 @@ class _FocusRoutineSections extends StatelessWidget {
       children: [
         const Gap(12),
         _FocusSessionCountSection(controller: controller),
-        const Gap(12),
-        _RestSection(controller: controller),
+        // Nothing to rest between when there is a single session.
+        if (controller.focusSessionCount.value > 1) ...[
+          const Gap(12),
+          _RestSection(controller: controller),
+        ],
       ],
     );
   });

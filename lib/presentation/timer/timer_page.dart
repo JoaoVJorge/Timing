@@ -506,6 +506,8 @@ class _TimerStatsCard extends StatelessWidget {
         ? Icons.menu_book_rounded
         : Icons.free_breakfast_rounded;
 
+    final String? nextBreak = tick.nextBreak;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 480),
       padding: AppSpacing.tile,
@@ -518,16 +520,18 @@ class _TimerStatsCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _TimerStatItem(
-              icon: firstIcon,
-              label: firstLabel,
-              value: tick.nextBreak,
-              accentColor: chrome.accentColor,
-              foregroundColor: chrome.foregroundColor,
+          if (nextBreak != null) ...[
+            Expanded(
+              child: _TimerStatItem(
+                icon: firstIcon,
+                label: firstLabel,
+                value: nextBreak,
+                accentColor: chrome.accentColor,
+                foregroundColor: chrome.foregroundColor,
+              ),
             ),
-          ),
-          _TimerStatDivider(color: chrome.foregroundColor),
+            _TimerStatDivider(color: chrome.foregroundColor),
+          ],
           Expanded(
             child: _TimerStatItem(
               icon: Icons.repeat_rounded,
@@ -1063,12 +1067,14 @@ class _TimerTick {
       currentTimeTrailingUnit: currentTimeUsesHours ? "min" : "s",
       nextBreak: isReading
           ? "${controller.currentActivityPages}"
-          : formatRestDuration(
+          : controller.subject.hasRest
+          ? formatRestDuration(
               context,
               Duration(seconds: controller.restIntervalSeconds),
               usesSeconds:
                   controller.subject.category == TimeCategoryType.exercises,
-            ),
+            )
+          : null,
       focusSectionLabel: "${controller.currentFocusSection}",
       totalSubjectTimeLabel: formatDurationLong(
         Duration(seconds: controller.currentActivitySeconds),
@@ -1081,7 +1087,9 @@ class _TimerTick {
   final String currentTime;
   final String currentTimeLeadingUnit;
   final String currentTimeTrailingUnit;
-  final String nextBreak;
+
+  /// Null when the subject has no break to show — see [SubjectEntity.hasRest].
+  final String? nextBreak;
   final String focusSectionLabel;
   final String totalSubjectTimeLabel;
   final double progress;

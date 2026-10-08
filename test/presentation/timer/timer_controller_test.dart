@@ -559,9 +559,20 @@ void main() {
   });
 
   group("TimerController rest interval", () {
+    test("is zero when the subject runs a single session", () {
+      final controller = _controller(_subject(restMinutes: 30));
+
+      expect(controller.restIntervalSeconds, 0);
+      expect(controller.isResting.value, isFalse);
+    });
+
     test("uses rest seconds for exercises", () {
       final controller = _controller(
-        _subject(category: TimeCategoryType.exercises, restMinutes: 30),
+        _subject(
+          category: TimeCategoryType.exercises,
+          restMinutes: 30,
+          focusSessionCount: 2,
+        ),
       );
 
       expect(controller.restIntervalSeconds, 30);
@@ -569,7 +580,11 @@ void main() {
 
     test("uses small exercise rest values as seconds", () {
       final controller = _controller(
-        _subject(category: TimeCategoryType.exercises, restMinutes: 8),
+        _subject(
+          category: TimeCategoryType.exercises,
+          restMinutes: 8,
+          focusSessionCount: 2,
+        ),
       );
 
       expect(controller.restIntervalSeconds, 8);
@@ -577,7 +592,11 @@ void main() {
 
     test("uses rest minutes for studying", () {
       final controller = _controller(
-        _subject(category: TimeCategoryType.studying, restMinutes: 30),
+        _subject(
+          category: TimeCategoryType.studying,
+          restMinutes: 30,
+          focusSessionCount: 2,
+        ),
       );
 
       expect(controller.restIntervalSeconds, 30 * 60);
@@ -587,7 +606,11 @@ void main() {
       "falls back to the default exercise rest seconds when non-positive",
       () {
         final controller = _controller(
-          _subject(category: TimeCategoryType.exercises, restMinutes: 0),
+          _subject(
+            category: TimeCategoryType.exercises,
+            restMinutes: 0,
+            focusSessionCount: 2,
+          ),
         );
 
         expect(
@@ -598,7 +621,9 @@ void main() {
     );
 
     test("falls back to the default study rest minutes when non-positive", () {
-      final controller = _controller(_subject(restMinutes: 0));
+      final controller = _controller(
+        _subject(restMinutes: 0, focusSessionCount: 2),
+      );
 
       expect(
         controller.restIntervalSeconds,
@@ -1531,7 +1556,7 @@ void main() {
     test("shows elapsed rest time instead of remaining rest time", () {
       final foregroundService = _FakeTimerForegroundService();
       final controller = _controller(
-        _subject(restMinutes: 5),
+        _subject(restMinutes: 5, focusSessionCount: 2),
         timerForegroundService: foregroundService,
       );
       controller.isResting.value = true;

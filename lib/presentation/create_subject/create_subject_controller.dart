@@ -232,10 +232,10 @@ class CreateSubjectController extends GetxController
       selectedIconName.value = subject.iconName.isEmpty
           ? SubjectIcons.suggestionsFor(category).first
           : subject.iconName;
-      restMinutes.value = category == TimeCategoryType.exercises
-          ? subject.restSeconds
-          : subject.restMinutes > 0
+      restMinutes.value = subject.restMinutes > 0
           ? subject.restMinutes
+          : category == TimeCategoryType.exercises
+          ? SubjectEntity.defaultRestSeconds
           : SubjectEntity.defaultRestMinutes;
       restMinutesController.text = restMinutes.value.toString();
       focusSessionCount.value = subject.focusSessionCount;
@@ -313,9 +313,11 @@ class CreateSubjectController extends GetxController
     final int normalizedFocusSessionCount = hasNoFocusRoutine
         ? 1
         : focusSessionCount.value;
-    final int normalizedRestMinutes = category == TimeCategoryType.hobbies
-        ? 0
-        : restMinutes.value;
+    // A break sits between two sessions, so a single-session subject stores
+    // none. This covers hobbies, which always normalize to one session.
+    final int normalizedRestMinutes = normalizedFocusSessionCount > 1
+        ? restMinutes.value
+        : 0;
     final SubjectEntity? subject = editingSubject;
     final Either<AppError, SubjectEntity> result = subject == null
         ? await _addSubjectUseCase(

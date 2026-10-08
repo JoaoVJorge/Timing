@@ -513,6 +513,9 @@ class CreateGroupController extends GetxController
     final bool isHobby = category == TimeCategoryType.hobbies;
     final bool isPermanent =
         activityType.value == SubjectActivityType.permanent;
+    // One session means no break to place between sessions.
+    final bool hasSingleSession =
+        isReading || isHobby || isPermanent || focusSessionCount.value <= 1;
     return GroupActivityDraft.subject(
       name: name,
       sourceIds: useExistingActivities.value
@@ -523,10 +526,8 @@ class CreateGroupController extends GetxController
       goalSeconds: isReading ? 0 : goalNumber * (isPermanent ? 3600 : 60),
       goalPages: isReading ? goalNumber : 0,
       iconName: selectedIconName.value,
-      restMinutes: isHobby ? 0 : restMinutes.value,
-      focusSessionCount: isReading || isHobby || isPermanent
-          ? 1
-          : focusSessionCount.value,
+      restMinutes: hasSingleSession ? 0 : restMinutes.value,
+      focusSessionCount: hasSingleSession ? 1 : focusSessionCount.value,
       wallpaperIndex: wallpaperIndex.value,
       activityType: activityType.value.name,
     );

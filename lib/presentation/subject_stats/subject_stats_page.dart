@@ -238,7 +238,7 @@ class _StatsGrid extends StatelessWidget {
             ),
             goalStart,
             activityType,
-            if (!controller.isHobby)
+            if (subject.hasRest)
               _StatItem(
                 icon: Icons.local_cafe_rounded,
                 value: _restValue(context, subject),

@@ -96,7 +96,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   late final RxInt restCountdownSeconds =
       (restoredSession?.restCountdownSeconds ?? restIntervalSeconds).obs;
   late final RxBool isRunning = (restoredSession?.isRunning ?? true).obs;
-  late final RxBool isResting = (restoredSession?.isResting ?? false).obs;
+  late final RxBool isResting =
+      (subject.hasRest && (restoredSession?.isResting ?? false)).obs;
   final RxBool isSessionFinished = false.obs;
   final Rx<FocusProtectionStatus> focusProtectionStatus =
       FocusProtectionStatus.unavailable.obs;
@@ -188,7 +189,9 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       !isResting.value &&
       !isSessionFinished.value;
 
-  int get restIntervalSeconds => subject.restSeconds > 0
+  int get restIntervalSeconds => !subject.hasRest
+      ? 0
+      : subject.restSeconds > 0
       ? subject.restSeconds
       : SubjectEntity.defaultRestSeconds;
 
@@ -941,7 +944,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         return;
       }
     }
-    isResting.value = value.isResting;
+    isResting.value = subject.hasRest && value.isResting;
     isRunning.value = value.isRunning;
     _syncFocusGuard();
   }

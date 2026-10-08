@@ -104,9 +104,18 @@ class SubjectEntity extends Equatable {
   /// subject targets 60 minutes, not 30.
   int get totalGoalSeconds => goalSeconds * sessionCount;
 
+  /// A break only exists *between* two focus sessions, so a subject that runs
+  /// a single session has none. Reading and hobbies are continuous and always
+  /// fall here through [sessionCount].
+  bool get hasRest => sessionCount > 1;
+
   /// Exercises store break duration in seconds. Other activity categories keep
-  /// the original minute-based value.
+  /// the original minute-based value. Zero when the subject has no break at
+  /// all — see [hasRest].
   int get restSeconds {
+    if (!hasRest) {
+      return 0;
+    }
     if (restMinutes <= 0) {
       return category == TimeCategoryType.exercises
           ? defaultRestSeconds
