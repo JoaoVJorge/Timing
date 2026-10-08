@@ -7,7 +7,6 @@ import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/presentation/schedule/widgets/schedule_date_strip.dart";
-import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 import "package:timing/shared/functions/format_calendar_labels.dart";
 import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/app_icon.dart";
@@ -76,9 +75,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
   void initState() {
     super.initState();
     _prefillFromEntry();
-    _titleController.addListener(_rebuildPreview);
-    _startTimeController.addListener(_rebuildPreview);
-    _endTimeController.addListener(_rebuildPreview);
+    _titleController.addListener(_onFormChanged);
+    _startTimeController.addListener(_onFormChanged);
+    _endTimeController.addListener(_onFormChanged);
     _startTimeFocusNode.addListener(_onStartFocusChanged);
     _endTimeFocusNode.addListener(_onEndFocusChanged);
   }
@@ -132,9 +131,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
 
   @override
   void dispose() {
-    _titleController.removeListener(_rebuildPreview);
-    _startTimeController.removeListener(_rebuildPreview);
-    _endTimeController.removeListener(_rebuildPreview);
+    _titleController.removeListener(_onFormChanged);
+    _startTimeController.removeListener(_onFormChanged);
+    _endTimeController.removeListener(_onFormChanged);
     _startTimeFocusNode.removeListener(_onStartFocusChanged);
     _endTimeFocusNode.removeListener(_onEndFocusChanged);
     _titleController.dispose();
@@ -145,7 +144,7 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
     super.dispose();
   }
 
-  void _rebuildPreview() {
+  void _onFormChanged() {
     if (mounted) {
       setState(() {});
     }
@@ -229,11 +228,9 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       showBackButton: true,
     ),
     bottomBar: _SubmitButton(
-      isEnabled: _isComplete,
       label: _isEditing
           ? context.l10n.saveChangesButton
           : context.l10n.createScheduleEntryButton,
-      hint: _isComplete ? null : _missingFieldsHint(context),
       onTap: _onSubmit,
     ),
     body: SingleChildScrollView(
@@ -364,25 +361,10 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
               onSelect: (color) => setState(() => _selectedColor = color),
             ),
           ),
-          const Gap(AppSpacing.page),
-          _FormSection(
-            title: context.l10n.schedulePreviewSection,
-            icon: Icons.visibility_rounded,
-            child: _PreviewFrame(
-              child: ScheduleEntryTile(entry: _previewEntry),
-            ),
-          ),
         ],
       ),
     ),
   );
-
-  bool get _isComplete {
-    final int? start = _startMinutes;
-    final int? end = _endMinutes;
-    return _titleController.text.trim().isNotEmpty &&
-        (start == null || end == null || end > start);
-  }
 
   Future<void> _pickTime(TextEditingController controller) async {
     final ({int hour, int minute})? current = _parseTime(controller.text);
@@ -399,22 +381,6 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
         "${picked.hour.toString().padLeft(2, "0")}:"
         "${picked.minute.toString().padLeft(2, "0")}";
   }
-
-  String get _previewTitle {
-    final String title = _titleController.text.trim();
-    return title.isEmpty ? context.l10n.scheduleTitleHint : title;
-  }
-
-  ScheduleEntryEntity get _previewEntry => ScheduleEntryEntity(
-    id: "schedule-preview",
-    title: _previewTitle,
-    weekday: _selectedWeekdays.first,
-    startMinutes: _startMinutes,
-    endMinutes: _endMinutes,
-    colorValue: _selectedColor.toARGB32(),
-    activeFrom: _activeFrom,
-    activeUntil: _activeUntil,
-  );
 
   void _toggleWeekday(int weekday) {
     setState(() {
@@ -491,12 +457,5 @@ class _AddScheduleEntryPageState extends State<AddScheduleEntryPage> {
       return context.l10n.scheduleDurationHours(hours);
     }
     return context.l10n.scheduleDurationHoursMinutes(hours, minutes);
-  }
-
-  String _missingFieldsHint(BuildContext context) {
-    if (_titleController.text.trim().isEmpty) {
-      return context.l10n.scheduleTitleRequiredError;
-    }
-    return context.l10n.endTimeBeforeStartError;
   }
 }

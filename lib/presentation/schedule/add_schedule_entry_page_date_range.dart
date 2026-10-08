@@ -66,7 +66,7 @@ class _DateChip extends StatelessWidget {
     pressedScale: 0.98,
     child: Container(
       constraints: const BoxConstraints(minHeight: 58),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: context.colorTokens.surface,
         borderRadius: BorderRadius.circular(14),
@@ -74,20 +74,26 @@ class _DateChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: context.colorTokens.primary, size: 20),
-          const Gap(6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodySmall.copyWith(
-                    color: context.colorTokens.textHint,
-                    fontWeight: FontWeight.w800,
-                  ),
+                Row(
+                  children: [
+                    Icon(icon, color: context.colorTokens.primary, size: 16),
+                    const Gap(6),
+                    Expanded(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.bodySmall.copyWith(
+                          color: context.colorTokens.textHint,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const Gap(2),
                 FittedBox(
@@ -97,7 +103,6 @@ class _DateChip extends StatelessWidget {
                     value,
                     maxLines: 1,
                     style: context.textStyles.bodyMedium.copyWith(
-                      color: context.colorTokens.textBody,
                       fontWeight: FontWeight.w900,
                     ),
                   ),

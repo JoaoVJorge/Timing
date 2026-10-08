@@ -178,94 +178,45 @@ class _WeekdayToggleChip extends StatelessWidget {
   );
 }
 
-class _PreviewFrame extends StatelessWidget {
-  const _PreviewFrame({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      color: context.colorTokens.scaffold.withValues(alpha: 0.48),
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(
-        color: context.colorTokens.primaryVeryLight,
-        width: 1.4,
-      ),
-    ),
-    child: child,
-  );
-}
-
-/// Pinned above the keyboard. When it is disabled it says *why*, instead of
-/// leaving the user tapping a dead button.
 class _SubmitButton extends StatelessWidget {
-  const _SubmitButton({
-    required this.isEnabled,
-    required this.label,
-    required this.hint,
-    required this.onTap,
-  });
+  const _SubmitButton({required this.label, required this.onTap});
 
-  final bool isEnabled;
   final String label;
-  final String? hint;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      if (hint != null) ...[
-        Text(
-          hint!,
-          textAlign: TextAlign.center,
-          style: context.textStyles.caption.copyWith(fontSize: 12),
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    child: BounceTap(
+      pressedScale: 0.97,
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          gradient: context.colorTokens.primaryGradient,
         ),
-        const Gap(AppSpacing.titleToDescription),
-      ],
-      Semantics(
-        button: true,
-        enabled: isEnabled,
-        child: BounceTap(
-          pressedScale: isEnabled ? 0.97 : 1,
-          onTap: onTap,
-          child: Opacity(
-            opacity: isEnabled ? 1 : 0.45,
-            child: Container(
-              width: double.infinity,
-              height: 56,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                gradient: context.colorTokens.primaryGradient,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppIcon(
-                    "schedule",
-                    color: context.colorTokens.primaryForeground,
-                  ),
-                  const Gap(AppSpacing.titleToDescription),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.textPrimaryButton.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppIcon("schedule", color: context.colorTokens.primaryForeground),
+            const Gap(AppSpacing.titleToDescription),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.textPrimaryButton.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
-    ],
+    ),
   );
 }
 
@@ -279,7 +230,6 @@ class _FieldLabel extends StatelessWidget {
     text,
     style: context.textStyles.bodySmall.copyWith(
       fontSize: 14,
-      color: context.colorTokens.textBody,
       fontWeight: FontWeight.w800,
     ),
   );
