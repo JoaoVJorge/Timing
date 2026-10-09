@@ -2101,62 +2101,158 @@ abstract class AppLocalizations {
   /// No description provided for @faqQ1.
   ///
   /// In en, this message translates to:
-  /// **'How does the study timer work?'**
+  /// **'How does the focus timer work?'**
   String get faqQ1;
 
   /// No description provided for @faqA1.
   ///
   /// In en, this message translates to:
-  /// **'Pick a subject, tap play, and the timer tracks your current session while adding it to that subject\'s total time. Tap pause any time to stop and save your progress.'**
+  /// **'Pick an activity and tap play. The timer counts the current session and adds it to that activity\'s total as it goes, so pausing or closing the app never loses what you already did.'**
   String get faqA1;
 
   /// No description provided for @faqQ2.
   ///
   /// In en, this message translates to:
-  /// **'What is the break countdown?'**
+  /// **'What are focus sections and breaks?'**
   String get faqQ2;
 
   /// No description provided for @faqA2.
   ///
   /// In en, this message translates to:
-  /// **'Each session follows a focus cycle: a 30 minute countdown to your next break. When it reaches zero it simply resets, it\'s a reminder, not a hard stop.'**
+  /// **'Each activity has a section length and a break length. When a section ends the timer offers the break and counts it down for you, and you can skip it to go straight into the next section.'**
   String get faqA2;
 
   /// No description provided for @faqQ3.
   ///
   /// In en, this message translates to:
-  /// **'How do I add a new subject?'**
+  /// **'What is the difference between a daily and a permanent activity?'**
   String get faqQ3;
 
   /// No description provided for @faqA3.
   ///
   /// In en, this message translates to:
-  /// **'Open a category from Home, then tap \"Add Subject\" at the bottom of the list. You can pick a color and set an estimated hours goal for it.'**
+  /// **'A daily activity starts over every day and you set how many sessions you want to complete in a day. A permanent one has a single total goal, in hours or pages, and stays active until you finish it.'**
   String get faqA3;
 
   /// No description provided for @faqQ4.
   ///
   /// In en, this message translates to:
-  /// **'How are groups and the leaderboard calculated?'**
+  /// **'How do I create an activity?'**
   String get faqQ4;
 
   /// No description provided for @faqA4.
   ///
   /// In en, this message translates to:
-  /// **'Groups show a scoreboard based on the group\'s theme: focus hours, completed goal days or pages read. Switch between Today, Week and Month to compare progress.'**
+  /// **'Open one of the categories on Home — study, exercise, reading or hobbies — and add the activity there. You choose its name, goal, type, color, icon and timer wallpaper.'**
   String get faqA4;
 
   /// No description provided for @faqQ5.
   ///
   /// In en, this message translates to:
-  /// **'Can I change the app\'s color theme?'**
+  /// **'I forgot to start the timer. Can I fix the time?'**
   String get faqQ5;
 
   /// No description provided for @faqA5.
   ///
   /// In en, this message translates to:
-  /// **'Yes, go to Settings > My Profile and pick any theme color. Every gradient, button and highlight across the app updates to match it, including dark mode.'**
+  /// **'Yes. Open the activity\'s statistics and use Adjust time. Time you add counts as done today, and time you remove comes off the most recent sessions.'**
   String get faqA5;
+
+  /// No description provided for @faqQ6.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I start an activity over without deleting it?'**
+  String get faqQ6;
+
+  /// No description provided for @faqA6.
+  ///
+  /// In en, this message translates to:
+  /// **'In the activity\'s statistics, use Clear data: time, pages and history go back to zero and the activity stays. If it belongs to a group, your progress leaves that group\'s ranking too, and this cannot be undone.'**
+  String get faqA6;
+
+  /// No description provided for @faqQ7.
+  ///
+  /// In en, this message translates to:
+  /// **'How do daily goals and the streak work?'**
+  String get faqQ7;
+
+  /// No description provided for @faqA7.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily goals are the short list for today on Home: write your own or take one of the suggestions, and swipe a goal to the left to edit or delete it. Your streak counts the days in a row you kept your progress going.'**
+  String get faqA7;
+
+  /// No description provided for @faqQ8.
+  ///
+  /// In en, this message translates to:
+  /// **'How does a reading activity count pages?'**
+  String get faqQ8;
+
+  /// No description provided for @faqA8.
+  ///
+  /// In en, this message translates to:
+  /// **'A reading activity has a page goal instead of hours. You update the current page as you read, and each book keeps its own notes for whatever you want to remember.'**
+  String get faqA8;
+
+  /// No description provided for @faqQ9.
+  ///
+  /// In en, this message translates to:
+  /// **'How is the group ranking calculated?'**
+  String get faqQ9;
+
+  /// No description provided for @faqA9.
+  ///
+  /// In en, this message translates to:
+  /// **'The group\'s theme defines the metric: study hours, exercise hours, hobby hours, pages read or completed goal days. Only that kind of progress counts, and you can switch between Today, Week and Month.'**
+  String get faqA9;
+
+  /// No description provided for @faqQ10.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I bring someone into a group?'**
+  String get faqQ10;
+
+  /// No description provided for @faqA10.
+  ///
+  /// In en, this message translates to:
+  /// **'Any member can share the group\'s link or invite a friend. The request goes to the leader, who accepts or declines it on the members screen, where they also hand over the leadership or remove someone.'**
+  String get faqA10;
+
+  /// No description provided for @faqQ11.
+  ///
+  /// In en, this message translates to:
+  /// **'Does my schedule go into Google Calendar?'**
+  String get faqQ11;
+
+  /// No description provided for @faqA11.
+  ///
+  /// In en, this message translates to:
+  /// **'If you connect Google Calendar on the schedule screen, every appointment you create in Timing is added there automatically. Without connecting it, the schedule simply stays in the app.'**
+  String get faqA11;
+
+  /// No description provided for @faqQ12.
+  ///
+  /// In en, this message translates to:
+  /// **'Does the app work without internet?'**
+  String get faqQ12;
+
+  /// No description provided for @faqA12.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. You keep timing and saving offline, and the changes sync by themselves once you are back online. Until then, groups show the last data they managed to load.'**
+  String get faqA12;
+
+  /// No description provided for @faqQ13.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I change how the app looks?'**
+  String get faqQ13;
+
+  /// No description provided for @faqA13.
+  ///
+  /// In en, this message translates to:
+  /// **'In Settings > My Profile you pick the theme color, and every gradient, button and highlight follows it, dark mode included. Each activity also picks its own timer wallpaper.'**
+  String get faqA13;
 
   /// No description provided for @createGroupTitle.
   ///

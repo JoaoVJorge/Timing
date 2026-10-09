@@ -1127,39 +1127,96 @@ class AppLocalizationsPt extends AppLocalizations {
   String get faqTitle => 'Perguntas frequentes';
 
   @override
-  String get faqQ1 => 'Como funciona o timer de estudo?';
+  String get faqQ1 => 'Como funciona o timer de foco?';
 
   @override
   String get faqA1 =>
-      'Escolha uma matéria, toque em play, e o timer acompanha sua sessão atual, somando ao tempo total daquela matéria. Toque em pausar a qualquer momento para parar e salvar seu progresso.';
+      'Escolha uma atividade e toque em play. O timer conta a sessão atual e já vai somando ao total daquela atividade, então pausar ou fechar o app não perde o que você já fez.';
 
   @override
-  String get faqQ2 => 'O que é a contagem de pausa?';
+  String get faqQ2 => 'O que são as seções de foco e as pausas?';
 
   @override
   String get faqA2 =>
-      'Cada sessão segue um ciclo de foco: uma contagem regressiva de 30 minutos até sua próxima pausa. Quando chega a zero, ela simplesmente reinicia — é um lembrete, não uma parada obrigatória.';
+      'Cada atividade tem uma duração de seção e uma duração de pausa. Quando a seção termina, o timer oferece a pausa e faz a contagem por você, e você pode pular a pausa pra cair direto na próxima seção.';
 
   @override
-  String get faqQ3 => 'Como adiciono uma nova matéria?';
+  String get faqQ3 =>
+      'Qual a diferença entre uma atividade diária e uma permanente?';
 
   @override
   String get faqA3 =>
-      'Abra uma categoria a partir da Home, depois toque em \"Adicionar Matéria\" no final da lista. Você pode escolher uma cor e definir uma meta de horas estimada.';
+      'A diária começa de novo todo dia e você define quantas sessões quer completar por dia. A permanente tem uma meta total única, em horas ou páginas, e fica ativa até você terminar.';
 
   @override
-  String get faqQ4 => 'Como são calculados os grupos e o placar?';
+  String get faqQ4 => 'Como eu crio uma atividade?';
 
   @override
   String get faqA4 =>
-      'Os grupos mostram um placar baseado no tema: horas de foco, dias de metas concluídas ou páginas lidas. Alterne entre Hoje, Semana e Mês para comparar o progresso.';
+      'Abra uma das categorias na Home — estudos, exercícios, leitura ou hobbies — e adicione a atividade por lá. Você escolhe o nome, a meta, o tipo, a cor, o ícone e o papel de parede do timer.';
 
   @override
-  String get faqQ5 => 'Posso mudar o tema de cores do app?';
+  String get faqQ5 => 'Esqueci de ligar o timer. Dá pra corrigir o tempo?';
 
   @override
   String get faqA5 =>
-      'Sim, vá em Configurações > Meu Perfil e escolha qualquer cor de tema. Todo gradiente, botão e destaque no app se atualiza pra combinar, incluindo o modo escuro.';
+      'Dá. Abra as estatísticas da atividade e use Ajustar tempo. O tempo que você adiciona conta como feito hoje, e o que você remove sai das sessões mais recentes.';
+
+  @override
+  String get faqQ6 => 'Como começo uma atividade do zero sem excluir ela?';
+
+  @override
+  String get faqA6 =>
+      'Nas estatísticas da atividade, use Limpar dados: tempo, páginas e histórico voltam pra zero e a atividade continua existindo. Se ela for de um grupo, o seu progresso também sai do ranking do grupo, e isso não tem como desfazer.';
+
+  @override
+  String get faqQ7 => 'Como funcionam as metas diárias e a sequência?';
+
+  @override
+  String get faqA7 =>
+      'As metas diárias são a lista curta do dia na Home: escreva a sua ou pegue uma das sugestões, e arraste a meta pra esquerda pra editar ou excluir. A sequência conta os dias seguidos em que você manteve o progresso.';
+
+  @override
+  String get faqQ8 => 'Como uma atividade de leitura conta as páginas?';
+
+  @override
+  String get faqA8 =>
+      'A leitura tem meta de páginas em vez de horas. Você atualiza a página atual conforme lê, e cada livro guarda as próprias anotações do que você quiser lembrar.';
+
+  @override
+  String get faqQ9 => 'Como o ranking do grupo é calculado?';
+
+  @override
+  String get faqA9 =>
+      'O tema do grupo define a métrica: horas de estudo, horas de exercício, horas de hobby, páginas lidas ou dias de metas concluídas. Só o progresso daquele tipo conta, e você pode alternar entre Hoje, Semana e Mês.';
+
+  @override
+  String get faqQ10 => 'Como eu chamo alguém pro grupo?';
+
+  @override
+  String get faqA10 =>
+      'Qualquer membro pode compartilhar o link do grupo ou convidar um amigo. O pedido vai pro líder, que aceita ou recusa na tela de membros, e é lá também que ele passa a liderança ou remove alguém.';
+
+  @override
+  String get faqQ11 => 'Minha agenda vai pro Google Calendar?';
+
+  @override
+  String get faqA11 =>
+      'Se você conectar o Google Calendar na tela da agenda, todo compromisso criado no Timing é adicionado lá automaticamente. Sem conectar, a agenda fica só no app.';
+
+  @override
+  String get faqQ12 => 'O app funciona sem internet?';
+
+  @override
+  String get faqA12 =>
+      'Funciona. Você continua marcando tempo e salvando offline, e as mudanças sincronizam sozinhas quando a conexão volta. Até lá, os grupos mostram os últimos dados que conseguiram carregar.';
+
+  @override
+  String get faqQ13 => 'Posso mudar a aparência do app?';
+
+  @override
+  String get faqA13 =>
+      'Em Configurações > Meu Perfil você escolhe a cor do tema, e todo gradiente, botão e destaque acompanha, incluindo o modo escuro. Cada atividade também escolhe o próprio papel de parede do timer.';
 
   @override
   String get createGroupTitle => 'Novo grupo';

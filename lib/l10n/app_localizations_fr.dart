@@ -1141,41 +1141,100 @@ class AppLocalizationsFr extends AppLocalizations {
   String get faqTitle => 'FAQ';
 
   @override
-  String get faqQ1 => 'Comment fonctionne le minuteur d\'étude ?';
+  String get faqQ1 => 'Comment fonctionne le minuteur de concentration ?';
 
   @override
   String get faqA1 =>
-      'Choisissez un sujet, appuyez sur Lecture et le minuteur suit votre session en cours tout en l\'ajoutant à la durée totale de ce sujet. Appuyez sur pause à tout moment pour arrêter et enregistrer votre progression.';
+      'Choisissez une activité et appuyez sur lecture. Le minuteur compte la session en cours et l\'ajoute au total de cette activité au fur et à mesure : mettre en pause ou fermer l\'app ne perd jamais ce qui est déjà fait.';
 
   @override
-  String get faqQ2 => 'Qu\'est-ce que le compte à rebours des pauses ?';
+  String get faqQ2 => 'Que sont les sections de concentration et les pauses ?';
 
   @override
   String get faqA2 =>
-      'Chaque séance suit un cycle de concentration : un compte à rebours de 30 minutes jusqu\'à votre prochaine pause. Lorsqu\'il atteint zéro, il se réinitialise simplement, c\'est un rappel, pas un arrêt brutal.';
+      'Chaque activité a une durée de section et une durée de pause. Quand la section se termine, le minuteur propose la pause et la décompte pour vous, et vous pouvez la passer pour enchaîner sur la section suivante.';
 
   @override
-  String get faqQ3 => 'Comment ajouter un nouveau sujet ?';
+  String get faqQ3 =>
+      'Quelle est la différence entre une activité quotidienne et une activité permanente ?';
 
   @override
   String get faqA3 =>
-      'Ouvrez une catégorie depuis Accueil, puis appuyez sur « Ajouter un sujet » au bas de la liste. Vous pouvez choisir une couleur et définir un objectif d’heures estimé pour celle-ci.';
+      'La quotidienne repart à zéro chaque jour et vous définissez combien de sessions vous voulez terminer par jour. La permanente a un seul objectif total, en heures ou en pages, et reste active jusqu\'à ce que vous l\'ayez atteint.';
 
   @override
-  String get faqQ4 =>
-      'Comment les groupes et le classement sont-ils calculés ?';
+  String get faqQ4 => 'Comment créer une activité ?';
 
   @override
   String get faqA4 =>
-      'Les groupes affichent un tableau de bord basé sur le thème du groupe : heures de concentration, jours d\'objectifs atteints ou pages lues. Basculez entre Aujourd’hui, Semaine et Mois pour comparer les progrès.';
+      'Ouvrez une des catégories sur l\'Accueil — études, sport, lecture ou loisirs — et ajoutez l\'activité là. Vous choisissez son nom, son objectif, son type, sa couleur, son icône et le fond du minuteur.';
 
   @override
   String get faqQ5 =>
-      'Puis-je modifier le thème de couleur de l\'application ?';
+      'J\'ai oublié de lancer le minuteur. Puis-je corriger le temps ?';
 
   @override
   String get faqA5 =>
-      'Oui, accédez à Paramètres > Mon profil et choisissez n\'importe quelle couleur de thème. Chaque dégradé, bouton et surbrillance de l\'application est mis à jour pour y correspondre, y compris le mode sombre.';
+      'Oui. Ouvrez les statistiques de l\'activité et utilisez Ajuster le temps. Le temps ajouté compte comme fait aujourd\'hui, et le temps retiré est pris sur les sessions les plus récentes.';
+
+  @override
+  String get faqQ6 =>
+      'Comment repartir de zéro sur une activité sans la supprimer ?';
+
+  @override
+  String get faqA6 =>
+      'Dans les statistiques de l\'activité, utilisez Effacer les données : temps, pages et historique reviennent à zéro et l\'activité reste. Si elle appartient à un groupe, votre progression quitte aussi ce classement, et c\'est irréversible.';
+
+  @override
+  String get faqQ7 =>
+      'Comment fonctionnent les objectifs du jour et la série ?';
+
+  @override
+  String get faqA7 =>
+      'Les objectifs du jour forment la courte liste du jour sur l\'Accueil : écrivez le vôtre ou prenez une suggestion, et faites glisser un objectif vers la gauche pour le modifier ou le supprimer. La série compte les jours d\'affilée où vous avez maintenu votre progression.';
+
+  @override
+  String get faqQ8 =>
+      'Comment une activité de lecture compte-t-elle les pages ?';
+
+  @override
+  String get faqA8 =>
+      'La lecture a un objectif de pages au lieu d\'heures. Vous mettez à jour la page actuelle au fil de la lecture, et chaque livre garde ses propres notes pour ce que vous voulez retenir.';
+
+  @override
+  String get faqQ9 => 'Comment le classement du groupe est-il calculé ?';
+
+  @override
+  String get faqA9 =>
+      'Le thème du groupe définit la métrique : heures d\'étude, heures de sport, heures de loisirs, pages lues ou jours d\'objectifs atteints. Seule cette progression compte, et vous pouvez basculer entre Aujourd\'hui, Semaine et Mois.';
+
+  @override
+  String get faqQ10 => 'Comment faire entrer quelqu\'un dans un groupe ?';
+
+  @override
+  String get faqA10 =>
+      'N\'importe quel membre peut partager le lien du groupe ou inviter un ami. La demande part vers le chef, qui l\'accepte ou la refuse sur l\'écran des membres, où il peut aussi transmettre la direction ou retirer quelqu\'un.';
+
+  @override
+  String get faqQ11 => 'Mon agenda part-il dans Google Calendar ?';
+
+  @override
+  String get faqA11 =>
+      'Si vous connectez Google Calendar sur l\'écran de l\'agenda, chaque rendez-vous créé dans Timing y est ajouté automatiquement. Sans cette connexion, l\'agenda reste uniquement dans l\'app.';
+
+  @override
+  String get faqQ12 => 'L\'app fonctionne-t-elle sans internet ?';
+
+  @override
+  String get faqA12 =>
+      'Oui. Vous continuez à chronométrer et à enregistrer hors ligne, et les changements se synchronisent d\'eux-mêmes dès le retour de la connexion. En attendant, les groupes affichent les dernières données chargées.';
+
+  @override
+  String get faqQ13 => 'Puis-je changer l\'apparence de l\'app ?';
+
+  @override
+  String get faqA13 =>
+      'Dans Paramètres > Mon profil, vous choisissez la couleur du thème, et chaque dégradé, bouton et surbrillance la suit, mode sombre inclus. Chaque activité choisit aussi son propre fond de minuteur.';
 
   @override
   String get createGroupTitle => 'Nouveau groupe';

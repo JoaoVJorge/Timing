@@ -1139,39 +1139,98 @@ class AppLocalizationsDe extends AppLocalizations {
   String get faqTitle => 'FAQ';
 
   @override
-  String get faqQ1 => 'Wie funktioniert der Lerntimer?';
+  String get faqQ1 => 'Wie funktioniert der Fokus-Timer?';
 
   @override
   String get faqA1 =>
-      'Wählen Sie ein Thema aus, tippen Sie auf „Wiedergabe“ und der Timer verfolgt Ihre aktuelle Sitzung und addiert sie zur Gesamtzeit dieses Themas. Tippen Sie jederzeit auf „Pause“, um anzuhalten und Ihren Fortschritt zu speichern.';
+      'Wählen Sie eine Aktivität und tippen Sie auf Start. Der Timer zählt die laufende Sitzung und rechnet sie fortlaufend auf die Gesamtzeit dieser Aktivität an — pausieren oder die App schließen verliert also nichts vom bereits Geschafften.';
 
   @override
-  String get faqQ2 => 'Was ist der Pausen-Countdown?';
+  String get faqQ2 => 'Was sind Fokusabschnitte und Pausen?';
 
   @override
   String get faqA2 =>
-      'Jede Sitzung folgt einem Fokuszyklus: einem 30-minütigen Countdown bis zur nächsten Pause. Wenn der Wert Null erreicht, wird er einfach zurückgesetzt. Es handelt sich um eine Erinnerung und nicht um einen harten Stopp.';
+      'Jede Aktivität hat eine Abschnittsdauer und eine Pausendauer. Endet der Abschnitt, bietet der Timer die Pause an und zählt sie für Sie herunter; Sie können sie überspringen und direkt in den nächsten Abschnitt gehen.';
 
   @override
-  String get faqQ3 => 'Wie füge ich einen neuen Betreff hinzu?';
+  String get faqQ3 =>
+      'Was ist der Unterschied zwischen einer täglichen und einer dauerhaften Aktivität?';
 
   @override
   String get faqA3 =>
-      'Öffnen Sie auf der Startseite eine Kategorie und tippen Sie dann unten in der Liste auf „Betreff hinzufügen“. Sie können eine Farbe auswählen und ein geschätztes Stundenziel dafür festlegen.';
+      'Eine tägliche Aktivität beginnt jeden Tag neu, und Sie legen fest, wie viele Sitzungen Sie pro Tag abschließen möchten. Eine dauerhafte hat ein einziges Gesamtziel in Stunden oder Seiten und bleibt aktiv, bis Sie es erreichen.';
 
   @override
-  String get faqQ4 => 'Wie werden Gruppen und die Bestenliste berechnet?';
+  String get faqQ4 => 'Wie erstelle ich eine Aktivität?';
 
   @override
   String get faqA4 =>
-      'Gruppen zeigen eine Anzeigetafel basierend auf dem Thema der Gruppe: Fokusstunden, erreichte Zieltage oder gelesene Seiten. Wechseln Sie zwischen Heute, Woche und Monat, um den Fortschritt zu vergleichen.';
+      'Öffnen Sie auf der Startseite eine der Kategorien — Lernen, Sport, Lesen oder Hobbys — und fügen Sie die Aktivität dort hinzu. Sie wählen Name, Ziel, Typ, Farbe, Symbol und Timer-Hintergrund.';
 
   @override
-  String get faqQ5 => 'Kann ich das Farbthema der App ändern?';
+  String get faqQ5 =>
+      'Ich habe vergessen, den Timer zu starten. Kann ich die Zeit korrigieren?';
 
   @override
   String get faqA5 =>
-      'Ja, gehen Sie zu Einstellungen > Mein Profil und wählen Sie eine beliebige Designfarbe aus. Jeder Farbverlauf, jede Schaltfläche und jede Hervorhebung in der App wird entsprechend aktualisiert, einschließlich des Dunkelmodus.';
+      'Ja. Öffnen Sie die Statistik der Aktivität und nutzen Sie „Zeit anpassen“. Hinzugefügte Zeit zählt als heute geschafft, entfernte Zeit geht von den neuesten Sitzungen ab.';
+
+  @override
+  String get faqQ6 =>
+      'Wie fange ich bei einer Aktivität neu an, ohne sie zu löschen?';
+
+  @override
+  String get faqA6 =>
+      'Nutzen Sie in der Statistik der Aktivität „Daten löschen“: Zeit, Seiten und Verlauf gehen auf null zurück, die Aktivität bleibt. Gehört sie zu einer Gruppe, verlässt Ihr Fortschritt auch deren Rangliste — das lässt sich nicht widerrufen.';
+
+  @override
+  String get faqQ7 => 'Wie funktionieren Tagesziele und die Serie?';
+
+  @override
+  String get faqA7 =>
+      'Tagesziele sind die kurze Liste für heute auf der Startseite: Schreiben Sie Ihr eigenes oder nehmen Sie einen Vorschlag, und wischen Sie ein Ziel nach links, um es zu bearbeiten oder zu löschen. Die Serie zählt die Tage in Folge, an denen Sie Ihren Fortschritt gehalten haben.';
+
+  @override
+  String get faqQ8 => 'Wie zählt eine Leseaktivität die Seiten?';
+
+  @override
+  String get faqA8 =>
+      'Lesen hat ein Seitenziel statt Stunden. Sie aktualisieren die aktuelle Seite beim Lesen, und jedes Buch behält seine eigenen Notizen für alles, was Sie sich merken wollen.';
+
+  @override
+  String get faqQ9 => 'Wie wird die Gruppenrangliste berechnet?';
+
+  @override
+  String get faqA9 =>
+      'Das Thema der Gruppe bestimmt die Messgröße: Lernstunden, Sportstunden, Hobbystunden, gelesene Seiten oder erreichte Zieltage. Nur dieser Fortschritt zählt, und Sie können zwischen Heute, Woche und Monat wechseln.';
+
+  @override
+  String get faqQ10 => 'Wie hole ich jemanden in eine Gruppe?';
+
+  @override
+  String get faqA10 =>
+      'Jedes Mitglied kann den Gruppenlink teilen oder eine Freundin oder einen Freund einladen. Die Anfrage geht an die Leitung, die sie im Mitgliederbereich annimmt oder ablehnt — dort gibt sie auch die Leitung weiter oder entfernt jemanden.';
+
+  @override
+  String get faqQ11 => 'Landet mein Zeitplan im Google Calendar?';
+
+  @override
+  String get faqA11 =>
+      'Wenn Sie Google Calendar im Zeitplan verbinden, wird jeder in Timing erstellte Termin automatisch dort eingetragen. Ohne Verbindung bleibt der Zeitplan nur in der App.';
+
+  @override
+  String get faqQ12 => 'Funktioniert die App ohne Internet?';
+
+  @override
+  String get faqA12 =>
+      'Ja. Sie messen und speichern offline weiter, und die Änderungen synchronisieren sich von selbst, sobald Sie wieder online sind. Bis dahin zeigen Gruppen die zuletzt geladenen Daten.';
+
+  @override
+  String get faqQ13 => 'Kann ich das Aussehen der App ändern?';
+
+  @override
+  String get faqA13 =>
+      'Unter Einstellungen > Mein Profil wählen Sie die Designfarbe, und jeder Farbverlauf, jede Schaltfläche und jede Hervorhebung folgt ihr, auch im Dunkelmodus. Jede Aktivität wählt zudem ihren eigenen Timer-Hintergrund.';
 
   @override
   String get createGroupTitle => 'Neue Gruppe';
