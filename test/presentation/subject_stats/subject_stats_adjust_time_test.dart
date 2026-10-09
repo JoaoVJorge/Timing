@@ -58,9 +58,19 @@ class _Picker {
   }
 }
 
-Widget _app(Widget home) => GetMaterialApp(
+Widget _app(
+  Widget home, {
+  Brightness brightness = Brightness.light,
+  double textScale = 1,
+}) => GetMaterialApp(
   locale: const Locale("pt"),
-  theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+  theme: AppThemes.build(seed: Colors.blue, brightness: brightness),
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(
+      context,
+    ).copyWith(textScaler: TextScaler.linear(textScale)),
+    child: child!,
+  ),
   supportedLocales: AppLocalizations.supportedLocales,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   home: home,
@@ -163,8 +173,8 @@ void main() {
     test("a failure is reported and the numbers stay", () async {
       final FakeSubjectTimeUseCase remove =
           FakeSubjectTimeUseCase(subject: _subject(), sign: -1)
-            ..failure = GenericAppError(
-              error: "boom",
+            ..failure = UnexpectedError(
+              cause: "boom",
               stackTrace: StackTrace.current,
             );
       final RecordingNavigator navigator = RecordingNavigator();
@@ -327,9 +337,12 @@ void main() {
     Finder plus() => find.byKey(const ValueKey("time-adjustment-plus"));
     Finder minus() => find.byKey(const ValueKey("time-adjustment-minus"));
     Finder confirm() => find.byKey(const ValueKey("time-adjustment-confirm"));
-    String shown(WidgetTester tester) => tester.widget<Text>(value()).data!;
+    String shown(WidgetTester tester) =>
+        tester.widget<TextField>(value()).controller!.text;
 
-    testWidgets("starts at 30 minutes and steps by five", (tester) async {
+    testWidgets("opens a bottom sheet at 30 minutes and steps by one", (
+      tester,
+    ) async {
       Get.put<AppNavigator>(AppNavigator());
       await tester.pumpWidget(
         _app(
@@ -343,17 +356,87 @@ void main() {
       await tester.tap(find.text("open"));
       await tester.pumpAndSettle();
       expect(find.text("Adicionar tempo"), findsOneWidget);
-      expect(shown(tester), "30 min");
+      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(shown(tester), "30");
 
       await tester.tap(plus());
       await tester.pump();
-      expect(shown(tester), "35 min");
+      expect(shown(tester), "31");
 
       await tester.tap(minus());
       await tester.tap(minus());
       await tester.pump();
-      expect(shown(tester), "25 min");
+      expect(shown(tester), "29");
     });
+
+    testWidgets("typed amounts validate before confirmation", (tester) async {
+      int? answer;
+      Get.put<AppNavigator>(AppNavigator());
+      await tester.pumpWidget(
+        _app(
+          TextButton(
+            onPressed: () async => answer = await showTimeAdjustmentDialog(
+              isRemoving: false,
+              maxSeconds: 86400,
+            ),
+            child: const Text("open"),
+          ),
+        ),
+      );
+      await tester.tap(find.text("open"));
+      await tester.pumpAndSettle();
+
+      for (final invalid in ["", "0", "1441"]) {
+        await tester.enterText(value(), invalid);
+        await tester.pump();
+        expect(tester.widget<FilledButton>(confirm()).onPressed, isNull);
+      }
+      await tester.enterText(value(), "27");
+      await tester.pump();
+      expect(find.text("Adicionar 27 min"), findsOneWidget);
+      await tester.tap(confirm());
+      await tester.pumpAndSettle();
+      expect(answer, 27 * 60);
+    });
+
+    testWidgets(
+      "small dark screen keeps confirmation reachable above keyboard",
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(320, 640);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetViewInsets);
+        Get.put<AppNavigator>(AppNavigator());
+        int? answer;
+        await tester.pumpWidget(
+          _app(
+            TextButton(
+              onPressed: () async => answer = await showTimeAdjustmentDialog(
+                isRemoving: false,
+                maxSeconds: 86400,
+              ),
+              child: const Text("open"),
+            ),
+            brightness: Brightness.dark,
+            textScale: 1.5,
+          ),
+        );
+        await tester.tap(find.text("open"));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.enterText(value(), "1440");
+        tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(confirm());
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(tester.getBottomLeft(confirm()).dy, lessThanOrEqualTo(360));
+        await tester.tap(confirm());
+        await tester.pumpAndSettle();
+        expect(answer, 86400);
+      },
+    );
 
     testWidgets("answers with the chosen amount in seconds", (tester) async {
       int? answer;
@@ -376,11 +459,11 @@ void main() {
       await tester.pump();
       await tester.tap(plus());
       await tester.pump();
-      expect(shown(tester), "1h 5 min");
+      expect(shown(tester), "61");
       await tester.tap(confirm());
       await tester.pumpAndSettle();
 
-      expect(answer, 65 * 60);
+      expect(answer, 61 * 60);
     });
 
     testWidgets("cancelling answers nothing", (tester) async {
@@ -400,7 +483,7 @@ void main() {
       await tester.tap(find.text("open"));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text("Cancelar"));
+      await tester.tap(find.byTooltip("Fechar"));
       await tester.pumpAndSettle();
 
       expect(answer, isNull);
@@ -428,13 +511,13 @@ void main() {
 
       expect(find.text("Remover tempo"), findsOneWidget);
       // Starts at the most there is, and only the presets that fit show.
-      expect(shown(tester), "23 min");
+      expect(shown(tester), "23");
       expect(find.text("15 min"), findsOneWidget);
       expect(find.text("30 min"), findsNothing);
 
       await tester.tap(plus(), warnIfMissed: false);
       await tester.pump();
-      expect(shown(tester), "23 min");
+      expect(shown(tester), "23");
 
       await tester.tap(confirm());
       await tester.pumpAndSettle();
@@ -443,7 +526,7 @@ void main() {
       expect(answer, 22 * 60 + 10);
     });
 
-    testWidgets("coming down from the limit lands back on the grid", (
+    testWidgets("steps down from the limit and never exceeds it", (
       tester,
     ) async {
       Get.put<AppNavigator>(AppNavigator());
@@ -461,13 +544,13 @@ void main() {
 
       await tester.tap(minus());
       await tester.pump();
-      expect(shown(tester), "20 min");
+      expect(shown(tester), "22");
 
       await tester.tap(plus());
       await tester.pump();
       await tester.tap(plus());
       await tester.pump();
-      expect(shown(tester), "23 min");
+      expect(shown(tester), "23");
     });
 
     testWidgets("an activity with under a minute can still be emptied", (
@@ -489,7 +572,7 @@ void main() {
       await tester.tap(find.text("open"));
       await tester.pumpAndSettle();
 
-      expect(shown(tester), "1 min");
+      expect(shown(tester), "1");
       await tester.tap(confirm());
       await tester.pumpAndSettle();
 

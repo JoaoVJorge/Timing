@@ -15,7 +15,6 @@ import "package:timing/shared/widgets/app_icon_badge.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_section_header.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
-import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
 
@@ -53,8 +52,8 @@ class SubjectStatsPage extends GetView<SubjectStatsController> {
             const Gap(AppSpacing.betweenSections),
             AppSectionHeader(title: context.l10n.adjustTimeSectionTitle),
             const Gap(AppSpacing.betweenRelated),
-            _AdjustTimeButtons(controller: controller, accent: accent),
-            const Gap(AppSpacing.betweenSections),
+            _AdjustTimeList(controller: controller, accent: accent),
+            const Gap(AppSpacing.betweenRelated + 12),
             _ClearDataButton(controller: controller),
           ],
         ),
@@ -64,91 +63,114 @@ class SubjectStatsPage extends GetView<SubjectStatsController> {
 }
 
 /// Adds time done without the timer, or takes back time it counted by mistake.
-class _AdjustTimeButtons extends StatelessWidget {
-  const _AdjustTimeButtons({required this.controller, required this.accent});
+class _AdjustTimeList extends StatelessWidget {
+  const _AdjustTimeList({required this.controller, required this.accent});
 
   final SubjectStatsController controller;
   final Color accent;
 
   @override
   Widget build(BuildContext context) => Obx(() {
-    final bool isBusy = controller.isAdjustingTime.value;
+    final bool isBusy =
+        controller.isAdjustingTime.value || controller.isClearingData.value;
 
-    return Row(
-      children: [
-        Expanded(
-          child: _AdjustTimeButton(
+    return Material(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          _AdjustTimeRow(
             key: const ValueKey<String>("add-subject-time"),
             icon: Icons.add_rounded,
             label: context.l10n.addTimeButtonLabel,
+            subtitle: context.l10n.addTimeRowSubtitle,
             color: accent,
-            isEnabled: !isBusy,
-            onTap: controller.onAddTime,
+            onTap: isBusy ? null : controller.onAddTime,
           ),
-        ),
-        const Gap(AppSpacing.betweenRelated),
-        Expanded(
-          child: _AdjustTimeButton(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(
+              height: 1,
+              color: context.colorTokens.borderUnfocused.withValues(
+                alpha: 0.55,
+              ),
+            ),
+          ),
+          _AdjustTimeRow(
             key: const ValueKey<String>("remove-subject-time"),
             icon: Icons.remove_rounded,
             label: context.l10n.removeTimeButtonLabel,
+            subtitle: context.l10n.removeTimeRowSubtitle,
             color: accent,
-            isEnabled: !isBusy && controller.canRemoveTime,
-            onTap: controller.onRemoveTime,
+            onTap: !isBusy && controller.canRemoveTime
+                ? controller.onRemoveTime
+                : null,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   });
 }
 
-class _AdjustTimeButton extends StatelessWidget {
-  const _AdjustTimeButton({
+class _AdjustTimeRow extends StatelessWidget {
+  const _AdjustTimeRow({
     required this.icon,
     required this.label,
+    required this.subtitle,
     required this.color,
-    required this.isEnabled,
     required this.onTap,
     super.key,
   });
 
   final IconData icon;
   final String label;
+  final String subtitle;
   final Color color;
-  final bool isEnabled;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => AbsorbPointer(
-    absorbing: !isEnabled,
-    child: Opacity(
-      opacity: isEnabled ? 1 : 0.45,
-      child: BounceTap(
-        onTap: onTap,
-        child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: color.withValues(alpha: 0.45)),
-          ),
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    enabled: onTap != null,
+    child: InkWell(
+      onTap: onTap,
+      child: Opacity(
+        opacity: onTap == null ? 0.45 : 1,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 22),
-              const Gap(6),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textStyles.bodyMedium.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w900,
-                  ),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(11),
                 ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Gap(3),
+                    Text(subtitle, style: context.textStyles.caption),
+                  ],
+                ),
+              ),
+              const Gap(8),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: context.colorTokens.textHint,
+                size: 20,
               ),
             ],
           ),
@@ -158,53 +180,32 @@ class _AdjustTimeButton extends StatelessWidget {
   );
 }
 
-/// The last thing on the page: deletes the user's own data on this activity,
-/// after asking. The activity stays; its numbers and history go.
+/// A quiet destructive action; the existing confirmation protects the data.
 class _ClearDataButton extends StatelessWidget {
   const _ClearDataButton({required this.controller});
 
   final SubjectStatsController controller;
 
   @override
-  Widget build(BuildContext context) {
-    final Color danger = context.colorTokens.error;
-
-    return Obx(
-      () => AbsorbPointer(
-        absorbing: controller.isClearingData.value,
-        child: Opacity(
-          opacity: controller.isClearingData.value ? 0.6 : 1,
-          child: BounceTap(
-            key: const ValueKey<String>("clear-subject-data"),
-            onTap: controller.onClearData,
-            child: Container(
-              height: 56,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: danger.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: danger.withValues(alpha: 0.45)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.delete_sweep_rounded, color: danger, size: 22),
-                  const Gap(8),
-                  Text(
-                    context.l10n.clearDataButtonLabel,
-                    style: context.textStyles.bodyMedium.copyWith(
-                      color: danger,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  Widget build(BuildContext context) => Obx(
+    () => Center(
+      child: TextButton.icon(
+        key: const ValueKey<String>("clear-subject-data"),
+        onPressed:
+            controller.isClearingData.value || controller.isAdjustingTime.value
+            ? null
+            : controller.onClearData,
+        style: TextButton.styleFrom(
+          foregroundColor: context.colorTokens.error,
+          minimumSize: const Size(0, 48),
+          textStyle: context.textStyles.caption,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
+        icon: const Icon(Icons.delete_outline_rounded, size: 18),
+        label: Text(context.l10n.clearDataButtonLabel),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _SubjectStatsHero extends StatelessWidget {
