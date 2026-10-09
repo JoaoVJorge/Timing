@@ -1,5 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -44,17 +45,23 @@ DailyTaskEntity _task({
 );
 
 void main() {
-  final DailyTasksDataSource dataSource = DailyTasksDataSource(
+  final DailyTasksRepository dataSource = DailyTasksRepository(
+    dailyTasksDataSource: DailyTasksDataSource(
+      supabaseService: _DummySupabase(),
+      logger: AppLoggerService(),
+    ),
     localStorageService: _DummyStorage(),
-    supabaseService: _DummySupabase(),
     logger: _DummyLogger(),
     pendingSyncStore: _DummyPendingSync(),
   );
 
   test("remote deletes stay disabled before the first complete read", () {
-    final nonHydratedDataSource = DailyTasksDataSource(
+    final nonHydratedDataSource = DailyTasksRepository(
+      dailyTasksDataSource: DailyTasksDataSource(
+        supabaseService: _SignedInSupabase(),
+        logger: AppLoggerService(),
+      ),
       localStorageService: _DummyStorage(),
-      supabaseService: _SignedInSupabase(),
       logger: _DummyLogger(),
       pendingSyncStore: _DummyPendingSync(),
     );
@@ -62,7 +69,7 @@ void main() {
     expect(nonHydratedDataSource.canDeleteRemoteTasks("user-1"), isFalse);
   });
 
-  group("DailyTasksDataSource.mergeTasks last-write-wins", () {
+  group("DailyTasksRepository.mergeTasks last-write-wins", () {
     test("keeps a fresh local change over a stale remote copy", () {
       final DateTime now = DateTime.now().toUtc();
       // Local has just marked yesterday (newer); remote is still the old copy.
@@ -174,5 +181,62 @@ void main() {
         expect(merged.single.completedDates, ["2026-08-25"]);
       },
     );
+  });
+
+  group("DailyTasksRepository.mergeTasks deletions made elsewhere", () {
+    final DailyTaskEntity kept = _task(id: "kept", completedDates: const []);
+
+    test("drops a goal the backend once held and no longer does", () {
+      final List<DailyTaskEntity> merged = dataSource.mergeTasks(
+        localTasks: [
+          kept,
+          _task(id: "deleted", completedDates: const []),
+        ],
+        remoteTasks: [kept],
+        syncedIds: {"kept", "deleted"},
+      );
+
+      expect(merged.map((task) => task.id), ["kept"]);
+    });
+
+    test("keeps a goal created here that was never uploaded", () {
+      final List<DailyTaskEntity> merged = dataSource.mergeTasks(
+        localTasks: [
+          kept,
+          _task(id: "new", completedDates: const []),
+        ],
+        remoteTasks: [kept],
+        syncedIds: {"kept"},
+      );
+
+      expect(merged.map((task) => task.id).toSet(), {"kept", "new"});
+    });
+
+    test("drops a leftover group goal the backend does not hold", () {
+      final List<DailyTaskEntity> merged = dataSource.mergeTasks(
+        localTasks: [
+          kept,
+          _task(
+            id: "grp_activity-9",
+            completedDates: const ["2026-08-25"],
+            groupId: "left-group",
+            groupActivityId: "activity-9",
+          ),
+        ],
+        remoteTasks: [kept],
+      );
+
+      expect(merged.map((task) => task.id), ["kept"]);
+    });
+
+    test("an empty read never drops what this device holds", () {
+      final List<DailyTaskEntity> merged = dataSource.mergeTasks(
+        localTasks: [kept],
+        remoteTasks: const [],
+        syncedIds: {"kept"},
+      );
+
+      expect(merged.map((task) => task.id), ["kept"]);
+    });
   });
 }

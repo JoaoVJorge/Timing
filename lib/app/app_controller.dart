@@ -9,16 +9,14 @@ import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/route_arguments.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
+import "package:timing/core/data/repositories/profile_sync_repository.dart";
+import "package:timing/core/data/repositories/app_config_repository.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/app_config_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_activity_entries_use_case.dart";
-import "package:timing/core/domain/use_cases/get_app_config_use_case.dart";
-import "package:timing/core/domain/use_cases/get_current_profile_use_case.dart";
-import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
-import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
-import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_reconciler.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
@@ -26,6 +24,7 @@ import "package:timing/core/services/auth/offline_grace_period.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/services/deep_links/group_link_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
@@ -46,12 +45,10 @@ import "package:timing/theme/accent_presets.dart";
 
 class AppController extends GetxController with WidgetsBindingObserver {
   AppController({
-    required this._getAppConfigUseCase,
-    required this._getActivityEntriesUseCase,
-    required this._getCurrentProfileUseCase,
-    required this._saveAppConfigUseCase,
-    required this._syncProfileToBackendUseCase,
-    required this._signOutUseCase,
+    required this._appConfigRepository,
+    required this._activityRepository,
+    required this._profileSyncRepository,
+    required this._phoneAuthRepository,
     required this._appNavigator,
     required this._supabaseService,
     required this._timerNotificationService,
@@ -66,12 +63,10 @@ class AppController extends GetxController with WidgetsBindingObserver {
        ).obs,
        isDarkMode = initialIsDarkMode.obs;
 
-  final GetAppConfigUseCase _getAppConfigUseCase;
-  final GetActivityEntriesUseCase _getActivityEntriesUseCase;
-  final GetCurrentProfileUseCase _getCurrentProfileUseCase;
-  final SaveAppConfigUseCase _saveAppConfigUseCase;
-  final SyncProfileToBackendUseCase _syncProfileToBackendUseCase;
-  final SignOutUseCase _signOutUseCase;
+  final AppConfigRepository _appConfigRepository;
+  final ActivityRepository _activityRepository;
+  final ProfileSyncRepository _profileSyncRepository;
+  final PhoneAuthRepository _phoneAuthRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
   final TimerNotificationService _timerNotificationService;
@@ -110,6 +105,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
   Future<bool>? _activityBackfillInProgress;
   DateTime? _lastSubjectsReconcileAt;
   static const Duration _subjectsReconcileGap = Duration(minutes: 10);
+  DateTime? _lastActivityHistoryReadAt;
+  static const Duration _activityHistoryReadGap = Duration(minutes: 1);
   bool _hadQueuedOfflineChanges = false;
 
   static const Duration _presenceHeartbeatInterval = Duration(seconds: 45);
@@ -142,6 +139,11 @@ class AppController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    // A group link can start the app; from here on one that arrives opens the
+    // join screen.
+    if (Get.isRegistered<GroupLinkService>()) {
+      Get.find<GroupLinkService>().start();
+    }
     if (_supabaseService.hasSignedInUser) {
       _startPresenceTracking();
     }
@@ -269,8 +271,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> _loadAppConfig() async {
-    final Either<AppError, AppConfigEntity> result =
-        await _getAppConfigUseCase();
+    final Either<AppError, AppConfigEntity> result = await _appConfigRepository
+        .getAppConfig();
     result.fold((error) => null, _applyConfig);
   }
 
@@ -307,7 +309,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     final bool wasOffline =
         Get.isRegistered<ConnectivityService>() &&
         !Get.find<ConnectivityService>().isOnline.value;
-    await _signOutUseCase();
+    await _phoneAuthRepository.signOut();
     await _appNavigator.offAllNamed(AppRoutes.login);
     if (wasOffline) {
       final BuildContext? context = Get.context;
@@ -365,7 +367,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     _startPresenceTracking();
 
     final Either<AppError, AppConfigEntity?> result =
-        await _getCurrentProfileUseCase();
+        await _profileSyncRepository.getCurrentProfile();
     return await result.fold((error) async => false, (config) async {
       await recordSuccessfulBackendContact();
       if (config == null) {
@@ -373,7 +375,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       }
       final AppConfigEntity mergedConfig = _withLocalDevicePreferences(config);
       _applyConfig(mergedConfig);
-      await _saveAppConfigUseCase(_currentConfig);
+      await _appConfigRepository.saveAppConfig(_currentConfig);
       return config.userName.isNotEmpty;
     });
   }
@@ -441,6 +443,10 @@ class AppController extends GetxController with WidgetsBindingObserver {
     if (_supabaseService.hasSignedInUser) {
       unawaited(_flushPendingAndNotify());
       unawaited(_reconcileActivityHistory());
+      // A group link followed before signing in waited for this moment.
+      if (Get.isRegistered<GroupLinkService>()) {
+        unawaited(Get.find<GroupLinkService>().flushPendingLink());
+      }
     }
   }
 
@@ -472,13 +478,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       return false;
     }
     final List<bool> results = await Future.wait([
-      ActivityHistoryReconciler(
-        fetchEntries: _getActivityEntriesUseCase.call,
-        activityHistory: Get.find<ActivityHistoryService>(),
-        dailyProgress: Get.find<DailyProgressService>(),
-        subjectHistory: Get.find<SubjectDailyHistoryService>(),
-        localStorage: localStorageService,
-      ).reconcile(force: force),
+      _reconcileActivityEntries(force: force),
       _reconcileSubjects(force: force),
     ]);
     final bool changed = results.any((didChange) => didChange);
@@ -486,6 +486,26 @@ class AppController extends GetxController with WidgetsBindingObserver {
       _refreshProgressViews();
     }
     return changed;
+  }
+
+  /// Start, resume and reconnect each ask for a pass and often come together;
+  /// one read of the account's history covers a burst of them.
+  Future<bool> _reconcileActivityEntries({required bool force}) async {
+    final DateTime now = DateTime.now();
+    final DateTime? last = _lastActivityHistoryReadAt;
+    if (!force &&
+        last != null &&
+        now.difference(last) < _activityHistoryReadGap) {
+      return false;
+    }
+    _lastActivityHistoryReadAt = now;
+    return ActivityHistoryReconciler(
+      fetchEntries: _activityRepository.getActivityEntries,
+      activityHistory: Get.find<ActivityHistoryService>(),
+      dailyProgress: Get.find<DailyProgressService>(),
+      subjectHistory: Get.find<SubjectDailyHistoryService>(),
+      localStorage: localStorageService,
+    ).reconcile(force: force);
   }
 
   /// A small read of the account's activities, cheap enough to repeat on every
@@ -521,23 +541,23 @@ class AppController extends GetxController with WidgetsBindingObserver {
 
   Future<void> setDarkMode(bool value) async {
     isDarkMode.value = value;
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> setAccentColor(Color value) async {
     accentColor.value = value;
     await _saveCachedAccentColorValue(value.toARGB32());
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> setAvatarIconIndex(int value) async {
     avatarIconIndex.value = value;
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> setProfilePhotoBase64(String? value) async {
     profilePhotoBase64.value = value;
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> setNotificationsEnabled(bool value) async {
@@ -546,7 +566,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       notificationsEnabled.value = false;
       Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
       _configureGoalReminders();
-      await _saveAppConfigUseCase(_currentConfig);
+      await _appConfigRepository.saveAppConfig(_currentConfig);
       return;
     }
 
@@ -555,7 +575,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     notificationsEnabled.value = allowed;
     Get.find<AchievementUnlockService>().setNotificationsEnabled(allowed);
     _configureGoalReminders();
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> refreshNotificationsEnabledFromSystem() async {
@@ -567,7 +587,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     notificationsEnabled.value = false;
     Get.find<AchievementUnlockService>().setNotificationsEnabled(false);
     _configureGoalReminders();
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Future<void> setLanguageCode(String? value) async {
@@ -579,7 +599,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     // locale change and forcing the app to rebuild with it.
     await Get.updateLocale(_resolvedLocale(value));
     _configureGoalReminders();
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   bool isFocusLockEnabledFor(TimeCategoryType category) => switch (category) {
@@ -599,7 +619,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
     focusLockExercisesEnabled.value = exercises;
     focusLockReadingEnabled.value = reading;
     focusLockHobbiesEnabled.value = hobbies;
-    await _saveAppConfigUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
   }
 
   Locale _resolvedLocale(String? code) {
@@ -642,8 +662,8 @@ class AppController extends GetxController with WidgetsBindingObserver {
     this.profilePhotoBase64.value =
         profilePhotoBase64 ?? this.profilePhotoBase64.value;
 
-    await _saveAppConfigUseCase(_currentConfig);
-    return _syncProfileToBackendUseCase(_currentConfig);
+    await _appConfigRepository.saveAppConfig(_currentConfig);
+    return _profileSyncRepository.syncProfile(_currentConfig);
   }
 
   Future<void> logOut() async {
@@ -653,7 +673,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
       isOnline: false,
     ).timeout(_presenceLogoutWait, onTimeout: () {});
     await localStorageService.deleteCurrentUserData();
-    await _signOutUseCase();
+    await _phoneAuthRepository.signOut();
     userName.value = "";
     nickName.value = "";
     email.value = null;

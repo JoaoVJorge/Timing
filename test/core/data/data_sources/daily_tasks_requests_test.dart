@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -51,9 +52,12 @@ class _Rig {
       );
     });
     store = PendingSyncStore(localStorageService: storage);
-    dataSource = DailyTasksDataSource(
+    dataSource = DailyTasksRepository(
+      dailyTasksDataSource: DailyTasksDataSource(
+        supabaseService: TestSupabaseService(backend.client),
+        logger: AppLoggerService(),
+      ),
       localStorageService: storage,
-      supabaseService: TestSupabaseService(backend.client),
       logger: AppLoggerService(),
       pendingSyncStore: store,
     );
@@ -64,7 +68,7 @@ class _Rig {
   List<DailyTaskEntity> remote = [];
   late final TestBackend backend;
   late final PendingSyncStore store;
-  late final DailyTasksDataSource dataSource;
+  late final DailyTasksRepository dataSource;
 
   void seedLocal(List<DailyTaskEntity> tasks) {
     storage.data[LocalStorageKeys.dailyTasks] = jsonEncode(
@@ -148,5 +152,44 @@ void main() {
     await rig.dataSource.getTasks();
 
     expect(rig.writes("GET"), hasLength(1));
+  });
+
+  test("a goal deleted on another device leaves this one too", () async {
+    rig.remote = [_task("a"), _task("b")];
+    rig.seedLocal([_task("a"), _task("b")]);
+    await rig.dataSource.getTasks();
+    // Another phone deletes a goal after this one read the account.
+    rig.remote = [_task("a")];
+
+    await rig.dataSource.refreshAfterGroupLinkChange();
+
+    final tasks = (await rig.dataSource.getLocalTasks()).getOrElse(() => []);
+    expect(tasks.map((task) => task.id), ["a"]);
+    expect(rig.writes("POST"), isEmpty);
+    expect(rig.writes("DELETE"), isEmpty);
+  });
+
+  test("a goal uploaded here and deleted elsewhere leaves this one", () async {
+    rig.remote = [_task("a")];
+    rig.seedLocal([_task("a")]);
+    await rig.dataSource.getTasksForMutation();
+    await rig.save([_task("a"), _task("fresh")]);
+    // The other phone, which had received it, deletes it.
+    rig.remote = [_task("a")];
+
+    await rig.dataSource.refreshAfterGroupLinkChange();
+
+    final tasks = (await rig.dataSource.getLocalTasks()).getOrElse(() => []);
+    expect(tasks.map((task) => task.id), ["a"]);
+  });
+
+  test("a goal created offline survives a read that lacks it", () async {
+    rig.remote = [_task("a")];
+    rig.seedLocal([_task("a"), _task("offline")]);
+
+    await rig.dataSource.getTasks();
+
+    final tasks = (await rig.dataSource.getLocalTasks()).getOrElse(() => []);
+    expect(tasks.map((task) => task.id).toSet(), {"a", "offline"});
   });
 }

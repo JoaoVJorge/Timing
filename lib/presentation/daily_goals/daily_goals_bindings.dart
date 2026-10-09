@@ -7,10 +7,9 @@ class DailyGoalsBindings extends Bindings {
     Get.put<DailyGoalsController>(
       DailyGoalsController(
         appNavigator: Get.find(),
-        getDailyTasksUseCase: Get.find(),
+        dailyTasksRepository: Get.find(),
         toggleDailyTaskCheckUseCase: Get.find(),
         deleteDailyTaskUseCase: Get.find(),
-        clearDailyTaskDataUseCase: Get.find(),
         lastActivityService: Get.find(),
         achievementUnlockService: Get.find(),
         activityChangeBus: Get.find(),

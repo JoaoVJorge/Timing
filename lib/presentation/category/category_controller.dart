@@ -3,11 +3,11 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/app/route_arguments.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
-import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -15,14 +15,14 @@ import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 class CategoryController extends GetxController {
   CategoryController({
-    required this._getSubjectsUseCase,
+    required this._subjectsRepository,
     required this._deleteSubjectUseCase,
     required this._subjectDailyHistoryService,
     required this._appNavigator,
     required this.category,
   });
 
-  final GetSubjectsUseCase _getSubjectsUseCase;
+  final SubjectsRepository _subjectsRepository;
   final DeleteSubjectUseCase _deleteSubjectUseCase;
   final SubjectDailyHistoryService _subjectDailyHistoryService;
   final AppNavigator _appNavigator;
@@ -58,11 +58,11 @@ class CategoryController extends GetxController {
   Future<void> loadSubjects() async {
     isLoading.value = true;
     final Either<AppError, List<SubjectEntity>> result =
-        await _getSubjectsUseCase();
+        await _subjectsRepository.getSubjects();
     result.fold(
       (error) {
         subjects.clear();
-        _appNavigator.showErrorSnackBar(error.message);
+        _appNavigator.showError(error);
       },
       (allSubjects) => subjects.value = allSubjects
           .where((subject) => subject.category == category)
@@ -211,6 +211,5 @@ class CategoryController extends GetxController {
     }
   }
 
-  void _handleError(AppError error) =>
-      _appNavigator.showErrorSnackBar(error.message);
+  void _handleError(AppError error) => _appNavigator.showError(error);
 }

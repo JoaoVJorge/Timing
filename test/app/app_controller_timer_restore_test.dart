@@ -2,6 +2,10 @@ import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
+import "package:timing/core/data/repositories/profile_sync_repository.dart";
+import "package:timing/core/data/repositories/app_config_repository.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
@@ -10,12 +14,6 @@ import "package:timing/core/domain/entities/app_config_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_activity_entries_use_case.dart";
-import "package:timing/core/domain/use_cases/get_app_config_use_case.dart";
-import "package:timing/core/domain/use_cases/get_current_profile_use_case.dart";
-import "package:timing/core/domain/use_cases/save_app_config_use_case.dart";
-import "package:timing/core/domain/use_cases/sign_out_use_case.dart";
-import "package:timing/core/domain/use_cases/sync_profile_to_backend_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
@@ -30,9 +28,9 @@ class _Noop {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class _FakeGetAppConfigUseCase extends _Noop implements GetAppConfigUseCase {
+class _FakeAppConfigRepository extends _Noop implements AppConfigRepository {
   @override
-  Future<Either<AppError, AppConfigEntity>> call() async =>
+  Future<Either<AppError, AppConfigEntity>> getAppConfig() async =>
       Right(AppConfigEntity.fallback().copyWith(userName: "Timer tester"));
 }
 
@@ -80,18 +78,12 @@ class _FakeAchievementUnlockService extends _Noop
   void setNotificationsEnabled(bool value) {}
 }
 
-class _FakeGetActivityEntriesUseCase extends _Noop
-    implements GetActivityEntriesUseCase {}
+class _FakeActivityRepository extends _Noop implements ActivityRepository {}
 
-class _FakeGetCurrentProfileUseCase extends _Noop
-    implements GetCurrentProfileUseCase {}
+class _FakeProfileSyncRepository extends _Noop
+    implements ProfileSyncRepository {}
 
-class _FakeSaveAppConfigUseCase extends _Noop implements SaveAppConfigUseCase {}
-
-class _FakeSyncProfileToBackendUseCase extends _Noop
-    implements SyncProfileToBackendUseCase {}
-
-class _FakeSignOutUseCase extends _Noop implements SignOutUseCase {}
+class _FakePhoneAuthRepository extends _Noop implements PhoneAuthRepository {}
 
 class _FakeSyncReconciliationService extends _Noop
     implements SyncReconciliationService {}
@@ -158,12 +150,10 @@ void main() {
     );
 
     final controller = AppController(
-      getAppConfigUseCase: _FakeGetAppConfigUseCase(),
-      getActivityEntriesUseCase: _FakeGetActivityEntriesUseCase(),
-      getCurrentProfileUseCase: _FakeGetCurrentProfileUseCase(),
-      saveAppConfigUseCase: _FakeSaveAppConfigUseCase(),
-      syncProfileToBackendUseCase: _FakeSyncProfileToBackendUseCase(),
-      signOutUseCase: _FakeSignOutUseCase(),
+      appConfigRepository: _FakeAppConfigRepository(),
+      activityRepository: _FakeActivityRepository(),
+      profileSyncRepository: _FakeProfileSyncRepository(),
+      phoneAuthRepository: _FakePhoneAuthRepository(),
       appNavigator: AppNavigator(),
       supabaseService: _FakeSupabaseService(),
       timerNotificationService: _FakeTimerNotificationService(),

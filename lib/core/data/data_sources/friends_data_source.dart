@@ -1,104 +1,50 @@
 import "dart:async";
-import "dart:convert";
 
-import "package:dartz/dartz.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friend_presence_entity.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
-import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/services/local_storage/app_local_storage_service.dart";
-import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
-import "package:timing/core/services/sync/pending_sync_store.dart";
-import "package:timing/core/services/sync/sync_error_classifier.dart";
 import "package:timing/core/utils/profile_display_name.dart";
 import "package:timing/theme/group_colors.dart";
 
+/// The friendship tables and RPCs on the backend. Every call goes straight to
+/// Supabase and throws whatever it fails with: caching, queueing for a retry
+/// and turning the failure into an `AppError` belong to `FriendsRepository`.
 class FriendsDataSource {
-  FriendsDataSource({
-    required this._supabaseService,
-    required this._logger,
-    required this._localStorageService,
-    required this._pendingSyncStore,
-    this._isBackendReachable,
-  });
-
-  /// The app's connectivity flag: the offline fallbacks below only apply when
-  /// it says offline or the failure is not a definitive server rejection.
-  final bool Function()? _isBackendReachable;
+  FriendsDataSource({required this._supabaseService, required this._logger});
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
-  final AppLocalStorageService _localStorageService;
-  final PendingSyncStore _pendingSyncStore;
-  static const Duration _offlineFallbackTimeout = Duration(seconds: 8);
-  // Every other remote call below must fail fast on a "connected but no real
-  // internet" network so its try/catch can queue the write for retry or
-  // surface the offline notice, instead of hanging on the platform's own
-  // (much longer) socket timeout.
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its caller can queue the write for retry or surface the
+  // offline notice, instead of hanging on the platform's own (much longer)
+  // socket timeout.
   static const Duration _remoteCallTimeout = Duration(seconds: 10);
 
-  Future<Either<AppError, List<FriendPresenceEntity>>> getPresences(
+  String? get currentUserId => _supabaseService.currentUserId;
+
+  Future<List<FriendPresenceEntity>> fetchPresences(
     List<String> friendIds,
   ) async {
-    if (friendIds.isEmpty) {
-      return const Right([]);
-    }
-    try {
-      final List<Map<String, dynamic>> rows = await _selectRows(
-        table: "profile_presence_status",
-        columns: "id, is_online, last_seen_at",
-        filters: (query) => query.inFilter("id", friendIds),
-      );
-      return Right(
-        rows
-            .map(
-              (row) => FriendPresenceEntity(
-                id: row["id"] as String,
-                isOnline: row["is_online"] as bool? ?? false,
-                lastSeenAt: DateTime.tryParse(
-                  row["last_seen_at"] as String? ?? "",
-                ),
-              ),
-            )
-            .toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    final List<Map<String, dynamic>> rows = await _selectRows(
+      table: "profile_presence_status",
+      columns: "id, is_online, last_seen_at",
+      filters: (query) => query.inFilter("id", friendIds),
+    );
+    return rows
+        .map(
+          (row) => FriendPresenceEntity(
+            id: row["id"] as String,
+            isOnline: row["is_online"] as bool? ?? false,
+            lastSeenAt: DateTime.tryParse(row["last_seen_at"] as String? ?? ""),
+          ),
+        )
+        .toList();
   }
 
-  /// Like [GroupsDataSource.getGroups], this is remote-authoritative shared
-  /// state: try the backend first (unchanged from before), only falling back
-  /// to the last cached snapshot if that fails, with an inner timeout so an
-  /// offline device sees it quickly instead of after a long OS timeout.
-  Future<Either<AppError, FriendsSocialEntity>> getSocial() async {
-    final String? userId = _supabaseService.currentUserId;
-    if (userId == null) {
-      return const Right(FriendsSocialEntity.empty());
-    }
-
-    try {
-      final FriendsSocialEntity social = await _fetchRemoteSocial(
-        userId,
-      ).timeout(_offlineFallbackTimeout);
-      await _cacheSocial(social);
-      return Right(social);
-    } catch (error, stackTrace) {
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      final FriendsSocialEntity? cached = await _readCachedSocial();
-      if (cached != null) {
-        return Right(cached);
-      }
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
-  }
-
-  Future<FriendsSocialEntity> _fetchRemoteSocial(String userId) async {
+  Future<FriendsSocialEntity> fetchSocial(String userId) async {
     final Map<String, dynamic>? profileRow = await _supabaseService
         .requireClient
         .from("profiles")
@@ -169,35 +115,10 @@ class FriendsDataSource {
     );
   }
 
-  Future<Either<AppError, void>> sendFriendRequest(String addresseeId) async {
-    final String? userId = _supabaseService.currentUserId;
-    if (userId == null) {
-      return _signedOut("send a friend request");
-    }
-    try {
-      await _sendFriendRequestRemote(userId, addresseeId);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to send friend request",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _enqueueFriendAction({
-        "type": "sendFriendRequest",
-        "addresseeId": addresseeId,
-      });
-      return const Right(null);
-    }
-  }
-
-  Future<void> _sendFriendRequestRemote(
-    String userId,
-    String addresseeId,
-  ) async {
+  Future<void> sendFriendRequest({
+    required String userId,
+    required String addresseeId,
+  }) async {
     await _supabaseService.requireClient
         .from("friendships")
         .insert({
@@ -208,51 +129,7 @@ class FriendsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> acceptRequest(String friendshipId) async {
-    FriendsSocialEntity acceptInCache(FriendsSocialEntity social) {
-      final FriendEntity? match = _findByFriendshipId(
-        social.requests,
-        friendshipId,
-      );
-      if (match == null) {
-        return social;
-      }
-      return FriendsSocialEntity(
-        inviteCode: social.inviteCode,
-        requests: social.requests
-            .where((item) => item.friendshipId != friendshipId)
-            .toList(),
-        sentRequests: social.sentRequests,
-        friends: [
-          ...social.friends.where((item) => item.id != match.id),
-          match,
-        ],
-      );
-    }
-
-    try {
-      await _acceptRequestRemote(friendshipId);
-      await _updateCachedSocial(acceptInCache);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to accept friend request",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _updateCachedSocial(acceptInCache);
-      await _enqueueFriendAction({
-        "type": "acceptRequest",
-        "friendshipId": friendshipId,
-      });
-      return const Right(null);
-    }
-  }
-
-  Future<void> _acceptRequestRemote(String friendshipId) async {
+  Future<void> acceptRequest(String friendshipId) async {
     await _supabaseService.requireClient
         .from("friendships")
         .update({"status": "accepted"})
@@ -260,40 +137,7 @@ class FriendsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> declineRequest(String friendshipId) async {
-    FriendsSocialEntity declineInCache(FriendsSocialEntity social) =>
-        FriendsSocialEntity(
-          inviteCode: social.inviteCode,
-          requests: social.requests
-              .where((item) => item.friendshipId != friendshipId)
-              .toList(),
-          sentRequests: social.sentRequests,
-          friends: social.friends,
-        );
-
-    try {
-      await _declineRequestRemote(friendshipId);
-      await _updateCachedSocial(declineInCache);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to decline friend request",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _updateCachedSocial(declineInCache);
-      await _enqueueFriendAction({
-        "type": "declineRequest",
-        "friendshipId": friendshipId,
-      });
-      return const Right(null);
-    }
-  }
-
-  Future<void> _declineRequestRemote(String friendshipId) async {
+  Future<void> declineRequest(String friendshipId) async {
     await _supabaseService.requireClient
         .from("friendships")
         .delete()
@@ -301,54 +145,9 @@ class FriendsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> cancelSentRequest({
-    required String addresseeId,
-    String friendshipId = "",
-  }) async {
-    final String? userId = _supabaseService.currentUserId;
-    if (friendshipId.isEmpty && userId == null) {
-      return _signedOut("cancel a friend request");
-    }
-    FriendsSocialEntity cancelInCache(FriendsSocialEntity social) =>
-        FriendsSocialEntity(
-          inviteCode: social.inviteCode,
-          requests: social.requests,
-          sentRequests: social.sentRequests
-              .where(
-                (item) =>
-                    item.friendshipId != friendshipId && item.id != addresseeId,
-              )
-              .toList(),
-          friends: social.friends,
-        );
-    try {
-      await _cancelSentRequestRemote(
-        userId: userId,
-        addresseeId: addresseeId,
-        friendshipId: friendshipId,
-      );
-      await _updateCachedSocial(cancelInCache);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to cancel friend request",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _updateCachedSocial(cancelInCache);
-      await _enqueueFriendAction({
-        "type": "cancelSentRequest",
-        "addresseeId": addresseeId,
-        "friendshipId": friendshipId,
-      });
-      return const Right(null);
-    }
-  }
-
-  Future<void> _cancelSentRequestRemote({
+  /// Without a [friendshipId] the pending request is found by its two ends,
+  /// which needs the signed-in [userId].
+  Future<void> cancelSentRequest({
     required String? userId,
     required String addresseeId,
     required String friendshipId,
@@ -370,54 +169,9 @@ class FriendsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> removeFriend({
-    required String friendId,
-    String friendshipId = "",
-  }) async {
-    final String? userId = _supabaseService.currentUserId;
-    if (friendshipId.isEmpty && userId == null) {
-      return _signedOut("remove a friend");
-    }
-    FriendsSocialEntity removeInCache(FriendsSocialEntity social) =>
-        FriendsSocialEntity(
-          inviteCode: social.inviteCode,
-          requests: social.requests,
-          sentRequests: social.sentRequests,
-          friends: social.friends
-              .where(
-                (item) =>
-                    item.friendshipId != friendshipId && item.id != friendId,
-              )
-              .toList(),
-        );
-    try {
-      await _removeFriendRemote(
-        userId: userId,
-        friendId: friendId,
-        friendshipId: friendshipId,
-      );
-      await _updateCachedSocial(removeInCache);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to remove friend",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!_canUseOfflineFallback(error)) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _updateCachedSocial(removeInCache);
-      await _enqueueFriendAction({
-        "type": "removeFriend",
-        "friendId": friendId,
-        "friendshipId": friendshipId,
-      });
-      return const Right(null);
-    }
-  }
-
-  Future<void> _removeFriendRemote({
+  /// Without a [friendshipId] the friendship is found by its two ends, which
+  /// needs the signed-in [userId].
+  Future<void> removeFriend({
     required String? userId,
     required String friendId,
     required String friendshipId,
@@ -441,129 +195,21 @@ class FriendsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  /// Re-attempts friend actions that failed to reach the backend earlier, in
-  /// the order they were queued. Stops at the first failure so a later
-  /// action (e.g. a cancel after a send) never gets applied out of order.
-  Future<void> flushPendingSync() async {
-    if (!_pendingSyncStore.contains(PendingSyncDataset.friends)) {
-      return;
+  Future<FriendSuggestionEntity?> findByCode(String code) async {
+    final String lookupCode = _normalizeLookupCode(code);
+    if (lookupCode.isEmpty) {
+      return null;
     }
-    final List<Map<String, dynamic>> queue = await _readFriendActionQueue();
-    if (queue.isEmpty) {
-      await _pendingSyncStore.clear(PendingSyncDataset.friends);
-      return;
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("find_profile_by_friend_code", params: {"lookup_code": lookupCode})
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.find_profile_by_friend_code", response);
+    final List<dynamic> rows = response as List<dynamic>;
+    if (rows.isEmpty) {
+      return null;
     }
-
-    int processed = 0;
-    try {
-      for (final Map<String, dynamic> action in queue) {
-        try {
-          await _replayFriendAction(action);
-        } catch (error, stackTrace) {
-          if (!isPermanentSyncFailure(error)) {
-            rethrow;
-          }
-          // The server rejected this action for good (e.g. the request
-          // already exists); keeping it queued would block every later
-          // action forever.
-          _logger.logError(
-            "Dropping a queued friend action the server rejected",
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
-        processed++;
-      }
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to flush a queued friend action",
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    final List<Map<String, dynamic>> remaining = queue.sublist(processed);
-    await _writeFriendActionQueue(remaining);
-    if (remaining.isEmpty) {
-      await _pendingSyncStore.clear(PendingSyncDataset.friends);
-    }
+    return _suggestionFromRow(Map<String, dynamic>.from(rows.first as Map));
   }
-
-  Future<void> _replayFriendAction(Map<String, dynamic> action) async {
-    final String? userId = _supabaseService.currentUserId;
-    switch (action["type"] as String?) {
-      case "sendFriendRequest":
-        if (userId == null) {
-          throw StateError("User must be signed in to send a friend request.");
-        }
-        await _sendFriendRequestRemote(userId, action["addresseeId"] as String);
-      case "acceptRequest":
-        await _acceptRequestRemote(action["friendshipId"] as String);
-      case "declineRequest":
-        await _declineRequestRemote(action["friendshipId"] as String);
-      case "cancelSentRequest":
-        await _cancelSentRequestRemote(
-          userId: userId,
-          addresseeId: action["addresseeId"] as String,
-          friendshipId: action["friendshipId"] as String? ?? "",
-        );
-      case "removeFriend":
-        await _removeFriendRemote(
-          userId: userId,
-          friendId: action["friendId"] as String,
-          friendshipId: action["friendshipId"] as String? ?? "",
-        );
-    }
-  }
-
-  FriendEntity? _findByFriendshipId(
-    List<FriendEntity> entries,
-    String friendshipId,
-  ) {
-    for (final FriendEntity entry in entries) {
-      if (entry.friendshipId == friendshipId) {
-        return entry;
-      }
-    }
-    return null;
-  }
-
-  Future<Either<AppError, FriendSuggestionEntity?>> findByCode(
-    String code,
-  ) async {
-    try {
-      final String lookupCode = _normalizeLookupCode(code);
-      if (lookupCode.isEmpty) {
-        return const Right(null);
-      }
-      final dynamic response = await _supabaseService.requireClient
-          .rpc(
-            "find_profile_by_friend_code",
-            params: {"lookup_code": lookupCode},
-          )
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.find_profile_by_friend_code", response);
-      final List<dynamic> rows = response as List<dynamic>;
-      if (rows.isEmpty) {
-        return const Right(null);
-      }
-      return Right(
-        _suggestionFromRow(Map<String, dynamic>.from(rows.first as Map)),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
-  }
-
-  bool _canUseOfflineFallback(Object error) =>
-      shouldUseOfflineFallback(error, isBackendReachable: _isBackendReachable);
-
-  Left<AppError, T> _signedOut<T>(String action) => Left(
-    GenericAppError(
-      error: StateError("User must be signed in to $action."),
-      stackTrace: StackTrace.current,
-    ),
-  );
 
   Future<List<Map<String, dynamic>>> _selectRows({
     required String table,
@@ -697,65 +343,5 @@ class FriendsDataSource {
       buffer.write(replacements[character] ?? character);
     }
     return buffer.toString();
-  }
-
-  Future<void> _cacheSocial(FriendsSocialEntity social) async {
-    await _localStorageService.write(
-      LocalStorageKeys.cachedFriendsSocial,
-      jsonEncode(social.toMap()),
-    );
-  }
-
-  Future<FriendsSocialEntity?> _readCachedSocial() async {
-    final String? saved = await _localStorageService.read<String?>(
-      LocalStorageKeys.cachedFriendsSocial,
-    );
-    if (saved == null) {
-      return null;
-    }
-    try {
-      return FriendsSocialEntity.fromMap(
-        jsonDecode(saved) as Map<String, dynamic>,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> _updateCachedSocial(
-    FriendsSocialEntity Function(FriendsSocialEntity current) transform,
-  ) async {
-    final FriendsSocialEntity current =
-        await _readCachedSocial() ?? const FriendsSocialEntity.empty();
-    await _cacheSocial(transform(current));
-  }
-
-  Future<void> _enqueueFriendAction(Map<String, dynamic> action) async {
-    final List<Map<String, dynamic>> queue = await _readFriendActionQueue();
-    queue.add(action);
-    await _writeFriendActionQueue(queue);
-    await _pendingSyncStore.markPending(PendingSyncDataset.friends);
-  }
-
-  Future<List<Map<String, dynamic>>> _readFriendActionQueue() async {
-    final String? saved = await _localStorageService.read<String?>(
-      LocalStorageKeys.pendingFriendActions,
-    );
-    if (saved == null) {
-      return [];
-    }
-    try {
-      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
-      return decoded.map((item) => item as Map<String, dynamic>).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  Future<void> _writeFriendActionQueue(List<Map<String, dynamic>> queue) async {
-    await _localStorageService.write(
-      LocalStorageKeys.pendingFriendActions,
-      jsonEncode(queue),
-    );
   }
 }

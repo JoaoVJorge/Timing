@@ -146,9 +146,7 @@ class SubjectStatsController extends GetxController {
     isClearingData.value = true;
     try {
       final result = await _clearSubjectDataUseCase(subjectId: current.id);
-      result.fold((error) => _appNavigator.showErrorSnackBar(error.message), (
-        cleared,
-      ) {
+      result.fold((error) => _appNavigator.showError(error), (cleared) {
         _subject.value = cleared;
         if (cleared.isFromGroup) {
           _activityChangeBus.notifyGroupActivityChanged(
@@ -199,9 +197,7 @@ class SubjectStatsController extends GetxController {
               subjectId: current.id,
               seconds: seconds,
             );
-      result.fold((error) => _appNavigator.showErrorSnackBar(error.message), (
-        updated,
-      ) {
+      result.fold((error) => _appNavigator.showError(error), (updated) {
         _subject.value = updated;
         if (updated.isFromGroup) {
           _activityChangeBus.notifyGroupActivityChanged(

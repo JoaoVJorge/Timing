@@ -192,7 +192,7 @@ class EditGroupController extends GetxController {
     isSaving.value = false;
 
     result.fold(
-      (error) => appNavigator.showErrorSnackBar(error.message),
+      (error) => appNavigator.showError(error),
       (updatedGroup) => appNavigator.back<GroupEntity>(result: updatedGroup),
     );
   }

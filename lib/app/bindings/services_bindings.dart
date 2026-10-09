@@ -1,3 +1,4 @@
+import "package:app_links/app_links.dart";
 import "package:dio/dio.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:get/get.dart";
@@ -8,6 +9,7 @@ import "package:timing/core/services/analytics/logging_analytics_service.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
+import "package:timing/core/services/deep_links/group_link_service.dart";
 import "package:timing/core/services/focus/focus_feedback_service.dart";
 import "package:timing/core/services/focus/focus_guard_service.dart";
 import "package:timing/core/services/foreground/timer_foreground_service.dart";
@@ -24,6 +26,8 @@ import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 import "package:timing/core/services/timer/active_timer_session_service.dart";
+import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
 import "package:timing/env/environment_keys.dart";
 
 class ServicesBindings extends Bindings {
@@ -61,6 +65,21 @@ class ServicesBindings extends Bindings {
 
     final SupabaseService supabaseService = await SupabaseService.initialize();
     Get.put<SupabaseService>(supabaseService, permanent: true);
+    // A group link asks its leader to let the user in; it joins nothing by
+    // itself, and one that arrives signed out waits for the sign-in.
+    Get.put<GroupLinkService>(
+      GroupLinkService(
+        links: AppLinks().uriLinkStream,
+        isSignedIn: () => supabaseService.hasSignedInUser,
+        openJoinScreen: (code) async {
+          await Get.find<AppNavigator>().toNamed<void>(
+            AppRoutes.joinGroup,
+            arguments: code,
+          );
+        },
+      ),
+      permanent: true,
+    );
 
     Get.put<AppLocalStorageService>(
       AppLocalStorageService(

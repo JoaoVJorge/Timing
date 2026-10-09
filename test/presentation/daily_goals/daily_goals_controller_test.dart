@@ -4,23 +4,19 @@ import "package:dartz/dartz.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
-import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
-class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
-  _ControllableDailyTasksDataSource(this.tasks, {this.failSaves = false});
+class _ControllableDailyTasksRepository implements DailyTasksRepository {
+  _ControllableDailyTasksRepository(this.tasks, {this.failSaves = false});
 
   List<DailyTaskEntity> tasks;
   final bool failSaves;
@@ -28,9 +24,23 @@ class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
   final Completer<void> releaseFirstSave = Completer<void>();
   int saveCalls = 0;
 
+  Future<void> _mutationTail = Future<void>.value();
+
+  /// The repository's own queue, so the mutations under test are serialized
+  /// exactly as they are in the app.
   @override
-  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async =>
-      Right(List.of(tasks));
+  Future<T> runSerializedMutation<T>(Future<T> Function() mutation) {
+    final Future<T> scheduled = _mutationTail.then((_) => mutation());
+    _mutationTail = scheduled.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return scheduled;
+  }
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() =>
+      runSerializedMutation(() async => Right(List.of(tasks)));
 
   @override
   Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async =>
@@ -51,7 +61,7 @@ class _ControllableDailyTasksDataSource implements DailyTasksDataSource {
     }
     if (failSaves) {
       return Left(
-        GenericAppError(error: "save failed", stackTrace: StackTrace.current),
+        UnexpectedError(cause: "save failed", stackTrace: StackTrace.current),
       );
     }
     tasks = List.of(updatedTasks);
@@ -88,6 +98,11 @@ class _RecordingNavigator implements AppNavigator {
   }
 
   @override
+  void showError(AppError error) {
+    errorCount++;
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -108,27 +123,19 @@ class _NoopAchievementUnlockService implements AchievementUnlockService {
 }
 
 DailyGoalsController _controller(
-  _ControllableDailyTasksDataSource dataSource,
+  _ControllableDailyTasksRepository dataSource,
   _RecordingNavigator navigator, {
   DeleteConfirmationCallback? confirmDelete,
-  ClearDataConfirmationCallback? confirmClearData,
   ActivityChangeBus? activityChangeBus,
 }) {
-  final DailyTasksRepository repository = DailyTasksRepository(
-    dailyTasksDataSource: dataSource,
-  );
+  final DailyTasksRepository repository = dataSource;
   return DailyGoalsController(
     appNavigator: navigator,
-    getDailyTasksUseCase: GetDailyTasksUseCase(
-      dailyTasksRepository: repository,
-    ),
+    dailyTasksRepository: repository,
     toggleDailyTaskCheckUseCase: ToggleDailyTaskCheckUseCase(
       dailyTasksRepository: repository,
     ),
     deleteDailyTaskUseCase: DeleteDailyTaskUseCase(
-      dailyTasksRepository: repository,
-    ),
-    clearDailyTaskDataUseCase: ClearDailyTaskDataUseCase(
       dailyTasksRepository: repository,
     ),
     lastActivityService: _NoopLastActivityService(),
@@ -137,13 +144,6 @@ DailyGoalsController _controller(
     confirmDelete:
         confirmDelete ??
         ({required String itemName, String? itemTypeName}) async => false,
-    confirmClearData:
-        confirmClearData ??
-        ({
-          required String itemName,
-          required bool isGoal,
-          required bool isFromGroup,
-        }) async => false,
   );
 }
 
@@ -162,8 +162,8 @@ void main() {
     "different optimistic toggles persist without overwriting each other",
     () async {
       final List<DailyTaskEntity> initial = [_task("one"), _task("two")];
-      final _ControllableDailyTasksDataSource dataSource =
-          _ControllableDailyTasksDataSource(initial);
+      final _ControllableDailyTasksRepository dataSource =
+          _ControllableDailyTasksRepository(initial);
       final DailyGoalsController controller = _controller(
         dataSource,
         _RecordingNavigator(),
@@ -186,8 +186,8 @@ void main() {
 
   test("failed optimistic toggle restores the original task", () async {
     final DailyTaskEntity task = _task("one");
-    final _ControllableDailyTasksDataSource dataSource =
-        _ControllableDailyTasksDataSource([task], failSaves: true);
+    final _ControllableDailyTasksRepository dataSource =
+        _ControllableDailyTasksRepository([task], failSaves: true);
     final _RecordingNavigator navigator = _RecordingNavigator();
     final DailyGoalsController controller = _controller(dataSource, navigator);
     controller.tasks.value = [task];
@@ -200,8 +200,8 @@ void main() {
 
   test("a second toggle for the same task is ignored while saving", () async {
     final DailyTaskEntity task = _task("one");
-    final _ControllableDailyTasksDataSource dataSource =
-        _ControllableDailyTasksDataSource([task]);
+    final _ControllableDailyTasksRepository dataSource =
+        _ControllableDailyTasksRepository([task]);
     final DailyGoalsController controller = _controller(
       dataSource,
       _RecordingNavigator(),
@@ -230,8 +230,8 @@ void main() {
       groupId: "g1",
       groupActivityId: "ga1",
     );
-    final _ControllableDailyTasksDataSource dataSource =
-        _ControllableDailyTasksDataSource([groupGoal]);
+    final _ControllableDailyTasksRepository dataSource =
+        _ControllableDailyTasksRepository([groupGoal]);
     final _RecordingNavigator navigator = _RecordingNavigator();
     final DailyGoalsController controller = _controller(dataSource, navigator);
     controller.tasks.value = [groupGoal];
@@ -251,148 +251,11 @@ void main() {
     expect(navigator.dialogCount, 0);
   });
 
-  group("clearing a goal's data", () {
-    DailyTaskEntity markedGoal({String? groupId}) => DailyTaskEntity(
-      id: groupId == null ? "personal" : "grp_ga1",
-      name: "Meta",
-      colorValue: 1,
-      targetDays: 7,
-      completedDates: const ["2026-09-20", "2026-09-21", "2026-09-22"],
-      groupId: groupId,
-      groupActivityId: groupId == null ? null : "ga1",
-    );
-
-    test("asks first, and does nothing when the user declines", () async {
-      final DailyTaskEntity goal = markedGoal();
-      final _ControllableDailyTasksDataSource dataSource =
-          _ControllableDailyTasksDataSource([goal]);
-      final _RecordingNavigator navigator = _RecordingNavigator();
-      final DailyGoalsController controller = _controller(
-        dataSource,
-        navigator,
-      );
-      controller.tasks.value = [goal];
-
-      await controller.onClearTaskData(goal);
-
-      expect(controller.tasks.single.completedDates, goal.completedDates);
-      expect(dataSource.saveCalls, 0);
-      expect(navigator.successMessages, isEmpty);
-    });
-
-    test("wipes the marked days but keeps the goal itself", () async {
-      final DailyTaskEntity goal = markedGoal();
-      final _ControllableDailyTasksDataSource dataSource =
-          _ControllableDailyTasksDataSource([goal]);
-      final _RecordingNavigator navigator = _RecordingNavigator();
-      String? askedAbout;
-      bool? askedIsGoal;
-      bool? askedIsFromGroup;
-      final DailyGoalsController controller = _controller(
-        dataSource,
-        navigator,
-        confirmClearData:
-            ({
-              required String itemName,
-              required bool isGoal,
-              required bool isFromGroup,
-            }) async {
-              askedAbout = itemName;
-              askedIsGoal = isGoal;
-              askedIsFromGroup = isFromGroup;
-              return true;
-            },
-      );
-      controller.tasks.value = [goal];
-
-      final Future<void> clearing = controller.onClearTaskData(goal);
-      await dataSource.firstSaveStarted.future;
-      // The screen shows it cleared before the save finishes.
-      expect(controller.tasks.single.completedDates, isEmpty);
-      dataSource.releaseFirstSave.complete();
-      await clearing;
-
-      expect(askedAbout, "Meta");
-      expect(askedIsGoal, isTrue);
-      expect(askedIsFromGroup, isFalse);
-      final DailyTaskEntity saved = dataSource.tasks.single;
-      expect(saved.completedDates, isEmpty);
-      expect(saved.id, goal.id);
-      expect(saved.name, goal.name);
-      expect(saved.targetDays, goal.targetDays);
-      // Newer than what was there, so a stale remote copy cannot win back.
-      expect(saved.updatedAt, isNotNull);
-      expect(navigator.successMessages, hasLength(1));
-      expect(navigator.dialogCount, 0);
-    });
-
-    test("tells the group when its own goal was cleared", () async {
-      final DailyTaskEntity goal = markedGoal(groupId: "g1");
-      final _ControllableDailyTasksDataSource dataSource =
-          _ControllableDailyTasksDataSource([goal]);
-      final ActivityChangeBus bus = ActivityChangeBus();
-      final List<GroupActivityChange> changes = <GroupActivityChange>[];
-      final StreamSubscription<GroupActivityChange> subscription = bus.stream
-          .listen(changes.add);
-      addTearDown(subscription.cancel);
-      bool? askedIsFromGroup;
-      final DailyGoalsController controller = _controller(
-        dataSource,
-        _RecordingNavigator(),
-        activityChangeBus: bus,
-        confirmClearData:
-            ({
-              required String itemName,
-              required bool isGoal,
-              required bool isFromGroup,
-            }) async {
-              askedIsFromGroup = isFromGroup;
-              return true;
-            },
-      );
-      controller.tasks.value = [goal];
-
-      final Future<void> clearing = controller.onClearTaskData(goal);
-      await dataSource.firstSaveStarted.future;
-      dataSource.releaseFirstSave.complete();
-      await clearing;
-      await Future<void>.delayed(Duration.zero);
-
-      expect(askedIsFromGroup, isTrue);
-      expect(dataSource.tasks.single.completedDates, isEmpty);
-      expect(changes.map((change) => change.groupId), ["g1"]);
-    });
-
-    test("a failed save brings the days back and reports the error", () async {
-      final DailyTaskEntity goal = markedGoal();
-      final _ControllableDailyTasksDataSource dataSource =
-          _ControllableDailyTasksDataSource([goal], failSaves: true);
-      final _RecordingNavigator navigator = _RecordingNavigator();
-      final DailyGoalsController controller = _controller(
-        dataSource,
-        navigator,
-        confirmClearData:
-            ({
-              required String itemName,
-              required bool isGoal,
-              required bool isFromGroup,
-            }) async => true,
-      );
-      controller.tasks.value = [goal];
-
-      await controller.onClearTaskData(goal);
-
-      expect(controller.tasks.single.completedDates, goal.completedDates);
-      expect(navigator.errorCount, 1);
-      expect(navigator.successMessages, isEmpty);
-    });
-  });
-
   test("failed optimistic delete restores the previous task list", () async {
     final DailyTaskEntity firstTask = _task("one");
     final DailyTaskEntity secondTask = _task("two");
-    final _ControllableDailyTasksDataSource dataSource =
-        _ControllableDailyTasksDataSource([
+    final _ControllableDailyTasksRepository dataSource =
+        _ControllableDailyTasksRepository([
           firstTask,
           secondTask,
         ], failSaves: true);

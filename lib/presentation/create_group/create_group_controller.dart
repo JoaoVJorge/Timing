@@ -3,6 +3,9 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
@@ -11,13 +14,9 @@ import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "package:timing/core/services/sync/group_activity_link_sync.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/core/domain/use_cases/create_group_use_case.dart";
-import "package:timing/core/domain/use_cases/get_invitable_friends_use_case.dart";
 import "package:timing/presentation/create_subject/subject_creation_form_controller.dart";
 import "package:timing/theme/subject_colors.dart";
 import "package:timing/theme/subject_icons.dart";
@@ -25,20 +24,18 @@ import "package:timing/theme/subject_icons.dart";
 class CreateGroupController extends GetxController
     implements SubjectCreationFormController {
   CreateGroupController({
-    required this._getInvitableFriendsUseCase,
-    required this._createGroupUseCase,
-    this.getDailyTasksUseCase,
-    this.getSubjectsUseCase,
+    required this._groupsRepository,
+    this.dailyTasksRepository,
+    this.subjectsRepository,
     required this._appNavigator,
   });
 
   static const int lastStep = 3;
   static const List<int> dailyGoalTargetDaysOptions = [5, 14, 30];
 
-  final GetInvitableFriendsUseCase _getInvitableFriendsUseCase;
-  final CreateGroupUseCase _createGroupUseCase;
-  final GetDailyTasksUseCase? getDailyTasksUseCase;
-  final GetSubjectsUseCase? getSubjectsUseCase;
+  final GroupsRepository _groupsRepository;
+  final DailyTasksRepository? dailyTasksRepository;
+  final SubjectsRepository? subjectsRepository;
   final AppNavigator _appNavigator;
 
   final RxBool useExistingActivities = false.obs;
@@ -68,12 +65,12 @@ class CreateGroupController extends GetxController
   Future<void> loadPersonalActivities() async {
     isLoadingSources.value = true;
     sourcesLoadFailed.value = false;
-    final subjects = await getSubjectsUseCase?.call();
+    final subjects = await subjectsRepository?.getSubjects();
     subjects?.fold(
       (_) => sourcesLoadFailed.value = true,
       personalSubjects.assignAll,
     );
-    final tasks = await getDailyTasksUseCase?.call();
+    final tasks = await dailyTasksRepository?.getTasks();
     tasks?.fold((_) => sourcesLoadFailed.value = true, personalTasks.assignAll);
     isLoadingSources.value = false;
   }
@@ -277,8 +274,8 @@ class CreateGroupController extends GetxController
   Future<void> loadFriends() async {
     isLoading.value = true;
     hasLoadError.value = false;
-    final Either<AppError, List<FriendOption>> result =
-        await _getInvitableFriendsUseCase();
+    final Either<AppError, List<FriendOption>> result = await _groupsRepository
+        .getInvitableFriends();
     result.fold((error) {
       availableFriends.clear();
       hasLoadError.value = true;
@@ -570,20 +567,20 @@ class CreateGroupController extends GetxController
         .where((friend) => selectedFriendIds.contains(friend.id))
         .toList();
     final GroupActivityDraft? activity = buildActivityDraft();
-    final Either<AppError, GroupEntity> result = await _createGroupUseCase(
-      name: name,
-      theme: theme,
-      invitedFriends: invitedFriends,
-      description: descriptionController.text.trim(),
-      activity: activity,
-    );
-    await result.fold(
-      (error) async => _appNavigator.showErrorOrOfflineSnackBar(error.message),
-      (group) async {
-        await refreshPersonalActivitiesAfterLinking();
-        Get.back<GroupEntity>(result: group, closeOverlays: true);
-      },
-    );
+    final Either<AppError, GroupEntity> result = await _groupsRepository
+        .createGroup(
+          name: name,
+          theme: theme,
+          invitedFriends: invitedFriends,
+          description: descriptionController.text.trim(),
+          activity: activity,
+        );
+    await result.fold((error) async => _appNavigator.showError(error), (
+      group,
+    ) async {
+      await refreshPersonalActivitiesAfterLinking();
+      Get.back<GroupEntity>(result: group, closeOverlays: true);
+    });
     isCreating.value = false;
   }
 

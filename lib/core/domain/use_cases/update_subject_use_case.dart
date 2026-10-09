@@ -46,8 +46,8 @@ class UpdateSubjectUseCase {
 
       if (updatedSubject == null) {
         return Left(
-          GenericAppError(
-            error: StateError("Subject not found"),
+          UnexpectedError(
+            cause: StateError("Subject not found"),
             stackTrace: StackTrace.current,
           ),
         );

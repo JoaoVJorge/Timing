@@ -5,12 +5,12 @@ import "package:flutter/services.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/domain/entities/active_timer_session_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
-import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/analytics/analytics_event.dart";
@@ -35,7 +35,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
   TimerController({
     required this.updateSubjectTimeUseCase,
     required this.updateSubjectPagesUseCase,
-    required this.logActivityUseCase,
+    required this.activityRepository,
     required this.lastActivityService,
     required this.activityHistoryService,
     required this.dailyProgressService,
@@ -69,7 +69,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   final UpdateSubjectTimeUseCase updateSubjectTimeUseCase;
   final UpdateSubjectPagesUseCase updateSubjectPagesUseCase;
-  final LogActivityUseCase logActivityUseCase;
+  final ActivityRepository activityRepository;
   final LastActivityService lastActivityService;
   final ActivityHistoryService activityHistoryService;
   final DailyProgressService dailyProgressService;
@@ -122,7 +122,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
 
   late final TimerSessionPersister _persister = TimerSessionPersister(
     updateSubjectTimeUseCase: updateSubjectTimeUseCase,
-    logActivityUseCase: logActivityUseCase,
+    activityRepository: activityRepository,
     activityHistoryService: activityHistoryService,
     dailyProgressService: dailyProgressService,
     subjectDailyHistoryService: subjectDailyHistoryService,
@@ -605,7 +605,7 @@ class TimerController extends GetxController with WidgetsBindingObserver {
           pages: sanitizedPages,
         ),
       );
-      final Future<void> pagesLogged = logActivityUseCase(
+      final Future<void> pagesLogged = activityRepository.logActivity(
         category: subject.category,
         subjectId: subject.id,
         subjectName: subject.name,

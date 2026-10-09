@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:get/get.dart";
+import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/shared/extensions/app_error_localization_extensions.dart";
 
 final AppNavigator appNavigator = Get.find();
 
@@ -140,6 +142,26 @@ class AppNavigator {
     }
   }
 
+  /// Tells the user about [error] in their own language. A failure while the
+  /// app is offline is reported as a connection problem, whatever it was.
+  void showError(AppError error) {
+    final BuildContext? context = Get.context;
+    final bool isOffline = error is OfflineError || !_isBackendReachable;
+    final AppError shown = isOffline ? const OfflineError() : error;
+    final String? text = context == null
+        ? null
+        : shown.localizedMessage(context.l10n);
+    if (isOffline) {
+      showOfflineSnackBar(text);
+      return;
+    }
+    showErrorSnackBar(text);
+  }
+
+  bool get _isBackendReachable =>
+      !Get.isRegistered<ConnectivityService>() ||
+      Get.find<ConnectivityService>().isOnline.value;
+
   void showErrorSnackBar([String? text]) {
     final BuildContext? context = Get.context;
     if (text == null && context == null) {
@@ -174,8 +196,7 @@ class AppNavigator {
   /// an invitation, ...): shows the offline notice instead of a generic
   /// error when the failure is plausibly just "no connection right now".
   void showErrorOrOfflineSnackBar([String? text]) {
-    if (Get.isRegistered<ConnectivityService>() &&
-        !Get.find<ConnectivityService>().isOnline.value) {
+    if (!_isBackendReachable) {
       showOfflineSnackBar();
       return;
     }

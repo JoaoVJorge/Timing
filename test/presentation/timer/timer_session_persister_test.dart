@@ -2,10 +2,10 @@ import "dart:async";
 
 import "package:dartz/dartz.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
@@ -39,15 +39,15 @@ class _FakeUpdateSubjectTimeUseCase extends _Noop
     }
     return succeeds
         ? const Right(null)
-        : Left(GenericAppError(error: "nope", stackTrace: StackTrace.current));
+        : Left(UnexpectedError(cause: "nope", stackTrace: StackTrace.current));
   }
 }
 
-class _FakeLogActivityUseCase extends _Noop implements LogActivityUseCase {
+class _FakeActivityRepository extends _Noop implements ActivityRepository {
   int calls = 0;
 
   @override
-  Future<Either<AppError, void>> call({
+  Future<Either<AppError, void>> logActivity({
     required TimeCategoryType category,
     required String subjectId,
     required String subjectName,
@@ -118,7 +118,7 @@ SubjectEntity _subject() => const SubjectEntity(
 ({
   TimerSessionPersister persister,
   _FakeUpdateSubjectTimeUseCase update,
-  _FakeLogActivityUseCase log,
+  _FakeActivityRepository log,
   _FakeDailyProgressService daily,
   int Function() groupNotifications,
 })
@@ -129,13 +129,13 @@ _build({
   DateTime? now,
 }) {
   final update = _FakeUpdateSubjectTimeUseCase(succeeds: succeeds);
-  final log = _FakeLogActivityUseCase();
+  final log = _FakeActivityRepository();
   final daily = _FakeDailyProgressService();
   int groupNotifications = 0;
   final persister = TimerSessionPersister(
     autoSaveInterval: autoSaveInterval,
     updateSubjectTimeUseCase: update,
-    logActivityUseCase: log,
+    activityRepository: log,
     activityHistoryService: _FakeActivityHistoryService(),
     dailyProgressService: daily,
     subjectDailyHistoryService: _FakeSubjectDailyHistoryService(),
@@ -171,31 +171,33 @@ void main() {
     });
   });
 
-  test("a flush requested mid-flight coalesces into a single extra pass",
-      () async {
-    int seconds = 30;
-    final harness = _build(sessionSeconds: () => seconds);
-    harness.update.gate = Completer<void>();
+  test(
+    "a flush requested mid-flight coalesces into a single extra pass",
+    () async {
+      int seconds = 30;
+      final harness = _build(sessionSeconds: () => seconds);
+      harness.update.gate = Completer<void>();
 
-    harness.persister.flush(); // starts, blocks on the gated backend call
-    await Future<void>.delayed(Duration.zero);
-    expect(harness.update.calls, 1);
+      harness.persister.flush(); // starts, blocks on the gated backend call
+      await Future<void>.delayed(Duration.zero);
+      expect(harness.update.calls, 1);
 
-    // Three more flushes while the first is in flight must not start new loops.
-    seconds = 45;
-    harness.persister.flush();
-    harness.persister.flush();
-    harness.persister.flush();
-    expect(harness.update.calls, 1);
+      // Three more flushes while the first is in flight must not start new loops.
+      seconds = 45;
+      harness.persister.flush();
+      harness.persister.flush();
+      harness.persister.flush();
+      expect(harness.update.calls, 1);
 
-    harness.update.gate!.complete();
-    await Future<void>.delayed(Duration.zero);
-    await Future<void>.delayed(Duration.zero);
+      harness.update.gate!.complete();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
-    // Exactly one more pass for the coalesced request, not three.
-    expect(harness.update.calls, 2);
-    expect(harness.persister.persistedSeconds, 45);
-  });
+      // Exactly one more pass for the coalesced request, not three.
+      expect(harness.update.calls, 2);
+      expect(harness.persister.persistedSeconds, 45);
+    },
+  );
 
   test("keeps flushing while sessionSeconds is still growing", () async {
     int seconds = 20;
@@ -217,19 +219,21 @@ void main() {
     expect(harness.persister.persistedSeconds, 40);
   });
 
-  test("a failed backend write leaves the persisted marker untouched",
-      () async {
-    int seconds = 60;
-    final harness = _build(sessionSeconds: () => seconds, succeeds: false);
+  test(
+    "a failed backend write leaves the persisted marker untouched",
+    () async {
+      int seconds = 60;
+      final harness = _build(sessionSeconds: () => seconds, succeeds: false);
 
-    harness.persister.flush();
-    await Future<void>.delayed(Duration.zero);
+      harness.persister.flush();
+      await Future<void>.delayed(Duration.zero);
 
-    expect(harness.update.calls, 1);
-    expect(harness.persister.hasLoggedTime, isFalse);
-    expect(harness.persister.persistedSeconds, 0);
-    expect(harness.daily.addedSeconds, 0);
-  });
+      expect(harness.update.calls, 1);
+      expect(harness.persister.hasLoggedTime, isFalse);
+      expect(harness.persister.persistedSeconds, 0);
+      expect(harness.daily.addedSeconds, 0);
+    },
+  );
 
   test("autoSaveIfNeeded only flushes once per interval", () async {
     int seconds = 0;

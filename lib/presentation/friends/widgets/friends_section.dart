@@ -116,13 +116,13 @@ class _FriendRowState extends State<_FriendRow>
                   width: 64,
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   decoration: BoxDecoration(
-                    color: context.colorTokens.error,
+                    color: context.colorTokens.transparent,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.delete_outline_rounded,
-                    color: context.colorTokens.primaryForeground,
+                    color: context.colorTokens.error,
                     size: 26,
                   ),
                 ),

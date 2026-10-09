@@ -23,12 +23,10 @@ class AppBindings extends Bindings {
     final SharedPreferences localStorage = Get.find();
     Get.put<AppController>(
       AppController(
-        getAppConfigUseCase: Get.find(),
-        getActivityEntriesUseCase: Get.find(),
-        getCurrentProfileUseCase: Get.find(),
-        saveAppConfigUseCase: Get.find(),
-        syncProfileToBackendUseCase: Get.find(),
-        signOutUseCase: Get.find(),
+        appConfigRepository: Get.find(),
+        activityRepository: Get.find(),
+        profileSyncRepository: Get.find(),
+        phoneAuthRepository: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),
         timerNotificationService: Get.find(),

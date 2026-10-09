@@ -8,9 +8,8 @@ class EditProfileBindings extends Bindings {
       EditProfileController(
         appController: Get.find(),
         appNavigator: Get.find(),
-        getLinkedAuthProvidersUseCase: Get.find(),
-        linkAuthProviderUseCase: Get.find(),
-        deleteAccountUseCase: Get.find(),
+        phoneAuthRepository: Get.find(),
+        profileSyncRepository: Get.find(),
       ),
     );
   }

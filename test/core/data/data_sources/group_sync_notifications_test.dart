@@ -5,7 +5,9 @@ import "package:connectivity_plus/connectivity_plus.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/auth/offline_grace_period.dart";
@@ -132,9 +134,12 @@ void main() {
     await server.close(force: true);
   });
 
-  DailyTasksDataSource dailyTasks() => DailyTasksDataSource(
+  DailyTasksRepository dailyTasks() => DailyTasksRepository(
+    dailyTasksDataSource: DailyTasksDataSource(
+      supabaseService: backend,
+      logger: AppLoggerService(),
+    ),
     localStorageService: storage,
-    supabaseService: backend,
     logger: _Logger(),
     pendingSyncStore: pending,
     activityChangeBus: bus,
@@ -192,8 +197,8 @@ void main() {
   );
 
   test("queued focus activity refreshes groups after reconnect", () async {
-    final source = ActivityDataSource(
-      supabaseService: backend,
+    final source = ActivityRepository(
+      activityDataSource: ActivityDataSource(supabaseService: backend),
       localStorageService: storage,
       pendingSyncStore: pending,
       logger: _Logger(),
@@ -220,8 +225,8 @@ void main() {
 
   test("group activity survives restart and syncs after reconnect", () async {
     backend.offline = true;
-    final activity = ActivityDataSource(
-      supabaseService: backend,
+    final activity = ActivityRepository(
+      activityDataSource: ActivityDataSource(supabaseService: backend),
       localStorageService: storage,
       pendingSyncStore: pending,
       logger: _Logger(),
@@ -249,16 +254,19 @@ void main() {
     // persisted local storage.
     final restoredPending = PendingSyncStore(localStorageService: storage);
     await restoredPending.load();
-    final restoredActivity = ActivityDataSource(
-      supabaseService: backend,
+    final restoredActivity = ActivityRepository(
+      activityDataSource: ActivityDataSource(supabaseService: backend),
       localStorageService: storage,
       pendingSyncStore: restoredPending,
       logger: _Logger(),
       activityChangeBus: bus,
     );
-    final restoredGoals = DailyTasksDataSource(
+    final restoredGoals = DailyTasksRepository(
+      dailyTasksDataSource: DailyTasksDataSource(
+        supabaseService: backend,
+        logger: AppLoggerService(),
+      ),
       localStorageService: storage,
-      supabaseService: backend,
       logger: _Logger(),
       pendingSyncStore: restoredPending,
       activityChangeBus: bus,

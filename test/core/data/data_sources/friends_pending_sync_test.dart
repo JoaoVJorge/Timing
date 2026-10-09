@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/friends_data_source.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -61,12 +62,15 @@ FriendEntity _friend({String id = "friend-1", String friendshipId = "fs-1"}) =>
       colorValue: 0xFF000000,
     );
 
-Future<(FriendsDataSource, PendingSyncStore, _MemStorage)> _build() async {
+Future<(FriendsRepository, PendingSyncStore, _MemStorage)> _build() async {
   final storage = _MemStorage();
   final store = PendingSyncStore(localStorageService: storage);
   await store.load();
-  final dataSource = FriendsDataSource(
-    supabaseService: _OfflineSupabase(),
+  final dataSource = FriendsRepository(
+    friendsDataSource: FriendsDataSource(
+      supabaseService: _OfflineSupabase(),
+      logger: AppLoggerService(),
+    ),
     logger: AppLoggerService(),
     localStorageService: storage,
     pendingSyncStore: store,
@@ -75,7 +79,7 @@ Future<(FriendsDataSource, PendingSyncStore, _MemStorage)> _build() async {
 }
 
 void main() {
-  group("FriendsDataSource offline sync", () {
+  group("FriendsRepository offline sync", () {
     test("getSocial falls back to the cache when remote fails", () async {
       final (dataSource, _, storage) = await _build();
       final cached = FriendsSocialEntity(
@@ -185,8 +189,11 @@ void main() {
       await offlineSource.sendFriendRequest("friend-3");
       expect(store.contains(PendingSyncDataset.friends), isTrue);
 
-      final rejecting = FriendsDataSource(
-        supabaseService: _RejectingSupabase(),
+      final rejecting = FriendsRepository(
+        friendsDataSource: FriendsDataSource(
+          supabaseService: _RejectingSupabase(),
+          logger: AppLoggerService(),
+        ),
         logger: AppLoggerService(),
         localStorageService: storage,
         pendingSyncStore: store,

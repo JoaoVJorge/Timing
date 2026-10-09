@@ -73,6 +73,11 @@ enum LocalStorageKeys {
     isUserScoped: true,
     encryptAtRest: true,
   ),
+  syncedDailyTaskIds(
+    hasSensitiveData: false,
+    isUserScoped: true,
+    encryptAtRest: true,
+  ),
   lastVerifiedOnlineAt(
     hasSensitiveData: false,
     isUserScoped: true,

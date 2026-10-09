@@ -91,6 +91,10 @@ class RecordingNavigator implements AppNavigator {
   @override
   void showErrorSnackBar([String? text]) => errorMessages.add(text);
 
+  /// A typed error has no text until the real navigator localizes it.
+  @override
+  void showError(AppError error) => errorMessages.add(null);
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

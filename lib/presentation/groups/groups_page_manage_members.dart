@@ -39,7 +39,12 @@ class _ManageMembersView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: AppSpacing.betweenSections),
             children: [
-              _ManageGroupSummaryCard(group: group),
+              // The leader answers who is waiting here; everyone else just
+              // sees which group this is.
+              if (currentUserIsLeader)
+                _JoinRequestsCard(controller: controller)
+              else
+                _ManageGroupSummaryCard(group: group),
               const Gap(12),
               if (leader != null) ...[
                 _MembersSectionLabel(label: context.l10n.groupLeaderLabel),
@@ -51,45 +56,269 @@ class _ManageMembersView extends StatelessWidget {
                   badgeLabel: context.l10n.groupLeaderLabel,
                   isFirst: true,
                   isLast: true,
-                  isGroupLeader: currentUserIsLeader,
+                  isStandalone: true,
+                  canTransferLeadership: false,
+                  canManageMember: false,
                 ),
                 const Gap(12),
               ],
-              _MembersSectionLabel(label: context.l10n.groupMembersLabel),
-              const Gap(8),
-              Container(
-                decoration: AppSurfaces.rowGroup(context.colorTokens),
-                child: Column(
-                  children: [
-                    for (int index = 0; index < members.length; index++) ...[
-                      _MemberSwipeActions(
-                        controller: controller,
-                        member: members[index],
-                        roleLabel: context.l10n.groupMemberRoleLabel,
-                        isFirst: index == 0,
-                        isLast: index == members.length - 1,
-                        isGroupLeader: currentUserIsLeader,
-                      ),
-                      if (index < members.length - 1)
-                        Divider(
-                          height: 1,
-                          indent: 78,
-                          color: context.colorTokens.divider,
-                        ),
-                    ],
-                  ],
+              if (members.isNotEmpty) ...[
+                _MembersSectionLabel(label: context.l10n.groupMembersLabel),
+                const Gap(8),
+                _MemberRowGroup(
+                  controller: controller,
+                  group: group,
+                  members: members,
+                  roleLabel: context.l10n.groupMemberRoleLabel,
+                  canTransferLeadership: currentUserIsLeader,
                 ),
-              ),
-              if (currentUserIsLeader) ...[
-                const Gap(14),
-                _AddMemberButton(onTap: controller.onTapInviteMembers),
               ],
+              // Every member may bring someone in; the leader answers the
+              // request that follows.
+              const Gap(14),
+              _AddMemberButton(onTap: controller.onTapInviteMembers),
             ],
           ),
         ),
       ],
     );
   }
+}
+
+/// Each member uses the same standalone surface as the leader's row.
+class _MemberRowGroup extends StatelessWidget {
+  const _MemberRowGroup({
+    required this.controller,
+    required this.group,
+    required this.members,
+    required this.roleLabel,
+    required this.canTransferLeadership,
+  });
+
+  final GroupsController controller;
+  final GroupEntity group;
+  final List<GroupMemberEntity> members;
+  final String roleLabel;
+  final bool canTransferLeadership;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (int index = 0; index < members.length; index++) ...[
+        _MemberSwipeActions(
+          controller: controller,
+          member: members[index],
+          roleLabel: roleLabel,
+          isFirst: true,
+          isLast: true,
+          isStandalone: true,
+          canTransferLeadership: canTransferLeadership,
+          canManageMember: controller.canManageMember(group, members[index]),
+        ),
+        if (index < members.length - 1) const Gap(10),
+      ],
+    ],
+  );
+}
+
+/// The leader's answer list at the top of the member screen: who asked to
+/// join, through the group's link or through a member's invitation.
+class _JoinRequestsCard extends StatelessWidget {
+  const _JoinRequestsCard({required this.controller});
+
+  final GroupsController controller;
+
+  @override
+  Widget build(BuildContext context) => Obx(() {
+    final List<GroupJoinRequestEntity> requests = controller.joinRequests
+        .toList();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: context.colorTokens.primaryVeryLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.how_to_reg_rounded,
+                  size: 22,
+                  color: context.colorTokens.primary,
+                ),
+              ),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.groupJoinRequestsTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.cardTitle,
+                    ),
+                    const Gap(2),
+                    Text(
+                      context.l10n.groupJoinRequestsCount(requests.length),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.bodyMedium.copyWith(
+                        color: requests.isEmpty
+                            ? context.colorTokens.textHint
+                            : context.colorTokens.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (controller.isLoadingJoinRequests.value)
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.colorTokens.primary,
+                  ),
+                ),
+            ],
+          ),
+          if (requests.isEmpty) ...[
+            const Gap(10),
+            Text(
+              context.l10n.groupJoinRequestsEmptyHint,
+              style: context.textStyles.bodyMedium.copyWith(
+                color: context.colorTokens.textHint,
+              ),
+            ),
+          ],
+          for (final GroupJoinRequestEntity request in requests) ...[
+            const Gap(10),
+            Divider(height: 1, color: context.colorTokens.divider),
+            const Gap(10),
+            _JoinRequestRow(controller: controller, request: request),
+          ],
+        ],
+      ),
+    );
+  });
+}
+
+class _JoinRequestRow extends StatelessWidget {
+  const _JoinRequestRow({required this.controller, required this.request});
+
+  final GroupsController controller;
+  final GroupJoinRequestEntity request;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isAnswering = controller.answeringJoinRequestIds.contains(
+      request.id,
+    );
+    final String? invitedBy = request.invitedByName;
+    return IgnorePointer(
+      ignoring: isAnswering,
+      child: Opacity(
+        opacity: isAnswering ? 0.5 : 1,
+        child: Row(
+          children: [
+            GroupMemberAvatar(
+              name: request.userName,
+              colorValue: request.accentColorValue,
+              avatar: request.avatar,
+              avatarIconIndex: request.avatarIconIndex,
+              size: 42,
+              useSolidFallbackBackground: true,
+            ),
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    request.userName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyLarge.copyWith(fontSize: 15),
+                  ),
+                  const Gap(2),
+                  Text(
+                    invitedBy == null
+                        ? context.l10n.groupJoinRequestFromLink
+                        : context.l10n.groupJoinRequestInvitedBy(invitedBy),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: context.colorTokens.textHint,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(8),
+            _JoinRequestButton(
+              icon: Icons.close_rounded,
+              color: context.colorTokens.error,
+              isFilled: false,
+              onTap: () =>
+                  controller.onAnswerJoinRequest(request, approve: false),
+            ),
+            const Gap(8),
+            _JoinRequestButton(
+              icon: Icons.check_rounded,
+              color: context.colorTokens.primary,
+              isFilled: true,
+              onTap: () =>
+                  controller.onAnswerJoinRequest(request, approve: true),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _JoinRequestButton extends StatelessWidget {
+  const _JoinRequestButton({
+    required this.icon,
+    required this.color,
+    required this.isFilled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final bool isFilled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.94,
+    child: Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: isFilled ? color : context.colorTokens.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: isFilled
+            ? null
+            : Border.all(color: color.withValues(alpha: 0.45)),
+      ),
+      child: Icon(
+        icon,
+        size: 20,
+        color: isFilled ? context.colorTokens.white : color,
+      ),
+    ),
+  );
 }
 
 class _ManageGroupSummaryCard extends StatelessWidget {
@@ -152,6 +381,7 @@ class _MemberRow extends StatelessWidget {
     required this.roleLabel,
     required this.isFirst,
     required this.isLast,
+    this.isStandalone = false,
     this.badgeLabel,
     this.friendshipStatusLabel,
   });
@@ -160,6 +390,9 @@ class _MemberRow extends StatelessWidget {
   final String roleLabel;
   final bool isFirst;
   final bool isLast;
+
+  /// A row shown on its own, outside a group of rows, draws its own outline.
+  final bool isStandalone;
   final String? badgeLabel;
   final String? friendshipStatusLabel;
 
@@ -173,7 +406,7 @@ class _MemberRow extends StatelessWidget {
         top: isFirst ? const Radius.circular(18) : Radius.zero,
         bottom: isLast ? const Radius.circular(18) : Radius.zero,
       ),
-      border: badgeLabel == null
+      border: !isStandalone
           ? null
           : Border.all(
               color: context.colorTokens.borderUnfocused.withValues(alpha: 0.4),
@@ -244,7 +477,9 @@ class _MemberSwipeActions extends StatelessWidget {
     required this.roleLabel,
     required this.isFirst,
     required this.isLast,
-    required this.isGroupLeader,
+    required this.canTransferLeadership,
+    required this.canManageMember,
+    this.isStandalone = false,
     this.badgeLabel,
   });
 
@@ -253,7 +488,13 @@ class _MemberSwipeActions extends StatelessWidget {
   final String roleLabel;
   final bool isFirst;
   final bool isLast;
-  final bool isGroupLeader;
+  final bool isStandalone;
+
+  /// Only the leader hands the leadership over.
+  final bool canTransferLeadership;
+
+  /// Only the leader may remove another member.
+  final bool canManageMember;
   final String? badgeLabel;
 
   @override
@@ -265,6 +506,7 @@ class _MemberSwipeActions extends StatelessWidget {
         badgeLabel: badgeLabel,
         isFirst: isFirst,
         isLast: isLast,
+        isStandalone: isStandalone,
       );
     }
     return Obx(() {
@@ -296,28 +538,32 @@ class _MemberSwipeActions extends StatelessWidget {
                   : hasSentRequest
                   ? Icons.close_rounded
                   : Icons.person_add_alt_1_rounded,
-              background: isFriend
+              background: context.colorTokens.transparent,
+              iconColor: isFriend
                   ? context.colorTokens.error
                   : context.colorTokens.primary,
               onTap: () => controller.onTapFriendshipMemberAction(member),
             ),
-            if (isGroupLeader)
+            if (canTransferLeadership)
               SwipeRevealAction(
                 iconData: Icons.workspace_premium_outlined,
-                background: context.colorTokens.primary,
+                background: context.colorTokens.transparent,
+                iconColor: context.colorTokens.primary,
                 onTap: () => controller.onTransferGroupLeadership(member),
               ),
           ],
           actions: [
-            if (isGroupLeader)
+            if (canManageMember)
               SwipeRevealAction(
-                iconData: Icons.person_remove_alt_1_rounded,
-                background: context.colorTokens.error,
+                iconData: Icons.close_rounded,
+                background: context.colorTokens.transparent,
+                iconColor: context.colorTokens.error,
                 onTap: () => controller.onRemoveGroupMember(member),
               ),
             SwipeRevealAction(
               iconData: Icons.flag_outlined,
-              background: context.colorTokens.error,
+              background: context.colorTokens.transparent,
+              iconColor: context.colorTokens.error,
               onTap: () => controller.onReportGroupMember(member),
             ),
           ],
@@ -328,6 +574,7 @@ class _MemberSwipeActions extends StatelessWidget {
             friendshipStatusLabel: statusLabel,
             isFirst: isFirst,
             isLast: isLast,
+            isStandalone: isStandalone,
           ),
         ),
       );

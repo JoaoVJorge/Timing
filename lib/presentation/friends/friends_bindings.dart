@@ -6,19 +6,10 @@ class FriendsBindings extends Bindings {
   void dependencies() {
     Get.put<FriendsController>(
       FriendsController(
-        getFriendsSocialUseCase: Get.find(),
-        getFriendPresencesUseCase: Get.find(),
-        appController: Get.find(),
-        sendFriendRequestUseCase: Get.find(),
-        acceptFriendRequestUseCase: Get.find(),
-        declineFriendRequestUseCase: Get.find(),
-        cancelFriendRequestUseCase: Get.find(),
-        removeFriendUseCase: Get.find(),
-        findProfileByCodeUseCase: Get.find(),
-        getGroupInvitationsUseCase: Get.find(),
-        acceptGroupInvitationUseCase: Get.find(),
-        declineGroupInvitationUseCase: Get.find(),
+        socialStore: Get.find(),
+        friendsRepository: Get.find(),
         groupsRepository: Get.find(),
+        appController: Get.find(),
         appNavigator: Get.find(),
       ),
     );

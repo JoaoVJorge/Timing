@@ -1,5 +1,6 @@
 import "package:dartz/dartz.dart";
 import "package:dio/dio.dart";
+import "package:timing/core/data/errors/backend_error.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/http/app_http_request.dart";
 import "package:timing/core/services/http/http_status_code.dart";
@@ -26,7 +27,7 @@ class HttpClientService {
 
       return handleResponse(response);
     } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+      return Left(toAppError(error, stackTrace));
     }
   }
 
@@ -44,6 +45,8 @@ class HttpClientService {
 
     final String errorMessage = data["message"] as String? ?? "Unknown error";
 
-    return Left(HttpError(statusCode: statusCode, message: errorMessage));
+    return Left(
+      RejectedError(code: "${response.statusCode}", cause: errorMessage),
+    );
   }
 }

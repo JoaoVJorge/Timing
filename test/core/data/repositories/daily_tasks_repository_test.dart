@@ -1,36 +1,54 @@
 import "dart:async";
 
-import "package:flutter_test/flutter_test.dart";
 import "package:dartz/dartz.dart";
+import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
+
+import "../../../support/supabase_test_harness.dart";
 
 class _UnusedDailyTasksDataSource implements DailyTasksDataSource {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A signed-in backend whose read of the goals waits until it is released.
 class _ControllableReadDataSource implements DailyTasksDataSource {
   final Completer<void> readStarted = Completer<void>();
   final Completer<void> releaseRead = Completer<void>();
 
   @override
-  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async {
+  String? get currentUserId => "user-1";
+
+  @override
+  Future<List<DailyTaskEntity>> fetchTasks(String userId) async {
     readStarted.complete();
     await releaseRead.future;
-    return const Right([]);
+    return const [];
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+DailyTasksRepository _repository(DailyTasksDataSource dataSource) {
+  final MemoryStorage storage = MemoryStorage();
+  return DailyTasksRepository(
+    dailyTasksDataSource: dataSource,
+    localStorageService: storage,
+    logger: AppLoggerService(),
+    pendingSyncStore: PendingSyncStore(localStorageService: storage),
+  );
+}
+
 void main() {
   test("remote hydration is serialized before a mutation", () async {
     final dataSource = _ControllableReadDataSource();
-    final repository = DailyTasksRepository(dailyTasksDataSource: dataSource);
+    final repository = _repository(dataSource);
     bool mutationStarted = false;
 
     final Future<Either<AppError, List<DailyTaskEntity>>> read = repository
@@ -49,8 +67,8 @@ void main() {
   });
 
   test("daily-task mutations execute in their original order", () async {
-    final DailyTasksRepository repository = DailyTasksRepository(
-      dailyTasksDataSource: _UnusedDailyTasksDataSource(),
+    final DailyTasksRepository repository = _repository(
+      _UnusedDailyTasksDataSource(),
     );
     final Completer<void> releaseFirst = Completer<void>();
     final List<String> events = [];
@@ -75,8 +93,8 @@ void main() {
   });
 
   test("a failed mutation does not poison the queue", () async {
-    final DailyTasksRepository repository = DailyTasksRepository(
-      dailyTasksDataSource: _UnusedDailyTasksDataSource(),
+    final DailyTasksRepository repository = _repository(
+      _UnusedDailyTasksDataSource(),
     );
     bool secondRan = false;
 

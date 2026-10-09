@@ -3,6 +3,10 @@ import "dart:async";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
 import "package:timing/core/data/repositories/subjects_repository.dart";
+import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/sync/pending_sync_store.dart";
+
+import "../../../support/supabase_test_harness.dart";
 
 class _NoopSubjectsDataSource implements SubjectsDataSource {
   @override
@@ -11,8 +15,12 @@ class _NoopSubjectsDataSource implements SubjectsDataSource {
 
 void main() {
   test("subject mutations execute in their original order", () async {
+    final MemoryStorage storage = MemoryStorage();
     final SubjectsRepository repository = SubjectsRepository(
       subjectsDataSource: _NoopSubjectsDataSource(),
+      localStorageService: storage,
+      logger: AppLoggerService(),
+      pendingSyncStore: PendingSyncStore(localStorageService: storage),
     );
     final Completer<void> releaseFirst = Completer<void>();
     final List<String> events = <String>[];

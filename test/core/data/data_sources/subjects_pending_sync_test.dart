@@ -1,6 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -62,15 +63,18 @@ SubjectEntity _subject() => const SubjectEntity(
   activityType: SubjectActivityType.permanent,
 );
 
-Future<(SubjectsDataSource, PendingSyncStore, _MemStorage)> _build(
+Future<(SubjectsRepository, PendingSyncStore, _MemStorage)> _build(
   SupabaseService supabase,
 ) async {
   final storage = _MemStorage();
   final store = PendingSyncStore(localStorageService: storage);
   await store.load();
-  final dataSource = SubjectsDataSource(
+  final dataSource = SubjectsRepository(
+    subjectsDataSource: SubjectsDataSource(
+      supabaseService: supabase,
+      logger: AppLoggerService(),
+    ),
     localStorageService: storage,
-    supabaseService: supabase,
     logger: AppLoggerService(),
     pendingSyncStore: store,
   );
@@ -78,7 +82,7 @@ Future<(SubjectsDataSource, PendingSyncStore, _MemStorage)> _build(
 }
 
 void main() {
-  group("SubjectsDataSource offline sync", () {
+  group("SubjectsRepository offline sync", () {
     test(
       "saves locally and marks pending when the remote sync fails",
       () async {

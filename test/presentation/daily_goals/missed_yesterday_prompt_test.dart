@@ -5,13 +5,10 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
@@ -19,14 +16,28 @@ import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/presentation/daily_goals/widgets/missed_yesterday_multi_dialog.dart";
 
-class _InMemoryDailyTasksDataSource implements DailyTasksDataSource {
-  _InMemoryDailyTasksDataSource(this.tasks);
+class _InMemoryDailyTasksRepository implements DailyTasksRepository {
+  _InMemoryDailyTasksRepository(this.tasks);
 
   List<DailyTaskEntity> tasks;
 
+  Future<void> _mutationTail = Future<void>.value();
+
+  /// The repository's own queue, so the mutations under test are serialized
+  /// exactly as they are in the app.
   @override
-  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() async =>
-      Right(List.of(tasks));
+  Future<T> runSerializedMutation<T>(Future<T> Function() mutation) {
+    final Future<T> scheduled = _mutationTail.then((_) => mutation());
+    _mutationTail = scheduled.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return scheduled;
+  }
+
+  @override
+  Future<Either<AppError, List<DailyTaskEntity>>> getTasks() =>
+      runSerializedMutation(() async => Right(List.of(tasks)));
 
   @override
   Future<Either<AppError, List<DailyTaskEntity>>> getLocalTasks() async =>
@@ -92,24 +103,17 @@ class _NoopAchievementUnlockService implements AchievementUnlockService {
 }
 
 DailyGoalsController _controller(
-  _InMemoryDailyTasksDataSource dataSource,
+  _InMemoryDailyTasksRepository dataSource,
   _DialogRecordingNavigator navigator,
 ) {
-  final DailyTasksRepository repository = DailyTasksRepository(
-    dailyTasksDataSource: dataSource,
-  );
+  final DailyTasksRepository repository = dataSource;
   return DailyGoalsController(
     appNavigator: navigator,
-    getDailyTasksUseCase: GetDailyTasksUseCase(
-      dailyTasksRepository: repository,
-    ),
+    dailyTasksRepository: repository,
     toggleDailyTaskCheckUseCase: ToggleDailyTaskCheckUseCase(
       dailyTasksRepository: repository,
     ),
     deleteDailyTaskUseCase: DeleteDailyTaskUseCase(
-      dailyTasksRepository: repository,
-    ),
-    clearDailyTaskDataUseCase: ClearDailyTaskDataUseCase(
       dailyTasksRepository: repository,
     ),
     lastActivityService: _NoopLastActivityService(),
@@ -151,8 +155,8 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    final _InMemoryDailyTasksDataSource dataSource =
-        _InMemoryDailyTasksDataSource([
+    final _InMemoryDailyTasksRepository dataSource =
+        _InMemoryDailyTasksRepository([
           _intenseGoal("read"),
           _intenseGoal("train"),
         ]);
@@ -185,8 +189,8 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    final _InMemoryDailyTasksDataSource dataSource =
-        _InMemoryDailyTasksDataSource([
+    final _InMemoryDailyTasksRepository dataSource =
+        _InMemoryDailyTasksRepository([
           _intenseGoal("read"),
           _intenseGoal("train"),
         ]);

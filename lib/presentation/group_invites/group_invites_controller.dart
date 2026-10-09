@@ -1,6 +1,9 @@
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
+import "package:flutter/services.dart";
+import "package:share_plus/share_plus.dart";
+import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
@@ -63,8 +66,30 @@ class GroupInvitesController extends GetxController {
     }
   }
 
+  /// The group's link, which asks its leader to let the opener in.
+  String get groupLink => AppConstants.groupLink(group.inviteCode);
+
+  Future<void> onCopyLink() async {
+    await Clipboard.setData(ClipboardData(text: groupLink));
+    appNavigator.showSuccessSnackBar(
+      Get.context?.l10n.groupLinkCopiedMessage ?? "Link copied",
+    );
+  }
+
+  Future<void> onShareLink() async {
+    await SharePlus.instance.share(
+      ShareParams(
+        text:
+            Get.context?.l10n.shareGroupLinkMessage(group.name, groupLink) ??
+            "Join my group ${group.name} on Timing: $groupLink",
+      ),
+    );
+  }
+
   Future<void> onTapOption(GroupInviteOptionEntity option) async {
-    if (option.isMember || updatingFriendIds.contains(option.friendId)) {
+    if (option.isMember ||
+        option.isWaitingForLeader ||
+        updatingFriendIds.contains(option.friendId)) {
       return;
     }
 

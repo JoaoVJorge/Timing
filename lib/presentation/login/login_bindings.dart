@@ -7,7 +7,7 @@ class LoginBindings extends Bindings {
   void dependencies() {
     Get.put<LoginController>(
       LoginController(
-        signInWithGoogleUseCase: Get.find(),
+        phoneAuthRepository: Get.find(),
         appController: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),

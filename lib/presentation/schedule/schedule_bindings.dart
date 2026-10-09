@@ -12,7 +12,7 @@ class ScheduleBindings extends Bindings {
 
     Get.put<ScheduleController>(
       ScheduleController(
-        getScheduleEntriesUseCase: Get.find(),
+        scheduleRepository: Get.find(),
         addScheduleEntryUseCase: Get.find(),
         deleteScheduleEntryUseCase: Get.find(),
         updateScheduleEntryUseCase: Get.find(),

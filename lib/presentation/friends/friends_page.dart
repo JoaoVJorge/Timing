@@ -29,7 +29,7 @@ class FriendsPage extends GetView<FriendsController> {
     body: RefreshIndicator(
       color: context.colorTokens.primary,
       onRefresh: controller.loadSocial,
-      child: SingleChildScrollView(
+      child: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
@@ -38,46 +38,43 @@ class FriendsPage extends GetView<FriendsController> {
           AppSpacing.page,
           18,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Obx(
-              () => FriendsInviteCodeDisclosure(
-                code: controller.inviteCode.value.isEmpty
-                    ? "..."
-                    : controller.inviteCode.value,
-                onCopy: controller.copyInviteCode,
-                onShare: controller.shareInviteCode,
-              ),
+        children: [
+          Obx(
+            () => FriendsInviteCodeDisclosure(
+              code: controller.inviteCode.value.isEmpty
+                  ? "..."
+                  : controller.inviteCode.value,
+              onCopy: controller.copyInviteCode,
+              onShare: controller.shareInviteCode,
             ),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return const FriendsLoadingSkeleton();
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Gap(14),
-                  FriendsActivityShortcuts(
-                    pendingCount: controller.requests.length,
-                    sentCount:
-                        controller.groupInvitations.length +
-                        controller.sentGroupInvitations.length,
-                    onPendingTap: controller.openPendingRequestsPage,
-                    onSentTap: controller.openGroupInvitationsPage,
-                  ),
-                  const Gap(18),
-                  FriendsSection(
-                    friends: controller.friends.toList(),
-                    now: controller.presenceNow.value,
-                    onShare: controller.shareInviteCode,
-                    onRemove: controller.removeFriend,
-                  ),
-                ],
-              );
-            }),
-          ],
-        ),
+          ),
+          Obx(() {
+            if (controller.isLoading.value) {
+              return const FriendsLoadingSkeleton();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Gap(14),
+                FriendsActivityShortcuts(
+                  pendingCount: controller.requests.length,
+                  sentCount:
+                      controller.groupInvitations.length +
+                      controller.sentGroupInvitations.length,
+                  onPendingTap: controller.openPendingRequestsPage,
+                  onSentTap: controller.openGroupInvitationsPage,
+                ),
+                const Gap(18),
+                FriendsSection(
+                  friends: controller.friends.toList(),
+                  now: controller.presenceNow.value,
+                  onShare: controller.shareInviteCode,
+                  onRemove: controller.removeFriend,
+                ),
+              ],
+            );
+          }),
+        ],
       ),
     ),
   );

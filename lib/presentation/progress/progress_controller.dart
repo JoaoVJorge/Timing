@@ -2,6 +2,8 @@ import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
@@ -9,9 +11,7 @@ import "package:timing/core/domain/entities/profile_stats_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
-import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/utils/extensions/date_time_extensions.dart";
@@ -107,16 +107,16 @@ List<ProgressActivitySummary> buildProgressActivitySummaries({
 class ProgressController extends GetxController {
   ProgressController({
     required this._getProfileStatsUseCase,
-    required this._getDailyTasksUseCase,
-    required this._getSubjectsUseCase,
+    required this._dailyTasksRepository,
+    required this._subjectsRepository,
     required this._dailyProgressService,
     required this._activityHistoryService,
     required this._appNavigator,
   });
 
   final GetProfileStatsUseCase _getProfileStatsUseCase;
-  final GetDailyTasksUseCase _getDailyTasksUseCase;
-  final GetSubjectsUseCase _getSubjectsUseCase;
+  final DailyTasksRepository _dailyTasksRepository;
+  final SubjectsRepository _subjectsRepository;
   final DailyProgressService _dailyProgressService;
   final ActivityHistoryService _activityHistoryService;
   final AppNavigator _appNavigator;
@@ -264,8 +264,8 @@ class ProgressController extends GetxController {
     isLoading.value = true;
     try {
       final statsFuture = _getProfileStatsUseCase();
-      final tasksFuture = _getDailyTasksUseCase();
-      final subjectsFuture = _getSubjectsUseCase();
+      final tasksFuture = _dailyTasksRepository.getTasks();
+      final subjectsFuture = _subjectsRepository.getSubjects();
 
       final Either<AppError, ProfileStatsEntity> statsResult =
           await statsFuture;

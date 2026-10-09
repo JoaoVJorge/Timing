@@ -72,8 +72,18 @@ lib/
 Fluxo de dependencia:
 
 ```text
-presentation -> domain/use_cases -> data/repositories -> data_sources -> services
+presentation -> data/repositories -> data_sources -> Supabase
+presentation -> domain/use_cases -> data/repositories   (so quando ha regra de negocio)
 ```
+
+Papel de cada camada:
+
+- `data_sources`: so falam com o Supabase. Devolvem o valor e lancam a excecao crua; nao guardam cache, nao enfileiram e nao conhecem `AppError`.
+- `repositories`: donos da politica offline (copia local, fila de escritas pendentes via `OfflineActionQueue`, fallback para o cache) e o unico lugar que traduz uma falha em `AppError` (`toAppError`).
+- `use_cases`: existem apenas quando ha regra de negocio (ler, alterar e salvar em uma mutacao serializada, validar, combinar repositorios). Uma leitura ou escrita direta vai do controller para o repositorio.
+- `core/services/social/SocialStore`: amigos e pedidos de amizade, guardados uma vez para as telas de amigos e de grupos.
+
+Erros: `AppError` e selado por tipo (`OfflineError`, `SignedOutError`, `RejectedError`, `LocalDataError`, `UnexpectedError`). O texto mostrado ao usuario sai de um unico ponto, `AppNavigator.showError`, que traduz o tipo via l10n; causa e stack trace ficam so no log.
 
 Padrao de tela:
 
@@ -90,7 +100,7 @@ Padrao de tela:
 - carrega o `.env` de debug ou prod;
 - registra `AppNavigator`;
 - inicializa servicos;
-- registra data sources, repositories e use cases;
+- registra data sources, repositories (com `SocialStore` e `SyncReconciliationService`) e use cases;
 - registra `AppController` como permanente;
 - registra `ScheduleController` como singleton permanente, para Perfil e Agenda observarem a mesma lista de horarios.
 
@@ -704,32 +714,28 @@ i18n:
 
 ## 19. Use Cases
 
-Todos ficam em `lib/core/domain/use_cases/` e retornam `Either<AppError, T>`.
+Ficam em `lib/core/domain/use_cases/`, retornam `Either<AppError, T>` e existem apenas onde ha regra de negocio. O que e so leitura ou escrita direta e chamado no repositorio pelo controller.
 
 | Use case | Responsabilidade |
 |---|---|
-| `GetAppConfigUseCase` | ler configuracao |
-| `SaveAppConfigUseCase` | salvar configuracao |
-| `SyncProfileToBackendUseCase` | sync mockado de perfil |
-| `RequestPhoneCodeUseCase` | solicitar codigo mockado |
-| `VerifyPhoneCodeUseCase` | validar OTP mockado |
-| `GetSubjectsUseCase` | listar subjects |
-| `AddSubjectUseCase` | criar subject |
-| `DeleteSubjectUseCase` | deletar subject |
+| `AddSubjectUseCase` | criar atividade |
+| `UpdateSubjectUseCase` | editar a configuracao de uma atividade |
+| `DeleteSubjectUseCase` | deletar atividade |
 | `UpdateSubjectTimeUseCase` | atualizar tempo acumulado |
 | `UpdateSubjectPagesUseCase` | atualizar paginas de leitura |
 | `UpdateSubjectNotesUseCase` | atualizar notas |
-| `GetDailyTasksUseCase` | listar tarefas |
-| `AddDailyTaskUseCase` | criar tarefa |
-| `DeleteDailyTaskUseCase` | deletar tarefa |
-| `ToggleDailyTaskCheckUseCase` | marcar/desmarcar tarefa hoje |
-| `GetScheduleEntriesUseCase` | listar agenda |
-| `AddScheduleEntryUseCase` | criar entrada de agenda |
-| `DeleteScheduleEntryUseCase` | deletar entrada de agenda |
-| `GetGroupsUseCase` | listar grupos mockados |
-| `CreateGroupUseCase` | criar grupo mockado |
-| `GetInvitableFriendsUseCase` | listar amigos mockados |
+| `AddSubjectTimeUseCase` | somar tempo manualmente, com historico e ranking |
+| `RemoveSubjectTimeUseCase` | retirar tempo manualmente, com historico e ranking |
+| `ClearSubjectDataUseCase` | apagar o historico de uma atividade |
 | `GetProfileStatsUseCase` | gerar estatisticas agregadas |
+| `AddDailyTaskUseCase` | criar meta diaria |
+| `UpdateDailyTaskUseCase` | editar meta diaria |
+| `DeleteDailyTaskUseCase` | deletar meta diaria |
+| `ToggleDailyTaskCheckUseCase` | marcar/desmarcar meta em um dia |
+| `ClearDailyTaskDataUseCase` | apagar os dias marcados de uma meta |
+| `AddScheduleEntryUseCase` | criar entrada de agenda |
+| `UpdateScheduleEntryUseCase` | editar entrada de agenda |
+| `DeleteScheduleEntryUseCase` | deletar entrada de agenda |
 
 ---
 

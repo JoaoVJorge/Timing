@@ -12,13 +12,32 @@ import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
-import "package:timing/core/domain/use_cases/create_group_use_case.dart";
-import "package:timing/core/domain/use_cases/get_invitable_friends_use_case.dart";
 import "package:timing/presentation/create_group/create_group_controller.dart";
+import "package:timing/presentation/create_group/create_group_bindings.dart";
 
 void main() {
+  testWidgets(
+    "binding resolves repositories registered with non-nullable types",
+    (tester) async {
+      addTearDown(() => Get.reset());
+      final dailyTasks = _NoopDailyTasksRepository();
+      final subjects = _NoopSubjectsRepository();
+      Get.put<GroupsRepository>(_NoopGroupsRepository());
+      Get.put<DailyTasksRepository>(dailyTasks);
+      Get.put<SubjectsRepository>(subjects);
+      Get.put<AppNavigator>(AppNavigator());
+
+      CreateGroupBindings().dependencies();
+      await tester.pump();
+
+      final controller = Get.find<CreateGroupController>();
+      expect(controller.dailyTasksRepository, same(dailyTasks));
+      expect(controller.subjectsRepository, same(subjects));
+      expect(controller.isLoadingSources.value, isFalse);
+      expect(controller.sourcesLoadFailed.value, isFalse);
+    },
+  );
+
   group("CreateGroupController", () {
     test(
       "selects multiple compatible sources without changing personal goals",
@@ -156,16 +175,9 @@ void main() {
 CreateGroupController _buildController() {
   final _NoopGroupsRepository repository = _NoopGroupsRepository();
   return CreateGroupController(
-    getInvitableFriendsUseCase: GetInvitableFriendsUseCase(
-      groupsRepository: repository,
-    ),
-    createGroupUseCase: CreateGroupUseCase(groupsRepository: repository),
-    getDailyTasksUseCase: GetDailyTasksUseCase(
-      dailyTasksRepository: _NoopDailyTasksRepository(),
-    ),
-    getSubjectsUseCase: GetSubjectsUseCase(
-      subjectsRepository: _NoopSubjectsRepository(),
-    ),
+    groupsRepository: repository,
+    dailyTasksRepository: _NoopDailyTasksRepository(),
+    subjectsRepository: _NoopSubjectsRepository(),
     appNavigator: AppNavigator(),
   );
 }

@@ -38,7 +38,7 @@ void _showError(Object error, [StackTrace? stackTrace]) {
   }
   final AppNavigator navigator = Get.find<AppNavigator>();
   if (error is AppError) {
-    navigator.showErrorSnackBar(error.message);
+    navigator.showError(error);
     return;
   }
   navigator.showErrorSnackBar();

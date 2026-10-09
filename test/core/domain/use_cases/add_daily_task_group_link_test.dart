@@ -6,6 +6,9 @@ import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_daily_task_use_case.dart";
 
 class _FakeDailyTasksRepository implements DailyTasksRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
   _FakeDailyTasksRepository(this._tasks, {this.hydratedTasks});
 
   List<DailyTaskEntity> _tasks;

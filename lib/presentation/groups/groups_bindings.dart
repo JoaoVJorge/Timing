@@ -10,13 +10,8 @@ class GroupsBindings extends Bindings {
 
     Get.put<GroupsController>(
       GroupsController(
-        getGroupsUseCase: Get.find(),
-        getFriendsSocialUseCase: Get.find(),
-        sendFriendRequestUseCase: Get.find(),
-        cancelFriendRequestUseCase: Get.find(),
-        acceptFriendRequestUseCase: Get.find(),
-        removeFriendUseCase: Get.find(),
         groupsRepository: Get.find(),
+        socialStore: Get.find(),
         dailyTasksRepository: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),

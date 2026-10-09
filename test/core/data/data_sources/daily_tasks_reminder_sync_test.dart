@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
@@ -21,7 +22,7 @@ DailyTaskEntity _goal({int? reminder}) => DailyTaskEntity(
 void main() {
   late MemoryStorage storage;
   late TestBackend backend;
-  late DailyTasksDataSource dataSource;
+  late DailyTasksRepository dataSource;
   late List<Map<String, dynamic>> remoteRows;
   late List<dynamic> uploadedRows;
 
@@ -38,9 +39,12 @@ void main() {
       }
       return http.Response("", 201, request: request);
     });
-    dataSource = DailyTasksDataSource(
+    dataSource = DailyTasksRepository(
+      dailyTasksDataSource: DailyTasksDataSource(
+        supabaseService: TestSupabaseService(backend.client),
+        logger: AppLoggerService(),
+      ),
       localStorageService: storage,
-      supabaseService: TestSupabaseService(backend.client),
       logger: AppLoggerService(),
       pendingSyncStore: PendingSyncStore(localStorageService: storage),
     );
@@ -99,7 +103,9 @@ void main() {
     await pumpEventQueue();
     expect(announced.last.single.reminderMinutes, 60);
 
+    // The account now holds what was uploaded, plus a goal from another phone.
     remoteRows = [
+      ...uploadedRows.cast<Map<String, dynamic>>(),
       {
         "id": "b",
         "user_id": "user-1",

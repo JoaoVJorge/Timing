@@ -7,29 +7,25 @@ import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
-import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
+import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
-import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
-import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
+import "package:timing/core/services/social/social_store.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/main_tab_refresh_service.dart";
@@ -39,18 +35,15 @@ import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
+import "package:share_plus/share_plus.dart";
+import "package:flutter/services.dart";
 
 enum GroupDetailsTab { ranking, goals, chat }
 
 class GroupsController extends GetxController {
   GroupsController({
-    required this._getGroupsUseCase,
-    required this._getFriendsSocialUseCase,
-    required this._sendFriendRequestUseCase,
-    required this._cancelFriendRequestUseCase,
-    required this._acceptFriendRequestUseCase,
-    required this._removeFriendUseCase,
     required this._groupsRepository,
+    required this._socialStore,
     required this._dailyTasksRepository,
     required this._appNavigator,
     required this._supabaseService,
@@ -61,13 +54,8 @@ class GroupsController extends GetxController {
   }) : _mainTabRefreshService =
            mainTabRefreshService ?? MainTabRefreshService();
 
-  final GetGroupsUseCase _getGroupsUseCase;
-  final GetFriendsSocialUseCase _getFriendsSocialUseCase;
-  final SendFriendRequestUseCase _sendFriendRequestUseCase;
-  final CancelFriendRequestUseCase _cancelFriendRequestUseCase;
-  final AcceptFriendRequestUseCase _acceptFriendRequestUseCase;
-  final RemoveFriendUseCase _removeFriendUseCase;
   final GroupsRepository _groupsRepository;
+  final SocialStore _socialStore;
   final DailyTasksRepository _dailyTasksRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
@@ -83,13 +71,18 @@ class GroupsController extends GetxController {
   static const Duration _activityChangeDebounce = Duration(seconds: 3);
   StreamSubscription<GroupActivityChange>? _activityChangeSubscription;
   StreamSubscription<bool>? _connectivitySubscription;
+  StreamSubscription<GroupEntity>? _joinedGroupSubscription;
   Timer? _activityChangeDebounceTimer;
   String? _pendingActivityChangeGroupId;
 
   final RxList<GroupEntity> groups = <GroupEntity>[].obs;
-  final RxList<FriendEntity> friends = <FriendEntity>[].obs;
-  final RxList<FriendEntity> incomingFriendRequests = <FriendEntity>[].obs;
-  final RxList<FriendEntity> sentFriendRequests = <FriendEntity>[].obs;
+
+  /// Friends and friend requests live in the [SocialStore], shared with the
+  /// friends screens; these are the same lists, not copies.
+  RxList<FriendEntity> get friends => _socialStore.friends;
+  RxList<FriendEntity> get incomingFriendRequests =>
+      _socialStore.incomingRequests;
+  RxList<FriendEntity> get sentFriendRequests => _socialStore.sentRequests;
 
   /// Group invitations received and not answered yet. Only the count is kept:
   /// it feeds the friends card, while the friends screen lists the invitations.
@@ -125,6 +118,13 @@ class GroupsController extends GetxController {
   final RxList<GroupActivityProgressEntity> activityProgress =
       <GroupActivityProgressEntity>[].obs;
 
+  /// People waiting for the selected group's leader to let them in. Only the
+  /// leader is served these, so for anyone else the list stays empty.
+  final RxList<GroupJoinRequestEntity> joinRequests =
+      <GroupJoinRequestEntity>[].obs;
+  final RxBool isLoadingJoinRequests = false.obs;
+  final RxSet<String> answeringJoinRequestIds = <String>{}.obs;
+
   String get currentUserId => _supabaseService.currentUserId ?? "";
 
   RxBool get isOnline => _connectivityService?.isOnline ?? _assumedOnline;
@@ -141,6 +141,22 @@ class GroupsController extends GetxController {
     }
     return group.ownerId == userId;
   }
+
+  bool isGroupLeader(GroupEntity group, GroupMemberEntity member) =>
+      member.id == group.ownerId || member.role == GroupMemberEntity.ownerRole;
+
+  bool canManageGroup(GroupEntity group) => isGroupOwner(group);
+
+  bool get canManageSelectedGroup {
+    final GroupEntity? group = selectedGroup.value;
+    return group != null && canManageGroup(group);
+  }
+
+  /// Only the leader may remove another member.
+  bool canManageMember(GroupEntity group, GroupMemberEntity member) =>
+      isGroupOwner(group) &&
+      !isCurrentUser(member) &&
+      !isGroupLeader(group, member);
 
   /// Sorting the members is cheap on its own, but the ranking tab reads this
   /// getter (directly and through `rankOf`/`differenceToPrevious`) dozens of
@@ -369,20 +385,22 @@ class GroupsController extends GetxController {
 
   bool isCurrentUser(GroupMemberEntity member) => member.id == currentUserId;
 
-  bool isFriend(String memberId) =>
-      friends.any((friend) => friend.id == memberId);
+  bool isFriend(String memberId) => _socialStore.isFriend(memberId);
 
   bool hasIncomingFriendRequest(String memberId) =>
-      incomingFriendRequests.any((request) => request.id == memberId);
+      _socialStore.incomingRequestFrom(memberId) != null;
 
   FriendEntity? sentFriendRequestFor(String memberId) =>
-      sentFriendRequests.firstWhereOrNull((request) => request.id == memberId);
+      _socialStore.sentRequestTo(memberId);
 
   @override
   void onInit() {
     super.onInit();
     _activityChangeSubscription = _activityChangeBus.stream.listen(
       _onGroupActivityChanged,
+    );
+    _joinedGroupSubscription = _socialStore.joinedGroups.listen(
+      (group) => unawaited(upsertJoinedGroup(group)),
     );
     _connectivitySubscription = isOnline.listen((online) {
       if (online) {
@@ -399,20 +417,14 @@ class GroupsController extends GetxController {
     }
   }
 
-  /// Also runs offline: the data source falls back to its cached snapshot.
+  /// Also runs offline: the repository falls back to its cached snapshot.
   Future<void> loadFriends() async {
     isLoadingFriends.value = true;
     // Not awaited: on a slow connection the friends card should not wait on
     // the badge count to stop showing its loading state.
     unawaited(loadPendingGroupInvitationCount());
     try {
-      final Either<AppError, FriendsSocialEntity> result =
-          await _getFriendsSocialUseCase();
-      result.fold((_) {}, (social) {
-        friends.assignAll(social.friends);
-        incomingFriendRequests.assignAll(social.requests);
-        sentFriendRequests.assignAll(social.sentRequests);
-      });
+      await _socialStore.load();
     } finally {
       isLoadingFriends.value = false;
     }
@@ -442,6 +454,7 @@ class GroupsController extends GetxController {
     _staleRetryTimer?.cancel();
     unawaited(_activityChangeSubscription?.cancel());
     unawaited(_connectivitySubscription?.cancel());
+    unawaited(_joinedGroupSubscription?.cancel());
     super.onClose();
   }
 
@@ -466,8 +479,9 @@ class GroupsController extends GetxController {
     isLoading.value = true;
     didFailLoadingGroups.value = false;
     try {
-      final Either<AppError, List<GroupEntity>> result =
-          await _getGroupsUseCase().timeout(_groupsLoadTimeout);
+      final Either<AppError, List<GroupEntity>> result = await _groupsRepository
+          .getGroups()
+          .timeout(_groupsLoadTimeout);
       if (revision != _loadGroupsRevision) {
         // A newer loadGroups() call already landed while this one was in
         // flight; applying this stale result would revert it.
@@ -476,7 +490,7 @@ class GroupsController extends GetxController {
       result.fold(
         (error) {
           didFailLoadingGroups.value = true;
-          _appNavigator.showErrorSnackBar(error.message);
+          _appNavigator.showError(error);
         },
         (value) {
           didFailLoadingGroups.value = false;
@@ -493,9 +507,9 @@ class GroupsController extends GetxController {
             membershipChanged = true;
             _mainTabRefreshService.markGroupsChanged();
           }
-          // Copy so the controller's list doesn't alias the data source's mutable
-          // store — otherwise a created group appears in both the store add and the
-          // controller add below, showing up twice.
+          // Copy so the controller's list doesn't alias the repository's
+          // mutable list, otherwise a created group appears in both that add
+          // and the controller add below, showing up twice.
           groups.value = List.of(value);
           // A reload updates data, not navigation. The user may have opened
           // another group while the request was in flight; keep that selection.
@@ -549,7 +563,7 @@ class GroupsController extends GetxController {
     }
   }
 
-  /// Marks the list as stale when the data source had to serve its saved copy
+  /// Marks the list as stale when the repository had to serve its saved copy
   /// while the app is online, and retries a couple of times on its own: such
   /// failures are usually a slow response that the next attempt gets through.
   void _trackStaleness() {
@@ -704,6 +718,90 @@ class GroupsController extends GetxController {
       return;
     }
     isShowingMemberManagement.value = true;
+    unawaited(loadJoinRequests());
+  }
+
+  /// The group's link, which asks its leader to let the opener in.
+  String groupLinkFor(GroupEntity group) =>
+      AppConstants.groupLink(group.inviteCode);
+
+  Future<void> onCopyGroupLink(GroupEntity group) async {
+    if (group.inviteCode.isEmpty) {
+      return;
+    }
+    await Clipboard.setData(ClipboardData(text: groupLinkFor(group)));
+    _appNavigator.showSuccessSnackBar(
+      Get.context?.l10n.groupLinkCopiedMessage ?? "Link copied",
+    );
+  }
+
+  Future<void> onShareGroupLink(GroupEntity group) async {
+    if (group.inviteCode.isEmpty) {
+      return;
+    }
+    final String link = groupLinkFor(group);
+    await SharePlus.instance.share(
+      ShareParams(
+        text:
+            Get.context?.l10n.shareGroupLinkMessage(group.name, link) ??
+            "Join my group ${group.name} on Timing: $link",
+      ),
+    );
+  }
+
+  /// Who is waiting to be let in. Reading it as anyone but the leader comes
+  /// back empty, which is what the screen shows them.
+  Future<void> loadJoinRequests() async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null || !isGroupOwner(group)) {
+      joinRequests.clear();
+      return;
+    }
+    isLoadingJoinRequests.value = true;
+    final Either<AppError, List<GroupJoinRequestEntity>> result =
+        await _groupsRepository.getJoinRequests(group.id);
+    isLoadingJoinRequests.value = false;
+    if (selectedGroup.value?.id != group.id) {
+      return;
+    }
+    result.fold((_) => joinRequests.clear(), joinRequests.assignAll);
+  }
+
+  Future<void> onAnswerJoinRequest(
+    GroupJoinRequestEntity request, {
+    required bool approve,
+  }) async {
+    final GroupEntity? group = selectedGroup.value;
+    if (group == null ||
+        !_ensureGroupOwner(group) ||
+        !answeringJoinRequestIds.add(request.id)) {
+      return;
+    }
+    try {
+      final Either<AppError, void> result = await _groupsRepository
+          .answerJoinRequest(requestId: request.id, approve: approve);
+      await result.fold(
+        (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
+        (_) async {
+          joinRequests.removeWhere((item) => item.id == request.id);
+          final BuildContext? context = Get.context;
+          _appNavigator.showSuccessSnackBar(
+            approve
+                ? context?.l10n.groupJoinRequestApprovedMessage(
+                        request.userName,
+                      ) ??
+                      "They joined the group."
+                : context?.l10n.groupJoinRequestDeclinedMessage ??
+                      "Request declined.",
+          );
+          if (approve) {
+            await loadGroups(preferredGroupId: group.id);
+          }
+        },
+      );
+    } finally {
+      answeringJoinRequestIds.remove(request.id);
+    }
   }
 
   void onBackToGroupDetails() => isShowingMemberManagement.value = false;
@@ -988,25 +1086,23 @@ class GroupsController extends GetxController {
       return;
     }
     try {
-      final Either<AppError, void> result = await _sendFriendRequestUseCase(
-        member.id,
+      final Either<AppError, void> result = await _socialStore.sendRequest(
+        FriendEntity(
+          id: member.id,
+          friendshipId: "",
+          name: member.name,
+          handle: "",
+          colorValue: member.avatarColorValue,
+          avatarIconIndex: member.avatarIconIndex,
+          profilePhotoBase64: member.avatar,
+        ),
       );
-      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-        sentFriendRequests.add(
-          FriendEntity(
-            id: member.id,
-            friendshipId: "",
-            name: member.name,
-            handle: "",
-            colorValue: member.avatarColorValue,
-            avatarIconIndex: member.avatarIconIndex,
-            profilePhotoBase64: member.avatar,
-          ),
-        );
-        _appNavigator.showSuccessSnackBar(
+      result.fold(
+        (error) => _appNavigator.showErrorSnackBar(),
+        (_) => _appNavigator.showSuccessSnackBar(
           Get.context?.l10n.friendRequestSentMessage ?? "Request sent",
-        );
-      });
+        ),
+      );
     } finally {
       updatingFriendshipMemberIds.remove(member.id);
     }
@@ -1018,25 +1114,16 @@ class GroupsController extends GetxController {
       return;
     }
     try {
-      final Either<AppError, void> result = await _cancelFriendRequestUseCase(
-        addresseeId: member.id,
-        friendshipId: request.friendshipId,
-      );
-      result.fold(
-        (error) => _appNavigator.showErrorSnackBar(),
-        (_) => sentFriendRequests.removeWhere(
-          (sentRequest) => sentRequest.id == member.id,
-        ),
-      );
+      final Either<AppError, void> result = await _socialStore
+          .cancelSentRequest(request);
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
     } finally {
       updatingFriendshipMemberIds.remove(member.id);
     }
   }
 
   Future<void> onTapFriendshipMemberAction(GroupMemberEntity member) async {
-    final FriendEntity? friend = friends.firstWhereOrNull(
-      (item) => item.id == member.id,
-    );
+    final FriendEntity? friend = _socialStore.friendWith(member.id);
     if (friend != null) {
       await onRemoveFriendFromMember(member, friend);
       return;
@@ -1045,8 +1132,9 @@ class GroupsController extends GetxController {
       await onCancelFriendRequestToMember(member);
       return;
     }
-    final FriendEntity? incomingRequest = incomingFriendRequests
-        .firstWhereOrNull((item) => item.id == member.id);
+    final FriendEntity? incomingRequest = _socialStore.incomingRequestFrom(
+      member.id,
+    );
     if (incomingRequest != null) {
       await onAcceptFriendRequestFromMember(member, incomingRequest);
       return;
@@ -1062,15 +1150,10 @@ class GroupsController extends GetxController {
       return;
     }
     try {
-      final Either<AppError, void> result = await _acceptFriendRequestUseCase(
-        request.friendshipId,
+      final Either<AppError, void> result = await _socialStore.acceptRequest(
+        request,
       );
-      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-        incomingFriendRequests.removeWhere((item) => item.id == member.id);
-        if (!isFriend(member.id)) {
-          friends.add(request);
-        }
-      });
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
     } finally {
       updatingFriendshipMemberIds.remove(member.id);
     }
@@ -1097,14 +1180,10 @@ class GroupsController extends GetxController {
       return;
     }
     try {
-      final Either<AppError, void> result = await _removeFriendUseCase(
-        friendId: member.id,
-        friendshipId: friend.friendshipId,
+      final Either<AppError, void> result = await _socialStore.removeFriend(
+        friend,
       );
-      result.fold(
-        (error) => _appNavigator.showErrorSnackBar(),
-        (_) => friends.removeWhere((item) => item.id == member.id),
-      );
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
     } finally {
       updatingFriendshipMemberIds.remove(member.id);
     }
@@ -1115,8 +1194,7 @@ class GroupsController extends GetxController {
     final BuildContext? context = Get.context;
     if (group == null ||
         context == null ||
-        isCurrentUser(member) ||
-        !_ensureGroupOwner(group) ||
+        !_ensureCanManageMember(group, member) ||
         !updatingGroupMemberIds.add(member.id)) {
       return;
     }
@@ -1127,7 +1205,7 @@ class GroupsController extends GetxController {
       message: context.l10n.deleteConfirmationContent(member.name),
       cancelLabel: context.l10n.cancelButton,
       confirmLabel: context.l10n.deleteButton,
-      icon: Icons.person_remove_outlined,
+      icon: Icons.group_remove_outlined,
       isDestructive: true,
     );
     if (!confirmed) {
@@ -1184,7 +1262,7 @@ class GroupsController extends GetxController {
 
   Future<void> onTapEditGroup() async {
     final GroupEntity? group = selectedGroup.value;
-    if (group == null || !_ensureGroupOwner(group)) {
+    if (group == null || !_ensureGroupManager(group)) {
       return;
     }
     final dynamic result = await _appNavigator.toNamed(
@@ -1241,7 +1319,7 @@ class GroupsController extends GetxController {
   Future<void> onTapResetGroup() async {
     final GroupEntity? group = selectedGroup.value;
     final BuildContext? context = Get.context;
-    if (group == null || context == null || !_ensureGroupOwner(group)) {
+    if (group == null || context == null || !_ensureGroupManager(group)) {
       return;
     }
 
@@ -1276,7 +1354,9 @@ class GroupsController extends GetxController {
 
   Future<void> onConfirmResetGroup({bool clearOwnHistory = false}) async {
     final GroupEntity? group = selectedGroup.value;
-    if (group == null || isResettingGroup.value || !_ensureGroupOwner(group)) {
+    if (group == null ||
+        isResettingGroup.value ||
+        !_ensureGroupManager(group)) {
       return;
     }
 
@@ -1352,6 +1432,30 @@ class GroupsController extends GetxController {
     );
     return false;
   }
+
+  bool _ensureGroupManager(GroupEntity group) {
+    if (canManageGroup(group)) {
+      return true;
+    }
+    _showManagerOnlyError();
+    return false;
+  }
+
+  bool _ensureCanManageMember(GroupEntity group, GroupMemberEntity member) {
+    if (canManageMember(group, member)) {
+      return true;
+    }
+    // Acting on oneself is never offered, so it needs no explanation.
+    if (!isCurrentUser(member)) {
+      _showManagerOnlyError();
+    }
+    return false;
+  }
+
+  void _showManagerOnlyError() => _appNavigator.showErrorSnackBar(
+    Get.context?.l10n.ownerOnlyGroupActionError ??
+        "Only the group leader can do this.",
+  );
 
   Future<void> onConfirmLeaveGroup() async {
     final GroupEntity? group = selectedGroup.value;

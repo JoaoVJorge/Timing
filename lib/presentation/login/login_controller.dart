@@ -5,8 +5,8 @@ import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -15,7 +15,7 @@ import "package:supabase_flutter/supabase_flutter.dart";
 
 class LoginController extends GetxController {
   LoginController({
-    required this.signInWithGoogleUseCase,
+    required this.phoneAuthRepository,
     required this.appController,
     required this.appNavigator,
     required this.supabaseService,
@@ -28,7 +28,7 @@ class LoginController extends GetxController {
   static const Duration _postSignInTimeout = Duration(seconds: 15);
   static const Duration _callbackTimeout = Duration(seconds: 30);
 
-  final SignInWithGoogleUseCase signInWithGoogleUseCase;
+  final PhoneAuthRepository phoneAuthRepository;
   final AppController appController;
   final AppNavigator appNavigator;
   final SupabaseService supabaseService;
@@ -80,11 +80,11 @@ class LoginController extends GetxController {
     isGoogleSubmitting.value = true;
     try {
       final Either<AppError, void>
-      result = await signInWithGoogleUseCase().timeout(
+      result = await phoneAuthRepository.signInWithGoogle().timeout(
         _googleSignInTimeout,
         onTimeout: () => Left(
-          GenericAppError(
-            error: TimeoutException(
+          UnexpectedError(
+            cause: TimeoutException(
               "Google sign in did not complete after $_googleSignInTimeout.",
             ),
             stackTrace: StackTrace.current,

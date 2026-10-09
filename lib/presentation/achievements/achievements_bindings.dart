@@ -7,7 +7,7 @@ class AchievementsBindings extends Bindings {
     Get.put<AchievementsController>(
       AchievementsController(
         getProfileStatsUseCase: Get.find(),
-        getDailyTasksUseCase: Get.find(),
+        dailyTasksRepository: Get.find(),
         dailyProgressService: Get.find(),
         appNavigator: Get.find(),
       ),

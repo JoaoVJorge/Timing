@@ -12,13 +12,8 @@ import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
-import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
-import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
-import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
+import "package:timing/core/services/social/social_store.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
@@ -143,9 +138,12 @@ void main() {
       final bus = ActivityChangeBus();
       addTearDown(bus.dispose);
       final service = TestSupabaseService(backend.client);
-      final tasksDataSource = DailyTasksDataSource(
+      final tasksDataSource = DailyTasksRepository(
+        dailyTasksDataSource: DailyTasksDataSource(
+          supabaseService: service,
+          logger: AppLoggerService(),
+        ),
         localStorageService: storage,
-        supabaseService: service,
         logger: AppLoggerService(),
         pendingSyncStore: store,
         activityChangeBus: bus,
@@ -154,31 +152,17 @@ void main() {
         groupsDataSource: GroupsDataSource(
           supabaseService: service,
           logger: AppLoggerService(),
-          localStorageService: storage,
-          pendingSyncStore: store,
-          activityChangeBus: bus,
         ),
+        logger: AppLoggerService(),
+        localStorageService: storage,
+        pendingSyncStore: store,
+        activityChangeBus: bus,
       );
       final friends = _Friends();
       final controller = GroupsController(
-        getGroupsUseCase: GetGroupsUseCase(groupsRepository: groupsRepository),
-        getFriendsSocialUseCase: GetFriendsSocialUseCase(
-          friendsRepository: friends,
-        ),
-        sendFriendRequestUseCase: SendFriendRequestUseCase(
-          friendsRepository: friends,
-        ),
-        cancelFriendRequestUseCase: CancelFriendRequestUseCase(
-          friendsRepository: friends,
-        ),
-        acceptFriendRequestUseCase: AcceptFriendRequestUseCase(
-          friendsRepository: friends,
-        ),
-        removeFriendUseCase: RemoveFriendUseCase(friendsRepository: friends),
+        socialStore: SocialStore(friendsRepository: friends),
         groupsRepository: groupsRepository,
-        dailyTasksRepository: DailyTasksRepository(
-          dailyTasksDataSource: tasksDataSource,
-        ),
+        dailyTasksRepository: tasksDataSource,
         appNavigator: _Navigator(),
         supabaseService: service,
         localStorageService: storage,
@@ -189,9 +173,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 200));
 
       final toggle = ToggleDailyTaskCheckUseCase(
-        dailyTasksRepository: DailyTasksRepository(
-          dailyTasksDataSource: tasksDataSource,
-        ),
+        dailyTasksRepository: tasksDataSource,
       );
 
       Future<List<String>> complete(DateTime day) async {

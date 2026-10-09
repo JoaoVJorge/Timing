@@ -4,8 +4,11 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/data/data_sources/friends_data_source.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
@@ -72,24 +75,30 @@ class _Env {
   late final SupabaseService supabase;
   late final bool Function() isBackendReachable;
 
-  GroupsDataSource get groups => GroupsDataSource(
-    supabaseService: supabase,
+  GroupsRepository get groups => GroupsRepository(
+    groupsDataSource: GroupsDataSource(
+      supabaseService: supabase,
+      logger: AppLoggerService(),
+    ),
     logger: AppLoggerService(),
     localStorageService: storage,
     pendingSyncStore: store,
     isBackendReachable: isBackendReachable,
   );
 
-  FriendsDataSource get friends => FriendsDataSource(
-    supabaseService: supabase,
+  FriendsRepository get friends => FriendsRepository(
+    friendsDataSource: FriendsDataSource(
+      supabaseService: supabase,
+      logger: AppLoggerService(),
+    ),
     logger: AppLoggerService(),
     localStorageService: storage,
     pendingSyncStore: store,
     isBackendReachable: isBackendReachable,
   );
 
-  ActivityDataSource get activity => ActivityDataSource(
-    supabaseService: supabase,
+  ActivityRepository get activity => ActivityRepository(
+    activityDataSource: ActivityDataSource(supabaseService: supabase),
     localStorageService: storage,
     pendingSyncStore: store,
     logger: AppLoggerService(),

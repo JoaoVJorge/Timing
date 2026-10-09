@@ -23,8 +23,8 @@ class UpdateDailyTaskUseCase {
       final int index = tasks.indexWhere((item) => item.id == task.id);
       if (index == -1) {
         return Left(
-          GenericAppError(
-            error: "Task not found: ${task.id}",
+          UnexpectedError(
+            cause: "Task not found: ${task.id}",
             stackTrace: StackTrace.current,
           ),
         );

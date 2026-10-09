@@ -3,10 +3,15 @@ import "package:equatable/equatable.dart";
 enum GroupInviteStatus {
   available,
   invited,
+
+  /// They accepted an invitation, or used the link, and are waiting for the
+  /// group's leader to let them in.
+  requested,
   member;
 
   static GroupInviteStatus byName(String value) => switch (value) {
     "invited" => GroupInviteStatus.invited,
+    "requested" => GroupInviteStatus.requested,
     "member" => GroupInviteStatus.member,
     _ => GroupInviteStatus.available,
   };
@@ -39,6 +44,7 @@ class GroupInviteOptionEntity extends Equatable {
 
   bool get isInvited => status == GroupInviteStatus.invited;
   bool get isMember => status == GroupInviteStatus.member;
+  bool get isWaitingForLeader => status == GroupInviteStatus.requested;
 
   GroupInviteOptionEntity copyWith({
     GroupInviteStatus? status,

@@ -37,6 +37,10 @@ class GroupMemberEntity extends Equatable {
     joinedAt: DateTime.tryParse(map["joinedAt"] as String? ?? ""),
   );
 
+  /// The values of [role], as the backend stores them.
+  static const String ownerRole = "owner";
+  static const String memberRole = "member";
+
   final String id;
   final String name;
   final int avatarColorValue;

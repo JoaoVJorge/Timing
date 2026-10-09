@@ -43,8 +43,8 @@ class _RecordingAdd extends _Unused implements AddSubjectUseCase {
   }) async {
     savedRestMinutes = restMinutes;
     savedFocusSessionCount = focusSessionCount;
-    return Left(
-      GenericAppError(error: "stops here", stackTrace: StackTrace.empty),
+    return const Left(
+      UnexpectedError(cause: "stops here", stackTrace: StackTrace.empty),
     );
   }
 }

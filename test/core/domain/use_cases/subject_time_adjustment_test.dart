@@ -240,7 +240,7 @@ void main() {
     test("nothing changes when the request cannot be recorded", () async {
       await rig.add(subjectId: "a", seconds: 600);
       rig.activity.removalResult = Left(
-        GenericAppError(error: "storage", stackTrace: StackTrace.current),
+        UnexpectedError(cause: "storage", stackTrace: StackTrace.current),
       );
 
       final result = await rig.remove(subjectId: "a", seconds: 300);

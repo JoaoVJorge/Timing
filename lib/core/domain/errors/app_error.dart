@@ -1,76 +1,83 @@
-import "package:timing/core/services/http/http_status_code.dart";
+/// A failure the app knows how to explain to the user. The subtype decides
+/// which explanation applies; [operation], [cause] and [stackTrace] are
+/// diagnostics for the log and never reach the screen.
+///
+/// Turning a failure into text for the user happens in one place only: the
+/// `localized` extension, which every screen reaches through
+/// `AppNavigator.showError`.
+sealed class AppError {
+  const AppError({this.operation, this.cause, this.stackTrace});
 
-abstract class AppError {
-  const AppError(this.message);
+  /// What was being attempted, e.g. `rpc public.create_group_with_members`.
+  final String? operation;
 
-  final String message;
-}
+  /// The exception, or a description, behind this failure.
+  final Object? cause;
 
-class HttpError extends AppError {
-  HttpError({required this.statusCode, required String message})
-    : super(message);
+  final StackTrace? stackTrace;
 
-  final HttpStatusCode statusCode;
-}
-
-class GenericAppError extends AppError {
-  GenericAppError({required Object error, required StackTrace stackTrace})
-    : super("Generic error: $error \n StackTrace: $stackTrace");
-}
-
-class SqlOperationAppError extends AppError {
-  SqlOperationAppError({
-    required String operation,
-    required Object error,
-    required StackTrace stackTrace,
-  }) : super("Erro no Supabase ($operation): ${describe(error)}");
-
-  static String describe(Object error) {
-    final dynamic raw = error;
-    final List<String> parts = [];
-
-    void addField(String label, Object? Function() read) {
-      try {
-        final Object? value = read();
-        if (value == null) {
-          return;
-        }
-        final String text = value.toString().trim();
-        if (text.isNotEmpty) {
-          parts.add("$label=$text");
-        }
-      } catch (_) {
-        return;
-      }
-    }
-
-    addField("code", () => raw.code);
-    addField("message", () => raw.message);
-    addField("details", () => raw.details);
-    addField("hint", () => raw.hint);
-
-    if (parts.isEmpty) {
-      parts.add(error.toString());
-    }
-
-    final String message = parts.join(" | ");
-    return message.length <= 420 ? message : "${message.substring(0, 420)}...";
+  /// Diagnostic text for the log.
+  String get debugDescription {
+    final String? attempted = operation;
+    final Object? reason = cause;
+    return [
+      runtimeType.toString(),
+      if (attempted != null) "($attempted)",
+      if (reason != null) ": $reason",
+    ].join();
   }
+
+  @override
+  String toString() => debugDescription;
 }
 
-class SerializationAppError extends AppError {
-  SerializationAppError({required Object error, required StackTrace stackTrace})
-    : super("Serialization error: $error \n StackTrace: $stackTrace");
+/// The backend could not be reached: no network, a timeout or a gateway
+/// failure. Trying again later can work.
+final class OfflineError extends AppError {
+  const OfflineError({super.operation, super.cause, super.stackTrace});
 }
 
-class RouteArgumentError extends AppError {
+/// The action needs a signed-in user and there is none.
+final class SignedOutError extends AppError {
+  const SignedOutError({super.operation, super.cause, super.stackTrace});
+}
+
+/// The backend answered and refused the action for good, so repeating the same
+/// request cannot succeed.
+final class RejectedError extends AppError {
+  const RejectedError({
+    this.code,
+    super.operation,
+    super.cause,
+    super.stackTrace,
+  });
+
+  /// The backend's own error code (a SQLSTATE or PostgREST code), when it sent
+  /// one.
+  final String? code;
+}
+
+/// Data saved on this device could not be read back or written.
+final class LocalDataError extends AppError {
+  const LocalDataError({super.operation, super.cause, super.stackTrace});
+}
+
+/// A failure the app has no more specific explanation for.
+final class UnexpectedError extends AppError {
+  const UnexpectedError({super.operation, super.cause, super.stackTrace});
+}
+
+/// A screen was opened without the arguments it needs.
+final class RouteArgumentError extends AppError {
   RouteArgumentError({
     required this.routeName,
     required this.expected,
     required this.actual,
   }) : super(
-         "Route \"$routeName\" expected arguments of type $expected but "
-         "received ${actual == null ? "null" : actual.runtimeType}.",
+         operation: "route $routeName",
+         cause:
+             "expected arguments of type $expected but received "
+             "${actual == null ? "null" : actual.runtimeType}",
        );
 
   final String routeName;

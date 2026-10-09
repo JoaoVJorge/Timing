@@ -1,6 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -38,16 +39,19 @@ class _CountingSupabase implements SupabaseService {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-Future<(DailyTasksDataSource, _CountingSupabase)> _build({
+Future<(DailyTasksRepository, _CountingSupabase)> _build({
   required bool reachable,
 }) async {
   final storage = _MemStorage()..data[LocalStorageKeys.dailyTasks] = "[]";
   final store = PendingSyncStore(localStorageService: storage);
   await store.load();
   final supabase = _CountingSupabase();
-  final dataSource = DailyTasksDataSource(
+  final dataSource = DailyTasksRepository(
+    dailyTasksDataSource: DailyTasksDataSource(
+      supabaseService: supabase,
+      logger: AppLoggerService(),
+    ),
     localStorageService: storage,
-    supabaseService: supabase,
     logger: AppLoggerService(),
     pendingSyncStore: store,
     isBackendReachable: () => reachable,
@@ -56,7 +60,7 @@ Future<(DailyTasksDataSource, _CountingSupabase)> _build({
 }
 
 void main() {
-  group("DailyTasksDataSource reads", () {
+  group("DailyTasksRepository reads", () {
     test("skip the remote refresh while the backend is unreachable", () async {
       final (dataSource, supabase) = await _build(reachable: false);
 

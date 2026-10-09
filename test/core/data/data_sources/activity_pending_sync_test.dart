@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
@@ -59,14 +60,14 @@ class _SignedOutSupabase implements SupabaseService {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-Future<(ActivityDataSource, PendingSyncStore, _MemStorage)> _build(
+Future<(ActivityRepository, PendingSyncStore, _MemStorage)> _build(
   SupabaseService supabase,
 ) async {
   final storage = _MemStorage();
   final store = PendingSyncStore(localStorageService: storage);
   await store.load();
-  final dataSource = ActivityDataSource(
-    supabaseService: supabase,
+  final dataSource = ActivityRepository(
+    activityDataSource: ActivityDataSource(supabaseService: supabase),
     localStorageService: storage,
     pendingSyncStore: store,
     logger: AppLoggerService(),
@@ -75,7 +76,7 @@ Future<(ActivityDataSource, PendingSyncStore, _MemStorage)> _build(
 }
 
 void main() {
-  group("ActivityDataSource offline sync", () {
+  group("ActivityRepository offline sync", () {
     test(
       "queues the session and marks pending when the remote sync fails",
       () async {
@@ -192,8 +193,10 @@ void main() {
         }
         expect(store.contains(PendingSyncDataset.activityEntries), isTrue);
 
-        final rejecting = ActivityDataSource(
-          supabaseService: _RejectingSupabase(),
+        final rejecting = ActivityRepository(
+          activityDataSource: ActivityDataSource(
+            supabaseService: _RejectingSupabase(),
+          ),
           localStorageService: storage,
           pendingSyncStore: store,
           logger: AppLoggerService(),
@@ -225,7 +228,7 @@ void main() {
       };
 
       test("get a valid id and their original time", () {
-        final repaired = ActivityDataSource.repairLegacyActivityRows([
+        final repaired = ActivityRepository.repairLegacyActivityRows([
           legacyRow(),
         ]);
 
@@ -240,7 +243,7 @@ void main() {
       test("keep an occurred_at they already carry", () {
         final row = legacyRow()..["occurred_at"] = "2026-09-20T10:00:00.000Z";
 
-        final repaired = ActivityDataSource.repairLegacyActivityRows([row]);
+        final repaired = ActivityRepository.repairLegacyActivityRows([row]);
 
         expect(repaired.rows.single["occurred_at"], "2026-09-20T10:00:00.000Z");
       });
@@ -249,7 +252,7 @@ void main() {
         final valid = legacyRow()
           ..["id"] = "5f1c9a20-1111-4a4a-8888-0e0e0e0e0e0e";
 
-        final repaired = ActivityDataSource.repairLegacyActivityRows([valid]);
+        final repaired = ActivityRepository.repairLegacyActivityRows([valid]);
 
         expect(repaired.changed, isFalse);
         expect(repaired.rows.single["id"], valid["id"]);

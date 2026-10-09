@@ -1,7 +1,7 @@
 import "dart:async";
 
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
-import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/activity_history/activity_history_service.dart";
@@ -20,7 +20,7 @@ class TimerSessionPersister {
   TimerSessionPersister({
     required this.autoSaveInterval,
     required this._updateSubjectTimeUseCase,
-    required this._logActivityUseCase,
+    required this._activityRepository,
     required this._activityHistoryService,
     required this._dailyProgressService,
     required this._subjectDailyHistoryService,
@@ -37,7 +37,7 @@ class TimerSessionPersister {
        _lastAutoSaveAt = now ?? DateTime.now();
 
   final UpdateSubjectTimeUseCase _updateSubjectTimeUseCase;
-  final LogActivityUseCase _logActivityUseCase;
+  final ActivityRepository _activityRepository;
   final ActivityHistoryService _activityHistoryService;
   final DailyProgressService _dailyProgressService;
   final SubjectDailyHistoryService _subjectDailyHistoryService;
@@ -124,12 +124,14 @@ class TimerSessionPersister {
       ),
     );
     unawaited(
-      _logActivityUseCase(
-        category: subject.category,
-        subjectId: subject.id,
-        subjectName: subject.name,
-        seconds: elapsedSinceLastPersist,
-      ).then((_) => _onGroupActivityChanged()),
+      _activityRepository
+          .logActivity(
+            category: subject.category,
+            subjectId: subject.id,
+            subjectName: subject.name,
+            seconds: elapsedSinceLastPersist,
+          )
+          .then((_) => _onGroupActivityChanged()),
     );
     await _dailyProgressService.addFocusSeconds(elapsedSinceLastPersist);
     await _subjectDailyHistoryService.addFocusSeconds(

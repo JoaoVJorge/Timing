@@ -21,8 +21,8 @@ class ToggleDailyTaskCheckUseCase {
       final int index = tasks.indexWhere((task) => task.id == taskId);
       if (index == -1) {
         return Left(
-          GenericAppError(
-            error: "Task not found: $taskId",
+          UnexpectedError(
+            cause: "Task not found: $taskId",
             stackTrace: StackTrace.current,
           ),
         );

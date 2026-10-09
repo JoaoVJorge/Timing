@@ -7,6 +7,8 @@ import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/last_activity_entity.dart";
@@ -14,8 +16,6 @@ import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
-import "package:timing/core/domain/use_cases/get_subjects_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
@@ -33,8 +33,8 @@ class HomeController extends GetxController {
     required this._lastActivityService,
     required this._dailyProgressService,
     required this._subjectDailyHistoryService,
-    required this._getSubjectsUseCase,
-    required this._getDailyTasksUseCase,
+    required this._subjectsRepository,
+    required this._dailyTasksRepository,
     required this._scheduleController,
     required this._achievementUnlockService,
     required this._homeWidgetService,
@@ -46,8 +46,8 @@ class HomeController extends GetxController {
   final LastActivityService _lastActivityService;
   final DailyProgressService _dailyProgressService;
   final SubjectDailyHistoryService _subjectDailyHistoryService;
-  final GetSubjectsUseCase _getSubjectsUseCase;
-  final GetDailyTasksUseCase _getDailyTasksUseCase;
+  final SubjectsRepository _subjectsRepository;
+  final DailyTasksRepository _dailyTasksRepository;
   final ScheduleController _scheduleController;
   final AchievementUnlockService _achievementUnlockService;
   final HomeWidgetService _homeWidgetService;
@@ -78,8 +78,10 @@ class HomeController extends GetxController {
   }) async {
     isLoading.value = true;
     try {
-      final subjectsFuture = _getSubjectsUseCase();
-      final tasksFuture = reloadDailyTasks ? _getDailyTasksUseCase() : null;
+      final subjectsFuture = _subjectsRepository.getSubjects();
+      final tasksFuture = reloadDailyTasks
+          ? _dailyTasksRepository.getTasks()
+          : null;
       final scheduleFuture = reloadSchedule
           ? _scheduleController.loadEntries()
           : null;
@@ -88,7 +90,7 @@ class HomeController extends GetxController {
           await subjectsFuture;
       subjectsResult.fold((error) {
         subjects.clear();
-        _appNavigator.showErrorSnackBar(error.message);
+        _appNavigator.showError(error);
       }, (value) => subjects.value = value);
 
       // Daily tasks only change on the Daily Goals screen, so most returns to Home
@@ -98,7 +100,7 @@ class HomeController extends GetxController {
             await tasksFuture;
         tasksResult.fold((error) {
           dailyTasks.clear();
-          _appNavigator.showErrorSnackBar(error.message);
+          _appNavigator.showError(error);
         }, (value) => dailyTasks.value = value);
       }
 

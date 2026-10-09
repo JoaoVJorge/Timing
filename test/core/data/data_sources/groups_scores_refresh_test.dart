@@ -1,6 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:timing/core/data/data_sources/groups_data_source.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
@@ -36,14 +37,17 @@ void main() {
   late List<String> requests;
   late MemoryStorage storage;
 
-  GroupsDataSource build(Future<http.Response> Function(http.Request) handler) {
+  GroupsRepository build(Future<http.Response> Function(http.Request) handler) {
     final backend = TestBackend((request) {
       requests.add("${request.method} ${request.url.path}");
       return handler(request);
     });
     addTearDown(backend.dispose);
-    return GroupsDataSource(
-      supabaseService: TestSupabaseService(backend.client),
+    return GroupsRepository(
+      groupsDataSource: GroupsDataSource(
+        supabaseService: TestSupabaseService(backend.client),
+        logger: AppLoggerService(),
+      ),
       logger: AppLoggerService(),
       localStorageService: storage,
       pendingSyncStore: PendingSyncStore(localStorageService: storage),

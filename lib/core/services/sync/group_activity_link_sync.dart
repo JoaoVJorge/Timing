@@ -1,16 +1,16 @@
 import "package:get/get.dart";
-import "package:timing/core/data/data_sources/subjects_data_source.dart";
-import "package:timing/core/data/data_sources/daily_tasks_data_source.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 
 /// Upload pending sources before taking the server's history baseline. Never
 /// discard local caches: they may still contain offline work.
 Future<bool> preparePersonalActivitiesForLinking() async {
-  if (Get.isRegistered<SubjectsDataSource>()) {
-    await Get.find<SubjectsDataSource>().flushPendingSync();
+  if (Get.isRegistered<SubjectsRepository>()) {
+    await Get.find<SubjectsRepository>().flushPendingSync();
   }
-  if (Get.isRegistered<DailyTasksDataSource>()) {
-    await Get.find<DailyTasksDataSource>().flushPendingSync();
+  if (Get.isRegistered<DailyTasksRepository>()) {
+    await Get.find<DailyTasksRepository>().flushPendingSync();
   }
   if (!Get.isRegistered<PendingSyncStore>()) return true;
   final pending = Get.find<PendingSyncStore>();
@@ -19,10 +19,10 @@ Future<bool> preparePersonalActivitiesForLinking() async {
 }
 
 Future<void> refreshPersonalActivitiesAfterLinking() async {
-  if (Get.isRegistered<SubjectsDataSource>()) {
-    await Get.find<SubjectsDataSource>().reconcileWithRemote();
+  if (Get.isRegistered<SubjectsRepository>()) {
+    await Get.find<SubjectsRepository>().reconcileWithRemote();
   }
-  if (Get.isRegistered<DailyTasksDataSource>()) {
-    await Get.find<DailyTasksDataSource>().refreshAfterGroupLinkChange();
+  if (Get.isRegistered<DailyTasksRepository>()) {
+    await Get.find<DailyTasksRepository>().refreshAfterGroupLinkChange();
   }
 }

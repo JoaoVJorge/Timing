@@ -236,7 +236,7 @@ class NotesController extends GetxController {
     return result.fold(
       (error) {
         saveState.value = NotesSaveState.idle;
-        _appNavigator.showErrorSnackBar(error.message);
+        _appNavigator.showError(error);
         return false;
       },
       (_) {

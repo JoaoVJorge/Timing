@@ -3,10 +3,10 @@ import "dart:async";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
-import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/presentation/login/login_controller.dart";
@@ -100,7 +100,7 @@ class _Navigator extends _Stub implements AppNavigator {
   }
 }
 
-class _SignIn extends _Stub implements SignInWithGoogleUseCase {}
+class _SignIn extends _Stub implements PhoneAuthRepository {}
 
 void main() {
   testWidgets("successful login does not time out while Home remains open", (
@@ -111,7 +111,7 @@ void main() {
     final app = _AppController();
     final navigator = _Navigator();
     final controller = LoginController(
-      signInWithGoogleUseCase: _SignIn(),
+      phoneAuthRepository: _SignIn(),
       appController: app,
       appNavigator: navigator,
       supabaseService: service,
@@ -145,7 +145,7 @@ void main() {
     );
     final navigator = _Navigator();
     LoginController openLoginPage() => LoginController(
-      signInWithGoogleUseCase: _SignIn(),
+      phoneAuthRepository: _SignIn(),
       appController: _AppController(),
       appNavigator: navigator,
       supabaseService: _SignedOutService(client),
@@ -193,7 +193,7 @@ void main() {
     });
 
     LoginController openLoginPage({_AppController? app}) => LoginController(
-      signInWithGoogleUseCase: _SignIn(),
+      phoneAuthRepository: _SignIn(),
       appController: app ?? _AppController(),
       appNavigator: navigator,
       supabaseService: _SignedOutService(client),
@@ -273,9 +273,7 @@ void main() {
 
       callbacks.add(oauthCallback);
       await tester.pump();
-      client.auth.events.addError(
-        const AuthException("Code exchange failed"),
-      );
+      client.auth.events.addError(const AuthException("Code exchange failed"));
       await tester.pump();
       expect(controller.signInStep.value, isNull);
       expect(navigator.errors, 1);

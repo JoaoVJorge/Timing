@@ -2,13 +2,16 @@ import "dart:async";
 
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/data/data_sources/profile_sync_data_source.dart";
+import "package:timing/core/data/repositories/profile_sync_repository.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 
 import "../../../support/supabase_test_harness.dart";
 
-ProfileSyncDataSource _dataSource(TestBackend backend) => ProfileSyncDataSource(
-  supabaseService: TestSupabaseService(backend.client),
-  logger: AppLoggerService(),
+ProfileSyncRepository _repository(TestBackend backend) => ProfileSyncRepository(
+  profileSyncDataSource: ProfileSyncDataSource(
+    supabaseService: TestSupabaseService(backend.client),
+    logger: AppLoggerService(),
+  ),
 );
 
 void main() {
@@ -32,7 +35,7 @@ void main() {
     });
     addTearDown(backend.dispose);
 
-    final result = await _dataSource(backend).getCurrentProfile();
+    final result = await _repository(backend).getCurrentProfile();
 
     final profile = result.fold((_) => fail("expected Right"), (p) => p);
     expect(profile?.userName, "Ana");
@@ -44,7 +47,7 @@ void main() {
     final backend = TestBackend((request) async => jsonResponse(request, []));
     addTearDown(backend.dispose);
 
-    final result = await _dataSource(backend).getCurrentProfile();
+    final result = await _repository(backend).getCurrentProfile();
 
     expect(result.fold((_) => fail("expected Right"), (p) => p), isNull);
   });
@@ -57,7 +60,7 @@ void main() {
     });
     addTearDown(backend.dispose);
 
-    final result = await _dataSource(backend).deleteAccount();
+    final result = await _repository(backend).deleteAccount();
 
     expect(result.isRight(), isTrue);
     expect(seen, hasLength(1));
@@ -71,7 +74,7 @@ void main() {
     );
     addTearDown(backend.dispose);
 
-    final result = await _dataSource(backend).deleteAccount();
+    final result = await _repository(backend).deleteAccount();
 
     expect(result.isLeft(), isTrue);
   });

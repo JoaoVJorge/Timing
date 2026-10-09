@@ -9,8 +9,8 @@ class ProgressBindings extends Bindings {
     Get.put<ProgressController>(
       ProgressController(
         getProfileStatsUseCase: Get.find(),
-        getDailyTasksUseCase: Get.find(),
-        getSubjectsUseCase: Get.find(),
+        dailyTasksRepository: Get.find(),
+        subjectsRepository: Get.find(),
         dailyProgressService: Get.find(),
         activityHistoryService: Get.find(),
         appNavigator: Get.find(),

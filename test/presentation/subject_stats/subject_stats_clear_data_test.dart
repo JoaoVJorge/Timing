@@ -168,7 +168,7 @@ void main() {
         history: _history(),
         clearUseCase: FakeClearSubjectDataUseCase(
           result: Left(
-            GenericAppError(error: "boom", stackTrace: StackTrace.current),
+            UnexpectedError(cause: "boom", stackTrace: StackTrace.current),
           ),
         ),
         navigator: navigator,

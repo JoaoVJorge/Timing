@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/core/domain/use_cases/sign_in_with_google_use_case.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/l10n/app_localizations.dart";
@@ -16,7 +16,7 @@ import "package:timing/theme/theme.dart";
 
 import "../../support/pump_in_scroll_view.dart";
 
-class _FakeSignInWithGoogleUseCase implements SignInWithGoogleUseCase {
+class _FakePhoneAuthRepository implements PhoneAuthRepository {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -59,7 +59,7 @@ void main() {
 
     Get.put(
       LoginController(
-        signInWithGoogleUseCase: _FakeSignInWithGoogleUseCase(),
+        phoneAuthRepository: _FakePhoneAuthRepository(),
         appController: _FakeAppController(),
         appNavigator: _FakeAppNavigator(),
         supabaseService: _FakeSupabaseService(),
@@ -89,7 +89,7 @@ void main() {
   ) async {
     final LoginController controller = Get.put(
       LoginController(
-        signInWithGoogleUseCase: _FakeSignInWithGoogleUseCase(),
+        phoneAuthRepository: _FakePhoneAuthRepository(),
         appController: _FakeAppController(),
         appNavigator: _FakeAppNavigator(),
         supabaseService: _FakeSupabaseService(),

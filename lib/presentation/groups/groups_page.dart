@@ -8,6 +8,7 @@ import "package:timing/core/domain/entities/group_activity_progress_entity.dart"
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
+import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";

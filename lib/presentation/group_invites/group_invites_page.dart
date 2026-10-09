@@ -32,17 +32,6 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
         );
       }
 
-      if (controller.options.isEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
-          child: AppEmptyState(
-            icon: Icons.person_add_alt_1_rounded,
-            title: context.l10n.groupInvitesNoFriendsTitle,
-            description: context.l10n.groupInvitesNoFriendsDescription,
-          ),
-        );
-      }
-
       final List<GroupInviteOptionEntity> options = controller.options.toList();
       final Set<String> updatingFriendIds = controller.updatingFriendIds
           .toSet();
@@ -50,7 +39,7 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
       return RefreshIndicator(
         color: context.colorTokens.primary,
         onRefresh: controller.loadOptions,
-        child: ListView.separated(
+        child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.page,
@@ -58,16 +47,164 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
             AppSpacing.page,
             20,
           ),
-          itemCount: options.length,
-          separatorBuilder: (_, _) => const Gap(10),
-          itemBuilder: (context, index) => _GroupInviteRow(
-            option: options[index],
-            isUpdating: updatingFriendIds.contains(options[index].friendId),
-            onTap: () => controller.onTapOption(options[index]),
-          ),
+          children: [
+            // Anyone can bring people in, and the link reaches those who are
+            // not friends here yet.
+            _GroupLinkCard(
+              link: controller.groupLink,
+              onCopy: controller.onCopyLink,
+              onShare: controller.onShareLink,
+            ),
+            const Gap(AppSpacing.betweenRelated),
+            if (options.isEmpty)
+              AppEmptyState(
+                icon: Icons.person_add_alt_1_rounded,
+                title: context.l10n.groupInvitesNoFriendsTitle,
+                description: context.l10n.groupInvitesNoFriendsDescription,
+              )
+            else
+              for (final (int index, GroupInviteOptionEntity option)
+                  in options.indexed) ...[
+                if (index > 0) const Gap(10),
+                _GroupInviteRow(
+                  option: option,
+                  isUpdating: updatingFriendIds.contains(option.friendId),
+                  onTap: () => controller.onTapOption(option),
+                ),
+              ],
+          ],
         ),
       );
     }),
+  );
+}
+
+/// The group's link, at the top of the invite screen: a copyable line and a
+/// share button. Whoever opens it asks the leader to be let in.
+class _GroupLinkCard extends StatelessWidget {
+  const _GroupLinkCard({
+    required this.link,
+    required this.onCopy,
+    required this.onShare,
+  });
+
+  final String link;
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: context.colorTokens.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: context.colorTokens.primary.withValues(alpha: 0.35),
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.link_rounded,
+              size: 26,
+              color: context.colorTokens.primary,
+            ),
+            const Gap(8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.groupShareLinkTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.cardTitle,
+                  ),
+                  const Gap(6),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Text(
+                      context.l10n.groupShareLinkDescription,
+                      style: context.textStyles.bodySmall.copyWith(
+                        color: context.colorTokens.textHint,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Gap(12),
+        BounceTap(
+          onTap: onCopy,
+          pressedScale: 0.98,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: context.colorTokens.surfaceInnerLayer.withValues(
+                alpha: 0.5,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    link,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Gap(32),
+                Icon(
+                  Icons.copy_rounded,
+                  size: 18,
+                  color: context.colorTokens.primary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Gap(10),
+        BounceTap(
+          onTap: onShare,
+          pressedScale: 0.98,
+          child: Container(
+            height: 46,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: context.colorTokens.primary,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.ios_share_rounded,
+                  size: 18,
+                  color: context.colorTokens.white,
+                ),
+                const Gap(8),
+                Text(
+                  context.l10n.groupShareLinkButton,
+                  style: context.textStyles.cardTitle.copyWith(
+                    color: context.colorTokens.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
@@ -85,7 +222,9 @@ class _GroupInviteRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _InviteVisuals visuals = _visualsFor(context, option.status);
-    final bool canTap = !option.isMember && !isUpdating;
+    // Someone already waiting for the leader is not invited again from here.
+    final bool canTap =
+        !option.isMember && !option.isWaitingForLeader && !isUpdating;
 
     return IgnorePointer(
       ignoring: !canTap,
@@ -165,6 +304,11 @@ class _GroupInviteRow extends StatelessWidget {
           label: context.l10n.invitedLabel,
           icon: Icons.mark_email_read_outlined,
           color: context.colorTokens.primary,
+        ),
+        GroupInviteStatus.requested => _InviteVisuals(
+          label: context.l10n.groupJoinRequestsTitle,
+          icon: Icons.hourglass_bottom_rounded,
+          color: context.colorTokens.textHint,
         ),
         GroupInviteStatus.member => _InviteVisuals(
           label: context.l10n.groupMemberRoleLabel,

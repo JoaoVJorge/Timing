@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:timing/core/data/data_sources/subjects_data_source.dart";
+import "package:timing/core/data/repositories/subjects_repository.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
@@ -76,9 +77,12 @@ class _Rig {
       );
     });
     store = PendingSyncStore(localStorageService: storage);
-    dataSource = SubjectsDataSource(
+    dataSource = SubjectsRepository(
+      subjectsDataSource: SubjectsDataSource(
+        supabaseService: TestSupabaseService(backend.client),
+        logger: AppLoggerService(),
+      ),
       localStorageService: storage,
-      supabaseService: TestSupabaseService(backend.client),
       logger: AppLoggerService(),
       pendingSyncStore: store,
     );
@@ -91,7 +95,7 @@ class _Rig {
   bool failWrites = false;
   late final TestBackend backend;
   late final PendingSyncStore store;
-  late final SubjectsDataSource dataSource;
+  late final SubjectsRepository dataSource;
 
   List<String> writes(String method) =>
       requests.where((r) => r.startsWith(method)).toList();
@@ -120,7 +124,7 @@ void main() {
       "groupId": "group",
       "groupActivityId": "activity",
     });
-    final merged = SubjectsDataSource.mergeSubjects(
+    final merged = SubjectsRepository.mergeSubjects(
       local: [legacy],
       remote: [legacy.copyWith(clearGroupLink: true, totalSeconds: 300)],
       deletions: {},

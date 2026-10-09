@@ -24,8 +24,8 @@ class _Repository implements GroupsRepository {
     if (empty) return const Right([]);
     if (failLoad) {
       return Left(
-        GenericAppError(
-          error: StateError('offline'),
+        UnexpectedError(
+          cause: StateError('offline'),
           stackTrace: StackTrace.current,
         ),
       );
@@ -55,8 +55,8 @@ class _Repository implements GroupsRepository {
     createdNew = createNew;
     return failSave
         ? Left(
-            GenericAppError(
-              error: StateError('offline'),
+            UnexpectedError(
+              cause: StateError('offline'),
               stackTrace: StackTrace.current,
             ),
           )

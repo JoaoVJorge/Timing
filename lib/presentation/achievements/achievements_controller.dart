@@ -2,10 +2,10 @@ import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/profile_stats_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -33,13 +33,13 @@ typedef _AchievementInputs = ({
 class AchievementsController extends GetxController {
   AchievementsController({
     required this.getProfileStatsUseCase,
-    required this.getDailyTasksUseCase,
+    required this.dailyTasksRepository,
     required this.dailyProgressService,
     required this.appNavigator,
   });
 
   final GetProfileStatsUseCase getProfileStatsUseCase;
-  final GetDailyTasksUseCase getDailyTasksUseCase;
+  final DailyTasksRepository dailyTasksRepository;
   final DailyProgressService dailyProgressService;
   final AppNavigator appNavigator;
 
@@ -71,7 +71,7 @@ class AchievementsController extends GetxController {
     final Either<AppError, ProfileStatsEntity> statsResult =
         await getProfileStatsUseCase();
     final Either<AppError, List<DailyTaskEntity>> tasksResult =
-        await getDailyTasksUseCase();
+        await dailyTasksRepository.getTasks();
 
     statsResult.fold((error) => null, (value) => stats.value = value);
     tasksResult.fold((error) => null, (value) => tasks.assignAll(value));

@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -46,12 +47,15 @@ GroupEntity _group({String id = "g1"}) => GroupEntity(
   members: const [],
 );
 
-Future<(GroupsDataSource, PendingSyncStore, _MemStorage)> _build() async {
+Future<(GroupsRepository, PendingSyncStore, _MemStorage)> _build() async {
   final storage = _MemStorage();
   final store = PendingSyncStore(localStorageService: storage);
   await store.load();
-  final dataSource = GroupsDataSource(
-    supabaseService: _OfflineSupabase(),
+  final dataSource = GroupsRepository(
+    groupsDataSource: GroupsDataSource(
+      supabaseService: _OfflineSupabase(),
+      logger: AppLoggerService(),
+    ),
     logger: AppLoggerService(),
     localStorageService: storage,
     pendingSyncStore: store,
@@ -60,7 +64,7 @@ Future<(GroupsDataSource, PendingSyncStore, _MemStorage)> _build() async {
 }
 
 void main() {
-  group("GroupsDataSource offline sync", () {
+  group("GroupsRepository offline sync", () {
     test("getGroups falls back to the cache when remote fails", () async {
       final (dataSource, _, storage) = await _build();
       storage.data[LocalStorageKeys.cachedGroups] = jsonEncode([

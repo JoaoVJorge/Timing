@@ -20,6 +20,9 @@ class _FakeSubjectsRepository implements SubjectsRepository {
   Future<bool> reconcileWithRemote() async => false;
 
   @override
+  Future<void> flushPendingSync() async {}
+
+  @override
   Future<Either<AppError, List<SubjectEntity>>> getSubjects() async =>
       Right(_subjects);
 

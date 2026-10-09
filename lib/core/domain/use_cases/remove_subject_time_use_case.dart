@@ -46,8 +46,8 @@ class RemoveSubjectTimeUseCase {
             );
             if (index == -1) {
               return Left(
-                GenericAppError(
-                  error: "Subject not found: $subjectId",
+                UnexpectedError(
+                  cause: "Subject not found: $subjectId",
                   stackTrace: StackTrace.current,
                 ),
               );

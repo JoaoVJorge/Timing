@@ -1,97 +1,52 @@
-import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "dart:async";
 
 import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
+import "package:share_plus/share_plus.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
-import "package:timing/core/domain/entities/friend_presence_entity.dart";
-import "package:timing/core/domain/entities/friends_social_entity.dart";
+import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
-import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/accept_group_invitation_use_case.dart";
-import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/decline_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/decline_group_invitation_use_case.dart";
-import "package:timing/core/domain/use_cases/find_profile_by_code_use_case.dart";
-import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
-import "package:timing/core/domain/use_cases/get_friend_presences_use_case.dart";
-import "package:timing/core/domain/use_cases/get_group_invitations_use_case.dart";
-import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
-import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
+import "package:timing/core/services/social/social_store.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/friends/find_friends_page.dart";
 import "package:timing/presentation/friends/friend_requests_page.dart";
 import "package:timing/presentation/friends/group_invitations_page.dart";
-import "package:timing/presentation/groups/groups_controller.dart";
+import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
-import "package:share_plus/share_plus.dart";
-
-@visibleForTesting
-List<FriendEntity> mergeFriendPresences(
-  Iterable<FriendEntity> currentFriends,
-  Iterable<FriendPresenceEntity> presences,
-) {
-  final byId = {for (final presence in presences) presence.id: presence};
-  return currentFriends
-      .map((friend) {
-        final FriendPresenceEntity? presence = byId[friend.id];
-        return presence == null
-            ? friend
-            : friend.copyWith(
-                isOnline: presence.isOnline,
-                lastSeenAt: presence.lastSeenAt,
-              );
-      })
-      .toList(growable: false);
-}
 
 class FriendsController extends GetxController {
   FriendsController({
-    required this._getFriendsSocialUseCase,
-    required this._getFriendPresencesUseCase,
-    required this._appController,
-    required this._sendFriendRequestUseCase,
-    required this._acceptFriendRequestUseCase,
-    required this._declineFriendRequestUseCase,
-    required this._cancelFriendRequestUseCase,
-    required this._removeFriendUseCase,
-    required this._findProfileByCodeUseCase,
-    required this._getGroupInvitationsUseCase,
-    required this._acceptGroupInvitationUseCase,
-    required this._declineGroupInvitationUseCase,
+    required this._socialStore,
+    required this._friendsRepository,
     required this._groupsRepository,
+    required this._appController,
     required this._appNavigator,
   });
 
-  final GetFriendsSocialUseCase _getFriendsSocialUseCase;
-  final GetFriendPresencesUseCase _getFriendPresencesUseCase;
-  final AppController _appController;
-  final SendFriendRequestUseCase _sendFriendRequestUseCase;
-  final AcceptFriendRequestUseCase _acceptFriendRequestUseCase;
-  final DeclineFriendRequestUseCase _declineFriendRequestUseCase;
-  final CancelFriendRequestUseCase _cancelFriendRequestUseCase;
-  final RemoveFriendUseCase _removeFriendUseCase;
-  final FindProfileByCodeUseCase _findProfileByCodeUseCase;
-  final GetGroupInvitationsUseCase _getGroupInvitationsUseCase;
-  final AcceptGroupInvitationUseCase _acceptGroupInvitationUseCase;
-  final DeclineGroupInvitationUseCase _declineGroupInvitationUseCase;
+  final SocialStore _socialStore;
+  final FriendsRepository _friendsRepository;
   final GroupsRepository _groupsRepository;
+  final AppController _appController;
   final AppNavigator _appNavigator;
 
-  final RxList<FriendEntity> requests = <FriendEntity>[].obs;
-  final RxList<FriendEntity> sentRequests = <FriendEntity>[].obs;
-  final RxList<FriendEntity> friends = <FriendEntity>[].obs;
+  /// Friends and friend requests live in the [SocialStore], shared with the
+  /// group screens; these are the same lists, not copies.
+  RxList<FriendEntity> get requests => _socialStore.incomingRequests;
+  RxList<FriendEntity> get sentRequests => _socialStore.sentRequests;
+  RxList<FriendEntity> get friends => _socialStore.friends;
+  RxString get inviteCode => _socialStore.inviteCode;
+
   final RxList<GroupInvitationEntity> groupInvitations =
       <GroupInvitationEntity>[].obs;
   final RxList<SentGroupInvitationEntity> sentGroupInvitations =
       <SentGroupInvitationEntity>[].obs;
-  final RxString inviteCode = "".obs;
   final RxBool isLoading = true.obs;
   final Rx<DateTime> presenceNow = DateTime.now().toUtc().obs;
   final RxSet<String> acceptingFriendRequestIds = <String>{}.obs;
@@ -102,7 +57,6 @@ class FriendsController extends GetxController {
   final RxBool hasSearched = false.obs;
   Timer? _presenceTimer;
   Worker? _foregroundWorker;
-  bool _isRefreshingPresence = false;
   int _presenceTicks = 0;
 
   Set<String> get sentRequestIds =>
@@ -129,52 +83,24 @@ class FriendsController extends GetxController {
     }
     _presenceTicks = 0;
     presenceNow.value = DateTime.now().toUtc();
-    unawaited(_refreshPresences());
+    unawaited(_socialStore.refreshPresences());
     _presenceTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       presenceNow.value = DateTime.now().toUtc();
       _presenceTicks++;
       if (_presenceTicks.isEven) {
-        unawaited(_refreshPresences());
+        unawaited(_socialStore.refreshPresences());
       }
     });
-  }
-
-  Future<void> _refreshPresences() async {
-    if (_isRefreshingPresence || friends.isEmpty) {
-      return;
-    }
-    _isRefreshingPresence = true;
-    try {
-      final result = await _getFriendPresencesUseCase(
-        friends.map((friend) => friend.id).toList(),
-      );
-      result.fold((_) => null, (List<FriendPresenceEntity> presences) {
-        final List<FriendEntity> updated = mergeFriendPresences(
-          friends,
-          presences,
-        );
-        friends.assignAll(updated);
-      });
-    } finally {
-      _isRefreshingPresence = false;
-    }
   }
 
   Future<void> loadSocial() async {
     isLoading.value = true;
     try {
-      final socialFuture = _getFriendsSocialUseCase();
+      final socialFuture = _socialStore.load();
       final groupInvitationsFuture = _loadGroupInvitations();
       final sentGroupInvitationsFuture = _loadSentGroupInvitations();
       final result = await socialFuture;
-      result.fold((error) => _appNavigator.showErrorSnackBar(), (
-        FriendsSocialEntity social,
-      ) {
-        inviteCode.value = social.inviteCode;
-        requests.assignAll(social.requests);
-        sentRequests.assignAll(social.sentRequests);
-        friends.assignAll(social.friends);
-      });
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
       await Future.wait([groupInvitationsFuture, sentGroupInvitationsFuture]);
     } finally {
       isLoading.value = false;
@@ -182,7 +108,7 @@ class FriendsController extends GetxController {
   }
 
   Future<void> _loadGroupInvitations() async {
-    final result = await _getGroupInvitationsUseCase();
+    final result = await _groupsRepository.getPendingInvitations();
     result.fold(
       (error) => groupInvitations.clear(),
       groupInvitations.assignAll,
@@ -206,15 +132,23 @@ class FriendsController extends GetxController {
       return;
     }
     try {
-      final result = await _acceptGroupInvitationUseCase(invitation.id);
+      final result = await _groupsRepository.acceptInvitation(invitation.id);
       await result.fold(
         (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
-        (group) async {
-          await showGroupActivityLinks(group);
-          if (Get.isRegistered<GroupsController>()) {
-            await Get.find<GroupsController>().upsertJoinedGroup(group);
-          }
+        (outcome) async {
           groupInvitations.removeWhere((item) => item.id == invitation.id);
+          // Only the leader's invitation joins on the spot; a member's one
+          // leaves the leader to answer, so there is no group to open yet.
+          final GroupEntity? group = outcome.group;
+          if (group == null) {
+            _appNavigator.showSuccessSnackBar(
+              _l10n?.groupJoinRequestSentMessage(invitation.groupName) ??
+                  "Request sent to the group's leader.",
+            );
+            return;
+          }
+          await showGroupActivityLinks(group);
+          _socialStore.announceJoinedGroup(group);
           _appNavigator.showSuccessSnackBar(
             _l10n?.joinedGroupMessage ?? "You joined the group",
           );
@@ -226,7 +160,7 @@ class FriendsController extends GetxController {
   }
 
   Future<void> declineGroupInvitation(GroupInvitationEntity invitation) async {
-    final result = await _declineGroupInvitationUseCase(invitation.id);
+    final result = await _groupsRepository.declineInvitation(invitation.id);
     result.fold(
       (error) => _appNavigator.showErrorOrOfflineSnackBar(),
       (_) => groupInvitations.removeWhere((item) => item.id == invitation.id),
@@ -251,23 +185,23 @@ class FriendsController extends GetxController {
     if (isRequestSent(profile.id)) {
       return;
     }
-    final result = await _sendFriendRequestUseCase(profile.id);
-    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {
-      sentRequests.add(
-        FriendEntity(
-          id: profile.id,
-          friendshipId: "",
-          name: profile.name,
-          handle: profile.handle,
-          colorValue: profile.colorValue,
-          avatarIconIndex: profile.avatarIconIndex,
-          profilePhotoBase64: profile.profilePhotoBase64,
-        ),
-      );
-      _appNavigator.showSuccessSnackBar(
+    final result = await _socialStore.sendRequest(
+      FriendEntity(
+        id: profile.id,
+        friendshipId: "",
+        name: profile.name,
+        handle: profile.handle,
+        colorValue: profile.colorValue,
+        avatarIconIndex: profile.avatarIconIndex,
+        profilePhotoBase64: profile.profilePhotoBase64,
+      ),
+    );
+    result.fold(
+      (error) => _appNavigator.showErrorSnackBar(),
+      (_) => _appNavigator.showSuccessSnackBar(
         _l10n?.friendRequestSentMessage ?? "Request sent",
-      );
-    });
+      ),
+    );
   }
 
   Future<void> acceptRequest(FriendEntity profile) async {
@@ -275,55 +209,21 @@ class FriendsController extends GetxController {
       return;
     }
     try {
-      final result = await _acceptFriendRequestUseCase(profile.friendshipId);
-      await result.fold<Future<void>>(
-        (error) async {
-          _appNavigator.showErrorSnackBar();
-        },
-        (_) async {
-          // Pending requests may have no visible profile under RLS. Acceptance
-          // grants access, so hydrate the friend before reusing the placeholder.
-          final socialResult = await _getFriendsSocialUseCase();
-          final FriendEntity acceptedProfile = socialResult.fold(
-            (_) => profile,
-            (social) => social.friends.firstWhere(
-              (friend) => friend.id == profile.id,
-              orElse: () => profile,
-            ),
-          );
-          requests.removeWhere((request) => request.id == profile.id);
-          final int existingIndex = friends.indexWhere(
-            (friend) => friend.id == profile.id,
-          );
-          if (existingIndex < 0) {
-            friends.insert(0, acceptedProfile);
-          } else {
-            friends[existingIndex] = acceptedProfile;
-          }
-        },
-      );
+      final result = await _socialStore.acceptRequest(profile);
+      result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
     } finally {
       acceptingFriendRequestIds.remove(profile.id);
     }
   }
 
   Future<void> declineRequest(FriendEntity profile) async {
-    final result = await _declineFriendRequestUseCase(profile.friendshipId);
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (_) => requests.removeWhere((request) => request.id == profile.id),
-    );
+    final result = await _socialStore.declineRequest(profile);
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
   }
 
   Future<void> cancelSentRequest(FriendEntity profile) async {
-    final result = await _cancelFriendRequestUseCase(
-      addresseeId: profile.id,
-      friendshipId: profile.friendshipId,
-    );
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (_) => sentRequests.removeWhere((request) => request.id == profile.id),
-    );
+    final result = await _socialStore.cancelSentRequest(profile);
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
   }
 
   Future<void> removeFriend(FriendEntity profile) async {
@@ -334,14 +234,8 @@ class FriendsController extends GetxController {
     if (!confirmed) {
       return;
     }
-    final result = await _removeFriendUseCase(
-      friendId: profile.id,
-      friendshipId: profile.friendshipId,
-    );
-    result.fold(
-      (error) => _appNavigator.showErrorSnackBar(),
-      (_) => friends.removeWhere((friend) => friend.id == profile.id),
-    );
+    final result = await _socialStore.removeFriend(profile);
+    result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
   }
 
   Future<void> findByCode(String code) async {
@@ -351,7 +245,7 @@ class FriendsController extends GetxController {
     isSearching.value = true;
     hasSearched.value = true;
     foundUser.value = null;
-    final result = await _findProfileByCodeUseCase(code);
+    final result = await _friendsRepository.findByCode(code);
     result.fold(
       (error) {
         isSearching.value = false;

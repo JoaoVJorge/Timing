@@ -438,7 +438,6 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
                 child: Text(
                   context.l10n.friendHowItWorksTitle,
                   style: context.textStyles.bodyMedium.copyWith(
-                    color: context.colorTokens.textHint,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
                   ),
@@ -455,7 +454,7 @@ class _HowItWorksCardState extends State<_HowItWorksCard> {
             ],
           ),
           if (isExpanded) ...[
-            const Gap(12),
+            const Gap(20),
             _HowStep(
               icon: Icons.chat_bubble_outline_rounded,
               text: context.l10n.friendHowItWorksStepOne,
@@ -498,13 +497,14 @@ class _HowStep extends StatelessWidget {
             width: 42,
             child: Icon(icon, color: context.colorTokens.primary, size: 22),
           ),
-          const Gap(10),
+          const Gap(8),
           Expanded(
             child: Text(
               text,
               style: context.textStyles.bodyMedium.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: context.colorTokens.textHint,
               ),
             ),
           ),

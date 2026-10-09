@@ -7,11 +7,10 @@ import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/core/data/repositories/phone_auth_repository.dart";
+import "package:timing/core/data/repositories/profile_sync_repository.dart";
 import "package:timing/core/domain/enums/auth_identity_provider.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_linked_auth_providers_use_case.dart";
-import "package:timing/core/domain/use_cases/link_auth_provider_use_case.dart";
-import "package:timing/core/domain/use_cases/delete_account_use_case.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
@@ -24,16 +23,14 @@ class EditProfileController extends GetxController {
   EditProfileController({
     required this._appController,
     required this._appNavigator,
-    required this._getLinkedAuthProvidersUseCase,
-    required this._linkAuthProviderUseCase,
-    required this._deleteAccountUseCase,
+    required this._phoneAuthRepository,
+    required this._profileSyncRepository,
   });
 
   final AppController _appController;
   final AppNavigator _appNavigator;
-  final GetLinkedAuthProvidersUseCase _getLinkedAuthProvidersUseCase;
-  final LinkAuthProviderUseCase _linkAuthProviderUseCase;
-  final DeleteAccountUseCase _deleteAccountUseCase;
+  final PhoneAuthRepository _phoneAuthRepository;
+  final ProfileSyncRepository _profileSyncRepository;
 
   late final TextEditingController nameController = TextEditingController(
     text: _appController.userName.value,
@@ -140,7 +137,7 @@ class EditProfileController extends GetxController {
   }
 
   Future<void> refreshLinkedAuthProviders() async {
-    final result = await _getLinkedAuthProvidersUseCase();
+    final result = await _phoneAuthRepository.getLinkedAuthProviders();
     result.fold((error) => null, (providers) {
       isGoogleLinked.value = providers.contains(
         AuthIdentityProvider.google.providerKey,
@@ -176,7 +173,7 @@ class EditProfileController extends GetxController {
     }
 
     loading.value = true;
-    final result = await _linkAuthProviderUseCase(provider);
+    final result = await _phoneAuthRepository.linkAuthProvider(provider);
     loading.value = false;
     result.fold(
       (error) => _appNavigator.showErrorSnackBar(
@@ -244,7 +241,7 @@ class EditProfileController extends GetxController {
     if (!finalConfirmed) return;
 
     isDeletingAccount.value = true;
-    final result = await _deleteAccountUseCase();
+    final result = await _profileSyncRepository.deleteAccount();
     isDeletingAccount.value = false;
     await result.fold(
       (error) async => _appNavigator.showErrorSnackBar(),

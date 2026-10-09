@@ -65,11 +65,12 @@ Future<SubjectsRepository> _repository(_SlowStorage storage) async {
   await store.load();
   return SubjectsRepository(
     subjectsDataSource: SubjectsDataSource(
-      localStorageService: storage,
       supabaseService: _SignedOutSupabase(),
       logger: AppLoggerService(),
-      pendingSyncStore: store,
     ),
+    localStorageService: storage,
+    logger: AppLoggerService(),
+    pendingSyncStore: store,
   );
 }
 

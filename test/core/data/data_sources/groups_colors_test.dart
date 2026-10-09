@@ -1,5 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
+import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -51,8 +52,11 @@ void main() {
       });
       addTearDown(backend.dispose);
       final storage = MemoryStorage();
-      GroupsDataSource source() => GroupsDataSource(
-        supabaseService: TestSupabaseService(backend.client),
+      GroupsRepository source() => GroupsRepository(
+        groupsDataSource: GroupsDataSource(
+          supabaseService: TestSupabaseService(backend.client),
+          logger: AppLoggerService(),
+        ),
         logger: AppLoggerService(),
         localStorageService: storage,
         pendingSyncStore: PendingSyncStore(localStorageService: storage),

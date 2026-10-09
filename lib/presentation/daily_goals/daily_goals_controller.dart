@@ -6,18 +6,16 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
 import "package:timing/app/route_arguments.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/clear_daily_task_data_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_daily_task_use_case.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/toggle_daily_task_check_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/daily_goals/widgets/missed_yesterday_multi_dialog.dart";
-import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
 import "package:timing/theme/app_spacing.dart";
@@ -25,27 +23,23 @@ import "package:timing/theme/app_spacing.dart";
 class DailyGoalsController extends GetxController {
   DailyGoalsController({
     required this._appNavigator,
-    required this._getDailyTasksUseCase,
+    required this._dailyTasksRepository,
     required this._toggleDailyTaskCheckUseCase,
     required this._deleteDailyTaskUseCase,
-    required this._clearDailyTaskDataUseCase,
     required this._lastActivityService,
     required this._achievementUnlockService,
     required this._activityChangeBus,
     this._confirmDelete = showDeleteConfirmationDialog,
-    this._confirmClearData = showClearDataConfirmationDialog,
   });
 
   final AppNavigator _appNavigator;
-  final GetDailyTasksUseCase _getDailyTasksUseCase;
+  final DailyTasksRepository _dailyTasksRepository;
   final ToggleDailyTaskCheckUseCase _toggleDailyTaskCheckUseCase;
   final DeleteDailyTaskUseCase _deleteDailyTaskUseCase;
-  final ClearDailyTaskDataUseCase _clearDailyTaskDataUseCase;
   final LastActivityService _lastActivityService;
   final AchievementUnlockService _achievementUnlockService;
   final ActivityChangeBus _activityChangeBus;
   final DeleteConfirmationCallback _confirmDelete;
-  final ClearDataConfirmationCallback _confirmClearData;
 
   final RxList<DailyTaskEntity> tasks = <DailyTaskEntity>[].obs;
   final RxBool isLoading = true.obs;
@@ -71,7 +65,7 @@ class DailyGoalsController extends GetxController {
     isLoading.value = true;
     try {
       final Either<AppError, List<DailyTaskEntity>> result =
-          await _getDailyTasksUseCase();
+          await _dailyTasksRepository.getTasks();
       result.fold((error) => null, (loadedTasks) {
         tasks.value = loadedTasks;
         _scheduleMissedYesterdayPrompt();
@@ -306,60 +300,8 @@ class DailyGoalsController extends GetxController {
     );
     result.fold((error) {
       tasks.value = previousTasks;
-      _appNavigator.showErrorSnackBar(error.message);
+      _appNavigator.showError(error);
     }, (_) {});
-  }
-
-  /// Wipes the days marked on a goal but keeps the goal. For a group goal this
-  /// is also what takes the user's share out of the group ranking.
-  Future<void> onClearTaskData(DailyTaskEntity task) async {
-    if (!_togglingTaskIds.add(task.id)) {
-      return;
-    }
-
-    try {
-      final bool confirmed = await _confirmClearData(
-        itemName: task.name,
-        isGoal: true,
-        isFromGroup: task.isFromGroup,
-      );
-      final int index = tasks.indexWhere((item) => item.id == task.id);
-      if (!confirmed || index == -1) {
-        return;
-      }
-
-      final DailyTaskEntity previousTask = tasks[index];
-      tasks[index] = previousTask.copyWith(
-        completedDates: const [],
-        updatedAt: DateTime.now().toUtc(),
-      );
-      final Either<AppError, DailyTaskEntity> result =
-          await _clearDailyTaskDataUseCase(taskId: task.id);
-      result.fold(
-        (error) {
-          _restoreTask(previousTask);
-          _appNavigator.showErrorSnackBar(error.message);
-        },
-        (clearedTask) {
-          final int clearedIndex = tasks.indexWhere(
-            (item) => item.id == clearedTask.id,
-          );
-          if (clearedIndex != -1) {
-            tasks[clearedIndex] = clearedTask;
-          }
-          if (clearedTask.isFromGroup) {
-            _activityChangeBus.notifyGroupActivityChanged(
-              groupId: clearedTask.groupId,
-            );
-          }
-          _appNavigator.showSuccessSnackBar(
-            Get.context?.l10n.clearDataSuccessMessage ?? "Data deleted.",
-          );
-        },
-      );
-    } finally {
-      _togglingTaskIds.remove(task.id);
-    }
   }
 
   String? get _goalTypeName {

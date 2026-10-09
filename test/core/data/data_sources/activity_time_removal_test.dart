@@ -5,6 +5,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:supabase_flutter/supabase_flutter.dart";
 import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
@@ -62,15 +63,15 @@ class _Rig {
     return rig;
   }
 
-  ActivityDataSource sourceOn(SupabaseService supabase) => ActivityDataSource(
-    supabaseService: supabase,
+  ActivityRepository sourceOn(SupabaseService supabase) => ActivityRepository(
+    activityDataSource: ActivityDataSource(supabaseService: supabase),
     localStorageService: storage,
     pendingSyncStore: store,
     logger: AppLoggerService(),
     activityChangeBus: bus,
   );
 
-  ActivityDataSource sourceOnline() {
+  ActivityRepository sourceOnline() {
     final TestBackend backend = TestBackend((request) async {
       final String function = request.url.pathSegments.last;
       calls.add(function);
@@ -118,10 +119,10 @@ Future<void> _settle() async {
 }
 
 void main() {
-  group("ActivityDataSource.removeSubjectSeconds", () {
+  group("ActivityRepository.removeSubjectSeconds", () {
     test("asks the backend to take the time off that activity", () async {
       final _Rig rig = await _Rig.create();
-      final ActivityDataSource dataSource = rig.sourceOnline();
+      final ActivityRepository dataSource = rig.sourceOnline();
       final DateTime before = DateTime.now().toUtc();
 
       final result = await dataSource.removeSubjectSeconds(
@@ -145,7 +146,7 @@ void main() {
 
     test("leaves nothing pending once it went through", () async {
       final _Rig rig = await _Rig.create();
-      final ActivityDataSource dataSource = rig.sourceOnline();
+      final ActivityRepository dataSource = rig.sourceOnline();
 
       await dataSource.removeSubjectSeconds(subjectId: "s1", seconds: 600);
       await _settle();
@@ -159,7 +160,7 @@ void main() {
       final _Rig rig = await _Rig.create();
       rig.seedQueue([_queuedRow("s1")]);
       await rig.store.markPending(PendingSyncDataset.activityEntries);
-      final ActivityDataSource dataSource = rig.sourceOnline();
+      final ActivityRepository dataSource = rig.sourceOnline();
 
       await dataSource.removeSubjectSeconds(subjectId: "s1", seconds: 30);
       await _settle();
@@ -193,7 +194,7 @@ void main() {
     test("a backend that is not answering keeps the request", () async {
       final _Rig rig = await _Rig.create();
       rig.removalStatus = 503;
-      final ActivityDataSource dataSource = rig.sourceOnline();
+      final ActivityRepository dataSource = rig.sourceOnline();
 
       await dataSource.removeSubjectSeconds(subjectId: "s1", seconds: 600);
       await _settle();
@@ -218,7 +219,7 @@ void main() {
       rig
         ..removalStatus = 403
         ..removalError = {"code": "42501", "message": "denied"};
-      final ActivityDataSource dataSource = rig.sourceOnline();
+      final ActivityRepository dataSource = rig.sourceOnline();
 
       await dataSource.removeSubjectSeconds(subjectId: "s1", seconds: 600);
       await _settle();
@@ -229,7 +230,7 @@ void main() {
 
     test("several requests are sent oldest first", () async {
       final _Rig rig = await _Rig.create();
-      final ActivityDataSource offline = rig.sourceOn(_OfflineSupabase());
+      final ActivityRepository offline = rig.sourceOn(_OfflineSupabase());
       await offline.removeSubjectSeconds(subjectId: "s1", seconds: 100);
       await offline.removeSubjectSeconds(subjectId: "s2", seconds: 200);
       await _settle();

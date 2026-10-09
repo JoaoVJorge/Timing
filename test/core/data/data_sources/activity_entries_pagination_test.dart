@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:timing/core/data/data_sources/activity_data_source.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/sync/pending_sync_store.dart";
 
@@ -62,10 +63,12 @@ Future<http.Response> Function(http.Request) _serverWith(
 Iterable<http.Request> _to(List<http.Request> log, String path) =>
     log.where((request) => request.url.path == path);
 
-ActivityDataSource _dataSource(TestBackend backend) {
+ActivityRepository _dataSource(TestBackend backend) {
   final storage = MemoryStorage();
-  return ActivityDataSource(
-    supabaseService: TestSupabaseService(backend.client),
+  return ActivityRepository(
+    activityDataSource: ActivityDataSource(
+      supabaseService: TestSupabaseService(backend.client),
+    ),
     localStorageService: storage,
     pendingSyncStore: PendingSyncStore(localStorageService: storage),
     logger: AppLoggerService(),

@@ -1,181 +1,98 @@
-import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "dart:async";
-import "dart:convert";
 
-import "package:dartz/dartz.dart";
+import "package:supabase_flutter/supabase_flutter.dart"
+    show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
+import "package:timing/core/data/errors/backend_error.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/entities/group_activity_draft.dart";
+import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
-import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/group_invite_option_entity.dart";
+import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
-import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/services/local_storage/app_local_storage_service.dart";
-import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
-import "package:timing/core/services/sync/pending_sync_store.dart";
-import "package:timing/core/services/sync/activity_change_bus.dart";
-import "package:timing/core/services/sync/sync_error_classifier.dart";
 import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/core/utils/profile_display_name.dart";
 import "package:timing/theme/group_colors.dart";
-import "package:supabase_flutter/supabase_flutter.dart"
-    show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
+
+/// The group tables and RPCs on the backend. Every call goes straight to
+/// Supabase and throws whatever it fails with: the cached list, the queue of
+/// writes waiting for a connection and turning a failure into an `AppError`
+/// belong to `GroupsRepository`.
+/// What the backend answered when the user used a link or an invitation:
+/// which group, its name, and whether the leader still has to approve.
+typedef GroupJoinResponse = ({
+  String groupId,
+  String groupName,
+  bool pendingApproval,
+});
 
 class GroupsDataSource {
-  GroupsDataSource({
-    required this._supabaseService,
-    required this._logger,
-    required this._localStorageService,
-    required this._pendingSyncStore,
-    this._activityChangeBus,
-    this._isBackendReachable,
-  });
-
-  final ActivityChangeBus? _activityChangeBus;
-
-  /// The app's connectivity flag: the offline fallbacks below only apply when
-  /// it says offline or the failure is not a definitive server rejection.
-  final bool Function()? _isBackendReachable;
-
-  bool _lastGroupsFetchServedCache = false;
-
-  /// Whether the most recent [getGroups] could not reach the backend and
-  /// returned the cached list instead. While the app believes it is online
-  /// that means the data on screen is stale and the user should be told.
-  bool get lastGroupsFetchServedCache => _lastGroupsFetchServedCache;
+  GroupsDataSource({required this._supabaseService, required this._logger});
 
   final SupabaseService _supabaseService;
   final AppLoggerService _logger;
-  final AppLocalStorageService _localStorageService;
-  final PendingSyncStore _pendingSyncStore;
-  static const Duration _activityScoresTimeout = Duration(seconds: 8);
-  static const Duration _offlineFallbackTimeout = Duration(seconds: 15);
-  // Every other remote call below must fail fast on a "connected but no real
-  // internet" network so its try/catch can queue the write for retry or
-  // surface the offline notice, instead of hanging on the platform's own
-  // (much longer) socket timeout.
+  // A remote call must fail fast on a "connected but no real internet"
+  // network so its caller can queue the write for retry or surface the
+  // offline notice, instead of hanging on the platform's own (much longer)
+  // socket timeout.
   static const Duration _remoteCallTimeout = Duration(seconds: 10);
   static const int _imageMessagesPageSize = 50;
 
-  /// Groups are remote-authoritative shared state (other members change
-  /// them), unlike subjects, so reads stay remote-first: this tries the
-  /// backend first, exactly as before, and only falls back to the last
-  /// locally cached list if that fails (offline, timeout, etc). An inner
-  /// timeout keeps that fallback fast — otherwise an offline user would wait
-  /// out a long OS-level connection timeout before ever seeing the cache.
-  ///
-  /// This must stay comfortably above [_activityScoresTimeout]: the fetch it
-  /// wraps runs several sequential queries and only then awaits the
-  /// leaderboard RPC, which has its own [_activityScoresTimeout] budget. Equal
-  /// values let the outer timeout win the race before the RPC's own timeout
-  /// ever fires, silently serving stale cached groups after every real
-  /// activity update instead of the fresh ranking.
-  Future<Either<AppError, List<GroupActivityLinkOptions>>>
-  getActivityLinkOptions(String groupId) async {
-    try {
-      final dynamic result = await _supabaseService.requireClient
-          .rpc(
-            "group_activity_link_options",
-            params: {"target_group_id": groupId},
-          )
-          .timeout(_remoteCallTimeout);
-      return Right(
-        (result as List)
-            .map(
-              (item) => GroupActivityLinkOptions.fromMap(
-                Map<String, dynamic>.from(item as Map),
-              ),
-            )
-            .toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(
-        SqlOperationAppError(
-          operation: "group_activity_link_options",
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
+  /// The budget of the leaderboard read at the end of [fetchGroups]. A caller
+  /// that puts its own timeout around that fetch must stay comfortably above
+  /// it.
+  static const Duration activityScoresTimeout = Duration(seconds: 8);
+
+  String? get currentUserId => _supabaseService.currentUserId;
+
+  Future<List<GroupActivityLinkOptions>> fetchActivityLinkOptions(
+    String groupId,
+  ) async {
+    final dynamic result = await _supabaseService.requireClient
+        .rpc(
+          "group_activity_link_options",
+          params: {"target_group_id": groupId},
+        )
+        .timeout(_remoteCallTimeout);
+    return (result as List)
+        .map(
+          (item) => GroupActivityLinkOptions.fromMap(
+            Map<String, dynamic>.from(item as Map),
+          ),
+        )
+        .toList();
   }
 
-  Future<Either<AppError, void>> setActivityLinks({
+  Future<void> setActivityLinks({
     required String activityId,
     required List<String> sourceIds,
     bool createNew = false,
   }) async {
-    try {
-      await _supabaseService.requireClient
-          .rpc(
-            "set_group_activity_links",
-            params: {
-              "target_activity_id": activityId,
-              "source_ids": sourceIds,
-              "create_new": createNew,
-              "local_date": DateTime.now().toIso8601String().substring(0, 10),
-            },
-          )
-          .timeout(_remoteCallTimeout);
-      _activityChangeBus?.notifyGroupActivityChanged();
-      return const Right(null);
-    } catch (error, stackTrace) {
-      return Left(
-        SqlOperationAppError(
-          operation: "set_group_activity_links",
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
+    await _supabaseService.requireClient
+        .rpc(
+          "set_group_activity_links",
+          params: {
+            "target_activity_id": activityId,
+            "source_ids": sourceIds,
+            "create_new": createNew,
+            "local_date": DateTime.now().toIso8601String().substring(0, 10),
+          },
+        )
+        .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, List<GroupEntity>>> getGroups() async {
-    final String? userId = _supabaseService.currentUserId;
-    if (userId == null) {
-      return const Right([]);
-    }
-
-    try {
-      final List<GroupEntity> groups = await _fetchRemoteGroups(
-        userId,
-      ).timeout(_offlineFallbackTimeout);
-      await _cacheGroups(groups);
-      _lastGroupsFetchServedCache = false;
-      return Right(groups);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to refresh groups",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!shouldUseOfflineFallback(
-        error,
-        isBackendReachable: _isBackendReachable,
-      )) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      final List<GroupEntity>? cached = await _readCachedGroups();
-      if (cached != null) {
-        _lastGroupsFetchServedCache = true;
-        return Right(cached);
-      }
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
-  }
-
-  /// Last successfully fetched groups, without touching the network. Used to
-  /// keep the groups screen usable while the backend is unreachable.
-  Future<Either<AppError, List<GroupEntity>>> getCachedGroups() async =>
-      Right(await _readCachedGroups() ?? const []);
-
-  Future<List<GroupEntity>> _fetchRemoteGroups(String userId) async {
+  /// The groups [userId] belongs to, with their members and ranking. Five
+  /// requests: memberships, groups, members, every member's profile with its
+  /// photo, then the leaderboard.
+  Future<List<GroupEntity>> fetchGroups(String userId) async {
     final List<Map<String, dynamic>> currentMemberships = await _selectRows(
       table: "group_members",
       columns: "group_id",
@@ -271,48 +188,39 @@ class GroupsDataSource {
     }).toList();
   }
 
-  Future<Either<AppError, List<GroupActivityProgressEntity>>>
-  getGroupActivityProgress(String groupId, {String? localDate}) async {
-    try {
-      // The progress RPC omits the activity's saved appearance. Load its
-      // payload alongside progress so every member sees the group's color.
-      final optionsFuture = getActivityLinkOptions(groupId);
-      final dynamic response = await _supabaseService.requireClient
-          .rpc(
-            "group_activity_progress",
-            params: {"target_group_id": groupId, "local_date": localDate},
-          )
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.group_activity_progress", response);
-      final List<dynamic> rows = response as List<dynamic>? ?? const [];
-      final optionsResult = await optionsFuture;
-      final Map<String, int> colorsByActivity = optionsResult.fold(
-        (_) => <String, int>{},
-        (options) => {
-          for (final option in options)
-            if (option.payload["color_value"] is num)
-              option.activityId: (option.payload["color_value"] as num).toInt(),
-        },
-      );
-      return Right(
-        rows
-            .map(
-              (row) => GroupActivityProgressEntity.fromMap({
-                ...Map<String, dynamic>.from(row as Map),
-                if (colorsByActivity.containsKey(row["activity_id"]))
-                  "color_value": colorsByActivity[row["activity_id"]],
-              }),
-            )
-            .toList(),
-      );
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to load group_activity_progress",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+  Future<List<GroupActivityProgressEntity>> fetchGroupActivityProgress(
+    String groupId, {
+    String? localDate,
+  }) async {
+    // The progress RPC omits the activity's saved appearance. Load its
+    // payload alongside progress so every member sees the group's color; the
+    // color is cosmetic, so failing to read it does not fail the progress.
+    final Future<List<GroupActivityLinkOptions>> optionsFuture =
+        fetchActivityLinkOptions(
+          groupId,
+        ).catchError((Object _) => const <GroupActivityLinkOptions>[]);
+    final dynamic response = await _supabaseService.requireClient
+        .rpc(
+          "group_activity_progress",
+          params: {"target_group_id": groupId, "local_date": localDate},
+        )
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.group_activity_progress", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    final Map<String, int> colorsByActivity = {
+      for (final GroupActivityLinkOptions option in await optionsFuture)
+        if (option.payload["color_value"] is num)
+          option.activityId: (option.payload["color_value"] as num).toInt(),
+    };
+    return rows
+        .map(
+          (row) => GroupActivityProgressEntity.fromMap({
+            ...Map<String, dynamic>.from(row as Map),
+            if (colorsByActivity.containsKey(row["activity_id"]))
+              "color_value": colorsByActivity[row["activity_id"]],
+          }),
+        )
+        .toList();
   }
 
   /// Scores for the fetch that also loads the groups themselves: the
@@ -356,7 +264,7 @@ class GroupsDataSource {
             "month_start": _monthStart().toIso8601String(),
           },
         )
-        .timeout(_activityScoresTimeout);
+        .timeout(activityScoresTimeout);
     _logger.logResponse("rpc public.group_leaderboard_scores", response);
     final List<dynamic> rows = response as List<dynamic>? ?? const [];
     final Map<String, Map<String, _PeriodScores>> scoresByGroup = {};
@@ -384,38 +292,19 @@ class GroupsDataSource {
   /// members, names and photos as they are.
   ///
   /// A focus session or a goal check changes nothing but the ranking, yet a
-  /// full [getGroups] repeats five requests (memberships, groups, members,
-  /// every member's profile with its photo, then the leaderboard). Unlike that
-  /// fetch, a failure here is reported, not turned into zeros, so the caller
-  /// can fall back to the full reload.
-  Future<Either<AppError, List<GroupEntity>>> refreshGroupScores(
-    List<GroupEntity> groups,
-  ) async {
-    if (groups.isEmpty) {
-      return Right(groups);
-    }
-    try {
-      final Map<String, Map<String, _PeriodScores>> scores =
-          await _fetchLeaderboardScores(
-            groups.map((group) => group.id).toList(),
-          );
-      final List<GroupEntity> updated = [
-        for (final GroupEntity group in groups)
-          group.copyWithMembers([
-            for (final GroupMemberEntity member in group.members)
-              _withScores(member, scores[group.id]?[member.id]),
-          ]),
-      ];
-      await _cacheGroups(updated);
-      return Right(updated);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to refresh group scores",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+  /// full [fetchGroups] repeats five requests. Unlike that fetch, a failure
+  /// here is thrown, not turned into zeros, so the caller can fall back to
+  /// the full reload.
+  Future<List<GroupEntity>> fetchGroupScores(List<GroupEntity> groups) async {
+    final Map<String, Map<String, _PeriodScores>> scores =
+        await _fetchLeaderboardScores(groups.map((group) => group.id).toList());
+    return [
+      for (final GroupEntity group in groups)
+        group.copyWithMembers([
+          for (final GroupMemberEntity member in group.members)
+            _withScores(member, scores[group.id]?[member.id]),
+        ]),
+    ];
   }
 
   GroupMemberEntity _withScores(
@@ -432,245 +321,166 @@ class GroupsDataSource {
     );
   }
 
-  Future<Either<AppError, List<FriendOption>>> getInvitableFriends() async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return const Right([]);
-      }
+  Future<List<FriendOption>> fetchInvitableFriends(String userId) async {
+    final List<Map<String, dynamic>> friendshipRows = await _selectRows(
+      table: "friendships",
+      columns: "requester_id, addressee_id",
+      filters: (query) => query
+          .eq("status", "accepted")
+          .or("requester_id.eq.$userId,addressee_id.eq.$userId"),
+    );
+    final List<String> friendIds = friendshipRows
+        .map((row) {
+          final String requesterId = row["requester_id"] as String;
+          final String addresseeId = row["addressee_id"] as String;
+          return requesterId == userId ? addresseeId : requesterId;
+        })
+        .toSet()
+        .toList();
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById(
+      friendIds,
+      withPhoto: true,
+    );
 
-      final List<Map<String, dynamic>> friendshipRows = await _selectRows(
-        table: "friendships",
-        columns: "requester_id, addressee_id",
-        filters: (query) => query
-            .eq("status", "accepted")
-            .or("requester_id.eq.$userId,addressee_id.eq.$userId"),
+    return friendIds.map((id) {
+      final Map<String, dynamic>? profile = profilesById[id];
+      return (
+        id: id,
+        name: profileDisplayName(profile, fallback: "Friend"),
+        colorValue:
+            (profile?["accent_color_value"] as num?)?.toInt() ??
+            GroupAvatarColors.byIndex(id.hashCode.abs()),
+        avatarIconIndex: (profile?["avatar_icon_index"] as num?)?.toInt(),
+        profilePhotoBase64: profile?["profile_photo_base64"] as String? ?? "",
       );
-      final List<String> friendIds = friendshipRows
-          .map((row) {
-            final String requesterId = row["requester_id"] as String;
-            final String addresseeId = row["addressee_id"] as String;
-            return requesterId == userId ? addresseeId : requesterId;
-          })
-          .toSet()
-          .toList();
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(friendIds, withPhoto: true);
-
-      return Right(
-        friendIds.map((id) {
-          final Map<String, dynamic>? profile = profilesById[id];
-          return (
-            id: id,
-            name: profileDisplayName(profile, fallback: "Friend"),
-            colorValue:
-                (profile?["accent_color_value"] as num?)?.toInt() ??
-                GroupAvatarColors.byIndex(id.hashCode.abs()),
-            avatarIconIndex: (profile?["avatar_icon_index"] as num?)?.toInt(),
-            profilePhotoBase64:
-                profile?["profile_photo_base64"] as String? ?? "",
-          );
-        }).toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    }).toList();
   }
 
-  Future<Either<AppError, List<GroupInviteOptionEntity>>> getGroupInviteOptions(
+  Future<List<GroupInviteOptionEntity>> fetchGroupInviteOptions(
     String groupId,
   ) async {
-    try {
-      final dynamic response = await _supabaseService.requireClient
-          .rpc("group_invite_options", params: {"target_group_id": groupId})
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.group_invite_options", response);
-      final List<dynamic> rows = response as List<dynamic>? ?? const [];
-      return Right(
-        rows
-            .map(
-              (row) => GroupInviteOptionEntity.fromMap(
-                Map<String, dynamic>.from(row as Map),
-              ),
-            )
-            .toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("group_invite_options", params: {"target_group_id": groupId})
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.group_invite_options", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    return rows
+        .map(
+          (row) => GroupInviteOptionEntity.fromMap(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList();
   }
 
-  Future<Either<AppError, void>> inviteFriendToGroup({
+  Future<void> inviteFriendToGroup({
     required String groupId,
     required String friendId,
   }) async {
-    try {
-      final dynamic response = await _supabaseService.requireClient
-          .rpc(
-            "invite_friend_to_group",
-            params: {"target_group_id": groupId, "target_friend_id": friendId},
-          )
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.invite_friend_to_group", response);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    final dynamic response = await _supabaseService.requireClient
+        .rpc(
+          "invite_friend_to_group",
+          params: {"target_group_id": groupId, "target_friend_id": friendId},
+        )
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.invite_friend_to_group", response);
   }
 
-  Future<Either<AppError, void>> cancelGroupInvitation({
+  Future<void> cancelGroupInvitation({
     required String groupId,
     required String friendId,
   }) async {
-    try {
-      final dynamic response = await _supabaseService.requireClient
-          .rpc(
-            "cancel_group_invitation",
-            params: {"target_group_id": groupId, "target_friend_id": friendId},
-          )
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.cancel_group_invitation", response);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    final dynamic response = await _supabaseService.requireClient
+        .rpc(
+          "cancel_group_invitation",
+          params: {"target_group_id": groupId, "target_friend_id": friendId},
+        )
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.cancel_group_invitation", response);
   }
 
-  Future<Either<AppError, GroupImageMessagesPage>> getImageMessages(
+  /// One page of the group's images, newest last. [before] asks for the page
+  /// that precedes that message.
+  Future<GroupImageMessagesPage> fetchImageMessages(
     String groupId, {
     GroupImageMessageEntity? before,
   }) async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return const Right(
-          GroupImageMessagesPage(messages: [], hasMore: false),
+    final List<Map<String, dynamic>> rows = await _selectRows(
+      table: "group_image_messages",
+      columns: "id, group_id, sender_id, image_base64, created_at",
+      filters: (query) {
+        PostgrestFilterBuilder<PostgrestList> filtered = query.eq(
+          "group_id",
+          groupId,
         );
-      }
-
-      final List<Map<String, dynamic>> rows = await _selectRows(
-        table: "group_image_messages",
-        columns: "id, group_id, sender_id, image_base64, created_at",
-        filters: (query) {
-          PostgrestFilterBuilder<PostgrestList> filtered = query.eq(
-            "group_id",
-            groupId,
+        if (before != null) {
+          final String timestamp = before.createdAt.toUtc().toIso8601String();
+          filtered = filtered.or(
+            "created_at.lt.\"$timestamp\","
+            "and(created_at.eq.\"$timestamp\",id.lt.${before.id})",
           );
-          if (before != null) {
-            final String timestamp = before.createdAt.toUtc().toIso8601String();
-            filtered = filtered.or(
-              "created_at.lt.\"$timestamp\","
-              "and(created_at.eq.\"$timestamp\",id.lt.${before.id})",
-            );
-          }
-          return filtered
-              .order("created_at", ascending: false)
-              .order("id", ascending: false)
-              .limit(_imageMessagesPageSize + 1);
-        },
-      );
-      final bool hasMore = rows.length > _imageMessagesPageSize;
-      final List<Map<String, dynamic>> pageRows = rows
-          .take(_imageMessagesPageSize)
-          .toList();
-      final List<String> senderIds = pageRows
-          .map((row) => row["sender_id"] as String)
-          .toSet()
-          .toList();
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(senderIds, withPhoto: true);
+        }
+        return filtered
+            .order("created_at", ascending: false)
+            .order("id", ascending: false)
+            .limit(_imageMessagesPageSize + 1);
+      },
+    );
+    final bool hasMore = rows.length > _imageMessagesPageSize;
+    final List<Map<String, dynamic>> pageRows = rows
+        .take(_imageMessagesPageSize)
+        .toList();
+    final List<String> senderIds = pageRows
+        .map((row) => row["sender_id"] as String)
+        .toSet()
+        .toList();
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById(
+      senderIds,
+      withPhoto: true,
+    );
 
-      return Right(
-        GroupImageMessagesPage(
-          messages: pageRows.reversed
-              .map(
-                (row) => _imageMessageFromRow(
-                  row,
-                  profileRow: profilesById[row["sender_id"]],
-                ),
-              )
-              .toList(),
-          hasMore: hasMore,
-        ),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    return GroupImageMessagesPage(
+      messages: pageRows.reversed
+          .map(
+            (row) => _imageMessageFromRow(
+              row,
+              profileRow: profilesById[row["sender_id"]],
+            ),
+          )
+          .toList(),
+      hasMore: hasMore,
+    );
   }
 
-  Future<Either<AppError, GroupImageMessageEntity>> sendImageMessage({
+  Future<GroupImageMessageEntity> sendImageMessage({
+    required String userId,
     required String groupId,
     required String imageBase64,
   }) async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return Left(
-          GenericAppError(
-            error: StateError("User must be signed in to send images."),
-            stackTrace: StackTrace.current,
-          ),
-        );
-      }
+    final Map<String, dynamic> row = await _supabaseService.requireClient
+        .from("group_image_messages")
+        .insert({
+          "group_id": groupId,
+          "sender_id": userId,
+          "image_base64": imageBase64,
+        })
+        .select("id, group_id, sender_id, image_base64, created_at")
+        .single()
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("insert public.group_image_messages", row);
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById([
+      userId,
+    ], withPhoto: true);
 
-      final Map<String, dynamic> row = await _supabaseService.requireClient
-          .from("group_image_messages")
-          .insert({
-            "group_id": groupId,
-            "sender_id": userId,
-            "image_base64": imageBase64,
-          })
-          .select("id, group_id, sender_id, image_base64, created_at")
-          .single()
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("insert public.group_image_messages", row);
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById([userId], withPhoto: true);
-
-      return Right(_imageMessageFromRow(row, profileRow: profilesById[userId]));
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    return _imageMessageFromRow(row, profileRow: profilesById[userId]);
   }
 
-  /// Leaves the caller's own membership — safe to retry offline (deleting an
-  /// already-gone `group_members` row is a no-op), so a failure while offline
-  /// is queued instead of surfaced as an error. A definitive server rejection
-  /// while online is still reported.
-  Future<Either<AppError, void>> leaveGroup(String groupId) async {
-    final String? userId = _supabaseService.currentUserId;
-    if (userId == null) {
-      return Left(
-        GenericAppError(
-          error: StateError("User must be signed in to leave a group."),
-          stackTrace: StackTrace.current,
-        ),
-      );
-    }
-
-    try {
-      await _leaveGroupRemote(groupId, userId);
-      await _removeCachedGroup(groupId);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to leave group $groupId",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (!shouldUseOfflineFallback(
-        error,
-        isBackendReachable: _isBackendReachable,
-      )) {
-        return Left(GenericAppError(error: error, stackTrace: stackTrace));
-      }
-      await _removeCachedGroup(groupId);
-      await _enqueueGroupAction({"type": "leaveGroup", "groupId": groupId});
-      return const Right(null);
-    }
-  }
-
-  Future<void> _leaveGroupRemote(String groupId, String userId) async {
+  /// Ends [userId]'s own membership. Deleting a `group_members` row that is
+  /// already gone is a no-op, so this is safe to send again.
+  Future<void> leaveGroup({
+    required String groupId,
+    required String userId,
+  }) async {
     await _supabaseService.requireClient
         .from("group_members")
         .delete()
@@ -679,276 +489,227 @@ class GroupsDataSource {
         .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> removeMember({
+  Future<void> removeMember({
     required String groupId,
     required String memberId,
   }) async {
-    try {
-      await _supabaseService.requireClient
-          .from("group_members")
-          .delete()
-          .eq("group_id", groupId)
-          .eq("user_id", memberId)
-          .timeout(_remoteCallTimeout);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+    await _supabaseService.requireClient
+        .from("group_members")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", memberId)
+        .timeout(_remoteCallTimeout);
   }
 
-  Future<Either<AppError, void>> transferLeadership({
+  Future<void> transferLeadership({
     required String groupId,
     required String nextLeaderId,
   }) async {
     const String operation = "rpc public.transfer_group_ownership";
-    try {
-      final Map<String, dynamic> payload = {
-        "target_group_id": groupId,
-        "next_owner_id": nextLeaderId,
-      };
-      _logger.logRequest(operation, payload);
-      final dynamic response = await _supabaseService.requireClient
-          .rpc("transfer_group_ownership", params: payload)
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse(operation, response);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to transfer group ownership",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      return Left(
-        SqlOperationAppError(
-          operation: operation,
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
+    final Map<String, dynamic> payload = {
+      "target_group_id": groupId,
+      "next_owner_id": nextLeaderId,
+    };
+    _logger.logRequest(operation, payload);
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("transfer_group_ownership", params: payload)
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse(operation, response);
   }
 
-  Future<Either<AppError, void>> resetGroupProgress(String groupId) async {
+  Future<void> resetGroupProgress(String groupId) async {
     const String operation = "rpc public.reset_group_progress";
-    try {
-      _logger.logRequest(operation, {"target_group_id": groupId});
-      final dynamic response = await _supabaseService.requireClient
-          .rpc("reset_group_progress", params: {"target_group_id": groupId})
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse(operation, response);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Supabase $operation failed",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      return Left(
-        SqlOperationAppError(
-          operation: operation,
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
-    }
+    _logger.logRequest(operation, {"target_group_id": groupId});
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("reset_group_progress", params: {"target_group_id": groupId})
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse(operation, response);
   }
 
-  Future<Either<AppError, List<GroupInvitationEntity>>>
-  getPendingInvitations() async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return const Right([]);
-      }
-      final dynamic response = await _supabaseService.requireClient
-          .rpc("pending_group_invitations")
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse("rpc public.pending_group_invitations", response);
-      final List<dynamic> rows = response as List<dynamic>? ?? const [];
-      return Right(
-        rows
-            .map(
-              (row) => GroupInvitationEntity.fromMap(
-                Map<String, dynamic>.from(row as Map),
-              ),
-            )
-            .toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+  Future<List<GroupInvitationEntity>> fetchPendingInvitations() async {
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("pending_group_invitations")
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.pending_group_invitations", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    return rows
+        .map(
+          (row) => GroupInvitationEntity.fromMap(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList();
   }
 
-  Future<Either<AppError, List<SentGroupInvitationEntity>>>
-  getSentInvitations() async {
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return const Right([]);
-      }
-
-      final List<Map<String, dynamic>> invitationRows = await _selectRows(
-        table: "group_invitations",
-        columns: "id, group_id, invitee_id, created_at",
-        filters: (query) => query
-            .eq("inviter_id", userId)
-            .eq("status", "pending")
-            .order("created_at", ascending: false),
-      );
-      if (invitationRows.isEmpty) {
-        return const Right([]);
-      }
-
-      final List<String> groupIds = invitationRows
-          .map((row) => row["group_id"] as String)
-          .toSet()
-          .toList();
-      final List<String> inviteeIds = invitationRows
-          .map((row) => row["invitee_id"] as String)
-          .toSet()
-          .toList();
-
-      final List<Map<String, dynamic>> groupRows = await _selectRows(
-        table: "groups",
-        columns: "id, name, theme",
-        filters: (query) => query.inFilter("id", groupIds),
-      );
-      final Map<String, Map<String, dynamic>> groupsById = {
-        for (final Map<String, dynamic> row in groupRows)
-          row["id"] as String: row,
-      };
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById(inviteeIds);
-
-      return Right(
-        invitationRows.map((row) {
-          final String groupId = row["group_id"] as String;
-          final String inviteeId = row["invitee_id"] as String;
-          final Map<String, dynamic>? groupRow = groupsById[groupId];
-          final Map<String, dynamic>? profileRow = profilesById[inviteeId];
-
-          return SentGroupInvitationEntity(
-            id: row["id"] as String,
-            groupId: groupId,
-            groupName: groupRow?["name"] as String? ?? "Grupo",
-            theme: GroupThemeType.byName(groupRow?["theme"] as String?),
-            inviteeId: inviteeId,
-            inviteeName: profileDisplayName(profileRow, fallback: "Amigo"),
-            inviteeColorValue:
-                (profileRow?["accent_color_value"] as num?)?.toInt() ??
-                GroupAvatarColors.byIndex(inviteeId.hashCode.abs()),
-            createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
-          );
-        }).toList(),
-      );
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
-  }
-
-  Future<Either<AppError, GroupEntity>> acceptInvitation(
-    String invitationId,
+  Future<List<SentGroupInvitationEntity>> fetchSentInvitations(
+    String userId,
   ) async {
-    String operation = "rpc public.accept_group_invitation";
+    final List<Map<String, dynamic>> invitationRows = await _selectRows(
+      table: "group_invitations",
+      columns: "id, group_id, invitee_id, created_at",
+      filters: (query) => query
+          .eq("inviter_id", userId)
+          .eq("status", "pending")
+          .order("created_at", ascending: false),
+    );
+    if (invitationRows.isEmpty) {
+      return const [];
+    }
+
+    final List<String> groupIds = invitationRows
+        .map((row) => row["group_id"] as String)
+        .toSet()
+        .toList();
+    final List<String> inviteeIds = invitationRows
+        .map((row) => row["invitee_id"] as String)
+        .toSet()
+        .toList();
+
+    final List<Map<String, dynamic>> groupRows = await _selectRows(
+      table: "groups",
+      columns: "id, name, theme",
+      filters: (query) => query.inFilter("id", groupIds),
+    );
+    final Map<String, Map<String, dynamic>> groupsById = {
+      for (final Map<String, dynamic> row in groupRows)
+        row["id"] as String: row,
+    };
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById(
+      inviteeIds,
+    );
+
+    return invitationRows.map((row) {
+      final String groupId = row["group_id"] as String;
+      final String inviteeId = row["invitee_id"] as String;
+      final Map<String, dynamic>? groupRow = groupsById[groupId];
+      final Map<String, dynamic>? profileRow = profilesById[inviteeId];
+
+      return SentGroupInvitationEntity(
+        id: row["id"] as String,
+        groupId: groupId,
+        groupName: groupRow?["name"] as String? ?? "Grupo",
+        theme: GroupThemeType.byName(groupRow?["theme"] as String?),
+        inviteeId: inviteeId,
+        inviteeName: profileDisplayName(profileRow, fallback: "Amigo"),
+        inviteeColorValue:
+            (profileRow?["accent_color_value"] as num?)?.toInt() ??
+            GroupAvatarColors.byIndex(inviteeId.hashCode.abs()),
+        createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
+      );
+    }).toList();
+  }
+
+  /// Accepts the invitation. The answer says whether the user is in the group
+  /// or is now waiting for its leader: only an invitation from the leader
+  /// joins straight away.
+  ///
+  /// Backends in the field disagree on the RPC's parameter name, and an older
+  /// version of it fails on an ambiguous column, so this tries both names and
+  /// then accepts through the tables directly.
+  Future<GroupJoinResponse> acceptInvitation(String invitationId) async {
+    dynamic response;
     try {
-      dynamic response;
+      response = await _supabaseService.requireClient
+          .rpc(
+            "accept_group_invitation",
+            params: {"invitation_id": invitationId},
+          )
+          .timeout(_remoteCallTimeout);
+    } catch (error) {
+      if (_isRecoverableAcceptInvitationRpcError(error)) {
+        return _acceptInvitationDirectly(invitationId);
+      }
+      if (!_isRpcSignatureError(error)) {
+        rethrow;
+      }
       try {
         response = await _supabaseService.requireClient
             .rpc(
               "accept_group_invitation",
-              params: {"invitation_id": invitationId},
+              params: {"target_invitation_id": invitationId},
             )
             .timeout(_remoteCallTimeout);
-      } catch (error) {
-        if (_isRecoverableAcceptInvitationRpcError(error)) {
-          return await _acceptInvitationDirectly(invitationId);
+      } catch (fallbackError) {
+        if (_isRecoverableAcceptInvitationRpcError(fallbackError)) {
+          return _acceptInvitationDirectly(invitationId);
         }
-        if (!_isRpcSignatureError(error)) {
-          rethrow;
-        }
-        try {
-          response = await _supabaseService.requireClient
-              .rpc(
-                "accept_group_invitation",
-                params: {"target_invitation_id": invitationId},
-              )
-              .timeout(_remoteCallTimeout);
-        } catch (fallbackError) {
-          if (_isRecoverableAcceptInvitationRpcError(fallbackError)) {
-            return await _acceptInvitationDirectly(invitationId);
-          }
-          rethrow;
-        }
+        rethrow;
       }
-      _logger.logResponse(operation, response);
-      final String? groupId = _groupIdFromRpcResponse(response);
-      if (groupId != null) {
-        return await _groupByIdAfterMembershipChange(groupId);
-      }
-      return await _acceptInvitationDirectly(invitationId);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Supabase $operation failed",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
     }
+    _logger.logResponse("rpc public.accept_group_invitation", response);
+    return _joinResponseFrom(response) ??
+        await _acceptInvitationDirectly(invitationId);
   }
 
-  Future<Either<AppError, void>> declineInvitation(String invitationId) async {
+  Future<void> declineInvitation(String invitationId) async {
+    await _supabaseService.requireClient
+        .rpc(
+          "decline_group_invitation",
+          params: {"invitation_id": invitationId},
+        )
+        .timeout(_remoteCallTimeout);
+  }
+
+  /// Asks to join the group behind [inviteCode]. The link never joins on its
+  /// own: unless the user is already a member, the answer is a request the
+  /// group's leader has to approve.
+  Future<GroupJoinResponse> joinGroupByInviteCode(String inviteCode) async {
+    final String code = inviteCode.trim().toUpperCase();
+    if (code.isEmpty) {
+      throw ArgumentError("Invite code must not be empty.");
+    }
+    dynamic response;
     try {
-      await _supabaseService.requireClient
-          .rpc(
-            "decline_group_invitation",
-            params: {"invitation_id": invitationId},
-          )
+      response = await _supabaseService.requireClient
+          .rpc("join_group_by_invite_code", params: {"lookup_code": code})
           .timeout(_remoteCallTimeout);
-      return const Right(null);
-    } catch (error, stackTrace) {
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
+    } catch (error) {
+      if (!_isRpcSignatureError(error)) {
+        rethrow;
+      }
+      response = await _supabaseService.requireClient
+          .rpc("join_group_by_invite_code", params: {"invite_code": code})
+          .timeout(_remoteCallTimeout);
     }
+    _logger.logResponse("rpc public.join_group_by_invite_code", response);
+    final GroupJoinResponse? joined = _joinResponseFrom(response);
+    if (joined == null) {
+      throw StateError("join_group_by_invite_code returned no group row.");
+    }
+    return joined;
   }
 
-  Future<Either<AppError, GroupEntity>> joinGroupByInviteCode(
-    String inviteCode,
-  ) async {
-    String operation = "rpc public.join_group_by_invite_code";
-    try {
-      final String code = inviteCode.trim().toUpperCase();
-      if (code.isEmpty) {
-        throw ArgumentError("Invite code must not be empty.");
-      }
-      dynamic response;
-      try {
-        response = await _supabaseService.requireClient
-            .rpc("join_group_by_invite_code", params: {"lookup_code": code})
-            .timeout(_remoteCallTimeout);
-      } catch (error) {
-        if (!_isRpcSignatureError(error)) {
-          rethrow;
-        }
-        response = await _supabaseService.requireClient
-            .rpc("join_group_by_invite_code", params: {"invite_code": code})
-            .timeout(_remoteCallTimeout);
-      }
-      _logger.logResponse(operation, response);
-      final String? groupId = _groupIdFromRpcResponse(response);
-      if (groupId == null) {
-        throw StateError("join_group_by_invite_code returned no group row.");
-      }
-      return await _groupByIdAfterMembershipChange(groupId);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Supabase $operation failed",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      return Left(GenericAppError(error: error, stackTrace: stackTrace));
-    }
+  /// The people waiting for the group's leader to let them in. Only the
+  /// leader is served this list.
+  Future<List<GroupJoinRequestEntity>> fetchJoinRequests(String groupId) async {
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("group_join_requests", params: {"target_group_id": groupId})
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.group_join_requests", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    return rows
+        .map(
+          (row) => GroupJoinRequestEntity.fromMap(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList();
   }
 
-  Future<Either<AppError, GroupEntity>> _acceptInvitationDirectly(
+  Future<void> answerJoinRequest({
+    required String requestId,
+    required bool approve,
+  }) async {
+    final String function = approve
+        ? "approve_group_join_request"
+        : "decline_group_join_request";
+    final dynamic response = await _supabaseService.requireClient
+        .rpc(function, params: {"request_id": requestId})
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.$function", response);
+  }
+
+  Future<GroupJoinResponse> _acceptInvitationDirectly(
     String invitationId,
   ) async {
     final String? userId = _supabaseService.currentUserId;
@@ -1000,21 +761,9 @@ class GroupsDataSource {
           .timeout(_remoteCallTimeout);
     }
 
-    return await _groupByIdAfterMembershipChange(groupId);
-  }
-
-  Future<Either<AppError, GroupEntity>> _groupByIdAfterMembershipChange(
-    String groupId,
-  ) async {
-    final Either<AppError, List<GroupEntity>> groupsResult = await getGroups();
-    return groupsResult.fold(Left.new, (groups) {
-      for (final GroupEntity item in groups) {
-        if (item.id == groupId) {
-          return Right(item);
-        }
-      }
-      throw StateError("Joined group was not returned by getGroups.");
-    });
+    // This path only runs against a backend that predates join requests, so
+    // the insert above is the whole story.
+    return (groupId: groupId, groupName: "", pendingApproval: false);
   }
 
   String? _groupIdFromRpcResponse(dynamic response) {
@@ -1022,6 +771,21 @@ class GroupsDataSource {
     final Object? rawId = row?["id"] ?? row?["group_id"];
     final String? id = rawId?.toString();
     return id == null || id.isEmpty ? null : id;
+  }
+
+  /// A backend that predates join requests answers without
+  /// `pending_approval`, which reads as the join it performed.
+  GroupJoinResponse? _joinResponseFrom(dynamic response) {
+    final String? groupId = _groupIdFromRpcResponse(response);
+    if (groupId == null) {
+      return null;
+    }
+    final Map<String, dynamic>? row = _firstRpcRow(response);
+    return (
+      groupId: groupId,
+      groupName: row?["name"] as String? ?? "",
+      pendingApproval: row?["pending_approval"] as bool? ?? false,
+    );
   }
 
   Map<String, dynamic>? _firstRpcRow(dynamic response) {
@@ -1042,186 +806,95 @@ class GroupsDataSource {
   }
 
   bool _isRpcSignatureError(Object error) {
-    final String description = SqlOperationAppError.describe(error);
+    final String description = describeBackendError(error);
     return description.contains("PGRST202") ||
         description.contains("42883") ||
         description.contains("function") && description.contains("not found");
   }
 
   bool _isRecoverableAcceptInvitationRpcError(Object error) {
-    final String description = SqlOperationAppError.describe(error);
+    final String description = describeBackendError(error);
     return description.contains("42702") || description.contains("ambiguous");
   }
 
   bool _isUniqueViolation(Object error) {
-    final String description = SqlOperationAppError.describe(error);
+    final String description = describeBackendError(error);
     return description.contains("23505") ||
         description.contains("duplicate key");
   }
 
-  Future<Either<AppError, GroupEntity>> createGroup({
+  /// Creates the group with [userId] as its owner. Invited friends are not
+  /// members yet: they get a pending invitation and only appear once they
+  /// accept, so the new group starts with the owner only.
+  Future<GroupEntity> createGroup({
+    required String userId,
     required String name,
     required GroupThemeType theme,
     required List<FriendOption> invitedFriends,
     String description = "",
     GroupActivityDraft? activity,
   }) async {
-    String operation = "checking signed-in user";
-    try {
-      final String? userId = _supabaseService.currentUserId;
-      if (userId == null) {
-        return Left(
-          GenericAppError(
-            error: StateError("User must be signed in to create a group."),
-            stackTrace: StackTrace.current,
-          ),
-        );
-      }
-
-      operation = "rpc public.create_group_with_members";
-      final Map<String, dynamic> createGroupPayload = {
-        "group_name": name,
-        "group_theme": theme.name,
-        "invited_friend_ids": invitedFriends
-            .map((friend) => friend.id)
-            .toList(),
-        "group_description": description,
-        "activity_kind": activity?.kindName,
-        "activity_payload": activity == null
-            ? null
-            : {
-                ...activity.toPayload(),
-                "local_date": DateTime.now().toIso8601String().substring(0, 10),
-              },
-      };
-      _logger.logRequest(operation, createGroupPayload);
-      final dynamic response = await _supabaseService.requireClient
-          .rpc("create_group_with_members", params: createGroupPayload)
-          .timeout(_remoteCallTimeout);
-      _logger.logResponse(operation, response);
-      final List<dynamic> rows = response as List<dynamic>;
-      if (rows.isEmpty) {
-        throw StateError("create_group_with_members returned no group row.");
-      }
-      final Map<String, dynamic> groupRow = Map<String, dynamic>.from(
-        rows.first as Map,
-      );
-      final String groupId = groupRow["id"] as String;
-      operation = "select public.profiles for group owner";
-      final Map<String, Map<String, dynamic>> profilesById =
-          await _profilesById([userId], withPhoto: true);
-      final DateTime now = DateTime.now().toUtc();
-      // Invited friends are not members yet: they get a pending invitation and
-      // only appear once they accept. The new group starts with the owner only.
-      final List<GroupMemberEntity> members = [
-        _memberFromRows(
-          memberRow: {
-            "user_id": userId,
-            "role": "owner",
-            "joined_at": now.toIso8601String(),
-          },
-          profileRow: profilesById[userId],
-          scoresByUser: const {},
-        ),
-      ];
-
-      return Right(
-        GroupEntity(
-          id: groupId,
-          name: name,
-          theme: theme,
-          members: members,
-          description: groupRow["description"] as String? ?? description,
-          ownerId: userId,
-          createdAt: DateTime.tryParse(groupRow["created_at"] as String? ?? ""),
-          inviteCode: groupRow["invite_code"] as String? ?? "",
-          privacy: groupRow["privacy"] as String? ?? "inviteOnly",
-          createdActivityId: groupRow["activity_id"] as String?,
-          colorValue: activity?.colorValue,
-        ),
-      );
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Supabase $operation failed",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      return Left(
-        SqlOperationAppError(
-          operation: operation,
-          error: error,
-          stackTrace: stackTrace,
-        ),
-      );
+    const String operation = "rpc public.create_group_with_members";
+    final Map<String, dynamic> createGroupPayload = {
+      "group_name": name,
+      "group_theme": theme.name,
+      "invited_friend_ids": invitedFriends.map((friend) => friend.id).toList(),
+      "group_description": description,
+      "activity_kind": activity?.kindName,
+      "activity_payload": activity == null
+          ? null
+          : {
+              ...activity.toPayload(),
+              "local_date": DateTime.now().toIso8601String().substring(0, 10),
+            },
+    };
+    _logger.logRequest(operation, createGroupPayload);
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("create_group_with_members", params: createGroupPayload)
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse(operation, response);
+    final List<dynamic> rows = response as List<dynamic>;
+    if (rows.isEmpty) {
+      throw StateError("create_group_with_members returned no group row.");
     }
+    final Map<String, dynamic> groupRow = Map<String, dynamic>.from(
+      rows.first as Map,
+    );
+    final String groupId = groupRow["id"] as String;
+    final Map<String, Map<String, dynamic>> profilesById = await _profilesById([
+      userId,
+    ], withPhoto: true);
+    final DateTime now = DateTime.now().toUtc();
+    final List<GroupMemberEntity> members = [
+      _memberFromRows(
+        memberRow: {
+          "user_id": userId,
+          "role": "owner",
+          "joined_at": now.toIso8601String(),
+        },
+        profileRow: profilesById[userId],
+        scoresByUser: const {},
+      ),
+    ];
+
+    return GroupEntity(
+      id: groupId,
+      name: name,
+      theme: theme,
+      members: members,
+      description: groupRow["description"] as String? ?? description,
+      ownerId: userId,
+      createdAt: DateTime.tryParse(groupRow["created_at"] as String? ?? ""),
+      inviteCode: groupRow["invite_code"] as String? ?? "",
+      privacy: groupRow["privacy"] as String? ?? "inviteOnly",
+      createdActivityId: groupRow["activity_id"] as String?,
+      colorValue: activity?.colorValue,
+    );
   }
 
-  /// Updates the caller's own group settings — queued and applied
-  /// optimistically to the cache on failure, since only the client already
-  /// knows (name/description/activity), nothing server-generated is needed.
-  Future<Either<AppError, GroupEntity>> updateGroup({
-    required GroupEntity group,
-    required String name,
-    required String description,
-    required Map<String, dynamic> activityPayload,
-  }) async {
-    const String operation = "rpc public.update_group_with_activity";
-    try {
-      final GroupEntity updated = await _updateGroupRemote(
-        groupId: group.id,
-        name: name,
-        description: description,
-        activityPayload: activityPayload,
-        fallbackGroup: group,
-      );
-      await _updateCachedGroup(updated);
-      return Right(updated);
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Supabase $operation failed",
-        error: SqlOperationAppError.describe(error),
-        stackTrace: stackTrace,
-      );
-      if (!shouldUseOfflineFallback(
-        error,
-        isBackendReachable: _isBackendReachable,
-      )) {
-        return Left(
-          SqlOperationAppError(
-            operation: operation,
-            error: error,
-            stackTrace: stackTrace,
-          ),
-        );
-      }
-      final GroupEntity optimistic = GroupEntity(
-        id: group.id,
-        name: name,
-        theme: group.theme,
-        members: group.members,
-        description: description,
-        ownerId: group.ownerId,
-        createdAt: group.createdAt,
-        inviteCode: group.inviteCode,
-        privacy: group.privacy,
-        createdActivityId: group.createdActivityId,
-        colorValue:
-            (activityPayload["color_value"] as num?)?.toInt() ??
-            group.colorValue,
-      );
-      await _updateCachedGroup(optimistic);
-      await _enqueueGroupAction({
-        "type": "updateGroup",
-        "groupId": group.id,
-        "name": name,
-        "description": description,
-        "activityPayload": activityPayload,
-      });
-      return Right(optimistic);
-    }
-  }
-
-  Future<GroupEntity> _updateGroupRemote({
+  /// Saves the group's settings. The answer carries no members, so those (and
+  /// anything else it leaves out) are taken from [fallbackGroup].
+  Future<GroupEntity> updateGroup({
     required String groupId,
     required String name,
     required String description,
@@ -1267,91 +940,6 @@ class GroupsDataSource {
       createdActivityId:
           row["activity_id"] as String? ?? fallbackGroup.createdActivityId,
     );
-  }
-
-  /// Re-attempts group actions that failed to reach the backend earlier, in
-  /// the order they were queued. Stops at the first failure so a later
-  /// action never gets applied out of order ahead of an earlier one.
-  Future<void> flushPendingSync() async {
-    if (!_pendingSyncStore.contains(PendingSyncDataset.groups)) {
-      return;
-    }
-    final List<Map<String, dynamic>> queue = await _readGroupActionQueue();
-    if (queue.isEmpty) {
-      await _pendingSyncStore.clear(PendingSyncDataset.groups);
-      return;
-    }
-
-    int processed = 0;
-    try {
-      for (final Map<String, dynamic> action in queue) {
-        try {
-          await _replayGroupAction(action);
-        } catch (error, stackTrace) {
-          if (!isPermanentSyncFailure(error)) {
-            rethrow;
-          }
-          // The server rejected this action for good; keeping it queued
-          // would block every later action forever.
-          _logger.logError(
-            "Dropping a queued group action the server rejected",
-            error: error,
-            stackTrace: stackTrace,
-          );
-        }
-        processed++;
-      }
-    } catch (error, stackTrace) {
-      _logger.logError(
-        "Failed to flush a queued group action",
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    final List<Map<String, dynamic>> remaining = queue.sublist(processed);
-    await _writeGroupActionQueue(remaining);
-    if (processed > 0) {
-      _activityChangeBus?.notifyGroupActivityChanged();
-    }
-    if (remaining.isEmpty) {
-      await _pendingSyncStore.clear(PendingSyncDataset.groups);
-    }
-  }
-
-  Future<void> _replayGroupAction(Map<String, dynamic> action) async {
-    switch (action["type"] as String?) {
-      case "updateGroup":
-        final String groupId = action["groupId"] as String;
-        final List<GroupEntity> cached = await _readCachedGroups() ?? const [];
-        final GroupEntity fallback = cached.firstWhere(
-          (item) => item.id == groupId,
-          orElse: () => GroupEntity(
-            id: groupId,
-            name: action["name"] as String? ?? "",
-            theme: GroupThemeType.byName(null),
-            members: const [],
-          ),
-        );
-        final GroupEntity updated = await _updateGroupRemote(
-          groupId: groupId,
-          name: action["name"] as String,
-          description: action["description"] as String,
-          activityPayload: Map<String, dynamic>.from(
-            action["activityPayload"] as Map? ?? const {},
-          ),
-          fallbackGroup: fallback,
-        );
-        await _updateCachedGroup(updated);
-      case "leaveGroup":
-        final String groupId = action["groupId"] as String;
-        final String? userId = _supabaseService.currentUserId;
-        if (userId == null) {
-          throw StateError("User must be signed in to leave a group.");
-        }
-        await _leaveGroupRemote(groupId, userId);
-        await _removeCachedGroup(groupId);
-    }
   }
 
   Future<List<Map<String, dynamic>>> _selectRows({
@@ -1454,76 +1042,6 @@ class GroupsDataSource {
   DateTime _monthStart() {
     final DateTime now = DateTime.now();
     return DateTime(now.year, now.month).toUtc();
-  }
-
-  Future<void> _cacheGroups(List<GroupEntity> groups) async {
-    await _localStorageService.write(
-      LocalStorageKeys.cachedGroups,
-      jsonEncode(groups.map((group) => group.toMap()).toList()),
-    );
-  }
-
-  Future<List<GroupEntity>?> _readCachedGroups() async {
-    final String? saved = await _localStorageService.read<String?>(
-      LocalStorageKeys.cachedGroups,
-    );
-    if (saved == null) {
-      return null;
-    }
-    try {
-      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
-      return decoded
-          .map((item) => GroupEntity.fromMap(item as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<void> _updateCachedGroup(GroupEntity group) async {
-    final List<GroupEntity> cached = await _readCachedGroups() ?? [];
-    final int index = cached.indexWhere((item) => item.id == group.id);
-    if (index >= 0) {
-      cached[index] = group;
-    } else {
-      cached.add(group);
-    }
-    await _cacheGroups(cached);
-  }
-
-  Future<void> _removeCachedGroup(String groupId) async {
-    final List<GroupEntity> cached = await _readCachedGroups() ?? [];
-    cached.removeWhere((item) => item.id == groupId);
-    await _cacheGroups(cached);
-  }
-
-  Future<void> _enqueueGroupAction(Map<String, dynamic> action) async {
-    final List<Map<String, dynamic>> queue = await _readGroupActionQueue();
-    queue.add(action);
-    await _writeGroupActionQueue(queue);
-    await _pendingSyncStore.markPending(PendingSyncDataset.groups);
-  }
-
-  Future<List<Map<String, dynamic>>> _readGroupActionQueue() async {
-    final String? saved = await _localStorageService.read<String?>(
-      LocalStorageKeys.pendingGroupActions,
-    );
-    if (saved == null) {
-      return [];
-    }
-    try {
-      final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;
-      return decoded.map((item) => item as Map<String, dynamic>).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  Future<void> _writeGroupActionQueue(List<Map<String, dynamic>> queue) async {
-    await _localStorageService.write(
-      LocalStorageKeys.pendingGroupActions,
-      jsonEncode(queue),
-    );
   }
 }
 

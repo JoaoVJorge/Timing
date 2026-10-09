@@ -3,7 +3,11 @@ import "package:timing/core/domain/errors/app_error.dart";
 
 class AppLoggerService {
   void logAppError(String message, AppError error) {
-    logError(message, error: error.message);
+    logError(
+      message,
+      error: error.debugDescription,
+      stackTrace: error.stackTrace,
+    );
   }
 
   void logError(String message, {Object? error, StackTrace? stackTrace}) {

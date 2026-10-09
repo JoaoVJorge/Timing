@@ -1,6 +1,6 @@
 part of "groups_page.dart";
 
-// The bottom sheet of owner/member actions for a group.
+// The bottom sheet of leader and member actions for a group.
 
 Future<void> _showGroupActionsSheet(
   BuildContext context,
@@ -11,6 +11,7 @@ Future<void> _showGroupActionsSheet(
   barrierColor: context.colorTokens.black.withValues(alpha: 0.42),
   builder: (sheetContext) => _GroupActionsSheet(
     isOwner: controller.isSelectedGroupOwner,
+    canManage: controller.canManageSelectedGroup,
     onManageActivities: () {
       Navigator.of(sheetContext).pop();
       controller.onManageActivityLinks();
@@ -38,6 +39,7 @@ Future<void> _showGroupActionsSheet(
 class _GroupActionsSheet extends StatelessWidget {
   const _GroupActionsSheet({
     required this.isOwner,
+    required this.canManage,
     required this.onManageActivities,
     required this.onManageMembers,
     required this.onEditGroup,
@@ -47,6 +49,9 @@ class _GroupActionsSheet extends StatelessWidget {
   });
 
   final bool isOwner;
+
+  /// Whether the current user leads the group.
+  final bool canManage;
   final VoidCallback onManageActivities;
   final VoidCallback onManageMembers;
   final VoidCallback onEditGroup;
@@ -88,7 +93,7 @@ class _GroupActionsSheet extends StatelessWidget {
               onTap: onManageActivities,
             ),
             const Gap(8),
-            if (isOwner) ...[
+            if (canManage) ...[
               _GroupActionRow(
                 icon: Icons.edit_outlined,
                 label: context.l10n.editGroupLabel,

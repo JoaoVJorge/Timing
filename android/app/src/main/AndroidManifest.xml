@@ -53,6 +53,9 @@
                 <data android:scheme="helpout" android:host="login-callback" />
                 <data android:scheme="helpout" android:host="calendar-callback" />
                 <data android:scheme="com.moonstone.timing" android:host="login-callback" />
+                <!-- A group's share link: it asks the group's leader to let
+                     the opener in, and joins nothing on its own. -->
+                <data android:scheme="com.moonstone.timing" android:host="join-group" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

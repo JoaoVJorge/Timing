@@ -2,7 +2,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friend_presence_entity.dart";
-import "package:timing/presentation/friends/friends_controller.dart";
+import "package:timing/core/services/social/social_store.dart";
 
 void main() {
   test("presence merge is materialized before replacing the source RxList", () {
@@ -24,7 +24,7 @@ void main() {
     ].obs;
     final DateTime seenAt = DateTime.utc(2026, 9, 5, 12);
 
-    final List<FriendEntity> updated = mergeFriendPresences(friends, [
+    final List<FriendEntity> updated = SocialStore.withPresences(friends, [
       FriendPresenceEntity(id: "one", isOnline: true, lastSeenAt: seenAt),
     ]);
     friends.assignAll(updated);

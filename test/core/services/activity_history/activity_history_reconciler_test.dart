@@ -30,8 +30,8 @@ class _Rig {
       fetchEntries: ({required int retentionDays}) async {
         requestedWindows.add(retentionDays);
         if (failing) {
-          return Left(
-            GenericAppError(error: "offline", stackTrace: StackTrace.empty),
+          return const Left(
+            UnexpectedError(cause: "offline", stackTrace: StackTrace.empty),
           );
         }
         return Right(entries);
@@ -69,15 +69,37 @@ void main() {
     );
   });
 
-  test("a pass soon after another does not hit the backend", () async {
+  test("a pass soon after another reads only the latest days", () async {
     final rig = _Rig();
     await rig.reconciler.reconcile();
+    final Object? firstPassAt =
+        rig.storage.data[LocalStorageKeys.activityHistoryReconciledAt];
 
     rig.clock = rig.clock.add(const Duration(hours: 5));
     final bool changed = await rig.reconciler.reconcile();
 
     expect(changed, isFalse);
-    expect(rig.requestedWindows, hasLength(1));
+    expect(rig.requestedWindows, [
+      ActivityHistoryService.retentionDays,
+      ActivityHistoryReconciler.latestWindowDays,
+    ]);
+    // It does not push back the next read of the recent window.
+    expect(
+      rig.storage.data[LocalStorageKeys.activityHistoryReconciledAt],
+      firstPassAt,
+    );
+  });
+
+  test("what the other phone logged today arrives on the next pass", () async {
+    final rig = _Rig();
+    await rig.reconciler.reconcile();
+
+    // Minutes later the other phone logs a session and this one is opened.
+    rig.entries = [_entry(DateTime(2026, 9, 24, 12, 5), seconds: 300)];
+    rig.clock = rig.clock.add(const Duration(minutes: 10));
+
+    expect(await rig.reconciler.reconcile(), isTrue);
+    expect(rig.reconciler.dailyProgress.allProgress.single.focusSeconds, 300);
   });
 
   test("later passes read only the recent window", () async {
@@ -99,7 +121,10 @@ void main() {
 
     await rig.reconciler.reconcile(force: true);
 
-    expect(rig.requestedWindows, hasLength(2));
+    expect(rig.requestedWindows, [
+      ActivityHistoryService.retentionDays,
+      ActivityHistoryReconciler.recentWindowDays,
+    ]);
   });
 
   test("a failed read is not counted as a pass", () async {

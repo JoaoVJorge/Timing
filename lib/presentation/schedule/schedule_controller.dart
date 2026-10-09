@@ -5,11 +5,11 @@ import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
+import "package:timing/core/data/repositories/schedule_repository.dart";
 import "package:timing/core/domain/entities/schedule_entry_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/add_schedule_entry_use_case.dart";
 import "package:timing/core/domain/use_cases/delete_schedule_entry_use_case.dart";
-import "package:timing/core/domain/use_cases/get_schedule_entries_use_case.dart";
 import "package:timing/core/domain/use_cases/update_schedule_entry_use_case.dart";
 import "package:timing/core/services/google_calendar/google_calendar_service.dart";
 import "package:timing/core/utils/extensions/date_time_extensions.dart";
@@ -18,14 +18,14 @@ import "package:timing/presentation/schedule/widgets/schedule_entry_tile.dart";
 
 class ScheduleController extends GetxController {
   ScheduleController({
-    required this._getScheduleEntriesUseCase,
+    required this._scheduleRepository,
     required this._addScheduleEntryUseCase,
     required this._deleteScheduleEntryUseCase,
     required this._updateScheduleEntryUseCase,
     required this._appNavigator,
   });
 
-  final GetScheduleEntriesUseCase _getScheduleEntriesUseCase;
+  final ScheduleRepository _scheduleRepository;
   final AddScheduleEntryUseCase _addScheduleEntryUseCase;
   final DeleteScheduleEntryUseCase _deleteScheduleEntryUseCase;
   final UpdateScheduleEntryUseCase _updateScheduleEntryUseCase;
@@ -159,10 +159,10 @@ class ScheduleController extends GetxController {
   Future<void> loadEntries() async {
     isLoading.value = true;
     final Either<AppError, List<ScheduleEntryEntity>> result =
-        await _getScheduleEntriesUseCase();
+        await _scheduleRepository.getEntries();
     result.fold((error) {
       entries.clear();
-      _appNavigator.showErrorSnackBar(error.message);
+      _appNavigator.showError(error);
     }, (value) => entries.value = value);
     _invalidateWeekdayIndex();
     isLoading.value = false;
@@ -193,7 +193,7 @@ class ScheduleController extends GetxController {
           );
       final bool hasError = addResult.fold(
         (error) {
-          _appNavigator.showErrorSnackBar(error.message);
+          _appNavigator.showError(error);
           return true;
         },
         (entry) {
@@ -248,14 +248,13 @@ class ScheduleController extends GetxController {
           activeUntil: result.activeUntil,
         );
 
-    updateResult.fold(
-      (error) => _appNavigator.showErrorSnackBar(error.message),
-      (updatedEntries) {
-        entries.value = updatedEntries;
-        _invalidateWeekdayIndex();
-        entries.refresh();
-      },
-    );
+    updateResult.fold((error) => _appNavigator.showError(error), (
+      updatedEntries,
+    ) {
+      entries.value = updatedEntries;
+      _invalidateWeekdayIndex();
+      entries.refresh();
+    });
   }
 
   Future<void> onDeleteEntry(String entryId) async {
@@ -268,7 +267,7 @@ class ScheduleController extends GetxController {
     result.fold((error) {
       entries.value = previousEntries;
       _invalidateWeekdayIndex();
-      _appNavigator.showErrorSnackBar(error.message);
+      _appNavigator.showError(error);
     }, (_) {});
   }
 }

@@ -5,6 +5,7 @@ import "package:dartz/dartz.dart";
 import "package:get/get.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:timing/core/data/repositories/activity_repository.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/active_timer_session_entity.dart";
@@ -12,7 +13,6 @@ import "package:timing/core/domain/entities/daily_progress_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/log_activity_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_pages_use_case.dart";
 import "package:timing/core/domain/use_cases/update_subject_time_use_case.dart";
 import "package:timing/core/services/achievements/achievement_unlock_service.dart";
@@ -57,9 +57,9 @@ class _FakeUpdateSubjectTimeUseCase extends _Noop
 class _FakeUpdateSubjectPagesUseCase extends _Noop
     implements UpdateSubjectPagesUseCase {}
 
-class _FakeLogActivityUseCase extends _Noop implements LogActivityUseCase {
+class _FakeActivityRepository extends _Noop implements ActivityRepository {
   @override
-  Future<Either<AppError, void>> call({
+  Future<Either<AppError, void>> logActivity({
     required TimeCategoryType category,
     required String subjectId,
     required String subjectName,
@@ -445,7 +445,7 @@ TimerController _controller(
   updateSubjectTimeUseCase:
       updateSubjectTimeUseCase ?? _FakeUpdateSubjectTimeUseCase(),
   updateSubjectPagesUseCase: _FakeUpdateSubjectPagesUseCase(),
-  logActivityUseCase: _FakeLogActivityUseCase(),
+  activityRepository: _FakeActivityRepository(),
   lastActivityService: _FakeLastActivityService(),
   activityHistoryService: _FakeActivityHistoryService(),
   dailyProgressService: dailyProgressService ?? _FakeDailyProgressService(),

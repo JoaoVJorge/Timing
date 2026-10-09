@@ -1,10 +1,10 @@
 import "package:dartz/dartz.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import "package:get/get.dart";
+import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/profile_stats_entity.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_daily_tasks_use_case.dart";
 import "package:timing/core/domain/use_cases/get_profile_stats_use_case.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
@@ -15,7 +15,7 @@ import "package:timing/presentation/achievements/achievements_controller.dart";
 class AchievementUnlockService {
   AchievementUnlockService({
     required this.getProfileStatsUseCase,
-    required this.getDailyTasksUseCase,
+    required this.dailyTasksRepository,
     required this.dailyProgressService,
     required this.localStorageService,
   });
@@ -27,7 +27,7 @@ class AchievementUnlockService {
   static const String _notificationIcon = "ic_notification";
 
   final GetProfileStatsUseCase getProfileStatsUseCase;
-  final GetDailyTasksUseCase getDailyTasksUseCase;
+  final DailyTasksRepository dailyTasksRepository;
   final DailyProgressService dailyProgressService;
   final AppLocalStorageService localStorageService;
   final FlutterLocalNotificationsPlugin _plugin =
@@ -89,7 +89,7 @@ class AchievementUnlockService {
 
   Future<Set<int>?> _currentUnlockedIds() async {
     final statsFuture = getProfileStatsUseCase();
-    final tasksFuture = getDailyTasksUseCase();
+    final tasksFuture = dailyTasksRepository.getTasks();
     final Either<AppError, ProfileStatsEntity> statsResult = await statsFuture;
     final Either<AppError, List<DailyTaskEntity>> tasksResult =
         await tasksFuture;

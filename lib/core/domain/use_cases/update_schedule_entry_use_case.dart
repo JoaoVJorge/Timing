@@ -25,8 +25,8 @@ class UpdateScheduleEntryUseCase {
   }) async {
     if (weekdays.isEmpty) {
       return Left(
-        GenericAppError(
-          error: "No weekday selected for schedule entry $entryId",
+        UnexpectedError(
+          cause: "No weekday selected for schedule entry $entryId",
           stackTrace: StackTrace.current,
         ),
       );
@@ -41,8 +41,8 @@ class UpdateScheduleEntryUseCase {
           .firstOrNull;
       if (original == null) {
         return Left(
-          GenericAppError(
-            error: "Schedule entry $entryId was not found",
+          UnexpectedError(
+            cause: "Schedule entry $entryId was not found",
             stackTrace: StackTrace.current,
           ),
         );

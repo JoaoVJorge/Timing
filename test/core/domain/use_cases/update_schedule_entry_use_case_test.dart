@@ -23,6 +23,9 @@ class _FakeScheduleRepository implements ScheduleRepository {
     _entries = entries;
     return const Right(null);
   }
+
+  @override
+  Future<void> flushPendingSync() async {}
 }
 
 ScheduleEntryEntity _entry({

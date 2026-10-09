@@ -17,9 +17,12 @@ import "package:timing/core/services/local_storage/local_storage_keys.dart";
 /// phone, two days); the reconcile therefore runs again over time:
 ///
 ///  * the first pass reads the whole retention window;
-///  * later passes read only [recentWindowDays], at most once per
-///    [minInterval] unless forced, which catches sessions the other phone
-///    uploaded late without re-reading the full history each time.
+///  * later passes read [recentWindowDays], at most once per [minInterval]
+///    unless forced, which catches sessions the other phone uploaded late
+///    without re-reading the full history each time;
+///  * every pass in between reads only [latestWindowDays], a small read, so
+///    what the other phone logged today shows up the next time this one is
+///    opened rather than hours later.
 class ActivityHistoryReconciler {
   ActivityHistoryReconciler({
     required this.fetchEntries,
@@ -42,20 +45,22 @@ class ActivityHistoryReconciler {
 
   static const Duration minInterval = Duration(hours: 6);
   static const int recentWindowDays = 60;
+  static const int latestWindowDays = 2;
 
   /// Returns whether any cache changed. A failed read changes nothing and does
   /// not count as a pass, so it is retried on the next trigger.
   Future<bool> reconcile({bool force = false}) async {
     final DateTime? last = await _lastReconciledAt();
     final DateTime now = _now();
-    if (!force && last != null && now.difference(last) < minInterval) {
-      return false;
-    }
+    final bool isLatestOnly =
+        !force && last != null && now.difference(last) < minInterval;
 
     final Either<AppError, List<ActivityEntryEntity>> result =
         await fetchEntries(
           retentionDays: last == null
               ? ActivityHistoryService.retentionDays
+              : isLatestOnly
+              ? latestWindowDays
               : recentWindowDays,
         );
     final List<ActivityEntryEntity>? entries = result.fold(
@@ -75,10 +80,12 @@ class ActivityHistoryReconciler {
       ]);
       changed = results.any((didChange) => didChange);
     }
-    await localStorage.write(
-      LocalStorageKeys.activityHistoryReconciledAt,
-      now.toUtc().toIso8601String(),
-    );
+    if (!isLatestOnly) {
+      await localStorage.write(
+        LocalStorageKeys.activityHistoryReconciledAt,
+        now.toUtc().toIso8601String(),
+      );
+    }
     return changed;
   }
 

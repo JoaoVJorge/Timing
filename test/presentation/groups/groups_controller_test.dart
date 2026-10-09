@@ -18,16 +18,12 @@ import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/domain/use_cases/get_groups_use_case.dart";
-import "package:timing/core/domain/use_cases/get_friends_social_use_case.dart";
-import "package:timing/core/domain/use_cases/accept_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/cancel_friend_request_use_case.dart";
-import "package:timing/core/domain/use_cases/remove_friend_use_case.dart";
-import "package:timing/core/domain/use_cases/send_friend_request_use_case.dart";
+import "package:timing/core/services/social/social_store.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
@@ -68,6 +64,27 @@ class _FakeGroupsRepository implements GroupsRepository {
       Completer<GroupImageMessagesPage>();
   final List<String> leaveRequests = <String>[];
   final List<String> resetRequests = <String>[];
+  List<GroupJoinRequestEntity> joinRequests = const [];
+  final List<({String requestId, bool approve})> answeredJoinRequests =
+      <({String requestId, bool approve})>[];
+
+  @override
+  Future<Either<AppError, List<GroupJoinRequestEntity>>> getJoinRequests(
+    String groupId,
+  ) async => Right(joinRequests);
+
+  @override
+  Future<Either<AppError, void>> answerJoinRequest({
+    required String requestId,
+    required bool approve,
+  }) async {
+    answeredJoinRequests.add((requestId: requestId, approve: approve));
+    joinRequests = joinRequests
+        .where((request) => request.id != requestId)
+        .toList();
+    return const Right(null);
+  }
+
   int pendingInvitationCount = 0;
 
   @override
@@ -112,7 +129,9 @@ class _FakeGroupsRepository implements GroupsRepository {
   ) async {
     refreshGroupScoresCalls++;
     if (scoresRefreshFails) {
-      return Left(GenericAppError(error: "down", stackTrace: StackTrace.empty));
+      return const Left(
+        UnexpectedError(cause: "down", stackTrace: StackTrace.empty),
+      );
     }
     return Right(groups);
   }
@@ -234,6 +253,52 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   tearDown(Get.reset);
+
+  group("the social store shared with the friends screens", () {
+    test("a friend made elsewhere is a friend on the member list at once", () {
+      final SocialStore store = SocialStore(
+        friendsRepository: _FakeFriendsRepository(const []),
+      );
+      final GroupsController controller = _controller(
+        _FakeGroupsRepository(const []),
+        socialStore: store,
+      );
+      expect(controller.isFriend("ana"), isFalse);
+
+      store.friends.add(
+        const FriendEntity(
+          id: "ana",
+          friendshipId: "friendship-1",
+          name: "Ana",
+          handle: "@ana",
+          colorValue: 0,
+        ),
+      );
+
+      expect(controller.isFriend("ana"), isTrue);
+      expect(controller.friends, same(store.friends));
+    });
+
+    test("a group joined from another screen is added and selected", () async {
+      final SocialStore store = SocialStore(
+        friendsRepository: _FakeFriendsRepository(const []),
+      );
+      final GroupsController controller = _controller(
+        _FakeGroupsRepository(const []),
+        socialStore: store,
+      );
+      controller.onInit();
+      await Future<void>.delayed(Duration.zero);
+      addTearDown(controller.onClose);
+      final GroupEntity joined = _group("group-9", "Novo");
+
+      store.announceJoinedGroup(joined);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.groups.map((group) => group.id), contains("group-9"));
+      expect(controller.selectedGroup.value?.id, "group-9");
+    });
+  });
 
   group("GroupsController refreshAfterActivityChange", () {
     test(
@@ -590,6 +655,72 @@ void main() {
     expect(storage.deletedKeys, isEmpty);
   });
 
+  test("a retired role cannot reset group progress", () async {
+    final GroupEntity viceGroup = _group(
+      "vice",
+      "Sou vice",
+      ownerId: "someone-else",
+      memberRole: "vice",
+    );
+    final _FakeGroupsRepository repository = _FakeGroupsRepository([viceGroup]);
+    final GroupsController controller = _controller(repository);
+    controller.groups.value = [viceGroup];
+    controller.selectedGroup.value = viceGroup;
+
+    expect(controller.isSelectedGroupOwner, isFalse);
+    expect(controller.canManageSelectedGroup, isFalse);
+    await controller.onConfirmResetGroup();
+
+    expect(repository.resetRequests, isEmpty);
+  });
+
+  group("who may remove a member or change their role", () {
+    GroupMemberEntity member(String id, String role) => GroupMemberEntity(
+      id: id,
+      name: id,
+      avatarColorValue: 1,
+      todaySeconds: 0,
+      weekSeconds: 0,
+      monthSeconds: 0,
+      role: role,
+    );
+    GroupEntity groupWhereIAm(String role) => GroupEntity(
+      id: "group-1",
+      name: "Grupo",
+      theme: GroupThemeType.dailyGoals,
+      ownerId: role == GroupMemberEntity.ownerRole ? "me" : "leader",
+      members: [
+        member("me", role),
+        if (role != GroupMemberEntity.ownerRole)
+          member("leader", GroupMemberEntity.ownerRole),
+        member("vice", "vice"),
+        member("plain", GroupMemberEntity.memberRole),
+      ],
+    );
+    Set<String> manageable(String role) {
+      final GroupEntity group = groupWhereIAm(role);
+      final GroupsController controller = _controller(
+        _FakeGroupsRepository([group]),
+      );
+      return {
+        for (final GroupMemberEntity other in group.members)
+          if (controller.canManageMember(group, other)) other.id,
+      };
+    }
+
+    test("the leader: everyone else", () {
+      expect(manageable(GroupMemberEntity.ownerRole), {"vice", "plain"});
+    });
+
+    test("a retired role grants no management permissions", () {
+      expect(manageable("vice"), isEmpty);
+    });
+
+    test("an ordinary member: nobody", () {
+      expect(manageable(GroupMemberEntity.memberRole), isEmpty);
+    });
+  });
+
   test(
     "older image merge preserves a message added during the request",
     () async {
@@ -883,6 +1014,238 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text("Eu"), findsWidgets);
     expect(tester.takeException(), isNull);
+  });
+
+  group("member management", () {
+    GroupMemberEntity member(String id, String role) => GroupMemberEntity(
+      id: id,
+      name: id,
+      avatarColorValue: 1,
+      todaySeconds: 0,
+      weekSeconds: 0,
+      monthSeconds: 0,
+      role: role,
+    );
+
+    late _FakeGroupsRepository lastRepository;
+    Future<AppLocalizations> pumpMembers(
+      WidgetTester tester, {
+      required String myRole,
+      List<GroupJoinRequestEntity> joinRequests = const [],
+    }) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 1800);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final bool iLead = myRole == GroupMemberEntity.ownerRole;
+      final GroupEntity group = GroupEntity(
+        id: "group-1",
+        name: "Grupo",
+        theme: GroupThemeType.studying,
+        ownerId: iLead ? "me" : "Lia",
+        members: [
+          member("me", myRole),
+          if (!iLead) member("Lia", GroupMemberEntity.ownerRole),
+          member("Vera", GroupMemberEntity.memberRole),
+          member("Mario", GroupMemberEntity.memberRole),
+        ],
+      );
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([group])
+        ..joinRequests = joinRequests;
+      lastRepository = repository;
+      final GroupsController controller = _controller(repository);
+      controller.selectedGroup.value = group;
+      controller.isShowingGroupDetails.value = true;
+      // Opening the screen is also what reads who is waiting to be let in.
+      controller.onManageMembers();
+      Get.put<GroupsController>(controller);
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          locale: const Locale("en"),
+          theme: AppThemes.build(
+            seed: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const GroupsPage(showGroupFlowOnly: true),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      return lookupAppLocalizations(const Locale("en"));
+    }
+
+    /// Drags the row from the middle of the screen: once a row is pulled left
+    /// its name is off screen and cannot be dragged by.
+    Future<void> swipe(WidgetTester tester, String name, double dx) async {
+      final double rowY = tester.getCenter(find.text(name)).dy;
+      await tester.dragFrom(Offset(215, rowY), Offset(dx, 0));
+      await tester.pumpAndSettle();
+    }
+
+    tearDown(Get.reset);
+
+    testWidgets("all ordinary members share the same section", (tester) async {
+      final AppLocalizations l10n = await pumpMembers(
+        tester,
+        myRole: GroupMemberEntity.ownerRole,
+      );
+      expect(find.text(l10n.groupMembersLabel), findsOneWidget);
+      expect(find.text(l10n.groupMemberRoleLabel), findsNWidgets(2));
+      expect(find.text("Vera"), findsOneWidget);
+      expect(find.text("Mario"), findsOneWidget);
+    });
+
+    GroupJoinRequestEntity request(String id, {String? invitedByName}) =>
+        GroupJoinRequestEntity(
+          id: id,
+          userId: id,
+          userName: id,
+          accentColorValue: 1,
+          invitedById: invitedByName == null ? null : "someone",
+          invitedByName: invitedByName,
+        );
+
+    testWidgets("the leader answers join requests at the top of the list", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpMembers(
+        tester,
+        myRole: GroupMemberEntity.ownerRole,
+        joinRequests: [
+          request("Ana", invitedByName: "Mario"),
+          request("Beto"),
+        ],
+      );
+      await tester.pump();
+
+      expect(find.text(l10n.groupJoinRequestsTitle), findsOneWidget);
+      expect(find.text(l10n.groupJoinRequestsCount(2)), findsOneWidget);
+      expect(
+        find.text(l10n.groupJoinRequestInvitedBy("Mario")),
+        findsOneWidget,
+      );
+      expect(find.text(l10n.groupJoinRequestFromLink), findsOneWidget);
+      // It sits above the member list, in place of the group summary.
+      expect(
+        tester.getTopLeft(find.text(l10n.groupJoinRequestsTitle)).dy,
+        lessThan(tester.getTopLeft(find.text("Mario")).dy),
+      );
+      expect(find.text(l10n.groupParticipantsCount(4)), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.check_rounded).first);
+      await tester.pumpAndSettle();
+      expect(lastRepository.answeredJoinRequests, [
+        (requestId: "Ana", approve: true),
+      ]);
+
+      await tester.tap(find.byIcon(Icons.close_rounded).last);
+      await tester.pumpAndSettle();
+      expect(lastRepository.answeredJoinRequests.last, (
+        requestId: "Beto",
+        approve: false,
+      ));
+    });
+
+    testWidgets("with nobody waiting the leader still sees the panel", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpMembers(
+        tester,
+        myRole: GroupMemberEntity.ownerRole,
+      );
+      await tester.pump();
+
+      expect(find.text(l10n.groupJoinRequestsCount(0)), findsOneWidget);
+      expect(find.text(l10n.groupJoinRequestsEmptyHint), findsOneWidget);
+    });
+
+    testWidgets("an ordinary member sees the group, not the requests", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpMembers(
+        tester,
+        myRole: GroupMemberEntity.memberRole,
+        joinRequests: [request("Ana")],
+      );
+      await tester.pump();
+
+      expect(find.text(l10n.groupJoinRequestsTitle), findsNothing);
+      expect(find.text(l10n.groupParticipantsCount(4)), findsOneWidget);
+    });
+
+    testWidgets("the leader can transfer leadership and remove with an X", (
+      tester,
+    ) async {
+      await pumpMembers(tester, myRole: GroupMemberEntity.ownerRole);
+      await swipe(tester, "Vera", 300);
+      expect(find.byIcon(Icons.workspace_premium_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.add_moderator_outlined), findsNothing);
+      expect(find.byIcon(Icons.remove_moderator_outlined), findsNothing);
+      await swipe(tester, "Vera", -600);
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      final Container action = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.byIcon(Icons.close_rounded),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect((action.decoration! as BoxDecoration).color, Colors.transparent);
+    });
+
+    testWidgets("members and the leader reveal icons without backgrounds", (
+      tester,
+    ) async {
+      await pumpMembers(tester, myRole: GroupMemberEntity.memberRole);
+      for (final name in ["Mario", "Lia"]) {
+        await swipe(tester, name, 300);
+        // The "add member" button at the bottom shares this icon, so the
+        // revealed one is the first in the tree.
+        final Finder addFriend = find
+            .byIcon(Icons.person_add_alt_1_rounded)
+            .first;
+        final Container action = tester.widget<Container>(
+          find.ancestor(of: addFriend, matching: find.byType(Container)).first,
+        );
+        expect((action.decoration! as BoxDecoration).color, Colors.transparent);
+        await swipe(tester, name, -600);
+        expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.close_rounded), findsNothing);
+        await swipe(tester, name, 100);
+      }
+    });
+
+    testWidgets("removing from the group and unfriending use different icons", (
+      tester,
+    ) async {
+      await pumpMembers(tester, myRole: GroupMemberEntity.ownerRole);
+
+      await swipe(tester, "Mario", -600);
+
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.person_remove_alt_1_rounded), findsNothing);
+    });
+
+    testWidgets("an ordinary member gets no management actions", (
+      tester,
+    ) async {
+      final AppLocalizations l10n = await pumpMembers(
+        tester,
+        myRole: GroupMemberEntity.memberRole,
+      );
+
+      await swipe(tester, "Mario", 300);
+      expect(find.byIcon(Icons.add_moderator_outlined), findsNothing);
+      await swipe(tester, "Mario", -600);
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
+      // Everyone may bring someone in; the leader answers what follows.
+      expect(find.text(l10n.addMemberButton), findsOneWidget);
+    });
   });
 
   group("goals tab activity data", () {
@@ -1633,6 +1996,7 @@ GroupsController _controller(
   List<FriendEntity> friends = const [],
   List<FriendEntity> incomingRequests = const [],
   _FakeFriendsRepository? friendsRepository,
+  SocialStore? socialStore,
   AppLocalStorageService? localStorageService,
   ConnectivityService? connectivityService,
 }) {
@@ -1640,22 +2004,9 @@ GroupsController _controller(
       friendsRepository ??
       _FakeFriendsRepository(friends, requests: incomingRequests);
   return GroupsController(
-    getGroupsUseCase: GetGroupsUseCase(groupsRepository: repository),
-    getFriendsSocialUseCase: GetFriendsSocialUseCase(
-      friendsRepository: effectiveFriendsRepository,
-    ),
-    sendFriendRequestUseCase: SendFriendRequestUseCase(
-      friendsRepository: effectiveFriendsRepository,
-    ),
-    cancelFriendRequestUseCase: CancelFriendRequestUseCase(
-      friendsRepository: effectiveFriendsRepository,
-    ),
-    acceptFriendRequestUseCase: AcceptFriendRequestUseCase(
-      friendsRepository: effectiveFriendsRepository,
-    ),
-    removeFriendUseCase: RemoveFriendUseCase(
-      friendsRepository: effectiveFriendsRepository,
-    ),
+    socialStore:
+        socialStore ??
+        SocialStore(friendsRepository: effectiveFriendsRepository),
     groupsRepository: repository,
     dailyTasksRepository: _FakeDailyTasksRepository(),
     appNavigator: _FakeAppNavigator(),
