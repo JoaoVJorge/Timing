@@ -51,6 +51,9 @@ revoke all on function public.update_group_with_activity(
 ) from public;
 revoke all on function public.reset_group_progress(uuid) from public;
 revoke all on function public.pending_group_invitations() from public;
+revoke all on function public.group_join_requests(uuid) from public;
+revoke all on function public.approve_group_join_request(uuid) from public;
+revoke all on function public.decline_group_join_request(uuid) from public;
 revoke all on function public.group_invite_options(uuid) from public;
 revoke all on function public.invite_friend_to_group(uuid, uuid) from public;
 revoke all on function public.cancel_group_invitation(uuid, uuid) from public;
@@ -91,6 +94,11 @@ grant execute on function public.update_group_with_activity(
 ) to authenticated;
 grant execute on function public.reset_group_progress(uuid) to authenticated;
 grant execute on function public.pending_group_invitations() to authenticated;
+grant execute on function public.group_join_requests(uuid) to authenticated;
+grant execute on function public.approve_group_join_request(uuid)
+  to authenticated;
+grant execute on function public.decline_group_join_request(uuid)
+  to authenticated;
 grant execute on function public.group_invite_options(uuid) to authenticated;
 grant execute on function public.invite_friend_to_group(uuid, uuid)
   to authenticated;
@@ -128,6 +136,7 @@ revoke all on table public.profiles from authenticated;
 revoke all on table public.friendships from authenticated;
 revoke all on table public.groups from authenticated;
 revoke all on table public.group_members from authenticated;
+revoke all on table public.group_join_requests from authenticated;
 revoke all on table public.group_invitations from authenticated;
 revoke all on table public.group_activities from authenticated;
 revoke all on table public.activity_entries from authenticated;
@@ -142,6 +151,8 @@ grant select, insert, update, delete
   on table public.friendships to authenticated;
 grant select, insert, update, delete on table public.groups to authenticated;
 grant select, insert, delete on table public.group_members to authenticated;
+-- Raised and answered only through their RPCs.
+grant select on table public.group_join_requests to authenticated;
 grant select, insert, update, delete
   on table public.group_invitations to authenticated;
 grant select, insert, update, delete

@@ -22,6 +22,7 @@ alter table public.user_subjects enable row level security;
 alter table public.daily_goals enable row level security;
 alter table public.schedule_entries enable row level security;
 alter table public.group_image_messages enable row level security;
+alter table public.group_join_requests enable row level security;
 
 -- -----------------------------------------------------------------------------
 -- Drop previous policies
@@ -51,16 +52,22 @@ drop policy if exists "members see group memberships" on public.group_members;
 drop policy if exists "owners add group members" on public.group_members;
 drop policy if exists "users join groups" on public.group_members;
 drop policy if exists "invitees join invited groups" on public.group_members;
+drop policy if exists "leader invitees join groups" on public.group_members;
+drop policy if exists "requesters and leaders read join requests"
+on public.group_join_requests;
 drop policy if exists "owners remove group members" on public.group_members;
+drop policy if exists "managers remove group members" on public.group_members;
 drop policy if exists "users leave their groups" on public.group_members;
 drop policy if exists "invited or inviter see invitations"
 on public.group_invitations;
 drop policy if exists "owners create invitations" on public.group_invitations;
+drop policy if exists "managers create invitations" on public.group_invitations;
 drop policy if exists "invitee answers invitations" on public.group_invitations;
 drop policy if exists "inviter or invitee delete invitations"
 on public.group_invitations;
 drop policy if exists "members read group activities" on public.group_activities;
 drop policy if exists "owners manage group activities" on public.group_activities;
+drop policy if exists "managers manage group activities" on public.group_activities;
 drop policy if exists "users see activity from group peers"
 on public.activity_entries;
 drop policy if exists "users insert own activity" on public.activity_entries;
@@ -172,7 +179,10 @@ create policy "members see group memberships"
 on public.group_members for select
 using (public.is_group_member(group_members.group_id, auth.uid()));
 
-create policy "invitees join invited groups"
+-- Only an invitation from the leader puts someone straight into the group.
+-- Everyone else arrives through an approved join request, which is written by
+-- approve_group_join_request.
+create policy "leader invitees join groups"
 on public.group_members for insert
 with check (
   group_members.user_id = auth.uid()
@@ -180,10 +190,21 @@ with check (
   and exists (
     select 1
     from public.group_invitations gi
+    join public.groups g on g.id = gi.group_id
     where gi.group_id = group_members.group_id
       and gi.invitee_id = auth.uid()
       and gi.status = 'pending'
+      and gi.inviter_id = g.owner_id
   )
+);
+
+-- Requests are raised and answered through their RPCs; reading one is for the
+-- person waiting and for the leader who answers.
+create policy "requesters and leaders read join requests"
+on public.group_join_requests for select
+using (
+  group_join_requests.user_id = auth.uid()
+  or public.owns_group(group_join_requests.group_id, auth.uid())
 );
 
 create policy "owners remove group members"
@@ -328,3 +349,6 @@ alter table public.group_goal_contributions enable row level security;
 drop policy if exists group_activity_links_self on public.group_activity_links;
 create policy group_activity_links_self on public.group_activity_links
 for select to authenticated using (user_id = auth.uid());
+
+-- All management checks now use owns_group.
+drop function if exists public.manages_group(uuid, uuid);

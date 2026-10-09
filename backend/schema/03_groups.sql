@@ -31,6 +31,13 @@ create table if not exists public.group_members (
   primary key (group_id, user_id)
 );
 
+-- Retire the old secondary role on existing installations.
+alter table public.group_members
+  drop constraint if exists group_members_role_check;
+update public.group_members set role = 'member' where role = 'vice';
+alter table public.group_members add constraint group_members_role_check
+  check (role in ('owner', 'member'));
+
 create table if not exists public.group_invitations (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -43,6 +50,26 @@ create table if not exists public.group_invitations (
   unique (group_id, invitee_id),
   check (inviter_id <> invitee_id)
 );
+
+-- Someone asking to join: from the group's link, or from an invitation sent
+-- by a member who is not the leader. The leader answers each one. A person
+-- has at most one request per group; asking again revives the same row.
+create table if not exists public.group_join_requests (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.groups(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  -- The member whose invitation led here, when it did not come from the link.
+  invited_by uuid references public.profiles(id) on delete set null,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'declined')),
+  created_at timestamptz not null default now(),
+  decided_at timestamptz,
+  unique (group_id, user_id)
+);
+
+create index if not exists group_join_requests_pending_idx
+  on public.group_join_requests(group_id)
+  where status = 'pending';
 
 create table if not exists public.group_image_messages (
   id uuid primary key default gen_random_uuid(),

@@ -464,6 +464,13 @@ create table if not exists public.group_members (
   primary key (group_id, user_id)
 );
 
+-- Retire the old secondary role on existing installations.
+alter table public.group_members
+  drop constraint if exists group_members_role_check;
+update public.group_members set role = 'member' where role = 'vice';
+alter table public.group_members add constraint group_members_role_check
+  check (role in ('owner', 'member'));
+
 create table if not exists public.group_invitations (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -476,6 +483,26 @@ create table if not exists public.group_invitations (
   unique (group_id, invitee_id),
   check (inviter_id <> invitee_id)
 );
+
+-- Someone asking to join: from the group's link, or from an invitation sent
+-- by a member who is not the leader. The leader answers each one. A person
+-- has at most one request per group; asking again revives the same row.
+create table if not exists public.group_join_requests (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.groups(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  -- The member whose invitation led here, when it did not come from the link.
+  invited_by uuid references public.profiles(id) on delete set null,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'declined')),
+  created_at timestamptz not null default now(),
+  decided_at timestamptz,
+  unique (group_id, user_id)
+);
+
+create index if not exists group_join_requests_pending_idx
+  on public.group_join_requests(group_id)
+  where status = 'pending';
 
 create table if not exists public.group_image_messages (
   id uuid primary key default gen_random_uuid(),
@@ -2110,6 +2137,9 @@ to authenticated;
 
 drop function if exists public.join_group_by_invite_code(text);
 
+-- The group's link and code do not put anyone in the group: they raise a
+-- request for the leader to answer. [pending_approval] is false only when the
+-- caller is already a member, so the client can just open the group.
 create or replace function public.join_group_by_invite_code(lookup_code text)
 returns table (
   id uuid,
@@ -2119,7 +2149,8 @@ returns table (
   owner_id uuid,
   created_at timestamptz,
   invite_code text,
-  privacy text
+  privacy text,
+  pending_approval boolean
 )
 language plpgsql
 security definer
@@ -2127,6 +2158,7 @@ set search_path = public
 as $$
 declare
   target_group_id uuid;
+  already_member boolean;
 begin
   if auth.uid() is null then
     raise exception 'not authenticated';
@@ -2142,18 +2174,22 @@ begin
     raise exception 'group not found';
   end if;
 
-  insert into public.group_members (group_id, user_id, role)
-  values (target_group_id, auth.uid(), 'member')
-  on conflict (group_id, user_id) do nothing;
+  already_member := public.is_group_member(target_group_id, auth.uid());
 
-  perform public.materialize_group_activities_for_user(
-    target_group_id, auth.uid()
-  );
+  if not already_member then
+    insert into public.group_join_requests (group_id, user_id)
+    values (target_group_id, auth.uid())
+    on conflict (group_id, user_id) do update
+    set status = 'pending',
+        invited_by = null,
+        created_at = now(),
+        decided_at = null;
+  end if;
 
   return query
   select
     g.id, g.name, g.theme, g.description, g.owner_id,
-    g.created_at, g.invite_code, g.privacy
+    g.created_at, g.invite_code, g.privacy, not already_member
   from public.groups g
   where g.id = target_group_id;
 end;
@@ -2387,6 +2423,9 @@ revoke all on function public.transfer_group_ownership(uuid, uuid) from public;
 grant execute on function public.transfer_group_ownership(uuid, uuid)
   to authenticated;
 
+-- Remove the discontinued role-assignment endpoint from existing installs.
+drop function if exists public.set_group_member_role(uuid, uuid, text);
+
 -- -----------------------------------------------------------------------------
 -- Account deletion
 -- -----------------------------------------------------------------------------
@@ -2416,8 +2455,10 @@ $$;
 
 -- backend/schema/08_group_invitations.sql
 -- =============================================================================
--- 08 · Group invitations
--- Inviting friends into a group and answering those invitations.
+-- 08 · Group invitations and join requests
+-- Inviting friends into a group, answering those invitations, and the
+-- requests the leader approves (from the group's link, or from an invitation
+-- sent by a member who is not the leader).
 -- Requires: 02_friends.sql, 03_groups.sql, 05_group_activities.sql
 -- =============================================================================
 
@@ -2466,9 +2507,10 @@ $$;
 
 grant execute on function public.pending_group_invitations() to authenticated;
 
--- Friends that the current group owner can invite, plus their current state for
--- this group. Runs with definer rights so a promoted owner can manage pending
--- invitations created by the previous owner.
+-- Friends the caller can invite, plus their current state for this group.
+-- Every member may invite, so this also marks those already waiting for the
+-- leader's approval. Runs with definer rights so one member can see the
+-- invitations sent by another.
 drop function if exists public.group_invite_options(uuid);
 create or replace function public.group_invite_options(target_group_id uuid)
 returns table (
@@ -2500,6 +2542,11 @@ as $$
     from public.group_invitations gi
     where gi.group_id = target_group_id
     order by gi.invitee_id, gi.created_at desc
+  ),
+  pending_requests as (
+    select jr.user_id
+    from public.group_join_requests jr
+    where jr.group_id = target_group_id and jr.status = 'pending'
   )
   select
     cf.friend_id,
@@ -2508,6 +2555,7 @@ as $$
     p.accent_color_value,
     case
       when gm.user_id is not null then 'member'
+      when pr.user_id is not null then 'requested'
       when li.status = 'pending' then 'invited'
       else 'available'
     end as status,
@@ -2517,7 +2565,8 @@ as $$
   left join public.group_members gm
     on gm.group_id = target_group_id and gm.user_id = cf.friend_id
   left join latest_invitations li on li.invitee_id = cf.friend_id
-  where public.owns_group(target_group_id, auth.uid())
+  left join pending_requests pr on pr.user_id = cf.friend_id
+  where public.is_group_member(target_group_id, auth.uid())
   order by friend_name asc;
 $$;
 
@@ -2536,8 +2585,8 @@ begin
       using errcode = '28000';
   end if;
 
-  if not public.owns_group(target_group_id, auth.uid()) then
-    raise exception 'Only the group owner can invite members.'
+  if not public.is_group_member(target_group_id, auth.uid()) then
+    raise exception 'Only group members can invite friends.'
       using errcode = '42501';
   end if;
 
@@ -2583,15 +2632,20 @@ begin
       using errcode = '28000';
   end if;
 
-  if not public.owns_group(target_group_id, auth.uid()) then
-    raise exception 'Only the group owner can cancel invitations.'
+  if not public.is_group_member(target_group_id, auth.uid()) then
+    raise exception 'Only group members can cancel invitations.'
       using errcode = '42501';
   end if;
 
+  -- Whoever sent it may take it back, and so may the leader.
   delete from public.group_invitations gi
   where gi.group_id = target_group_id
     and gi.invitee_id = target_friend_id
-    and gi.status = 'pending';
+    and gi.status = 'pending'
+    and (
+      gi.inviter_id = auth.uid()
+      or public.owns_group(target_group_id, auth.uid())
+    );
 end;
 $$;
 
@@ -2601,9 +2655,10 @@ to authenticated;
 grant execute on function public.cancel_group_invitation(uuid, uuid)
 to authenticated;
 
--- Accepts a pending invitation: joins the group, marks the invitation accepted,
--- and materializes the group's activities for the new member. Returns the group
--- row so the client can add it to the list without a second lookup.
+-- Accepts a pending invitation. An invitation from the leader puts the user
+-- in the group at once; one from an ordinary member becomes a request for the
+-- leader to approve. [pending_approval] says which happened, and the group row
+-- lets the client add it to the list without a second lookup when it joined.
 drop function if exists public.accept_group_invitation(uuid);
 create or replace function public.accept_group_invitation(invitation_id uuid)
 returns table (
@@ -2614,7 +2669,8 @@ returns table (
   owner_id uuid,
   created_at timestamptz,
   invite_code text,
-  privacy text
+  privacy text,
+  pending_approval boolean
 )
 language plpgsql
 security definer
@@ -2623,14 +2679,16 @@ as $$
 declare
   current_user_id uuid := auth.uid();
   target_group_id uuid;
+  inviter uuid;
+  needs_approval boolean;
 begin
   if current_user_id is null then
     raise exception 'User must be authenticated to accept an invitation.'
       using errcode = '28000';
   end if;
 
-  select gi.group_id
-  into target_group_id
+  select gi.group_id, gi.inviter_id
+  into target_group_id, inviter
   from public.group_invitations gi
   where gi.id = invitation_id
     and gi.invitee_id = current_user_id
@@ -2642,22 +2700,36 @@ begin
       using errcode = 'P0002';
   end if;
 
-  insert into public.group_members (group_id, user_id, role)
-  values (target_group_id, current_user_id, 'member')
-  on conflict (group_id, user_id) do nothing;
+  needs_approval :=
+    not public.owns_group(target_group_id, inviter)
+    and not public.is_group_member(target_group_id, current_user_id);
 
   update public.group_invitations gi
     set status = 'accepted', responded_at = now()
     where gi.id = invitation_id;
 
-  perform public.materialize_group_activities_for_user(
-    target_group_id, current_user_id
-  );
+  if needs_approval then
+    insert into public.group_join_requests (group_id, user_id, invited_by)
+    values (target_group_id, current_user_id, inviter)
+    on conflict (group_id, user_id) do update
+    set status = 'pending',
+        invited_by = excluded.invited_by,
+        created_at = now(),
+        decided_at = null;
+  else
+    insert into public.group_members (group_id, user_id, role)
+    values (target_group_id, current_user_id, 'member')
+    on conflict (group_id, user_id) do nothing;
+
+    perform public.materialize_group_activities_for_user(
+      target_group_id, current_user_id
+    );
+  end if;
 
   return query
   select
     g.id, g.name, g.theme, g.description, g.owner_id,
-    g.created_at, g.invite_code, g.privacy
+    g.created_at, g.invite_code, g.privacy, needs_approval
   from public.groups g
   where g.id = target_group_id;
 end;
@@ -2679,6 +2751,129 @@ begin
     where id = invitation_id
       and invitee_id = auth.uid()
       and status = 'pending';
+end;
+$$;
+
+-- -----------------------------------------------------------------------------
+-- Join requests
+-- -----------------------------------------------------------------------------
+
+-- Who is waiting to be let into the group. Only the leader answers them, so
+-- only the leader reads the list. Definer rights so the leader can read the
+-- profile of someone they do not know yet.
+drop function if exists public.group_join_requests(uuid);
+create or replace function public.group_join_requests(target_group_id uuid)
+returns table (
+  id uuid,
+  user_id uuid,
+  user_name text,
+  accent_color_value bigint,
+  profile_photo_base64 text,
+  avatar_icon_index integer,
+  invited_by uuid,
+  invited_by_name text,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    jr.id,
+    jr.user_id,
+    coalesce(
+      nullif(trim(p.nick_name), ''),
+      nullif(trim(p.user_name), ''),
+      'Timing User'
+    ) as user_name,
+    p.accent_color_value,
+    p.profile_photo_base64,
+    p.avatar_icon_index,
+    jr.invited_by,
+    coalesce(nullif(trim(i.nick_name), ''), nullif(trim(i.user_name), ''))
+      as invited_by_name,
+    jr.created_at
+  from public.group_join_requests jr
+  join public.profiles p on p.id = jr.user_id
+  left join public.profiles i on i.id = jr.invited_by
+  where jr.group_id = target_group_id
+    and jr.status = 'pending'
+    and public.owns_group(target_group_id, auth.uid())
+  order by jr.created_at asc;
+$$;
+
+-- Lets the person in. Repeating it on an answered request changes nothing.
+create or replace function public.approve_group_join_request(request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_group_id uuid;
+  requester_id uuid;
+begin
+  select jr.group_id, jr.user_id
+  into target_group_id, requester_id
+  from public.group_join_requests jr
+  where jr.id = request_id and jr.status = 'pending'
+  for update;
+
+  if target_group_id is null then
+    raise exception 'Join request not found or already handled.'
+      using errcode = 'P0002';
+  end if;
+
+  if not public.owns_group(target_group_id, auth.uid()) then
+    raise exception 'Only the group leader can answer join requests.'
+      using errcode = '42501';
+  end if;
+
+  insert into public.group_members (group_id, user_id, role)
+  values (target_group_id, requester_id, 'member')
+  on conflict (group_id, user_id) do nothing;
+
+  update public.group_join_requests
+  set status = 'approved', decided_at = now()
+  where id = request_id;
+
+  perform public.materialize_group_activities_for_user(
+    target_group_id, requester_id
+  );
+end;
+$$;
+
+-- Turns the request down. The row is kept as 'declined' rather than deleted,
+-- so asking again is a deliberate new request instead of a silent retry.
+create or replace function public.decline_group_join_request(request_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_group_id uuid;
+begin
+  select jr.group_id
+  into target_group_id
+  from public.group_join_requests jr
+  where jr.id = request_id and jr.status = 'pending'
+  for update;
+
+  if target_group_id is null then
+    raise exception 'Join request not found or already handled.'
+      using errcode = 'P0002';
+  end if;
+
+  if not public.owns_group(target_group_id, auth.uid()) then
+    raise exception 'Only the group leader can answer join requests.'
+      using errcode = '42501';
+  end if;
+
+  update public.group_join_requests
+  set status = 'declined', decided_at = now()
+  where id = request_id;
 end;
 $$;
 
@@ -2707,6 +2902,7 @@ alter table public.user_subjects enable row level security;
 alter table public.daily_goals enable row level security;
 alter table public.schedule_entries enable row level security;
 alter table public.group_image_messages enable row level security;
+alter table public.group_join_requests enable row level security;
 
 -- -----------------------------------------------------------------------------
 -- Drop previous policies
@@ -2736,16 +2932,22 @@ drop policy if exists "members see group memberships" on public.group_members;
 drop policy if exists "owners add group members" on public.group_members;
 drop policy if exists "users join groups" on public.group_members;
 drop policy if exists "invitees join invited groups" on public.group_members;
+drop policy if exists "leader invitees join groups" on public.group_members;
+drop policy if exists "requesters and leaders read join requests"
+on public.group_join_requests;
 drop policy if exists "owners remove group members" on public.group_members;
+drop policy if exists "managers remove group members" on public.group_members;
 drop policy if exists "users leave their groups" on public.group_members;
 drop policy if exists "invited or inviter see invitations"
 on public.group_invitations;
 drop policy if exists "owners create invitations" on public.group_invitations;
+drop policy if exists "managers create invitations" on public.group_invitations;
 drop policy if exists "invitee answers invitations" on public.group_invitations;
 drop policy if exists "inviter or invitee delete invitations"
 on public.group_invitations;
 drop policy if exists "members read group activities" on public.group_activities;
 drop policy if exists "owners manage group activities" on public.group_activities;
+drop policy if exists "managers manage group activities" on public.group_activities;
 drop policy if exists "users see activity from group peers"
 on public.activity_entries;
 drop policy if exists "users insert own activity" on public.activity_entries;
@@ -2857,7 +3059,10 @@ create policy "members see group memberships"
 on public.group_members for select
 using (public.is_group_member(group_members.group_id, auth.uid()));
 
-create policy "invitees join invited groups"
+-- Only an invitation from the leader puts someone straight into the group.
+-- Everyone else arrives through an approved join request, which is written by
+-- approve_group_join_request.
+create policy "leader invitees join groups"
 on public.group_members for insert
 with check (
   group_members.user_id = auth.uid()
@@ -2865,10 +3070,21 @@ with check (
   and exists (
     select 1
     from public.group_invitations gi
+    join public.groups g on g.id = gi.group_id
     where gi.group_id = group_members.group_id
       and gi.invitee_id = auth.uid()
       and gi.status = 'pending'
+      and gi.inviter_id = g.owner_id
   )
+);
+
+-- Requests are raised and answered through their RPCs; reading one is for the
+-- person waiting and for the leader who answers.
+create policy "requesters and leaders read join requests"
+on public.group_join_requests for select
+using (
+  group_join_requests.user_id = auth.uid()
+  or public.owns_group(group_join_requests.group_id, auth.uid())
 );
 
 create policy "owners remove group members"
@@ -3013,6 +3229,9 @@ alter table public.group_goal_contributions enable row level security;
 drop policy if exists group_activity_links_self on public.group_activity_links;
 create policy group_activity_links_self on public.group_activity_links
 for select to authenticated using (user_id = auth.uid());
+
+-- All management checks now use owns_group.
+drop function if exists public.manages_group(uuid, uuid);
 
 -- backend/schema/10_storage.sql
 -- =============================================================================
@@ -3165,6 +3384,9 @@ revoke all on function public.update_group_with_activity(
 ) from public;
 revoke all on function public.reset_group_progress(uuid) from public;
 revoke all on function public.pending_group_invitations() from public;
+revoke all on function public.group_join_requests(uuid) from public;
+revoke all on function public.approve_group_join_request(uuid) from public;
+revoke all on function public.decline_group_join_request(uuid) from public;
 revoke all on function public.group_invite_options(uuid) from public;
 revoke all on function public.invite_friend_to_group(uuid, uuid) from public;
 revoke all on function public.cancel_group_invitation(uuid, uuid) from public;
@@ -3205,6 +3427,11 @@ grant execute on function public.update_group_with_activity(
 ) to authenticated;
 grant execute on function public.reset_group_progress(uuid) to authenticated;
 grant execute on function public.pending_group_invitations() to authenticated;
+grant execute on function public.group_join_requests(uuid) to authenticated;
+grant execute on function public.approve_group_join_request(uuid)
+  to authenticated;
+grant execute on function public.decline_group_join_request(uuid)
+  to authenticated;
 grant execute on function public.group_invite_options(uuid) to authenticated;
 grant execute on function public.invite_friend_to_group(uuid, uuid)
   to authenticated;
@@ -3242,6 +3469,7 @@ revoke all on table public.profiles from authenticated;
 revoke all on table public.friendships from authenticated;
 revoke all on table public.groups from authenticated;
 revoke all on table public.group_members from authenticated;
+revoke all on table public.group_join_requests from authenticated;
 revoke all on table public.group_invitations from authenticated;
 revoke all on table public.group_activities from authenticated;
 revoke all on table public.activity_entries from authenticated;
@@ -3256,6 +3484,8 @@ grant select, insert, update, delete
   on table public.friendships to authenticated;
 grant select, insert, update, delete on table public.groups to authenticated;
 grant select, insert, delete on table public.group_members to authenticated;
+-- Raised and answered only through their RPCs.
+grant select on table public.group_join_requests to authenticated;
 grant select, insert, update, delete
   on table public.group_invitations to authenticated;
 grant select, insert, update, delete

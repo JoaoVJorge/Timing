@@ -130,6 +130,9 @@ to authenticated;
 
 drop function if exists public.join_group_by_invite_code(text);
 
+-- The group's link and code do not put anyone in the group: they raise a
+-- request for the leader to answer. [pending_approval] is false only when the
+-- caller is already a member, so the client can just open the group.
 create or replace function public.join_group_by_invite_code(lookup_code text)
 returns table (
   id uuid,
@@ -139,7 +142,8 @@ returns table (
   owner_id uuid,
   created_at timestamptz,
   invite_code text,
-  privacy text
+  privacy text,
+  pending_approval boolean
 )
 language plpgsql
 security definer
@@ -147,6 +151,7 @@ set search_path = public
 as $$
 declare
   target_group_id uuid;
+  already_member boolean;
 begin
   if auth.uid() is null then
     raise exception 'not authenticated';
@@ -162,18 +167,22 @@ begin
     raise exception 'group not found';
   end if;
 
-  insert into public.group_members (group_id, user_id, role)
-  values (target_group_id, auth.uid(), 'member')
-  on conflict (group_id, user_id) do nothing;
+  already_member := public.is_group_member(target_group_id, auth.uid());
 
-  perform public.materialize_group_activities_for_user(
-    target_group_id, auth.uid()
-  );
+  if not already_member then
+    insert into public.group_join_requests (group_id, user_id)
+    values (target_group_id, auth.uid())
+    on conflict (group_id, user_id) do update
+    set status = 'pending',
+        invited_by = null,
+        created_at = now(),
+        decided_at = null;
+  end if;
 
   return query
   select
     g.id, g.name, g.theme, g.description, g.owner_id,
-    g.created_at, g.invite_code, g.privacy
+    g.created_at, g.invite_code, g.privacy, not already_member
   from public.groups g
   where g.id = target_group_id;
 end;
@@ -406,6 +415,9 @@ $$;
 revoke all on function public.transfer_group_ownership(uuid, uuid) from public;
 grant execute on function public.transfer_group_ownership(uuid, uuid)
   to authenticated;
+
+-- Remove the discontinued role-assignment endpoint from existing installs.
+drop function if exists public.set_group_member_role(uuid, uuid, text);
 
 -- -----------------------------------------------------------------------------
 -- Account deletion

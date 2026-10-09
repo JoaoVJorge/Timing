@@ -14,7 +14,7 @@ one only depends on the sections before it.
 | `05_group_activities.sql` | Personal activity link periods, goal contributions, selection RPCs and legacy migration |
 | `06_group_ranking.sql` | `group_leaderboard_scores`, `group_activity_progress` |
 | `07_group_management.sql` | Create, join, edit, reset and transfer a group, and `delete_my_account` |
-| `08_group_invitations.sql` | Invite, cancel, accept and decline |
+| `08_group_invitations.sql` | Invite (any member), cancel, accept and decline, plus the join requests the leader approves (`group_join_requests`, `approve_group_join_request`, `decline_group_join_request`) |
 | `09_policies.sql` | Row level security for every table |
 | `10_storage.sql` | Image buckets and their `storage.objects` policies |
 | `11_grants.sql` | Least-privilege function and table grants |
