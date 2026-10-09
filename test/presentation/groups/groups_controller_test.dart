@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
+import "package:timing/app/app_routes.dart";
 import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
@@ -217,11 +218,24 @@ class _FakeSupabaseService implements SupabaseService {
 }
 
 class _FakeAppNavigator implements AppNavigator {
+  final List<String> pushedRoutes = <String>[];
+
   @override
   void showErrorSnackBar([String? text]) {}
 
   @override
   void showSuccessSnackBar(String text) {}
+
+  @override
+  Future<T?>? toNamed<T>(
+    String page, {
+    Object? arguments,
+    int? id,
+    bool preventDuplicates = true,
+  }) {
+    pushedRoutes.add(page);
+    return Future<T?>.value();
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -1382,6 +1396,57 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets("every benefit of the empty state opens the group creation", (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(430, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final _FakeAppNavigator navigator = _FakeAppNavigator();
+    final GroupsController controller = _controller(
+      _FakeGroupsRepository(const []),
+      appNavigator: navigator,
+    );
+    Get.put<GroupsController>(controller);
+    final AppLocalizations l10n = lookupAppLocalizations(const Locale("en"));
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("en"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.groupsEmptyButton), findsOneWidget);
+
+    // The button and the three benefits below it are the same door. The
+    // benefits go by icon: their labels repeat elsewhere on the screen.
+    await tester.tap(find.text(l10n.groupsEmptyButton));
+    await tester.pumpAndSettle();
+    for (final IconData icon in [
+      Icons.leaderboard_rounded,
+      Icons.show_chart_rounded,
+      Icons.favorite_border_rounded,
+    ]) {
+      await tester.tap(find.byIcon(icon));
+      await tester.pumpAndSettle();
+    }
+
+    expect(navigator.pushedRoutes, [
+      AppRoutes.createGroup,
+      AppRoutes.createGroup,
+      AppRoutes.createGroup,
+      AppRoutes.createGroup,
+    ]);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets("friends card renders the current friends", (tester) async {
     final _FakeGroupsRepository repository = _FakeGroupsRepository([
       _group("group-1", "Grupo", description: "Descrição criada pelo usuário"),
@@ -1999,6 +2064,7 @@ GroupsController _controller(
   SocialStore? socialStore,
   AppLocalStorageService? localStorageService,
   ConnectivityService? connectivityService,
+  AppNavigator? appNavigator,
 }) {
   final _FakeFriendsRepository effectiveFriendsRepository =
       friendsRepository ??
@@ -2009,7 +2075,7 @@ GroupsController _controller(
         SocialStore(friendsRepository: effectiveFriendsRepository),
     groupsRepository: repository,
     dailyTasksRepository: _FakeDailyTasksRepository(),
-    appNavigator: _FakeAppNavigator(),
+    appNavigator: appNavigator ?? _FakeAppNavigator(),
     supabaseService: _FakeSupabaseService(),
     localStorageService: localStorageService ?? _FakeLocalStorageService(),
     activityChangeBus: activityChangeBus ?? ActivityChangeBus(),

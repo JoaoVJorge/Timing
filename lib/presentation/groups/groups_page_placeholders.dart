@@ -129,12 +129,15 @@ class _GroupsEmptyState extends StatelessWidget {
       const Gap(AppSpacing.betweenSections),
       Center(child: _BenefitsHeader(label: context.l10n.groupsBenefitsHeader)),
       const Gap(AppSpacing.betweenRelated),
+      // Each benefit is a second way into the same creation flow: whoever
+      // taps one is asking for the group that would give it to them.
       Row(
         children: [
           Expanded(
             child: _BenefitTile(
               icon: Icons.leaderboard_rounded,
               label: context.l10n.leaderboardTitle,
+              onTap: onCreateGroup,
             ),
           ),
           const Gap(AppSpacing.titleToDescription),
@@ -142,6 +145,7 @@ class _GroupsEmptyState extends StatelessWidget {
             child: _BenefitTile(
               icon: Icons.show_chart_rounded,
               label: context.l10n.progressTitle,
+              onTap: onCreateGroup,
             ),
           ),
           const Gap(AppSpacing.titleToDescription),
@@ -149,6 +153,7 @@ class _GroupsEmptyState extends StatelessWidget {
             child: _BenefitTile(
               icon: Icons.favorite_border_rounded,
               label: context.l10n.groupsFriendsTitle,
+              onTap: onCreateGroup,
             ),
           ),
         ],
@@ -335,29 +340,39 @@ class _HeaderLine extends StatelessWidget {
 }
 
 class _BenefitTile extends StatelessWidget {
-  const _BenefitTile({required this.icon, required this.label});
+  const _BenefitTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 88,
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-    decoration: AppSurfaces.content(context.colorTokens),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 26, color: context.colorTokens.primary),
-        const Gap(AppSpacing.titleToDescription),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textStyles.cardTitle.copyWith(fontSize: 14),
-        ),
-      ],
+  Widget build(BuildContext context) => BounceTap(
+    onTap: onTap,
+    pressedScale: 0.96,
+    behavior: HitTestBehavior.opaque,
+    child: Container(
+      height: 88,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      decoration: AppSurfaces.content(context.colorTokens),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 26, color: context.colorTokens.primary),
+          const Gap(AppSpacing.titleToDescription),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textStyles.cardTitle.copyWith(fontSize: 14),
+          ),
+        ],
+      ),
     ),
   );
 }
