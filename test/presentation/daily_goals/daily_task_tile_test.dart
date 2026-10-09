@@ -17,7 +17,6 @@ Future<void> _pumpTile(
   WidgetTester tester, {
   DailyTaskEntity task = _personalGoal,
   Future<void> Function()? onToggle,
-  VoidCallback? onClearData,
 }) => tester.pumpWidget(
   MaterialApp(
     locale: const Locale("pt"),
@@ -31,7 +30,6 @@ Future<void> _pumpTile(
         onEdit: () {},
         onToggle: onToggle ?? () async {},
         onDelete: () {},
-        onClearData: onClearData ?? () {},
       ),
     ),
   ),
@@ -57,60 +55,37 @@ void main() {
     expect(toggles, 1);
   });
 
-  testWidgets("pulling right reveals a clear-data block that can be tapped", (
+  testWidgets("pulling right reveals nothing: a goal's data is not cleared", (
     tester,
   ) async {
-    int cleared = 0;
-    await _pumpTile(tester, onClearData: () => cleared++);
+    await _pumpTile(tester);
+    final Offset before = tester.getTopLeft(find.text("Beber água"));
+
+    await tester.drag(find.byKey(const ValueKey("tile")), const Offset(120, 0));
+    await tester.pumpAndSettle();
+
     expect(find.byIcon(Icons.delete_sweep_rounded), findsNothing);
-
-    await tester.drag(find.byKey(const ValueKey("tile")), const Offset(120, 0));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.delete_sweep_rounded));
-    await tester.pumpAndSettle();
-
-    expect(cleared, 1);
+    expect(_squares(), findsNothing);
+    expect(tester.getTopLeft(find.text("Beber água")), before);
   });
 
-  testWidgets("clearing data stays available on a goal from a group", (
-    tester,
-  ) async {
-    int cleared = 0;
-    await _pumpTile(
-      tester,
-      task: _personalGoal.copyWith(groupId: "group-1", groupActivityId: "ga-1"),
-      onClearData: () => cleared++,
+  testWidgets("the edit block is tinted with the goal's color", (tester) async {
+    await _pumpTile(tester);
+
+    await tester.drag(
+      find.byKey(const ValueKey("tile")),
+      const Offset(-200, 0),
     );
-
-    await tester.drag(find.byKey(const ValueKey("tile")), const Offset(120, 0));
     await tester.pumpAndSettle();
-    // Edit and delete are locked for group goals, clearing one's own is not.
-    await tester.tap(find.byIcon(Icons.delete_sweep_rounded));
 
-    expect(cleared, 1);
+    final Container edit = tester.widget<Container>(_squares().first);
+    expect(
+      (edit.decoration! as BoxDecoration).color,
+      const Color(0xFF4C84FF).withValues(alpha: 0.14),
+    );
   });
 
-  group("revealed blocks are symmetric squares", () {
-    testWidgets("the block on the right side is a square centered on the row", (
-      tester,
-    ) async {
-      await _pumpTile(tester);
-
-      await tester.drag(
-        find.byKey(const ValueKey("tile")),
-        const Offset(120, 0),
-      );
-      await tester.pumpAndSettle();
-
-      expect(_squares(), findsOneWidget);
-      final Size square = tester.getSize(_squares());
-      expect(square.width, square.height);
-      expect(
-        tester.getCenter(_squares()).dy,
-        closeTo(tester.getCenter(find.byType(DailyTaskTile)).dy, 0.01),
-      );
-    });
-
+  group("revealed blocks are squares", () {
     testWidgets("the blocks on the left side are the same square, evenly set", (
       tester,
     ) async {
@@ -143,12 +118,12 @@ void main() {
 
       await tester.drag(
         find.byKey(const ValueKey("tile")),
-        const Offset(120, 0),
+        const Offset(-200, 0),
       );
       await tester.pumpAndSettle();
 
       final Rect row = tester.getRect(find.byType(DailyTaskTile));
-      final Rect square = tester.getRect(_squares());
+      final Rect square = tester.getRect(_squares().first);
       expect(square.top - row.top, closeTo(row.bottom - square.bottom, 0.01));
       expect(square.top, greaterThanOrEqualTo(row.top));
     });

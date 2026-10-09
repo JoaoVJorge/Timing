@@ -79,7 +79,6 @@ class DailyGoalsPage extends StatelessWidget {
                 onEdit: controller.onEditTask,
                 onToggle: controller.onToggleTask,
                 onDelete: controller.onDeleteTask,
-                onClearData: controller.onClearTaskData,
               ),
             ],
             if (completed.isNotEmpty) ...[
@@ -105,7 +104,6 @@ class DailyGoalsPage extends StatelessWidget {
                 onEdit: controller.onEditTask,
                 onToggle: controller.onToggleTask,
                 onDelete: controller.onDeleteTask,
-                onClearData: controller.onClearTaskData,
               ),
             ],
             const Gap(AppSpacing.titleToDescription),
@@ -175,14 +173,12 @@ class _TaskSection extends StatelessWidget {
     required this.onEdit,
     required this.onToggle,
     required this.onDelete,
-    required this.onClearData,
   });
 
   final List<DailyTaskEntity> tasks;
   final ValueChanged<DailyTaskEntity> onEdit;
   final Future<void> Function(DailyTaskEntity task) onToggle;
   final ValueChanged<DailyTaskEntity> onDelete;
-  final ValueChanged<DailyTaskEntity> onClearData;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -194,7 +190,6 @@ class _TaskSection extends StatelessWidget {
           onEdit: () => onEdit(task),
           onToggle: () => onToggle(task),
           onDelete: () => onDelete(task),
-          onClearData: () => onClearData(task),
         ),
         if (index != tasks.length - 1) const Gap(AppSpacing.betweenRelated),
       ],
