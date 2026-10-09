@@ -48,7 +48,9 @@ class _ScheduleDatePickerDialogState extends State<_ScheduleDatePickerDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colorTokens.surfaceInnerLayer,
+                color: context.colorTokens.surfaceInnerLayer.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
