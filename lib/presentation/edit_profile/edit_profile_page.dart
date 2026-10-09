@@ -139,8 +139,8 @@ class EditProfilePage extends StatelessWidget {
                 Obx(
                   () => CenteredWrapGrid(
                     itemsPerRow: 4,
-                    spacing: 16,
-                    runSpacing: 16,
+                    spacing: 12,
+                    runSpacing: 12,
                     children: AppAccentPresets.values.map((color) {
                       final bool isSelected =
                           controller.accentColor.value.toARGB32() ==
