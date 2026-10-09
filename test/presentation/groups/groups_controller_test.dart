@@ -1195,10 +1195,10 @@ void main() {
             )
             .first,
       );
-      expect((action.decoration! as BoxDecoration).color, Colors.transparent);
+      expect((action.decoration! as BoxDecoration).color, Colors.white);
     });
 
-    testWidgets("members and the leader reveal icons without backgrounds", (
+    testWidgets("members and the leader reveal icons on a white card", (
       tester,
     ) async {
       await pumpMembers(tester, myRole: GroupMemberEntity.memberRole);
@@ -1212,7 +1212,7 @@ void main() {
         final Container action = tester.widget<Container>(
           find.ancestor(of: addFriend, matching: find.byType(Container)).first,
         );
-        expect((action.decoration! as BoxDecoration).color, Colors.transparent);
+        expect((action.decoration! as BoxDecoration).color, Colors.white);
         await swipe(tester, name, -600);
         expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
         expect(find.byIcon(Icons.close_rounded), findsNothing);

@@ -531,6 +531,8 @@ class _MemberSwipeActions extends StatelessWidget {
       return IgnorePointer(
         ignoring: isUpdatingFriendship || isUpdatingMembership,
         child: SwipeRevealActions(
+          // The same surface the activity tiles reveal: a white card behind
+          // the icon, so the action reads as a button and not as a loose icon.
           leadingActions: [
             SwipeRevealAction(
               iconData: isFriend
@@ -538,7 +540,8 @@ class _MemberSwipeActions extends StatelessWidget {
                   : hasSentRequest
                   ? Icons.close_rounded
                   : Icons.person_add_alt_1_rounded,
-              background: context.colorTokens.transparent,
+              background: context.colorTokens.surface,
+              borderColor: context.colorTokens.borderUnfocused,
               iconColor: isFriend
                   ? context.colorTokens.error
                   : context.colorTokens.primary,
@@ -547,7 +550,8 @@ class _MemberSwipeActions extends StatelessWidget {
             if (canTransferLeadership)
               SwipeRevealAction(
                 iconData: Icons.workspace_premium_outlined,
-                background: context.colorTokens.transparent,
+                background: context.colorTokens.surface,
+                borderColor: context.colorTokens.borderUnfocused,
                 iconColor: context.colorTokens.primary,
                 onTap: () => controller.onTransferGroupLeadership(member),
               ),
@@ -556,13 +560,15 @@ class _MemberSwipeActions extends StatelessWidget {
             if (canManageMember)
               SwipeRevealAction(
                 iconData: Icons.close_rounded,
-                background: context.colorTokens.transparent,
+                background: context.colorTokens.surface,
+                borderColor: context.colorTokens.borderUnfocused,
                 iconColor: context.colorTokens.error,
                 onTap: () => controller.onRemoveGroupMember(member),
               ),
             SwipeRevealAction(
               iconData: Icons.flag_outlined,
-              background: context.colorTokens.transparent,
+              background: context.colorTokens.surface,
+              borderColor: context.colorTokens.borderUnfocused,
               iconColor: context.colorTokens.error,
               onTap: () => controller.onReportGroupMember(member),
             ),
