@@ -14,18 +14,23 @@ class CreationPageScaffold extends StatelessWidget {
   const CreationPageScaffold({
     required this.children,
     required this.submitButton,
+    this.backgroundColor,
     super.key,
   });
 
   final List<Widget> children;
   final Widget submitButton;
 
+  /// Overrides the tinted creation background — an editing flow reuses this
+  /// chrome but belongs with the page it was opened from.
+  final Color? backgroundColor;
+
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
     behavior: HitTestBehavior.opaque,
     child: Scaffold(
-      backgroundColor: context.creationPageBackground,
+      backgroundColor: backgroundColor ?? context.creationPageBackground,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(

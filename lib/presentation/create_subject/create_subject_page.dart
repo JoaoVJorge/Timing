@@ -26,6 +26,11 @@ class CreateSubjectPage extends StatelessWidget {
     controller.initializeThemeColor(context.colorTokens.primary);
 
     return CreationPageScaffold(
+      // Editing an activity sits next to its statistics, so it keeps the
+      // statistics background instead of the tinted creation one.
+      backgroundColor: controller.isEditing
+          ? context.colorTokens.scaffold
+          : null,
       submitButton: Obx(
         () => CreationSubmitButton(
           label: controller.submitLabel(context),
