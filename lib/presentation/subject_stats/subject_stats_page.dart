@@ -188,7 +188,12 @@ class _ClearDataButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Obx(
-    () => Center(
+    () => Container(
+      decoration: BoxDecoration(
+        color: context.colorTokens.primaryForeground,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(8),
       child: TextButton.icon(
         key: const ValueKey<String>("clear-subject-data"),
         onPressed:
