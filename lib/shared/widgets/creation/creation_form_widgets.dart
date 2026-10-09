@@ -144,7 +144,10 @@ class CreationSectionHeader extends StatelessWidget {
               ),
             ],
           ),
+          // A tooltip hands its text style to a DefaultTextStyle that replaces
+          // the inherited one, so the app font has to be named again here.
           textStyle: context.textStyles.bodySmall.copyWith(
+            fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
             color: context.colorTokens.dialogText,
             fontSize: 13,
             fontWeight: FontWeight.w400,
@@ -154,11 +157,12 @@ class CreationSectionHeader extends StatelessWidget {
             width: 30,
             height: 30,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+            decoration: const BoxDecoration(shape: BoxShape.circle),
+            child: AppIcon(
+              "info",
+              size: 14,
+              color: context.colorTokens.borderUnfocused,
             ),
-            child: AppIcon("info", size: 14, color: accent),
           ),
         ),
       ],
