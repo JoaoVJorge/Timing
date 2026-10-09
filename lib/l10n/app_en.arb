@@ -1132,6 +1132,35 @@
   "codeCopiedMessage": "Code copied",
   "friendRequestSentMessage": "Request sent",
   "joinedGroupMessage": "You joined the group",
+  "groupJoinRequestSentMessage": "Request sent to the leader of {groupName}.",
+  "@groupJoinRequestSentMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "groupJoinRequestsTitle": "Requests to join",
+  "groupJoinRequestsCount": "{count, plural, =0{No requests} =1{1 person waiting} other{{count} people waiting}}",
+  "@groupJoinRequestsCount": {
+    "placeholders": {"count": {"type": "num", "format": "decimalPattern"}}
+  },
+  "groupJoinRequestsEmptyHint": "Whoever opens the group's link shows up here for you to accept.",
+  "groupJoinRequestInvitedBy": "Invited by {memberName}",
+  "@groupJoinRequestInvitedBy": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestFromLink": "Came through the group's link",
+  "groupJoinRequestApprovedMessage": "{memberName} joined the group.",
+  "@groupJoinRequestApprovedMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestDeclinedMessage": "Request declined.",
+  "groupShareLinkTitle": "Invite with a link",
+  "groupShareLinkDescription": "Whoever opens the link asks to join, and you accept them here.",
+  "groupShareLinkButton": "Share link",
+  "groupLinkCopiedMessage": "Link copied",
+  "shareGroupLinkMessage": "Join my group {groupName} on Timing: {link}",
+  "@shareGroupLinkMessage": {
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+  },
+  "joinGroupPendingHint": "The group's leader has to accept your request.",
   "friendTypeName": "friend",
   "shareInviteCodeMessage": "Add me on Timing with my code: {code}",
   "groupInvitesTitle": "Group invites ({count})",
@@ -1722,7 +1751,7 @@
   "groupInvitationsSentEmptyDescription": "Invitations you send for someone to join a group show up here.",
   "swipeHintDismissLabel": "Got it",
   "dailyGoalSwipeHintTitle": "Goal gestures",
-  "dailyGoalSwipeHintMessage": "Swipe a goal left to edit or delete it, or right to delete only your own progress. Some actions may be unavailable for group goals.",
+  "dailyGoalSwipeHintMessage": "Swipe a goal left to edit or delete it. Some actions may be unavailable for group goals.",
   "@clearActivityDataMessage": {
     "placeholders": {
       "name": {
@@ -1847,6 +1876,9 @@
   "offlineChangesQueuedMessage": "You're offline. This will be saved once you reconnect.",
   "offlineSyncCompletedMessage": "Your saved changes have synced successfully.",
   "offlineSessionExpiredMessage": "You've been offline for a while. Connect to the internet to sign in again.",
+  "errorOfflineMessage": "No connection. Check your internet and try again.",
+  "errorSignedOutMessage": "Your session has ended. Sign in again to continue.",
+  "errorRejectedMessage": "This action couldn't be completed. Check the details and try again.",
   "editGroupInformationDescription": "Set a name and description for the group.",
   "editGroupActivityOverview": "Configure the activity and progress goal.",
   "editGroupActivityDescription": "Choose the activity and set your progress goal.",
@@ -1896,5 +1928,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "addTimeRowSubtitle": "Record today's time",
+  "removeTimeRowSubtitle": "Correct recorded time"
 }

@@ -1907,6 +1907,72 @@ class AppLocalizationsEs extends AppLocalizations {
   String get joinedGroupMessage => 'Te uniste al grupo';
 
   @override
+  String groupJoinRequestSentMessage(String groupName) {
+    return 'Solicitud enviada al líder de $groupName.';
+  }
+
+  @override
+  String get groupJoinRequestsTitle => 'Solicitudes para entrar';
+
+  @override
+  String groupJoinRequestsCount(num count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString personas esperando',
+      one: '1 persona esperando',
+      zero: 'Sin solicitudes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupJoinRequestsEmptyHint =>
+      'Quien abra el enlace del grupo aparecerá aquí para que lo aceptes.';
+
+  @override
+  String groupJoinRequestInvitedBy(String memberName) {
+    return 'Invitado por $memberName';
+  }
+
+  @override
+  String get groupJoinRequestFromLink => 'Llegó por el enlace del grupo';
+
+  @override
+  String groupJoinRequestApprovedMessage(String memberName) {
+    return '$memberName entró al grupo.';
+  }
+
+  @override
+  String get groupJoinRequestDeclinedMessage => 'Solicitud rechazada.';
+
+  @override
+  String get groupShareLinkTitle => 'Invitar con un enlace';
+
+  @override
+  String get groupShareLinkDescription =>
+      'Quien abra el enlace pide entrar y tú lo aceptas aquí.';
+
+  @override
+  String get groupShareLinkButton => 'Compartir enlace';
+
+  @override
+  String get groupLinkCopiedMessage => 'Enlace copiado';
+
+  @override
+  String shareGroupLinkMessage(String groupName, String link) {
+    return 'Entra en mi grupo $groupName en Timing: $link';
+  }
+
+  @override
+  String get joinGroupPendingHint =>
+      'El líder del grupo debe aceptar tu solicitud.';
+
+  @override
   String get friendTypeName => 'amigo';
 
   @override
@@ -3129,7 +3195,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Desliza una meta a la izquierda para editarla o eliminarla, o a la derecha para borrar solo tu progreso. Algunas acciones pueden estar bloqueadas para metas de grupo.';
+      'Desliza una meta a la izquierda para editarla o eliminarla. Algunas acciones pueden estar bloqueadas para metas de grupo.';
 
   @override
   String get clearDataButtonLabel => 'Borrar datos';
@@ -3438,6 +3504,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Has estado sin conexión por un tiempo. Conéctate a internet para iniciar sesión de nuevo.';
 
   @override
+  String get errorOfflineMessage =>
+      'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
+
+  @override
+  String get errorSignedOutMessage =>
+      'Tu sesión ha terminado. Inicia sesión de nuevo para continuar.';
+
+  @override
+  String get errorRejectedMessage =>
+      'No se pudo completar esta acción. Revisa los datos e inténtalo de nuevo.';
+
+  @override
   String get editGroupInformationDescription =>
       'Define un nombre y una descripción para el grupo.';
 
@@ -3570,4 +3648,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get googleCalendarActions => 'Opciones de Google Calendar';
+
+  @override
+  String get addTimeRowSubtitle => 'Registrar el tiempo de hoy';
+
+  @override
+  String get removeTimeRowSubtitle => 'Corregir el tiempo registrado';
 }

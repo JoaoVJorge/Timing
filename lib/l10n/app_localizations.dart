@@ -3442,6 +3442,90 @@ abstract class AppLocalizations {
   /// **'You joined the group'**
   String get joinedGroupMessage;
 
+  /// No description provided for @groupJoinRequestSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to the leader of {groupName}.'**
+  String groupJoinRequestSentMessage(String groupName);
+
+  /// No description provided for @groupJoinRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests to join'**
+  String get groupJoinRequestsTitle;
+
+  /// No description provided for @groupJoinRequestsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No requests} =1{1 person waiting} other{{count} people waiting}}'**
+  String groupJoinRequestsCount(num count);
+
+  /// No description provided for @groupJoinRequestsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Whoever opens the group\'s link shows up here for you to accept.'**
+  String get groupJoinRequestsEmptyHint;
+
+  /// No description provided for @groupJoinRequestInvitedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited by {memberName}'**
+  String groupJoinRequestInvitedBy(String memberName);
+
+  /// No description provided for @groupJoinRequestFromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Came through the group\'s link'**
+  String get groupJoinRequestFromLink;
+
+  /// No description provided for @groupJoinRequestApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName} joined the group.'**
+  String groupJoinRequestApprovedMessage(String memberName);
+
+  /// No description provided for @groupJoinRequestDeclinedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request declined.'**
+  String get groupJoinRequestDeclinedMessage;
+
+  /// No description provided for @groupShareLinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite with a link'**
+  String get groupShareLinkTitle;
+
+  /// No description provided for @groupShareLinkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Whoever opens the link asks to join, and you accept them here.'**
+  String get groupShareLinkDescription;
+
+  /// No description provided for @groupShareLinkButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get groupShareLinkButton;
+
+  /// No description provided for @groupLinkCopiedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied'**
+  String get groupLinkCopiedMessage;
+
+  /// No description provided for @shareGroupLinkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Join my group {groupName} on Timing: {link}'**
+  String shareGroupLinkMessage(String groupName, String link);
+
+  /// No description provided for @joinGroupPendingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The group\'s leader has to accept your request.'**
+  String get joinGroupPendingHint;
+
   /// No description provided for @friendTypeName.
   ///
   /// In en, this message translates to:
@@ -5617,7 +5701,7 @@ abstract class AppLocalizations {
   /// No description provided for @dailyGoalSwipeHintMessage.
   ///
   /// In en, this message translates to:
-  /// **'Swipe a goal left to edit or delete it, or right to delete only your own progress. Some actions may be unavailable for group goals.'**
+  /// **'Swipe a goal left to edit or delete it. Some actions may be unavailable for group goals.'**
   String get dailyGoalSwipeHintMessage;
 
   /// No description provided for @clearDataButtonLabel.
@@ -6136,6 +6220,24 @@ abstract class AppLocalizations {
   /// **'You\'ve been offline for a while. Connect to the internet to sign in again.'**
   String get offlineSessionExpiredMessage;
 
+  /// No description provided for @errorOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your internet and try again.'**
+  String get errorOfflineMessage;
+
+  /// No description provided for @errorSignedOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Sign in again to continue.'**
+  String get errorSignedOutMessage;
+
+  /// No description provided for @errorRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action couldn\'t be completed. Check the details and try again.'**
+  String get errorRejectedMessage;
+
   /// No description provided for @editGroupInformationDescription.
   ///
   /// In en, this message translates to:
@@ -6351,6 +6453,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Google Calendar options'**
   String get googleCalendarActions;
+
+  /// No description provided for @addTimeRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record today\'s time'**
+  String get addTimeRowSubtitle;
+
+  /// No description provided for @removeTimeRowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct recorded time'**
+  String get removeTimeRowSubtitle;
 }
 
 class _AppLocalizationsDelegate

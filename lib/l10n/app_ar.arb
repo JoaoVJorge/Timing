@@ -1097,6 +1097,35 @@
   "codeCopiedMessage": "?? ??? ?????",
   "friendRequestSentMessage": "?? ????? ?????",
   "joinedGroupMessage": "?????? ??? ????????",
+  "groupJoinRequestSentMessage": "تم إرسال الطلب إلى قائد {groupName}.",
+  "@groupJoinRequestSentMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "groupJoinRequestsTitle": "طلبات الانضمام",
+  "groupJoinRequestsCount": "{count, plural, =0{لا توجد طلبات} =1{شخص واحد في الانتظار} other{{count} أشخاص في الانتظار}}",
+  "@groupJoinRequestsCount": {
+    "placeholders": {"count": {"type": "num", "format": "decimalPattern"}}
+  },
+  "groupJoinRequestsEmptyHint": "كل من يفتح رابط المجموعة يظهر هنا لتقبله.",
+  "groupJoinRequestInvitedBy": "دعاه {memberName}",
+  "@groupJoinRequestInvitedBy": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestFromLink": "وصل عبر رابط المجموعة",
+  "groupJoinRequestApprovedMessage": "انضم {memberName} إلى المجموعة.",
+  "@groupJoinRequestApprovedMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestDeclinedMessage": "تم رفض الطلب.",
+  "groupShareLinkTitle": "الدعوة برابط",
+  "groupShareLinkDescription": "من يفتح الرابط يطلب الانضمام وتقبله أنت هنا.",
+  "groupShareLinkButton": "مشاركة الرابط",
+  "groupLinkCopiedMessage": "تم نسخ الرابط",
+  "shareGroupLinkMessage": "انضم إلى مجموعتي {groupName} على Timing: {link}",
+  "@shareGroupLinkMessage": {
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+  },
+  "joinGroupPendingHint": "على قائد المجموعة قبول طلبك.",
   "friendTypeName": "????",
   "shareInviteCodeMessage": "أضفني على Timing باستخدام رمزي: {code}",
   "groupInvitesTitle": "دعوات المجموعات ({count})",
@@ -1635,7 +1664,7 @@
   "groupInvitationsSentEmptyDescription": "الدعوات التي ترسلها للانضمام إلى مجموعة ستظهر هنا.",
   "swipeHintDismissLabel": "فهمت",
   "dailyGoalSwipeHintTitle": "إيماءات الهدف",
-  "dailyGoalSwipeHintMessage": "اسحب الهدف إلى اليسار لتعديله أو حذفه، أو إلى اليمين لحذف تقدمك أنت فقط. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.",
+  "dailyGoalSwipeHintMessage": "اسحب الهدف إلى اليسار لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.",
   "clearDataButtonLabel": "حذف البيانات",
   "clearDataDialogTitle": "حذف البيانات؟",
   "clearActivityDataMessage": "سيتم حذف كل تقدمك في \"{name}\": الوقت والصفحات والسجل. يبقى النشاط لكنه يبدأ من الصفر. لا يمكن التراجع عن هذا الإجراء.",
@@ -1725,6 +1754,9 @@
   "offlineChangesQueuedMessage": "أنت غير متصل بالإنترنت. سيتم حفظ هذا بمجرد إعادة الاتصال.",
   "offlineSyncCompletedMessage": "تمت مزامنة تغييراتك المحفوظة بنجاح.",
   "offlineSessionExpiredMessage": "لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى.",
+  "errorOfflineMessage": "لا يوجد اتصال. تحقق من الإنترنت وحاول مرة أخرى.",
+  "errorSignedOutMessage": "انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة.",
+  "errorRejectedMessage": "تعذّر إكمال هذا الإجراء. تحقق من البيانات وحاول مرة أخرى.",
   "editGroupInformationDescription": "حدد اسمًا ووصفًا للمجموعة.",
   "editGroupActivityOverview": "اضبط النشاط وهدف التقدم.",
   "editGroupActivityDescription": "اختر النشاط وحدد هدف تقدمك.",
@@ -1774,5 +1806,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "addTimeRowSubtitle": "تسجيل وقت اليوم",
+  "removeTimeRowSubtitle": "تصحيح الوقت المسجل"
 }

@@ -1097,6 +1097,35 @@
   "codeCopiedMessage": "Code copi?",
   "friendRequestSentMessage": "Demande envoyée",
   "joinedGroupMessage": "Vous avez rejoint le groupe",
+  "groupJoinRequestSentMessage": "Demande envoyée au chef de {groupName}.",
+  "@groupJoinRequestSentMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "groupJoinRequestsTitle": "Demandes d'adhésion",
+  "groupJoinRequestsCount": "{count, plural, =0{Aucune demande} =1{1 personne en attente} other{{count} personnes en attente}}",
+  "@groupJoinRequestsCount": {
+    "placeholders": {"count": {"type": "num", "format": "decimalPattern"}}
+  },
+  "groupJoinRequestsEmptyHint": "Les personnes qui ouvrent le lien du groupe apparaissent ici pour que vous les acceptiez.",
+  "groupJoinRequestInvitedBy": "Invité par {memberName}",
+  "@groupJoinRequestInvitedBy": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestFromLink": "Arrivé par le lien du groupe",
+  "groupJoinRequestApprovedMessage": "{memberName} a rejoint le groupe.",
+  "@groupJoinRequestApprovedMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestDeclinedMessage": "Demande refusée.",
+  "groupShareLinkTitle": "Inviter avec un lien",
+  "groupShareLinkDescription": "Celui qui ouvre le lien demande à entrer et vous l'acceptez ici.",
+  "groupShareLinkButton": "Partager le lien",
+  "groupLinkCopiedMessage": "Lien copié",
+  "shareGroupLinkMessage": "Rejoignez mon groupe {groupName} sur Timing : {link}",
+  "@shareGroupLinkMessage": {
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+  },
+  "joinGroupPendingHint": "Le chef du groupe doit accepter votre demande.",
   "friendTypeName": "ami",
   "shareInviteCodeMessage": "Ajoutez-moi sur Timing avec mon code : {code}",
   "groupInvitesTitle": "Invitations de groupe ({count})",
@@ -1635,7 +1664,7 @@
   "groupInvitationsSentEmptyDescription": "Les invitations que vous envoyez pour rejoindre un groupe apparaissent ici.",
   "swipeHintDismissLabel": "Compris",
   "dailyGoalSwipeHintTitle": "Gestes de l’objectif",
-  "dailyGoalSwipeHintMessage": "Faites glisser un objectif vers la gauche pour le modifier ou le supprimer, ou vers la droite pour effacer seulement votre progression. Certaines actions peuvent être bloquées pour les objectifs de groupe.",
+  "dailyGoalSwipeHintMessage": "Faites glisser un objectif vers la gauche pour le modifier ou le supprimer. Certaines actions peuvent être bloquées pour les objectifs de groupe.",
   "clearDataButtonLabel": "Effacer les données",
   "clearDataDialogTitle": "Effacer les données ?",
   "clearActivityDataMessage": "Toute votre progression dans « {name} » sera effacée : temps, pages et historique. L’activité reste, mais repart de zéro. Cette action est irréversible.",
@@ -1725,6 +1754,9 @@
   "offlineChangesQueuedMessage": "Vous êtes hors ligne. Cela sera enregistré dès que vous serez reconnecté(e).",
   "offlineSyncCompletedMessage": "Vos modifications enregistrées ont bien été synchronisées.",
   "offlineSessionExpiredMessage": "Vous êtes hors ligne depuis un moment. Connectez-vous à internet pour vous reconnecter.",
+  "errorOfflineMessage": "Pas de connexion. Vérifiez votre accès à internet et réessayez.",
+  "errorSignedOutMessage": "Votre session a expiré. Reconnectez-vous pour continuer.",
+  "errorRejectedMessage": "Cette action n'a pas pu être effectuée. Vérifiez les informations et réessayez.",
   "editGroupInformationDescription": "Définissez un nom et une description pour le groupe.",
   "editGroupActivityOverview": "Configurez l’activité et l’objectif de progression.",
   "editGroupActivityDescription": "Choisissez l’activité et définissez votre objectif de progression.",
@@ -1774,5 +1806,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "addTimeRowSubtitle": "Enregistrer le temps d’aujourd’hui",
+  "removeTimeRowSubtitle": "Corriger le temps enregistré"
 }

@@ -1097,6 +1097,35 @@
   "codeCopiedMessage": "Code kopiert",
   "friendRequestSentMessage": "Anfrage gesendet",
   "joinedGroupMessage": "Du bist der Gruppe beigetreten",
+  "groupJoinRequestSentMessage": "Anfrage an die Leitung von {groupName} gesendet.",
+  "@groupJoinRequestSentMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "groupJoinRequestsTitle": "Beitrittsanfragen",
+  "groupJoinRequestsCount": "{count, plural, =0{Keine Anfragen} =1{1 Person wartet} other{{count} Personen warten}}",
+  "@groupJoinRequestsCount": {
+    "placeholders": {"count": {"type": "num", "format": "decimalPattern"}}
+  },
+  "groupJoinRequestsEmptyHint": "Wer den Gruppenlink öffnet, erscheint hier zum Annehmen.",
+  "groupJoinRequestInvitedBy": "Eingeladen von {memberName}",
+  "@groupJoinRequestInvitedBy": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestFromLink": "Über den Gruppenlink gekommen",
+  "groupJoinRequestApprovedMessage": "{memberName} ist der Gruppe beigetreten.",
+  "@groupJoinRequestApprovedMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestDeclinedMessage": "Anfrage abgelehnt.",
+  "groupShareLinkTitle": "Mit einem Link einladen",
+  "groupShareLinkDescription": "Wer den Link öffnet, fragt nach dem Beitritt, und du nimmst ihn hier an.",
+  "groupShareLinkButton": "Link teilen",
+  "groupLinkCopiedMessage": "Link kopiert",
+  "shareGroupLinkMessage": "Tritt meiner Gruppe {groupName} bei Timing bei: {link}",
+  "@shareGroupLinkMessage": {
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+  },
+  "joinGroupPendingHint": "Die Gruppenleitung muss deine Anfrage annehmen.",
   "friendTypeName": "Freund",
   "shareInviteCodeMessage": "Füge mich auf Timing mit meinem Code hinzu: {code}",
   "groupInvitesTitle": "Gruppeneinladungen ({count})",
@@ -1635,7 +1664,7 @@
   "groupInvitationsSentEmptyDescription": "Einladungen, die du zum Beitritt einer Gruppe sendest, erscheinen hier.",
   "swipeHintDismissLabel": "Verstanden",
   "dailyGoalSwipeHintTitle": "Zielgesten",
-  "dailyGoalSwipeHintMessage": "Wische ein Ziel nach links, um es zu bearbeiten oder zu löschen, oder nach rechts, um nur deinen eigenen Fortschritt zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.",
+  "dailyGoalSwipeHintMessage": "Wische ein Ziel nach links, um es zu bearbeiten oder zu löschen. Bei Gruppenzielen können einige Aktionen gesperrt sein.",
   "clearDataButtonLabel": "Daten löschen",
   "clearDataDialogTitle": "Daten löschen?",
   "clearActivityDataMessage": "Dein gesamter Fortschritt in \"{name}\" wird gelöscht: Zeit, Seiten und Verlauf. Die Aktivität bleibt, beginnt aber bei null. Das kann nicht rückgängig gemacht werden.",
@@ -1725,6 +1754,9 @@
   "offlineChangesQueuedMessage": "Du bist offline. Das wird gespeichert, sobald du wieder verbunden bist.",
   "offlineSyncCompletedMessage": "Deine gespeicherten Änderungen wurden synchronisiert.",
   "offlineSessionExpiredMessage": "Du warst eine Weile offline. Verbinde dich mit dem Internet, um dich erneut anzumelden.",
+  "errorOfflineMessage": "Keine Verbindung. Prüfe deine Internetverbindung und versuche es erneut.",
+  "errorSignedOutMessage": "Deine Sitzung ist beendet. Melde dich erneut an, um fortzufahren.",
+  "errorRejectedMessage": "Diese Aktion konnte nicht abgeschlossen werden. Prüfe die Angaben und versuche es erneut.",
   "editGroupInformationDescription": "Lege einen Namen und eine Beschreibung für die Gruppe fest.",
   "editGroupActivityOverview": "Konfiguriere die Aktivität und das Fortschrittsziel.",
   "editGroupActivityDescription": "Wähle die Aktivität und lege dein Fortschrittsziel fest.",
@@ -1774,5 +1806,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "addTimeRowSubtitle": "Zeit für heute erfassen",
+  "removeTimeRowSubtitle": "Erfasste Zeit korrigieren"
 }

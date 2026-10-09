@@ -787,6 +787,35 @@
   "codeCopiedMessage": "Código copiado",
   "friendRequestSentMessage": "Solicitação enviada",
   "joinedGroupMessage": "Você entrou no grupo",
+  "groupJoinRequestSentMessage": "Pedido enviado ao líder de {groupName}.",
+  "@groupJoinRequestSentMessage": {
+    "placeholders": {"groupName": {"type": "String"}}
+  },
+  "groupJoinRequestsTitle": "Solicitações para entrar",
+  "groupJoinRequestsCount": "{count, plural, =0{Nenhuma solicitação} =1{1 pessoa esperando} other{{count} pessoas esperando}}",
+  "@groupJoinRequestsCount": {
+    "placeholders": {"count": {"type": "num", "format": "decimalPattern"}}
+  },
+  "groupJoinRequestsEmptyHint": "Quem usar o link do grupo aparece aqui para você aceitar.",
+  "groupJoinRequestInvitedBy": "Convidado por {memberName}",
+  "@groupJoinRequestInvitedBy": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestFromLink": "Entrou pelo link do grupo",
+  "groupJoinRequestApprovedMessage": "{memberName} entrou no grupo.",
+  "@groupJoinRequestApprovedMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
+  "groupJoinRequestDeclinedMessage": "Solicitação recusada.",
+  "groupShareLinkTitle": "Convidar por link",
+  "groupShareLinkDescription": "Quem abrir o link pede para entrar e você aceita aqui.",
+  "groupShareLinkButton": "Compartilhar link",
+  "groupLinkCopiedMessage": "Link copiado",
+  "shareGroupLinkMessage": "Entre no meu grupo {groupName} no Timing: {link}",
+  "@shareGroupLinkMessage": {
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+  },
+  "joinGroupPendingHint": "O líder do grupo precisa aceitar o seu pedido.",
   "friendTypeName": "amigo",
   "shareInviteCodeMessage": "Me adicione no Timing com meu código: {code}",
   "groupInvitesTitle": "Convites de grupo ({count})",
@@ -1325,7 +1354,7 @@
   "groupInvitationsSentEmptyDescription": "Os convites que você enviar para alguém entrar em um grupo aparecem aqui.",
   "swipeHintDismissLabel": "Entendi",
   "dailyGoalSwipeHintTitle": "Gestos da meta",
-  "dailyGoalSwipeHintMessage": "Arraste uma meta para a esquerda para editar ou apagar, e para a direita para apagar só o seu progresso. Metas de grupo podem ter algumas ações bloqueadas.",
+  "dailyGoalSwipeHintMessage": "Arraste uma meta para a esquerda para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.",
   "clearDataButtonLabel": "Apagar dados",
   "clearDataDialogTitle": "Apagar dados?",
   "clearActivityDataMessage": "Todo o seu progresso em \"{name}\" será apagado: tempo, páginas e histórico. A atividade continua, mas volta do zero. Esta ação não poderá ser desfeita.",
@@ -1415,6 +1444,9 @@
   "offlineChangesQueuedMessage": "Você está offline. Isso será salvo assim que você se reconectar.",
   "offlineSyncCompletedMessage": "Dados salvos e sincronizados com sucesso.",
   "offlineSessionExpiredMessage": "Você ficou offline por um tempo. Conecte-se à internet para entrar novamente.",
+  "errorOfflineMessage": "Sem conexão. Verifique sua internet e tente novamente.",
+  "errorSignedOutMessage": "Sua sessão terminou. Entre novamente para continuar.",
+  "errorRejectedMessage": "Não foi possível concluir esta ação. Confira os dados e tente novamente.",
   "editGroupInformationDescription": "Defina um nome e uma descrição para o grupo.",
   "editGroupActivityOverview": "Configure a atividade e a meta de progresso.",
   "editGroupActivityDescription": "Escolha a atividade e defina sua meta de progresso.",
@@ -1464,5 +1496,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "addTimeRowSubtitle": "Registrar tempo de hoje",
+  "removeTimeRowSubtitle": "Corrigir o tempo registrado"
 }

@@ -1885,6 +1885,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get joinedGroupMessage => '?????? ??? ????????';
 
   @override
+  String groupJoinRequestSentMessage(String groupName) {
+    return 'تم إرسال الطلب إلى قائد $groupName.';
+  }
+
+  @override
+  String get groupJoinRequestsTitle => 'طلبات الانضمام';
+
+  @override
+  String groupJoinRequestsCount(num count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString أشخاص في الانتظار',
+      one: 'شخص واحد في الانتظار',
+      zero: 'لا توجد طلبات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupJoinRequestsEmptyHint =>
+      'كل من يفتح رابط المجموعة يظهر هنا لتقبله.';
+
+  @override
+  String groupJoinRequestInvitedBy(String memberName) {
+    return 'دعاه $memberName';
+  }
+
+  @override
+  String get groupJoinRequestFromLink => 'وصل عبر رابط المجموعة';
+
+  @override
+  String groupJoinRequestApprovedMessage(String memberName) {
+    return 'انضم $memberName إلى المجموعة.';
+  }
+
+  @override
+  String get groupJoinRequestDeclinedMessage => 'تم رفض الطلب.';
+
+  @override
+  String get groupShareLinkTitle => 'الدعوة برابط';
+
+  @override
+  String get groupShareLinkDescription =>
+      'من يفتح الرابط يطلب الانضمام وتقبله أنت هنا.';
+
+  @override
+  String get groupShareLinkButton => 'مشاركة الرابط';
+
+  @override
+  String get groupLinkCopiedMessage => 'تم نسخ الرابط';
+
+  @override
+  String shareGroupLinkMessage(String groupName, String link) {
+    return 'انضم إلى مجموعتي $groupName على Timing: $link';
+  }
+
+  @override
+  String get joinGroupPendingHint => 'على قائد المجموعة قبول طلبك.';
+
+  @override
   String get friendTypeName => '????';
 
   @override
@@ -3098,7 +3163,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'اسحب الهدف إلى اليسار لتعديله أو حذفه، أو إلى اليمين لحذف تقدمك أنت فقط. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.';
+      'اسحب الهدف إلى اليسار لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.';
 
   @override
   String get clearDataButtonLabel => 'حذف البيانات';
@@ -3401,6 +3466,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'لقد كنت غير متصل لفترة. اتصل بالإنترنت لتسجيل الدخول مرة أخرى.';
 
   @override
+  String get errorOfflineMessage =>
+      'لا يوجد اتصال. تحقق من الإنترنت وحاول مرة أخرى.';
+
+  @override
+  String get errorSignedOutMessage =>
+      'انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة.';
+
+  @override
+  String get errorRejectedMessage =>
+      'تعذّر إكمال هذا الإجراء. تحقق من البيانات وحاول مرة أخرى.';
+
+  @override
   String get editGroupInformationDescription => 'حدد اسمًا ووصفًا للمجموعة.';
 
   @override
@@ -3528,4 +3605,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get googleCalendarActions => 'خيارات Google Calendar';
+
+  @override
+  String get addTimeRowSubtitle => 'تسجيل وقت اليوم';
+
+  @override
+  String get removeTimeRowSubtitle => 'تصحيح الوقت المسجل';
 }
