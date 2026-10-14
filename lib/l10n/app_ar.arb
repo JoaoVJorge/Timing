@@ -1150,6 +1150,13 @@
     "placeholders": {"memberName": {"type": "String"}}
   },
   "groupJoinRequestDeclinedMessage": "تم رفض الطلب.",
+  "groupJoinRequestWaitingForLeader": "في انتظار موافقة قائد المجموعة.",
+  "groupJoinRequestAwaitingYourApproval": "في انتظار موافقتك",
+  "groupJoinRequestApproveConfirmTitle": "قبول الطلب",
+  "groupJoinRequestApproveConfirmMessage": "هل تسمح لـ {memberName} بالانضمام إلى المجموعة؟",
+  "@groupJoinRequestApproveConfirmMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
   "groupShareLinkTitle": "الدعوة برابط",
   "groupShareLinkDescription": "من يفتح الرابط يطلب الانضمام وتقبله أنت هنا.",
   "groupShareLinkButton": "مشاركة الرابط",

@@ -2064,18 +2064,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get groupJoinRequestWaitingForLeader =>
-      'Waiting for the leader\'s approval.';
+      'Wartet auf die Zustimmung der Leitung.';
 
   @override
   String get groupJoinRequestAwaitingYourApproval =>
-      'Waiting for your approval';
+      'Wartet auf deine Zustimmung';
 
   @override
-  String get groupJoinRequestApproveConfirmTitle => 'Approve request';
+  String get groupJoinRequestApproveConfirmTitle => 'Anfrage annehmen';
 
   @override
   String groupJoinRequestApproveConfirmMessage(String memberName) {
-    return 'Let $memberName join the group?';
+    return '$memberName der Gruppe beitreten lassen?';
   }
 
   @override

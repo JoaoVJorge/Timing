@@ -2024,18 +2024,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get groupJoinRequestWaitingForLeader =>
-      'Waiting for the leader\'s approval.';
+      'في انتظار موافقة قائد المجموعة.';
 
   @override
-  String get groupJoinRequestAwaitingYourApproval =>
-      'Waiting for your approval';
+  String get groupJoinRequestAwaitingYourApproval => 'في انتظار موافقتك';
 
   @override
-  String get groupJoinRequestApproveConfirmTitle => 'Approve request';
+  String get groupJoinRequestApproveConfirmTitle => 'قبول الطلب';
 
   @override
   String groupJoinRequestApproveConfirmMessage(String memberName) {
-    return 'Let $memberName join the group?';
+    return 'هل تسمح لـ $memberName بالانضمام إلى المجموعة؟';
   }
 
   @override

@@ -1150,6 +1150,13 @@
     "placeholders": {"memberName": {"type": "String"}}
   },
   "groupJoinRequestDeclinedMessage": "Demande refusée.",
+  "groupJoinRequestWaitingForLeader": "En attente de l'approbation du chef.",
+  "groupJoinRequestAwaitingYourApproval": "En attente de votre approbation",
+  "groupJoinRequestApproveConfirmTitle": "Approuver la demande",
+  "groupJoinRequestApproveConfirmMessage": "Laisser {memberName} rejoindre le groupe ?",
+  "@groupJoinRequestApproveConfirmMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
   "groupShareLinkTitle": "Inviter avec un lien",
   "groupShareLinkDescription": "Celui qui ouvre le lien demande à entrer et vous l'acceptez ici.",
   "groupShareLinkButton": "Partager le lien",
