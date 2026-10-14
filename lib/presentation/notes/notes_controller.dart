@@ -4,6 +4,7 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/use_cases/update_subject_notes_use_case.dart";
+import "package:timing/presentation/notes/notes_page_search.dart";
 import "package:timing/presentation/notes/notes_pages_codec.dart";
 import "package:timing/presentation/notes/notes_rich_text_codec.dart";
 
@@ -47,6 +48,13 @@ class NotesController extends GetxController {
   bool _isClosing = false;
 
   int get pageCount => notesControllers.length;
+
+  /// Every page as the page search reads it, taken when the sheet opens: the
+  /// editor is covered by then, so the documents cannot change underneath it.
+  List<NotesPageSummary> get pageSummaries => [
+    for (int index = 0; index < pageCount; index++)
+      NotesPageSummary.of(index, notesControllers[index].document),
+  ];
 
   QuillController get activeNotesController =>
       notesControllers[currentPageIndex.value];
@@ -136,6 +144,17 @@ class NotesController extends GetxController {
       return;
     }
     _goToPage(currentPageIndex.value + 1);
+  }
+
+  /// Jumps straight to [index], as the page search sheet does. A page left
+  /// blank survives the jump and is dropped when the notebook is saved, which
+  /// is how swiping away from it already behaves.
+  void goToPage(int index) {
+    if (index < 0 || index >= pageCount || index == currentPageIndex.value) {
+      return;
+    }
+    focusNodes[currentPageIndex.value].unfocus();
+    _goToPage(index);
   }
 
   void addPage() {

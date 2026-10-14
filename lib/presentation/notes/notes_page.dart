@@ -2,11 +2,14 @@ import "dart:math" as math;
 
 import "package:flutter/material.dart";
 import "package:flutter_quill/flutter_quill.dart";
+import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/notes/notes_controller.dart";
+import "package:timing/presentation/notes/notes_pages_sheet.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
+import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/subject_colors.dart";
 
 class NotesPage extends StatelessWidget {
@@ -225,6 +228,8 @@ class NotesPage extends StatelessWidget {
                             pageCount: controller.pageCount,
                             onPrevious: controller.previousPage,
                             onNext: controller.nextPage,
+                            onOpenPages: () =>
+                                showNotesPagesSheet(context, controller),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -518,12 +523,16 @@ class _PageControls extends StatelessWidget {
     required this.pageCount,
     required this.onPrevious,
     required this.onNext,
+    required this.onOpenPages,
   });
 
   final int currentPage;
   final int pageCount;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+
+  /// Opens the page list, where a page is searched for instead of swiped to.
+  final VoidCallback onOpenPages;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -545,13 +554,41 @@ class _PageControls extends StatelessWidget {
           onTap: currentPage > 1 ? onPrevious : null,
         ),
         Expanded(
-          child: Semantics(
-            label: context.l10n.notesPageCounter(currentPage, pageCount),
-            child: Text(
-              "$currentPage / $pageCount",
-              textAlign: TextAlign.center,
-              style: context.textStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w700,
+          child: Tooltip(
+            message: context.l10n.notesSearchTitle,
+            child: BounceTap(
+              key: const ValueKey("notes-page-picker"),
+              onTap: onOpenPages,
+              pressedScale: 0.96,
+              behavior: HitTestBehavior.opaque,
+              child: Semantics(
+                button: true,
+                label: context.l10n.notesPageCounter(currentPage, pageCount),
+                child: SizedBox(
+                  height: 48,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          "$currentPage / $pageCount",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: context.textStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const Gap(6),
+                      Icon(
+                        Icons.search_rounded,
+                        size: 18,
+                        color: context.colorTokens.textHint,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
