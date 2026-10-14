@@ -135,11 +135,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get targetDaysHint => 'Objetivo personalizado';
 
   @override
-  String taskDaysProgress(int completed, int target) {
-    return '$completed/$target días';
-  }
-
-  @override
   String get taskCompletedLabel => '¡Completada!';
 
   @override
@@ -459,6 +454,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get removeHighlightTooltip => 'Quitar resaltado';
+
+  @override
+  String get notesSearchTitle => 'Filtros y búsqueda';
+
+  @override
+  String get notesSearchHint => 'Buscar en las páginas';
+
+  @override
+  String get notesSearchClearTooltip => 'Limpiar búsqueda';
+
+  @override
+  String get notesSearchNoResults => 'No se encontraron páginas';
+
+  @override
+  String get notesPagesFilterAll => 'Todas';
+
+  @override
+  String get notesPagesFilterWithText => 'Con texto';
+
+  @override
+  String get notesPagesFilterHighlighted => 'Destacadas';
+
+  @override
+  String get notesPagesFilterEmpty => 'Vacías';
+
+  @override
+  String notesPageNumberLabel(int page) {
+    return 'Página $page';
+  }
+
+  @override
+  String notesPageWordCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count palabras',
+      one: '1 palabra',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notesEmptyPageLabel => 'Página vacía';
 
   @override
   String durationProgress(String duration, String goalDuration) {
@@ -1170,7 +1208,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get faqA6 =>
-      'En las estadísticas de la actividad, usa Borrar datos: tiempo, páginas e historial vuelven a cero y la actividad se queda. Si pertenece a un grupo, tu progreso también sale de esa clasificación, y esto no se puede deshacer.';
+      'En las estadísticas de la actividad, usa Borrar datos: tiempo, páginas e historial vuelven a cero y la actividad se queda. Si está vinculada a un grupo, tu progreso también sale de esa clasificación, y esto no se puede deshacer.';
 
   @override
   String get faqQ7 => '¿Cómo funcionan las metas diarias y la racha?';
@@ -1191,7 +1229,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get faqA9 =>
-      'El tema del grupo define la métrica: horas de estudio, horas de ejercicio, horas de hobby, páginas leídas o días de metas completadas. Solo cuenta ese tipo de progreso, y puedes alternar entre Hoy, Semana y Mes.';
+      'El tema del grupo define la métrica: horas de estudio, horas de ejercicio, horas de hobby, páginas leídas o días de metas completadas. Solo cuenta lo que registras en las actividades que vinculaste al grupo, y puedes alternar entre Hoy, Semana y Mes.';
 
   @override
   String get faqQ10 => '¿Cómo invito a alguien al grupo?';
@@ -2009,6 +2047,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupJoinRequestDeclinedMessage => 'Solicitud rechazada.';
 
   @override
+  String get groupJoinRequestWaitingForLeader =>
+      'Waiting for the leader\'s approval.';
+
+  @override
+  String get groupJoinRequestAwaitingYourApproval =>
+      'Waiting for your approval';
+
+  @override
+  String get groupJoinRequestApproveConfirmTitle => 'Approve request';
+
+  @override
+  String groupJoinRequestApproveConfirmMessage(String memberName) {
+    return 'Let $memberName join the group?';
+  }
+
+  @override
   String get groupShareLinkTitle => 'Invitar con un enlace';
 
   @override
@@ -2022,8 +2076,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupLinkCopiedMessage => 'Enlace copiado';
 
   @override
-  String shareGroupLinkMessage(String groupName, String link) {
-    return 'Entra en mi grupo $groupName en Timing: $link';
+  String shareGroupLinkMessage(String groupName, String link, String code) {
+    return 'Entra en mi grupo $groupName en Timing con el código:\n$code\n\nAbrir en la app: $link';
   }
 
   @override
@@ -2034,8 +2088,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get friendTypeName => 'amigo';
 
   @override
-  String shareInviteCodeMessage(String code) {
-    return 'Agrégame en Timing con mi código: $code';
+  String shareInviteCodeMessage(String code, String link) {
+    return 'Agrégame en Timing con mi código:\n$code\n\nAbrir en la app: $link';
   }
 
   @override
@@ -2275,13 +2329,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupActionsLabel => 'Acciones del grupo';
 
   @override
-  String get goalsTabLabel => 'Datos';
-
-  @override
   String get chatTabLabel => 'Chat';
-
-  @override
-  String get groupGoalTitle => 'Meta del grupo';
 
   @override
   String get groupMainRuleTitle => 'Regla principal';
@@ -2297,36 +2345,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get groupNextMilestoneDescription =>
       'para desbloquear la insignia \"Enfoque Total\"';
-
-  @override
-  String get groupActivityLabel => 'Actividad del grupo';
-
-  @override
-  String groupActivityReachedGoal(int reached, int total) {
-    return '$reached/$total alcanzaron la meta';
-  }
-
-  @override
-  String get groupActivityFocusDataLabel => 'Enfoque';
-
-  @override
-  String get groupActivityPauseDataLabel => 'Pausa';
-
-  @override
-  String get groupActivitySessionsDataLabel => 'Sesiones';
-
-  @override
-  String get groupGoalTargetDataLabel => 'Duración objetivo';
-
-  @override
-  String get groupGoalCurrentDayDataLabel => 'Día de la meta';
-
-  @override
-  String get groupActivityPendingUsersTitle => 'Usuarios pendientes';
-
-  @override
-  String get groupActivityAllCompletedToday =>
-      'Todos completaron la actividad hoy.';
 
   @override
   String get groupNoImagesTitle => 'Aún no hay imágenes';
@@ -2354,16 +2372,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String groupsFriendsSubtitleWithCount(int groupCount) {
     return 'Solicitudes, invitaciones y $groupCount en grupos';
-  }
-
-  @override
-  String groupGoalKeepMetric(String metric) {
-    return 'Mantener $metric todos los días';
-  }
-
-  @override
-  String groupGoalDescription(String metric) {
-    return 'Cada participante registra $metric para mantener activa la racha del grupo.';
   }
 
   @override
@@ -2400,17 +2408,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupCollectiveProgressTitle => 'Progreso colectivo';
 
   @override
-  String get dailyLabel => 'Diaria';
-
-  @override
-  String get completedLabel => 'Completado';
-
-  @override
-  String groupActivityCompletedCount(int completed, int total) {
-    return '$completed de $total completaron';
-  }
-
-  @override
   String groupMissingParticipants(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2421,55 +2418,6 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String groupParticipantsDataTitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Participantes ($count)',
-      one: 'Participantes (1)',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String groupCompletedMembersTitle(int count) {
-    return 'Completaron ($count)';
-  }
-
-  @override
-  String groupPendingMembersTitle(int count) {
-    return 'Pendientes ($count)';
-  }
-
-  @override
-  String get groupNoCompletedMembersTitle => 'Nadie completó aún';
-
-  @override
-  String get groupNoCompletedMembersSubtitle =>
-      '¡Sé el primero en completar la meta!';
-
-  @override
-  String get groupStatisticsTitle => 'Estadísticas del grupo';
-
-  @override
-  String get groupStreakStatLabel => 'Racha del grupo';
-
-  @override
-  String get groupTodayTotalStatLabel => 'Tiempo total hoy';
-
-  @override
-  String get groupPeriodTotalStatLabel => 'Total del período';
-
-  @override
-  String get groupCompletedSessionsStatLabel => 'Sesiones completadas';
-
-  @override
-  String get groupGoalReachedStatLabel => 'Alcanzaron la meta';
-
-  @override
-  String get groupParticipantsStatLabel => 'Participante en el grupo';
 
   @override
   String get currentUserRankCompleteFirstGoal =>
@@ -2516,12 +2464,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pagesReadTodayLabel => 'Páginas hoy';
-
-  @override
-  String get goalLabel => 'Meta';
-
-  @override
-  String get sessionsLabel => 'Sesiones';
 
   @override
   String get goalStartLabel => 'Inicio de la meta';
@@ -3037,6 +2979,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Disfruta tus hobbies con enfoque.';
 
   @override
+  String get createGroupAboutTitle => 'Sobre el grupo';
+
+  @override
+  String get createGroupAboutDescription => 'Cómo se muestra a tus amigos.';
+
+  @override
   String get createGroupDescriptionLabel => 'Descripción';
 
   @override
@@ -3045,41 +2993,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get createGroupThemeMetricDescription =>
-      'Este tema define la métrica del ranking.';
-
-  @override
-  String get createGroupActivityTypeDescription =>
-      'Cada integrante recibe una copia para hacer seguimiento.';
-
-  @override
-  String get createGroupActivityNameLabel => 'Nombre de la actividad';
-
-  @override
-  String get createGroupActivityNameHint => 'Ej: Cálculo I';
-
-  @override
-  String get createGroupGoalTypeLabel => 'Tipo de meta';
-
-  @override
-  String get createGroupGoalTypeTotal => 'Total';
-
-  @override
-  String get createGroupGoalTypeDaily => 'Diaria';
+      'El tema define la métrica del ranking y qué actividades puede vincular cada persona.';
 
   @override
   String get createGroupDaysGoalLabel => 'Meta de días';
-
-  @override
-  String get createGroupPagesGoalLabel => 'Meta de páginas';
 
   @override
   String get createGroupTimeGoalMinutesLabel => 'Meta de tiempo (min)';
 
   @override
   String get createGroupSummaryTitle => 'Resumen del grupo';
-
-  @override
-  String get createGroupActivitySummaryLabel => 'Actividad';
 
   @override
   String get createGroupGuestsLabel => 'Invitados';
@@ -3091,10 +3014,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get timerEndActionLabel => 'Finalizar';
 
   @override
-  String get createGroupActivityStepSubtitle =>
-      'Elige la actividad que todos en el grupo harán.';
-
-  @override
   String get createGroupFriendsStepSubtitle =>
       'Invita al menos a 1 amigo para participar.';
 
@@ -3104,9 +3023,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get createGroupStepInformation => 'Información';
-
-  @override
-  String get createGroupStepActivity => 'Actividad';
 
   @override
   String get createGroupStepFriends => 'Amigos';
@@ -3132,39 +3048,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get createGroupContinueButton => 'Continuar';
-
-  @override
-  String get createGroupActivitySummaryDaily => 'Meta diaria';
-
-  @override
-  String createGroupActivitySummaryGoalDays(String days) {
-    return 'Meta • $days días';
-  }
-
-  @override
-  String createGroupActivitySummaryReading(String pages) {
-    return 'Lectura • $pages páginas';
-  }
-
-  @override
-  String createGroupActivitySummaryTime(String category, String minutes) {
-    return '$category • $minutes min';
-  }
-
-  @override
-  String get createGroupActivityRequiredError =>
-      'Elige una actividad para el grupo.';
-
-  @override
-  String get createGroupActivityNameRequiredError =>
-      'Dale un nombre a la actividad.';
-
-  @override
-  String get createGroupActivityGoalInvalidError => 'Define una meta válida.';
-
-  @override
-  String get createGroupActivityMissingError =>
-      'Define la actividad del grupo.';
 
   @override
   String get timerBackTooltip => 'Volver';
@@ -3253,7 +3136,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dailyGoalSwipeHintMessage =>
-      'Desliza una meta a la izquierda para editarla o eliminarla. Algunas acciones pueden estar bloqueadas para metas de grupo.';
+      'Desliza una meta a la izquierda para editarla o eliminarla.';
 
   @override
   String get clearDataButtonLabel => 'Borrar datos';
@@ -3270,10 +3153,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String clearGoalDataMessage(String name) {
     return 'Se borrarán todos los días que marcaste en \"$name\" y la meta vuelve a cero. Esta acción no se puede deshacer.';
   }
-
-  @override
-  String get clearDataGroupNote =>
-      'Como forma parte de un grupo, tu progreso individual también sale del ranking. Sigues en el grupo.';
 
   @override
   String get clearDataSuccessMessage => 'Datos borrados.';
@@ -3309,23 +3188,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get activitySwipeHintMessage =>
-      'Desliza una actividad para ver notas, datos, editarla o eliminarla. Algunas acciones pueden estar bloqueadas para elementos de grupo.';
-
-  @override
-  String get groupGoalEditBlockedMessage =>
-      'Esta meta pertenece a un grupo. Edítala desde el grupo para cambiarla.';
-
-  @override
-  String get groupGoalDeleteBlockedMessage =>
-      'Esta meta pertenece a un grupo. Sal del grupo para eliminarla.';
-
-  @override
-  String get groupActivityEditBlockedMessage =>
-      'Esta actividad pertenece a un grupo. Edítala desde el grupo para cambiarla.';
-
-  @override
-  String get groupActivityDeleteBlockedMessage =>
-      'Esta actividad pertenece a un grupo. Sal del grupo para eliminarla.';
+      'Desliza una actividad para ver notas, datos, editarla o eliminarla.';
 
   @override
   String get groupUpdatedSuccess => 'Grupo actualizado correctamente';
@@ -3405,9 +3268,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get editGroupInfoSection => 'Información del grupo';
-
-  @override
-  String get createGroupFocusGoalLabel => 'Meta de concentración';
 
   @override
   String get connectedAccountsSection => 'Cuentas conectadas';
@@ -3495,23 +3355,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resetGroupLabel => 'Reiniciar grupo';
 
   @override
-  String get resetGroupConfirmTitle => '¿Reiniciar el progreso del grupo?';
+  String get resetGroupConfirmTitle => '¿Reiniciar la clasificación del grupo?';
 
   @override
   String resetGroupConfirmMessage(String groupName) {
-    return 'Esto reinicia el progreso compartido y la clasificación de $groupName. Se conservará el historial personal de actividad de cada miembro.';
+    return 'Esto reinicia la clasificación de $groupName. Se conservará el historial personal de actividad de cada miembro.';
   }
 
   @override
   String get resetGroupConfirmButton => 'Reiniciar';
 
   @override
-  String get resetGroupClearOwnHistoryLabel =>
-      'También borrar mi historial personal de esta meta';
-
-  @override
-  String get groupResetSuccess =>
-      'Se reiniciaron el progreso y la clasificación del grupo.';
+  String get groupResetSuccess => 'Se reinició la clasificación del grupo.';
 
   @override
   String get ownerOnlyGroupActionError =>
@@ -3578,26 +3433,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Define un nombre y una descripción para el grupo.';
 
   @override
-  String get editGroupActivityOverview =>
-      'Configura la actividad y la meta de progreso.';
-
-  @override
-  String get editGroupActivityDescription =>
-      'Elige la actividad y define tu meta de progreso.';
-
-  @override
   String get editGroupInformationTip =>
       '¡Un nombre y una descripción claros ayudan a mantener al grupo motivado!';
 
   @override
-  String get editGroupActivityTip =>
-      '¡Define una meta realista para mantener la constancia!';
-
-  @override
   String get editGroupMoreOptions => 'Más opciones';
-
-  @override
-  String get editGroupSaveContinue => 'Guardar y continuar';
 
   @override
   String get editGroupTipLabel => 'Consejo';
@@ -3616,16 +3456,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signInProgressPreparingHome => 'Preparando todo para ti...';
 
   @override
-  String get groupLinksTitle => 'Mis actividades vinculadas';
+  String get groupLinksTitle => 'Actividades vinculadas';
 
   @override
-  String get groupLinksUseExisting => 'Usar mis actividades';
-
-  @override
-  String get groupLinksCreateNew => 'Crear actividad';
-
-  @override
-  String get groupLinksEmpty => 'No hay actividades compatibles.';
+  String get groupLinksEmpty =>
+      'Todavía no tienes actividades de este tema. Crea una en la pantalla de inicio y vuelve para vincularla.';
 
   @override
   String groupLinksSelected(int count) {
@@ -3644,13 +3479,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Solo cuentan los nuevos registros desde la vinculación. Se conservan tu historial y tus metas personales. Desmarcar detiene nuevas contribuciones; sin selección, tu participación queda pausada.';
 
   @override
-  String get groupLinksReadingHint =>
-      'Si el grupo sigue un libro específico, selecciona solo actividades de ese libro.';
-
-  @override
-  String get groupLinksSelectRequired => 'Selecciona al menos una actividad.';
-
-  @override
   String get groupLinksSyncError =>
       'No se pudieron cargar o sincronizar tus actividades. Revisa la conexión e inténtalo de nuevo.';
 
@@ -3665,7 +3493,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupLinksSave => 'Guardar vínculos';
 
   @override
-  String get groupLinksSharedTarget => 'Actividad y meta del grupo';
+  String get groupLinksEmptyGoals =>
+      'Todavía no tienes metas. Crea una y vuelve para vincularla.';
+
+  @override
+  String groupLinksSelectedGoal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '1 meta seleccionada.',
+      zero: 'Ninguna meta seleccionada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupLinksHintStudying =>
+      'Elige cuáles de tus actividades de estudio cuentan para este grupo.';
+
+  @override
+  String get groupLinksHintExercises =>
+      'Elige cuáles de tus actividades de ejercicio cuentan para este grupo.';
+
+  @override
+  String get groupLinksHintReading =>
+      'Elige cuáles de tus lecturas cuentan para este grupo.';
+
+  @override
+  String get groupLinksHintHobbies =>
+      'Elige cuáles de tus hobbies cuentan para este grupo.';
+
+  @override
+  String get groupLinksHintDailyGoals =>
+      'Elige cuál de tus metas cuenta para este grupo. Cada persona vincula solo una.';
+
+  @override
+  String get createGroupLinksOptional =>
+      'Opcional: puedes vincularlas o cambiarlas después, en el menú del grupo.';
+
+  @override
+  String get createGroupNoLinksYet => 'Ninguna por ahora';
 
   @override
   String get googleCalendarDescription =>

@@ -334,12 +334,6 @@ abstract class AppLocalizations {
   /// **'Custom target'**
   String get targetDaysHint;
 
-  /// No description provided for @taskDaysProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'{completed}/{target} days'**
-  String taskDaysProgress(int completed, int target);
-
   /// No description provided for @taskCompletedLabel.
   ///
   /// In en, this message translates to:
@@ -897,6 +891,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove highlight'**
   String get removeHighlightTooltip;
+
+  /// No description provided for @notesSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters and search'**
+  String get notesSearchTitle;
+
+  /// No description provided for @notesSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the pages'**
+  String get notesSearchHint;
+
+  /// No description provided for @notesSearchClearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get notesSearchClearTooltip;
+
+  /// No description provided for @notesSearchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No pages found'**
+  String get notesSearchNoResults;
+
+  /// No description provided for @notesPagesFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notesPagesFilterAll;
+
+  /// No description provided for @notesPagesFilterWithText.
+  ///
+  /// In en, this message translates to:
+  /// **'With text'**
+  String get notesPagesFilterWithText;
+
+  /// No description provided for @notesPagesFilterHighlighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighted'**
+  String get notesPagesFilterHighlighted;
+
+  /// No description provided for @notesPagesFilterEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get notesPagesFilterEmpty;
+
+  /// No description provided for @notesPageNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String notesPageNumberLabel(int page);
+
+  /// No description provided for @notesPageWordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 word} other{{count} words}}'**
+  String notesPageWordCount(int count);
+
+  /// No description provided for @notesEmptyPageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty page'**
+  String get notesEmptyPageLabel;
 
   /// No description provided for @durationProgress.
   ///
@@ -2167,7 +2227,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqA6.
   ///
   /// In en, this message translates to:
-  /// **'In the activity\'s statistics, use Clear data: time, pages and history go back to zero and the activity stays. If it belongs to a group, your progress leaves that group\'s ranking too, and this cannot be undone.'**
+  /// **'In the activity\'s statistics, use Clear data: time, pages and history go back to zero and the activity stays. If it is linked to a group, your progress leaves that group\'s ranking too, and this cannot be undone.'**
   String get faqA6;
 
   /// No description provided for @faqQ7.
@@ -2203,7 +2263,7 @@ abstract class AppLocalizations {
   /// No description provided for @faqA9.
   ///
   /// In en, this message translates to:
-  /// **'The group\'s theme defines the metric: study hours, exercise hours, hobby hours, pages read or completed goal days. Only that kind of progress counts, and you can switch between Today, Week and Month.'**
+  /// **'The group\'s theme defines the metric: study hours, exercise hours, hobby hours, pages read or completed goal days. Only what you record on the activities you linked to the group counts, and you can switch between Today, Week and Month.'**
   String get faqA9;
 
   /// No description provided for @faqQ10.
@@ -3586,6 +3646,30 @@ abstract class AppLocalizations {
   /// **'Request declined.'**
   String get groupJoinRequestDeclinedMessage;
 
+  /// No description provided for @groupJoinRequestWaitingForLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the leader\'s approval.'**
+  String get groupJoinRequestWaitingForLeader;
+
+  /// No description provided for @groupJoinRequestAwaitingYourApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your approval'**
+  String get groupJoinRequestAwaitingYourApproval;
+
+  /// No description provided for @groupJoinRequestApproveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve request'**
+  String get groupJoinRequestApproveConfirmTitle;
+
+  /// No description provided for @groupJoinRequestApproveConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Let {memberName} join the group?'**
+  String groupJoinRequestApproveConfirmMessage(String memberName);
+
   /// No description provided for @groupShareLinkTitle.
   ///
   /// In en, this message translates to:
@@ -3613,8 +3697,8 @@ abstract class AppLocalizations {
   /// No description provided for @shareGroupLinkMessage.
   ///
   /// In en, this message translates to:
-  /// **'Join my group {groupName} on Timing: {link}'**
-  String shareGroupLinkMessage(String groupName, String link);
+  /// **'Join my group {groupName} on Timing with the code:\n{code}\n\nOpen in the app: {link}'**
+  String shareGroupLinkMessage(String groupName, String link, String code);
 
   /// No description provided for @joinGroupPendingHint.
   ///
@@ -3631,8 +3715,8 @@ abstract class AppLocalizations {
   /// No description provided for @shareInviteCodeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Add me on Timing with my code: {code}'**
-  String shareInviteCodeMessage(String code);
+  /// **'Add me on Timing with my code:\n{code}\n\nOpen in the app: {link}'**
+  String shareInviteCodeMessage(String code, String link);
 
   /// No description provided for @groupInvitesTitle.
   ///
@@ -4048,23 +4132,11 @@ abstract class AppLocalizations {
   /// **'Group actions'**
   String get groupActionsLabel;
 
-  /// No description provided for @goalsTabLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Data'**
-  String get goalsTabLabel;
-
   /// No description provided for @chatTabLabel.
   ///
   /// In en, this message translates to:
   /// **'Chat'**
   String get chatTabLabel;
-
-  /// No description provided for @groupGoalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Group goal'**
-  String get groupGoalTitle;
 
   /// No description provided for @groupMainRuleTitle.
   ///
@@ -4089,60 +4161,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'to unlock the \"Total Focus\" badge'**
   String get groupNextMilestoneDescription;
-
-  /// No description provided for @groupActivityLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Group activity'**
-  String get groupActivityLabel;
-
-  /// No description provided for @groupActivityReachedGoal.
-  ///
-  /// In en, this message translates to:
-  /// **'{reached}/{total} reached the goal'**
-  String groupActivityReachedGoal(int reached, int total);
-
-  /// No description provided for @groupActivityFocusDataLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Focus'**
-  String get groupActivityFocusDataLabel;
-
-  /// No description provided for @groupActivityPauseDataLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Break'**
-  String get groupActivityPauseDataLabel;
-
-  /// No description provided for @groupActivitySessionsDataLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Sessions'**
-  String get groupActivitySessionsDataLabel;
-
-  /// No description provided for @groupGoalTargetDataLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Target duration'**
-  String get groupGoalTargetDataLabel;
-
-  /// No description provided for @groupGoalCurrentDayDataLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal day'**
-  String get groupGoalCurrentDayDataLabel;
-
-  /// No description provided for @groupActivityPendingUsersTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending users'**
-  String get groupActivityPendingUsersTitle;
-
-  /// No description provided for @groupActivityAllCompletedToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyone completed the activity today.'**
-  String get groupActivityAllCompletedToday;
 
   /// No description provided for @groupNoImagesTitle.
   ///
@@ -4192,18 +4210,6 @@ abstract class AppLocalizations {
   /// **'Requests, invites and {groupCount} in groups'**
   String groupsFriendsSubtitleWithCount(int groupCount);
 
-  /// No description provided for @groupGoalKeepMetric.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep {metric} every day'**
-  String groupGoalKeepMetric(String metric);
-
-  /// No description provided for @groupGoalDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Each member logs {metric} to keep the group streak active.'**
-  String groupGoalDescription(String metric);
-
   /// No description provided for @groupRuleDescription.
   ///
   /// In en, this message translates to:
@@ -4246,101 +4252,11 @@ abstract class AppLocalizations {
   /// **'Collective progress'**
   String get groupCollectiveProgressTitle;
 
-  /// No description provided for @dailyLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily'**
-  String get dailyLabel;
-
-  /// No description provided for @completedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get completedLabel;
-
-  /// No description provided for @groupActivityCompletedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{completed} of {total} completed'**
-  String groupActivityCompletedCount(int completed, int total);
-
   /// No description provided for @groupMissingParticipants.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0{Everyone completed the goal} =1{1 participant left to complete the goal} other{{count} participants left to complete the goal}}'**
   String groupMissingParticipants(int count);
-
-  /// No description provided for @groupParticipantsDataTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Participants (1)} other{Participants ({count})}}'**
-  String groupParticipantsDataTitle(int count);
-
-  /// No description provided for @groupCompletedMembersTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed ({count})'**
-  String groupCompletedMembersTitle(int count);
-
-  /// No description provided for @groupPendingMembersTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending ({count})'**
-  String groupPendingMembersTitle(int count);
-
-  /// No description provided for @groupNoCompletedMembersTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No one completed yet'**
-  String get groupNoCompletedMembersTitle;
-
-  /// No description provided for @groupNoCompletedMembersSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Be the first to complete the goal!'**
-  String get groupNoCompletedMembersSubtitle;
-
-  /// No description provided for @groupStatisticsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Group statistics'**
-  String get groupStatisticsTitle;
-
-  /// No description provided for @groupStreakStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Group streak'**
-  String get groupStreakStatLabel;
-
-  /// No description provided for @groupTodayTotalStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total time today'**
-  String get groupTodayTotalStatLabel;
-
-  /// No description provided for @groupPeriodTotalStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Period total'**
-  String get groupPeriodTotalStatLabel;
-
-  /// No description provided for @groupCompletedSessionsStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed sessions'**
-  String get groupCompletedSessionsStatLabel;
-
-  /// No description provided for @groupGoalReachedStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Reached the goal'**
-  String get groupGoalReachedStatLabel;
-
-  /// No description provided for @groupParticipantsStatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Participant in group'**
-  String get groupParticipantsStatLabel;
 
   /// No description provided for @currentUserRankCompleteFirstGoal.
   ///
@@ -4425,18 +4341,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pages today'**
   String get pagesReadTodayLabel;
-
-  /// No description provided for @goalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal'**
-  String get goalLabel;
-
-  /// No description provided for @sessionsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Sessions'**
-  String get sessionsLabel;
 
   /// No description provided for @goalStartLabel.
   ///
@@ -5434,6 +5338,18 @@ abstract class AppLocalizations {
   /// **'Enjoy your hobbies with focus.'**
   String get concentrationHobbiesSubtitle;
 
+  /// No description provided for @createGroupAboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About the group'**
+  String get createGroupAboutTitle;
+
+  /// No description provided for @createGroupAboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How it appears to your friends.'**
+  String get createGroupAboutDescription;
+
   /// No description provided for @createGroupDescriptionLabel.
   ///
   /// In en, this message translates to:
@@ -5449,56 +5365,14 @@ abstract class AppLocalizations {
   /// No description provided for @createGroupThemeMetricDescription.
   ///
   /// In en, this message translates to:
-  /// **'This theme defines the ranking metric.'**
+  /// **'The theme sets the ranking metric and which activities each person can link.'**
   String get createGroupThemeMetricDescription;
-
-  /// No description provided for @createGroupActivityTypeDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Each member gets a copy to track.'**
-  String get createGroupActivityTypeDescription;
-
-  /// No description provided for @createGroupActivityNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Activity name'**
-  String get createGroupActivityNameLabel;
-
-  /// No description provided for @createGroupActivityNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Ex: Calculus I'**
-  String get createGroupActivityNameHint;
-
-  /// No description provided for @createGroupGoalTypeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal type'**
-  String get createGroupGoalTypeLabel;
-
-  /// No description provided for @createGroupGoalTypeTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get createGroupGoalTypeTotal;
-
-  /// No description provided for @createGroupGoalTypeDaily.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily'**
-  String get createGroupGoalTypeDaily;
 
   /// No description provided for @createGroupDaysGoalLabel.
   ///
   /// In en, this message translates to:
   /// **'Days goal'**
   String get createGroupDaysGoalLabel;
-
-  /// No description provided for @createGroupPagesGoalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Pages goal'**
-  String get createGroupPagesGoalLabel;
 
   /// No description provided for @createGroupTimeGoalMinutesLabel.
   ///
@@ -5511,12 +5385,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Group summary'**
   String get createGroupSummaryTitle;
-
-  /// No description provided for @createGroupActivitySummaryLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Activity'**
-  String get createGroupActivitySummaryLabel;
 
   /// No description provided for @createGroupGuestsLabel.
   ///
@@ -5536,12 +5404,6 @@ abstract class AppLocalizations {
   /// **'End'**
   String get timerEndActionLabel;
 
-  /// No description provided for @createGroupActivityStepSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the activity everyone in the group will do.'**
-  String get createGroupActivityStepSubtitle;
-
   /// No description provided for @createGroupFriendsStepSubtitle.
   ///
   /// In en, this message translates to:
@@ -5559,12 +5421,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Information'**
   String get createGroupStepInformation;
-
-  /// No description provided for @createGroupStepActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'Activity'**
-  String get createGroupStepActivity;
 
   /// No description provided for @createGroupStepFriends.
   ///
@@ -5613,54 +5469,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get createGroupContinueButton;
-
-  /// No description provided for @createGroupActivitySummaryDaily.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily goal'**
-  String get createGroupActivitySummaryDaily;
-
-  /// No description provided for @createGroupActivitySummaryGoalDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Goal • {days} days'**
-  String createGroupActivitySummaryGoalDays(String days);
-
-  /// No description provided for @createGroupActivitySummaryReading.
-  ///
-  /// In en, this message translates to:
-  /// **'Reading • {pages} pages'**
-  String createGroupActivitySummaryReading(String pages);
-
-  /// No description provided for @createGroupActivitySummaryTime.
-  ///
-  /// In en, this message translates to:
-  /// **'{category} • {minutes} min'**
-  String createGroupActivitySummaryTime(String category, String minutes);
-
-  /// No description provided for @createGroupActivityRequiredError.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose an activity for the group.'**
-  String get createGroupActivityRequiredError;
-
-  /// No description provided for @createGroupActivityNameRequiredError.
-  ///
-  /// In en, this message translates to:
-  /// **'Give the activity a name.'**
-  String get createGroupActivityNameRequiredError;
-
-  /// No description provided for @createGroupActivityGoalInvalidError.
-  ///
-  /// In en, this message translates to:
-  /// **'Set a valid goal.'**
-  String get createGroupActivityGoalInvalidError;
-
-  /// No description provided for @createGroupActivityMissingError.
-  ///
-  /// In en, this message translates to:
-  /// **'Define the group\'s activity.'**
-  String get createGroupActivityMissingError;
 
   /// No description provided for @timerBackTooltip.
   ///
@@ -5797,7 +5605,7 @@ abstract class AppLocalizations {
   /// No description provided for @dailyGoalSwipeHintMessage.
   ///
   /// In en, this message translates to:
-  /// **'Swipe a goal left to edit or delete it. Some actions may be unavailable for group goals.'**
+  /// **'Swipe a goal left to edit or delete it.'**
   String get dailyGoalSwipeHintMessage;
 
   /// No description provided for @clearDataButtonLabel.
@@ -5823,12 +5631,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every day you marked in \"{name}\" will be deleted and the goal starts over from zero. This cannot be undone.'**
   String clearGoalDataMessage(String name);
-
-  /// No description provided for @clearDataGroupNote.
-  ///
-  /// In en, this message translates to:
-  /// **'It belongs to a group, so your individual progress also leaves the group ranking. You stay in the group.'**
-  String get clearDataGroupNote;
 
   /// No description provided for @clearDataSuccessMessage.
   ///
@@ -5893,32 +5695,8 @@ abstract class AppLocalizations {
   /// No description provided for @activitySwipeHintMessage.
   ///
   /// In en, this message translates to:
-  /// **'Swipe an activity to see notes, stats, edit or delete it. Some actions may be unavailable for group items.'**
+  /// **'Swipe an activity to see notes, stats, edit or delete it.'**
   String get activitySwipeHintMessage;
-
-  /// No description provided for @groupGoalEditBlockedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This goal belongs to a group. Edit it from the group to make changes.'**
-  String get groupGoalEditBlockedMessage;
-
-  /// No description provided for @groupGoalDeleteBlockedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This goal belongs to a group. Leave the group to remove it.'**
-  String get groupGoalDeleteBlockedMessage;
-
-  /// No description provided for @groupActivityEditBlockedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This activity belongs to a group. Edit it from the group to make changes.'**
-  String get groupActivityEditBlockedMessage;
-
-  /// No description provided for @groupActivityDeleteBlockedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This activity belongs to a group. Leave the group to remove it.'**
-  String get groupActivityDeleteBlockedMessage;
 
   /// No description provided for @groupUpdatedSuccess.
   ///
@@ -6057,12 +5835,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Group information'**
   String get editGroupInfoSection;
-
-  /// No description provided for @createGroupFocusGoalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Focus goal'**
-  String get createGroupFocusGoalLabel;
 
   /// No description provided for @connectedAccountsSection.
   ///
@@ -6205,13 +5977,13 @@ abstract class AppLocalizations {
   /// No description provided for @resetGroupConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reset group progress?'**
+  /// **'Reset group ranking?'**
   String get resetGroupConfirmTitle;
 
   /// No description provided for @resetGroupConfirmMessage.
   ///
   /// In en, this message translates to:
-  /// **'This resets the shared progress and ranking in {groupName}. Each member\'s personal activity history will be kept.'**
+  /// **'This resets the ranking in {groupName}. Each member\'s personal activity history will be kept.'**
   String resetGroupConfirmMessage(String groupName);
 
   /// No description provided for @resetGroupConfirmButton.
@@ -6220,16 +5992,10 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get resetGroupConfirmButton;
 
-  /// No description provided for @resetGroupClearOwnHistoryLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Also clear my personal history for this goal'**
-  String get resetGroupClearOwnHistoryLabel;
-
   /// No description provided for @groupResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'The group\'s progress and ranking were reset.'**
+  /// **'The group\'s ranking was reset.'**
   String get groupResetSuccess;
 
   /// No description provided for @ownerOnlyGroupActionError.
@@ -6340,41 +6106,17 @@ abstract class AppLocalizations {
   /// **'Set a name and description for the group.'**
   String get editGroupInformationDescription;
 
-  /// No description provided for @editGroupActivityOverview.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure the activity and progress goal.'**
-  String get editGroupActivityOverview;
-
-  /// No description provided for @editGroupActivityDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the activity and set your progress goal.'**
-  String get editGroupActivityDescription;
-
   /// No description provided for @editGroupInformationTip.
   ///
   /// In en, this message translates to:
   /// **'A clear name and description help keep the group motivated!'**
   String get editGroupInformationTip;
 
-  /// No description provided for @editGroupActivityTip.
-  ///
-  /// In en, this message translates to:
-  /// **'Set a realistic goal to stay consistent!'**
-  String get editGroupActivityTip;
-
   /// No description provided for @editGroupMoreOptions.
   ///
   /// In en, this message translates to:
   /// **'More options'**
   String get editGroupMoreOptions;
-
-  /// No description provided for @editGroupSaveContinue.
-  ///
-  /// In en, this message translates to:
-  /// **'Save and continue'**
-  String get editGroupSaveContinue;
 
   /// No description provided for @editGroupTipLabel.
   ///
@@ -6409,25 +6151,13 @@ abstract class AppLocalizations {
   /// No description provided for @groupLinksTitle.
   ///
   /// In en, this message translates to:
-  /// **'My linked activities'**
+  /// **'Linked activities'**
   String get groupLinksTitle;
-
-  /// No description provided for @groupLinksUseExisting.
-  ///
-  /// In en, this message translates to:
-  /// **'Use my activities'**
-  String get groupLinksUseExisting;
-
-  /// No description provided for @groupLinksCreateNew.
-  ///
-  /// In en, this message translates to:
-  /// **'Create activity'**
-  String get groupLinksCreateNew;
 
   /// No description provided for @groupLinksEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No compatible activities available.'**
+  /// **'You have no activities of this theme yet. Create one on the home screen, then come back to link it.'**
   String get groupLinksEmpty;
 
   /// No description provided for @groupLinksSelected.
@@ -6441,18 +6171,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only new records count from the time you link. Your personal history and goals are preserved. Deselecting stops new contributions; selecting none pauses your participation.'**
   String get groupLinksExplanation;
-
-  /// No description provided for @groupLinksReadingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'If the group tracks a specific book, select only activities for that book.'**
-  String get groupLinksReadingHint;
-
-  /// No description provided for @groupLinksSelectRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Select at least one activity.'**
-  String get groupLinksSelectRequired;
 
   /// No description provided for @groupLinksSyncError.
   ///
@@ -6478,11 +6196,59 @@ abstract class AppLocalizations {
   /// **'Save links'**
   String get groupLinksSave;
 
-  /// No description provided for @groupLinksSharedTarget.
+  /// No description provided for @groupLinksEmptyGoals.
   ///
   /// In en, this message translates to:
-  /// **'Group activity and target'**
-  String get groupLinksSharedTarget;
+  /// **'You have no goals yet. Create one, then come back to link it.'**
+  String get groupLinksEmptyGoals;
+
+  /// No description provided for @groupLinksSelectedGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No goal selected.} other{1 goal selected.}}'**
+  String groupLinksSelectedGoal(int count);
+
+  /// No description provided for @groupLinksHintStudying.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which of your study activities count for this group.'**
+  String get groupLinksHintStudying;
+
+  /// No description provided for @groupLinksHintExercises.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which of your exercise activities count for this group.'**
+  String get groupLinksHintExercises;
+
+  /// No description provided for @groupLinksHintReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which of your reading activities count for this group.'**
+  String get groupLinksHintReading;
+
+  /// No description provided for @groupLinksHintHobbies.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which of your hobbies count for this group.'**
+  String get groupLinksHintHobbies;
+
+  /// No description provided for @groupLinksHintDailyGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which of your goals counts for this group. Each person links just one.'**
+  String get groupLinksHintDailyGoals;
+
+  /// No description provided for @createGroupLinksOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: you can link or change them later from the group\'s menu.'**
+  String get createGroupLinksOptional;
+
+  /// No description provided for @createGroupNoLinksYet.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet'**
+  String get createGroupNoLinksYet;
 
   /// No description provided for @googleCalendarDescription.
   ///

@@ -38,7 +38,6 @@
   "targetDaysLabel": "Alvo (dias)",
   "targetDaysChip": "{days} dias",
   "targetDaysHint": "Alvo personalizado",
-  "taskDaysProgress": "{completed}/{target} dias",
   "taskCompletedLabel": "Concluída!",
   "lastActivityLabel": "Última atividade",
   "lastActivityNone": "Nada ainda — comece algo!",
@@ -149,6 +148,31 @@
   },
   "highlightTextTooltip": "Destacar texto",
   "removeHighlightTooltip": "Remover destaque",
+  "notesSearchTitle": "Filtros e busca",
+  "notesSearchHint": "Buscar nas páginas",
+  "notesSearchClearTooltip": "Limpar busca",
+  "notesSearchNoResults": "Nenhuma página encontrada",
+  "notesPagesFilterAll": "Todas",
+  "notesPagesFilterWithText": "Com texto",
+  "notesPagesFilterHighlighted": "Destaques",
+  "notesPagesFilterEmpty": "Vazias",
+  "notesPageNumberLabel": "Página {page}",
+  "@notesPageNumberLabel": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "notesPageWordCount": "{count, plural, =1{1 palavra} other{{count} palavras}}",
+  "@notesPageWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notesEmptyPageLabel": "Página vazia",
   "durationProgress": "{duration} de {goalDuration}",
   "timerTotalLabel": "Total: {duration}",
   "timerNextBreakLabel": "Próxima pausa em {duration}",
@@ -360,13 +384,13 @@
   "faqQ5": "Esqueci de ligar o timer. Dá pra corrigir o tempo?",
   "faqA5": "Dá. Abra as estatísticas da atividade e use Ajustar tempo. O tempo que você adiciona conta como feito hoje, e o que você remove sai das sessões mais recentes.",
   "faqQ6": "Como começo uma atividade do zero sem excluir ela?",
-  "faqA6": "Nas estatísticas da atividade, use Limpar dados: tempo, páginas e histórico voltam pra zero e a atividade continua existindo. Se ela for de um grupo, o seu progresso também sai do ranking do grupo, e isso não tem como desfazer.",
+  "faqA6": "Nas estatísticas da atividade, use Limpar dados: tempo, páginas e histórico voltam pra zero e a atividade continua existindo. Se ela estiver vinculada a um grupo, o seu progresso também sai do ranking do grupo, e isso não tem como desfazer.",
   "faqQ7": "Como funcionam as metas diárias e a sequência?",
   "faqA7": "As metas diárias são a lista curta do dia na Home: escreva a sua ou pegue uma das sugestões, e arraste a meta pra esquerda pra editar ou excluir. A sequência conta os dias seguidos em que você manteve o progresso.",
   "faqQ8": "Como uma atividade de leitura conta as páginas?",
   "faqA8": "A leitura tem meta de páginas em vez de horas. Você atualiza a página atual conforme lê, e cada livro guarda as próprias anotações do que você quiser lembrar.",
   "faqQ9": "Como o ranking do grupo é calculado?",
-  "faqA9": "O tema do grupo define a métrica: horas de estudo, horas de exercício, horas de hobby, páginas lidas ou dias de metas concluídas. Só o progresso daquele tipo conta, e você pode alternar entre Hoje, Semana e Mês.",
+  "faqA9": "O tema do grupo define a métrica: horas de estudo, horas de exercício, horas de hobby, páginas lidas ou dias de metas concluídas. Só conta o que você registra nas atividades que vinculou ao grupo, e você pode alternar entre Hoje, Semana e Mês.",
   "faqQ10": "Como eu chamo alguém pro grupo?",
   "faqA10": "Qualquer membro pode compartilhar o link do grupo ou convidar um amigo. O pedido vai pro líder, que aceita ou recusa na tela de membros, e é lá também que ele passa a liderança ou remove alguém.",
   "faqQ11": "Minha agenda vai pro Google Calendar?",
@@ -783,6 +807,9 @@
     "placeholders": {
       "code": {
         "type": "String"
+      },
+      "link": {
+        "type": "String"
       }
     }
   },
@@ -823,17 +850,24 @@
     "placeholders": {"memberName": {"type": "String"}}
   },
   "groupJoinRequestDeclinedMessage": "Solicitação recusada.",
+  "groupJoinRequestWaitingForLeader": "Aguardando aprovação do líder.",
+  "groupJoinRequestAwaitingYourApproval": "Aguardando sua aprovação",
+  "groupJoinRequestApproveConfirmTitle": "Aprovar entrada",
+  "groupJoinRequestApproveConfirmMessage": "Permitir que {memberName} entre no grupo?",
+  "@groupJoinRequestApproveConfirmMessage": {
+    "placeholders": {"memberName": {"type": "String"}}
+  },
   "groupShareLinkTitle": "Convidar por link",
   "groupShareLinkDescription": "Quem abrir o link pede para entrar e você aceita aqui.",
   "groupShareLinkButton": "Compartilhar link",
   "groupLinkCopiedMessage": "Link copiado",
-  "shareGroupLinkMessage": "Entre no meu grupo {groupName} no Timing: {link}",
+  "shareGroupLinkMessage": "Entre no meu grupo {groupName} no Timing com o código:\n{code}\n\nAbrir no app: {link}",
   "@shareGroupLinkMessage": {
-    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}, "code": {"type": "String"}}
   },
   "joinGroupPendingHint": "O líder do grupo precisa aceitar o seu pedido.",
   "friendTypeName": "amigo",
-  "shareInviteCodeMessage": "Me adicione no Timing com meu código: {code}",
+  "shareInviteCodeMessage": "Me adicione no Timing com meu código:\n{code}\n\nAbrir no app: {link}",
   "groupInvitesTitle": "Convites de grupo ({count})",
   "groupInvitedBy": "{inviter} convidou voc?",
   "acceptButton": "Aceitar",
@@ -927,9 +961,7 @@
   "groupMemberRoleLabel": "Membro",
   "groupMembersLabel": "Membros",
   "groupActionsLabel": "Ações do grupo",
-  "goalsTabLabel": "Dados",
   "chatTabLabel": "Chat",
-  "groupGoalTitle": "Meta do grupo",
   "groupMainRuleTitle": "Regra principal",
   "groupNextMilestoneTitle": "Próximo marco",
   "groupMembersProgressValue": "{current}/{total} membros",
@@ -944,25 +976,6 @@
     }
   },
   "groupNextMilestoneDescription": "para liberar o selo \"Foco Total\"",
-  "groupActivityLabel": "Atividade do grupo",
-  "groupActivityReachedGoal": "{reached}/{total} atingiram a meta",
-  "@groupActivityReachedGoal": {
-    "placeholders": {
-      "reached": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "groupActivityFocusDataLabel": "Foco",
-  "groupActivityPauseDataLabel": "Pausa",
-  "groupActivitySessionsDataLabel": "Sessões",
-  "groupGoalTargetDataLabel": "Tempo alvo",
-  "groupGoalCurrentDayDataLabel": "Dia da meta",
-  "groupActivityPendingUsersTitle": "Usuários pendentes",
-  "groupActivityAllCompletedToday": "Todos concluíram a atividade hoje.",
   "groupNoImagesTitle": "Nenhuma imagem ainda",
   "groupNoImagesDescription": "Envie a primeira imagem do grupo.",
   "groupSendImageButton": "Enviar imagem",
@@ -982,22 +995,6 @@
     "placeholders": {
       "groupCount": {
         "type": "int"
-      }
-    }
-  },
-  "groupGoalKeepMetric": "Manter {metric} todos os dias",
-  "@groupGoalKeepMetric": {
-    "placeholders": {
-      "metric": {
-        "type": "String"
-      }
-    }
-  },
-  "groupGoalDescription": "Cada participante registra {metric} para manter a sequência do grupo ativa.",
-  "@groupGoalDescription": {
-    "placeholders": {
-      "metric": {
-        "type": "String"
       }
     }
   },
@@ -1032,19 +1029,6 @@
   },
   "addMemberButton": "Adicionar membro",
   "groupCollectiveProgressTitle": "Progresso coletivo",
-  "dailyLabel": "Diária",
-  "completedLabel": "Concluído",
-  "groupActivityCompletedCount": "{completed} de {total} concluíram",
-  "@groupActivityCompletedCount": {
-    "placeholders": {
-      "completed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "groupMissingParticipants": "{count, plural, =0{Todos completaram a meta} =1{Falta 1 participante para completar a meta} other{Faltam {count} participantes para completar a meta}}",
   "@groupMissingParticipants": {
     "placeholders": {
@@ -1053,39 +1037,6 @@
       }
     }
   },
-  "groupParticipantsDataTitle": "{count, plural, =1{Participantes (1)} other{Participantes ({count})}}",
-  "@groupParticipantsDataTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupCompletedMembersTitle": "Concluíram ({count})",
-  "@groupCompletedMembersTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupPendingMembersTitle": "Pendentes ({count})",
-  "@groupPendingMembersTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupNoCompletedMembersTitle": "Ninguém concluiu ainda",
-  "groupNoCompletedMembersSubtitle": "Seja o primeiro a completar a meta!",
-  "groupStatisticsTitle": "Estatísticas do grupo",
-  "groupStreakStatLabel": "Sequência do grupo",
-  "groupTodayTotalStatLabel": "Tempo total hoje",
-  "groupPeriodTotalStatLabel": "Total no período",
-  "groupCompletedSessionsStatLabel": "Sessões concluídas",
-  "groupGoalReachedStatLabel": "Atingiram a meta",
-  "groupParticipantsStatLabel": "Participante no grupo",
   "currentUserRankCompleteFirstGoal": "Conclua sua primeira meta para entrar no ranking.",
   "currentUserRankTiedLead": "Empate na liderança.",
   "currentUserRankTiedFirstLabel": "Empate em 1\u00ba",
@@ -1107,8 +1058,6 @@
   "readingTimeLabel": "Tempo lido",
   "totalPagesReadLabel": "Total de páginas",
   "pagesReadTodayLabel": "Páginas hoje",
-  "goalLabel": "Meta",
-  "sessionsLabel": "Sessões",
   "goalStartLabel": "Início da meta",
   "restLabel": "Descanso",
   "comparativesTitle": "Comparativos",
@@ -1310,28 +1259,20 @@
   "concentrationReadingSubtitle": "Mergulhe nas suas leituras.",
   "concentrationHobbiesTitle": "Hobbies",
   "concentrationHobbiesSubtitle": "Aproveite seus hobbies com foco.",
+  "createGroupAboutTitle": "Sobre o grupo",
+  "createGroupAboutDescription": "Como ele aparece para seus amigos.",
   "createGroupDescriptionLabel": "Descrição",
   "createGroupDescriptionHint": "Descreva o grupo e qual é o objetivo dele.",
-  "createGroupThemeMetricDescription": "Este tema define a métrica do ranking.",
-  "createGroupActivityTypeDescription": "Cada integrante recebe uma cópia para acompanhar.",
-  "createGroupActivityNameLabel": "Nome da atividade",
-  "createGroupActivityNameHint": "Ex: Cálculo I",
-  "createGroupGoalTypeLabel": "Tipo de meta",
-  "createGroupGoalTypeTotal": "Total",
-  "createGroupGoalTypeDaily": "Diária",
+  "createGroupThemeMetricDescription": "O tema define a métrica do ranking e quais atividades cada pessoa pode vincular.",
   "createGroupDaysGoalLabel": "Meta de dias",
-  "createGroupPagesGoalLabel": "Meta de páginas",
   "createGroupTimeGoalMinutesLabel": "Meta de tempo (min)",
   "createGroupSummaryTitle": "Resumo do grupo",
-  "createGroupActivitySummaryLabel": "Atividade",
   "createGroupGuestsLabel": "Convidados",
   "timerTotalTodayLabel": "Total hoje",
   "timerEndActionLabel": "Encerrar",
-  "createGroupActivityStepSubtitle": "Escolha a atividade que todos do grupo vão fazer.",
   "createGroupFriendsStepSubtitle": "Convide pelo menos 1 amigo para participar.",
   "createGroupSummaryStepSubtitle": "Revise os dados antes de criar.",
   "createGroupStepInformation": "Informações",
-  "createGroupStepActivity": "Atividade",
   "createGroupStepFriends": "Amigos",
   "createGroupStepSummary": "Resumo",
   "createGroupDaysGoalHint": "Ex: 30",
@@ -1340,14 +1281,6 @@
   "createGroupAddFriendsPromptTitle": "Não encontrou alguém?",
   "createGroupAddFriendsPromptDescription": "Adicione mais amigos para poder convidar.",
   "createGroupContinueButton": "Continuar",
-  "createGroupActivitySummaryDaily": "Meta diária",
-  "createGroupActivitySummaryGoalDays": "Meta • {days} dias",
-  "createGroupActivitySummaryReading": "Leitura • {pages} páginas",
-  "createGroupActivitySummaryTime": "{category} • {minutes} min",
-  "createGroupActivityRequiredError": "Escolha uma atividade para o grupo.",
-  "createGroupActivityNameRequiredError": "Dê um nome para a atividade.",
-  "createGroupActivityGoalInvalidError": "Defina uma meta válida.",
-  "createGroupActivityMissingError": "Defina a atividade do grupo.",
   "timerBackTooltip": "Voltar",
   "timerRestMessageTitle": "Descanse um pouco",
   "timerFocusLabel": "Foco",
@@ -1370,12 +1303,11 @@
   "groupInvitationsSentEmptyDescription": "Os convites que você enviar para alguém entrar em um grupo aparecem aqui.",
   "swipeHintDismissLabel": "Entendi",
   "dailyGoalSwipeHintTitle": "Gestos da meta",
-  "dailyGoalSwipeHintMessage": "Arraste uma meta para a esquerda para editar ou apagar. Metas de grupo podem ter algumas ações bloqueadas.",
+  "dailyGoalSwipeHintMessage": "Arraste uma meta para a esquerda para editar ou apagar.",
   "clearDataButtonLabel": "Apagar dados",
   "clearDataDialogTitle": "Apagar dados?",
   "clearActivityDataMessage": "Todo o seu progresso em \"{name}\" será apagado: tempo, páginas e histórico. A atividade continua, mas volta do zero. Esta ação não poderá ser desfeita.",
   "clearGoalDataMessage": "Todos os dias que você marcou em \"{name}\" serão apagados e a meta volta do zero. Esta ação não poderá ser desfeita.",
-  "clearDataGroupNote": "Como faz parte de um grupo, seu progresso individual também sai do ranking. Você continua no grupo.",
   "clearDataSuccessMessage": "Dados apagados.",
   "adjustTimeSectionTitle": "Ajustar tempo",
   "addTimeButtonLabel": "Adicionar tempo",
@@ -1386,11 +1318,7 @@
   "timeAddedMessage": "Tempo adicionado.",
   "timeRemovedMessage": "Tempo removido.",
   "activitySwipeHintTitle": "Gestos da atividade",
-  "activitySwipeHintMessage": "Arraste uma atividade para ver notas, dados, editar ou apagar. Itens de grupo podem ter algumas ações bloqueadas.",
-  "groupGoalEditBlockedMessage": "Esta meta é de um grupo. Edite pelo grupo para alterar.",
-  "groupGoalDeleteBlockedMessage": "Esta meta é de um grupo. Saia do grupo para removê-la.",
-  "groupActivityEditBlockedMessage": "Esta atividade é de um grupo. Edite pelo grupo para alterar.",
-  "groupActivityDeleteBlockedMessage": "Esta atividade é de um grupo. Saia do grupo para removê-la.",
+  "activitySwipeHintMessage": "Arraste uma atividade para ver notas, dados, editar ou apagar.",
   "groupUpdatedSuccess": "Grupo atualizado com sucesso",
   "groupInviteCanceledMessage": "Convite cancelado.",
   "groupInviteSentMessage": "Convite enviado.",
@@ -1414,7 +1342,6 @@
   "groupsStaleNotice": "Não foi possível atualizar seus grupos. Mostrando os últimos dados salvos.",
   "personalInformationTitle": "Informações pessoais",
   "editGroupInfoSection": "Informações do grupo",
-  "createGroupFocusGoalLabel": "Meta de foco",
   "connectedAccountsSection": "Contas conectadas",
   "contactSection": "Contato",
   "receivedTab": "Recebidos",
@@ -1438,11 +1365,10 @@
   "leaveGroupConfirmMessage": "Tem certeza de que deseja sair de {groupName}?",
   "leaveGroupConfirmButton": "Sair",
   "resetGroupLabel": "Resetar grupo",
-  "resetGroupConfirmTitle": "Resetar progresso do grupo?",
-  "resetGroupConfirmMessage": "Isso zera o progresso compartilhado e o ranking de {groupName}. O histórico pessoal de atividade de cada membro será mantido.",
+  "resetGroupConfirmTitle": "Resetar ranking do grupo?",
+  "resetGroupConfirmMessage": "Isso zera o ranking de {groupName}. O histórico pessoal de atividade de cada membro será mantido.",
   "resetGroupConfirmButton": "Resetar",
-  "resetGroupClearOwnHistoryLabel": "Também apagar meu histórico pessoal desta meta",
-  "groupResetSuccess": "O progresso e o ranking do grupo foram resetados.",
+  "groupResetSuccess": "O ranking do grupo foi resetado.",
   "ownerOnlyGroupActionError": "Apenas o dono do grupo pode fazer isso.",
   "viewMembersLabel": "Ver membros",
   "groupMembersPageTitle": "Membros do grupo",
@@ -1464,30 +1390,21 @@
   "errorSignedOutMessage": "Sua sessão terminou. Entre novamente para continuar.",
   "errorRejectedMessage": "Não foi possível concluir esta ação. Confira os dados e tente novamente.",
   "editGroupInformationDescription": "Defina um nome e uma descrição para o grupo.",
-  "editGroupActivityOverview": "Configure a atividade e a meta de progresso.",
-  "editGroupActivityDescription": "Escolha a atividade e defina sua meta de progresso.",
   "editGroupInformationTip": "Um nome e uma descrição claros ajudam a manter o grupo motivado!",
-  "editGroupActivityTip": "Defina uma meta realista para manter a consistência!",
   "editGroupMoreOptions": "Mais opções",
-  "editGroupSaveContinue": "Salvar e continuar",
   "editGroupTipLabel": "Dica",
   "signInProgressTitle": "Entrando na sua conta",
   "signInProgressConfirmingAccount": "Confirmando sua conta Google...",
   "signInProgressLoadingProfile": "Carregando seu perfil...",
   "signInProgressPreparingHome": "Preparando tudo para você...",
-  "groupLinksTitle": "Minhas atividades vinculadas",
-  "groupLinksUseExisting": "Usar minhas atividades",
-  "groupLinksCreateNew": "Criar atividade",
-  "groupLinksEmpty": "Nenhuma atividade compatível disponível.",
+  "groupLinksTitle": "Atividades vinculadas",
+  "groupLinksEmpty": "Você ainda não tem atividades deste tema. Crie uma na tela inicial e volte para vinculá-la.",
   "groupLinksSelected": "{count, plural, =0{Nenhuma atividade selecionada.} =1{1 atividade selecionada.} other{{count} atividades selecionadas.}}",
   "groupLinksExplanation": "Somente novos registros contam a partir do vínculo. Seu histórico e suas metas pessoais são preservados. Desmarcar interrompe novas contribuições; com nenhuma selecionada, a participação fica pausada.",
-  "groupLinksReadingHint": "Se o grupo acompanha um livro específico, selecione apenas atividades desse livro.",
-  "groupLinksSelectRequired": "Selecione pelo menos uma atividade.",
   "groupLinksSyncError": "Não foi possível carregar ou sincronizar suas atividades. Verifique a conexão e tente novamente.",
   "groupLinksSaveError": "Não foi possível salvar os vínculos. Sua seleção foi mantida; tente novamente.",
   "groupLinksRetry": "Tentar novamente",
   "groupLinksSave": "Salvar vínculos",
-  "groupLinksSharedTarget": "Atividade e meta do grupo",
   "@groupLinksSelected": {
     "placeholders": {
       "count": {
@@ -1495,6 +1412,22 @@
       }
     }
   },
+  "groupLinksEmptyGoals": "Você ainda não tem metas. Crie uma e volte para vinculá-la.",
+  "groupLinksSelectedGoal": "{count, plural, =0{Nenhuma meta selecionada.} other{1 meta selecionada.}}",
+  "@groupLinksSelectedGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupLinksHintStudying": "Escolha quais das suas atividades de estudo contam para este grupo.",
+  "groupLinksHintExercises": "Escolha quais das suas atividades de exercício contam para este grupo.",
+  "groupLinksHintReading": "Escolha quais das suas leituras contam para este grupo.",
+  "groupLinksHintHobbies": "Escolha quais dos seus hobbies contam para este grupo.",
+  "groupLinksHintDailyGoals": "Escolha qual das suas metas conta para este grupo. Cada pessoa vincula uma só.",
+  "createGroupLinksOptional": "Opcional: dá para vincular ou trocar depois, no menu do grupo.",
+  "createGroupNoLinksYet": "Nenhuma por enquanto",
   "googleCalendarDescription": "Criar automaticamente no Google os horários salvos no Timing.",
   "googleCalendarConnect": "Conectar",
   "googleCalendarConnected": "Conectado · fuso: {timeZone}",

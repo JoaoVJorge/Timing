@@ -42,16 +42,6 @@
       }
     }
   },
-  "@taskDaysProgress": {
-    "placeholders": {
-      "completed": {
-        "type": "int"
-      },
-      "target": {
-        "type": "int"
-      }
-    }
-  },
   "@lastActivityMinutesAgo": {
     "placeholders": {
       "minutes": {
@@ -417,7 +407,6 @@
   "targetDaysLabel": "الهدف (الأيام)",
   "targetDaysChip": "{days} يوم",
   "targetDaysHint": "هدف مخصص",
-  "taskDaysProgress": "{completed}/{target} يوم",
   "taskCompletedLabel": "تم!",
   "lastActivityLabel": "النشاط الأخير",
   "lastActivityNone": "لا شيء بعد - ابدأ شيئًا!",
@@ -511,6 +500,31 @@
   "notesPageCounter": "صفحة {currentPage} من {pageCount}",
   "highlightTextTooltip": "تمييز النص",
   "removeHighlightTooltip": "إزالة التمييز",
+  "notesSearchTitle": "عوامل التصفية والبحث",
+  "notesSearchHint": "ابحث في الصفحات",
+  "notesSearchClearTooltip": "مسح البحث",
+  "notesSearchNoResults": "لم يتم العثور على صفحات",
+  "notesPagesFilterAll": "الكل",
+  "notesPagesFilterWithText": "تحتوي على نص",
+  "notesPagesFilterHighlighted": "مميزة",
+  "notesPagesFilterEmpty": "فارغة",
+  "notesPageNumberLabel": "صفحة {page}",
+  "@notesPageNumberLabel": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "notesPageWordCount": "{count, plural, =1{كلمة واحدة} other{{count} كلمات}}",
+  "@notesPageWordCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notesEmptyPageLabel": "صفحة فارغة",
   "durationProgress": "{duration} من {goalDuration}",
   "timerTotalLabel": "الإجمالي: {duration}",
   "timerNextBreakLabel": "الاستراحة التالية في {duration}",
@@ -722,13 +736,13 @@
   "faqQ5": "نسيت تشغيل المؤقت. هل يمكنني تصحيح الوقت؟",
   "faqA5": "نعم. افتح إحصاءات النشاط واستخدم «ضبط الوقت». الوقت الذي تضيفه يُحسب كمنجز اليوم، والوقت الذي تحذفه يُخصم من أحدث الجلسات.",
   "faqQ6": "كيف أبدأ نشاطًا من الصفر دون حذفه؟",
-  "faqA6": "من إحصاءات النشاط استخدم «محو البيانات»: يعود الوقت والصفحات والسجل إلى الصفر ويبقى النشاط موجودًا. وإن كان تابعًا لمجموعة فسيخرج تقدّمك من ترتيب تلك المجموعة أيضًا، ولا يمكن التراجع عن ذلك.",
+  "faqA6": "من إحصاءات النشاط استخدم «محو البيانات»: يعود الوقت والصفحات والسجل إلى الصفر ويبقى النشاط موجودًا. وإن كان مرتبطًا بمجموعة فسيخرج تقدّمك من ترتيب تلك المجموعة أيضًا، ولا يمكن التراجع عن ذلك.",
   "faqQ7": "كيف تعمل الأهداف اليومية والتتابع؟",
   "faqA7": "الأهداف اليومية هي قائمة اليوم القصيرة في الصفحة الرئيسية: اكتب هدفك أو اختر أحد الاقتراحات، واسحب الهدف إلى اليسار لتعديله أو حذفه. ويحسب التتابع الأيام المتتالية التي حافظت فيها على تقدّمك.",
   "faqQ8": "كيف يحسب نشاط القراءة الصفحات؟",
   "faqA8": "للقراءة هدف بالصفحات بدلاً من الساعات. تحدّث الصفحة الحالية أثناء القراءة، ويحفظ كل كتاب ملاحظاته الخاصة بما تريد تذكّره.",
   "faqQ9": "كيف يُحسب ترتيب المجموعة؟",
-  "faqA9": "يحدّد موضوع المجموعة المقياس: ساعات الدراسة أو ساعات التمارين أو ساعات الهوايات أو الصفحات المقروءة أو أيام الأهداف المكتملة. يُحسب هذا النوع من التقدّم فقط، ويمكنك التبديل بين اليوم والأسبوع والشهر.",
+  "faqA9": "يحدّد موضوع المجموعة المقياس: ساعات الدراسة أو ساعات التمارين أو ساعات الهوايات أو الصفحات المقروءة أو أيام الأهداف المكتملة. يُحسب فقط ما تسجّله في الأنشطة التي ربطتها بالمجموعة، ويمكنك التبديل بين اليوم والأسبوع والشهر.",
   "faqQ10": "كيف أضيف شخصًا إلى المجموعة؟",
   "faqA10": "يمكن لأي عضو مشاركة رابط المجموعة أو دعوة صديق. يصل الطلب إلى قائد المجموعة الذي يقبله أو يرفضه من شاشة الأعضاء، ومن هناك أيضًا ينقل القيادة أو يُخرج أحد الأعضاء.",
   "faqQ11": "هل تنتقل أجندتي إلى Google Calendar؟",
@@ -1093,6 +1107,9 @@
     "placeholders": {
       "code": {
         "type": "String"
+      },
+      "link": {
+        "type": "String"
       }
     }
   },
@@ -1137,13 +1154,13 @@
   "groupShareLinkDescription": "من يفتح الرابط يطلب الانضمام وتقبله أنت هنا.",
   "groupShareLinkButton": "مشاركة الرابط",
   "groupLinkCopiedMessage": "تم نسخ الرابط",
-  "shareGroupLinkMessage": "انضم إلى مجموعتي {groupName} على Timing: {link}",
+  "shareGroupLinkMessage": "انضم إلى مجموعتي {groupName} على Timing باستخدام الرمز:\n{code}\n\nافتح في التطبيق: {link}",
   "@shareGroupLinkMessage": {
-    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}}
+    "placeholders": {"groupName": {"type": "String"}, "link": {"type": "String"}, "code": {"type": "String"}}
   },
   "joinGroupPendingHint": "على قائد المجموعة قبول طلبك.",
   "friendTypeName": "????",
-  "shareInviteCodeMessage": "أضفني على Timing باستخدام رمزي: {code}",
+  "shareInviteCodeMessage": "أضفني على Timing باستخدام رمزي:\n{code}\n\nافتح في التطبيق: {link}",
   "groupInvitesTitle": "دعوات المجموعات ({count})",
   "groupInvitedBy": "دعاك {inviter}",
   "acceptButton": "????",
@@ -1237,9 +1254,7 @@
   "groupMemberRoleLabel": "???",
   "groupMembersLabel": "???????",
   "groupActionsLabel": "??????? ????????",
-  "goalsTabLabel": "???????",
   "chatTabLabel": "???????",
-  "groupGoalTitle": "??? ????????",
   "groupMainRuleTitle": "??????? ????????",
   "groupNextMilestoneTitle": "?????? ??????",
   "groupMembersProgressValue": "{current}/{total} ?????",
@@ -1254,25 +1269,6 @@
     }
   },
   "groupNextMilestoneDescription": "لفتح شارة \"التركيز الكامل\"",
-  "groupActivityLabel": "???? ????????",
-  "groupActivityReachedGoal": "{reached}/{total} ????? ?????",
-  "@groupActivityReachedGoal": {
-    "placeholders": {
-      "reached": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "groupActivityFocusDataLabel": "تركيز",
-  "groupActivityPauseDataLabel": "استراحة",
-  "groupActivitySessionsDataLabel": "جلسات",
-  "groupGoalTargetDataLabel": "المدة المستهدفة",
-  "groupGoalCurrentDayDataLabel": "يوم الهدف",
-  "groupActivityPendingUsersTitle": "المستخدمون المعلقون",
-  "groupActivityAllCompletedToday": "أكمل الجميع النشاط اليوم.",
   "groupNoImagesTitle": "?? ???? ??? ???",
   "groupNoImagesDescription": "أرسل أول صورة للمجموعة.",
   "groupSendImageButton": "????? ????",
@@ -1292,22 +1288,6 @@
     "placeholders": {
       "groupCount": {
         "type": "int"
-      }
-    }
-  },
-  "groupGoalKeepMetric": "?????? ??? {metric} ?? ???",
-  "@groupGoalKeepMetric": {
-    "placeholders": {
-      "metric": {
-        "type": "String"
-      }
-    }
-  },
-  "groupGoalDescription": "يسجل كل عضو {metric} للحفاظ على سلسلة المجموعة نشطة.",
-  "@groupGoalDescription": {
-    "placeholders": {
-      "metric": {
-        "type": "String"
       }
     }
   },
@@ -1342,19 +1322,6 @@
   },
   "addMemberButton": "????? ???",
   "groupCollectiveProgressTitle": "?????? ???????",
-  "dailyLabel": "يومي",
-  "completedLabel": "مكتمل",
-  "groupActivityCompletedCount": "أكمل {completed} من {total}",
-  "@groupActivityCompletedCount": {
-    "placeholders": {
-      "completed": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "groupMissingParticipants": "{count, plural, =0{أكمل الجميع الهدف} =1{بقي مشارك واحد لإكمال الهدف} other{بقي {count} مشاركين لإكمال الهدف}}",
   "@groupMissingParticipants": {
     "placeholders": {
@@ -1363,39 +1330,6 @@
       }
     }
   },
-  "groupParticipantsDataTitle": "{count, plural, =1{المشاركون (1)} other{المشاركون ({count})}}",
-  "@groupParticipantsDataTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupCompletedMembersTitle": "أكملوا ({count})",
-  "@groupCompletedMembersTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupPendingMembersTitle": "قيد الانتظار ({count})",
-  "@groupPendingMembersTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupNoCompletedMembersTitle": "لم يكمل أحد بعد",
-  "groupNoCompletedMembersSubtitle": "كن أول من يكمل الهدف!",
-  "groupStatisticsTitle": "إحصاءات المجموعة",
-  "groupStreakStatLabel": "سلسلة المجموعة",
-  "groupTodayTotalStatLabel": "إجمالي الوقت اليوم",
-  "groupPeriodTotalStatLabel": "إجمالي الفترة",
-  "groupCompletedSessionsStatLabel": "الجلسات المكتملة",
-  "groupGoalReachedStatLabel": "حققوا الهدف",
-  "groupParticipantsStatLabel": "مشارك في المجموعة",
   "currentUserRankCompleteFirstGoal": "أكمل هدفك الأول للدخول إلى الترتيب.",
   "currentUserRankTiedLead": "تعادل على الصدارة.",
   "currentUserRankTiedFirstLabel": "????? ??? ?????? ?????",
@@ -1417,8 +1351,6 @@
   "readingTimeLabel": "??? ???????",
   "totalPagesReadLabel": "?????? ???????",
   "pagesReadTodayLabel": "????? ?????",
-  "goalLabel": "?????",
-  "sessionsLabel": "???????",
   "goalStartLabel": "بداية الهدف",
   "restLabel": "??????",
   "comparativesTitle": "?????????",
@@ -1620,28 +1552,20 @@
   "concentrationReadingSubtitle": "انغمس في قراءاتك.",
   "concentrationHobbiesTitle": "الهوايات",
   "concentrationHobbiesSubtitle": "استمتع بهواياتك بتركيز.",
+  "createGroupAboutTitle": "حول المجموعة",
+  "createGroupAboutDescription": "كيف تظهر لأصدقائك.",
   "createGroupDescriptionLabel": "الوصف",
   "createGroupDescriptionHint": "صف المجموعة وهدفها.",
-  "createGroupThemeMetricDescription": "يحدد هذا الموضوع مقياس الترتيب.",
-  "createGroupActivityTypeDescription": "يحصل كل عضو على نسخة للمتابعة.",
-  "createGroupActivityNameLabel": "??? ??????",
-  "createGroupActivityNameHint": "مثال: التفاضل I",
-  "createGroupGoalTypeLabel": "??? ?????",
-  "createGroupGoalTypeTotal": "????????",
-  "createGroupGoalTypeDaily": "يومي",
+  "createGroupThemeMetricDescription": "يحدد الموضوع مقياس الترتيب والأنشطة التي يمكن لكل شخص ربطها.",
   "createGroupDaysGoalLabel": "هدف الأيام",
-  "createGroupPagesGoalLabel": "هدف الصفحات",
   "createGroupTimeGoalMinutesLabel": "هدف الوقت (دقيقة)",
   "createGroupSummaryTitle": "ملخص المجموعة",
-  "createGroupActivitySummaryLabel": "النشاط",
   "createGroupGuestsLabel": "????????",
   "timerTotalTodayLabel": "إجمالي اليوم",
   "timerEndActionLabel": "إنهاء",
-  "createGroupActivityStepSubtitle": "اختر النشاط الذي سيقوم به جميع أعضاء المجموعة.",
   "createGroupFriendsStepSubtitle": "ادعُ صديقًا واحدًا على الأقل للانضمام.",
   "createGroupSummaryStepSubtitle": "راجع التفاصيل قبل الإنشاء.",
   "createGroupStepInformation": "المعلومات",
-  "createGroupStepActivity": "النشاط",
   "createGroupStepFriends": "الأصدقاء",
   "createGroupStepSummary": "الملخص",
   "createGroupDaysGoalHint": "مثال: 30",
@@ -1650,14 +1574,6 @@
   "createGroupAddFriendsPromptTitle": "لم تجد أحدًا؟",
   "createGroupAddFriendsPromptDescription": "أضف المزيد من الأصدقاء لتتمكن من دعوتهم.",
   "createGroupContinueButton": "متابعة",
-  "createGroupActivitySummaryDaily": "هدف يومي",
-  "createGroupActivitySummaryGoalDays": "الهدف • {days} يوم",
-  "createGroupActivitySummaryReading": "قراءة • {pages} صفحة",
-  "createGroupActivitySummaryTime": "{category} • {minutes} دقيقة",
-  "createGroupActivityRequiredError": "اختر نشاطًا للمجموعة.",
-  "createGroupActivityNameRequiredError": "أعطِ النشاط اسمًا.",
-  "createGroupActivityGoalInvalidError": "حدد هدفًا صالحًا.",
-  "createGroupActivityMissingError": "حدد نشاط المجموعة.",
   "timerBackTooltip": "رجوع",
   "timerRestMessageTitle": "استرح قليلًا",
   "timerFocusLabel": "تركيز",
@@ -1680,12 +1596,11 @@
   "groupInvitationsSentEmptyDescription": "الدعوات التي ترسلها للانضمام إلى مجموعة ستظهر هنا.",
   "swipeHintDismissLabel": "فهمت",
   "dailyGoalSwipeHintTitle": "إيماءات الهدف",
-  "dailyGoalSwipeHintMessage": "اسحب الهدف إلى اليسار لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لأهداف المجموعة.",
+  "dailyGoalSwipeHintMessage": "اسحب الهدف إلى اليسار لتعديله أو حذفه.",
   "clearDataButtonLabel": "حذف البيانات",
   "clearDataDialogTitle": "حذف البيانات؟",
   "clearActivityDataMessage": "سيتم حذف كل تقدمك في \"{name}\": الوقت والصفحات والسجل. يبقى النشاط لكنه يبدأ من الصفر. لا يمكن التراجع عن هذا الإجراء.",
   "clearGoalDataMessage": "سيتم حذف كل الأيام التي علّمت عليها في \"{name}\" ويبدأ الهدف من الصفر. لا يمكن التراجع عن هذا الإجراء.",
-  "clearDataGroupNote": "بما أنه جزء من مجموعة، فإن تقدمك الفردي يخرج أيضًا من الترتيب. تبقى في المجموعة.",
   "clearDataSuccessMessage": "تم حذف البيانات.",
   "adjustTimeSectionTitle": "تعديل الوقت",
   "addTimeButtonLabel": "إضافة وقت",
@@ -1696,11 +1611,7 @@
   "timeAddedMessage": "تمت إضافة الوقت.",
   "timeRemovedMessage": "تمت إزالة الوقت.",
   "activitySwipeHintTitle": "إيماءات النشاط",
-  "activitySwipeHintMessage": "اسحب النشاط لعرض الملاحظات والبيانات أو لتعديله أو حذفه. قد تكون بعض الإجراءات غير متاحة لعناصر المجموعة.",
-  "groupGoalEditBlockedMessage": "هذا الهدف تابع لمجموعة. عدّله من داخل المجموعة.",
-  "groupGoalDeleteBlockedMessage": "هذا الهدف تابع لمجموعة. غادر المجموعة لإزالته.",
-  "groupActivityEditBlockedMessage": "هذا النشاط تابع لمجموعة. عدّله من داخل المجموعة.",
-  "groupActivityDeleteBlockedMessage": "هذا النشاط تابع لمجموعة. غادر المجموعة لإزالته.",
+  "activitySwipeHintMessage": "اسحب النشاط لعرض الملاحظات والبيانات أو لتعديله أو حذفه.",
   "groupUpdatedSuccess": "تم تحديث المجموعة بنجاح",
   "groupInviteCanceledMessage": "تم إلغاء الدعوة.",
   "groupInviteSentMessage": "تم إرسال الدعوة.",
@@ -1724,7 +1635,6 @@
   "groupsStaleNotice": "تعذّر تحديث مجموعاتك. يتم عرض آخر البيانات المحفوظة.",
   "personalInformationTitle": "المعلومات الشخصية",
   "editGroupInfoSection": "معلومات المجموعة",
-  "createGroupFocusGoalLabel": "هدف التركيز",
   "connectedAccountsSection": "الحسابات المرتبطة",
   "contactSection": "جهة الاتصال",
   "receivedTab": "الواردة",
@@ -1748,11 +1658,10 @@
   "leaveGroupConfirmMessage": "هل أنت متأكد من رغبتك في مغادرة {groupName}؟",
   "leaveGroupConfirmButton": "مغادرة",
   "resetGroupLabel": "إعادة ضبط المجموعة",
-  "resetGroupConfirmTitle": "إعادة ضبط تقدم المجموعة؟",
-  "resetGroupConfirmMessage": "سيؤدي هذا إلى إعادة ضبط التقدم المشترك وترتيب {groupName}. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.",
+  "resetGroupConfirmTitle": "إعادة ضبط ترتيب المجموعة؟",
+  "resetGroupConfirmMessage": "سيؤدي هذا إلى إعادة ضبط ترتيب {groupName}. سيبقى سجل النشاط الشخصي لكل عضو محفوظًا.",
   "resetGroupConfirmButton": "إعادة ضبط",
-  "resetGroupClearOwnHistoryLabel": "امسح أيضًا سجلي الشخصي لهذا الهدف",
-  "groupResetSuccess": "تمت إعادة ضبط تقدم المجموعة وترتيبها.",
+  "groupResetSuccess": "تمت إعادة ضبط ترتيب المجموعة.",
   "ownerOnlyGroupActionError": "يمكن لمالك المجموعة فقط تنفيذ هذا الإجراء.",
   "viewMembersLabel": "عرض الأعضاء",
   "groupMembersPageTitle": "أعضاء المجموعة",
@@ -1774,30 +1683,21 @@
   "errorSignedOutMessage": "انتهت جلستك. سجّل الدخول مرة أخرى للمتابعة.",
   "errorRejectedMessage": "تعذّر إكمال هذا الإجراء. تحقق من البيانات وحاول مرة أخرى.",
   "editGroupInformationDescription": "حدد اسمًا ووصفًا للمجموعة.",
-  "editGroupActivityOverview": "اضبط النشاط وهدف التقدم.",
-  "editGroupActivityDescription": "اختر النشاط وحدد هدف تقدمك.",
   "editGroupInformationTip": "يساعد الاسم والوصف الواضحان في تحفيز المجموعة!",
-  "editGroupActivityTip": "حدد هدفًا واقعيًا للحفاظ على الاستمرارية!",
   "editGroupMoreOptions": "خيارات إضافية",
-  "editGroupSaveContinue": "حفظ ومتابعة",
   "editGroupTipLabel": "نصيحة",
   "signInProgressTitle": "جارٍ تسجيل دخولك",
   "signInProgressConfirmingAccount": "جارٍ تأكيد حسابك على جوجل...",
   "signInProgressLoadingProfile": "جارٍ تحميل ملفك الشخصي...",
   "signInProgressPreparingHome": "جارٍ تجهيز كل شيء لك...",
-  "groupLinksTitle": "أنشطتي المرتبطة",
-  "groupLinksUseExisting": "استخدام أنشطتي",
-  "groupLinksCreateNew": "إنشاء نشاط",
-  "groupLinksEmpty": "لا توجد أنشطة متوافقة.",
+  "groupLinksTitle": "الأنشطة المرتبطة",
+  "groupLinksEmpty": "ليس لديك أنشطة من هذا الموضوع بعد. أنشئ نشاطًا من الشاشة الرئيسية ثم عُد لربطه.",
   "groupLinksSelected": "{count, plural, =0{لم يتم اختيار أي نشاط.} =1{تم اختيار نشاط واحد.} other{تم اختيار {count} من الأنشطة.}}",
   "groupLinksExplanation": "تُحتسب السجلات الجديدة فقط منذ الربط. يبقى سجلك وأهدافك الشخصية محفوظين. إلغاء الاختيار يوقف المساهمات الجديدة؛ وعدم اختيار أي نشاط يوقف مشاركتك مؤقتًا.",
-  "groupLinksReadingHint": "إذا كانت المجموعة تتابع كتابًا محددًا، فاختر أنشطة ذلك الكتاب فقط.",
-  "groupLinksSelectRequired": "اختر نشاطًا واحدًا على الأقل.",
   "groupLinksSyncError": "تعذر تحميل أنشطتك أو مزامنتها. تحقق من الاتصال وحاول مجددًا.",
   "groupLinksSaveError": "تعذر حفظ الروابط. تم الاحتفاظ باختيارك؛ حاول مجددًا.",
   "groupLinksRetry": "إعادة المحاولة",
   "groupLinksSave": "حفظ الروابط",
-  "groupLinksSharedTarget": "نشاط المجموعة وهدفها",
   "@groupLinksSelected": {
     "placeholders": {
       "count": {
@@ -1805,6 +1705,22 @@
       }
     }
   },
+  "groupLinksEmptyGoals": "ليس لديك أهداف بعد. أنشئ هدفًا ثم عُد لربطه.",
+  "groupLinksSelectedGoal": "{count, plural, =0{لم يتم اختيار أي هدف.} other{تم اختيار هدف واحد.}}",
+  "@groupLinksSelectedGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupLinksHintStudying": "اختر أيًّا من أنشطة الدراسة لديك يُحتسب لهذه المجموعة.",
+  "groupLinksHintExercises": "اختر أيًّا من أنشطة التمارين لديك يُحتسب لهذه المجموعة.",
+  "groupLinksHintReading": "اختر أيًّا من أنشطة القراءة لديك يُحتسب لهذه المجموعة.",
+  "groupLinksHintHobbies": "اختر أيًّا من هواياتك يُحتسب لهذه المجموعة.",
+  "groupLinksHintDailyGoals": "اختر أيًّا من أهدافك يُحتسب لهذه المجموعة. يربط كل شخص هدفًا واحدًا فقط.",
+  "createGroupLinksOptional": "اختياري: يمكنك ربطها أو تغييرها لاحقًا من قائمة المجموعة.",
+  "createGroupNoLinksYet": "لا شيء حتى الآن",
   "googleCalendarDescription": "أضف جدول Timing تلقائيًا إلى Google Calendar.",
   "googleCalendarConnect": "اتصال",
   "googleCalendarConnected": "متصل · المنطقة الزمنية: {timeZone}",
