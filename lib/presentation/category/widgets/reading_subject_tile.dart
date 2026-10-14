@@ -32,83 +32,88 @@ class ReadingSubjectTile extends StatelessWidget {
         : 0;
     final int percent = (progress * 100).round();
 
-    return Container(
-      padding: AppSpacing.tile,
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: context.colorTokens.surfaceShadow,
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _ReadingCover(subject: subject, color: color),
-          const Gap(14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        subject.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.textStyles.extraBold20.copyWith(
-                          height: 1.1,
+    return BounceTap(
+      pressedScale: 0.985,
+      behavior: HitTestBehavior.opaque,
+      onTap: onTapPlay,
+      child: Container(
+        padding: AppSpacing.tile,
+        decoration: BoxDecoration(
+          color: context.colorTokens.surface,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: context.colorTokens.surfaceShadow,
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _ReadingCover(subject: subject, color: color),
+            const Gap(14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          subject.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textStyles.extraBold20.copyWith(
+                            height: 1.1,
+                          ),
                         ),
                       ),
-                    ),
-                    const Gap(8),
-                    _ReadingPlayButton(onTap: onTapPlay, color: color),
-                  ],
-                ),
-                const Gap(12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _ReadingMetric(
-                      icon: Icons.schedule_rounded,
-                      color: color,
-                      label: _durationLabel(context),
-                    ),
-                    _ReadingMetricDivider(color: context.colorTokens.divider),
-                    _ReadingMetric(
-                      icon: Icons.article_outlined,
-                      color: color,
-                      label: _pagesLabel(context, hasGoal: hasGoal),
-                    ),
-                    _ReadingMetricDivider(color: context.colorTokens.divider),
-                    _ReadingMetric(
-                      icon: Icons.track_changes_rounded,
-                      color: color,
-                      label: "$percent%",
-                    ),
-                  ],
-                ),
-                const Gap(12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: color.withValues(alpha: 0.24),
-                    valueColor: AlwaysStoppedAnimation(color),
+                      const Gap(8),
+                      _ReadingPlayButton(onTap: onTapPlay, color: color),
+                    ],
                   ),
-                ),
-              ],
+                  const Gap(12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _ReadingMetric(
+                        icon: Icons.schedule_rounded,
+                        color: color,
+                        label: _durationLabel(context),
+                      ),
+                      _ReadingMetricDivider(color: context.colorTokens.divider),
+                      _ReadingMetric(
+                        icon: Icons.article_outlined,
+                        color: color,
+                        label: _pagesLabel(context, hasGoal: hasGoal),
+                      ),
+                      _ReadingMetricDivider(color: context.colorTokens.divider),
+                      _ReadingMetric(
+                        icon: Icons.track_changes_rounded,
+                        color: color,
+                        label: "$percent%",
+                      ),
+                    ],
+                  ),
+                  const Gap(12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 6,
+                      backgroundColor: color.withValues(alpha: 0.24),
+                      valueColor: AlwaysStoppedAnimation(color),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
