@@ -549,14 +549,16 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       unawaited(HapticFeedback.selectionClick());
       await Future<void>.delayed(const Duration(milliseconds: 140));
       finishSession();
+      bool sessionEndedAcknowledged = false;
       if (Get.context != null) {
-        await showTimerSessionEndedDialog(
+        final bool? dialogResult = await showTimerSessionEndedDialog(
           accentColor: Color(subject.colorValue),
           subjectName: subject.name,
         );
+        sessionEndedAcknowledged = dialogResult == true;
       }
       _isFinishingSession = false;
-      return true;
+      return sessionEndedAcknowledged;
     }
 
     final BuildContext context = Get.context!;
@@ -666,6 +668,14 @@ class TimerController extends GetxController with WidgetsBindingObserver {
       isReading ? 0 : focusIntervalSeconds * focusSessionCount;
 
   void _updateNotification() {
+    // Lifecycle callbacks can still arrive after [finishSession] (opening the
+    // notification shade is enough to background the Activity). Never let one
+    // of those callbacks recreate a paused notification or Live Activity for
+    // a session whose ticker and action consumer have already been stopped.
+    if (isSessionFinished.value) {
+      return;
+    }
+
     unawaited(_saveActiveSession());
     unawaited(
       timerLiveActivityService.startOrUpdate(

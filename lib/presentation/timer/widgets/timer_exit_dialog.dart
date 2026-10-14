@@ -40,14 +40,15 @@ Future<int?> showReadingExitDialog({
   ),
 );
 
-Future<void> showTimerSessionEndedDialog({
+Future<bool?> showTimerSessionEndedDialog({
   required Color accentColor,
   required String subjectName,
-}) => appNavigator.dialog<void>(
+}) => appNavigator.dialog<bool>(
   child: _TimerSessionEndedDialog(
     accentColor: accentColor,
     subjectName: subjectName,
   ),
+  barrierDismissible: false,
 );
 
 class _TimerExitDialog extends StatelessWidget {
@@ -283,51 +284,54 @@ class _TimerSessionEndedDialog extends StatelessWidget {
   final String subjectName;
 
   @override
-  Widget build(BuildContext context) => Dialog(
-    elevation: 0,
-    backgroundColor: context.colorTokens.transparent,
-    insetPadding: AppSpacing.dialogInset,
-    child: Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 390),
-      padding: AppSpacing.illustratedDialog,
-      decoration: BoxDecoration(
-        color: context.colorTokens.dialogSurface,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 76,
-            height: 76,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: accentColor.withValues(alpha: 0.14),
-              border: Border.all(color: accentColor.withValues(alpha: 0.18)),
+  Widget build(BuildContext context) => PopScope(
+    canPop: false,
+    child: Dialog(
+      elevation: 0,
+      backgroundColor: context.colorTokens.transparent,
+      insetPadding: AppSpacing.dialogInset,
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 390),
+        padding: AppSpacing.illustratedDialog,
+        decoration: BoxDecoration(
+          color: context.colorTokens.dialogSurface,
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 76,
+              height: 76,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accentColor.withValues(alpha: 0.14),
+                border: Border.all(color: accentColor.withValues(alpha: 0.18)),
+              ),
+              child: Icon(Icons.check_rounded, color: accentColor, size: 42),
             ),
-            child: Icon(Icons.check_rounded, color: accentColor, size: 42),
-          ),
-          const Gap(22),
-          Text(
-            context.l10n.timerSessionEndedTitle,
-            textAlign: TextAlign.center,
-            style: context.textStyles.dialogTitleLarge,
-          ),
-          const Gap(12),
-          Text(
-            context.l10n.timerSessionEndedMessage(subjectName),
-            textAlign: TextAlign.center,
-            style: context.textStyles.dialogBodyLarge,
-          ),
-          const Gap(24),
-          _TimerExitDialogButton(
-            label: context.l10n.timerSessionEndedConfirm,
-            textColor: context.colorTokens.white,
-            backgroundColor: accentColor,
-            onTap: () => appNavigator.back<void>(),
-          ),
-        ],
+            const Gap(22),
+            Text(
+              context.l10n.timerSessionEndedTitle,
+              textAlign: TextAlign.center,
+              style: context.textStyles.dialogTitleLarge,
+            ),
+            const Gap(12),
+            Text(
+              context.l10n.timerSessionEndedMessage(subjectName),
+              textAlign: TextAlign.center,
+              style: context.textStyles.dialogBodyLarge,
+            ),
+            const Gap(24),
+            _TimerExitDialogButton(
+              label: context.l10n.timerSessionEndedConfirm,
+              textColor: context.colorTokens.white,
+              backgroundColor: accentColor,
+              onTap: () => appNavigator.back<bool>(result: true),
+            ),
+          ],
+        ),
       ),
     ),
   );

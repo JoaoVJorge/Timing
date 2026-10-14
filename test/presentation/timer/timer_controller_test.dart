@@ -497,9 +497,11 @@ void main() {
         locale: const Locale("pt"),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: const TimerPage(),
+        home: const Scaffold(body: Center(child: Text("Subjects page"))),
       ),
     );
+    unawaited(Get.to<void>(() => const TimerPage())!);
+    await tester.pumpAndSettle();
     final l10n = lookupAppLocalizations(const Locale("pt"));
     Finder actionButton(String label) => find.descendant(
       of: find.byWidgetPredicate(
@@ -541,6 +543,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.isSessionFinished.value, isTrue);
     expect(controller.sessionSeconds.value, 32 * 60);
+    expect(find.text(l10n.timerSessionEndedTitle), findsOneWidget);
+    expect(find.text(l10n.timerContinueButton), findsOneWidget);
+    expect(find.text(l10n.timerBackToSubjectsButton), findsNothing);
+
+    await tester.tap(find.text(l10n.timerSessionEndedConfirm));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Subjects page"), findsOneWidget);
+    expect(find.byType(TimerPage), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -1264,6 +1275,29 @@ void main() {
       expect(update.totals.last, 100 + 32 * 60);
       expect(history.addedSeconds, 32 * 60);
       expect(foregroundService.stopCount, 1);
+    });
+
+    test("does not recreate timer surfaces when backgrounded after finish", () {
+      final notifications = _FakeTimerNotificationService();
+      final liveActivity = _FakeTimerLiveActivityService();
+      final foregroundService = _FakeTimerForegroundService();
+      final controller = _controller(
+        _subject(),
+        timerNotificationService: notifications,
+        timerLiveActivityService: liveActivity,
+        timerForegroundService: foregroundService,
+      );
+      controller.sessionSeconds.value = 60;
+
+      controller.finishSession();
+      controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+      expect(controller.isSessionFinished.value, isTrue);
+      expect(foregroundService.startCount, 0);
+      expect(foregroundService.stopCount, 1);
+      expect(liveActivity.timerSeconds, isNull);
+      expect(liveActivity.endCount, 1);
+      expect(notifications.cancelCount, 1);
     });
 
     test("alarms at an interval boundary and immediately keeps focusing", () {

@@ -57,7 +57,11 @@ class TimerPage extends StatelessWidget {
               appNavigator.back(result: controller.subject);
             }
           },
-          onEndTap: controller.confirmFinishSession,
+          onEndTap: () async {
+            if (await controller.confirmFinishSession() && context.mounted) {
+              appNavigator.back(result: controller.subject);
+            }
+          },
           onMainTap: () {
             if (state == TimerVisualState.resting) {
               controller.continueFocus();
@@ -952,13 +956,13 @@ class _TimerChrome {
       mainActionIcon: switch (state) {
         TimerVisualState.resting => Icons.play_arrow_rounded,
         TimerVisualState.paused => Icons.play_arrow_rounded,
-        TimerVisualState.finished => Icons.arrow_back_rounded,
+        TimerVisualState.finished => Icons.play_arrow_rounded,
         TimerVisualState.focusing => Icons.pause_rounded,
       },
       mainActionLabel: switch (state) {
         TimerVisualState.resting => context.l10n.timerContinueButton,
         TimerVisualState.paused => context.l10n.timerContinueButton,
-        TimerVisualState.finished => context.l10n.timerBackToSubjectsButton,
+        TimerVisualState.finished => context.l10n.timerContinueButton,
         TimerVisualState.focusing => context.l10n.timerPauseButton,
       },
       trailingLabel: isResting
