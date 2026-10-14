@@ -5,7 +5,6 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.RemoteViews
@@ -25,7 +24,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class TimerSurfacesTest {
     @Test
-    fun timerIsNotMediaAndPauseResumeStillWorks() {
+    fun timerIsAColorizedMediaCardAndPauseResumeStillWorks() {
         val controller = Robolectric.buildService(TimerForegroundService::class.java).create()
         val service = controller.get()
         try {
@@ -38,17 +37,20 @@ class TimerSurfacesTest {
             }, 0, 1)
             val notification = shadowOf(service).lastForegroundNotification
             assertEquals(Notification.CATEGORY_STOPWATCH, notification.category)
-            assertNull(notification.extras.getParcelable<android.os.Parcelable>(Notification.EXTRA_MEDIA_SESSION))
-            assertFalse(notification.extras.getString(Notification.EXTRA_TEMPLATE).orEmpty().contains("Media"))
             assertTrue(notification.flags and Notification.FLAG_ONGOING_EVENT != 0)
-            if (Build.VERSION.SDK_INT >= 36) {
-                // The initial API 36 image predates the opt-in Live Updates contract.
-                assertTrue(notification.extras.getBoolean("android.requestPromotedOngoing"))
-                assertFalse(notification.extras.getBoolean(Notification.EXTRA_COLORIZED))
-                assertNull(notification.contentView)
-            }
+            // The media session is what One UI turns into the status bar chip,
+            // the expandable card and the lock screen Now Bar entry.
+            assertNotNull(notification.extras.getParcelable<android.os.Parcelable>(Notification.EXTRA_MEDIA_SESSION))
+            assertTrue(notification.extras.getString(Notification.EXTRA_TEMPLATE).orEmpty().contains("Media"))
+            assertTrue(notification.extras.getBoolean(Notification.EXTRA_COLORIZED))
+            assertFalse(notification.extras.getBoolean("android.requestPromotedOngoing"))
+            assertEquals(R.layout.notification_timer_compact, notification.contentView.layoutId)
+            assertEquals(R.layout.notification_timer_expanded, notification.bigContentView.layoutId)
+            assertEquals(1, notification.actions.size)
             val manager = service.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            assertNull(manager.getNotificationChannel(notification.channelId).sound)
+            val channel = manager.getNotificationChannel(notification.channelId)
+            assertNull(channel.sound)
+            assertEquals(NotificationManager.IMPORTANCE_DEFAULT, channel.importance)
             val toggle = shadowOf(notification.actions.single().actionIntent).savedIntent
             service.onStartCommand(toggle, 0, 2)
             val paused = shadowOf(service).lastForegroundNotification

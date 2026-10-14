@@ -22,6 +22,7 @@ class TimerForegroundService {
 
   static final Map<String, Future<Uint8List?>> _iconCache =
       <String, Future<Uint8List?>>{};
+  int _operationGeneration = 0;
 
   Future<void> start({
     required String title,
@@ -40,11 +41,18 @@ class TimerForegroundService {
       return;
     }
 
+    // Rendering an uncached SVG is asynchronous. A session can finish while
+    // that work is in flight, so only the newest start/stop operation is
+    // allowed to reach Android.
+    final int operationGeneration = ++_operationGeneration;
     try {
       final Uint8List? activityIcon = await _iconCache.putIfAbsent(
         iconName,
         () => _renderActivityIcon(iconName),
       );
+      if (operationGeneration != _operationGeneration) {
+        return;
+      }
       await _channel.invokeMethod<void>("start", <String, Object?>{
         "title": title,
         "actionLabel": actionLabel,
@@ -131,6 +139,7 @@ class TimerForegroundService {
       return;
     }
 
+    _operationGeneration++;
     try {
       await _channel.invokeMethod<void>("stop");
     } on PlatformException {
