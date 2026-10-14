@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
+import "package:timing/core/services/deep_links/invite_code.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/join_group/join_group_controller.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
@@ -42,6 +43,9 @@ class JoinGroupPage extends GetView<JoinGroupController> {
                 controller: controller.codeController,
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: [
+                  // A pasted shared message or link keeps only its code
+                  // instead of being squeezed into the first 12 letters.
+                  const InviteCodeInputFormatter(InviteCodeKind.group),
                   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9]")),
                   LengthLimitingTextInputFormatter(12),
                   _UpperCaseTextFormatter(),

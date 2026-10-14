@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
+import "package:timing/core/services/deep_links/invite_code.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/presentation/friends/widgets/friends_shared.dart";
@@ -16,7 +17,10 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 
 class FindFriendsPage extends StatefulWidget {
-  const FindFriendsPage({super.key});
+  const FindFriendsPage({this.initialCode, super.key});
+
+  /// A friend's code to fill in and look up as the page opens.
+  final String? initialCode;
 
   @override
   State<FindFriendsPage> createState() => _FindFriendsPageState();
@@ -28,6 +32,21 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
   final TextEditingController codeController = TextEditingController();
   final FriendsController controller = Get.find();
   Timer? _searchDebounce;
+
+  @override
+  void initState() {
+    super.initState();
+    final String code = widget.initialCode?.trim() ?? "";
+    if (code.isNotEmpty) {
+      codeController.text = code.toUpperCase();
+      // The search updates state the first frame is still reading.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _searchNow();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -89,7 +108,7 @@ class _FindFriendsPageState extends State<FindFriendsPage> {
     if (text.isEmpty) {
       return;
     }
-    codeController.text = text.toUpperCase();
+    codeController.text = InviteCodeKind.friend.codeIn(text).toUpperCase();
     _scheduleSearch(codeController.text);
   }
 
@@ -182,6 +201,10 @@ class _InviteLookupCard extends StatelessWidget {
                 child: TextField(
                   controller: controller,
                   textCapitalization: TextCapitalization.characters,
+                  // A pasted shared message or link keeps only its code.
+                  inputFormatters: const [
+                    InviteCodeInputFormatter(InviteCodeKind.friend),
+                  ],
                   onChanged: onChanged,
                   style: context.textStyles.black32.copyWith(
                     color: context.colorTokens.textBody,

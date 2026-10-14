@@ -24,7 +24,7 @@ import "package:timing/core/services/auth/offline_grace_period.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/daily_progress/daily_progress_service.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
-import "package:timing/core/services/deep_links/group_link_service.dart";
+import "package:timing/core/services/deep_links/invite_link_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
@@ -139,10 +139,10 @@ class AppController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
-    // A group link can start the app; from here on one that arrives opens the
-    // join screen.
-    if (Get.isRegistered<GroupLinkService>()) {
-      Get.find<GroupLinkService>().start();
+    // An invite link can start the app; from here on one that arrives opens
+    // the join-group or add-friend screen.
+    if (Get.isRegistered<InviteLinkService>()) {
+      Get.find<InviteLinkService>().start();
     }
     if (_supabaseService.hasSignedInUser) {
       _startPresenceTracking();
@@ -443,9 +443,9 @@ class AppController extends GetxController with WidgetsBindingObserver {
     if (_supabaseService.hasSignedInUser) {
       unawaited(_flushPendingAndNotify());
       unawaited(_reconcileActivityHistory());
-      // A group link followed before signing in waited for this moment.
-      if (Get.isRegistered<GroupLinkService>()) {
-        unawaited(Get.find<GroupLinkService>().flushPendingLink());
+      // An invite link followed before signing in waited for this moment.
+      if (Get.isRegistered<InviteLinkService>()) {
+        unawaited(Get.find<InviteLinkService>().flushPendingLink());
       }
     }
   }
