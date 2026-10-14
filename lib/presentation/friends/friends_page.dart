@@ -60,6 +60,7 @@ class FriendsPage extends GetView<FriendsController> {
                   pendingCount: controller.requests.length,
                   sentCount:
                       controller.groupInvitations.length +
+                      controller.pendingGroupJoinRequests.length +
                       controller.sentGroupInvitations.length,
                   onPendingTap: controller.openPendingRequestsPage,
                   onSentTap: controller.openGroupInvitationsPage,

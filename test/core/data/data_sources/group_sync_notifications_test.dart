@@ -151,7 +151,6 @@ void main() {
     colorValue: 1,
     targetDays: 30,
     completedDates: ["2026-09-21"],
-    groupId: "group-1",
   );
 
   test(

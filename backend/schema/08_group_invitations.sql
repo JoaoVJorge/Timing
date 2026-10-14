@@ -3,7 +3,7 @@
 -- Inviting friends into a group, answering those invitations, and the
 -- requests the leader approves (from the group's link, or from an invitation
 -- sent by a member who is not the leader).
--- Requires: 02_friends.sql, 03_groups.sql, 05_group_activities.sql
+-- Requires: 02_friends.sql, 03_groups.sql
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -62,7 +62,8 @@ returns table (
   friend_name text,
   accent_color_value bigint,
   status text,
-  invitation_id uuid
+  invitation_id uuid,
+  join_request_id uuid
 )
 language sql
 security definer
@@ -88,12 +89,25 @@ as $$
     order by gi.invitee_id, gi.created_at desc
   ),
   pending_requests as (
-    select jr.user_id
+    select jr.id, jr.user_id
     from public.group_join_requests jr
     where jr.group_id = target_group_id and jr.status = 'pending'
+  ),
+  candidates as (
+    select cf.friend_id
+    from current_friends cf
+    union
+    select pr.user_id
+    from pending_requests pr
+    where exists (
+      select 1
+      from public.groups g
+      where g.id = target_group_id
+        and g.owner_id = auth.uid()
+    )
   )
   select
-    cf.friend_id,
+    candidate.friend_id,
     coalesce(nullif(trim(p.nick_name), ''), nullif(trim(p.user_name), ''), 'Timing User')
       as friend_name,
     p.accent_color_value,
@@ -103,13 +117,14 @@ as $$
       when li.status = 'pending' then 'invited'
       else 'available'
     end as status,
-    case when li.status = 'pending' then li.id else null end as invitation_id
-  from current_friends cf
-  join public.profiles p on p.id = cf.friend_id
+    case when li.status = 'pending' then li.id else null end as invitation_id,
+    pr.id as join_request_id
+  from candidates candidate
+  join public.profiles p on p.id = candidate.friend_id
   left join public.group_members gm
-    on gm.group_id = target_group_id and gm.user_id = cf.friend_id
-  left join latest_invitations li on li.invitee_id = cf.friend_id
-  left join pending_requests pr on pr.user_id = cf.friend_id
+    on gm.group_id = target_group_id and gm.user_id = candidate.friend_id
+  left join latest_invitations li on li.invitee_id = candidate.friend_id
+  left join pending_requests pr on pr.user_id = candidate.friend_id
   where public.is_group_member(target_group_id, auth.uid())
   order by friend_name asc;
 $$;
@@ -264,10 +279,6 @@ begin
     insert into public.group_members (group_id, user_id, role)
     values (target_group_id, current_user_id, 'member')
     on conflict (group_id, user_id) do nothing;
-
-    perform public.materialize_group_activities_for_user(
-      target_group_id, current_user_id
-    );
   end if;
 
   return query
@@ -301,6 +312,40 @@ $$;
 -- -----------------------------------------------------------------------------
 -- Join requests
 -- -----------------------------------------------------------------------------
+
+-- Requests the current user has already made and that still await the leader.
+-- This is separate from invitations: opening a group link creates a request,
+-- so the requester needs a visible receipt even though there is no invitation
+-- left to show in the Friends area.
+drop function if exists public.pending_group_join_requests();
+create or replace function public.pending_group_join_requests()
+returns table (
+  id uuid,
+  group_id uuid,
+  group_name text,
+  group_theme text,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    jr.id,
+    jr.group_id,
+    g.name,
+    g.theme,
+    jr.created_at
+  from public.group_join_requests jr
+  join public.groups g on g.id = jr.group_id
+  where jr.user_id = auth.uid()
+    and jr.status = 'pending'
+  order by jr.created_at desc;
+$$;
+
+grant execute on function public.pending_group_join_requests()
+to authenticated;
 
 -- Who is waiting to be let into the group. Only the leader answers them, so
 -- only the leader reads the list. Definer rights so the leader can read the
@@ -381,10 +426,6 @@ begin
   update public.group_join_requests
   set status = 'approved', decided_at = now()
   where id = request_id;
-
-  perform public.materialize_group_activities_for_user(
-    target_group_id, requester_id
-  );
 end;
 $$;
 

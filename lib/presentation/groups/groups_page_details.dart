@@ -80,11 +80,7 @@ class _GroupDetailsTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedSegmentedTabs(
-    labels: [
-      context.l10n.leaderboardTitle,
-      context.l10n.goalsTabLabel,
-      context.l10n.chatTabLabel,
-    ],
+    labels: [context.l10n.leaderboardTitle, context.l10n.chatTabLabel],
     selectedIndex: selectedTab.index,
     onSelectIndex: (index) => onSelectTab(GroupDetailsTab.values[index]),
     onSwipe: onSwipeTab,
@@ -121,12 +117,9 @@ class _GroupDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) => Obx(() {
     final GroupDetailsTab selectedTab = controller.selectedDetailsTab.value;
     final bool showLoadingOverlay =
-        selectedTab == GroupDetailsTab.goals &&
-            controller.isLoadingActivityProgress.value &&
-            controller.activityHeaders.isNotEmpty ||
         selectedTab == GroupDetailsTab.chat &&
-            controller.isLoadingChat.value &&
-            controller.imageMessagesFor(group.id).isNotEmpty;
+        controller.isLoadingChat.value &&
+        controller.imageMessagesFor(group.id).isNotEmpty;
 
     return RepaintBoundary(
       child: SizedBox.expand(
@@ -144,9 +137,6 @@ class _GroupDetailsContent extends StatelessWidget {
                       group: group,
                       members: members,
                     ),
-                  ),
-                  _ScrollableDetailsTab(
-                    child: _GoalsTab(controller: controller, group: group),
                   ),
                   _ChatTab(controller: controller, group: group),
                 ],

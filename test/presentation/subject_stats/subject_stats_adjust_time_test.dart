@@ -19,7 +19,7 @@ import "package:timing/theme/theme.dart";
 import "../../support/subject_stats_test_support.dart";
 import "../../support/supabase_test_harness.dart";
 
-SubjectEntity _subject({int seconds = 3600, String? groupId}) => SubjectEntity(
+SubjectEntity _subject({int seconds = 3600}) => SubjectEntity(
   id: "subject-1",
   name: "Cálculo",
   category: TimeCategoryType.studying,
@@ -34,8 +34,6 @@ SubjectEntity _subject({int seconds = 3600, String? groupId}) => SubjectEntity(
   focusSessionCount: 1,
   wallpaperIndex: 0,
   activityType: SubjectActivityType.permanent,
-  groupId: groupId,
-  groupActivityId: groupId == null ? null : "ga1",
 );
 
 SubjectDailyHistoryService _history() =>
@@ -193,13 +191,14 @@ void main() {
       expect(navigator.successMessages, isEmpty);
     });
 
-    test("a group activity tells its group", () async {
+    // The activity may be linked to groups, whose rankings follow its time.
+    test("tells the groups a ranking may have changed", () async {
       final ActivityChangeBus bus = ActivityChangeBus();
-      final List<String?> notified = <String?>[];
+      int notified = 0;
       final StreamSubscription<GroupActivityChange> subscription = bus.stream
-          .listen((change) => notified.add(change.groupId));
+          .listen((_) => notified++);
       addTearDown(subscription.cancel);
-      final SubjectEntity subject = _subject(groupId: "g1");
+      final SubjectEntity subject = _subject();
       final SubjectStatsController controller = buildStatsController(
         subject: subject,
         history: _history(),
@@ -211,7 +210,7 @@ void main() {
       await controller.onRemoveTime();
       await pumpEventQueue();
 
-      expect(notified, ["g1"]);
+      expect(notified, 1);
     });
   });
 

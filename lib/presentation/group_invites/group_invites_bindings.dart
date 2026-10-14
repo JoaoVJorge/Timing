@@ -8,6 +8,7 @@ class GroupInvitesBindings extends Bindings {
       GroupInvitesController(
         groupsRepository: Get.find(),
         appNavigator: Get.find(),
+        supabaseService: Get.find(),
       ),
     );
   }

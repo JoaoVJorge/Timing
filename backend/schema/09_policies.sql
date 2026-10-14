@@ -14,7 +14,6 @@ alter table public.friendships enable row level security;
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;
 alter table public.group_invitations enable row level security;
-alter table public.group_activities enable row level security;
 alter table public.activity_entries enable row level security;
 -- No policies: remove_activity_seconds() is its only reader and writer.
 alter table public.activity_time_removals enable row level security;
@@ -65,11 +64,9 @@ drop policy if exists "managers create invitations" on public.group_invitations;
 drop policy if exists "invitee answers invitations" on public.group_invitations;
 drop policy if exists "inviter or invitee delete invitations"
 on public.group_invitations;
-drop policy if exists "members read group activities" on public.group_activities;
-drop policy if exists "owners manage group activities" on public.group_activities;
-drop policy if exists "managers manage group activities" on public.group_activities;
 drop policy if exists "users see activity from group peers"
 on public.activity_entries;
+drop policy if exists "users read own activity" on public.activity_entries;
 drop policy if exists "users insert own activity" on public.activity_entries;
 drop policy if exists "users manage own activity" on public.activity_entries;
 drop policy if exists "users delete own activity" on public.activity_entries;
@@ -237,23 +234,11 @@ create policy "inviter or invitee delete invitations"
 on public.group_invitations for delete
 using (inviter_id = auth.uid() or invitee_id = auth.uid());
 
-create policy "members read group activities"
-on public.group_activities for select
-using (public.is_group_member(group_activities.group_id, auth.uid()));
-
-create policy "owners manage group activities"
-on public.group_activities for all
-using (public.owns_group(group_activities.group_id, auth.uid()))
-with check (public.owns_group(group_activities.group_id, auth.uid()));
-
-create policy "users see activity from group peers"
+-- Nobody reads another person's entries: group peers only get the aggregates
+-- of group_leaderboard_scores().
+create policy "users read own activity"
 on public.activity_entries for select
-using (
-  user_id = auth.uid()
-  or public.can_view_peer_activity(
-    activity_entries.user_id, activity_entries.subject_id
-  )
-);
+using (user_id = auth.uid());
 
 create policy "users insert own activity"
 on public.activity_entries for insert
@@ -283,13 +268,7 @@ with check (user_id = auth.uid());
 
 create policy "users delete own subjects"
 on public.user_subjects for delete
-using (
-  user_id = auth.uid()
-  and (
-    group_id is null
-    or not public.is_group_member(group_id, auth.uid())
-  )
-);
+using (user_id = auth.uid());
 
 create policy "users read own goals"
 on public.daily_goals for select
@@ -306,13 +285,7 @@ with check (user_id = auth.uid());
 
 create policy "users delete own goals"
 on public.daily_goals for delete
-using (
-  user_id = auth.uid()
-  and (
-    group_id is null
-    or not public.is_group_member(group_id, auth.uid())
-  )
-);
+using (user_id = auth.uid());
 
 create policy "users read own schedule entries"
 on public.schedule_entries for select
@@ -352,3 +325,5 @@ for select to authenticated using (user_id = auth.uid());
 
 -- All management checks now use owns_group.
 drop function if exists public.manages_group(uuid, uuid);
+-- Entries are owner-only now, so the peer check has no policy left to serve.
+drop function if exists public.can_view_peer_activity(uuid, text);

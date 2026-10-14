@@ -12,7 +12,9 @@ class _SummaryStep extends StatelessWidget {
         .where((friend) => controller.selectedFriendIds.contains(friend.id))
         .toList();
     final String description = controller.descriptionController.text.trim();
-    final String activityName = controller.activityNameController.text.trim();
+    final String linkedActivities = controller.selectedSources
+        .map((source) => source.name)
+        .join(", ");
 
     return _SectionCard(
       child: Column(
@@ -73,43 +75,18 @@ class _SummaryStep extends StatelessWidget {
               ),
             ),
           ],
-          const Gap(10),
-          Text(
-            controller.useExistingActivities.value
-                ? controller.compatibleSources
-                      .where(
-                        (source) =>
-                            controller.selectedSourceIds.contains(source.id),
-                      )
-                      .map((source) => source.name)
-                      .join(" + ")
-                : context.l10n.groupLinksCreateNew,
-            style: context.textStyles.bodyLarge,
-          ),
-          if (activityName.isNotEmpty) ...[
+          if (theme != null) ...[
             const Gap(10),
             _SummaryRow(
-              icon: theme?.iconName ?? controller.category.iconName,
-              title: context.l10n.createGroupActivitySummaryLabel,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    activityName.isEmpty ? "-" : activityName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodyLarge,
-                  ),
-                  const Gap(2),
-                  Text(
-                    _activitySummary(context),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: context.colorTokens.textHint,
-                    ),
-                  ),
-                ],
+              icon: theme.iconName,
+              title: context.l10n.groupLinksTitle,
+              child: Text(
+                linkedActivities.isEmpty
+                    ? context.l10n.createGroupNoLinksYet
+                    : linkedActivities,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodyLarge,
               ),
             ),
           ],
@@ -153,22 +130,6 @@ class _SummaryStep extends StatelessWidget {
       ),
     );
   });
-}
-
-extension on _SummaryStep {
-  String _activitySummary(BuildContext context) {
-    final String goal = controller.activityGoalController.text.trim();
-    if (controller.isDailyGoalsTheme) {
-      return context.l10n.createGroupActivitySummaryGoalDays(goal);
-    }
-    if (controller.isPageBased) {
-      return context.l10n.createGroupActivitySummaryReading(goal);
-    }
-    return context.l10n.createGroupActivitySummaryTime(
-      controller.category.localizedLabel(context),
-      goal,
-    );
-  }
 }
 
 class _SummaryRow extends StatelessWidget {

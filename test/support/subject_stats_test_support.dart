@@ -102,7 +102,6 @@ class RecordingNavigator implements AppNavigator {
 Future<bool> _neverConfirm({
   required String itemName,
   required bool isGoal,
-  required bool isFromGroup,
 }) async => false;
 
 Future<int?> _neverPickTime({

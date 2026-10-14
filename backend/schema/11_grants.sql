@@ -11,22 +11,18 @@
 
 -- PostgreSQL grants EXECUTE on new functions to PUBLIC by default. Explicitly
 -- close every definer/trigger helper, then expose only the RPC surface used by
--- authenticated clients. In particular, materialize_group_activities_for_user
--- must remain internal because it bypasses RLS and accepts a target user id.
+-- authenticated clients.
 revoke all on function public.handle_new_user() from public;
-revoke all on function public.materialize_group_activities_for_user(uuid, uuid)
-  from public;
-revoke all on function public.cleanup_group_activities_on_leave() from public;
+revoke all on function public.handle_group_member_left() from public;
 revoke all on function public.delete_activity_entries_of_deleted_subject()
   from public;
-revoke all on function public.materialize_group_activities_on_join() from public;
 revoke all on function public.keep_friendship_identity_immutable() from public;
 revoke all on function public.keep_group_invitation_identity_immutable()
   from public;
 revoke all on function public.set_updated_at() from public;
 revoke all on function public.validate_activity_entry() from public;
-revoke all on function public.protect_group_subject() from public;
-revoke all on function public.protect_group_goal() from public;
+revoke all on function public.discard_group_ownership() from public;
+revoke all on function public.validate_daily_goal_dates() from public;
 revoke all on function public.enforce_group_image_rate_limit() from public;
 
 revoke all on function public.generate_friend_code() from public;
@@ -34,23 +30,21 @@ revoke all on function public.are_friends(uuid, uuid) from public;
 revoke all on function public.is_group_member(uuid, uuid) from public;
 revoke all on function public.share_group(uuid, uuid) from public;
 revoke all on function public.owns_group(uuid, uuid) from public;
-revoke all on function public.can_view_peer_activity(uuid, text) from public;
 revoke all on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) from public;
-revoke all on function public.group_activity_progress(uuid, text) from public;
 revoke all on function public.search_friend_candidates(text, integer)
   from public;
 revoke all on function public.find_profile_by_friend_code(text) from public;
 revoke all on function public.create_group_with_members(
-  text, text, uuid[], text, text, jsonb
+  text, text, uuid[], text, text[], date
 ) from public;
 revoke all on function public.join_group_by_invite_code(text) from public;
-revoke all on function public.update_group_with_activity(
-  uuid, text, text, jsonb
-) from public;
+revoke all on function public.update_group(uuid, text, text, bigint)
+  from public;
 revoke all on function public.reset_group_progress(uuid) from public;
 revoke all on function public.pending_group_invitations() from public;
+revoke all on function public.pending_group_join_requests() from public;
 revoke all on function public.group_join_requests(uuid) from public;
 revoke all on function public.approve_group_join_request(uuid) from public;
 revoke all on function public.decline_group_join_request(uuid) from public;
@@ -73,27 +67,24 @@ grant execute on function public.are_friends(uuid, uuid) to authenticated;
 grant execute on function public.is_group_member(uuid, uuid) to authenticated;
 grant execute on function public.share_group(uuid, uuid) to authenticated;
 grant execute on function public.owns_group(uuid, uuid) to authenticated;
-grant execute on function public.can_view_peer_activity(uuid, text)
-  to authenticated;
 grant execute on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) to authenticated;
-grant execute on function public.group_activity_progress(uuid, text)
-  to authenticated;
 grant execute on function public.search_friend_candidates(text, integer)
   to authenticated;
 grant execute on function public.find_profile_by_friend_code(text)
   to authenticated;
 grant execute on function public.create_group_with_members(
-  text, text, uuid[], text, text, jsonb
+  text, text, uuid[], text, text[], date
 ) to authenticated;
 grant execute on function public.join_group_by_invite_code(text)
   to authenticated;
-grant execute on function public.update_group_with_activity(
-  uuid, text, text, jsonb
-) to authenticated;
+grant execute on function public.update_group(uuid, text, text, bigint)
+  to authenticated;
 grant execute on function public.reset_group_progress(uuid) to authenticated;
 grant execute on function public.pending_group_invitations() to authenticated;
+grant execute on function public.pending_group_join_requests()
+  to authenticated;
 grant execute on function public.group_join_requests(uuid) to authenticated;
 grant execute on function public.approve_group_join_request(uuid)
   to authenticated;
@@ -138,7 +129,6 @@ revoke all on table public.groups from authenticated;
 revoke all on table public.group_members from authenticated;
 revoke all on table public.group_join_requests from authenticated;
 revoke all on table public.group_invitations from authenticated;
-revoke all on table public.group_activities from authenticated;
 revoke all on table public.activity_entries from authenticated;
 revoke all on table public.activity_time_removals from authenticated;
 revoke all on table public.user_subjects from authenticated;
@@ -155,8 +145,6 @@ grant select, insert, delete on table public.group_members to authenticated;
 grant select on table public.group_join_requests to authenticated;
 grant select, insert, update, delete
   on table public.group_invitations to authenticated;
-grant select, insert, update, delete
-  on table public.group_activities to authenticated;
 grant select, insert, update, delete
   on table public.user_subjects to authenticated;
 grant select, insert, update, delete
@@ -197,7 +185,7 @@ grant select, delete on table public.activity_entries to authenticated;
 revoke all on public.group_activity_links, public.group_goal_contributions from public, anon, authenticated;
 grant select on public.group_activity_links to authenticated;
 revoke all on function public.capture_group_goal_contributions() from public, anon, authenticated;
-revoke all on function public.set_group_activity_links(uuid, text[], boolean, date) from public, anon;
+revoke all on function public.set_group_activity_links(uuid, text[], date) from public, anon;
 revoke all on function public.group_activity_link_options(uuid) from public, anon;
-grant execute on function public.set_group_activity_links(uuid, text[], boolean, date) to authenticated;
+grant execute on function public.set_group_activity_links(uuid, text[], date) to authenticated;
 grant execute on function public.group_activity_link_options(uuid) to authenticated;

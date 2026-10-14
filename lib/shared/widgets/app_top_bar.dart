@@ -12,6 +12,7 @@ class AppTopBar extends StatelessWidget {
     this.onTitleTap,
     this.trailing,
     this.titleMaxLines = 2,
+    this.titleStyle,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class AppTopBar extends StatelessWidget {
   final VoidCallback? onTitleTap;
   final Widget? trailing;
   final int titleMaxLines;
+  final TextStyle? titleStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +59,9 @@ class AppTopBar extends StatelessWidget {
                         maxLines: titleMaxLines,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
-                        style: context.textStyles.pageTitle.copyWith(
-                          fontSize: 24,
-                        ),
+                        style:
+                            titleStyle ??
+                            context.textStyles.pageTitle.copyWith(fontSize: 24),
                       ),
                     ),
                   ),

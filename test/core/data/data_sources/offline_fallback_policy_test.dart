@@ -172,7 +172,6 @@ void main() {
         group: _group(),
         name: "Novo",
         description: "",
-        activityPayload: const {},
       );
 
       expect(result.isLeft(), isTrue);

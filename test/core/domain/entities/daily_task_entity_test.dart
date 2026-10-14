@@ -42,35 +42,19 @@ void main() {
       expect(task.shouldAskAboutMissedYesterday(today), true);
     });
 
-    test("tracks group ownership and survives a map round-trip", () {
-      final DailyTaskEntity groupGoal = const DailyTaskEntity(
-        id: "1",
-        name: "Estudar",
-        colorValue: 1,
-        targetDays: 5,
-        completedDates: [],
-        groupId: "group-123",
-      );
-      final DailyTaskEntity soloGoal = groupGoal.copyWith(name: "Ler");
+    test("reads a goal cached with the former group ownership fields", () {
+      final DailyTaskEntity goal = DailyTaskEntity.fromMap(const {
+        "id": "1",
+        "name": "Estudar",
+        "colorValue": 1,
+        "targetDays": 5,
+        "completedDates": <String>[],
+        "groupId": "group-123",
+        "groupActivityId": "activity-1",
+      });
 
-      expect(groupGoal.isFromGroup, true);
-      expect(DailyTaskEntity.fromMap(groupGoal.toMap()).groupId, "group-123");
-      expect(DailyTaskEntity.fromMap(groupGoal.toMap()).isFromGroup, true);
-      // copyWith keeps the group link.
-      expect(soloGoal.isFromGroup, true);
-    });
-
-    test("a goal with no group is not locked", () {
-      final DailyTaskEntity goal = const DailyTaskEntity(
-        id: "1",
-        name: "Estudar",
-        colorValue: 1,
-        targetDays: 5,
-        completedDates: [],
-      );
-
-      expect(goal.isFromGroup, false);
-      expect(DailyTaskEntity.fromMap(goal.toMap()).isFromGroup, false);
+      expect(goal.name, "Estudar");
+      expect(goal.toMap().keys, isNot(contains("groupId")));
     });
 
     test("infinite targets are never auto-completed", () {

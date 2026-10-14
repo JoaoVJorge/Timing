@@ -127,8 +127,8 @@ class SubjectStatsController extends GetxController {
   void selectPeriod({required bool isMonth}) => this.isMonth.value = isMonth;
 
   /// Deletes what the user did on this activity (time, pages and every logged
-  /// session) after asking, and keeps the activity itself. For a group
-  /// activity that is also what takes the user's share out of the ranking.
+  /// session) after asking, and keeps the activity itself. Where it is linked
+  /// to a group, that is also what takes the user's share out of the ranking.
   Future<void> onClearData() async {
     if (isClearingData.value) {
       return;
@@ -137,7 +137,6 @@ class SubjectStatsController extends GetxController {
     final bool confirmed = await _confirmClearData(
       itemName: current.name,
       isGoal: false,
-      isFromGroup: current.isFromGroup,
     );
     if (!confirmed) {
       return;
@@ -148,11 +147,7 @@ class SubjectStatsController extends GetxController {
       final result = await _clearSubjectDataUseCase(subjectId: current.id);
       result.fold((error) => _appNavigator.showError(error), (cleared) {
         _subject.value = cleared;
-        if (cleared.isFromGroup) {
-          _activityChangeBus.notifyGroupActivityChanged(
-            groupId: cleared.groupId,
-          );
-        }
+        _activityChangeBus.notifyGroupActivityChanged();
         _appNavigator.showSuccessSnackBar(
           Get.context?.l10n.clearDataSuccessMessage ?? "Data deleted.",
         );
@@ -199,11 +194,7 @@ class SubjectStatsController extends GetxController {
             );
       result.fold((error) => _appNavigator.showError(error), (updated) {
         _subject.value = updated;
-        if (updated.isFromGroup) {
-          _activityChangeBus.notifyGroupActivityChanged(
-            groupId: updated.groupId,
-          );
-        }
+        _activityChangeBus.notifyGroupActivityChanged();
         if (!isRemoving) {
           unawaited(_achievementUnlockService.checkForNewUnlocks());
         }

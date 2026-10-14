@@ -6,15 +6,13 @@ import "package:fake_async/fake_async.dart";
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:get/get.dart";
+import "package:image/image.dart" as image_lib;
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_routes.dart";
-import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/friends_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friends_social_entity.dart";
-import "package:timing/core/domain/entities/daily_task_entity.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
@@ -25,8 +23,6 @@ import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/social/social_store.dart";
-import "package:timing/core/services/local_storage/app_local_storage_service.dart";
-import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
@@ -36,8 +32,6 @@ import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/presentation/groups/groups_page.dart";
 import "package:timing/shared/widgets/app_skeleton.dart";
 import "package:timing/theme/theme.dart";
-
-class _FakeDailyTasksRepository extends Fake implements DailyTasksRepository {}
 
 class _FakeGroupsRepository implements GroupsRepository {
   _FakeGroupsRepository(this.groupsResult);
@@ -52,9 +46,6 @@ class _FakeGroupsRepository implements GroupsRepository {
   // resolution order of multiple concurrent getGroups() calls independently.
   List<Completer<List<GroupEntity>>>? getGroupsCallCompleters;
   int getGroupsCalls = 0;
-  final Map<String, List<GroupActivityProgressEntity>> progressByGroup =
-      <String, List<GroupActivityProgressEntity>>{};
-  final List<String> progressRequests = <String>[];
   GroupImageMessagesPage initialImagePage = const GroupImageMessagesPage(
     messages: [],
     hasMore: false,
@@ -135,13 +126,6 @@ class _FakeGroupsRepository implements GroupsRepository {
       );
     }
     return Right(groups);
-  }
-
-  @override
-  Future<Either<AppError, List<GroupActivityProgressEntity>>>
-  getGroupActivityProgress(String groupId, {String? localDate}) async {
-    progressRequests.add(groupId);
-    return Right(progressByGroup[groupId] ?? const []);
   }
 
   @override
@@ -241,28 +225,6 @@ class _FakeAppNavigator implements AppNavigator {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _FakeLocalStorageService implements AppLocalStorageService {
-  final Map<LocalStorageKeys, Object> values = <LocalStorageKeys, Object>{};
-  final List<LocalStorageKeys> deletedKeys = <LocalStorageKeys>[];
-
-  @override
-  Future<T?> read<T>(LocalStorageKeys key) async => values[key] as T?;
-
-  @override
-  Future<void> write<T>(LocalStorageKeys key, T value) async {
-    values[key] = value as Object;
-  }
-
-  @override
-  Future<void> delete(LocalStorageKeys key) async {
-    deletedKeys.add(key);
-    values.remove(key);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -316,7 +278,7 @@ void main() {
 
   group("GroupsController refreshAfterActivityChange", () {
     test(
-      "keeps the affected group selected and reloads its goal status",
+      "keeps the affected group selected and refreshes only the scores",
       () async {
         final GroupEntity firstGroup = _group("group-1", "Primeiro");
         final GroupEntity affectedGroup = _group("group-2", "Segundo");
@@ -324,27 +286,15 @@ void main() {
           firstGroup,
           affectedGroup,
         ]);
-        repository.progressByGroup["group-2"] = const [
-          GroupActivityProgressEntity(
-            activityId: "activity-2",
-            kind: "goal",
-            name: "Beber agua",
-            memberId: "me",
-            progress: 1,
-            target: 1,
-            reached: true,
-          ),
-        ];
         final GroupsController controller = _controller(repository);
         await controller.loadGroups();
         controller.selectedGroup.value = affectedGroup;
-        controller.selectedDetailsTab.value = GroupDetailsTab.goals;
 
         await controller.refreshAfterActivityChange(groupId: "group-2");
 
         expect(controller.selectedGroup.value?.id, "group-2");
-        expect(repository.progressRequests, ["group-2"]);
-        expect(controller.activityProgress.single.reached, true);
+        expect(repository.refreshGroupScoresCalls, 1);
+        expect(repository.getGroupsCalls, 1);
       },
     );
   });
@@ -555,78 +505,22 @@ void main() {
     },
   );
 
-  test(
-    "leaving a group preserves personal and unrelated goals and activities",
-    () async {
-      final GroupEntity departingGroup = _group("group-1", "Saindo");
-      final _FakeGroupsRepository repository = _FakeGroupsRepository([
-        departingGroup,
-      ]);
-      final _FakeLocalStorageService storage = _FakeLocalStorageService();
-      storage.values[LocalStorageKeys.dailyTasks] = jsonEncode([
-        _dailyTask("personal").toMap(),
-        _dailyTask("departing", groupId: "group-1").toMap(),
-        _dailyTask("other-group", groupId: "group-2").toMap(),
-      ]);
-      storage.values[LocalStorageKeys.subjects] = jsonEncode([
-        {"id": "personal-activity", "groupId": null},
-        {"id": "departing-activity", "groupId": "group-1"},
-        {"id": "other-group-activity", "groupId": "group-2"},
-      ]);
-      final GroupsController controller = _controller(
-        repository,
-        localStorageService: storage,
-      );
-      controller.groups.value = [departingGroup];
-      controller.selectedGroup.value = departingGroup;
-
-      await controller.onConfirmLeaveGroup();
-
-      final List<dynamic> retainedGoals =
-          jsonDecode(storage.values[LocalStorageKeys.dailyTasks]! as String)
-              as List<dynamic>;
-      expect(
-        retainedGoals.map((item) => (item as Map<String, dynamic>)["id"]),
-        ["personal", "departing", "other-group"],
-      );
-      final List<dynamic> retainedActivities =
-          jsonDecode(storage.values[LocalStorageKeys.subjects]! as String)
-              as List<dynamic>;
-      expect(
-        retainedActivities.map((item) => (item as Map<String, dynamic>)["id"]),
-        ["personal-activity", "departing-activity", "other-group-activity"],
-      );
-      expect(retainedGoals[1]["groupId"], isNull);
-      expect(retainedActivities[1]["groupId"], isNull);
-      expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.subjects)));
-      expect(storage.deletedKeys, isNot(contains(LocalStorageKeys.dailyTasks)));
-      expect(repository.leaveRequests, ["group-1"]);
-    },
-  );
-
-  test("leaving a group preserves malformed activity caches", () async {
+  test("leaving a group drops it from the list and nothing else", () async {
     final GroupEntity departingGroup = _group("group-1", "Saindo");
+    final GroupEntity otherGroup = _group("group-2", "Ficando");
     final _FakeGroupsRepository repository = _FakeGroupsRepository([
       departingGroup,
+      otherGroup,
     ]);
-    final _FakeLocalStorageService storage = _FakeLocalStorageService();
-    storage.values[LocalStorageKeys.dailyTasks] = "not-json";
-    storage.values[LocalStorageKeys.subjects] = jsonEncode(["invalid-item"]);
-    final GroupsController controller = _controller(
-      repository,
-      localStorageService: storage,
-    );
-    controller.groups.value = [departingGroup];
+    final GroupsController controller = _controller(repository);
+    controller.groups.value = [departingGroup, otherGroup];
     controller.selectedGroup.value = departingGroup;
 
     await controller.onConfirmLeaveGroup();
 
-    expect(storage.values[LocalStorageKeys.dailyTasks], "not-json");
-    expect(
-      storage.values[LocalStorageKeys.subjects],
-      jsonEncode(["invalid-item"]),
-    );
     expect(repository.leaveRequests, ["group-1"]);
+    expect(controller.groups.map((group) => group.id), ["group-2"]);
+    expect(controller.selectedGroup.value?.id, "group-2");
   });
 
   test("only the owner can reset group progress", () async {
@@ -648,11 +542,7 @@ void main() {
       memberGroup,
       staleRoleGroup,
     ]);
-    final _FakeLocalStorageService storage = _FakeLocalStorageService();
-    final GroupsController controller = _controller(
-      repository,
-      localStorageService: storage,
-    );
+    final GroupsController controller = _controller(repository);
     controller.groups.value = [ownedGroup, memberGroup];
 
     controller.selectedGroup.value = memberGroup;
@@ -666,7 +556,6 @@ void main() {
     controller.selectedGroup.value = ownedGroup;
     await controller.onConfirmResetGroup();
     expect(repository.resetRequests, ["owned"]);
-    expect(storage.deletedKeys, isEmpty);
   });
 
   test("a retired role cannot reset group progress", () async {
@@ -1014,10 +903,11 @@ void main() {
     );
     expect(controller.rankingPeriod, LeaderboardPeriodType.total);
 
-    await tester.tap(find.text(l10n.goalsTabLabel).first);
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(controller.selectedDetailsTab.value, GroupDetailsTab.goals);
-    expect(tester.takeException(), isNull);
+    // A group has a ranking and a chat: there is no shared activity to show.
+    expect(GroupDetailsTab.values, [
+      GroupDetailsTab.ranking,
+      GroupDetailsTab.chat,
+    ]);
 
     await tester.tap(find.text(l10n.chatTabLabel).first);
     await tester.pump(const Duration(milliseconds: 500));
@@ -1027,6 +917,51 @@ void main() {
     controller.onManageMembers();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text("Eu"), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("chat reserves each photo's aspect ratio before image decoding", (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(430, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final GroupEntity group = _group(
+      "group-1",
+      "Grupo de fotos",
+      theme: GroupThemeType.studying,
+    );
+    final GroupsController controller = _controller(
+      _FakeGroupsRepository([group]),
+    );
+    controller.selectedGroup.value = group;
+    controller.selectedDetailsTab.value = GroupDetailsTab.chat;
+    controller.imageMessagesByGroup[group.id] = [
+      _imageMessage(
+        "photo",
+        DateTime.utc(2026, 10, 9),
+        imageBase64: _testImageBase64(width: 2, height: 1),
+      ),
+    ];
+    Get.put<GroupsController>(controller);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        locale: const Locale("en"),
+        theme: AppThemes.build(seed: Colors.blue, brightness: Brightness.light),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: const GroupsPage(showGroupFlowOnly: true),
+      ),
+    );
+    await tester.pump();
+
+    final AspectRatio photoFrame = tester.widget<AspectRatio>(
+      find.byType(AspectRatio),
+    );
+    expect(photoFrame.aspectRatio, 2);
     expect(tester.takeException(), isNull);
   });
 
@@ -1259,100 +1194,6 @@ void main() {
       expect(find.byIcon(Icons.close_rounded), findsNothing);
       // Everyone may bring someone in; the leader answers what follows.
       expect(find.text(l10n.addMemberButton), findsOneWidget);
-    });
-  });
-
-  group("goals tab activity data", () {
-    Future<AppLocalizations> pumpGoalsTab(
-      WidgetTester tester,
-      GroupThemeType theme,
-      GroupActivityProgressEntity activity,
-    ) async {
-      tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(430, 1800);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      addTearDown(tester.view.resetPhysicalSize);
-
-      final GroupEntity group = _group("group-1", "Grupo", theme: theme);
-      final _FakeGroupsRepository repository = _FakeGroupsRepository([group])
-        ..progressByGroup[group.id] = [activity];
-      final GroupsController controller = _controller(repository);
-      controller.selectedGroup.value = group;
-      controller.isShowingGroupDetails.value = true;
-      controller.selectedDetailsTab.value = GroupDetailsTab.goals;
-      Get.put<GroupsController>(controller);
-
-      await tester.pumpWidget(
-        GetMaterialApp(
-          locale: const Locale("en"),
-          theme: AppThemes.build(
-            seed: Colors.blue,
-            brightness: Brightness.light,
-          ),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: const GroupsPage(showGroupFlowOnly: true),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      return lookupAppLocalizations(const Locale("en"));
-    }
-
-    testWidgets("a reading group shows its page goal, not sessions", (
-      tester,
-    ) async {
-      final AppLocalizations l10n = await pumpGoalsTab(
-        tester,
-        GroupThemeType.reading,
-        const GroupActivityProgressEntity(
-          activityId: "activity-1",
-          kind: "subject",
-          name: "Livro",
-          memberId: "me",
-          progress: 0,
-          target: 10,
-          reached: false,
-        ),
-      );
-
-      expect(find.text(l10n.createSubjectPagesGoalLabel), findsOneWidget);
-      expect(find.text(l10n.metricPagesValue(10)), findsWidgets);
-      // Books have no focus time, pauses or sessions.
-      expect(find.text(l10n.groupActivityFocusDataLabel), findsNothing);
-      expect(find.text(l10n.groupActivityPauseDataLabel), findsNothing);
-      expect(find.text(l10n.groupActivitySessionsDataLabel), findsNothing);
-      expect(find.text(l10n.groupCompletedSessionsStatLabel), findsNothing);
-      expect(find.text(l10n.groupGoalReachedStatLabel), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets("a study group keeps focus, pause and sessions", (
-      tester,
-    ) async {
-      final AppLocalizations l10n = await pumpGoalsTab(
-        tester,
-        GroupThemeType.studying,
-        const GroupActivityProgressEntity(
-          activityId: "activity-1",
-          kind: "subject",
-          name: "Matéria",
-          memberId: "me",
-          progress: 0,
-          target: 1800,
-          reached: false,
-          focusSeconds: 1800,
-          restMinutes: 5,
-          focusSessionCount: 3,
-        ),
-      );
-
-      expect(find.text(l10n.groupActivityFocusDataLabel), findsOneWidget);
-      expect(find.text(l10n.groupActivityPauseDataLabel), findsOneWidget);
-      expect(find.text(l10n.groupActivitySessionsDataLabel), findsOneWidget);
-      expect(find.text(l10n.groupCompletedSessionsStatLabel), findsOneWidget);
-      expect(find.text(l10n.groupGoalReachedStatLabel), findsNothing);
-      expect(tester.takeException(), isNull);
     });
   });
 
@@ -2038,9 +1879,22 @@ void main() {
       ),
       findsOneWidget,
     );
+    final Finder notice = find.byKey(
+      const ValueKey<String>("groups-notice-warning"),
+    );
+    expect(notice, findsOneWidget);
+    expect(
+      tester.getTopLeft(notice).dy,
+      greaterThan(tester.getTopLeft(find.text("Grupos")).dy),
+      reason: "the warning belongs below the page header",
+    );
+    final Container noticeCard = tester.widget<Container>(notice);
+    final BoxDecoration decoration = noticeCard.decoration! as BoxDecoration;
+    expect(decoration.border, isNotNull);
+    expect(decoration.borderRadius, BorderRadius.circular(18));
 
     repository.lastGroupsFetchServedCache = false;
-    await tester.tap(find.text("Tentar novamente"));
+    await tester.tap(find.byKey(const ValueKey<String>("groups-notice-retry")));
     await tester.pump();
     await tester.pump();
 
@@ -2062,7 +1916,6 @@ GroupsController _controller(
   List<FriendEntity> incomingRequests = const [],
   _FakeFriendsRepository? friendsRepository,
   SocialStore? socialStore,
-  AppLocalStorageService? localStorageService,
   ConnectivityService? connectivityService,
   AppNavigator? appNavigator,
 }) {
@@ -2074,10 +1927,8 @@ GroupsController _controller(
         socialStore ??
         SocialStore(friendsRepository: effectiveFriendsRepository),
     groupsRepository: repository,
-    dailyTasksRepository: _FakeDailyTasksRepository(),
     appNavigator: appNavigator ?? _FakeAppNavigator(),
     supabaseService: _FakeSupabaseService(),
-    localStorageService: localStorageService ?? _FakeLocalStorageService(),
     activityChangeBus: activityChangeBus ?? ActivityChangeBus(),
     connectivityService: connectivityService,
   );
@@ -2118,20 +1969,19 @@ GroupMemberEntity _rankingMember(String id, int score) => GroupMemberEntity(
   monthSeconds: score,
 );
 
-GroupImageMessageEntity _imageMessage(String id, DateTime createdAt) =>
-    GroupImageMessageEntity(
-      id: id,
-      groupId: "group-1",
-      senderId: "me",
-      imageBase64: "image",
-      createdAt: createdAt,
-    );
-
-DailyTaskEntity _dailyTask(String id, {String? groupId}) => DailyTaskEntity(
+GroupImageMessageEntity _imageMessage(
+  String id,
+  DateTime createdAt, {
+  String imageBase64 = "image",
+}) => GroupImageMessageEntity(
   id: id,
-  name: id,
-  colorValue: 1,
-  targetDays: 1,
-  completedDates: const [],
-  groupId: groupId,
+  groupId: "group-1",
+  senderId: "me",
+  imageBase64: imageBase64,
+  createdAt: createdAt,
 );
+
+String _testImageBase64({required int width, required int height}) =>
+    base64Encode(
+      image_lib.encodePng(image_lib.Image(width: width, height: height)),
+    );

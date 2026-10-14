@@ -1,4 +1,3 @@
-import "package:timing/core/services/sync/group_activity_link_sync.dart";
 import "package:timing/presentation/group_activity_links/group_activity_links_page.dart";
 import "dart:async";
 import "dart:convert";
@@ -9,11 +8,8 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_routes.dart";
-import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
-import "package:timing/core/domain/entities/daily_task_entity.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
@@ -22,32 +18,26 @@ import "package:timing/core/domain/entities/group_member_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
-import "package:timing/core/services/local_storage/app_local_storage_service.dart";
-import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/connectivity/connectivity_service.dart";
 import "package:timing/core/services/social/social_store.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/services/sync/main_tab_refresh_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/presentation/category/category_controller.dart";
-import "package:timing/presentation/daily_goals/daily_goals_controller.dart";
 import "package:timing/shared/widgets/app_confirmation_dialog.dart";
 import "package:timing/shared/widgets/photo_source_bottom_sheet.dart";
 import "package:image_picker/image_picker.dart";
 import "package:share_plus/share_plus.dart";
 import "package:flutter/services.dart";
 
-enum GroupDetailsTab { ranking, goals, chat }
+enum GroupDetailsTab { ranking, chat }
 
 class GroupsController extends GetxController {
   GroupsController({
     required this._groupsRepository,
     required this._socialStore,
-    required this._dailyTasksRepository,
     required this._appNavigator,
     required this._supabaseService,
-    required this._localStorageService,
     required this._activityChangeBus,
     this._connectivityService,
     MainTabRefreshService? mainTabRefreshService,
@@ -56,10 +46,8 @@ class GroupsController extends GetxController {
 
   final GroupsRepository _groupsRepository;
   final SocialStore _socialStore;
-  final DailyTasksRepository _dailyTasksRepository;
   final AppNavigator _appNavigator;
   final SupabaseService _supabaseService;
-  final AppLocalStorageService _localStorageService;
   final ActivityChangeBus _activityChangeBus;
   final ConnectivityService? _connectivityService;
   final MainTabRefreshService _mainTabRefreshService;
@@ -103,7 +91,6 @@ class GroupsController extends GetxController {
   final RxBool isLoadingFriends = true.obs;
   final RxBool isShowingGroupDetails = false.obs;
   final RxBool isShowingMemberManagement = false.obs;
-  final RxBool isLoadingActivityProgress = false.obs;
   final RxBool isLoadingChat = false.obs;
   final RxBool isSendingImage = false.obs;
   final RxBool isResettingGroup = false.obs;
@@ -115,8 +102,6 @@ class GroupsController extends GetxController {
   final RxBool _assumedOnline = true.obs;
   final RxMap<String, List<GroupImageMessageEntity>> imageMessagesByGroup =
       <String, List<GroupImageMessageEntity>>{}.obs;
-  final RxList<GroupActivityProgressEntity> activityProgress =
-      <GroupActivityProgressEntity>[].obs;
 
   /// People waiting for the selected group's leader to let them in. Only the
   /// leader is served these, so for anyone else the list stays empty.
@@ -169,10 +154,6 @@ class GroupsController extends GetxController {
   Map<String, int> _rankByMemberId = const {};
   Map<String, int?> _differenceByMemberId = const {};
   Map<int, int> _memberCountByScore = const {};
-  String? _activityProgressCacheKey;
-  final Set<String> _loadingActivityProgressKeys = <String>{};
-  final Map<String, List<GroupActivityProgressEntity>>
-  _activityProgressByCacheKey = <String, List<GroupActivityProgressEntity>>{};
   final Set<String> _loadingImageMessageGroupIds = <String>{};
   final RxSet<String> _loadingOlderImageMessageGroupIds = <String>{}.obs;
   final Map<String, bool> _hasMoreImageMessagesByGroup = <String, bool>{};
@@ -475,7 +456,6 @@ class GroupsController extends GetxController {
       return;
     }
     final int revision = ++_loadGroupsRevision;
-    bool membershipChanged = false;
     isLoading.value = true;
     didFailLoadingGroups.value = false;
     try {
@@ -504,7 +484,6 @@ class GroupsController extends GetxController {
           if (_hasLoadedGroups &&
               (previousGroupIds.length != loadedGroupIds.length ||
                   !previousGroupIds.containsAll(loadedGroupIds))) {
-            membershipChanged = true;
             _mainTabRefreshService.markGroupsChanged();
           }
           // Copy so the controller's list doesn't alias the repository's
@@ -520,9 +499,6 @@ class GroupsController extends GetxController {
           _hasLoadedGroups = true;
         },
       );
-      if (membershipChanged) {
-        await _invalidateActivityCaches();
-      }
     } on TimeoutException {
       if (revision == _loadGroupsRevision) {
         didFailLoadingGroups.value = true;
@@ -613,97 +589,10 @@ class GroupsController extends GetxController {
 
   void onSelectGroup(GroupEntity group) {
     selectedGroup.value = group;
-    activityProgress.clear();
-    _activityProgressCacheKey = null;
-    isLoadingActivityProgress.value = false;
     selectedDetailsTab.value = GroupDetailsTab.ranking;
     isShowingGroupDetails.value = true;
     isShowingMemberManagement.value = false;
-    unawaited(loadActivityProgress());
     _appNavigator.toNamed(AppRoutes.groupDetails);
-  }
-
-  /// Per-member completion of the selected group's activities, used by the
-  /// group's "Metas" tab to show who completed it today.
-  Future<void> loadActivityProgress() async {
-    final GroupEntity? group = selectedGroup.value;
-    if (group == null) {
-      activityProgress.clear();
-      _activityProgressCacheKey = null;
-      return;
-    }
-    final String cacheKey = "${group.id}:${_todayKey()}";
-    final List<GroupActivityProgressEntity>? cachedProgress =
-        _activityProgressByCacheKey[cacheKey];
-    if (cachedProgress != null) {
-      // Copy so the observable's backing list never aliases the cached
-      // instance — RxList.value assigns by reference, so a later
-      // activityProgress.clear() (e.g. from onSelectGroup) would otherwise
-      // empty the cached list too and poison every future read.
-      activityProgress.value = List.of(cachedProgress);
-      _activityProgressCacheKey = cacheKey;
-      return;
-    }
-    if (_activityProgressCacheKey == cacheKey ||
-        _loadingActivityProgressKeys.contains(cacheKey)) {
-      if (_loadingActivityProgressKeys.contains(cacheKey) &&
-          selectedGroup.value?.id == group.id &&
-          activityProgress.isEmpty) {
-        isLoadingActivityProgress.value = true;
-      }
-      return;
-    }
-    _loadingActivityProgressKeys.add(cacheKey);
-    isLoadingActivityProgress.value = true;
-    try {
-      final Either<AppError, List<GroupActivityProgressEntity>> result =
-          await _groupsRepository.getGroupActivityProgress(
-            group.id,
-            localDate: _todayKey(),
-          );
-      result.fold(
-        (error) {
-          if (selectedGroup.value?.id == group.id) {
-            activityProgress.clear();
-            _activityProgressCacheKey = null;
-          }
-        },
-        (value) {
-          _activityProgressByCacheKey[cacheKey] = value;
-          if (selectedGroup.value?.id == group.id) {
-            // Copy so clearing the observable later never mutates the cached
-            // list (RxList.value assigns by reference).
-            activityProgress.value = List.of(value);
-            _activityProgressCacheKey = cacheKey;
-          }
-        },
-      );
-    } finally {
-      _loadingActivityProgressKeys.remove(cacheKey);
-      if (selectedGroup.value?.id == group.id) {
-        isLoadingActivityProgress.value = false;
-      }
-    }
-  }
-
-  /// One entry per distinct group activity (usually just one), for the tab
-  /// header.
-  List<GroupActivityProgressEntity> get activityHeaders {
-    final Set<String> seen = {};
-    final List<GroupActivityProgressEntity> headers = [];
-    for (final GroupActivityProgressEntity item in activityProgress) {
-      if (seen.add(item.activityId)) {
-        headers.add(item);
-      }
-    }
-    return headers;
-  }
-
-  String _todayKey() {
-    final DateTime now = DateTime.now();
-    return "${now.year.toString().padLeft(4, "0")}-"
-        "${now.month.toString().padLeft(2, "0")}-"
-        "${now.day.toString().padLeft(2, "0")}";
   }
 
   void onBackToGroupList() {
@@ -740,12 +629,16 @@ class GroupsController extends GetxController {
       return;
     }
     final String link = groupLinkFor(group);
+    final String message =
+        Get.context?.l10n.shareGroupLinkMessage(
+          group.name,
+          link,
+          group.inviteCode,
+        ) ??
+        "Join my group ${group.name} on Timing with the code:\n"
+            "${group.inviteCode}\n\nOpen in the app: $link";
     await SharePlus.instance.share(
-      ShareParams(
-        text:
-            Get.context?.l10n.shareGroupLinkMessage(group.name, link) ??
-            "Join my group ${group.name} on Timing: $link",
-      ),
+      ShareParams(text: message, title: group.name),
     );
   }
 
@@ -811,9 +704,6 @@ class GroupsController extends GetxController {
       return;
     }
     selectedPeriod.value = period;
-    if (selectedDetailsTab.value == GroupDetailsTab.goals) {
-      unawaited(loadActivityProgress());
-    }
   }
 
   void onSelectDetailsTab(GroupDetailsTab tab) {
@@ -834,11 +724,6 @@ class GroupsController extends GetxController {
 
   void _selectDetailsTab(GroupDetailsTab tab) {
     if (selectedDetailsTab.value == tab) {
-      if (tab == GroupDetailsTab.goals &&
-          activityProgress.isEmpty &&
-          !isLoadingActivityProgress.value) {
-        unawaited(loadActivityProgress());
-      }
       return;
     }
     selectedDetailsTab.value = tab;
@@ -847,9 +732,6 @@ class GroupsController extends GetxController {
       if (groupId != null) {
         loadImageMessages(groupId);
       }
-    }
-    if (tab == GroupDetailsTab.goals) {
-      unawaited(loadActivityProgress());
     }
   }
 
@@ -939,12 +821,11 @@ class GroupsController extends GetxController {
     isSendingImage.value = false;
   }
 
+  /// Lets the member choose which of their activities count for the group.
   Future<void> onManageActivityLinks() async {
     final group = selectedGroup.value;
     if (group == null) return;
     await showGroupActivityLinks(group);
-    await _reloadVisibleActivityControllers();
-    _mainTabRefreshService.markGroupsChanged();
     await refreshAfterActivityChange(groupId: group.id);
   }
 
@@ -965,11 +846,8 @@ class GroupsController extends GetxController {
       groups.add(newGroup);
     }
     selectedGroup.value = newGroup;
-    _activityProgressCacheKey = null;
-    activityProgress.clear();
     groups.refresh();
     _mainTabRefreshService.markGroupsChanged();
-    await _reloadVisibleActivityControllers();
     _appNavigator.showSuccessSnackBar(Get.context!.l10n.groupCreatedSuccess);
   }
 
@@ -983,84 +861,16 @@ class GroupsController extends GetxController {
       groups.add(joinedGroup);
     }
     selectedGroup.value = joinedGroup;
-    _activityProgressCacheKey = null;
-    activityProgress.clear();
     groups.refresh();
     _mainTabRefreshService.markGroupsChanged();
-    await _invalidateActivityCaches();
   }
 
+  /// Something that counts for a ranking changed: recorded time, pages, a
+  /// checked goal, or which activities are linked.
   Future<void> refreshAfterActivityChange({String? groupId}) async {
-    final String? affectedGroupId = groupId ?? selectedGroup.value?.id;
-    _activityProgressByCacheKey.clear();
-    _activityProgressCacheKey = null;
     if (!await _refreshScoresOnly()) {
       await loadGroups();
     }
-    if (selectedGroup.value?.id == affectedGroupId &&
-        selectedDetailsTab.value == GroupDetailsTab.goals) {
-      activityProgress.clear();
-      await loadActivityProgress();
-    }
-  }
-
-  /// Merge server-created personal sources without discarding offline work.
-  Future<void> _invalidateActivityCaches() async {
-    await refreshPersonalActivitiesAfterLinking();
-    await _reloadVisibleActivityControllers();
-  }
-
-  /// Legacy cached copies become personal activities when membership ends.
-  /// Preserve their history while the next reconciliation updates metadata.
-  Future<void> _removeDepartedGroupActivityCaches(String groupId) async {
-    await Future.wait([
-      _removeGroupItemsFromCache(LocalStorageKeys.subjects, groupId),
-      _removeGroupItemsFromCache(LocalStorageKeys.dailyTasks, groupId),
-    ]);
-    await _reloadVisibleActivityControllers();
-  }
-
-  Future<void> _removeGroupItemsFromCache(
-    LocalStorageKeys key,
-    String groupId,
-  ) async {
-    final String? encodedItems = await _localStorageService.read<String?>(key);
-    if (encodedItems == null) {
-      return;
-    }
-
-    try {
-      final dynamic decodedItems = jsonDecode(encodedItems);
-      if (decodedItems is! List<dynamic> ||
-          decodedItems.any((item) => item is! Map<String, dynamic>)) {
-        return;
-      }
-      final List<dynamic> retainedItems = decodedItems.map((item) {
-        final Map<String, dynamic> cachedItem = Map<String, dynamic>.from(
-          item as Map,
-        );
-        if (cachedItem["groupId"] == groupId) {
-          cachedItem["groupId"] = null;
-          cachedItem["groupActivityId"] = null;
-        }
-        return cachedItem;
-      }).toList();
-      await _localStorageService.write(key, jsonEncode(retainedItems));
-    } on FormatException {
-      // Preserve unreadable cache data. The subsequent remote reload may heal
-      // it, while deleting it here could hide unrelated personal activities.
-    }
-  }
-
-  Future<void> _reloadVisibleActivityControllers() async {
-    final List<Future<void>> reloads = [];
-    if (Get.isRegistered<CategoryController>()) {
-      reloads.add(Get.find<CategoryController>().loadSubjects());
-    }
-    if (Get.isRegistered<DailyGoalsController>()) {
-      reloads.add(Get.find<DailyGoalsController>().loadTasks());
-    }
-    await Future.wait(reloads);
   }
 
   /// Friends live next to Groups: both answer "how am I doing with others?".
@@ -1075,6 +885,10 @@ class GroupsController extends GetxController {
       return;
     }
     await _appNavigator.toNamed<void>(AppRoutes.groupInvites, arguments: group);
+    await Future.wait([
+      loadGroups(preferredGroupId: group.id),
+      if (isGroupOwner(group)) loadJoinRequests(),
+    ]);
   }
 
   Future<void> onSendFriendRequestToMember(GroupMemberEntity member) async {
@@ -1281,17 +1095,8 @@ class GroupsController extends GetxController {
       groups[existingIndex] = updatedGroup;
     }
     selectedGroup.value = updatedGroup;
-    _activityProgressByCacheKey.removeWhere(
-      (key, value) => key.startsWith("${updatedGroup.id}:"),
-    );
-    _activityProgressCacheKey = null;
-    activityProgress.clear();
     groups.refresh();
     _mainTabRefreshService.markGroupsChanged();
-    await _invalidateActivityCaches();
-    if (selectedDetailsTab.value == GroupDetailsTab.goals) {
-      await loadActivityProgress();
-    }
     _appNavigator.showSuccessSnackBar(
       Get.context?.l10n.groupUpdatedSuccess ?? "Group updated successfully",
     );
@@ -1323,36 +1128,21 @@ class GroupsController extends GetxController {
       return;
     }
 
-    bool confirmed;
-    bool clearOwnHistory = false;
-    if (group.theme == GroupThemeType.dailyGoals) {
-      final (bool, bool) result = await showCheckboxConfirmationDialog(
-        title: context.l10n.resetGroupConfirmTitle,
-        message: context.l10n.resetGroupConfirmMessage(group.name),
-        cancelLabel: context.l10n.cancelButton,
-        confirmLabel: context.l10n.resetGroupConfirmButton,
-        checkboxLabel: context.l10n.resetGroupClearOwnHistoryLabel,
-        icon: Icons.restart_alt_rounded,
-        isDestructive: true,
-      );
-      (confirmed, clearOwnHistory) = result;
-    } else {
-      confirmed = await showAppConfirmationDialog(
-        title: context.l10n.resetGroupConfirmTitle,
-        message: context.l10n.resetGroupConfirmMessage(group.name),
-        cancelLabel: context.l10n.cancelButton,
-        confirmLabel: context.l10n.resetGroupConfirmButton,
-        icon: Icons.restart_alt_rounded,
-        isDestructive: true,
-      );
-    }
+    final bool confirmed = await showAppConfirmationDialog(
+      title: context.l10n.resetGroupConfirmTitle,
+      message: context.l10n.resetGroupConfirmMessage(group.name),
+      cancelLabel: context.l10n.cancelButton,
+      confirmLabel: context.l10n.resetGroupConfirmButton,
+      icon: Icons.restart_alt_rounded,
+      isDestructive: true,
+    );
     if (!confirmed || selectedGroup.value?.id != group.id) {
       return;
     }
-    await onConfirmResetGroup(clearOwnHistory: clearOwnHistory);
+    await onConfirmResetGroup();
   }
 
-  Future<void> onConfirmResetGroup({bool clearOwnHistory = false}) async {
+  Future<void> onConfirmResetGroup() async {
     final GroupEntity? group = selectedGroup.value;
     if (group == null ||
         isResettingGroup.value ||
@@ -1367,18 +1157,7 @@ class GroupsController extends GetxController {
       await result.fold(
         (error) async => _appNavigator.showErrorOrOfflineSnackBar(),
         (_) async {
-          if (clearOwnHistory) {
-            await _clearOwnActivityHistory(group);
-          }
-          _activityProgressByCacheKey.removeWhere(
-            (key, value) => key.startsWith("${group.id}:"),
-          );
-          _activityProgressCacheKey = null;
-          activityProgress.clear();
           await loadGroups(preferredGroupId: group.id);
-          if (selectedDetailsTab.value == GroupDetailsTab.goals) {
-            await loadActivityProgress();
-          }
           _appNavigator.showSuccessSnackBar(
             Get.context?.l10n.groupResetSuccess ??
                 "The group's progress and ranking were reset.",
@@ -1389,38 +1168,6 @@ class GroupsController extends GetxController {
       isResettingGroup.value = false;
     }
   }
-
-  /// The `reset_group_progress` RPC only zeroes the shared/ranking side and
-  /// deliberately keeps each member's personal history (see
-  /// resetGroupConfirmMessage). When the owner opts in via the checkbox, also
-  /// wipe this device's own completed-days record for the group's goal so it
-  /// starts counting from zero again.
-  Future<void> _clearOwnActivityHistory(GroupEntity group) =>
-      _dailyTasksRepository.runSerializedMutation(() async {
-        final Either<AppError, List<DailyTaskEntity>> result =
-            await _dailyTasksRepository.getTasksForMutation();
-        await result.fold((_) async {}, (tasks) async {
-          final bool hasHistoryToClear = tasks.any(
-            (task) =>
-                task.groupId == group.id && task.completedDates.isNotEmpty,
-          );
-          if (!hasHistoryToClear) {
-            return;
-          }
-
-          final List<DailyTaskEntity> updatedTasks = [
-            for (final DailyTaskEntity task in tasks)
-              if (task.groupId == group.id)
-                task.copyWith(
-                  completedDates: const [],
-                  updatedAt: DateTime.now().toUtc(),
-                )
-              else
-                task,
-          ];
-          await _dailyTasksRepository.saveTasks(updatedTasks);
-        });
-      });
 
   bool _ensureGroupOwner(GroupEntity group) {
     if (isGroupOwner(group)) {
@@ -1472,17 +1219,11 @@ class GroupsController extends GetxController {
       groups.removeWhere((item) => item.id == group.id);
       imageMessagesByGroup.remove(group.id);
       _hasMoreImageMessagesByGroup.remove(group.id);
-      _activityProgressByCacheKey.removeWhere(
-        (key, value) => key.startsWith("${group.id}:"),
-      );
-      _activityProgressCacheKey = null;
-      activityProgress.clear();
       selectedGroup.value = groups.isEmpty ? null : groups.first;
       isShowingMemberManagement.value = false;
       isShowingGroupDetails.value = false;
       groups.refresh();
       _mainTabRefreshService.markGroupsChanged();
-      await _removeDepartedGroupActivityCaches(group.id);
       _closeGroupDetailsRoute();
       _appNavigator.showSuccessSnackBar(
         Get.context?.l10n.leftGroupMessage ?? "You left the group.",

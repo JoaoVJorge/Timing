@@ -17,7 +17,6 @@ SubjectEntity _subject(
   String name = "Matéria",
   int totalSeconds = 0,
   int currentPages = 0,
-  String? groupActivityId,
   int goalSeconds = 0,
 }) => SubjectEntity(
   id: id,
@@ -33,8 +32,6 @@ SubjectEntity _subject(
   restMinutes: 5,
   focusSessionCount: 1,
   wallpaperIndex: 0,
-  groupId: groupActivityId == null ? null : "g1",
-  groupActivityId: groupActivityId,
 );
 
 Map<String, dynamic> _row(SubjectEntity s) => {
@@ -53,8 +50,6 @@ Map<String, dynamic> _row(SubjectEntity s) => {
   "focus_session_count": s.focusSessionCount,
   "wallpaper_index": s.wallpaperIndex,
   "activity_type": s.activityType.name,
-  "group_id": s.groupId,
-  "group_activity_id": s.groupActivityId,
 };
 
 class _Rig {
@@ -113,7 +108,7 @@ class _Rig {
 }
 
 void main() {
-  test("migration releases group ownership while preserving local history", () {
+  test("a cached copy once handed out by a group is an ordinary activity", () {
     final legacy = SubjectEntity.fromMap(const {
       "id": "legacy",
       "name": "Personal",
@@ -126,11 +121,11 @@ void main() {
     });
     final merged = SubjectsRepository.mergeSubjects(
       local: [legacy],
-      remote: [legacy.copyWith(clearGroupLink: true, totalSeconds: 300)],
+      remote: [legacy.copyWith(totalSeconds: 300)],
       deletions: {},
       syncedIds: {"legacy"},
     );
-    expect(merged.single.isFromGroup, isFalse);
+    expect(merged.single.toMap().keys, isNot(contains("groupId")));
     expect(merged.single.totalSeconds, 500);
     expect(merged.single.goalSeconds, 600);
   });
@@ -218,30 +213,6 @@ void main() {
 
       expect(rig.local().single.totalSeconds, 5000);
       expect(rig.local().single.currentPages, 40);
-    });
-
-    test("adopts the owner's edit of a group activity", () async {
-      rig.remote = [
-        _subject(
-          "grp_x",
-          name: "Nome novo",
-          goalSeconds: 7200,
-          groupActivityId: "x",
-        ),
-      ];
-      rig.seedLocal([
-        _subject(
-          "grp_x",
-          name: "Nome velho",
-          goalSeconds: 3600,
-          groupActivityId: "x",
-        ),
-      ]);
-
-      await rig.dataSource.reconcileWithRemote();
-
-      expect(rig.local().single.name, "Nome novo");
-      expect(rig.local().single.goalSeconds, 7200);
     });
 
     test("keeps this device's own edit of a personal activity", () async {

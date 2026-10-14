@@ -4,6 +4,7 @@ import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 import "package:get/get.dart";
 import "package:share_plus/share_plus.dart";
+import "package:timing/app/app_constants.dart";
 import "package:timing/app/app_controller.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/data/repositories/friends_repository.dart";
@@ -12,6 +13,7 @@ import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/friend_suggestion_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/pending_group_join_request_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/services/social/social_store.dart";
 import "package:timing/l10n/app_localizations.dart";
@@ -45,6 +47,8 @@ class FriendsController extends GetxController {
 
   final RxList<GroupInvitationEntity> groupInvitations =
       <GroupInvitationEntity>[].obs;
+  final RxList<PendingGroupJoinRequestEntity> pendingGroupJoinRequests =
+      <PendingGroupJoinRequestEntity>[].obs;
   final RxList<SentGroupInvitationEntity> sentGroupInvitations =
       <SentGroupInvitationEntity>[].obs;
   final RxBool isLoading = true.obs;
@@ -75,6 +79,16 @@ class FriendsController extends GetxController {
     _setPresencePolling(_appController.isAppInForeground.value);
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Opened from a friend's link, which carries their code.
+    final Object? arguments = _appNavigator.arguments;
+    if (arguments is String && arguments.trim().isNotEmpty) {
+      unawaited(openAddFriendPage(code: arguments.trim()));
+    }
+  }
+
   void _setPresencePolling(bool isForeground) {
     _presenceTimer?.cancel();
     _presenceTimer = null;
@@ -98,10 +112,15 @@ class FriendsController extends GetxController {
     try {
       final socialFuture = _socialStore.load();
       final groupInvitationsFuture = _loadGroupInvitations();
+      final joinRequestsFuture = _loadPendingGroupJoinRequests();
       final sentGroupInvitationsFuture = _loadSentGroupInvitations();
       final result = await socialFuture;
       result.fold((error) => _appNavigator.showErrorSnackBar(), (_) {});
-      await Future.wait([groupInvitationsFuture, sentGroupInvitationsFuture]);
+      await Future.wait([
+        groupInvitationsFuture,
+        joinRequestsFuture,
+        sentGroupInvitationsFuture,
+      ]);
     } finally {
       isLoading.value = false;
     }
@@ -123,8 +142,21 @@ class FriendsController extends GetxController {
     );
   }
 
+  Future<void> _loadPendingGroupJoinRequests() async {
+    final result = await _groupsRepository
+        .getPendingJoinRequestsForCurrentUser();
+    result.fold(
+      (error) => pendingGroupJoinRequests.clear(),
+      pendingGroupJoinRequests.assignAll,
+    );
+  }
+
   Future<void> refreshGroupInvitations() async {
-    await Future.wait([_loadGroupInvitations(), _loadSentGroupInvitations()]);
+    await Future.wait([
+      _loadGroupInvitations(),
+      _loadPendingGroupJoinRequests(),
+      _loadSentGroupInvitations(),
+    ]);
   }
 
   Future<void> acceptGroupInvitation(GroupInvitationEntity invitation) async {
@@ -141,6 +173,7 @@ class FriendsController extends GetxController {
           // leaves the leader to answer, so there is no group to open yet.
           final GroupEntity? group = outcome.group;
           if (group == null) {
+            await _loadPendingGroupJoinRequests();
             _appNavigator.showSuccessSnackBar(
               _l10n?.groupJoinRequestSentMessage(invitation.groupName) ??
                   "Request sent to the group's leader.",
@@ -278,18 +311,21 @@ class FriendsController extends GetxController {
     if (inviteCode.value.isEmpty) {
       return;
     }
+    final String code = inviteCode.value;
+    final String link = AppConstants.friendLink(code);
     await SharePlus.instance.share(
       ShareParams(
         text:
-            _l10n?.shareInviteCodeMessage(inviteCode.value) ??
-            "Add me on Timing with my code: ${inviteCode.value}",
+            _l10n?.shareInviteCodeMessage(code, link) ??
+            "Add me on Timing with my code:\n$code\n\nOpen in the app: $link",
       ),
     );
   }
 
-  Future<void> openAddFriendPage() async {
+  /// [code] comes from a friend's link and is looked up straight away.
+  Future<void> openAddFriendPage({String? code}) async {
     resetSearch();
-    await Get.to<void>(() => const FindFriendsPage());
+    await Get.to<void>(() => FindFriendsPage(initialCode: code));
     await loadSocial();
   }
 

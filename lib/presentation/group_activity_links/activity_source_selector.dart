@@ -6,26 +6,24 @@ import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/theme/app_spacing.dart";
 
+/// Picks which of the member's own activities count for a group. [options]
+/// already holds only what fits the group's theme. A daily-goals group takes
+/// one goal, so with [singleSelection] choosing another replaces the current
+/// one; tapping the chosen one always clears it.
 class ActivitySourceSelector extends StatelessWidget {
   const ActivitySourceSelector({
     super.key,
-    required this.useExisting,
     required this.options,
     required this.selectedIds,
-    required this.onModeChanged,
     required this.onToggle,
-    this.isReading = false,
-    this.title,
+    this.singleSelection = false,
     this.accent,
   });
 
-  final bool useExisting;
   final List<GroupActivitySourceOption> options;
   final Set<String> selectedIds;
-  final ValueChanged<bool> onModeChanged;
   final ValueChanged<String> onToggle;
-  final bool isReading;
-  final String? title;
+  final bool singleSelection;
   final Color? accent;
 
   @override
@@ -35,81 +33,38 @@ class ActivitySourceSelector extends StatelessWidget {
       accent: color,
       header: CreationSectionHeader(
         icon: Icons.link_rounded,
-        label: title ?? context.l10n.groupLinksTitle,
+        label: context.l10n.groupLinksTitle,
         accent: color,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _LinkModeOption(
-            title: context.l10n.groupLinksUseExisting,
-            icon: Icons.checklist_rounded,
-            selected: useExisting,
-            accent: color,
-            onTap: () => onModeChanged(true),
-          ),
-          const Gap(10),
-          _LinkModeOption(
-            title: context.l10n.groupLinksCreateNew,
-            icon: Icons.add_rounded,
-            selected: !useExisting,
-            accent: color,
-            onTap: () => onModeChanged(false),
-          ),
-          if (useExisting) ...[
-            const Gap(AppSpacing.betweenSections),
+          if (options.isEmpty)
             Text(
-              context.l10n.groupLinksSelected(selectedIds.length),
+              singleSelection
+                  ? context.l10n.groupLinksEmptyGoals
+                  : context.l10n.groupLinksEmpty,
+              style: context.textStyles.caption,
+            )
+          else ...[
+            Text(
+              singleSelection
+                  ? context.l10n.groupLinksSelectedGoal(selectedIds.length)
+                  : context.l10n.groupLinksSelected(selectedIds.length),
               style: context.textStyles.bodySmall.copyWith(
                 color: color,
                 fontWeight: FontWeight.w800,
               ),
             ),
             const Gap(AppSpacing.betweenRelated),
-            if (options.isEmpty)
-              Text(
-                context.l10n.groupLinksEmpty,
-                style: context.textStyles.caption,
-              ),
             for (final option in options) ...[
-              Material(
-                clipBehavior: Clip.antiAlias,
-                color: selectedIds.contains(option.id)
-                    ? color.withValues(alpha: 0.08)
-                    : context.colorTokens.surfaceInnerLayer.withValues(
-                        alpha: 0.3,
-                      ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: selectedIds.contains(option.id)
-                        ? color.withValues(alpha: 0.5)
-                        : context.colorTokens.borderUnfocused.withValues(
-                            alpha: 0.55,
-                          ),
-                  ),
-                ),
-                child: CheckboxListTile(
-                  key: ValueKey('source_${option.id}'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  activeColor: color,
-                  checkColor: context.colorTokens.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  title: Text(
-                    option.name,
-                    style: context.textStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  value: selectedIds.contains(option.id),
-                  onChanged: (_) => onToggle(option.id),
-                ),
+              _SourceTile(
+                key: ValueKey('source_${option.id}'),
+                name: option.name,
+                selected: selectedIds.contains(option.id),
+                singleSelection: singleSelection,
+                accent: color,
+                onTap: () => onToggle(option.id),
               ),
               const Gap(8),
             ],
@@ -127,28 +82,12 @@ class ActivitySourceSelector extends StatelessWidget {
                 Icon(Icons.info_outline_rounded, color: color, size: 20),
                 const Gap(10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.groupLinksExplanation,
-                        style: context.textStyles.bodySmall.copyWith(
-                          color: context.colorTokens.textHint,
-                          height: 1.4,
-                        ),
-                      ),
-                      if (isReading) ...[
-                        const Gap(8),
-                        Text(
-                          context.l10n.groupLinksReadingHint,
-                          style: context.textStyles.bodySmall.copyWith(
-                            color: color,
-                            fontWeight: FontWeight.w700,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: Text(
+                    context.l10n.groupLinksExplanation,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textHint,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -160,73 +99,77 @@ class ActivitySourceSelector extends StatelessWidget {
   }
 }
 
-class _LinkModeOption extends StatelessWidget {
-  const _LinkModeOption({
-    required this.title,
-    required this.icon,
+class _SourceTile extends StatelessWidget {
+  const _SourceTile({
+    super.key,
+    required this.name,
     required this.selected,
+    required this.singleSelection,
     required this.accent,
     required this.onTap,
   });
 
-  final String title;
-  final IconData icon;
+  final String name;
   final bool selected;
+  final bool singleSelection;
   final Color accent;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    selected: selected,
-    button: true,
-    child: BounceTap(
-      behavior: HitTestBehavior.opaque,
-      pressedScale: 0.98,
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        constraints: const BoxConstraints(minHeight: 60),
-        padding: AppSpacing.tile,
-        decoration: BoxDecoration(
-          color: selected
-              ? accent.withValues(alpha: 0.08)
-              : context.colorTokens.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
+  Widget build(BuildContext context) {
+    final IconData icon = singleSelection
+        ? (selected
+              ? Icons.radio_button_checked_rounded
+              : Icons.radio_button_unchecked_rounded)
+        : (selected
+              ? Icons.check_box_rounded
+              : Icons.check_box_outline_blank_rounded);
+
+    return Semantics(
+      button: true,
+      checked: selected,
+      inMutuallyExclusiveGroup: singleSelection,
+      child: BounceTap(
+        behavior: HitTestBehavior.opaque,
+        pressedScale: 0.98,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
             color: selected
-                ? accent.withValues(alpha: 0.68)
-                : context.colorTokens.borderUnfocused.withValues(alpha: 0.7),
-            width: selected ? 1.4 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: selected ? accent : context.colorTokens.textHint,
-              size: 24,
+                ? accent.withValues(alpha: 0.08)
+                : context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? accent.withValues(alpha: 0.5)
+                  : context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
             ),
-            const Gap(12),
-            Expanded(
-              child: Text(
-                title,
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: selected ? accent : context.colorTokens.textBody,
-                  fontWeight: FontWeight.w800,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: selected ? accent : context.colorTokens.borderUnfocused,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
-            const Gap(10),
-            Icon(
-              selected
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked_rounded,
-              color: selected ? accent : context.colorTokens.borderUnfocused,
-              size: 24,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

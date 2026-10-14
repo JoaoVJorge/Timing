@@ -5,9 +5,7 @@ import "package:dartz/dartz.dart";
 import "package:timing/core/data/data_sources/groups_data_source.dart";
 import "package:timing/core/data/errors/backend_error.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
-import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/entities/group_activity_link_options.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
@@ -15,6 +13,7 @@ import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/entities/group_join_outcome_entity.dart";
 import "package:timing/core/domain/entities/group_join_request_entity.dart";
+import "package:timing/core/domain/entities/pending_group_join_request_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
@@ -132,32 +131,22 @@ class GroupsRepository {
     });
   }
 
-  Future<Either<AppError, List<GroupActivityProgressEntity>>>
-  getGroupActivityProgress(String groupId, {String? localDate}) => _guard(
-    "rpc public.group_activity_progress",
-    () => _groupsDataSource.fetchGroupActivityProgress(
-      groupId,
-      localDate: localDate,
-    ),
-  );
-
-  Future<Either<AppError, List<GroupActivityLinkOptions>>>
-  getActivityLinkOptions(String groupId) => _guard(
+  Future<Either<AppError, GroupActivityLinkOptions>> getActivityLinkOptions(
+    String groupId,
+  ) => _guard(
     "rpc public.group_activity_link_options",
     () => _groupsDataSource.fetchActivityLinkOptions(groupId),
   );
 
   Future<Either<AppError, void>> setActivityLinks({
-    required String activityId,
+    required String groupId,
     required List<String> sourceIds,
-    bool createNew = false,
   }) => _guard("rpc public.set_group_activity_links", () async {
     await _groupsDataSource.setActivityLinks(
-      activityId: activityId,
+      groupId: groupId,
       sourceIds: sourceIds,
-      createNew: createNew,
     );
-    _activityChangeBus?.notifyGroupActivityChanged();
+    _activityChangeBus?.notifyGroupActivityChanged(groupId: groupId);
   });
 
   Future<Either<AppError, GroupEntity>> createGroup({
@@ -165,7 +154,7 @@ class GroupsRepository {
     required GroupThemeType theme,
     required List<FriendOption> invitedFriends,
     String description = "",
-    GroupActivityDraft? activity,
+    List<String> linkedSourceIds = const [],
   }) async {
     final String? userId = _groupsDataSource.currentUserId;
     if (userId == null) {
@@ -179,7 +168,7 @@ class GroupsRepository {
         theme: theme,
         invitedFriends: invitedFriends,
         description: description,
-        activity: activity,
+        linkedSourceIds: linkedSourceIds,
       ),
     );
   }
@@ -187,20 +176,20 @@ class GroupsRepository {
   /// Updates the caller's own group settings. Queued and applied
   /// optimistically to the cache when the backend cannot be reached, since
   /// the client already knows everything it changes (name, description,
-  /// activity) and nothing server-generated is needed.
+  /// color) and nothing server-generated is needed.
   Future<Either<AppError, GroupEntity>> updateGroup({
     required GroupEntity group,
     required String name,
     required String description,
-    required Map<String, dynamic> activityPayload,
+    int? colorValue,
   }) async {
-    const String operation = "rpc public.update_group_with_activity";
+    const String operation = "rpc public.update_group";
     try {
       final GroupEntity updated = await _groupsDataSource.updateGroup(
         groupId: group.id,
         name: name,
         description: description,
-        activityPayload: activityPayload,
+        colorValue: colorValue,
         fallbackGroup: group,
       );
       await _updateCachedGroup(updated);
@@ -220,10 +209,7 @@ class GroupsRepository {
         createdAt: group.createdAt,
         inviteCode: group.inviteCode,
         privacy: group.privacy,
-        createdActivityId: group.createdActivityId,
-        colorValue:
-            (activityPayload["color_value"] as num?)?.toInt() ??
-            group.colorValue,
+        colorValue: colorValue ?? group.colorValue,
       );
       await _updateCachedGroup(optimistic);
       await _pendingActions.enqueue({
@@ -231,7 +217,7 @@ class GroupsRepository {
         "groupId": group.id,
         "name": name,
         "description": description,
-        "activityPayload": activityPayload,
+        "colorValue": colorValue,
       });
       return Right(optimistic);
     }
@@ -341,6 +327,17 @@ class GroupsRepository {
     );
   }
 
+  Future<Either<AppError, List<PendingGroupJoinRequestEntity>>>
+  getPendingJoinRequestsForCurrentUser() async {
+    if (_groupsDataSource.currentUserId == null) {
+      return const Right([]);
+    }
+    return _guard(
+      "rpc public.pending_group_join_requests",
+      _groupsDataSource.fetchPendingJoinRequestsForCurrentUser,
+    );
+  }
+
   Future<Either<AppError, List<SentGroupInvitationEntity>>>
   getSentInvitations() async {
     final String? userId = _groupsDataSource.currentUserId;
@@ -440,6 +437,15 @@ class GroupsRepository {
     }
   }
 
+  /// The color of a queued group edit. An edit queued by a build from before
+  /// groups had their own color carried it inside the shared activity.
+  int? _queuedColorValue(Map<String, dynamic> action) {
+    final Object? color =
+        action["colorValue"] ??
+        (action["activityPayload"] as Map?)?["color_value"];
+    return color is num ? color.toInt() : null;
+  }
+
   Future<void> _replay(Map<String, dynamic> action) async {
     switch (action["type"] as String?) {
       case "updateGroup":
@@ -458,9 +464,7 @@ class GroupsRepository {
           groupId: groupId,
           name: action["name"] as String,
           description: action["description"] as String,
-          activityPayload: Map<String, dynamic>.from(
-            action["activityPayload"] as Map? ?? const {},
-          ),
+          colorValue: _queuedColorValue(action),
           fallbackGroup: fallback,
         );
         await _updateCachedGroup(updated);

@@ -1,12 +1,14 @@
 import "dart:async";
 
 import "package:supabase_flutter/supabase_flutter.dart"
-    show PostgrestFilterBuilder, PostgrestList, PostgrestTransformBuilder;
+    show
+        PostgrestException,
+        PostgrestFilterBuilder,
+        PostgrestList,
+        PostgrestTransformBuilder;
 import "package:timing/core/data/errors/backend_error.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
-import "package:timing/core/domain/entities/group_activity_draft.dart";
 import "package:timing/core/domain/entities/group_activity_link_options.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_image_messages_page.dart";
@@ -14,6 +16,7 @@ import "package:timing/core/domain/entities/group_invitation_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
+import "package:timing/core/domain/entities/pending_group_join_request_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
@@ -53,7 +56,9 @@ class GroupsDataSource {
 
   String? get currentUserId => _supabaseService.currentUserId;
 
-  Future<List<GroupActivityLinkOptions>> fetchActivityLinkOptions(
+  /// The signed-in member's activities that fit the group's theme, and the
+  /// ones linked to it now.
+  Future<GroupActivityLinkOptions> fetchActivityLinkOptions(
     String groupId,
   ) async {
     final dynamic result = await _supabaseService.requireClient
@@ -62,32 +67,30 @@ class GroupsDataSource {
           params: {"target_group_id": groupId},
         )
         .timeout(_remoteCallTimeout);
-    return (result as List)
-        .map(
-          (item) => GroupActivityLinkOptions.fromMap(
-            Map<String, dynamic>.from(item as Map),
-          ),
-        )
-        .toList();
+    return GroupActivityLinkOptions.fromMap(
+      Map<String, dynamic>.from(result as Map),
+    );
   }
 
+  /// Replaces the member's selection: what is in [sourceIds] is linked, the
+  /// rest stops counting for the group from now on.
   Future<void> setActivityLinks({
-    required String activityId,
+    required String groupId,
     required List<String> sourceIds,
-    bool createNew = false,
   }) async {
     await _supabaseService.requireClient
         .rpc(
           "set_group_activity_links",
           params: {
-            "target_activity_id": activityId,
+            "target_group_id": groupId,
             "source_ids": sourceIds,
-            "create_new": createNew,
-            "local_date": DateTime.now().toIso8601String().substring(0, 10),
+            "local_date": _localDate(),
           },
         )
         .timeout(_remoteCallTimeout);
   }
+
+  String _localDate() => DateTime.now().toIso8601String().substring(0, 10);
 
   /// The groups [userId] belongs to, with their members and ranking. Five
   /// requests: memberships, groups, members, every member's profile with its
@@ -105,32 +108,7 @@ class GroupsDataSource {
       return const [];
     }
 
-    final List<Map<String, dynamic>> groupRows = await _selectRows(
-      table: "groups",
-      columns:
-          "id, name, theme, description, owner_id, created_at, "
-          "invite_code, privacy",
-      filters: (query) => query.inFilter("id", groupIds),
-    );
-    // Fetch appearance for every group before caching the list, including groups
-    // the user has never opened. Keep the first saved activity color per group.
-    final List<Map<String, dynamic>> activityRows = await _selectRows(
-      table: "group_activities",
-      columns: "group_id, payload",
-      filters: (query) => query
-          .inFilter("group_id", groupIds)
-          .order("created_at", ascending: true),
-    );
-    final Map<String, int> colorsByGroup = {};
-    for (final row in activityRows) {
-      final dynamic color = (row["payload"] as Map?)?["color_value"];
-      if (color is num) {
-        colorsByGroup.putIfAbsent(
-          row["group_id"] as String,
-          () => color.toInt(),
-        );
-      }
-    }
+    final List<Map<String, dynamic>> groupRows = await _groupRows(groupIds);
     final List<Map<String, dynamic>> memberRows = await _selectRows(
       table: "group_members",
       columns: "group_id, user_id, role, joined_at",
@@ -174,7 +152,7 @@ class GroupsDataSource {
 
       return GroupEntity(
         id: groupId,
-        colorValue: colorsByGroup[groupId],
+        colorValue: (row["color_value"] as num?)?.toInt(),
         name: row["name"] as String? ?? "",
         theme: theme,
         members: members,
@@ -183,44 +161,38 @@ class GroupsDataSource {
         createdAt: DateTime.tryParse(row["created_at"] as String? ?? ""),
         inviteCode: row["invite_code"] as String? ?? "",
         privacy: row["privacy"] as String? ?? "inviteOnly",
-        createdActivityId: row["activity_id"] as String?,
       );
     }).toList();
   }
 
-  Future<List<GroupActivityProgressEntity>> fetchGroupActivityProgress(
-    String groupId, {
-    String? localDate,
-  }) async {
-    // The progress RPC omits the activity's saved appearance. Load its
-    // payload alongside progress so every member sees the group's color; the
-    // color is cosmetic, so failing to read it does not fail the progress.
-    final Future<List<GroupActivityLinkOptions>> optionsFuture =
-        fetchActivityLinkOptions(
-          groupId,
-        ).catchError((Object _) => const <GroupActivityLinkOptions>[]);
-    final dynamic response = await _supabaseService.requireClient
-        .rpc(
-          "group_activity_progress",
-          params: {"target_group_id": groupId, "local_date": localDate},
-        )
-        .timeout(_remoteCallTimeout);
-    _logger.logResponse("rpc public.group_activity_progress", response);
-    final List<dynamic> rows = response as List<dynamic>? ?? const [];
-    final Map<String, int> colorsByActivity = {
-      for (final GroupActivityLinkOptions option in await optionsFuture)
-        if (option.payload["color_value"] is num)
-          option.activityId: (option.payload["color_value"] as num).toInt(),
-    };
-    return rows
-        .map(
-          (row) => GroupActivityProgressEntity.fromMap({
-            ...Map<String, dynamic>.from(row as Map),
-            if (colorsByActivity.containsKey(row["activity_id"]))
-              "color_value": colorsByActivity[row["activity_id"]],
-          }),
-        )
-        .toList();
+  /// During a staggered rollout, an older backend may not have the optional
+  /// group color yet. Keep groups usable until its migration is applied; once
+  /// the column exists, the first query remains the only request made.
+  Future<List<Map<String, dynamic>>> _groupRows(List<String> groupIds) async {
+    const String baseColumns =
+        "id, name, theme, description, owner_id, created_at, "
+        "invite_code, privacy";
+    try {
+      return await _selectRows(
+        table: "groups",
+        columns: "$baseColumns, color_value",
+        filters: (query) => query.inFilter("id", groupIds),
+      );
+    } on PostgrestException catch (error) {
+      final bool colorColumnIsMissing =
+          error.code == "42703" && error.message.contains("color_value");
+      if (!colorColumnIsMissing) {
+        rethrow;
+      }
+      _logger.logInfo(
+        "groups.color_value is not deployed yet; loading groups without it",
+      );
+      return _selectRows(
+        table: "groups",
+        columns: baseColumns,
+        filters: (query) => query.inFilter("id", groupIds),
+      );
+    }
   }
 
   /// Scores for the fetch that also loads the groups themselves: the
@@ -541,6 +513,22 @@ class GroupsDataSource {
         .toList();
   }
 
+  Future<List<PendingGroupJoinRequestEntity>>
+  fetchPendingJoinRequestsForCurrentUser() async {
+    final dynamic response = await _supabaseService.requireClient
+        .rpc("pending_group_join_requests")
+        .timeout(_remoteCallTimeout);
+    _logger.logResponse("rpc public.pending_group_join_requests", response);
+    final List<dynamic> rows = response as List<dynamic>? ?? const [];
+    return rows
+        .map(
+          (row) => PendingGroupJoinRequestEntity.fromMap(
+            Map<String, dynamic>.from(row as Map),
+          ),
+        )
+        .toList();
+  }
+
   Future<List<SentGroupInvitationEntity>> fetchSentInvitations(
     String userId,
   ) async {
@@ -825,14 +813,16 @@ class GroupsDataSource {
 
   /// Creates the group with [userId] as its owner. Invited friends are not
   /// members yet: they get a pending invitation and only appear once they
-  /// accept, so the new group starts with the owner only.
+  /// accept, so the new group starts with the owner only. [linkedSourceIds]
+  /// are the owner's activities of the group's theme that start counting for
+  /// it right away.
   Future<GroupEntity> createGroup({
     required String userId,
     required String name,
     required GroupThemeType theme,
     required List<FriendOption> invitedFriends,
     String description = "",
-    GroupActivityDraft? activity,
+    List<String> linkedSourceIds = const [],
   }) async {
     const String operation = "rpc public.create_group_with_members";
     final Map<String, dynamic> createGroupPayload = {
@@ -840,13 +830,8 @@ class GroupsDataSource {
       "group_theme": theme.name,
       "invited_friend_ids": invitedFriends.map((friend) => friend.id).toList(),
       "group_description": description,
-      "activity_kind": activity?.kindName,
-      "activity_payload": activity == null
-          ? null
-          : {
-              ...activity.toPayload(),
-              "local_date": DateTime.now().toIso8601String().substring(0, 10),
-            },
+      "source_ids": linkedSourceIds,
+      "local_date": _localDate(),
     };
     _logger.logRequest(operation, createGroupPayload);
     final dynamic response = await _supabaseService.requireClient
@@ -887,8 +872,7 @@ class GroupsDataSource {
       createdAt: DateTime.tryParse(groupRow["created_at"] as String? ?? ""),
       inviteCode: groupRow["invite_code"] as String? ?? "",
       privacy: groupRow["privacy"] as String? ?? "inviteOnly",
-      createdActivityId: groupRow["activity_id"] as String?,
-      colorValue: activity?.colorValue,
+      colorValue: (groupRow["color_value"] as num?)?.toInt(),
     );
   }
 
@@ -898,25 +882,25 @@ class GroupsDataSource {
     required String groupId,
     required String name,
     required String description,
-    required Map<String, dynamic> activityPayload,
+    required int? colorValue,
     required GroupEntity fallbackGroup,
   }) async {
-    const String operation = "rpc public.update_group_with_activity";
+    const String operation = "rpc public.update_group";
     final Map<String, dynamic> payload = {
       "target_group_id": groupId,
       "group_name": name,
       "group_description": description,
-      "activity_payload": activityPayload,
+      "group_color_value": colorValue,
     };
     _logger.logRequest(operation, payload);
     final dynamic response = await _supabaseService.requireClient
-        .rpc("update_group_with_activity", params: payload)
+        .rpc("update_group", params: payload)
         .timeout(_remoteCallTimeout);
     _logger.logResponse(operation, response);
 
     final List<dynamic> rows = response as List<dynamic>;
     if (rows.isEmpty) {
-      throw StateError("update_group_with_activity returned no group row.");
+      throw StateError("update_group returned no group row.");
     }
     final Map<String, dynamic> row = Map<String, dynamic>.from(
       rows.first as Map,
@@ -928,7 +912,8 @@ class GroupsDataSource {
       theme: GroupThemeType.byName(row["theme"] as String?),
       members: fallbackGroup.members,
       colorValue:
-          (activityPayload["color_value"] as num?)?.toInt() ??
+          (row["color_value"] as num?)?.toInt() ??
+          colorValue ??
           fallbackGroup.colorValue,
       description: row["description"] as String? ?? description,
       ownerId: row["owner_id"] as String? ?? fallbackGroup.ownerId,
@@ -937,8 +922,6 @@ class GroupsDataSource {
           fallbackGroup.createdAt,
       inviteCode: row["invite_code"] as String? ?? fallbackGroup.inviteCode,
       privacy: row["privacy"] as String? ?? fallbackGroup.privacy,
-      createdActivityId:
-          row["activity_id"] as String? ?? fallbackGroup.createdActivityId,
     );
   }
 

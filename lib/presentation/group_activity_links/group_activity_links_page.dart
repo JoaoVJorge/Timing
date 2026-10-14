@@ -4,9 +4,11 @@ import "package:get/get.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
 import "package:timing/core/domain/entities/group_activity_link_options.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/group_activity_links/activity_source_selector.dart";
 import "package:timing/core/services/sync/group_activity_link_sync.dart";
+import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
 import "package:timing/shared/widgets/app_empty_state.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
@@ -15,7 +17,6 @@ import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
-import "package:timing/theme/colors.dart";
 
 Future<void> showGroupActivityLinks(GroupEntity group) async {
   if (Get.context == null) return;
@@ -34,12 +35,14 @@ class GroupActivityLinksPage extends StatefulWidget {
 
 class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
   final _repository = Get.find<GroupsRepository>();
-  List<GroupActivityLinkOptions> _activities = [];
-  final Map<String, Set<String>> _selected = {};
-  final Map<String, bool> _useExisting = {};
+  List<GroupActivitySourceOption> _options = [];
+  final Set<String> _selected = {};
   bool _loading = true;
   bool _saving = false;
   bool _failed = false;
+
+  /// A daily-goals group takes a single goal from each member.
+  bool get _singleSelection => widget.group.theme == GroupThemeType.dailyGoals;
 
   @override
   void initState() {
@@ -65,16 +68,22 @@ class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
     if (!mounted) return;
     setState(() {
       _loading = false;
-      result.fold((_) => _failed = true, (activities) {
-        _activities = activities;
-        for (final activity in activities) {
-          _selected[activity.activityId] = {...activity.selectedIds};
-          _useExisting[activity.activityId] =
-              activity.selectedIds.isNotEmpty || activity.options.isNotEmpty;
-        }
+      result.fold((_) => _failed = true, (links) {
+        _options = links.options;
+        _selected
+          ..clear()
+          ..addAll(
+            _singleSelection ? links.selectedIds.take(1) : links.selectedIds,
+          );
       });
     });
   }
+
+  void _toggle(String id) => setState(() {
+    if (_selected.remove(id)) return;
+    if (_singleSelection) _selected.clear();
+    _selected.add(id);
+  });
 
   Future<void> _save() async {
     if (_saving) return;
@@ -88,24 +97,19 @@ class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
       }
       return;
     }
-    for (final activity in _activities) {
-      final existing = _useExisting[activity.activityId]!;
-      final result = await _repository.setActivityLinks(
-        activityId: activity.activityId,
-        sourceIds: existing ? _selected[activity.activityId]!.toList() : [],
-        createNew: !existing,
-      );
-      if (!mounted) return;
-      if (result.isLeft()) {
-        setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.groupLinksSaveError)),
-        );
-        return;
-      }
+    final result = await _repository.setActivityLinks(
+      groupId: widget.group.id,
+      sourceIds: _selected.toList(),
+    );
+    if (!mounted) return;
+    if (result.isLeft()) {
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.groupLinksSaveError)));
+      return;
     }
-    await refreshPersonalActivitiesAfterLinking();
-    if (mounted) Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -120,7 +124,7 @@ class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
           if (!_saving) Navigator.of(context).maybePop();
         },
       ),
-      bottomBar: !_loading && !_failed && _activities.isNotEmpty
+      bottomBar: !_loading && !_failed && _options.isNotEmpty
           ? _saveButton(context)
           : null,
       body: _loading
@@ -145,48 +149,18 @@ class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
                         children: [
                           _groupHeader(context),
                           const Gap(AppSpacing.betweenSections),
-                          if (_activities.isEmpty)
-                            AppEmptyState(
-                              icon: Icons.link_off_rounded,
-                              title: context.l10n.groupLinksSharedTarget,
-                              description: context.l10n.groupLinksEmpty,
-                            ),
-                          for (final activity in _activities) ...[
-                            ActivitySourceSelector(
-                              title: activity.name,
-                              accent: _activityAccent(context, activity),
-                              useExisting: _useExisting[activity.activityId]!,
-                              options: activity.options,
-                              selectedIds: _selected[activity.activityId]!,
-                              isReading: activity.isReading,
-                              onModeChanged: (value) => setState(
-                                () => _useExisting[activity.activityId] = value,
-                              ),
-                              onToggle: (id) => setState(() {
-                                final ids = _selected[activity.activityId]!;
-                                if (!ids.remove(id)) ids.add(id);
-                              }),
-                            ),
-                            const Gap(AppSpacing.betweenRelated),
-                          ],
+                          ActivitySourceSelector(
+                            options: _options,
+                            selectedIds: _selected,
+                            singleSelection: _singleSelection,
+                            onToggle: _toggle,
+                          ),
                         ],
                       ),
                     ),
             ),
     ),
   );
-
-  Color _activityAccent(
-    BuildContext context,
-    GroupActivityLinkOptions activity,
-  ) {
-    final value = activity.payload["color_value"] as num?;
-    if (value == null) return context.colorTokens.primary;
-    return AppColorTokens.fromSeed(
-      seed: Color(value.toInt()),
-      isDark: Theme.of(context).brightness == Brightness.dark,
-    ).primary;
-  }
 
   Widget _groupHeader(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
@@ -215,7 +189,7 @@ class _GroupActivityLinksPageState extends State<GroupActivityLinksPage> {
               Text(widget.group.name, style: context.textStyles.cardTitle),
               const Gap(4),
               Text(
-                context.l10n.groupLinksSharedTarget,
+                groupLinksHint(context, widget.group.theme),
                 style: context.textStyles.caption,
               ),
             ],

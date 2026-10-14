@@ -9,7 +9,6 @@ import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/domain/use_cases/delete_subject_use_case.dart";
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
-import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/shared/widgets/delete_confirmation_dialog.dart";
 
@@ -120,13 +119,6 @@ class CategoryController extends GetxController {
   }
 
   Future<void> onTapEditSubject(SubjectEntity subject) async {
-    if (subject.isFromGroup) {
-      _appNavigator.showErrorSnackBar(
-        Get.context?.l10n.groupActivityEditBlockedMessage,
-      );
-      return;
-    }
-
     final dynamic result = await _appNavigator.toNamed(
       AppRoutes.createSubject,
       arguments: subject,
@@ -144,13 +136,6 @@ class CategoryController extends GetxController {
   }
 
   Future<void> onDeleteSubject(SubjectEntity subject) async {
-    if (subject.isFromGroup) {
-      _appNavigator.showErrorSnackBar(
-        Get.context?.l10n.groupActivityDeleteBlockedMessage,
-      );
-      return;
-    }
-
     final bool confirmed = await showDeleteConfirmationDialog(
       itemName: subject.name,
       itemTypeName: Get.context == null

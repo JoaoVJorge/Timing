@@ -38,7 +38,7 @@ try {
       ('${leader}','${memberA}','accepted'),('${leader}','${memberB}','accepted'),
       ('${leader}','${member}','accepted'),('${memberA}','${friend}','accepted');`);
   await user(leader);
-  group = (await db.query(`select * from public.create_group_with_members('Group','exercises',array['${memberA}','${memberB}','${member}']::uuid[],'','subject','{"name":"Gym","category":"exercises","goal_seconds":1800}'::jsonb)`)).rows[0].id;
+  group = (await db.query(`select * from public.create_group_with_members('Group','exercises',array['${memberA}','${memberB}','${member}']::uuid[])`)).rows[0].id;
   for (const invitee of [memberA, memberB, member]) {
     await user(invitee);
     await db.exec(`select public.accept_group_invitation('${await scalar(`select id from public.group_invitations where group_id='${group}' and invitee_id='${invitee}'`)}');`);
@@ -46,7 +46,7 @@ try {
 
   await user(member);
   await assert.rejects(db.exec(`select public.reset_group_progress('${group}');`), /only the group owner/);
-  await assert.rejects(db.exec(`select * from public.update_group_with_activity('${group}','Renamed','','{}'::jsonb);`), /only the group owner/);
+  await assert.rejects(db.exec(`select * from public.update_group('${group}','Renamed','');`), /only the group owner/);
   // Inviting is not a leader's privilege: every member may, and what follows
   // from it is covered by group_join_requests_test.
   await user(memberA);
@@ -69,6 +69,12 @@ try {
     update public.group_members set role='vice' where group_id='${group}' and user_id='${memberA}';
     create function public.set_group_member_role(uuid, uuid, text) returns void language sql as $$ select $$;
     create function public.manages_group(uuid, uuid) returns boolean language sql as $$ select true $$;
+    create table public.group_activities (
+      id uuid primary key default gen_random_uuid(),
+      group_id uuid not null references public.groups(id) on delete cascade,
+      kind text not null, payload jsonb not null default '{}'::jsonb,
+      score_reset_at timestamptz, created_at timestamptz not null default now());
+    alter table public.group_activities enable row level security;
     create policy "managers manage group activities" on public.group_activities for all
       using (public.manages_group(group_id, auth.uid()));`);
   for (const file of fs.readdirSync(schema).sort()) {

@@ -42,14 +42,13 @@ class _Navigator implements AppNavigator {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-const DailyTaskEntity _groupGoal = DailyTaskEntity(
-  id: "grp_ga1",
-  name: "Meta do grupo",
+/// A personal goal the user linked to their daily-goals group.
+const DailyTaskEntity _linkedGoal = DailyTaskEntity(
+  id: "goal-1",
+  name: "Beber água",
   colorValue: 1,
   targetDays: 10,
   completedDates: [],
-  groupId: "g1",
-  groupActivityId: "ga1",
 );
 
 Future<http.Response> _backend(http.Request request) async {
@@ -58,16 +57,14 @@ Future<http.Response> _backend(http.Request request) async {
     return request.method == "GET"
         ? jsonResponse(request, [
             {
-              ..._groupGoal.toMap(),
-              "id": "grp_ga1",
+              ..._linkedGoal.toMap(),
+              "id": "goal-1",
               "user_id": "user-1",
               "color_value": 1,
               "target_days": 10,
               "completed_dates": [],
               "goal_type": "total",
               "sequence_type": "casual",
-              "group_id": "g1",
-              "group_activity_id": "ga1",
               "updated_at": "2026-09-20T00:00:00Z",
             },
           ])
@@ -121,7 +118,7 @@ Future<http.Response> _backend(http.Request request) async {
 
 void main() {
   test(
-    "completing a group goal makes the fewest requests that keep the group current",
+    "completing a linked goal makes the fewest requests that keep the group current",
     () async {
       final List<String> requests = [];
       final backend = TestBackend((request) {
@@ -133,7 +130,7 @@ void main() {
       addTearDown(backend.dispose);
 
       final storage = MemoryStorage()
-        ..data[LocalStorageKeys.dailyTasks] = jsonEncode([_groupGoal.toMap()]);
+        ..data[LocalStorageKeys.dailyTasks] = jsonEncode([_linkedGoal.toMap()]);
       final store = PendingSyncStore(localStorageService: storage);
       final bus = ActivityChangeBus();
       addTearDown(bus.dispose);
@@ -162,10 +159,8 @@ void main() {
       final controller = GroupsController(
         socialStore: SocialStore(friendsRepository: friends),
         groupsRepository: groupsRepository,
-        dailyTasksRepository: tasksDataSource,
         appNavigator: _Navigator(),
         supabaseService: service,
-        localStorageService: storage,
         activityChangeBus: bus,
       );
       addTearDown(controller.onClose);
@@ -178,7 +173,7 @@ void main() {
 
       Future<List<String>> complete(DateTime day) async {
         requests.clear();
-        await toggle(taskId: "grp_ga1", date: day);
+        await toggle(taskId: "goal-1", date: day);
         // DailyGoalsController announces the change as soon as the save returns.
         bus.notifyGroupActivityChanged(groupId: "g1");
         // The groups screen waits for the burst to settle before refreshing.

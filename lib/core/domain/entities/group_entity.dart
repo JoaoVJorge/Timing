@@ -15,7 +15,6 @@ class GroupEntity extends Equatable {
     this.createdAt,
     this.inviteCode = "",
     this.privacy = "inviteOnly",
-    this.createdActivityId,
     this.colorValue,
   });
 
@@ -34,7 +33,6 @@ class GroupEntity extends Equatable {
     createdAt: DateTime.tryParse(map["createdAt"] as String? ?? ""),
     inviteCode: map["inviteCode"] as String? ?? "",
     privacy: map["privacy"] as String? ?? "inviteOnly",
-    createdActivityId: map["createdActivityId"] as String?,
     colorValue: (map["colorValue"] as num?)?.toInt(),
   );
 
@@ -47,7 +45,8 @@ class GroupEntity extends Equatable {
   final DateTime? createdAt;
   final String inviteCode;
   final String privacy;
-  final String? createdActivityId;
+
+  /// The group's own accent. Null follows the viewer's accent.
   final int? colorValue;
 
   Map<String, dynamic> toMap() => {
@@ -60,7 +59,6 @@ class GroupEntity extends Equatable {
     "createdAt": createdAt?.toIso8601String(),
     "inviteCode": inviteCode,
     "privacy": privacy,
-    "createdActivityId": createdActivityId,
     "colorValue": colorValue,
   };
 
@@ -74,7 +72,6 @@ class GroupEntity extends Equatable {
     createdAt: createdAt,
     inviteCode: inviteCode,
     privacy: privacy,
-    createdActivityId: createdActivityId,
     colorValue: colorValue,
   );
 
@@ -91,7 +88,6 @@ class GroupEntity extends Equatable {
     createdAt,
     inviteCode,
     privacy,
-    createdActivityId,
     colorValue,
   ];
 }

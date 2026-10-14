@@ -74,8 +74,6 @@ class DailyTasksDataSource {
         "lastResolvedMissedDate": row["last_resolved_missed_date"],
         "goalType": row["goal_type"],
         "updatedAt": row["updated_at"],
-        "groupId": row["group_id"],
-        "groupActivityId": row["group_activity_id"],
         "reminderMinutes": row["reminder_minutes"],
       });
 
@@ -89,8 +87,6 @@ class DailyTasksDataSource {
     "sequence_type": task.sequenceType.name,
     "last_resolved_missed_date": task.lastResolvedMissedDate,
     "goal_type": task.goalType.name,
-    "group_id": task.groupId,
-    "group_activity_id": task.groupActivityId,
     "reminder_minutes": task.reminderMinutes,
     "updated_at": (task.updatedAt ?? DateTime.now().toUtc())
         .toUtc()

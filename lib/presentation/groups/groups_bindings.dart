@@ -12,10 +12,8 @@ class GroupsBindings extends Bindings {
       GroupsController(
         groupsRepository: Get.find(),
         socialStore: Get.find(),
-        dailyTasksRepository: Get.find(),
         appNavigator: Get.find(),
         supabaseService: Get.find(),
-        localStorageService: Get.find(),
         activityChangeBus: Get.find(),
         connectivityService: Get.find<ConnectivityService>(),
         mainTabRefreshService: Get.find<MainTabRefreshService>(),

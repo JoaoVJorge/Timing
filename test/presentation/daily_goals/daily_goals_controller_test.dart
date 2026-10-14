@@ -220,15 +220,13 @@ void main() {
     expect(dataSource.saveCalls, 1);
   });
 
-  test("marking a group goal done is immediate, with no dialog", () async {
+  test("marking a goal done is immediate, with no dialog", () async {
     const DailyTaskEntity groupGoal = DailyTaskEntity(
-      id: "grp_ga1",
-      name: "Meta do grupo",
+      id: "goal-1",
+      name: "Meta vinculada a um grupo",
       colorValue: 1,
       targetDays: 7,
       completedDates: [],
-      groupId: "g1",
-      groupActivityId: "ga1",
     );
     final _ControllableDailyTasksRepository dataSource =
         _ControllableDailyTasksRepository([groupGoal]);

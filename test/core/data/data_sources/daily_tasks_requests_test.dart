@@ -18,8 +18,6 @@ DailyTaskEntity _task(String id, {List<String> done = const []}) =>
       colorValue: 1,
       targetDays: 10,
       completedDates: done,
-      groupId: id.startsWith("grp_") ? "g1" : null,
-      groupActivityId: id.startsWith("grp_") ? "ga1" : null,
     );
 
 Map<String, dynamic> _row(DailyTaskEntity t) => {
@@ -31,8 +29,6 @@ Map<String, dynamic> _row(DailyTaskEntity t) => {
   "completed_dates": t.completedDates,
   "goal_type": "total",
   "sequence_type": "casual",
-  "group_id": t.groupId,
-  "group_activity_id": t.groupActivityId,
   "updated_at": "2026-09-20T00:00:00Z",
 };
 
@@ -92,13 +88,13 @@ void main() {
   tearDown(() => rig.backend.dispose());
 
   test("completing a goal uploads it without a delete", () async {
-    rig.remote = [_task("grp_a")];
-    rig.seedLocal([_task("grp_a")]);
+    rig.remote = [_task("a")];
+    rig.seedLocal([_task("a")]);
     await rig.dataSource.getTasksForMutation();
     rig.requests.clear();
 
     await rig.save([
-      _task("grp_a", done: ["2026-09-24"]),
+      _task("a", done: ["2026-09-24"]),
     ]);
 
     expect(rig.requests, hasLength(1));
@@ -161,7 +157,7 @@ void main() {
     // Another phone deletes a goal after this one read the account.
     rig.remote = [_task("a")];
 
-    await rig.dataSource.refreshAfterGroupLinkChange();
+    await rig.dataSource.refreshFromRemote();
 
     final tasks = (await rig.dataSource.getLocalTasks()).getOrElse(() => []);
     expect(tasks.map((task) => task.id), ["a"]);
@@ -177,7 +173,7 @@ void main() {
     // The other phone, which had received it, deletes it.
     rig.remote = [_task("a")];
 
-    await rig.dataSource.refreshAfterGroupLinkChange();
+    await rig.dataSource.refreshFromRemote();
 
     final tasks = (await rig.dataSource.getLocalTasks()).getOrElse(() => []);
     expect(tasks.map((task) => task.id), ["a"]);

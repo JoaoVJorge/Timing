@@ -41,7 +41,7 @@ try {
       ('${leader}','${member}','accepted'),('${leader}','${friendOfLeader}','accepted'),
       ('${member}','${friendOfMember}','accepted'),('${member}','${invitee}','accepted');`);
   await user(leader);
-  const created = (await db.query(`select * from public.create_group_with_members('Group','exercises',array['${member}']::uuid[],'','subject','{"name":"Gym","category":"exercises","goal_seconds":1800}'::jsonb)`)).rows[0];
+  const created = (await db.query(`select * from public.create_group_with_members('Group','exercises',array['${member}']::uuid[])`)).rows[0];
   group = created.id;
   code = created.invite_code;
   await user(member);
@@ -65,6 +65,17 @@ try {
   assert.equal(waiting.length, 1);
   assert.equal(waiting[0].user_id, friendOfMember);
   assert.equal(waiting[0].invited_by, member, 'the request says who invited them');
+  const leaderOptions = await rows(`select * from public.group_invite_options('${group}')`);
+  const requestedFriend = leaderOptions.find(o => o.friend_id === friendOfMember);
+  assert.equal(requestedFriend.status, 'requested', 'the invite screen marks the pending request');
+  assert.equal(requestedFriend.join_request_id, waiting[0].id,
+    'the leader receives the request id needed to approve from the invite screen');
+
+  await user(friendOfMember);
+  const ownPending = await rows('select * from public.pending_group_join_requests()');
+  assert.equal(ownPending.length, 1, 'the requester sees the pending request in invitations');
+  assert.equal(ownPending[0].group_id, group);
+  assert.equal(ownPending[0].group_name, 'Group');
 
   // Only the leader answers.
   await user(member);
@@ -74,6 +85,9 @@ try {
   await db.exec(`select public.approve_group_join_request('${waiting[0].id}');`);
   assert.equal(await isMember(friendOfMember), true, 'approved: now a member');
   assert.equal((await pendingRequests()).length, 0, 'and off the list');
+  await user(friendOfMember);
+  assert.equal((await rows('select * from public.pending_group_join_requests()')).length, 0,
+    'approved requests disappear from the requester invitation page');
 
   // The link raises a request too, and never joins on its own.
   await user(outsider);
@@ -106,6 +120,8 @@ try {
   // The person waiting sees their own request; an unrelated member does not.
   await user(outsider);
   assert.equal(await scalar(`select count(*)::int from public.group_join_requests`), 1, 'own request is visible');
+  assert.equal((await rows('select * from public.pending_group_join_requests()')).length, 1,
+    'link requests also appear in the requester invitation page');
   await user(friendOfLeader);
   assert.equal(await scalar(`select count(*)::int from public.group_join_requests`), 0, 'other people see none');
 

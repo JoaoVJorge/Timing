@@ -13,15 +13,25 @@ create table if not exists public.groups (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references public.profiles(id) on delete cascade,
   name text not null,
+  -- A home category or 'dailyGoals'. It sets the ranking metric and which
+  -- personal activities each member may link (05).
   theme text not null,
   description text not null default '',
   invite_code text not null unique,
   privacy text not null default 'inviteOnly',
+  -- The group's own accent; null follows each viewer's accent.
+  color_value bigint,
+  -- Shared ranking counts from here on; null counts since the group began.
+  score_reset_at timestamptz,
   created_at timestamptz not null default now()
 );
 
 alter table public.groups
   add column if not exists description text not null default '';
+alter table public.groups
+  add column if not exists color_value bigint;
+alter table public.groups
+  add column if not exists score_reset_at timestamptz;
 
 create table if not exists public.group_members (
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -79,21 +89,6 @@ create table if not exists public.group_image_messages (
   created_at timestamptz not null default now()
 );
 
--- The shared target chosen when a group is created. Each member selects
--- personal sources via group_activity_links (05), without giving the group
--- ownership of personal names, settings, goals or history.
-create table if not exists public.group_activities (
-  id uuid primary key default gen_random_uuid(),
-  group_id uuid not null references public.groups(id) on delete cascade,
-  kind text not null check (kind in ('subject', 'goal')),
-  payload jsonb not null default '{}'::jsonb,
-  score_reset_at timestamptz,
-  created_at timestamptz not null default now()
-);
-
-alter table public.group_activities
-  add column if not exists score_reset_at timestamptz;
-
 -- -----------------------------------------------------------------------------
 -- Constraints
 -- -----------------------------------------------------------------------------
@@ -139,8 +134,6 @@ create index if not exists group_image_messages_group_cursor_idx
   on public.group_image_messages(group_id, created_at desc, id desc);
 create index if not exists group_image_messages_sender_rate_idx
   on public.group_image_messages(sender_id, created_at desc);
-create index if not exists group_activities_group_idx
-  on public.group_activities(group_id);
 
 -- -----------------------------------------------------------------------------
 -- Access helpers

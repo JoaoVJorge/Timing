@@ -31,8 +31,6 @@ class SubjectEntity extends Equatable {
     required this.wallpaperIndex,
     this.activityType = SubjectActivityType.daily,
     this.createdAt,
-    this.groupId,
-    this.groupActivityId,
   });
 
   factory SubjectEntity.fromJson(String source) =>
@@ -54,12 +52,6 @@ class SubjectEntity extends Equatable {
     wallpaperIndex: map["wallpaperIndex"] as int? ?? 0,
     activityType: SubjectActivityType.fromName(map["activityType"] as String?),
     createdAt: DateTime.tryParse(map["createdAt"] as String? ?? ""),
-    groupId: (map["groupId"] as String?)?.isEmpty ?? true
-        ? null
-        : map["groupId"] as String?,
-    groupActivityId: (map["groupActivityId"] as String?)?.isEmpty ?? true
-        ? null
-        : map["groupActivityId"] as String?,
   );
 
   static const int defaultRestSeconds = 60;
@@ -80,15 +72,6 @@ class SubjectEntity extends Equatable {
   final int wallpaperIndex;
   final SubjectActivityType activityType;
   final DateTime? createdAt;
-
-  /// Legacy ownership metadata. The backend migration clears these columns;
-  /// new group participation uses independent links to personal activities.
-  final String? groupId;
-  final String? groupActivityId;
-
-  /// Whether this subject belongs to a group and is therefore protected from
-  /// manual deletion.
-  bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
 
   /// Number of focus sessions, never below one. Reading and hobbies are
   /// continuous activities and never multiply their goal into sections.
@@ -143,8 +126,6 @@ class SubjectEntity extends Equatable {
     "wallpaperIndex": wallpaperIndex,
     "activityType": activityType.name,
     "createdAt": createdAt?.toIso8601String(),
-    "groupId": groupId,
-    "groupActivityId": groupActivityId,
   };
 
   String toJson() => jsonEncode(toMap());
@@ -163,9 +144,6 @@ class SubjectEntity extends Equatable {
     int? wallpaperIndex,
     SubjectActivityType? activityType,
     DateTime? createdAt,
-    bool clearGroupLink = false,
-    String? groupId,
-    String? groupActivityId,
   }) => SubjectEntity(
     id: id,
     name: name ?? this.name,
@@ -182,10 +160,6 @@ class SubjectEntity extends Equatable {
     wallpaperIndex: wallpaperIndex ?? this.wallpaperIndex,
     activityType: activityType ?? this.activityType,
     createdAt: createdAt ?? this.createdAt,
-    groupId: clearGroupLink ? null : groupId ?? this.groupId,
-    groupActivityId: clearGroupLink
-        ? null
-        : groupActivityId ?? this.groupActivityId,
   );
 
   @override
@@ -205,7 +179,5 @@ class SubjectEntity extends Equatable {
     wallpaperIndex,
     activityType,
     createdAt,
-    groupId,
-    groupActivityId,
   ];
 }

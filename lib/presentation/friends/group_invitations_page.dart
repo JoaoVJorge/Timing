@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/pending_group_join_request_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
@@ -38,6 +39,7 @@ class _GroupInvitationsPageState extends State<GroupInvitationsPage> {
           () => switch (selectedMode) {
             GroupInvitationsMode.incoming => _IncomingInvitationsList(
               invitations: controller.groupInvitations.toList(),
+              pendingRequests: controller.pendingGroupJoinRequests.toList(),
               acceptingInvitationIds: controller.acceptingGroupInvitationIds
                   .toSet(),
               onAccept: controller.acceptGroupInvitation,
@@ -55,19 +57,21 @@ class _GroupInvitationsPageState extends State<GroupInvitationsPage> {
 class _IncomingInvitationsList extends StatelessWidget {
   const _IncomingInvitationsList({
     required this.invitations,
+    required this.pendingRequests,
     required this.acceptingInvitationIds,
     required this.onAccept,
     required this.onDecline,
   });
 
   final List<GroupInvitationEntity> invitations;
+  final List<PendingGroupJoinRequestEntity> pendingRequests;
   final Set<String> acceptingInvitationIds;
   final ValueChanged<GroupInvitationEntity> onAccept;
   final ValueChanged<GroupInvitationEntity> onDecline;
 
   @override
   Widget build(BuildContext context) {
-    if (invitations.isEmpty) {
+    if (invitations.isEmpty && pendingRequests.isEmpty) {
       return FriendsRequestEmptyState(
         icon: Icons.inbox_rounded,
         title: context.l10n.groupInvitationsReceivedEmptyTitle,
@@ -75,21 +79,56 @@ class _IncomingInvitationsList extends StatelessWidget {
       );
     }
 
+    final List<Object> items = [...pendingRequests, ...invitations];
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 18),
-      itemCount: invitations.length,
+      itemCount: items.length,
       separatorBuilder: (context, index) => const Gap(12),
       itemBuilder: (context, index) {
-        final GroupInvitationEntity invitation = invitations[index];
-        return _IncomingInvitationCard(
-          invitation: invitation,
-          isAccepting: acceptingInvitationIds.contains(invitation.id),
-          onAccept: () => onAccept(invitation),
-          onDecline: () => onDecline(invitation),
-        );
+        final Object item = items[index];
+        return switch (item) {
+          PendingGroupJoinRequestEntity request => _PendingJoinRequestCard(
+            request: request,
+          ),
+          GroupInvitationEntity invitation => _IncomingInvitationCard(
+            invitation: invitation,
+            isAccepting: acceptingInvitationIds.contains(invitation.id),
+            onAccept: () => onAccept(invitation),
+            onDecline: () => onDecline(invitation),
+          ),
+          _ => const SizedBox.shrink(),
+        };
       },
     );
   }
+}
+
+class _PendingJoinRequestCard extends StatelessWidget {
+  const _PendingJoinRequestCard({required this.request});
+
+  final PendingGroupJoinRequestEntity request;
+
+  @override
+  Widget build(BuildContext context) => FriendsRequestCard(
+    child: _GroupInvitationHeader(
+      groupName: request.groupName,
+      theme: request.theme,
+      subtitle: context.l10n.groupJoinRequestWaitingForLeader,
+      trailing: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: context.colorTokens.primaryVeryLight,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.hourglass_top_rounded,
+          size: 20,
+          color: context.colorTokens.primary,
+        ),
+      ),
+    ),
+  );
 }
 
 class _IncomingInvitationCard extends StatelessWidget {
@@ -195,11 +234,13 @@ class _GroupInvitationHeader extends StatelessWidget {
     required this.groupName,
     required this.theme,
     required this.subtitle,
+    this.trailing,
   });
 
   final String groupName;
   final GroupThemeType theme;
   final String subtitle;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -245,6 +286,7 @@ class _GroupInvitationHeader extends StatelessWidget {
           ],
         ),
       ),
+      if (trailing != null) ...[const Gap(10), trailing!],
     ],
   );
 }

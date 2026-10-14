@@ -236,15 +236,12 @@ class SubjectsRepository {
   }
 
   /// Local and remote views of one account's activities, merged:
-  ///  * an activity only the backend has (created on another phone, or a group
-  ///    activity materialized for this user) is added;
+  ///  * an activity only the backend has (created on another phone) is added;
   ///  * one this device holds that the backend once had but no longer does was
   ///    deleted elsewhere, and is dropped; one the backend never had is new
   ///    here and kept;
   ///  * for the rest the larger total and page count win, since both only
-  ///    grow, and a group activity takes its definition from the backend so the
-  ///    owner's edits reach every member. A personal activity keeps its local
-  ///    definition.
+  ///    grow, and the activity keeps its local definition.
   @visibleForTesting
   static List<SubjectEntity> mergeSubjects({
     required List<SubjectEntity> local,
@@ -282,28 +279,11 @@ class SubjectsRepository {
     return merged;
   }
 
-  static SubjectEntity _mergeOne(SubjectEntity local, SubjectEntity remote) {
-    final SubjectEntity grown = local.copyWith(
-      totalSeconds: math.max(local.totalSeconds, remote.totalSeconds),
-      currentPages: math.max(local.currentPages, remote.currentPages),
-    );
-    if (!(remote.groupActivityId?.isNotEmpty ?? false)) {
-      return grown.copyWith(clearGroupLink: true);
-    }
-    return grown.copyWith(
-      name: remote.name,
-      colorValue: remote.colorValue,
-      goalSeconds: remote.goalSeconds,
-      goalPages: remote.goalPages,
-      iconName: remote.iconName,
-      restMinutes: remote.restMinutes,
-      focusSessionCount: remote.focusSessionCount,
-      wallpaperIndex: remote.wallpaperIndex,
-      activityType: remote.activityType,
-      groupId: remote.groupId,
-      groupActivityId: remote.groupActivityId,
-    );
-  }
+  static SubjectEntity _mergeOne(SubjectEntity local, SubjectEntity remote) =>
+      local.copyWith(
+        totalSeconds: math.max(local.totalSeconds, remote.totalSeconds),
+        currentPages: math.max(local.currentPages, remote.currentPages),
+      );
 
   List<SubjectEntity> _decodeLocal(String saved) {
     final List<dynamic> decoded = jsonDecode(saved) as List<dynamic>;

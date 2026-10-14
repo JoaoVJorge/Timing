@@ -10,6 +10,7 @@ import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/shared/widgets/app_confirmation_dialog.dart";
@@ -18,10 +19,12 @@ class GroupInvitesController extends GetxController {
   GroupInvitesController({
     required this.groupsRepository,
     required this.appNavigator,
+    required this.supabaseService,
   });
 
   final GroupsRepository groupsRepository;
   final AppNavigator appNavigator;
+  final SupabaseService supabaseService;
 
   final RxList<GroupInviteOptionEntity> options =
       <GroupInviteOptionEntity>[].obs;
@@ -69,6 +72,10 @@ class GroupInvitesController extends GetxController {
   /// The group's link, which asks its leader to let the opener in.
   String get groupLink => AppConstants.groupLink(group.inviteCode);
 
+  bool get canApproveJoinRequests =>
+      group.ownerId.isNotEmpty &&
+      group.ownerId == supabaseService.currentUserId;
+
   Future<void> onCopyLink() async {
     await Clipboard.setData(ClipboardData(text: groupLink));
     appNavigator.showSuccessSnackBar(
@@ -77,18 +84,25 @@ class GroupInvitesController extends GetxController {
   }
 
   Future<void> onShareLink() async {
+    final String message =
+        Get.context?.l10n.shareGroupLinkMessage(
+          group.name,
+          groupLink,
+          group.inviteCode,
+        ) ??
+        "Join my group ${group.name} on Timing with the code:\n"
+            "${group.inviteCode}\n\nOpen in the app: $groupLink";
     await SharePlus.instance.share(
-      ShareParams(
-        text:
-            Get.context?.l10n.shareGroupLinkMessage(group.name, groupLink) ??
-            "Join my group ${group.name} on Timing: $groupLink",
-      ),
+      ShareParams(text: message, title: group.name),
     );
   }
 
   Future<void> onTapOption(GroupInviteOptionEntity option) async {
+    final bool isApprovingRequest = option.isWaitingForLeader;
     if (option.isMember ||
-        option.isWaitingForLeader ||
+        (isApprovingRequest &&
+            (!canApproveJoinRequests ||
+                (option.joinRequestId?.isEmpty ?? true))) ||
         updatingFriendIds.contains(option.friendId)) {
       return;
     }
@@ -99,16 +113,24 @@ class GroupInvitesController extends GetxController {
     }
 
     final bool confirmed = await _confirm(
-      title: option.isInvited
+      title: isApprovingRequest
+          ? context.l10n.groupJoinRequestApproveConfirmTitle
+          : option.isInvited
           ? context.l10n.cancelInviteConfirmTitle
           : context.l10n.inviteFriendConfirmTitle,
-      content: option.isInvited
+      content: isApprovingRequest
+          ? context.l10n.groupJoinRequestApproveConfirmMessage(
+              option.friendName,
+            )
+          : option.isInvited
           ? context.l10n.cancelInviteConfirmMessage(option.friendName)
           : context.l10n.inviteFriendConfirmMessage(
               option.friendName,
               group.name,
             ),
-      confirmLabel: option.isInvited
+      confirmLabel: isApprovingRequest
+          ? context.l10n.acceptButton
+          : option.isInvited
           ? context.l10n.cancelInviteButton
           : context.l10n.inviteButton,
       isDestructive: option.isInvited,
@@ -118,7 +140,12 @@ class GroupInvitesController extends GetxController {
     }
 
     updatingFriendIds.add(option.friendId);
-    final Either<AppError, void> result = option.isInvited
+    final Either<AppError, void> result = isApprovingRequest
+        ? await groupsRepository.answerJoinRequest(
+            requestId: option.joinRequestId!,
+            approve: true,
+          )
+        : option.isInvited
         ? await groupsRepository.cancelGroupInvitation(
             groupId: group.id,
             friendId: option.friendId,
@@ -132,13 +159,20 @@ class GroupInvitesController extends GetxController {
     await result.fold((_) async => appNavigator.showErrorSnackBar(), (_) async {
       _updateOptionState(
         option,
-        option.isInvited
+        isApprovingRequest
+            ? GroupInviteStatus.member
+            : option.isInvited
             ? GroupInviteStatus.available
             : GroupInviteStatus.invited,
       );
       final BuildContext? context = Get.context;
       appNavigator.showSuccessSnackBar(
-        option.isInvited
+        isApprovingRequest
+            ? context?.l10n.groupJoinRequestApprovedMessage(
+                    option.friendName,
+                  ) ??
+                  "${option.friendName} joined the group."
+            : option.isInvited
             ? context?.l10n.groupInviteCanceledMessage ?? "Invitation canceled."
             : context?.l10n.groupInviteSentMessage ?? "Invitation sent.",
       );
@@ -164,6 +198,7 @@ class GroupInvitesController extends GetxController {
     options[index] = option.copyWith(
       status: status,
       clearInvitationId: status == GroupInviteStatus.available,
+      clearJoinRequestId: status != GroupInviteStatus.requested,
     );
   }
 

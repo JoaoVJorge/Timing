@@ -9,6 +9,7 @@ import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_invite_option_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
+import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/group_invites/group_invites_controller.dart";
 import "package:timing/presentation/group_invites/group_invites_page.dart";
@@ -20,10 +21,29 @@ const GroupEntity _group = GroupEntity(
   theme: GroupThemeType.studying,
   members: [],
   inviteCode: "abc123",
+  ownerId: "leader-1",
 );
+
+class _SupabaseService implements SupabaseService {
+  @override
+  String? get currentUserId => "leader-1";
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class _Repository implements GroupsRepository {
   List<GroupInviteOptionEntity> options = const [];
+  String? answeredRequestId;
+
+  @override
+  Future<Either<AppError, void>> answerJoinRequest({
+    required String requestId,
+    required bool approve,
+  }) async {
+    answeredRequestId = requestId;
+    return const Right(null);
+  }
 
   @override
   Future<Either<AppError, List<GroupInviteOptionEntity>>> getGroupInviteOptions(
@@ -39,16 +59,47 @@ class _Navigator implements AppNavigator {
   Object? get arguments => _group;
 
   @override
+  void back<T>({
+    T? result,
+    bool closeOverlays = false,
+    bool canPop = true,
+    int? id,
+  }) => Get.back<T>(
+    result: result,
+    closeOverlays: closeOverlays,
+    canPop: canPop,
+    id: id,
+  );
+
+  @override
+  Future<T?> dialog<T>({
+    required Widget child,
+    bool barrierDismissible = true,
+    bool useSafeArea = true,
+  }) => Get.dialog<T>(
+    child,
+    barrierDismissible: barrierDismissible,
+    useSafeArea: useSafeArea,
+  );
+
+  @override
+  void showSuccessSnackBar(String text) {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-GroupInviteOptionEntity _option(String name, GroupInviteStatus status) =>
-    GroupInviteOptionEntity(
-      friendId: name,
-      friendName: name,
-      accentColorValue: 1,
-      status: status,
-    );
+GroupInviteOptionEntity _option(
+  String name,
+  GroupInviteStatus status, {
+  String? joinRequestId,
+}) => GroupInviteOptionEntity(
+  friendId: name,
+  friendName: name,
+  accentColorValue: 1,
+  status: status,
+  joinRequestId: joinRequestId,
+);
 
 Future<AppLocalizations> _pumpPage(
   WidgetTester tester, {
@@ -66,6 +117,7 @@ Future<AppLocalizations> _pumpPage(
     GroupInvitesController(
       groupsRepository: repository,
       appNavigator: Get.find<AppNavigator>(),
+      supabaseService: _SupabaseService(),
     ),
   );
 
@@ -107,15 +159,31 @@ void main() {
     expect(find.text(l10n.groupInvitesNoFriendsTitle), findsOneWidget);
   });
 
-  testWidgets("someone already waiting for the leader is not invited again", (
+  testWidgets("the leader approves a pending request instead of reinviting", (
     tester,
   ) async {
     final AppLocalizations l10n = await _pumpPage(
       tester,
-      options: [_option("Ana", GroupInviteStatus.requested)],
+      options: [
+        _option("Ana", GroupInviteStatus.requested, joinRequestId: "request-1"),
+      ],
     );
 
-    expect(find.text(l10n.groupJoinRequestsTitle), findsOneWidget);
+    expect(
+      find.text(l10n.groupJoinRequestAwaitingYourApproval),
+      findsOneWidget,
+    );
     expect(find.text(l10n.selectButton), findsNothing);
+
+    await tester.tap(find.text("Ana"));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.groupJoinRequestApproveConfirmTitle), findsOneWidget);
+
+    await tester.tap(find.text(l10n.acceptButton));
+    await tester.pumpAndSettle();
+
+    final _Repository repository =
+        Get.find<GroupInvitesController>().groupsRepository as _Repository;
+    expect(repository.answeredRequestId, "request-1");
   });
 }

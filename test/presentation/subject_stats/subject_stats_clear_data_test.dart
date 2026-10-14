@@ -18,7 +18,7 @@ import "package:timing/theme/theme.dart";
 import "../../support/subject_stats_test_support.dart";
 import "../../support/supabase_test_harness.dart";
 
-SubjectEntity _subject({String? groupId}) => SubjectEntity(
+SubjectEntity _subject() => const SubjectEntity(
   id: "subject-1",
   name: "Cálculo",
   category: TimeCategoryType.studying,
@@ -33,8 +33,6 @@ SubjectEntity _subject({String? groupId}) => SubjectEntity(
   focusSessionCount: 1,
   wallpaperIndex: 0,
   activityType: SubjectActivityType.permanent,
-  groupId: groupId,
-  groupActivityId: groupId == null ? null : "ga1",
 );
 
 SubjectDailyHistoryService _history() =>
@@ -44,18 +42,12 @@ SubjectDailyHistoryService _history() =>
 class _Asked {
   String? itemName;
   bool? isGoal;
-  bool? isFromGroup;
   int times = 0;
 
-  Future<bool> yes({
-    required String itemName,
-    required bool isGoal,
-    required bool isFromGroup,
-  }) async {
+  Future<bool> yes({required String itemName, required bool isGoal}) async {
     times++;
     this.itemName = itemName;
     this.isGoal = isGoal;
-    this.isFromGroup = isFromGroup;
     return true;
   }
 }
@@ -83,10 +75,10 @@ void main() {
       expect(navigator.successMessages, isEmpty);
     });
 
-    test("asks about this activity, saying whether it is a group's", () async {
+    test("asks about this activity by name", () async {
       final _Asked asked = _Asked();
       final SubjectStatsController controller = buildStatsController(
-        subject: _subject(groupId: "g1"),
+        subject: _subject(),
         history: _history(),
         clearUseCase: FakeClearSubjectDataUseCase()..subject = _subject(),
         confirmClearData: asked.yes,
@@ -96,7 +88,6 @@ void main() {
 
       expect(asked.itemName, "Cálculo");
       expect(asked.isGoal, isFalse);
-      expect(asked.isFromGroup, isTrue);
     });
 
     test("clears it, shows it at zero and says so", () async {
@@ -120,28 +111,8 @@ void main() {
       expect(controller.isClearingData.value, isFalse);
     });
 
-    test("a group activity tells the group its ranking changed", () async {
-      final ActivityChangeBus bus = ActivityChangeBus();
-      final List<String?> groups = <String?>[];
-      final StreamSubscription<GroupActivityChange> subscription = bus.stream
-          .listen((change) => groups.add(change.groupId));
-      addTearDown(subscription.cancel);
-      final SubjectStatsController controller = buildStatsController(
-        subject: _subject(groupId: "g1"),
-        history: _history(),
-        clearUseCase: FakeClearSubjectDataUseCase()
-          ..subject = _subject(groupId: "g1"),
-        activityChangeBus: bus,
-        confirmClearData: _Asked().yes,
-      );
-
-      await controller.onClearData();
-      await Future<void>.delayed(Duration.zero);
-
-      expect(groups, ["g1"]);
-    });
-
-    test("a personal activity does not bother the groups", () async {
+    // The activity may be linked to groups, whose rankings lose this share.
+    test("tells the groups a ranking may have changed", () async {
       final ActivityChangeBus bus = ActivityChangeBus();
       int notifications = 0;
       final StreamSubscription<GroupActivityChange> subscription = bus.stream
@@ -158,7 +129,7 @@ void main() {
       await controller.onClearData();
       await Future<void>.delayed(Duration.zero);
 
-      expect(notifications, 0);
+      expect(notifications, 1);
     });
 
     test("a failure leaves the numbers as they were and reports it", () async {
@@ -214,7 +185,6 @@ void main() {
       required Future<bool> Function({
         required String itemName,
         required bool isGoal,
-        required bool isFromGroup,
       })
       confirm,
     }) async {
@@ -270,12 +240,8 @@ void main() {
     testWidgets("asks first: saying no keeps the numbers", (tester) async {
       await pumpPage(
         tester,
-        confirm:
-            ({
-              required String itemName,
-              required bool isGoal,
-              required bool isFromGroup,
-            }) async => false,
+        confirm: ({required String itemName, required bool isGoal}) async =>
+            false,
       );
       expect(find.text("50%"), findsOneWidget);
 

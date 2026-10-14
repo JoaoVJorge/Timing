@@ -12,7 +12,6 @@ class SwipeRevealAction {
     this.iconColor,
     this.iconSize = 25,
     this.borderColor,
-    this.locked = false,
   }) : assert(iconPath != null || iconData != null);
 
   final Color background;
@@ -24,11 +23,6 @@ class SwipeRevealAction {
 
   /// Optional outline, so a light button stays visible on a light surface.
   final Color? borderColor;
-
-  /// Renders the button greyed out with a small lock badge — used for actions
-  /// that are unavailable here (e.g. a group-owned item that can't be deleted
-  /// directly). The [onTap] still fires so the caller can explain why.
-  final bool locked;
 }
 
 /// Swipe a row to the left to reveal a fixed set of trailing actions (edit,
@@ -202,81 +196,34 @@ class _RevealActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool locked = action.locked;
-    final Color background = locked
-        ? context.colorTokens.surfaceInnerLayer
-        : action.background;
-    final Color iconColor = locked
-        ? context.colorTokens.textHint
-        : (action.iconColor ?? context.colorTokens.white);
+    final Color iconColor = action.iconColor ?? context.colorTokens.white;
 
     return GestureDetector(
       onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: squareSize ?? _width,
-            height: squareSize,
-            margin: squareSize == null
-                ? const EdgeInsets.symmetric(vertical: 4)
-                : null,
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: action.borderColor == null || locked
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: context.colorTokens.surfaceShadow,
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-            ),
-            alignment: Alignment.center,
-            child: action.iconPath != null
-                ? AppIcon(
-                    action.iconPath!,
-                    color: iconColor,
-                    size: action.iconSize,
-                  )
-                : Icon(
-                    action.iconData,
-                    color: iconColor,
-                    size: action.iconSize,
+      child: Container(
+        width: squareSize ?? _width,
+        height: squareSize,
+        margin: squareSize == null
+            ? const EdgeInsets.symmetric(vertical: 4)
+            : null,
+        decoration: BoxDecoration(
+          color: action.background,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: action.borderColor == null
+              ? null
+              : [
+                  BoxShadow(
+                    color: context.colorTokens.surfaceShadow,
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
-          ),
-          if (locked) const Positioned(top: -2, right: -2, child: _LockBadge()),
-        ],
+                ],
+        ),
+        alignment: Alignment.center,
+        child: action.iconPath != null
+            ? AppIcon(action.iconPath!, color: iconColor, size: action.iconSize)
+            : Icon(action.iconData, color: iconColor, size: action.iconSize),
       ),
     );
   }
-}
-
-class _LockBadge extends StatelessWidget {
-  const _LockBadge();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 20,
-    height: 20,
-    decoration: BoxDecoration(
-      color: context.colorTokens.surface,
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(
-          color: context.colorTokens.surfaceShadow.withValues(alpha: 0.08),
-          blurRadius: 10,
-          offset: const Offset(2, 2),
-        ),
-      ],
-    ),
-    alignment: Alignment.center,
-    child: Icon(
-      Icons.lock_rounded,
-      size: 12,
-      color: context.colorTokens.textHint,
-    ),
-  );
 }

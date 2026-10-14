@@ -6,10 +6,13 @@ import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/group_invitation_entity.dart";
+import "package:timing/core/domain/entities/pending_group_join_request_entity.dart";
 import "package:timing/core/domain/entities/sent_group_invitation_entity.dart";
+import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/l10n/app_localizations.dart";
 import "package:timing/presentation/friends/friends_controller.dart";
 import "package:timing/presentation/friends/friends_page.dart";
+import "package:timing/presentation/friends/group_invitations_page.dart";
 import "package:timing/theme/theme.dart";
 
 class _PageController extends GetxController implements FriendsController {
@@ -25,8 +28,13 @@ class _PageController extends GetxController implements FriendsController {
   final RxList<GroupInvitationEntity> groupInvitations =
       <GroupInvitationEntity>[].obs;
   @override
+  final RxList<PendingGroupJoinRequestEntity> pendingGroupJoinRequests =
+      <PendingGroupJoinRequestEntity>[].obs;
+  @override
   final RxList<SentGroupInvitationEntity> sentGroupInvitations =
       <SentGroupInvitationEntity>[].obs;
+  @override
+  final RxSet<String> acceptingGroupInvitationIds = <String>{}.obs;
   @override
   final Rx<DateTime> presenceNow = DateTime.utc(2026, 10, 9).obs;
 
@@ -84,4 +92,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    "a request made by link remains visible while awaiting approval",
+    (tester) async {
+      final controller = _PageController();
+      controller.pendingGroupJoinRequests.add(
+        const PendingGroupJoinRequestEntity(
+          id: "request-1",
+          groupId: "group-1",
+          groupName: "Grupo Corrida",
+          theme: GroupThemeType.exercises,
+        ),
+      );
+      Get.put<AppNavigator>(AppNavigator());
+      Get.put<FriendsController>(controller);
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          locale: const Locale("pt"),
+          theme: AppThemes.build(
+            seed: Colors.green,
+            brightness: Brightness.light,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const GroupInvitationsPage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final AppLocalizations l10n = lookupAppLocalizations(const Locale("pt"));
+      expect(find.text("Grupo Corrida"), findsOneWidget);
+      expect(find.text(l10n.groupJoinRequestWaitingForLeader), findsOneWidget);
+      expect(find.text(l10n.acceptButton), findsNothing);
+    },
+  );
 }

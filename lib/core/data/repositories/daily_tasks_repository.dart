@@ -95,9 +95,9 @@ class DailyTasksRepository {
     return scheduled;
   }
 
-  /// Reads the account's copy again the next time, whatever was read moments
-  /// ago: linking a group activity changes the goals on the backend.
-  Future<void> refreshAfterGroupLinkChange() async {
+  /// Reads the account's copy again now, whatever was read moments ago.
+  @visibleForTesting
+  Future<void> refreshFromRemote() async {
     _lastRemoteReadAt = null;
     await _readTasks();
   }
@@ -280,10 +280,8 @@ class DailyTasksRepository {
   /// Local and remote views of one account's goals, merged:
   ///  * a goal only the backend has (created on another phone) is added;
   ///  * one this device holds that the backend once had but no longer does was
-  ///    deleted elsewhere, and is dropped, as is a leftover group-owned copy
-  ///    the backend does not hold: those only ever came from the backend, and
-  ///    it rejects the upload of one. A goal the backend never had is new here
-  ///    and kept;
+  ///    deleted elsewhere, and is dropped. A goal the backend never had is new
+  ///    here and kept;
   ///  * for the rest the more recently changed copy wins.
   @visibleForTesting
   List<DailyTaskEntity> mergeTasks({
@@ -302,20 +300,11 @@ class DailyTasksRepository {
     };
     final Map<String, DailyTaskEntity> byId = <String, DailyTaskEntity>{};
     for (final DailyTaskEntity local in localTasks) {
-      final DailyTaskEntity? linkedRemote = _linkedRemoteCopyOf(
-        local,
-        remoteTasks,
-      );
-      if (linkedRemote == null) {
-        final bool wasDeletedElsewhere =
-            !remoteIds.contains(local.id) &&
-            (syncedIds.contains(local.id) || local.isFromGroup);
-        if (!wasDeletedElsewhere) {
-          byId[local.id] = local;
-        }
-        continue;
+      final bool wasDeletedElsewhere =
+          !remoteIds.contains(local.id) && syncedIds.contains(local.id);
+      if (!wasDeletedElsewhere) {
+        byId[local.id] = local;
       }
-      byId[linkedRemote.id] = _mergeGroupTaskCopy(local, linkedRemote);
     }
     for (final DailyTaskEntity remote in remoteTasks) {
       final DailyTaskEntity? local = byId[remote.id];
@@ -323,58 +312,9 @@ class DailyTasksRepository {
       // that hasn't finished syncing is not clobbered by a stale remote read.
       if (local == null || _isNewer(remote, local)) {
         byId[remote.id] = remote;
-      } else if (local.isFromGroup && !remote.isFromGroup) {
-        byId[remote.id] = local.copyWith(clearGroupLink: true);
       }
     }
     return byId.values.toList();
-  }
-
-  DailyTaskEntity? _linkedRemoteCopyOf(
-    DailyTaskEntity local,
-    List<DailyTaskEntity> remoteTasks,
-  ) {
-    for (final DailyTaskEntity remote in remoteTasks) {
-      if (_isLinkedRemoteCopyOf(local, remote)) {
-        return remote;
-      }
-    }
-    return null;
-  }
-
-  bool _isLinkedRemoteCopyOf(DailyTaskEntity local, DailyTaskEntity remote) =>
-      local.id != remote.id &&
-      local.isFromGroup &&
-      local.groupActivityId == null &&
-      remote.groupId == local.groupId &&
-      remote.groupActivityId != null &&
-      remote.name.trim().toLowerCase() == local.name.trim().toLowerCase() &&
-      remote.targetDays == local.targetDays &&
-      remote.sequenceType == local.sequenceType &&
-      remote.goalType == local.goalType;
-
-  DailyTaskEntity _mergeGroupTaskCopy(
-    DailyTaskEntity local,
-    DailyTaskEntity linkedRemote,
-  ) {
-    final Set<String> completedDates = <String>{
-      ...linkedRemote.completedDates,
-      ...local.completedDates,
-    };
-    return linkedRemote.copyWith(
-      completedDates: completedDates.toList()..sort(),
-      updatedAt: _newerDate(linkedRemote.updatedAt, local.updatedAt),
-    );
-  }
-
-  DateTime? _newerDate(DateTime? a, DateTime? b) {
-    if (a == null) {
-      return b;
-    }
-    if (b == null) {
-      return a;
-    }
-    return a.isAfter(b) ? a : b;
   }
 
   bool _isNewer(DailyTaskEntity candidate, DailyTaskEntity current) {

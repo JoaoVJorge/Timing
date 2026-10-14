@@ -95,13 +95,6 @@ class DailyGoalsController extends GetxController {
   }
 
   Future<void> onEditTask(DailyTaskEntity task) async {
-    if (task.isFromGroup) {
-      _appNavigator.showErrorSnackBar(
-        Get.context?.l10n.groupGoalEditBlockedMessage,
-      );
-      return;
-    }
-
     final dynamic result = await _appNavigator.toNamed(
       AppRoutes.createTask,
       arguments: task,
@@ -161,11 +154,7 @@ class DailyGoalsController extends GetxController {
           if (updatedTask.isCheckedToday) {
             unawaited(_lastActivityService.record(updatedTask.name));
           }
-          if (updatedTask.isFromGroup) {
-            _activityChangeBus.notifyGroupActivityChanged(
-              groupId: updatedTask.groupId,
-            );
-          }
+          _activityChangeBus.notifyGroupActivityChanged();
           unawaited(_achievementUnlockService.checkForNewUnlocks());
         },
       );
@@ -242,11 +231,7 @@ class DailyGoalsController extends GetxController {
           if (index != -1) {
             tasks[index] = updatedTask;
           }
-          if (updatedTask.isFromGroup) {
-            _activityChangeBus.notifyGroupActivityChanged(
-              groupId: updatedTask.groupId,
-            );
-          }
+          _activityChangeBus.notifyGroupActivityChanged();
           didUnlockCheck = true;
         });
       }
@@ -278,13 +263,6 @@ class DailyGoalsController extends GetxController {
   );
 
   Future<void> onDeleteTask(DailyTaskEntity task) async {
-    if (task.isFromGroup) {
-      _appNavigator.showErrorSnackBar(
-        Get.context?.l10n.groupGoalDeleteBlockedMessage,
-      );
-      return;
-    }
-
     final bool confirmed = await _confirmDelete(
       itemName: task.name,
       itemTypeName: _goalTypeName,

@@ -25,6 +25,7 @@ class _GroupsOfflineCachedNotice extends StatelessWidget {
   Widget build(BuildContext context) => _GroupsNotice(
     icon: Icons.wifi_off_rounded,
     message: context.l10n.groupsOfflineCachedNotice,
+    tone: _GroupsNoticeTone.info,
   );
 }
 
@@ -37,59 +38,107 @@ class _GroupsStaleNotice extends StatelessWidget {
   Widget build(BuildContext context) => _GroupsNotice(
     icon: Icons.cloud_off_rounded,
     message: context.l10n.groupsStaleNotice,
+    tone: _GroupsNoticeTone.warning,
     actionLabel: context.l10n.retryButton,
     onAction: onRetry,
   );
 }
 
+enum _GroupsNoticeTone { info, warning }
+
 class _GroupsNotice extends StatelessWidget {
   const _GroupsNotice({
     required this.icon,
     required this.message,
+    required this.tone,
     this.actionLabel,
     this.onAction,
   });
 
   final IconData icon;
   final String message;
+  final _GroupsNoticeTone tone;
   final String? actionLabel;
   final VoidCallback? onAction;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    margin: const EdgeInsets.only(bottom: AppSpacing.betweenRelated),
-    padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.betweenRelated,
-      vertical: AppSpacing.titleToDescription,
-    ),
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget build(BuildContext context) {
+    final Color accent = switch (tone) {
+      _GroupsNoticeTone.info => context.colorTokens.info,
+      _GroupsNoticeTone.warning => context.colorTokens.warning,
+    };
+    final bool hasAction = actionLabel != null && onAction != null;
+
+    return Container(
+      key: ValueKey<String>("groups-notice-${tone.name}"),
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(
+          accent.withValues(
+            alpha: Theme.of(context).brightness == Brightness.dark
+                ? 0.10
+                : 0.06,
+          ),
+          context.colorTokens.surface,
         ),
-        const Gap(AppSpacing.titleToDescription),
-        Expanded(
-          child: Text(
-            message,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+        borderRadius: BorderRadius.circular(AppSurfaces.groupRadius),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: accent),
+          ),
+          const Gap(AppSpacing.betweenRelated),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message,
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: context.colorTokens.textBody,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
+                if (hasAction) ...[
+                  const Gap(10),
+                  TextButton.icon(
+                    key: const ValueKey<String>("groups-notice-retry"),
+                    onPressed: onAction,
+                    style: TextButton.styleFrom(
+                      foregroundColor: accent,
+                      backgroundColor: accent.withValues(alpha: 0.10),
+                      minimumSize: const Size(0, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: context.textStyles.caption.copyWith(
+                        color: accent,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(actionLabel!),
+                  ),
+                ],
+              ],
             ),
           ),
-        ),
-        if (actionLabel != null && onAction != null) ...[
-          const Gap(AppSpacing.titleToDescription),
-          TextButton(onPressed: onAction, child: Text(actionLabel!)),
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 class _GroupsEmptyState extends StatelessWidget {

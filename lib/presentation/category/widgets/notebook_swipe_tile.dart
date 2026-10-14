@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/presentation/category/widgets/group_activity_lock_badge.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 
 /// Horizontal swipe tile with two reveals: drag right for notes/statistics,
@@ -13,8 +12,6 @@ class NotebookSwipeTile extends StatefulWidget {
     required this.onTapStats,
     required this.onTapEdit,
     required this.onDelete,
-    this.isEditLocked = false,
-    this.isDeleteLocked = false,
     this.onDragStart,
     super.key,
   });
@@ -25,8 +22,6 @@ class NotebookSwipeTile extends StatefulWidget {
   final VoidCallback onTapStats;
   final VoidCallback onTapEdit;
   final VoidCallback onDelete;
-  final bool isEditLocked;
-  final bool isDeleteLocked;
 
   /// Fired the moment the user starts dragging the tile, before any reveal
   /// distance is known. Used to dismiss a one-off swipe hint on first touch.
@@ -145,26 +140,16 @@ class _NotebookSwipeTileState extends State<NotebookSwipeTile>
                   children: [
                     _RevealAction(
                       iconData: Icons.edit_rounded,
-                      color: widget.isEditLocked
-                          ? context.colorTokens.surfaceInnerLayer
-                          : widget.accent.withValues(alpha: 0.14),
-                      iconColor: widget.isEditLocked
-                          ? context.colorTokens.textHint
-                          : widget.accent,
-                      showLock: widget.isEditLocked,
+                      color: context.colorTokens.white,
+                      iconColor: widget.accent,
                       onTap: _onTapEdit,
                     ),
                     const SizedBox(width: _RevealAction.gap),
                     _RevealAction(
                       iconPath: "trash",
                       iconSize: 20,
-                      color: widget.isDeleteLocked
-                          ? context.colorTokens.surfaceInnerLayer
-                          : context.colorTokens.error,
-                      iconColor: widget.isDeleteLocked
-                          ? context.colorTokens.textHint
-                          : context.colorTokens.white,
-                      showLock: widget.isDeleteLocked,
+                      color: context.colorTokens.error,
+                      iconColor: context.colorTokens.white,
                       onTap: _onTapDelete,
                     ),
                   ],
@@ -192,7 +177,6 @@ class _RevealAction extends StatelessWidget {
     this.iconColor,
     this.color,
     this.gradient,
-    this.showLock = false,
     this.iconSize = 25,
   }) : assert(iconPath != null || iconData != null);
 
@@ -204,48 +188,23 @@ class _RevealAction extends StatelessWidget {
   final VoidCallback onTap;
   final Color? color;
   final Gradient? gradient;
-  final bool showLock;
   final double iconSize;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    child: Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: _revealWidth,
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          decoration: BoxDecoration(
-            color: color,
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          alignment: Alignment.center,
-          child: iconPath != null
-              ? AppIcon(
-                  iconPath!,
-                  color: iconColor ?? Colors.white,
-                  size: iconSize,
-                )
-              : Icon(
-                  iconData,
-                  color: iconColor ?? Colors.white,
-                  size: iconSize,
-                ),
-        ),
-        if (showLock)
-          Positioned(
-            top: -2,
-            right: -2,
-            child: GroupActivityLockBadge(
-              size: 20,
-              iconSize: 12,
-              backgroundColor: context.colorTokens.surface,
-              iconColor: context.colorTokens.textHint,
-            ),
-          ),
-      ],
+    child: Container(
+      width: _revealWidth,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: color,
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: iconPath != null
+          ? AppIcon(iconPath!, color: iconColor ?? Colors.white, size: iconSize)
+          : Icon(iconData, color: iconColor ?? Colors.white, size: iconSize),
     ),
   );
 }

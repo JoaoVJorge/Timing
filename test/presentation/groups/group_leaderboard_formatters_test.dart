@@ -29,13 +29,11 @@ Future<String> _format(
 void main() {
   testWidgets("a session under a minute shows its seconds", (tester) async {
     expect(await _format(tester, 45, formatGroupScore), "45s");
-    expect(await _format(tester, 45, formatMetricValue), "45s");
   });
 
   testWidgets("a minute or more keeps the minute formats", (tester) async {
     expect(await _format(tester, 60, formatGroupScore), "1 min");
     expect(await _format(tester, 3660, formatGroupScore), "1h 1 min");
-    expect(await _format(tester, 5400, formatMetricValue), "90 min");
   });
 
   testWidgets("zero stays zero minutes", (tester) async {

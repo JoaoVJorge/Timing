@@ -119,7 +119,7 @@ void main() {
         "updated_at": "2026-10-07T00:00:00Z",
       },
     ];
-    await dataSource.refreshAfterGroupLinkChange();
+    await dataSource.refreshFromRemote();
     await pumpEventQueue();
 
     expect(announced.last.map((task) => task.id), containsAll(["a", "b"]));

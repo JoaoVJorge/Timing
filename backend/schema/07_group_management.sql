@@ -1,7 +1,7 @@
 -- =============================================================================
 -- 07 · Group management
 -- Create, join, edit, reset and hand over a group.
--- Requires: 03_groups.sql, 05_group_activities.sql
+-- Requires: 03_groups.sql, 05_group_activity_links.sql
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -12,14 +12,19 @@ drop function if exists public.create_group_with_members(text, text, uuid[]);
 drop function if exists public.create_group_with_members(
   text, text, uuid[], text, text, jsonb
 );
+drop function if exists public.create_group_with_members(
+  text, text, uuid[], text, text[], date
+);
 
+-- A group is its theme: the creator may already link personal activities of
+-- that theme (source_ids), exactly as any member does later.
 create or replace function public.create_group_with_members(
   group_name text,
   group_theme text,
   invited_friend_ids uuid[],
   group_description text default '',
-  activity_kind text default null,
-  activity_payload jsonb default null
+  source_ids text[] default '{}',
+  local_date date default current_date
 )
 returns table (
   id uuid,
@@ -29,8 +34,8 @@ returns table (
   description text,
   invite_code text,
   privacy text,
-  activity_id uuid,
-  created_at timestamptz
+  created_at timestamptz,
+  color_value bigint
 )
 language plpgsql
 security definer
@@ -40,11 +45,16 @@ declare
   current_user_id uuid := auth.uid();
   new_group_id uuid;
   new_invite_code text;
-  new_activity_id uuid;
 begin
   if current_user_id is null then
     raise exception 'User must be authenticated to create a group.'
       using errcode = '28000';
+  end if;
+
+  if group_theme is null or group_theme not in (
+    'studying', 'dailyGoals', 'exercises', 'reading', 'hobbies'
+  ) then
+    raise exception 'Unknown group theme.' using errcode = '23514';
   end if;
 
   if coalesce(array_length(invited_friend_ids, 1), 0) < 1 then
@@ -92,19 +102,31 @@ begin
   from unnest(invited_friend_ids) invited_id
   on conflict (group_id, invitee_id) do nothing;
 
-  if activity_kind is not null then
-    insert into public.group_activities (group_id, kind, payload)
-    values (
-      new_group_id, activity_kind, coalesce(activity_payload, '{}'::jsonb) - 'source_ids' - 'local_date'
-    )
-    returning group_activities.id into new_activity_id;
+  perform public.set_group_activity_links(
+    new_group_id,
+    coalesce(source_ids, '{}'::text[]),
+    coalesce(local_date, current_date)
+  );
 
-    perform public.set_group_activity_links(
-      new_activity_id,
-      array(select jsonb_array_elements_text(coalesce(activity_payload->'source_ids', '[]'::jsonb))),
-      not (coalesce(activity_payload, '{}'::jsonb) ? 'source_ids'),
-      coalesce((activity_payload->>'local_date')::date, current_date)
-    );
+  -- The first selected personal activity defines the group's accent. The
+  -- source was validated by set_group_activity_links above, so its color is
+  -- safe to copy without accepting an arbitrary client-provided value.
+  if cardinality(coalesce(source_ids, '{}'::text[])) > 0 then
+    if group_theme = 'dailyGoals' then
+      update public.groups g
+      set color_value = d.color_value
+      from public.daily_goals d
+      where g.id = new_group_id
+        and d.user_id = current_user_id
+        and d.id = source_ids[1];
+    else
+      update public.groups g
+      set color_value = s.color_value
+      from public.user_subjects s
+      where g.id = new_group_id
+        and s.user_id = current_user_id
+        and s.id = source_ids[1];
+    end if;
   end if;
 
   return query
@@ -116,15 +138,15 @@ begin
     g.description,
     g.invite_code,
     g.privacy,
-    new_activity_id,
-    g.created_at
+    g.created_at,
+    g.color_value
   from public.groups g
   where g.id = new_group_id;
 end;
 $$;
 
 grant execute on function public.create_group_with_members(
-  text, text, uuid[], text, text, jsonb
+  text, text, uuid[], text, text[], date
 )
 to authenticated;
 
@@ -189,12 +211,15 @@ end;
 $$;
 
 drop function if exists public.update_group_with_activity(uuid, text, text, jsonb);
+drop function if exists public.update_group(uuid, text, text, bigint);
 
-create or replace function public.update_group_with_activity(
+-- The leader's edits: name, description and the group's own color. A null
+-- color leaves the current one untouched.
+create or replace function public.update_group(
   target_group_id uuid,
   group_name text,
   group_description text default '',
-  activity_payload jsonb default '{}'::jsonb
+  group_color_value bigint default null
 )
 returns table (
   id uuid,
@@ -205,16 +230,12 @@ returns table (
   created_at timestamptz,
   invite_code text,
   privacy text,
-  activity_id uuid
+  color_value bigint
 )
 language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  target_activity_id uuid;
-  target_activity_kind text;
-  merged_payload jsonb;
 begin
   if not public.owns_group(target_group_id, auth.uid()) then
     raise exception 'only the group owner can edit this group'
@@ -224,85 +245,9 @@ begin
   update public.groups
   set
     name = nullif(btrim(group_name), ''),
-    description = coalesce(group_description, '')
+    description = coalesce(group_description, ''),
+    color_value = coalesce(group_color_value, groups.color_value)
   where groups.id = target_group_id;
-
-  select ga.id, ga.kind, ga.payload || coalesce(activity_payload, '{}'::jsonb)
-  into target_activity_id, target_activity_kind, merged_payload
-  from public.group_activities ga
-  where ga.group_id = target_group_id
-  order by ga.created_at
-  limit 1;
-
-  if target_activity_id is not null then
-    update public.group_activities
-    set payload = merged_payload
-    where group_activities.id = target_activity_id;
-
-    if target_activity_kind = 'subject' then
-      update public.user_subjects
-      set
-        name = coalesce(nullif(merged_payload->>'name', ''), user_subjects.name),
-        category = coalesce(
-          nullif(merged_payload->>'category', ''),
-          user_subjects.category
-        ),
-        color_value = coalesce(
-          (merged_payload->>'color_value')::bigint,
-          user_subjects.color_value
-        ),
-        goal_seconds = coalesce(
-          (merged_payload->>'goal_seconds')::integer,
-          user_subjects.goal_seconds
-        ),
-        goal_pages = coalesce(
-          (merged_payload->>'goal_pages')::integer,
-          user_subjects.goal_pages
-        ),
-        icon_name = coalesce(
-          nullif(merged_payload->>'icon_name', ''),
-          user_subjects.icon_name
-        ),
-        rest_minutes = coalesce(
-          (merged_payload->>'rest_minutes')::integer,
-          user_subjects.rest_minutes
-        ),
-        focus_session_count = coalesce(
-          (merged_payload->>'focus_session_count')::integer,
-          user_subjects.focus_session_count
-        ),
-        wallpaper_index = coalesce(
-          (merged_payload->>'wallpaper_index')::integer,
-          user_subjects.wallpaper_index
-        ),
-        activity_type = coalesce(
-          nullif(merged_payload->>'activity_type', ''),
-          user_subjects.activity_type
-        )
-      where user_subjects.group_activity_id = target_activity_id;
-    elsif target_activity_kind = 'goal' then
-      update public.daily_goals
-      set
-        name = coalesce(nullif(merged_payload->>'name', ''), daily_goals.name),
-        color_value = coalesce(
-          (merged_payload->>'color_value')::bigint,
-          daily_goals.color_value
-        ),
-        target_days = coalesce(
-          (merged_payload->>'target_days')::integer,
-          daily_goals.target_days
-        ),
-        sequence_type = coalesce(
-          nullif(merged_payload->>'sequence_type', ''),
-          daily_goals.sequence_type
-        ),
-        goal_type = coalesce(
-          nullif(merged_payload->>'goal_type', ''),
-          daily_goals.goal_type
-        )
-      where daily_goals.group_activity_id = target_activity_id;
-    end if;
-  end if;
 
   return query
   select
@@ -314,19 +259,19 @@ begin
     g.created_at,
     g.invite_code,
     g.privacy,
-    target_activity_id
+    g.color_value
   from public.groups g
   where g.id = target_group_id;
 end;
 $$;
 
-revoke all on function public.update_group_with_activity(uuid, text, text, jsonb)
+revoke all on function public.update_group(uuid, text, text, bigint)
 from public;
-grant execute on function public.update_group_with_activity(uuid, text, text, jsonb)
+grant execute on function public.update_group(uuid, text, text, bigint)
 to authenticated;
 
--- Starts fresh shared ranking and activity progress without changing anyone's
--- cumulative personal activity data. History remains intact.
+-- Starts the shared ranking afresh without changing anyone's personal
+-- activity data: history remains intact, it just stops counting for the group.
 drop function if exists public.reset_group_progress(uuid);
 create or replace function public.reset_group_progress(target_group_id uuid)
 returns void
@@ -334,22 +279,15 @@ language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  reset_at timestamptz := clock_timestamp();
 begin
   if not public.owns_group(target_group_id, auth.uid()) then
     raise exception 'only the group owner can reset this group'
       using errcode = '42501';
   end if;
 
-  update public.group_activities
-  set score_reset_at = reset_at
-  where group_id = target_group_id;
-
-  if not found then
-    raise exception 'group has no activities to reset'
-      using errcode = 'P0002';
-  end if;
+  update public.groups
+  set score_reset_at = clock_timestamp()
+  where id = target_group_id;
 end;
 $$;
 
@@ -424,7 +362,7 @@ drop function if exists public.set_group_member_role(uuid, uuid, text);
 -- -----------------------------------------------------------------------------
 
 -- Erases the caller's account and every row that hangs off it. Leaving each
--- group first lets trg_cleanup_group_activities_on_leave hand ownership to the
+-- group first lets trg_handle_group_member_left hand ownership to the
 -- earliest remaining member, or drop the group when nobody is left. Removing
 -- the auth user then cascades through profiles to all remaining personal data.
 drop function if exists public.delete_my_account();

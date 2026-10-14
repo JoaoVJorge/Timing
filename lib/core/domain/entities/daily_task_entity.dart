@@ -40,8 +40,6 @@ class DailyTaskEntity extends Equatable {
     this.lastResolvedMissedDate,
     this.goalType = DailyTaskGoalType.total,
     this.updatedAt,
-    this.groupId,
-    this.groupActivityId,
     this.reminderMinutes,
   });
 
@@ -58,12 +56,6 @@ class DailyTaskEntity extends Equatable {
     lastResolvedMissedDate: map["lastResolvedMissedDate"] as String?,
     goalType: DailyTaskGoalType.fromName(map["goalType"] as String?),
     updatedAt: _parseUpdatedAt(map["updatedAt"]),
-    groupId: (map["groupId"] as String?)?.isEmpty ?? true
-        ? null
-        : map["groupId"] as String?,
-    groupActivityId: (map["groupActivityId"] as String?)?.isEmpty ?? true
-        ? null
-        : map["groupActivityId"] as String?,
     reminderMinutes: _parseReminderMinutes(map["reminderMinutes"]),
   );
 
@@ -92,13 +84,6 @@ class DailyTaskEntity extends Equatable {
   final DailyTaskSequenceType sequenceType;
   final String? lastResolvedMissedDate;
   final DailyTaskGoalType goalType;
-
-  /// Legacy ownership metadata, cleared when the backend migrates group
-  /// copies to personal activities with independent contribution links.
-  final String? groupId;
-  final String? groupActivityId;
-
-  bool get isFromGroup => groupId != null && groupId!.isNotEmpty;
 
   /// Minute of the day (local time) a reminder is shown while the goal is
   /// still unchecked that day. Null when the goal has no reminder.
@@ -191,8 +176,6 @@ class DailyTaskEntity extends Equatable {
     "lastResolvedMissedDate": lastResolvedMissedDate,
     "goalType": goalType.name,
     "updatedAt": updatedAt?.toUtc().toIso8601String(),
-    "groupId": groupId,
-    "groupActivityId": groupActivityId,
     "reminderMinutes": reminderMinutes,
   };
 
@@ -205,9 +188,6 @@ class DailyTaskEntity extends Equatable {
     String? lastResolvedMissedDate,
     DailyTaskGoalType? goalType,
     DateTime? updatedAt,
-    bool clearGroupLink = false,
-    String? groupId,
-    String? groupActivityId,
     bool clearReminder = false,
     int? reminderMinutes,
   }) => DailyTaskEntity(
@@ -221,10 +201,6 @@ class DailyTaskEntity extends Equatable {
         lastResolvedMissedDate ?? this.lastResolvedMissedDate,
     goalType: goalType ?? this.goalType,
     updatedAt: updatedAt ?? this.updatedAt,
-    groupId: clearGroupLink ? null : groupId ?? this.groupId,
-    groupActivityId: clearGroupLink
-        ? null
-        : groupActivityId ?? this.groupActivityId,
     reminderMinutes: clearReminder
         ? null
         : reminderMinutes ?? this.reminderMinutes,
@@ -264,8 +240,6 @@ class DailyTaskEntity extends Equatable {
     lastResolvedMissedDate,
     goalType,
     updatedAt,
-    groupId,
-    groupActivityId,
     reminderMinutes,
   ];
 }

@@ -101,7 +101,6 @@ void main() {
           group: _group(),
           name: "Novo nome",
           description: "Nova descrição",
-          activityPayload: const {},
         );
 
         expect(result.isRight(), isTrue);

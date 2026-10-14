@@ -1,20 +1,19 @@
+import "dart:async";
 import "dart:convert";
 import "dart:typed_data";
 
 import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
+import "package:image/image.dart" as image_lib;
 import "package:timing/core/domain/entities/friend_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
 import "package:timing/core/domain/entities/group_image_message_entity.dart";
 import "package:timing/core/domain/entities/group_join_request_entity.dart";
 import "package:timing/core/domain/entities/group_member_entity.dart";
-import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/domain/enums/leaderboard_period_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
 import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
@@ -22,8 +21,6 @@ import "package:timing/presentation/groups/widgets/current_user_rank_card.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/presentation/groups/widgets/groups_header.dart";
 import "package:timing/presentation/groups/widgets/leaderboard_tile.dart";
-import "package:timing/shared/functions/format_duration.dart";
-import "package:timing/shared/functions/format_rest_duration.dart";
 import "package:timing/shared/functions/format_schedule_time.dart";
 import "package:timing/shared/widgets/animated_segmented_tabs.dart";
 import "package:timing/shared/widgets/app_empty_state.dart";
@@ -36,12 +33,10 @@ import "package:timing/shared/widgets/swipe_reveal_actions.dart";
 import "package:timing/theme/app_spacing.dart";
 import "package:timing/theme/app_surfaces.dart";
 import "package:timing/theme/colors.dart";
-import "package:timing/theme/subject_colors.dart";
 
 part "groups_page_ranking.dart";
 part "groups_page_manage_members.dart";
 part "groups_page_details.dart";
-part "groups_page_goals_tab.dart";
 part "groups_page_chat.dart";
 part "groups_page_actions_sheet.dart";
 part "groups_page_placeholders.dart";
@@ -65,30 +60,36 @@ class GroupsPage extends StatelessWidget {
         return const AppScaffold(body: _GroupsOfflineState());
       }
 
-      final Widget content;
-      if (showGroupFlowOnly) {
-        content = controller.isShowingMemberManagement.value
-            ? _ManageMembersView(controller: controller)
-            : _GroupDetailsView(controller: controller);
-      } else {
-        content = _GroupsHomeView(controller: controller);
-      }
-
       final bool isStale =
           !isOffline &&
           controller.isShowingStaleGroups.value &&
           controller.groups.isNotEmpty;
-      if (!isOffline && !isStale) {
+      final Widget? notice = isOffline
+          ? const _GroupsOfflineCachedNotice()
+          : isStale
+          ? _GroupsStaleNotice(onRetry: controller.loadGroups)
+          : null;
+      final Widget content = showGroupFlowOnly
+          ? controller.isShowingMemberManagement.value
+                ? _ManageMembersView(controller: controller)
+                : _GroupDetailsView(controller: controller)
+          : _GroupsHomeView(controller: controller, notice: notice);
+
+      if (!showGroupFlowOnly) {
         return AppScaffold(body: content);
       }
+
+      if (notice == null) {
+        return AppScaffold(body: content);
+      }
+
       return AppScaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (isOffline)
-              const _GroupsOfflineCachedNotice()
-            else
-              _GroupsStaleNotice(onRetry: controller.loadGroups),
+            const Gap(AppSpacing.betweenRelated),
+            notice,
+            const Gap(AppSpacing.betweenRelated),
             Expanded(child: content),
           ],
         ),
@@ -98,9 +99,10 @@ class GroupsPage extends StatelessWidget {
 }
 
 class _GroupsHomeView extends StatelessWidget {
-  const _GroupsHomeView({required this.controller});
+  const _GroupsHomeView({required this.controller, this.notice});
 
   final GroupsController controller;
+  final Widget? notice;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -108,7 +110,12 @@ class _GroupsHomeView extends StatelessWidget {
     children: [
       const Gap(16),
       GroupsHeader(onTapCreateGroup: controller.onTapCreateGroup),
-      const Gap(AppSpacing.betweenSections),
+      if (notice != null) ...[
+        const Gap(AppSpacing.betweenRelated),
+        notice!,
+        const Gap(AppSpacing.betweenRelated),
+      ] else
+        const Gap(AppSpacing.betweenSections),
       Expanded(
         child: Obx(() {
           if (controller.isLoading.value && controller.groups.isEmpty) {
@@ -621,8 +628,8 @@ class _GroupIcon extends StatelessWidget {
   }
 }
 
-/// Color tokens seeded from the group's activity color, so a group keeps its
-/// own look instead of inheriting the viewer's accent.
+/// Color tokens seeded from the group's own color, when its leader chose one,
+/// so the group keeps that look instead of inheriting the viewer's accent.
 AppColorTokens _groupColorTokens(BuildContext context, GroupEntity group) {
   final int? colorValue = group.colorValue;
   if (colorValue == null) {

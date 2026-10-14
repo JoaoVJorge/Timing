@@ -618,6 +618,10 @@ Exige:
 - tema (`GroupThemeType`);
 - pelo menos 1 amigo convidado.
 
+Opcional: vincular atividades proprias do tema (uma unica meta quando o tema e
+metas diarias). O grupo nao tem atividade propria; ver
+`docs/GROUP_ACTIVITY_LINKS.md`.
+
 Ao criar:
 
 - inclui o usuario atual como `"me"` e role `"owner"`;

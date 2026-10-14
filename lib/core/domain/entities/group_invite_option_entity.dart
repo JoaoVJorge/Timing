@@ -24,6 +24,7 @@ class GroupInviteOptionEntity extends Equatable {
     required this.accentColorValue,
     required this.status,
     this.invitationId,
+    this.joinRequestId,
   });
 
   factory GroupInviteOptionEntity.fromMap(Map<String, dynamic> map) =>
@@ -34,6 +35,7 @@ class GroupInviteOptionEntity extends Equatable {
             (map["accent_color_value"] as num?)?.toInt() ?? 4294940679,
         status: GroupInviteStatus.byName(map["status"] as String? ?? ""),
         invitationId: map["invitation_id"] as String?,
+        joinRequestId: map["join_request_id"] as String?,
       );
 
   final String friendId;
@@ -41,6 +43,7 @@ class GroupInviteOptionEntity extends Equatable {
   final int accentColorValue;
   final GroupInviteStatus status;
   final String? invitationId;
+  final String? joinRequestId;
 
   bool get isInvited => status == GroupInviteStatus.invited;
   bool get isMember => status == GroupInviteStatus.member;
@@ -49,13 +52,18 @@ class GroupInviteOptionEntity extends Equatable {
   GroupInviteOptionEntity copyWith({
     GroupInviteStatus? status,
     String? invitationId,
+    String? joinRequestId,
     bool clearInvitationId = false,
+    bool clearJoinRequestId = false,
   }) => GroupInviteOptionEntity(
     friendId: friendId,
     friendName: friendName,
     accentColorValue: accentColorValue,
     status: status ?? this.status,
     invitationId: clearInvitationId ? null : invitationId ?? this.invitationId,
+    joinRequestId: clearJoinRequestId
+        ? null
+        : joinRequestId ?? this.joinRequestId,
   );
 
   @override
@@ -65,5 +73,6 @@ class GroupInviteOptionEntity extends Equatable {
     accentColorValue,
     status,
     invitationId,
+    joinRequestId,
   ];
 }

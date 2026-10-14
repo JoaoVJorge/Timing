@@ -611,9 +611,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
         subjectName: subject.name,
         pages: sanitizedPages,
       );
-      // The group's progress reads the subject's saved page count while its
-      // ranking reads the logged entry, so refresh only once both reached the
-      // backend instead of right after the entry.
+      // A linked book feeds a group's ranking through the logged entry, so
+      // refresh once it and the saved page count both reached the backend.
       unawaited(
         Future.wait<void>([
           pagesSaved,
@@ -640,11 +639,8 @@ class TimerController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  void _notifyGroupActivityChanged() {
-    if (subject.isFromGroup) {
-      activityChangeBus.notifyGroupActivityChanged(groupId: subject.groupId);
-    }
-  }
+  void _notifyGroupActivityChanged() =>
+      activityChangeBus.notifyGroupActivityChanged();
 
   void _recordLastActivityIfNeeded() {
     if (!_persister.hasLoggedTime || _hasRecordedLastActivity) {

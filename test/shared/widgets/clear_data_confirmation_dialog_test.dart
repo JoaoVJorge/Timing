@@ -20,10 +20,6 @@ Future<void> _pumpHost(WidgetTester tester) async {
   await tester.pump();
 }
 
-const String _groupNote =
-    "Como faz parte de um grupo, seu progresso individual também sai do "
-    "ranking. Você continua no grupo.";
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -37,7 +33,6 @@ void main() {
     final Future<bool> answer = showClearDataConfirmationDialog(
       itemName: "Cálculo",
       isGoal: false,
-      isFromGroup: false,
     );
     await tester.pumpAndSettle();
 
@@ -45,7 +40,6 @@ void main() {
     expect(find.textContaining("\"Cálculo\""), findsOneWidget);
     expect(find.textContaining("tempo, páginas e histórico"), findsOneWidget);
     expect(find.textContaining("não poderá ser desfeita"), findsOneWidget);
-    expect(find.textContaining(_groupNote), findsNothing);
 
     await tester.tap(find.text("Cancelar"));
     await tester.pumpAndSettle();
@@ -58,7 +52,6 @@ void main() {
     final Future<bool> answer = showClearDataConfirmationDialog(
       itemName: "Beber água",
       isGoal: true,
-      isFromGroup: false,
     );
     await tester.pumpAndSettle();
 
@@ -73,32 +66,12 @@ void main() {
     await answer;
   });
 
-  testWidgets("for a group item, says it leaves the ranking too", (
-    tester,
-  ) async {
-    await _pumpHost(tester);
-
-    final Future<bool> answer = showClearDataConfirmationDialog(
-      itemName: "Meta do grupo",
-      isGoal: true,
-      isFromGroup: true,
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining(_groupNote), findsOneWidget);
-
-    await tester.tap(find.text("Cancelar"));
-    await tester.pumpAndSettle();
-    await answer;
-  });
-
   testWidgets("the destructive button answers yes", (tester) async {
     await _pumpHost(tester);
 
     final Future<bool> answer = showClearDataConfirmationDialog(
       itemName: "Cálculo",
       isGoal: false,
-      isFromGroup: false,
     );
     await tester.pumpAndSettle();
 

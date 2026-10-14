@@ -1,14 +1,12 @@
-import "package:timing/presentation/group_activity_links/activity_source_selector.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:gap/gap.dart";
 import "package:get/get.dart";
 import "package:timing/core/domain/entities/friend_option.dart";
 import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_group/create_group_controller.dart";
-import "package:timing/presentation/create_subject/create_subject_page.dart";
 import "package:timing/presentation/create_group/widgets/friend_tile.dart";
+import "package:timing/presentation/group_activity_links/activity_source_selector.dart";
 import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -16,13 +14,10 @@ import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/app_scaffold.dart";
 import "package:timing/shared/widgets/app_top_bar.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
-import "package:timing/shared/widgets/creation/creation_form_widgets.dart";
 import "package:timing/theme/decoration.dart";
 
-import "package:timing/theme/app_spacing.dart";
 part "create_group_page_step_progress.dart";
 part "create_group_page_information_step.dart";
-part "create_group_page_activity_step.dart";
 part "create_group_page_friends_step.dart";
 part "create_group_page_summary_step.dart";
 
@@ -36,8 +31,7 @@ class CreateGroupPage extends StatefulWidget {
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final GlobalKey _groupNameKey = GlobalKey();
   final GlobalKey _themeKey = GlobalKey();
-  final GlobalKey _activityNameKey = GlobalKey();
-  final GlobalKey _activityGoalKey = GlobalKey();
+  final GlobalKey _linksKey = GlobalKey();
   final GlobalKey _friendsKey = GlobalKey();
 
   @override
@@ -50,10 +44,15 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         if (!didPop) controller.onTapBack();
       },
       child: AppScaffold(
+        backgroundColor: context.creationPageBackground,
         topBar: AppTopBar(
           title: context.l10n.createGroupTitle,
           showBackButton: true,
           onBack: controller.onTapBack,
+          titleStyle: context.textStyles.pageTitle.copyWith(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         body: Obx(() {
           final int step = controller.currentStep.value;
@@ -67,11 +66,14 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 overflow: TextOverflow.ellipsis,
                 style: context.textStyles.bodyMedium.copyWith(
                   color: context.colorTokens.textHint,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  height: 1.3,
                 ),
               ),
-              const Gap(18),
+              const Gap(12),
               _StepProgress(currentStep: step),
-              const Gap(18),
+              const Gap(14),
               Expanded(
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
@@ -81,13 +83,11 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                       controller: controller,
                       groupNameKey: _groupNameKey,
                       themeKey: _themeKey,
+                      linksKey: _linksKey,
+                      onSelectTheme: (theme) =>
+                          _onSelectTheme(controller, theme),
                     ),
-                    1 => _ActivityStep(
-                      controller: controller,
-                      activityNameKey: _activityNameKey,
-                      activityGoalKey: _activityGoalKey,
-                    ),
-                    2 => _FriendsStep(
+                    1 => _FriendsStep(
                       controller: controller,
                       friendsKey: _friendsKey,
                     ),
@@ -110,10 +110,33 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
 
   String _subtitleForStep(BuildContext context, int step) => switch (step) {
     0 => context.l10n.createGroupSubtitle,
-    1 => context.l10n.createGroupActivityStepSubtitle,
-    2 => context.l10n.createGroupFriendsStepSubtitle,
+    1 => context.l10n.createGroupFriendsStepSubtitle,
     _ => context.l10n.createGroupSummaryStepSubtitle,
   };
+
+  /// The activities that fit the theme show up below the theme list, which
+  /// is often off screen; bring them into view once a theme is chosen.
+  Future<void> _onSelectTheme(
+    CreateGroupController controller,
+    GroupThemeType theme,
+  ) async {
+    final bool changed = controller.selectedTheme.value != theme;
+    controller.onSelectTheme(theme);
+    if (!changed) {
+      return;
+    }
+    await WidgetsBinding.instance.endOfFrame;
+    final BuildContext? linksContext = _linksKey.currentContext;
+    if (!mounted || linksContext == null || !linksContext.mounted) {
+      return;
+    }
+    await Scrollable.ensureVisible(
+      linksContext,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+  }
 
   Future<void> _onTapBottomAction(CreateGroupController controller) async {
     if (controller.isSummaryStep) {
@@ -135,12 +158,6 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           : !controller.hasTheme
           ? _themeKey
           : null;
-    } else if (controller.isActivityStep) {
-      targetKey = controller.activityName.value.trim().isEmpty
-          ? _activityNameKey
-          : !controller.hasValidActivityGoal
-          ? _activityGoalKey
-          : null;
     } else if (controller.isFriendsStep && !controller.hasFriends) {
       targetKey = _friendsKey;
     }
@@ -159,17 +176,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       await _scrollToKey(_themeKey);
       return;
     }
-    if (!controller.hasActivity) {
-      controller.currentStep.value = 1;
-      await _scrollToKey(
-        controller.activityName.value.trim().isEmpty
-            ? _activityNameKey
-            : _activityGoalKey,
-      );
-      return;
-    }
     if (!controller.hasFriends) {
-      controller.currentStep.value = 2;
+      controller.currentStep.value = 1;
       await _scrollToKey(_friendsKey);
     }
   }
@@ -209,8 +217,7 @@ class _BottomAction extends StatelessWidget {
     final bool isSummary = controller.isSummaryStep;
     final bool isEnabled = switch (controller.currentStep.value) {
       0 => controller.hasName && controller.hasTheme,
-      1 => controller.hasActivity,
-      2 => controller.hasFriends,
+      1 => controller.hasFriends,
       _ => controller.canCreate.value,
     };
 
@@ -219,11 +226,11 @@ class _BottomAction extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 52,
+        height: 56,
         decoration: BoxDecoration(
           gradient: isEnabled ? context.colorTokens.primaryGradient : null,
           color: isEnabled ? null : context.colorTokens.surfaceInnerLayer,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,
         child: controller.isCreating.value
@@ -236,17 +243,36 @@ class _BottomAction extends StatelessWidget {
                   color: context.colorTokens.primaryForeground,
                 ),
               )
-            : Text(
-                isSummary
-                    ? context.l10n.createGroupButton
-                    : context.l10n.createGroupContinueButton,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.textPrimaryButton.copyWith(
-                  color: isEnabled
-                      ? context.colorTokens.primaryForeground
-                      : context.colorTokens.textHint,
-                ),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      isSummary
+                          ? context.l10n.createGroupButton
+                          : context.l10n.createGroupContinueButton,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textStyles.textPrimaryButton.copyWith(
+                        color: isEnabled
+                            ? context.colorTokens.primaryForeground
+                            : context.colorTokens.textHint,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  if (!isSummary) ...[
+                    const Gap(8),
+                    Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20,
+                      color: isEnabled
+                          ? context.colorTokens.primaryForeground
+                          : context.colorTokens.textHint,
+                    ),
+                  ],
+                ],
               ),
       ),
     );
@@ -264,8 +290,15 @@ class _SectionCard extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       border: Border.all(color: context.colorTokens.borderUnfocused),
+      boxShadow: [
+        BoxShadow(
+          color: context.colorTokens.surfaceShadow,
+          blurRadius: 20,
+          offset: const Offset(0, 6),
+        ),
+      ],
     ),
     child: child,
   );

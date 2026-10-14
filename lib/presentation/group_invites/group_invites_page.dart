@@ -68,6 +68,10 @@ class GroupInvitesPage extends GetView<GroupInvitesController> {
                 if (index > 0) const Gap(10),
                 _GroupInviteRow(
                   option: option,
+                  canApproveJoinRequest:
+                      controller.canApproveJoinRequests &&
+                      option.isWaitingForLeader &&
+                      (option.joinRequestId?.isNotEmpty ?? false),
                   isUpdating: updatingFriendIds.contains(option.friendId),
                   onTap: () => controller.onTapOption(option),
                 ),
@@ -211,20 +215,29 @@ class _GroupLinkCard extends StatelessWidget {
 class _GroupInviteRow extends StatelessWidget {
   const _GroupInviteRow({
     required this.option,
+    required this.canApproveJoinRequest,
     required this.isUpdating,
     required this.onTap,
   });
 
   final GroupInviteOptionEntity option;
+  final bool canApproveJoinRequest;
   final bool isUpdating;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final _InviteVisuals visuals = _visualsFor(context, option.status);
-    // Someone already waiting for the leader is not invited again from here.
+    final _InviteVisuals visuals = _visualsFor(
+      context,
+      option.status,
+      canApproveJoinRequest: canApproveJoinRequest,
+    );
+    // A leader approves an existing request here instead of sending a second
+    // invitation. Other members only see that it is already being handled.
     final bool canTap =
-        !option.isMember && !option.isWaitingForLeader && !isUpdating;
+        !option.isMember &&
+        (!option.isWaitingForLeader || canApproveJoinRequest) &&
+        !isUpdating;
 
     return IgnorePointer(
       ignoring: !canTap,
@@ -298,29 +311,38 @@ class _GroupInviteRow extends StatelessWidget {
     );
   }
 
-  _InviteVisuals _visualsFor(BuildContext context, GroupInviteStatus status) =>
-      switch (status) {
-        GroupInviteStatus.invited => _InviteVisuals(
-          label: context.l10n.invitedLabel,
-          icon: Icons.mark_email_read_outlined,
-          color: context.colorTokens.primary,
-        ),
-        GroupInviteStatus.requested => _InviteVisuals(
-          label: context.l10n.groupJoinRequestsTitle,
-          icon: Icons.hourglass_bottom_rounded,
-          color: context.colorTokens.textHint,
-        ),
-        GroupInviteStatus.member => _InviteVisuals(
-          label: context.l10n.groupMemberRoleLabel,
-          icon: Icons.verified_rounded,
-          color: context.colorTokens.success,
-        ),
-        GroupInviteStatus.available => _InviteVisuals(
-          label: context.l10n.selectButton,
-          icon: Icons.add_rounded,
-          color: context.colorTokens.textBody,
-        ),
-      };
+  _InviteVisuals _visualsFor(
+    BuildContext context,
+    GroupInviteStatus status, {
+    required bool canApproveJoinRequest,
+  }) => switch (status) {
+    GroupInviteStatus.invited => _InviteVisuals(
+      label: context.l10n.invitedLabel,
+      icon: Icons.mark_email_read_outlined,
+      color: context.colorTokens.primary,
+    ),
+    GroupInviteStatus.requested => _InviteVisuals(
+      label: canApproveJoinRequest
+          ? context.l10n.groupJoinRequestAwaitingYourApproval
+          : context.l10n.groupJoinRequestWaitingForLeader,
+      icon: canApproveJoinRequest
+          ? Icons.how_to_reg_rounded
+          : Icons.hourglass_bottom_rounded,
+      color: canApproveJoinRequest
+          ? context.colorTokens.primary
+          : context.colorTokens.textHint,
+    ),
+    GroupInviteStatus.member => _InviteVisuals(
+      label: context.l10n.groupMemberRoleLabel,
+      icon: Icons.verified_rounded,
+      color: context.colorTokens.success,
+    ),
+    GroupInviteStatus.available => _InviteVisuals(
+      label: context.l10n.selectButton,
+      icon: Icons.add_rounded,
+      color: context.colorTokens.textBody,
+    ),
+  };
 }
 
 class _InviteStatusBadge extends StatelessWidget {

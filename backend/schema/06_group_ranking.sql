@@ -1,20 +1,21 @@
 -- =============================================================================
 -- 06 · Group ranking
--- Read side of group activities: the leaderboard and per-member progress.
--- Requires: 03_groups.sql, 04_tracking.sql
+-- Read side of a group: the leaderboard built from what members recorded on
+-- the personal activities they linked to it.
+-- Requires: 03_groups.sql, 04_tracking.sql, 05_group_activity_links.sql
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
 -- RPCs
 -- -----------------------------------------------------------------------------
 
--- Aggregated leaderboard scores for each requested group. Every score is
--- isolated to the subject/goal linked to that group and starts when the group
--- activity was created. Daily-goal groups count each completion date once.
--- Doing this server-side avoids downloading every activity entry and,
--- because the function runs with definer rights, avoids evaluating the
--- activity_entries peer RLS policy once per activity row. The explicit peer
--- check below keeps the same access boundary as that policy.
+-- Aggregated leaderboard scores for each requested group. A member scores
+-- only with entries of an activity linked to that group, recorded inside one
+-- of its link periods and after the group's last reset. Daily-goal groups
+-- count each completion date once.
+-- Doing this server-side avoids downloading every activity entry, and the
+-- function runs with definer rights because members cannot read each other's
+-- entries: only these aggregates leave the server.
 drop function if exists public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 );
@@ -39,12 +40,14 @@ security definer
 set search_path = public
 as $$
   with authorized_groups as (
-    select requested.group_id, target.theme as category
+    select requested.group_id, target.theme as category,
+      target.created_at, target.score_reset_at
     from unnest(target_group_ids) as requested(group_id)
     join public.groups target on target.id = requested.group_id
     where public.is_group_member(requested.group_id, auth.uid())
   ), member_scope as (
-    select target.group_id, target.category, member.user_id
+    select target.group_id, target.category, target.created_at,
+      target.score_reset_at, member.user_id
     from authorized_groups target
     join public.group_members member on member.group_id = target.group_id
   ), scored_entries as (
@@ -61,11 +64,12 @@ as $$
     join public.activity_entries activity on activity.user_id = member.user_id
     where exists (
       select 1 from public.group_activity_links link
-      join public.group_activities ga on ga.id = link.activity_id
-      where ga.group_id = member.group_id and ga.kind = 'subject'
+      where link.group_id = member.group_id
         and link.user_id = member.user_id and link.source_id = activity.subject_id
         and activity.category = member.category
-        and activity.occurred_at >= greatest(link.started_at, coalesce(ga.score_reset_at, ga.created_at))
+        and activity.occurred_at >= greatest(
+          link.started_at, coalesce(member.score_reset_at, member.created_at)
+        )
         and (link.ended_at is null or activity.occurred_at < link.ended_at)
     )
       and member.category <> 'dailyGoals'
@@ -92,15 +96,12 @@ as $$
       member.user_id,
       completed.completed_date
     from member_scope member
-    join public.group_activities activity
-      on activity.group_id = member.group_id
-     and activity.kind = 'goal'
-    join public.group_activity_links link on link.activity_id = activity.id
+    join public.group_activity_links link on link.group_id = member.group_id
       and link.user_id = member.user_id
     join public.group_goal_contributions completed on completed.link_id = link.id
     where member.category = 'dailyGoals'
-      and (activity.score_reset_at is null
-        or completed.completed_date > (activity.score_reset_at at time zone 'utc')::date)
+      and (member.score_reset_at is null
+        or completed.completed_date > (member.score_reset_at at time zone 'utc')::date)
       and completed.completed_date <= (today_start at time zone 'utc')::date
   ), goal_scores as (
     select
@@ -134,137 +135,3 @@ revoke execute on function public.group_leaderboard_scores(
 grant execute on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) to authenticated;
-
--- Per-member completion of a group's activities. Runs with definer rights so a
--- member can see whether their peers completed it today, which RLS on
--- user_subjects / daily_goals would otherwise hide. [local_date] is the
--- caller's local YYYY-MM-DD, used so the "daily" meta check matches the day the
--- client recorded, not the server's UTC day. Once an activity is reset, its
--- shared progress is derived from entries/completion dates after score_reset_at;
--- the member's cumulative personal fields remain untouched.
--- Dropped first: an older deployment may have a different OUT-parameter row
--- type, which `create or replace` cannot change (error 42P13).
-drop function if exists public.group_activity_progress(uuid, text);
-create or replace function public.group_activity_progress(
-  target_group_id uuid,
-  local_date text default null
-)
-returns table (
-  activity_id uuid,
-  kind text,
-  name text,
-  member_id uuid,
-  progress integer,
-  target integer,
-  reached boolean,
-  focus_seconds integer,
-  rest_minutes integer,
-  focus_session_count integer
-)
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  today_key text := coalesce(
-    nullif(local_date, ''),
-    to_char((now() at time zone 'utc'), 'YYYY-MM-DD')
-  );
-begin
-  if not public.is_group_member(target_group_id, auth.uid()) then
-    raise exception 'not a group member' using errcode = '42501';
-  end if;
-
-  return query
-  select
-    ga.id,
-    ga.kind,
-    coalesce(nullif(ga.payload->>'name', ''), 'Atividade'),
-    gm.user_id,
-    coalesce(reset_subject.progress, 0),
-    case
-      when coalesce((ga.payload->>'goal_pages')::integer, 0) > 0
-        then (ga.payload->>'goal_pages')::integer
-      else coalesce((ga.payload->>'goal_seconds')::integer, 0)
-    end,
-    case
-      when coalesce((ga.payload->>'goal_pages')::integer, 0) > 0 then
-        coalesce(reset_subject.progress, 0) >=
-          (ga.payload->>'goal_pages')::integer
-      else
-        coalesce((ga.payload->>'goal_seconds')::integer, 0) > 0
-        and coalesce(reset_subject.progress, 0) >=
-          (ga.payload->>'goal_seconds')::integer
-    end,
-    coalesce((ga.payload->>'goal_seconds')::integer, 0),
-    coalesce((ga.payload->>'rest_minutes')::integer, 5),
-    coalesce((ga.payload->>'focus_session_count')::integer, 1)
-  from public.group_activities ga
-  join public.group_members gm on gm.group_id = ga.group_id
-  left join lateral (
-    select coalesce(sum(
-      case
-        when coalesce((ga.payload->>'goal_pages')::integer, 0) > 0
-          then entry.pages
-        else entry.seconds
-      end
-    ), 0)::integer as progress
-    from public.activity_entries entry
-    where entry.user_id = gm.user_id
-      and entry.category = ga.payload->>'category'
-      and entry.occurred_at >= coalesce(ga.score_reset_at, ga.created_at)
-      and exists (
-        select 1 from public.group_activity_links link
-        where link.activity_id = ga.id and link.user_id = gm.user_id
-          and link.source_id = entry.subject_id
-          and entry.occurred_at >= link.started_at
-          and (link.ended_at is null or entry.occurred_at < link.ended_at)
-      )
-  ) reset_subject on true
-  where ga.group_id = target_group_id and ga.kind = 'subject'
-
-  union all
-
-  select
-    ga.id,
-    ga.kind,
-    coalesce(nullif(ga.payload->>'name', ''), 'Meta'),
-    gm.user_id,
-    case
-      when coalesce(ga.payload->>'goal_type', 'total') = 'daily'
-        then case when goal_progress.completed_today then 1 else 0 end
-      else goal_progress.completed_count
-    end,
-    coalesce(
-      case
-        when coalesce(ga.payload->>'goal_type', 'total') = 'daily'
-          then 1
-        else coalesce(
-          (ga.payload->>'target_days')::integer,
-          0
-        )
-      end,
-      0
-    ),
-    goal_progress.completed_today,
-    0,
-    5,
-    1
-  from public.group_activities ga
-  join public.group_members gm on gm.group_id = ga.group_id
-  left join lateral (
-    select count(distinct completed.completed_date)::integer as completed_count,
-      coalesce(bool_or(completed.completed_date::text = today_key), false) as completed_today
-    from public.group_activity_links link
-    join public.group_goal_contributions completed on completed.link_id = link.id
-    where link.activity_id = ga.id and link.user_id = gm.user_id
-      and completed.completed_date <= today_key::date
-      and (ga.score_reset_at is null or completed.completed_date >
-        (ga.score_reset_at at time zone 'utc')::date)
-  ) goal_progress on true
-  where ga.group_id = target_group_id and ga.kind = 'goal';
-end;
-$$;
-
-grant execute on function public.group_activity_progress(uuid, text)
-to authenticated;

@@ -1,8 +1,11 @@
+import "package:timing/core/domain/enums/time_category_type.dart";
+
 /// How a group's leaderboard progress is measured.
 enum GroupMetricUnit { hours, days, pages }
 
 /// The five themes a group can be built around. Each mirrors a home category
-/// (plus daily goals) and defines how members are ranked against each other.
+/// (plus daily goals) and defines how members are ranked against each other
+/// and which of their activities they can link to the group.
 enum GroupThemeType {
   studying(iconName: "graduate", unit: GroupMetricUnit.hours),
   dailyGoals(iconName: "trophy", unit: GroupMetricUnit.days),
@@ -14,6 +17,16 @@ enum GroupThemeType {
 
   final String iconName;
   final GroupMetricUnit unit;
+
+  /// The home category whose activities members link to a group of this
+  /// theme. Null for [dailyGoals], which takes a goal instead.
+  TimeCategoryType? get category => switch (this) {
+    GroupThemeType.studying => TimeCategoryType.studying,
+    GroupThemeType.exercises => TimeCategoryType.exercises,
+    GroupThemeType.reading => TimeCategoryType.reading,
+    GroupThemeType.hobbies => TimeCategoryType.hobbies,
+    GroupThemeType.dailyGoals => null,
+  };
 
   /// Falls back to [studying] for unknown/legacy values so persisted groups
   /// saved before themes existed keep working.

@@ -9,10 +9,10 @@ one only depends on the sections before it.
 | `00_common.sql` | Extensions and `set_updated_at()`, shared by everything else |
 | `01_profiles.sql` | `profiles`, owner-only `profile_private_data`, presence view, sign-up trigger |
 | `02_friends.sql` | `friendships`, `are_friends()`, friend search RPCs |
-| `03_groups.sql` | Group tables, membership helpers (`is_group_member`, `owns_group`, ...), integrity triggers |
+| `03_groups.sql` | Group tables (a group is a name, a theme and a color), membership helpers (`is_group_member`, `owns_group`, ...), integrity triggers |
 | `04_tracking.sql` | `activity_entries`, `user_subjects`, `daily_goals`, `schedule_entries`, progress metrics, `record_activity_entry`, `remove_activity_seconds`, `activity_entry_totals` |
-| `05_group_activities.sql` | Personal activity link periods, goal contributions, selection RPCs and legacy migration |
-| `06_group_ranking.sql` | `group_leaderboard_scores`, `group_activity_progress` |
+| `05_group_activity_links.sql` | Links from members' personal activities to a group of the matching theme: link periods, goal contributions, selection RPCs, leaving a group, and the upgrade from shared group activities |
+| `06_group_ranking.sql` | `group_leaderboard_scores` |
 | `07_group_management.sql` | Create, join, edit, reset and transfer a group, and `delete_my_account` |
 | `08_group_invitations.sql` | Invite (any member), cancel, accept and decline, plus the join requests the leader approves (`group_join_requests`, `approve_group_join_request`, `decline_group_join_request`) |
 | `09_policies.sql` | Row level security for every table |
@@ -52,6 +52,19 @@ including when the column exists but the API cache is stale.
 
 These focused scripts are applied manually; nothing deploys them automatically.
 After the update, reopen the app to retry pending goal synchronization.
+
+For installations created before pending group requests appeared in the
+invitation screens, run
+[`migrations/20261013_group_join_request_visibility.sql`](migrations/20261013_group_join_request_visibility.sql).
+It exposes the request ID to the leader, lists a user's own pending requests,
+and reloads the PostgREST schema cache.
+
+Groups no longer own a shared activity: members link their personal
+activities of the group's theme instead. That change runs through most
+sections, so it has no focused script. Apply the whole `supabase-setup.sql`
+together with the matching app build: section `05` converts existing groups in
+place (see [group activity linking](../docs/GROUP_ACTIVITY_LINKS.md)), and
+builds from before it stop loading groups once it is applied.
 
 ## Adding to it
 

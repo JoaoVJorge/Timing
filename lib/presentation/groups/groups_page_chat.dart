@@ -2,38 +2,81 @@ part of "groups_page.dart";
 
 // The image-only chat tab inside a group's details.
 
-class _ChatTab extends StatelessWidget {
+class _ChatTab extends StatefulWidget {
   const _ChatTab({required this.controller, required this.group});
 
   final GroupsController controller;
   final GroupEntity group;
 
   @override
+  State<_ChatTab> createState() => _ChatTabState();
+}
+
+class _ChatTabState extends State<_ChatTab> {
+  static const double _olderMessagesThreshold = 200;
+  bool _requestedAtCurrentEdge = false;
+
+  @override
+  void didUpdateWidget(covariant _ChatTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.group.id != widget.group.id) {
+      _requestedAtCurrentEdge = false;
+    }
+  }
+
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.depth != 0 ||
+        notification is! ScrollUpdateNotification &&
+            notification is! OverscrollNotification) {
+      return false;
+    }
+
+    final bool isNearOldest =
+        notification.metrics.maxScrollExtent - notification.metrics.pixels <=
+        _olderMessagesThreshold;
+    if (!isNearOldest) {
+      _requestedAtCurrentEdge = false;
+      return false;
+    }
+    if (_requestedAtCurrentEdge ||
+        widget.controller.isLoadingOlderImageMessagesFor(widget.group.id)) {
+      return false;
+    }
+
+    _requestedAtCurrentEdge = true;
+    unawaited(_loadOlderMessages());
+    return false;
+  }
+
+  Future<void> _loadOlderMessages() async {
+    await widget.controller.loadOlderImageMessages(widget.group.id);
+    // A new page may still leave the viewport at the pagination edge. Allow
+    // another request only after the current one has fully settled and the
+    // user scrolls again, instead of chaining loads during relayout.
+    if (mounted) {
+      _requestedAtCurrentEdge = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => Obx(() {
-    final List<GroupImageMessageEntity> messages = controller.imageMessagesFor(
-      group.id,
-    );
-    final bool isLoadingOlder = controller.isLoadingOlderImageMessagesFor(
-      group.id,
-    );
+    final List<GroupImageMessageEntity> messages = widget.controller
+        .imageMessagesFor(widget.group.id);
+    final bool isLoadingOlder = widget.controller
+        .isLoadingOlderImageMessagesFor(widget.group.id);
 
     return Column(
       children: [
         Expanded(
-          child: controller.isLoadingChat.value && messages.isEmpty
+          child: widget.controller.isLoadingChat.value && messages.isEmpty
               ? const _TabLoadingIndicator()
               : messages.isEmpty
               ? _ChatEmptyImages(
-                  onTapSend: () => controller.onTapSendGroupImage(group.id),
+                  onTapSend: () =>
+                      widget.controller.onTapSendGroupImage(widget.group.id),
                 )
               : NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification.metrics.pixels >=
-                        notification.metrics.maxScrollExtent - 200) {
-                      controller.loadOlderImageMessages(group.id);
-                    }
-                    return false;
-                  },
+                  onNotification: _onScroll,
                   child: ListView.separated(
                     reverse: true,
                     padding: const EdgeInsets.only(top: 8, bottom: 4),
@@ -48,7 +91,8 @@ class _ChatTab extends StatelessWidget {
                       return _ImageMessageBubble(
                         key: ValueKey(message.id),
                         message: message,
-                        isMine: message.senderId == controller.currentUserId,
+                        isMine:
+                            message.senderId == widget.controller.currentUserId,
                       );
                     },
                   ),
@@ -56,8 +100,8 @@ class _ChatTab extends StatelessWidget {
         ),
         const Gap(12),
         _SendImageBar(
-          isSending: controller.isSendingImage.value,
-          onTap: () => controller.onTapSendGroupImage(group.id),
+          isSending: widget.controller.isSendingImage.value,
+          onTap: () => widget.controller.onTapSendGroupImage(widget.group.id),
         ),
         const Gap(8),
       ],
@@ -81,19 +125,31 @@ class _ImageMessageBubble extends StatefulWidget {
 
 class _ImageMessageBubbleState extends State<_ImageMessageBubble> {
   late Uint8List _imageBytes;
+  late double _imageAspectRatio;
 
   @override
   void initState() {
     super.initState();
-    _imageBytes = base64Decode(widget.message.imageBase64);
+    _readImage();
   }
 
   @override
   void didUpdateWidget(covariant _ImageMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.message.imageBase64 != widget.message.imageBase64) {
-      _imageBytes = base64Decode(widget.message.imageBase64);
+      _readImage();
     }
+  }
+
+  void _readImage() {
+    _imageBytes = base64Decode(widget.message.imageBase64);
+    final image_lib.Decoder? decoder = image_lib.findDecoderForData(
+      _imageBytes,
+    );
+    final image_lib.DecodeInfo? info = decoder?.startDecode(_imageBytes);
+    _imageAspectRatio = info == null || info.width <= 0 || info.height <= 0
+        ? 1
+        : info.width / info.height;
   }
 
   @override
@@ -151,11 +207,16 @@ class _ImageMessageBubbleState extends State<_ImageMessageBubble> {
                 const Gap(8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    _imageBytes,
-                    width: 220,
-                    fit: BoxFit.cover,
-                    cacheWidth: decodeWidth,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 220),
+                    child: AspectRatio(
+                      aspectRatio: _imageAspectRatio,
+                      child: Image.memory(
+                        _imageBytes,
+                        fit: BoxFit.cover,
+                        cacheWidth: decodeWidth,
+                      ),
+                    ),
                   ),
                 ),
                 const Gap(6),

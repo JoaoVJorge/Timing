@@ -17,9 +17,8 @@ create extension if not exists pg_trgm;
 -- -----------------------------------------------------------------------------
 
 -- Stamps updated_at from the server clock on every update, so it stays
--- reliable even for rows changed by RPCs (materialize_group_activities_for_user,
--- update_group_with_activity, cleanup_group_activities_on_leave) that don't set
--- it themselves. Clients that resolve sync conflicts by comparing updated_at
+-- reliable even for rows changed by RPCs and triggers that don't set it
+-- themselves. Clients that resolve sync conflicts by comparing updated_at
 -- can then trust it regardless of which code path touched the row.
 create or replace function public.set_updated_at()
 returns trigger

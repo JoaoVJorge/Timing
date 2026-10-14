@@ -1,83 +1,49 @@
-import "dart:async";
-
 import "package:dartz/dartz.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:timing/app/app_navigator.dart";
-import "package:timing/core/data/repositories/daily_tasks_repository.dart";
 import "package:timing/core/data/repositories/groups_repository.dart";
-import "package:timing/core/domain/entities/daily_task_entity.dart";
-import "package:timing/core/domain/entities/group_activity_progress_entity.dart";
 import "package:timing/core/domain/entities/group_entity.dart";
-import "package:timing/core/domain/enums/group_theme_type.dart";
-import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/groups/groups_controller.dart";
 import "package:timing/theme/subject_colors.dart";
 
+/// The leader's edits to a group: its name, description and color. The theme
+/// is fixed at creation, since every member's linked activities depend on it.
 class EditGroupController extends GetxController {
   EditGroupController({
     required this.groupsRepository,
-    required this.dailyTasksRepository,
     required this.appNavigator,
   });
 
   final GroupsRepository groupsRepository;
-  final DailyTasksRepository dailyTasksRepository;
   final AppNavigator appNavigator;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController activityNameController = TextEditingController();
-  final TextEditingController activityGoalController = TextEditingController();
-  final TextEditingController restController = TextEditingController();
-  final TextEditingController sessionsController = TextEditingController();
 
   final Rx<GroupEntity?> group = Rx<GroupEntity?>(null);
-  final Rx<GroupActivityProgressEntity?> activity =
-      Rx<GroupActivityProgressEntity?>(null);
-  final RxBool isLoadingActivity = false.obs;
   final RxBool isSaving = false.obs;
 
   final Rx<Color> selectedColor = SubjectColors.values.first.obs;
-  final Rx<DailyTaskSequenceType> sequenceType =
-      DailyTaskSequenceType.casual.obs;
-  bool _hasInitializedThemeColor = false;
 
-  GroupThemeType? get theme => group.value?.theme;
+  /// A group without a color of its own follows each viewer's accent, and
+  /// keeps doing so unless the leader picks one here.
+  bool _hasOwnColor = false;
 
-  bool get isDailyGoalsTheme => theme == GroupThemeType.dailyGoals;
-
-  bool get isReadingTheme => theme == GroupThemeType.reading;
-
-  bool get isHobbyTheme => theme == GroupThemeType.hobbies;
-
-  bool get showRestAndSessions =>
-      !isDailyGoalsTheme && !isReadingTheme && !isHobbyTheme;
-
-  String get goalSuffix {
-    if (isDailyGoalsTheme) {
-      return "dias";
-    }
-    if (isReadingTheme) {
-      return "pags.";
-    }
-    return "min";
-  }
-
-  String get restSuffix => theme == GroupThemeType.exercises ? "s" : "min";
-
+  /// Shows the viewer's accent as the starting swatch of a group that has no
+  /// color of its own yet.
   void initializeThemeColor(Color color) {
-    if (_hasInitializedThemeColor) {
+    if (_hasOwnColor) {
       return;
     }
     selectedColor.value = SubjectColors.fromThemeAccent(color);
-    _hasInitializedThemeColor = true;
   }
 
-  void onSelectSequenceType(DailyTaskSequenceType type) {
-    sequenceType.value = type;
+  void onSelectColor(Color color) {
+    _hasOwnColor = true;
+    selectedColor.value = color;
   }
 
   @override
@@ -90,71 +56,16 @@ class EditGroupController extends GetxController {
         ? Get.find<GroupsController>().selectedGroup.value
         : null;
     group.value = initialGroup;
-    if (initialGroup != null) {
-      nameController.text = initialGroup.name;
-      descriptionController.text = initialGroup.description;
-    }
-    _loadCurrentActivity();
-  }
-
-  Future<void> _loadCurrentActivity() async {
-    if (!Get.isRegistered<GroupsController>()) {
+    if (initialGroup == null) {
       return;
     }
-    final GroupsController groupsController = Get.find<GroupsController>();
-    GroupActivityProgressEntity? header =
-        groupsController.activityHeaders.firstOrNull;
-    if (header == null && group.value != null) {
-      isLoadingActivity.value = true;
-      await groupsController.loadActivityProgress();
-      header = groupsController.activityHeaders.firstOrNull;
-      isLoadingActivity.value = false;
+    nameController.text = initialGroup.name;
+    descriptionController.text = initialGroup.description;
+    final int? colorValue = initialGroup.colorValue;
+    if (colorValue != null) {
+      _hasOwnColor = true;
+      selectedColor.value = Color(colorValue);
     }
-    activity.value = header;
-    _fillActivityFields(header);
-    await _prefillColorAndSequence(header);
-  }
-
-  Future<void> _prefillColorAndSequence(
-    GroupActivityProgressEntity? header,
-  ) async {
-    final currentGroup = group.value;
-    if (currentGroup == null) return;
-    final result = await groupsRepository.getActivityLinkOptions(
-      currentGroup.id,
-    );
-    result.fold((_) {}, (options) {
-      if (options.isEmpty) return;
-      final payload = options.first.payload;
-      final color = payload["color_value"] as num?;
-      if (color != null) {
-        selectedColor.value = Color(color.toInt());
-        _hasInitializedThemeColor = true;
-      }
-      sequenceType.value = DailyTaskSequenceType.fromName(
-        payload["sequence_type"] as String?,
-      );
-    });
-  }
-
-  void _fillActivityFields(GroupActivityProgressEntity? header) {
-    if (header == null) {
-      return;
-    }
-    activityNameController.text = header.name;
-    activityGoalController.text = _goalValueFrom(header).toString();
-    restController.text = header.restMinutes.toString();
-    sessionsController.text = header.focusSessionCount.toString();
-  }
-
-  int _goalValueFrom(GroupActivityProgressEntity header) {
-    if (isDailyGoalsTheme || isReadingTheme) {
-      return header.target > 0 ? header.target : 1;
-    }
-    final int seconds = header.focusSeconds > 0
-        ? header.focusSeconds
-        : header.target;
-    return (seconds / 60).round().clamp(1, 9999);
   }
 
   Future<void> save() async {
@@ -168,16 +79,8 @@ class EditGroupController extends GetxController {
     }
 
     final String name = nameController.text.trim();
-    final String activityName = activityNameController.text.trim();
-    final int goal = int.tryParse(activityGoalController.text.trim()) ?? 0;
     if (name.isEmpty) {
       appNavigator.showErrorSnackBar(Get.context?.l10n.nameRequiredError);
-      return;
-    }
-    if (activityName.isEmpty || goal <= 0) {
-      appNavigator.showErrorSnackBar(
-        Get.context?.l10n.createGroupActivityMissingError,
-      );
       return;
     }
 
@@ -187,7 +90,7 @@ class EditGroupController extends GetxController {
           group: currentGroup,
           name: name,
           description: descriptionController.text.trim(),
-          activityPayload: _activityPayload(activityName, goal),
+          colorValue: _hasOwnColor ? selectedColor.value.toARGB32() : null,
         );
     isSaving.value = false;
 
@@ -197,46 +100,10 @@ class EditGroupController extends GetxController {
     );
   }
 
-  Map<String, dynamic> _activityPayload(String activityName, int goal) {
-    final int colorValue = selectedColor.value.toARGB32();
-
-    if (isDailyGoalsTheme) {
-      return {
-        "name": activityName,
-        "target_days": goal,
-        "color_value": colorValue,
-        "sequence_type": sequenceType.value.name,
-      };
-    }
-
-    final TimeCategoryType category = switch (theme) {
-      GroupThemeType.reading => TimeCategoryType.reading,
-      GroupThemeType.exercises => TimeCategoryType.exercises,
-      GroupThemeType.hobbies => TimeCategoryType.hobbies,
-      _ => TimeCategoryType.studying,
-    };
-    final int rest = int.tryParse(restController.text.trim()) ?? 0;
-    final int sessions = int.tryParse(sessionsController.text.trim()) ?? 1;
-    return {
-      "name": activityName,
-      "category": category.name,
-      "color_value": colorValue,
-      "goal_seconds": isReadingTheme ? 0 : goal * 60,
-      "goal_pages": isReadingTheme ? goal : 0,
-      "rest_minutes": isHobbyTheme ? 0 : (rest <= 0 ? 1 : rest),
-      "focus_session_count": isHobbyTheme ? 1 : (sessions <= 0 ? 1 : sessions),
-      "activity_type": "daily",
-    };
-  }
-
   @override
   void onClose() {
     nameController.dispose();
     descriptionController.dispose();
-    activityNameController.dispose();
-    activityGoalController.dispose();
-    restController.dispose();
-    sessionsController.dispose();
     super.onClose();
   }
 }

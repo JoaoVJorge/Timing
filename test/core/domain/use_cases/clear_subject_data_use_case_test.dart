@@ -69,8 +69,6 @@ SubjectEntity _subject(String id, {int seconds = 0, int pages = 0}) =>
       restMinutes: 5,
       focusSessionCount: 3,
       wallpaperIndex: 2,
-      groupId: "g1",
-      groupActivityId: "ga1",
     );
 
 class _Rig {
@@ -139,8 +137,6 @@ void main() {
     expect(saved.goalPages, 50);
     expect(saved.notes, "minhas notas");
     expect(saved.focusSessionCount, 3);
-    expect(saved.groupId, "g1");
-    expect(saved.groupActivityId, "ga1");
   });
 
   test("leaves the other activities alone", () async {

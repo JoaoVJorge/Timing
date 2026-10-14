@@ -2,7 +2,7 @@
 -- 04 · Tracking
 -- Everything a user records about their own time: activity log, subjects,
 -- daily goals and the weekly schedule, plus the progress metrics view.
--- Requires: 01_profiles.sql, 03_groups.sql (subjects and goals link to groups)
+-- Requires: 01_profiles.sql, 03_groups.sql
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -111,14 +111,14 @@ begin
   end if;
 end $$;
 
--- Legacy ownership columns retained for old cached clients. Section 05 migrates
--- these copies to ordinary personal sources plus independent link periods.
+-- Former ownership columns. Nothing reads them: a personal activity is never
+-- owned by a group, it is only linked to one (05). They stay, always null, so a
+-- build that still uploads them keeps syncing its personal data.
 alter table public.user_subjects
   add column if not exists group_id uuid
     references public.groups(id) on delete set null;
 alter table public.user_subjects
-  add column if not exists group_activity_id uuid
-    references public.group_activities(id) on delete set null;
+  add column if not exists group_activity_id uuid;
 alter table public.user_subjects
   add column if not exists activity_type text not null default 'daily'
     check (activity_type in ('daily', 'permanent'));
@@ -126,8 +126,7 @@ alter table public.daily_goals
   add column if not exists group_id uuid
     references public.groups(id) on delete set null;
 alter table public.daily_goals
-  add column if not exists group_activity_id uuid
-    references public.group_activities(id) on delete set null;
+  add column if not exists group_activity_id uuid;
 alter table public.daily_goals
   add column if not exists sequence_type text not null default 'casual'
     check (sequence_type in ('intense', 'casual'));
@@ -210,17 +209,14 @@ create index if not exists activity_entries_user_subject_period_idx
   on public.activity_entries(user_id, subject_id, occurred_at);
 create index if not exists user_subjects_user_category_idx
   on public.user_subjects(user_id, category);
-create index if not exists user_subjects_group_activity_user_idx
-  on public.user_subjects(group_activity_id, user_id);
 create index if not exists daily_goals_user_idx
   on public.daily_goals(user_id);
 create index if not exists schedule_entries_user_weekday_idx
   on public.schedule_entries(user_id, weekday, active_from, start_minutes);
 
-create index if not exists user_subjects_group_idx
-  on public.user_subjects(group_id);
-create index if not exists daily_goals_group_idx
-  on public.daily_goals(group_id);
+drop index if exists public.user_subjects_group_activity_user_idx;
+drop index if exists public.user_subjects_group_idx;
+drop index if exists public.daily_goals_group_idx;
 
 -- -----------------------------------------------------------------------------
 -- Views
@@ -293,34 +289,6 @@ left join lateral (
 where p.id = auth.uid();
 
 -- -----------------------------------------------------------------------------
--- Access helpers
--- -----------------------------------------------------------------------------
-
--- Narrower than share_group: true only when the caller shares a group with
--- target_user_id through the specific subject that produced this activity
--- entry, so a group peer sees the entries feeding the leaderboard and nothing
--- else the target user tracks outside that group.
-create or replace function public.can_view_peer_activity(
-  target_user_id uuid,
-  target_subject_id text
-)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.user_subjects s
-    where s.user_id = target_user_id
-      and s.id = target_subject_id
-      and s.group_id is not null
-      and public.is_group_member(s.group_id, auth.uid())
-  );
-$$;
-
--- -----------------------------------------------------------------------------
 -- Triggers
 -- -----------------------------------------------------------------------------
 
@@ -340,14 +308,12 @@ create trigger trg_schedule_entries_set_updated_at
   before update on public.schedule_entries
   for each row execute function public.set_updated_at();
 
--- An activity's log rows (activity_entries) go away with the activity: deleted
--- by the user, or removed because they left (or were removed from) the group
--- that handed it out. activity_entries.subject_id is plain text rather than a
+-- An activity's log rows (activity_entries) go away with the activity when the
+-- user deletes it. activity_entries.subject_id is plain text rather than a
 -- foreign key (a session can reach the backend before its activity does, and a
 -- foreign key would reject that row), so nothing else ever removed the log of a
 -- deleted activity and it stayed in the table for good.
--- An activity that is only unlinked (group_id set to null when its group is
--- deleted) is updated, not deleted, so it keeps its log.
+-- Unlinking an activity from a group, or leaving the group, deletes nothing.
 create or replace function public.delete_activity_entries_of_deleted_subject()
 returns trigger
 language plpgsql

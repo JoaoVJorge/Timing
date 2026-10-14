@@ -21,44 +21,12 @@ class AddSubjectUseCase {
     int focusSessionCount = 1,
     int wallpaperIndex = 0,
     SubjectActivityType activityType = SubjectActivityType.daily,
-    bool reuseMatchingSubject = false,
-    String? groupId,
-    String? groupActivityId,
     String? id,
   }) => _subjectsRepository.runSerializedMutation(() async {
     final Either<AppError, List<SubjectEntity>> getResult =
         await _subjectsRepository.getSubjects();
 
     return getResult.fold((error) async => Left(error), (subjects) async {
-      if (reuseMatchingSubject) {
-        final String normalizedName = name.trim().toLowerCase();
-        final int matchIndex = subjects.indexWhere(
-          (subject) =>
-              subject.name.trim().toLowerCase() == normalizedName &&
-              subject.category == category &&
-              subject.goalSeconds == goalSeconds &&
-              subject.goalPages == goalPages &&
-              subject.activityType == activityType,
-        );
-        if (matchIndex != -1) {
-          final SubjectEntity match = subjects[matchIndex];
-          if (groupId != null &&
-              (match.groupId != groupId ||
-                  match.groupActivityId != groupActivityId)) {
-            final SubjectEntity linked = match.copyWith(
-              groupId: groupId,
-              groupActivityId: groupActivityId,
-            );
-            final List<SubjectEntity> updatedSubjects = [...subjects]
-              ..[matchIndex] = linked;
-            final Either<AppError, void> saveResult = await _subjectsRepository
-                .saveSubjects(updatedSubjects);
-            return saveResult.fold(Left.new, (_) => Right(linked));
-          }
-          return Right(match);
-        }
-      }
-
       final SubjectEntity newSubject = SubjectEntity(
         id: id ?? generateEntityId(),
         name: name,
@@ -75,8 +43,6 @@ class AddSubjectUseCase {
         wallpaperIndex: wallpaperIndex,
         activityType: activityType,
         createdAt: DateTime.now(),
-        groupId: groupId,
-        groupActivityId: groupActivityId,
       );
 
       final Either<AppError, void> saveResult = await _subjectsRepository

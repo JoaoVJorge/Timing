@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:gap/gap.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
-import "package:timing/presentation/category/widgets/group_activity_lock_badge.dart";
 import "package:timing/shared/functions/format_duration.dart";
 import "package:timing/shared/widgets/app_icon.dart";
 import "package:timing/shared/widgets/bounce_tap.dart";
@@ -249,7 +248,6 @@ class _HobbyOptionsSheet extends StatelessWidget {
                     icon: Icons.edit_rounded,
                     label: context.l10n.hobbyEdit,
                     accent: accent,
-                    isLocked: subject.isFromGroup,
                     onTap: () => onAction("edit"),
                   ),
                   Divider(height: 1, color: context.colorTokens.divider),
@@ -264,7 +262,6 @@ class _HobbyOptionsSheet extends StatelessWidget {
             ),
             const Gap(14),
             _HobbyDeleteAction(
-              isLocked: subject.isFromGroup,
               label: context.l10n.hobbyDelete,
               subtitle: context.l10n.deleteActionCannotBeUndone,
               onTap: () => onAction("delete"),
@@ -297,44 +294,24 @@ class _HobbySheetAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
-    this.isLocked = false,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
   final Color accent;
-  final bool isLocked;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final Color actionColor = isLocked ? context.colorTokens.textHint : accent;
-
     final Widget row = Container(
       height: 58,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              _HobbySheetIcon(
-                color: actionColor.withValues(alpha: 0.12),
-                child: Icon(icon, color: actionColor, size: 22),
-              ),
-              if (isLocked)
-                Positioned(
-                  top: -4,
-                  right: -4,
-                  child: GroupActivityLockBadge(
-                    size: 20,
-                    iconSize: 12,
-                    backgroundColor: context.colorTokens.surface,
-                    iconColor: actionColor,
-                  ),
-                ),
-            ],
+          _HobbySheetIcon(
+            color: accent.withValues(alpha: 0.12),
+            child: Icon(icon, color: accent, size: 22),
           ),
           const Gap(12),
           Expanded(
@@ -343,15 +320,13 @@ class _HobbySheetAction extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodyLarge.copyWith(
-                color: isLocked
-                    ? context.colorTokens.textHint
-                    : context.colorTokens.dialogText,
+                color: context.colorTokens.dialogText,
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: actionColor, size: 28),
+          Icon(Icons.chevron_right_rounded, color: accent, size: 28),
         ],
       ),
     );
@@ -370,22 +345,18 @@ class _HobbySheetAction extends StatelessWidget {
 
 class _HobbyDeleteAction extends StatelessWidget {
   const _HobbyDeleteAction({
-    required this.isLocked,
     required this.label,
     required this.subtitle,
     required this.onTap,
   });
 
-  final bool isLocked;
   final String label;
   final String subtitle;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = isLocked
-        ? context.colorTokens.textHint
-        : context.colorTokens.error;
+    final Color accent = context.colorTokens.error;
 
     return BounceTap(
       pressedScale: 0.97,
@@ -401,29 +372,13 @@ class _HobbyDeleteAction extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _HobbySheetIcon(
-                  color: isLocked ? accent.withValues(alpha: 0.12) : accent,
-                  child: Icon(
-                    Icons.delete_outline_rounded,
-                    color: isLocked ? accent : context.colorTokens.white,
-                    size: 18,
-                  ),
-                ),
-                if (isLocked)
-                  Positioned(
-                    top: -4,
-                    right: -4,
-                    child: GroupActivityLockBadge(
-                      size: 20,
-                      iconSize: 12,
-                      backgroundColor: context.colorTokens.surface,
-                      iconColor: accent,
-                    ),
-                  ),
-              ],
+            _HobbySheetIcon(
+              color: accent,
+              child: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colorTokens.white,
+                size: 18,
+              ),
             ),
             const Gap(12),
             Expanded(

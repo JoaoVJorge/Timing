@@ -66,7 +66,6 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
           // Tinted with the goal's color, like the edit action of an activity.
           background: taskColor.withValues(alpha: 0.14),
           iconColor: taskColor,
-          locked: widget.task.isFromGroup,
           onTap: widget.onEdit,
         ),
         SwipeRevealAction(
@@ -74,7 +73,6 @@ class _DailyTaskTileState extends State<DailyTaskTile> {
           iconSize: 20,
           background: context.colorTokens.error,
           iconColor: context.colorTokens.white,
-          locked: widget.task.isFromGroup,
           onTap: widget.onDelete,
         ),
       ],
