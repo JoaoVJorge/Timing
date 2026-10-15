@@ -38,7 +38,6 @@ $$;
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   friend_code text not null default public.generate_friend_code() unique,
-  is_dark_mode boolean not null default false,
   user_name text not null default '',
   nick_name text not null default '',
   email text,
@@ -140,18 +139,13 @@ begin
 end $$;
 
 -- -----------------------------------------------------------------------------
--- Indexes
+-- Retired indexes
 -- -----------------------------------------------------------------------------
 
--- GIN trigram indexes so search_friend_candidates()'s `ilike '%...%'` filter
--- can use an index instead of scanning every profile (a leading wildcard rules
--- out a plain b-tree index).
-create index if not exists profiles_user_name_trgm_idx
-  on public.profiles using gin (user_name gin_trgm_ops);
-create index if not exists profiles_nick_name_trgm_idx
-  on public.profiles using gin (nick_name gin_trgm_ops);
-create index if not exists profiles_friend_code_trgm_idx
-  on public.profiles using gin (friend_code gin_trgm_ops);
+-- The trigram indexes existed only for the retired open profile search (02).
+drop index if exists public.profiles_user_name_trgm_idx;
+drop index if exists public.profiles_nick_name_trgm_idx;
+drop index if exists public.profiles_friend_code_trgm_idx;
 
 -- -----------------------------------------------------------------------------
 -- Views

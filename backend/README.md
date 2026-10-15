@@ -50,6 +50,14 @@ in the affected project's Supabase SQL editor. It adds the nullable reminder
 column and requests a PostgREST schema cache reload. It is safe to repeat,
 including when the column exists but the API cache is stale.
 
+Objects nothing ever used are gone from the schema, and
+[`migrations/20261015_drop_unused_backend_objects.sql`](migrations/20261015_drop_unused_backend_objects.sql)
+clears them from existing installations: the `search_friend_candidates`
+RPC with its trigram indexes and `pg_trgm`, the `user_progress_metrics`
+view, and `profiles.is_dark_mode`. Builds up to 0.1.6 still select that
+column and stop loading the profile once it is gone, so run it only after
+they are retired.
+
 These focused scripts are applied manually; nothing deploys them automatically.
 After the update, reopen the app to retry pending goal synchronization.
 

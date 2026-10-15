@@ -33,8 +33,6 @@ revoke all on function public.owns_group(uuid, uuid) from public;
 revoke all on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) from public;
-revoke all on function public.search_friend_candidates(text, integer)
-  from public;
 revoke all on function public.find_profile_by_friend_code(text) from public;
 revoke all on function public.create_group_with_members(
   text, text, uuid[], text, text[], date
@@ -70,8 +68,6 @@ grant execute on function public.owns_group(uuid, uuid) to authenticated;
 grant execute on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) to authenticated;
-grant execute on function public.search_friend_candidates(text, integer)
-  to authenticated;
 grant execute on function public.find_profile_by_friend_code(text)
   to authenticated;
 grant execute on function public.create_group_with_members(
@@ -153,7 +149,6 @@ grant select, insert, update, delete
   on table public.schedule_entries to authenticated;
 grant select, insert on table public.group_image_messages to authenticated;
 grant select on table public.profile_presence_status to authenticated;
-grant select on table public.user_progress_metrics to authenticated;
 
 revoke all on table public.profile_private_data from authenticated;
 grant select, insert, update, delete
@@ -163,7 +158,6 @@ grant select, insert, update, delete
 revoke update on table public.profiles from authenticated;
 grant update (
   id,
-  is_dark_mode,
   user_name,
   nick_name,
   profile_photo_base64,

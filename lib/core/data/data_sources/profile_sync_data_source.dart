@@ -64,7 +64,7 @@ class ProfileSyncDataSource {
       _supabaseService.requireClient
           .from("profiles")
           .select(
-            "id, friend_code, is_dark_mode, user_name, nick_name, "
+            "id, friend_code, user_name, nick_name, "
             "profile_photo_base64, avatar_icon_index, "
             "notifications_enabled, "
             "focus_lock_studying_enabled, focus_lock_exercises_enabled, "

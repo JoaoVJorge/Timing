@@ -12,7 +12,6 @@
 -- -----------------------------------------------------------------------------
 
 create extension if not exists pgcrypto;
-create extension if not exists pg_trgm;
 
 -- -----------------------------------------------------------------------------
 -- Shared trigger helper
@@ -74,7 +73,6 @@ $$;
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   friend_code text not null default public.generate_friend_code() unique,
-  is_dark_mode boolean not null default false,
   user_name text not null default '',
   nick_name text not null default '',
   email text,
@@ -176,18 +174,13 @@ begin
 end $$;
 
 -- -----------------------------------------------------------------------------
--- Indexes
+-- Retired indexes
 -- -----------------------------------------------------------------------------
 
--- GIN trigram indexes so search_friend_candidates()'s `ilike '%...%'` filter
--- can use an index instead of scanning every profile (a leading wildcard rules
--- out a plain b-tree index).
-create index if not exists profiles_user_name_trgm_idx
-  on public.profiles using gin (user_name gin_trgm_ops);
-create index if not exists profiles_nick_name_trgm_idx
-  on public.profiles using gin (nick_name gin_trgm_ops);
-create index if not exists profiles_friend_code_trgm_idx
-  on public.profiles using gin (friend_code gin_trgm_ops);
+-- The trigram indexes existed only for the retired open profile search (02).
+drop index if exists public.profiles_user_name_trgm_idx;
+drop index if exists public.profiles_nick_name_trgm_idx;
+drop index if exists public.profiles_friend_code_trgm_idx;
 
 -- -----------------------------------------------------------------------------
 -- Views
@@ -251,8 +244,8 @@ create trigger trg_profile_private_data_set_updated_at
 -- backend/schema/02_friends.sql
 -- =============================================================================
 -- 02 · Friends
--- Friendship requests, the access helper built on them, and the RPCs used
--- to find people to add.
+-- Friendship requests, the access helper built on them, and the RPC used
+-- to find the person behind a friend code.
 -- Requires: 01_profiles.sql
 -- =============================================================================
 
@@ -336,57 +329,6 @@ create trigger trg_keep_friendship_identity_immutable
 -- RPCs
 -- -----------------------------------------------------------------------------
 
-drop function if exists public.search_friend_candidates(text, integer);
-create or replace function public.search_friend_candidates(
-  search_text text default '',
-  result_limit integer default 12
-)
-returns table (
-  id uuid,
-  user_name text,
-  nick_name text,
-  friend_code text,
-  accent_color_value bigint,
-  avatar_icon_index integer,
-  profile_photo_base64 text
-)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select
-    p.id,
-    p.user_name,
-    p.nick_name,
-    p.friend_code,
-    p.accent_color_value,
-    p.avatar_icon_index,
-    p.profile_photo_base64
-  from public.profiles p
-  where p.id <> auth.uid()
-    and not exists (
-      select 1
-      from public.friendships f
-      where f.status in ('pending', 'accepted')
-        and (
-          f.requester_id = auth.uid() and f.addressee_id = p.id
-          or f.requester_id = p.id and f.addressee_id = auth.uid()
-        )
-    )
-    and (
-      coalesce(nullif(trim(search_text), ''), '') = ''
-      or p.user_name ilike '%' || replace(trim(search_text), '@', '') || '%'
-      or p.nick_name ilike '%' || replace(trim(search_text), '@', '') || '%'
-      or p.friend_code ilike '%' || replace(trim(search_text), '@', '') || '%'
-    )
-  order by p.created_at desc
-  limit greatest(1, least(coalesce(result_limit, 12), 30));
-$$;
-
-grant execute on function public.search_friend_candidates(text, integer)
-to authenticated;
-
 drop function if exists public.find_profile_by_friend_code(text);
 create or replace function public.find_profile_by_friend_code(lookup_code text)
 returns table (
@@ -428,6 +370,14 @@ $$;
 
 grant execute on function public.find_profile_by_friend_code(text)
 to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Retired open profile search
+-- -----------------------------------------------------------------------------
+
+-- People are found by their friend code alone. The former search listed
+-- every profile for any authenticated caller, so it goes with its indexes.
+drop function if exists public.search_friend_candidates(text, integer);
 
 -- backend/schema/03_groups.sql
 -- =============================================================================
@@ -904,74 +854,12 @@ drop index if exists public.user_subjects_group_idx;
 drop index if exists public.daily_goals_group_idx;
 
 -- -----------------------------------------------------------------------------
--- Views
+-- Retired views
 -- -----------------------------------------------------------------------------
 
-create or replace view public.user_progress_metrics
-with (security_invoker = true) as
-select
-  p.id as user_id,
-  subject_metrics.total_focus_seconds::integer,
-  subject_metrics.studying_seconds::integer,
-  subject_metrics.exercises_seconds::integer,
-  subject_metrics.reading_seconds::integer,
-  subject_metrics.hobbies_seconds::integer,
-  subject_metrics.pages_read::integer,
-  subject_metrics.focus_goal_seconds::integer,
-  subject_metrics.reading_goal_pages::integer,
-  goal_metrics.completed_goal_days::integer,
-  goal_metrics.goals_count::integer,
-  subject_metrics.subjects_count::integer,
-  coalesce(month_activity.focus_seconds, 0)::integer as month_focus_seconds,
-  coalesce(month_activity.sessions, 0)::integer as month_sessions,
-  coalesce(month_activity.pages, 0)::integer as month_pages,
-  coalesce(month_activity.completed_tasks, 0)::integer
-    as month_completed_tasks
-from public.profiles p
-left join lateral (
-  select
-    coalesce(sum(s.total_seconds), 0) as total_focus_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'studying'),
-      0
-    ) as studying_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'exercises'),
-      0
-    ) as exercises_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'reading'),
-      0
-    ) as reading_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'hobbies'),
-      0
-    ) as hobbies_seconds,
-    coalesce(sum(s.current_pages), 0) as pages_read,
-    coalesce(sum(s.goal_seconds), 0) as focus_goal_seconds,
-    coalesce(sum(s.goal_pages), 0) as reading_goal_pages,
-    count(*) as subjects_count
-  from public.user_subjects s
-  where s.user_id = p.id
-) subject_metrics on true
-left join lateral (
-  select
-    coalesce(sum(cardinality(g.completed_dates)), 0) as completed_goal_days,
-    count(*) as goals_count
-  from public.daily_goals g
-  where g.user_id = p.id
-) goal_metrics on true
-left join lateral (
-  select
-    coalesce(sum(a.seconds), 0) as focus_seconds,
-    count(*) filter (where a.seconds > 0) as sessions,
-    coalesce(sum(a.pages), 0) as pages,
-    coalesce(sum(a.completed_tasks), 0) as completed_tasks
-  from public.activity_entries a
-  where a.user_id = p.id
-    and a.occurred_at >= date_trunc('month', now())
-) month_activity on true
-where p.id = auth.uid();
+-- Nothing ever read these aggregates: the app derives its progress numbers
+-- from the activity and goal rows it already syncs.
+drop view if exists public.user_progress_metrics;
 
 -- -----------------------------------------------------------------------------
 -- Triggers
@@ -3139,8 +3027,6 @@ revoke all on function public.owns_group(uuid, uuid) from public;
 revoke all on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) from public;
-revoke all on function public.search_friend_candidates(text, integer)
-  from public;
 revoke all on function public.find_profile_by_friend_code(text) from public;
 revoke all on function public.create_group_with_members(
   text, text, uuid[], text, text[], date
@@ -3176,8 +3062,6 @@ grant execute on function public.owns_group(uuid, uuid) to authenticated;
 grant execute on function public.group_leaderboard_scores(
   uuid[], timestamptz, timestamptz, timestamptz
 ) to authenticated;
-grant execute on function public.search_friend_candidates(text, integer)
-  to authenticated;
 grant execute on function public.find_profile_by_friend_code(text)
   to authenticated;
 grant execute on function public.create_group_with_members(
@@ -3259,7 +3143,6 @@ grant select, insert, update, delete
   on table public.schedule_entries to authenticated;
 grant select, insert on table public.group_image_messages to authenticated;
 grant select on table public.profile_presence_status to authenticated;
-grant select on table public.user_progress_metrics to authenticated;
 
 revoke all on table public.profile_private_data from authenticated;
 grant select, insert, update, delete
@@ -3269,7 +3152,6 @@ grant select, insert, update, delete
 revoke update on table public.profiles from authenticated;
 grant update (
   id,
-  is_dark_mode,
   user_name,
   nick_name,
   profile_photo_base64,

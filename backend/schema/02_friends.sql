@@ -1,7 +1,7 @@
 -- =============================================================================
 -- 02 · Friends
--- Friendship requests, the access helper built on them, and the RPCs used
--- to find people to add.
+-- Friendship requests, the access helper built on them, and the RPC used
+-- to find the person behind a friend code.
 -- Requires: 01_profiles.sql
 -- =============================================================================
 
@@ -85,57 +85,6 @@ create trigger trg_keep_friendship_identity_immutable
 -- RPCs
 -- -----------------------------------------------------------------------------
 
-drop function if exists public.search_friend_candidates(text, integer);
-create or replace function public.search_friend_candidates(
-  search_text text default '',
-  result_limit integer default 12
-)
-returns table (
-  id uuid,
-  user_name text,
-  nick_name text,
-  friend_code text,
-  accent_color_value bigint,
-  avatar_icon_index integer,
-  profile_photo_base64 text
-)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select
-    p.id,
-    p.user_name,
-    p.nick_name,
-    p.friend_code,
-    p.accent_color_value,
-    p.avatar_icon_index,
-    p.profile_photo_base64
-  from public.profiles p
-  where p.id <> auth.uid()
-    and not exists (
-      select 1
-      from public.friendships f
-      where f.status in ('pending', 'accepted')
-        and (
-          f.requester_id = auth.uid() and f.addressee_id = p.id
-          or f.requester_id = p.id and f.addressee_id = auth.uid()
-        )
-    )
-    and (
-      coalesce(nullif(trim(search_text), ''), '') = ''
-      or p.user_name ilike '%' || replace(trim(search_text), '@', '') || '%'
-      or p.nick_name ilike '%' || replace(trim(search_text), '@', '') || '%'
-      or p.friend_code ilike '%' || replace(trim(search_text), '@', '') || '%'
-    )
-  order by p.created_at desc
-  limit greatest(1, least(coalesce(result_limit, 12), 30));
-$$;
-
-grant execute on function public.search_friend_candidates(text, integer)
-to authenticated;
-
 drop function if exists public.find_profile_by_friend_code(text);
 create or replace function public.find_profile_by_friend_code(lookup_code text)
 returns table (
@@ -177,3 +126,11 @@ $$;
 
 grant execute on function public.find_profile_by_friend_code(text)
 to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Retired open profile search
+-- -----------------------------------------------------------------------------
+
+-- People are found by their friend code alone. The former search listed
+-- every profile for any authenticated caller, so it goes with its indexes.
+drop function if exists public.search_friend_candidates(text, integer);

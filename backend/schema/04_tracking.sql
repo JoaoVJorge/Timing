@@ -219,74 +219,12 @@ drop index if exists public.user_subjects_group_idx;
 drop index if exists public.daily_goals_group_idx;
 
 -- -----------------------------------------------------------------------------
--- Views
+-- Retired views
 -- -----------------------------------------------------------------------------
 
-create or replace view public.user_progress_metrics
-with (security_invoker = true) as
-select
-  p.id as user_id,
-  subject_metrics.total_focus_seconds::integer,
-  subject_metrics.studying_seconds::integer,
-  subject_metrics.exercises_seconds::integer,
-  subject_metrics.reading_seconds::integer,
-  subject_metrics.hobbies_seconds::integer,
-  subject_metrics.pages_read::integer,
-  subject_metrics.focus_goal_seconds::integer,
-  subject_metrics.reading_goal_pages::integer,
-  goal_metrics.completed_goal_days::integer,
-  goal_metrics.goals_count::integer,
-  subject_metrics.subjects_count::integer,
-  coalesce(month_activity.focus_seconds, 0)::integer as month_focus_seconds,
-  coalesce(month_activity.sessions, 0)::integer as month_sessions,
-  coalesce(month_activity.pages, 0)::integer as month_pages,
-  coalesce(month_activity.completed_tasks, 0)::integer
-    as month_completed_tasks
-from public.profiles p
-left join lateral (
-  select
-    coalesce(sum(s.total_seconds), 0) as total_focus_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'studying'),
-      0
-    ) as studying_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'exercises'),
-      0
-    ) as exercises_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'reading'),
-      0
-    ) as reading_seconds,
-    coalesce(
-      sum(s.total_seconds) filter (where s.category = 'hobbies'),
-      0
-    ) as hobbies_seconds,
-    coalesce(sum(s.current_pages), 0) as pages_read,
-    coalesce(sum(s.goal_seconds), 0) as focus_goal_seconds,
-    coalesce(sum(s.goal_pages), 0) as reading_goal_pages,
-    count(*) as subjects_count
-  from public.user_subjects s
-  where s.user_id = p.id
-) subject_metrics on true
-left join lateral (
-  select
-    coalesce(sum(cardinality(g.completed_dates)), 0) as completed_goal_days,
-    count(*) as goals_count
-  from public.daily_goals g
-  where g.user_id = p.id
-) goal_metrics on true
-left join lateral (
-  select
-    coalesce(sum(a.seconds), 0) as focus_seconds,
-    count(*) filter (where a.seconds > 0) as sessions,
-    coalesce(sum(a.pages), 0) as pages,
-    coalesce(sum(a.completed_tasks), 0) as completed_tasks
-  from public.activity_entries a
-  where a.user_id = p.id
-    and a.occurred_at >= date_trunc('month', now())
-) month_activity on true
-where p.id = auth.uid();
+-- Nothing ever read these aggregates: the app derives its progress numbers
+-- from the activity and goal rows it already syncs.
+drop view if exists public.user_progress_metrics;
 
 -- -----------------------------------------------------------------------------
 -- Triggers
