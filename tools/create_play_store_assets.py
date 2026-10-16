@@ -1,128 +1,169 @@
+"""Frame actual localized Flutter captures for the Google Play listing.
+
+The app UI is never redrawn here. Re-capture it with
+``tools/play_store_capture_main.dart`` before regenerating these assets.
+"""
+
+from __future__ import annotations
+
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
-
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-RAW_PT = ROOT / "docs" / "play-store" / "screenshots" / "raw"
-RAW_EN = ROOT / "docs" / "play-store" / "screenshots" / "raw-en"
-OUT_ROOT = ROOT / "docs" / "play-store" / "screenshots" / "final"
+STORE = ROOT / "docs" / "play-store"
+CAPTURES = STORE / "screenshots" / "captures"
+OUT = STORE / "screenshots" / "final"
+BACKGROUND = STORE / "marketing-background.png"
+REGULAR = ROOT / "assets/fonts/Nunito/static/Nunito-Regular.ttf"
+SEMIBOLD = ROOT / "assets/fonts/Nunito/static/Nunito-SemiBold.ttf"
+BOLD = ROOT / "assets/fonts/Nunito/static/Nunito-ExtraBold.ttf"
+ICON = ROOT / "assets/images/logo_launcher.png"
 
-FONT_REGULAR = ROOT / "assets" / "fonts" / "Nunito" / "static" / "Nunito-Regular.ttf"
-FONT_BOLD = ROOT / "assets" / "fonts" / "Nunito" / "static" / "Nunito-ExtraBold.ttf"
-ICON = ROOT / "assets" / "images" / "logo_launcher.png"
+INK = (43, 52, 67)
+MUTED = (88, 102, 117)
+TEAL = (28, 172, 185)
+WHITE = (255, 255, 255)
+
+COPY = {
+    "pt-BR": {
+        "slides": [
+            ("home", "Tudo em um só lugar", "Estudos, exercícios e leitura no seu ritmo", "01-tudo-em-um-so-lugar.png"),
+            ("subjects", "Estude com clareza", "Matemática e Química com metas visíveis", "02-estude-com-clareza.png"),
+            ("reading", "Sua leitura evolui", "Acompanhe páginas e tempo de leitura", "03-sua-leitura-evolui.png"),
+            ("goals", "Metas para hoje", "Exercícios, leitura e estudos viram rotina", "04-metas-para-hoje.png"),
+            ("timer", "Foco em cada minuto", "Um cronômetro simples para a próxima sessão", "05-foco-em-cada-minuto.png"),
+            ("progress", "Veja o que você fez", "Tempo, sessões e progresso em um só lugar", "06-veja-seu-progresso.png"),
+            ("achievements", "Cada conquista conta", "Reconheça sua constância todos os dias", "07-cada-conquista-conta.png"),
+        ],
+        "feature": "Seu tempo. Seu progresso.",
+        "badges": "FOCO  •  ESTUDOS  •  METAS",
+    },
+    "en-US": {
+        "slides": [
+            ("home", "Everything in one place", "Study, exercise, and reading at your pace", "01-everything-in-one-place.png"),
+            ("subjects", "Study with clarity", "Visible goals for Mathematics and Chemistry", "02-study-with-clarity.png"),
+            ("reading", "Make reading progress", "Track pages and time spent reading", "03-make-reading-progress.png"),
+            ("goals", "Goals for today", "Make exercise, reading, and study a routine", "04-goals-for-today.png"),
+            ("timer", "Focus on every minute", "A simple timer for your next session", "05-focus-on-every-minute.png"),
+            ("progress", "See how far you have come", "Time, sessions, and progress in one place", "06-see-your-progress.png"),
+            ("achievements", "Every achievement counts", "Celebrate consistency every day", "07-every-achievement-counts.png"),
+        ],
+        "feature": "Your time. Your progress.",
+        "badges": "FOCUS  •  STUDY  •  GOALS",
+    },
+}
 
 
 def font(path: Path, size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(str(path), size)
 
 
-def gradient(size: tuple[int, int], top: tuple[int, int, int], bottom: tuple[int, int, int]) -> Image.Image:
-    width, height = size
-    image = Image.new("RGB", size)
-    pixels = image.load()
-    for y in range(height):
-        t = y / max(height - 1, 1)
-        color = tuple(round(a + (b - a) * t) for a, b in zip(top, bottom))
-        for x in range(width):
-            pixels[x, y] = color
-    return image
+def fit_text(draw: ImageDraw.ImageDraw, value: str, path: Path, size: int, width: int) -> ImageFont.FreeTypeFont:
+    while size > 22 and draw.textlength(value, font=font(path, size)) > width:
+        size -= 2
+    return font(path, size)
 
 
-def fit_screenshot(path: Path, width: int, height: int, top_crop: int = 70) -> Image.Image:
-    image = Image.open(path).convert("RGB")
-    image = image.crop((4, top_crop, image.width - 4, image.height - 4))
-    scale = width / image.width
-    resized = image.resize((width, round(image.height * scale)), Image.Resampling.LANCZOS)
-    if resized.height < height:
-        padded = Image.new("RGB", (width, height), resized.getpixel((0, 0)))
-        padded.paste(resized, (0, 0))
-        return padded
-    return resized.crop((0, 0, width, height))
+def centered(draw: ImageDraw.ImageDraw, bounds: tuple[int, int, int, int], value: str, face: ImageFont.FreeTypeFont, fill: tuple[int, int, int]) -> None:
+    bbox = draw.textbbox((0, 0), value, font=face)
+    x = bounds[0] + (bounds[2] - bounds[0] - (bbox[2] - bbox[0])) / 2
+    y = bounds[1] + (bounds[3] - bounds[1] - (bbox[3] - bbox[1])) / 2 - bbox[1]
+    draw.text((x, y), value, font=face, fill=fill)
+
+
+def cover(path: Path, size: tuple[int, int]) -> Image.Image:
+    source = Image.open(path).convert("RGB")
+    scale = max(size[0] / source.width, size[1] / source.height)
+    source = source.resize((round(source.width * scale), round(source.height * scale)), Image.Resampling.LANCZOS)
+    x, y = (source.width - size[0]) // 2, (source.height - size[1]) // 2
+    return source.crop((x, y, x + size[0], y + size[1]))
 
 
 def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
-    mask = Image.new("L", size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size[0], size[1]), radius=radius, fill=255)
+    mask = Image.new("L", size)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius=radius, fill=255)
     return mask
 
 
-def create_store_shot(
-    raw_dir: Path,
-    out_dir: Path,
-    source: str,
-    output: str,
-    title: str,
-    subtitle: str,
-    dark_frame: bool = False,
-) -> None:
-    canvas = gradient((1080, 1920), (24, 55, 91), (14, 29, 52))
+def marketing_canvas(title: str, subtitle: str, index: int) -> Image.Image:
+    canvas = cover(BACKGROUND, (1080, 1920))
     draw = ImageDraw.Draw(canvas)
-
-    draw.ellipse((720, -120, 1190, 350), outline=(27, 210, 197), width=3)
-    draw.ellipse((770, -70, 1140, 300), outline=(54, 120, 180), width=2)
-    draw.rounded_rectangle((56, 52, 220, 116), radius=32, fill=(35, 78, 116))
-    draw.text((88, 67), "TIMING", font=font(FONT_BOLD, 28), fill=(111, 238, 227))
-
-    title_size = 62
-    title_font = font(FONT_BOLD, title_size)
-    while draw.textbbox((0, 0), title, font=title_font)[2] > 968:
-        title_size -= 2
-        title_font = font(FONT_BOLD, title_size)
-    draw.text((56, 145), title, font=title_font, fill="white")
-    draw.text((58, 225), subtitle, font=font(FONT_REGULAR, 34), fill=(211, 225, 239))
-
-    frame_box = (70, 320, 1010, 1870)
-    frame_color = (11, 21, 38) if dark_frame else (244, 247, 250)
-    draw.rounded_rectangle(frame_box, radius=70, fill=frame_color, outline=(91, 183, 244), width=4)
-
-    shot = fit_screenshot(raw_dir / source, 880, 1490)
-    mask = rounded_mask(shot.size, 45)
-    canvas.paste(shot, (100, 350), mask)
-
-    out_dir.mkdir(parents=True, exist_ok=True)
-    canvas.save(out_dir / output, format="PNG", optimize=True)
+    draw.rounded_rectangle((56, 50, 232, 114), radius=32, fill=(226, 249, 246), outline=(173, 232, 225), width=2)
+    draw.ellipse((76, 67, 105, 96), fill=TEAL)
+    draw.ellipse((84, 75, 97, 88), fill=WHITE)
+    draw.text((119, 67), "TIMING", font=font(BOLD, 27), fill=(20, 113, 105))
+    draw.rounded_rectangle((888, 56, 1024, 108), radius=26, fill=WHITE, outline=(208, 223, 229), width=2)
+    centered(draw, (888, 56, 1024, 108), f"{index}/7", font(SEMIBOLD, 22), MUTED)
+    draw.text((56, 158), title, font=fit_text(draw, title, BOLD, 66, 968), fill=INK)
+    draw.text((58, 261), subtitle, font=fit_text(draw, subtitle, REGULAR, 31, 964), fill=MUTED)
+    return canvas
 
 
-def create_english_feature_graphic() -> None:
-    canvas = gradient((1024, 500), (27, 54, 84), (16, 34, 60))
+def add_actual_screen(canvas: Image.Image, source_path: Path) -> None:
+    source = Image.open(source_path).convert("RGB")
+    if source.size != (1179, 2556):
+        raise ValueError(f"Unexpected capture size {source.size}: {source_path}")
+
+    # Match the captured viewport ratio exactly: no stretched UI or invented
+    # cards, graphs, controls, and navigation.
+    screen_size = (652, round(652 * source.height / source.width))
+    screen = source.resize(screen_size, Image.Resampling.LANCZOS)
+    x, y = (1080 - screen.width) // 2, 454
+    shadow = Image.new("RGBA", canvas.size)
+    ImageDraw.Draw(shadow).rounded_rectangle((x - 28, y - 27, x + screen.width + 28, y + screen.height + 29), radius=68, fill=(71, 99, 118, 57))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(27))
+    canvas.paste(shadow, (0, 0), shadow)
     draw = ImageDraw.Draw(canvas)
-    draw.ellipse((585, 18, 1045, 478), outline=(28, 82, 105), width=2)
-    draw.ellipse((610, 48, 1015, 453), outline=(31, 68, 101), width=2)
-    draw.rounded_rectangle((74, 108, 82, 313), radius=4, fill=(18, 213, 198))
-    draw.text((110, 126), "Timing", font=font(FONT_BOLD, 88), fill="white")
-    draw.text((114, 248), "Your time. Your progress.", font=font(FONT_REGULAR, 34), fill=(218, 229, 239))
-    draw.rounded_rectangle((114, 350, 525, 404), radius=27, fill=(36, 77, 96))
-    draw.text((141, 364), "FOCUS  •  ROUTINE  •  GOALS", font=font(FONT_BOLD, 20), fill=(108, 237, 226))
+    draw.rounded_rectangle((x - 25, y - 25, x + screen.width + 25, y + screen.height + 25), radius=63, fill=(232, 237, 242), outline=WHITE, width=5)
+    canvas.paste(screen, (x, y), rounded_mask(screen_size, 43))
 
-    icon = Image.open(ICON).convert("RGB").resize((352, 352), Image.Resampling.LANCZOS)
-    canvas.paste(icon, (640, 74), rounded_mask(icon.size, 82))
-    canvas.save(ROOT / "docs" / "play-store" / "feature-graphic-en-US-1024x500.png", format="PNG", optimize=True)
+
+def feature_graphic(locale: str) -> Path:
+    canvas = cover(BACKGROUND, (1024, 500))
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle((58, 70, 69, 428), radius=6, fill=TEAL)
+    draw.text((104, 87), "Timing", font=font(BOLD, 84), fill=INK)
+    draw.text((108, 213), COPY[locale]["feature"], font=fit_text(draw, COPY[locale]["feature"], REGULAR, 35, 505), fill=MUTED)
+    draw.rounded_rectangle((108, 320, 532, 382), radius=31, fill=(226, 249, 246), outline=(165, 229, 222), width=2)
+    centered(draw, (108, 320, 532, 382), COPY[locale]["badges"], font(BOLD, 21), (23, 124, 115))
+    icon = Image.open(ICON).convert("RGB").resize((330, 330), Image.Resampling.LANCZOS)
+    canvas.paste(icon, (635, 84), rounded_mask(icon.size, 82))
+    path = STORE / f"feature-graphic-{locale}-1024x500.png"
+    canvas.save(path, optimize=True)
+    return path
 
 
 def main() -> None:
-    pt_specs = [
-        ("timer.png", "01-foco-sem-distracoes.png", "Foco sem distrações", "Cronômetro, pausas e notas no mesmo fluxo", True),
-        ("daily-goals.png", "02-metas-que-viram-rotina.png", "Metas que viram rotina", "Planeje o dia com objetivos simples", False),
-        ("create-group-step.png", "03-progresso-em-grupo.png", "Progresso em grupo", "Crie desafios e evolua com amigos", False),
-        ("progress.png", "04-veja-sua-evolucao.png", "Veja sua evolução", "Acompanhe foco, sessões e conquistas", False),
-        ("schedule.png", "05-planeje-sua-agenda.png", "Planeje sua agenda", "Organize compromissos e sua rotina semanal", False),
-    ]
-    en_specs = [
-        ("timer.png", "01-distraction-free-focus.png", "Distraction-free focus", "Timer, breaks, and notes in one seamless flow", True),
-        ("daily-goals.png", "02-goals-that-build-routines.png", "Goals that build routines", "Plan your day with clear, achievable goals", False),
-        ("create-group-step.png", "03-progress-together.png", "Progress together", "Create challenges and grow with friends", False),
-        ("progress.png", "04-see-your-progress.png", "See your progress", "Track focus, sessions, and achievements", False),
-        ("schedule.png", "05-plan-your-schedule.png", "Plan your schedule", "Organize appointments and your weekly routine", False),
-    ]
-    for source, output, title, subtitle, dark_frame in pt_specs:
-        create_store_shot(RAW_PT, OUT_ROOT / "pt-BR", source, output, title, subtitle, dark_frame)
-    for source, output, title, subtitle, dark_frame in en_specs:
-        create_store_shot(RAW_EN, OUT_ROOT / "en-US", source, output, title, subtitle, dark_frame)
+    generated: list[Path] = []
+    for locale, copy in COPY.items():
+        paths: list[Path] = []
+        locale_dir = OUT / locale
+        locale_dir.mkdir(parents=True, exist_ok=True)
+        for index, (page, title, subtitle, filename) in enumerate(copy["slides"], 1):
+            source = CAPTURES / locale / f"{locale}-{page}.png"
+            if not source.exists():
+                raise FileNotFoundError(f"Capture missing: {source}")
+            canvas = marketing_canvas(title, subtitle, index)
+            add_actual_screen(canvas, source)
+            path = locale_dir / filename
+            canvas.save(path, optimize=True)
+            generated.append(path)
+            paths.append(path)
 
-    app_icon = Image.open(ICON).convert("RGB").resize((512, 512), Image.Resampling.LANCZOS)
-    app_icon.save(ROOT / "docs" / "play-store" / "app-icon-512.png", format="PNG", optimize=True)
-    create_english_feature_graphic()
+        sheet = Image.new("RGB", (1080, 960), WHITE)
+        for index, path in enumerate(paths):
+            preview = Image.open(path).resize((270, 480), Image.Resampling.LANCZOS)
+            sheet.paste(preview, ((index % 4) * 270, (index // 4) * 480))
+        sheet_path = OUT / f"contact-sheet-{locale}.jpg"
+        sheet.save(sheet_path, quality=90)
+        generated.extend((sheet_path, feature_graphic(locale)))
+
+    icon = Image.open(ICON).convert("RGB").resize((512, 512), Image.Resampling.LANCZOS)
+    icon_path = STORE / "app-icon-512.png"
+    icon.save(icon_path, optimize=True)
+    generated.append(icon_path)
+    print("\n".join(str(path.relative_to(ROOT)) for path in generated))
 
 
 if __name__ == "__main__":

@@ -44,5 +44,8 @@ Produtividade
 ## Assets
 
 - Ícone: `app-icon-512.png`
-- Recurso gráfico: `../timing_feature_graphic_1024x500.png`
-- Capturas: `screenshots/final/pt-BR/01-foco-sem-distracoes.png` até `05-planeje-sua-agenda.png`
+- Recurso gráfico: `feature-graphic-pt-BR-1024x500.png`
+- Capturas: `screenshots/final/pt-BR/01-tudo-em-um-so-lugar.png` até `07-cada-conquista-conta.png`
+- Prévia do conjunto: `screenshots/final/contact-sheet-pt-BR.jpg`
+
+As capturas mostram as telas reais do app com um perfil demonstrativo neutro, sem foto ou dados pessoais. A narrativa mostra Matemática, Química, exercícios, leitura e estudos com os mesmos dados em todas as telas.

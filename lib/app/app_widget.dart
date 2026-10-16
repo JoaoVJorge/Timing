@@ -9,7 +9,9 @@ import "package:timing/l10n/app_localizations.dart";
 import "package:timing/theme/theme.dart";
 
 class AppWidget extends StatelessWidget {
-  const AppWidget({super.key});
+  const AppWidget({super.key, this.initialRoute = AppRoutes.splash});
+
+  final String initialRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,7 @@ class AppWidget extends StatelessWidget {
             );
           }),
         ),
-        initialRoute: AppRoutes.splash,
+        initialRoute: initialRoute,
         getPages: AppRoutes.getPages,
       ),
     );

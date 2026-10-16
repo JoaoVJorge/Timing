@@ -45,4 +45,7 @@ Productivity
 
 - App icon: `app-icon-512.png`
 - Feature graphic: `feature-graphic-en-US-1024x500.png`
-- Screenshots: `screenshots/final/en-US/01-distraction-free-focus.png` through `05-plan-your-schedule.png`
+- Screenshots: `screenshots/final/en-US/01-everything-in-one-place.png` through `07-every-achievement-counts.png`
+- Set preview: `screenshots/final/contact-sheet-en-US.jpg`
+
+The screenshots show the app's actual screens with a neutral demo profile and no personal photo or identifying data. The story consistently features Mathematics, Chemistry, exercises, reading, and study.
