@@ -26,6 +26,7 @@ import "package:timing/core/services/daily_progress/daily_progress_service.dart"
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/deep_links/invite_link_service.dart";
 import "package:timing/core/services/last_activity/last_activity_service.dart";
+import "package:timing/core/services/log/boot_trace.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/local_storage/local_storage_keys.dart";
 import "package:timing/core/services/notifications/goal_reminder_service.dart";
@@ -113,6 +114,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
   static const Duration _presenceRequestTimeout = Duration(seconds: 2);
   static const Duration _presenceLogoutWait = Duration(milliseconds: 1500);
   static const Duration _initialConfigLoadTimeout = Duration(seconds: 10);
+  static const Duration _splashStepTimeout = Duration(seconds: 5);
 
   /// Decoded once per photo change and reused afterwards: `Image.memory` keys
   /// its cache by byte-list identity, so handing it a fresh list on every
@@ -200,38 +202,62 @@ class AppController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> initialize() async {
+    BootTrace.mark("splash: loading config");
     // Bounded so a stalled network call (e.g. racing the OAuth deep-link
     // session exchange right after a cold start) can never leave the splash
     // screen stuck forever. The underlying calls keep running in the
     // background and still apply their results whenever they resolve.
     await Future.wait([
-      _loadInitialConfig().timeout(_initialConfigLoadTimeout, onTimeout: () {}),
+      _loadInitialConfig()
+          .timeout(
+            _initialConfigLoadTimeout,
+            onTimeout: () => BootTrace.mark("splash: config load timed out"),
+          )
+          .catchError(
+            (Object error, StackTrace stackTrace) =>
+                BootTrace.fail("splash: config load", error, stackTrace),
+          ),
       Future.delayed(AppConstants.splashScreenDuration),
     ]);
-    await _navigateAfterSplash();
+    try {
+      await _navigateAfterSplash();
+    } catch (error, stackTrace) {
+      // The splash screen has no way out of its own, so a check that fails
+      // must not keep the user on it. Login is always a way out: a user who
+      // is still signed in is sent on from there.
+      BootTrace.fail("splash: choosing the next screen", error, stackTrace);
+      _leaveSplash(AppRoutes.login);
+    }
   }
 
   Future<void> _navigateAfterSplash() async {
     if (_supabaseService.isConfigured && !_supabaseService.hasSignedInUser) {
-      await _appNavigator.offAllNamed(AppRoutes.login);
+      _leaveSplash(AppRoutes.login);
       return;
     }
 
-    if (_supabaseService.hasSignedInUser && await _hasGracePeriodExpired()) {
+    // Both steps below read encrypted local data, whose key comes from the
+    // device keystore, and a keystore can stall. A read that never answers is
+    // treated like a device without the saved value.
+    if (_supabaseService.hasSignedInUser &&
+        await _hasGracePeriodExpired().timeout(
+          _splashStepTimeout,
+          onTimeout: () => false,
+        )) {
       await _forceReauthentication();
       return;
     }
 
     if (userName.value.isEmpty) {
-      await _appNavigator.offAllNamed(AppRoutes.login);
+      _leaveSplash(AppRoutes.login);
       return;
     }
 
-    final activeSession = await _activeTimerSessionService.restore();
-    unawaited(
-      _appNavigator.offAllNamed<void>(AppRoutes.mainNavigation) ??
-          Future<void>.value(),
+    final activeSession = await _activeTimerSessionService.restore().timeout(
+      _splashStepTimeout,
+      onTimeout: () => null,
     );
+    _leaveSplash(AppRoutes.mainNavigation);
     if (activeSession == null) {
       return;
     }
@@ -254,6 +280,13 @@ class AppController extends GetxController with WidgetsBindingObserver {
             Future<void>.value(),
       );
     });
+  }
+
+  /// A route's future only completes once that route is removed again, so
+  /// leaving the splash screen never waits on it.
+  void _leaveSplash(String route) {
+    BootTrace.mark("splash: opening $route");
+    unawaited(_appNavigator.offAllNamed<void>(route) ?? Future<void>.value());
   }
 
   Future<void> _loadInitialConfig() async {
@@ -310,7 +343,7 @@ class AppController extends GetxController with WidgetsBindingObserver {
         Get.isRegistered<ConnectivityService>() &&
         !Get.find<ConnectivityService>().isOnline.value;
     await _phoneAuthRepository.signOut();
-    await _appNavigator.offAllNamed(AppRoutes.login);
+    _leaveSplash(AppRoutes.login);
     if (wasOffline) {
       final BuildContext? context = Get.context;
       if (context != null && context.mounted) {

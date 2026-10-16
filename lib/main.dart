@@ -8,6 +8,7 @@ import "package:timing/app/app_widget.dart";
 import "package:timing/app/bindings/app_bindings.dart";
 import "package:timing/core/domain/errors/app_error.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/log/boot_trace.dart";
 
 Future<void> main() async {
   await runZonedGuarded(() async {
@@ -20,7 +21,8 @@ Future<void> main() async {
         _showError(exception);
       }
     };
-    await AppBindings().dependencies();
+    await BootTrace.step("bindings", AppBindings().dependencies);
+    BootTrace.mark("runApp");
     runApp(const AppWidget());
   }, _showError);
 }

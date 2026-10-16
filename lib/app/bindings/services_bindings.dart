@@ -20,6 +20,7 @@ import "package:timing/core/services/last_activity/last_activity_service.dart";
 import "package:timing/core/services/live_activity/timer_live_activity_service.dart";
 import "package:timing/core/services/local_storage/app_local_storage_service.dart";
 import "package:timing/core/services/log/app_logger_service.dart";
+import "package:timing/core/services/log/boot_trace.dart";
 import "package:timing/core/services/notifications/timer_notification_service.dart";
 import "package:timing/core/services/supabase/supabase_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
@@ -33,8 +34,10 @@ import "package:timing/env/environment_keys.dart";
 class ServicesBindings extends Bindings {
   @override
   Future<void> dependencies() async {
-    final SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance();
+    final SharedPreferences sharedPreferences = await BootTrace.step(
+      "shared preferences",
+      SharedPreferences.getInstance,
+    );
     Get.put<SharedPreferences>(sharedPreferences, permanent: true);
     Get.put<FlutterSecureStorage>(
       const FlutterSecureStorage(),
@@ -42,7 +45,7 @@ class ServicesBindings extends Bindings {
     );
     Get.put<AppLoggerService>(AppLoggerService(), permanent: true);
     final ConnectivityService connectivityService = ConnectivityService();
-    await connectivityService.initialize();
+    await BootTrace.step("connectivity", connectivityService.initialize);
     Get.put<ConnectivityService>(connectivityService, permanent: true);
     Get.put<ActivityChangeBus>(ActivityChangeBus(), permanent: true);
     Get.put<MainTabRefreshService>(MainTabRefreshService(), permanent: true);
@@ -63,7 +66,10 @@ class ServicesBindings extends Bindings {
     Get.put<HomeWidgetService>(HomeWidgetService(), permanent: true);
     Get.put<TimerForegroundService>(TimerForegroundService(), permanent: true);
 
-    final SupabaseService supabaseService = await SupabaseService.initialize();
+    final SupabaseService supabaseService = await BootTrace.step(
+      "supabase",
+      SupabaseService.initialize,
+    );
     Get.put<SupabaseService>(supabaseService, permanent: true);
     // A group link asks its leader to let the user in and a friend link finds
     // the friend's profile; neither acts by itself, and one that arrives
@@ -104,7 +110,7 @@ class ServicesBindings extends Bindings {
     final PendingSyncStore pendingSyncStore = PendingSyncStore(
       localStorageService: Get.find(),
     );
-    await pendingSyncStore.load();
+    await BootTrace.step("pending sync store", pendingSyncStore.load);
     Get.put<PendingSyncStore>(pendingSyncStore, permanent: true);
 
     final GoogleCalendarService googleCalendar = GoogleCalendarService(
@@ -112,24 +118,27 @@ class ServicesBindings extends Bindings {
       localStorageService: Get.find(),
       pendingSyncStore: Get.find(),
     );
-    await googleCalendar.initialize();
+    await BootTrace.step("google calendar", googleCalendar.initialize);
     Get.put<GoogleCalendarService>(googleCalendar, permanent: true);
 
     final LastActivityService lastActivityService = LastActivityService(
       localStorageService: Get.find(),
     );
-    await lastActivityService.load();
+    await BootTrace.step("last activity", lastActivityService.load);
     Get.put<LastActivityService>(lastActivityService, permanent: true);
 
     final DailyProgressService dailyProgressService = DailyProgressService(
       localStorageService: Get.find(),
     );
-    await dailyProgressService.load();
+    await BootTrace.step("daily progress", dailyProgressService.load);
     Get.put<DailyProgressService>(dailyProgressService, permanent: true);
 
     final SubjectDailyHistoryService subjectDailyHistoryService =
         SubjectDailyHistoryService(localStorageService: Get.find());
-    await subjectDailyHistoryService.load();
+    await BootTrace.step(
+      "subject daily history",
+      subjectDailyHistoryService.load,
+    );
     Get.put<SubjectDailyHistoryService>(
       subjectDailyHistoryService,
       permanent: true,
@@ -137,7 +146,7 @@ class ServicesBindings extends Bindings {
 
     final ActivityHistoryService activityHistoryService =
         ActivityHistoryService(localStorageService: Get.find());
-    await activityHistoryService.load();
+    await BootTrace.step("activity history", activityHistoryService.load);
     Get.put<ActivityHistoryService>(activityHistoryService, permanent: true);
 
     final Dio dio = Dio(BaseOptions(baseUrl: EnvironmentKeys.baseUrl));
