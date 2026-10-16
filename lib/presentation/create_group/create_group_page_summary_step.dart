@@ -112,13 +112,13 @@ class _SummaryStep extends StatelessWidget {
                     height: 38,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: context.colorTokens.primaryVeryLight,
+                      color: context.colorTokens.primary,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       "+${selectedFriends.length - 5}",
                       style: context.textStyles.bodySmall.copyWith(
-                        color: context.colorTokens.primary,
+                        color: context.colorTokens.primaryForeground,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

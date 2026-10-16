@@ -505,7 +505,7 @@ class _OverlappingFriends extends StatelessWidget {
                 height: size,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: context.colorTokens.primaryVeryLight,
+                  color: context.colorTokens.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: context.colorTokens.surface,
@@ -515,7 +515,7 @@ class _OverlappingFriends extends StatelessWidget {
                 child: Text(
                   "+$extraCount",
                   style: context.textStyles.bodyTiny.copyWith(
-                    color: context.colorTokens.primary,
+                    color: context.colorTokens.primaryForeground,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -573,7 +573,7 @@ class _OverlappingMembers extends StatelessWidget {
                 height: size,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: context.colorTokens.primaryVeryLight,
+                  color: context.colorTokens.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: context.colorTokens.surface,
@@ -584,7 +584,7 @@ class _OverlappingMembers extends StatelessWidget {
                   "+$extraCount",
                   maxLines: 1,
                   style: context.textStyles.bodyTiny.copyWith(
-                    color: context.colorTokens.primary,
+                    color: context.colorTokens.primaryForeground,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
