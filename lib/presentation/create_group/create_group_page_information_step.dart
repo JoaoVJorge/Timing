@@ -5,14 +5,12 @@ class _InformationStep extends StatelessWidget {
     required this.controller,
     required this.groupNameKey,
     required this.themeKey,
-    required this.linksKey,
     required this.onSelectTheme,
   });
 
   final CreateGroupController controller;
   final Key groupNameKey;
   final Key themeKey;
-  final Key linksKey;
   final ValueChanged<GroupThemeType> onSelectTheme;
 
   @override
@@ -20,31 +18,23 @@ class _InformationStep extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _AboutGroupCard(key: groupNameKey, controller: controller),
-      const Gap(24),
+      const Gap(18),
       _CreateGroupSectionHeader(
         key: themeKey,
         icon: Icons.emoji_events_rounded,
-        title: context.l10n.groupThemeLabel,
+        title: context.l10n.createGroupRankingThemeTitle,
         description: context.l10n.createGroupThemeMetricDescription,
       ),
       const Gap(14),
-      Obx(() {
-        final GroupThemeType? selected = controller.selectedTheme.value;
-
-        return Column(
-          children: [
-            _ThemeGrid(selectedTheme: selected, onSelectTheme: onSelectTheme),
-            if (selected != null) ...[
-              const Gap(18),
-              _LinkedActivitiesSection(
-                key: linksKey,
-                controller: controller,
-                theme: selected,
-              ),
-            ],
-          ],
-        );
-      }),
+      Obx(
+        () => _ThemeGrid(
+          selectedTheme: controller.selectedTheme.value,
+          onSelectTheme: onSelectTheme,
+        ),
+      ),
+      const Gap(16),
+      const _ActivitiesLaterHint(),
+      const Gap(4),
     ],
   );
 }
@@ -57,18 +47,16 @@ class _AboutGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(18),
+    padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
       color: context.colorTokens.surface,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(
-        color: context.colorTokens.primary.withValues(alpha: 0.12),
-      ),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: context.colorTokens.borderUnfocused),
       boxShadow: [
         BoxShadow(
           color: context.colorTokens.surfaceShadow,
-          blurRadius: 14,
-          offset: const Offset(0, 4),
+          blurRadius: 18,
+          offset: const Offset(0, 5),
         ),
       ],
     ),
@@ -82,36 +70,35 @@ class _AboutGroupCard extends StatelessWidget {
               height: 42,
               decoration: BoxDecoration(
                 color: context.colorTokens.primaryVeryLight,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
                 child: AppIcon(
                   "group",
-                  size: 21,
+                  size: 20,
                   color: context.colorTokens.primary,
                 ),
               ),
             ),
-            const Gap(12),
+            const Gap(11),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     context.l10n.createGroupAboutTitle,
-                    style: context.textStyles.sectionTitle.copyWith(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const Gap(2),
                   Text(
                     context.l10n.createGroupAboutDescription,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.bodySmall.copyWith(
                       color: context.colorTokens.textHint,
-                      fontSize: 13,
+                      fontSize: 15,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -120,14 +107,15 @@ class _AboutGroupCard extends StatelessWidget {
             ),
           ],
         ),
-        const Gap(18),
+        const Gap(20),
         _CreateGroupFieldLabel(context.l10n.groupNameLabel),
-        const Gap(7),
+        const Gap(8),
         TextField(
           controller: controller.groupNameController,
           onChanged: controller.onGroupNameChanged,
           style: context.textStyles.inputText.copyWith(
-            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
           ),
           decoration: _roundedFieldDecoration(
             context,
@@ -139,26 +127,22 @@ class _AboutGroupCard extends StatelessWidget {
             ),
           ),
         ),
-        const Gap(14),
+        const Gap(18),
         _CreateGroupFieldLabel(context.l10n.createGroupDescriptionLabel),
-        const Gap(7),
+        const Gap(8),
         TextField(
           controller: controller.descriptionController,
-          minLines: 1,
+          minLines: 3,
           maxLines: 3,
           maxLength: 280,
           style: context.textStyles.inputText.copyWith(
-            fontWeight: FontWeight.w600,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
           ),
           decoration: _roundedFieldDecoration(
             context,
             hintText: context.l10n.createGroupDescriptionHint,
-            prefixIcon: Icon(
-              Icons.notes_rounded,
-              size: 21,
-              color: context.colorTokens.primary,
-            ),
-          ),
+          ).copyWith(counterText: ""),
         ),
       ],
     ),
@@ -174,8 +158,8 @@ class _CreateGroupFieldLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     label,
     style: context.textStyles.bodyMedium.copyWith(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
     ),
   );
 }
@@ -191,18 +175,18 @@ InputDecoration _roundedFieldDecoration(
       prefixIcon: prefixIcon,
     ).copyWith(
       filled: true,
-      fillColor: context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.22),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+      fillColor: context.creationPageBackground,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: context.colorTokens.borderUnfocused),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: context.colorTokens.borderUnfocused),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(color: context.colorTokens.primary, width: 1.4),
       ),
     );
@@ -228,24 +212,30 @@ class _CreateGroupSectionHeader extends StatelessWidget {
         height: 44,
         decoration: BoxDecoration(
           color: context.colorTokens.primaryVeryLight,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, size: 23, color: context.colorTokens.primary),
+        child: Icon(icon, size: 22, color: context.colorTokens.primary),
       ),
-      const Gap(12),
+      const Gap(14),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: context.textStyles.sectionTitle),
-            const Gap(3),
+            Text(
+              title,
+              style: context.textStyles.bodyMedium.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             Text(
               description,
-              maxLines: 3,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.textStyles.bodySmall.copyWith(
                 color: context.colorTokens.textHint,
-                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -265,7 +255,7 @@ class _ThemeGrid extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final int columns = constraints.maxWidth < 340 ? 1 : 2;
-      const double spacing = 10;
+      const double spacing = 12;
       final double tileWidth =
           (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -288,51 +278,34 @@ class _ThemeGrid extends StatelessWidget {
   );
 }
 
-/// The creator's activities of the chosen theme. Linking is optional here:
-/// the same choice stays available from the group's menu.
-class _LinkedActivitiesSection extends StatelessWidget {
-  const _LinkedActivitiesSection({
-    required this.controller,
-    required this.theme,
-    super.key,
-  });
-
-  final CreateGroupController controller;
-  final GroupThemeType theme;
+class _ActivitiesLaterHint extends StatelessWidget {
+  const _ActivitiesLaterHint();
 
   @override
-  Widget build(BuildContext context) => Obx(
-    () => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          groupLinksHint(context, theme),
-          style: context.textStyles.bodySmall.copyWith(
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Icon(
+          Icons.info_outline_rounded,
+          size: 19,
+          color: context.colorTokens.textHint,
+        ),
+      ),
+      const Gap(12),
+      Expanded(
+        child: Text(
+          context.l10n.createGroupActivitiesLaterHint,
+          style: context.textStyles.bodyMedium.copyWith(
             color: context.colorTokens.textHint,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            height: 1.45,
           ),
         ),
-        const Gap(4),
-        Text(
-          context.l10n.createGroupLinksOptional,
-          style: context.textStyles.bodySmall.copyWith(
-            color: context.colorTokens.textHint,
-          ),
-        ),
-        const Gap(12),
-        if (controller.isLoadingSources.value) const LinearProgressIndicator(),
-        if (controller.sourcesLoadFailed.value)
-          TextButton(
-            onPressed: controller.loadPersonalActivities,
-            child: Text(context.l10n.groupLinksRetry),
-          ),
-        ActivitySourceSelector(
-          options: controller.compatibleSources,
-          selectedIds: controller.selectedSourceIds.toSet(),
-          singleSelection: theme == GroupThemeType.dailyGoals,
-          onToggle: controller.toggleSource,
-        ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
@@ -357,98 +330,79 @@ class _ThemeTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        constraints: const BoxConstraints(minHeight: 98),
-        padding: const EdgeInsets.all(13),
+        constraints: const BoxConstraints(minHeight: 100),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? context.colorTokens.primaryVeryLight
-              : context.colorTokens.surface,
+          color: context.colorTokens.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? context.colorTokens.primary
                 : context.colorTokens.borderUnfocused,
-            width: isSelected ? 1.6 : 1.2,
+            width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected
-                  ? context.colorTokens.primary.withValues(alpha: 0.12)
-                  : context.colorTokens.surfaceShadow,
-              blurRadius: isSelected ? 18 : 12,
-              offset: const Offset(0, 4),
+              color: context.colorTokens.surfaceShadow,
+              blurRadius: 14,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
-        child: Stack(
+        child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: context.colorTokens.primaryVeryLight,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Center(
-                      child: AppIcon(
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: context.colorTokens.primaryVeryLight,
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: Center(
+                child: theme == GroupThemeType.hobbies
+                    ? Icon(
+                        Icons.palette_outlined,
+                        size: 22,
+                        color: context.colorTokens.primary,
+                      )
+                    : AppIcon(
                         theme.iconName,
                         size: 21,
                         color: context.colorTokens.primary,
                       ),
+              ),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    theme.localizedLabel(context),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodyMedium.copyWith(
+                      color: isSelected
+                          ? context.colorTokens.primary
+                          : context.colorTokens.textBody,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const Gap(10),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          theme.localizedLabel(context),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.bodyLarge.copyWith(
-                            color: isSelected
-                                ? context.colorTokens.primary
-                                : context.colorTokens.textBody,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          groupMetricDescription(context, theme),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textStyles.bodySmall.copyWith(
-                            color: context.colorTokens.textHint,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  const Gap(3),
+                  Text(
+                    _capitalizedMetric(context, theme),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textStyles.bodySmall.copyWith(
+                      color: context.colorTokens.textHint,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
                     ),
                   ),
                 ],
-              ),
-            ),
-            PositionedDirectional(
-              top: 0,
-              end: 0,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 160),
-                child: Icon(
-                  isSelected
-                      ? Icons.check_circle_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  key: ValueKey(isSelected),
-                  size: 21,
-                  color: isSelected
-                      ? context.colorTokens.primary
-                      : context.colorTokens.borderUnfocused,
-                ),
               ),
             ),
           ],
@@ -456,4 +410,10 @@ class _ThemeTile extends StatelessWidget {
       ),
     ),
   );
+}
+
+String _capitalizedMetric(BuildContext context, GroupThemeType theme) {
+  final String metric = groupMetricDescription(context, theme);
+  if (metric.isEmpty) return metric;
+  return "${metric[0].toUpperCase()}${metric.substring(1)}";
 }

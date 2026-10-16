@@ -218,9 +218,11 @@ void main() {
       expect(find.text(l10n.createGroupAboutTitle), findsOneWidget);
       expect(find.text(l10n.groupNameLabel), findsOneWidget);
       expect(find.text(l10n.createGroupDescriptionLabel), findsOneWidget);
-      expect(find.text("Opcional"), findsNothing);
+      expect(find.text(l10n.optionalHint), findsOneWidget);
       expect(find.text("Obrigatório"), findsNothing);
       expect(find.textContaining("Uma frase curta"), findsNothing);
+      expect(find.text(l10n.createGroupTitle), findsOneWidget);
+      expect(find.textContaining("1/3"), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -237,55 +239,49 @@ void main() {
       expect(find.text("Atividades vinculadas"), findsNothing);
     });
 
-    testWidgets("the theme brings the creator's activities that fit it", (
+    testWidgets("matches the ranking theme section without linking yet", (
       tester,
     ) async {
       final controller = await pumpPage(tester);
       final AppLocalizations l10n = lookupAppLocalizations(const Locale("pt"));
 
-      await tester.tap(find.text(l10n.groupMetricExercises));
+      expect(find.text(l10n.createGroupRankingThemeTitle), findsOneWidget);
+      expect(find.text(l10n.createGroupActivitiesLaterHint), findsOneWidget);
+      expect(find.text("Horas focadas"), findsOneWidget);
+      expect(find.text("Dias concluídos"), findsOneWidget);
+      expect(find.text("Horas treinadas"), findsOneWidget);
+      expect(find.text("Páginas lidas"), findsOneWidget);
+      expect(find.text("Horas praticadas"), findsOneWidget);
+
+      await tester.tap(find.text("Exercícios"));
       await tester.pumpAndSettle();
 
-      expect(find.text("Atividades vinculadas"), findsOneWidget);
-      expect(find.text(l10n.groupLinksHintExercises), findsOneWidget);
-      expect(find.text(l10n.createGroupLinksOptional), findsOneWidget);
-      expect(find.text("Superior"), findsOneWidget);
-      expect(find.text("Inferior"), findsOneWidget);
-      expect(find.text("Livro"), findsNothing);
-      expect(find.text("Criar atividade"), findsNothing);
-
-      await tester.tap(find.text("Superior"));
-      await tester.tap(find.text("Inferior"));
-      await tester.pumpAndSettle();
-      expect(controller.selectedSourceIds, {"upper", "lower"});
-      expect(find.text("2 atividades selecionadas."), findsOneWidget);
+      expect(controller.selectedTheme.value, GroupThemeType.exercises);
+      expect(controller.selectedSourceIds, isEmpty);
+      expect(find.text("Atividades vinculadas"), findsNothing);
+      expect(find.text("Superior"), findsNothing);
     });
 
-    testWidgets("a goals theme lets a single goal be picked", (tester) async {
+    testWidgets("the goals theme also defers activity linking", (tester) async {
       final controller = await pumpPage(tester);
-      final AppLocalizations l10n = lookupAppLocalizations(const Locale("pt"));
 
-      await tester.tap(find.text(l10n.groupMetricDailyGoals));
-      await tester.pumpAndSettle();
-      expect(find.text(l10n.groupLinksHintDailyGoals), findsOneWidget);
-
-      await tester.tap(find.text("Beber água"));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text("Caminhar"));
+      await tester.tap(find.text("Metas diárias"));
       await tester.pumpAndSettle();
 
-      expect(controller.selectedSourceIds, {"walk"});
-      expect(find.text("1 meta selecionada."), findsOneWidget);
+      expect(controller.selectedTheme.value, GroupThemeType.dailyGoals);
+      expect(controller.selectedSourceIds, isEmpty);
+      expect(find.text("Beber água"), findsNothing);
+      expect(find.text("Caminhar"), findsNothing);
     });
 
-    testWidgets("the summary lists what will be linked", (tester) async {
+    testWidgets("the summary explains that activities are linked later", (
+      tester,
+    ) async {
       final controller = await pumpPage(tester);
       final AppLocalizations l10n = lookupAppLocalizations(const Locale("pt"));
 
       await tester.enterText(find.byType(TextField).first, "Academia");
-      await tester.tap(find.text(l10n.groupMetricExercises));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text("Superior"));
+      await tester.tap(find.text("Exercícios"));
       await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.createGroupContinueButton));
       await tester.pumpAndSettle();
@@ -296,8 +292,7 @@ void main() {
 
       expect(controller.isSummaryStep, isTrue);
       expect(find.text("Academia"), findsOneWidget);
-      expect(find.text("Atividades vinculadas"), findsOneWidget);
-      expect(find.text("Superior"), findsOneWidget);
+      expect(find.text(l10n.createGroupNoLinksYet), findsOneWidget);
       expect(find.text(l10n.createGroupButton), findsOneWidget);
     });
 
@@ -324,7 +319,7 @@ void main() {
       final AppLocalizations l10n = lookupAppLocalizations(const Locale("pt"));
 
       await tester.enterText(find.byType(TextField).first, "Leitura");
-      await tester.tap(find.text(l10n.groupMetricReading));
+      await tester.tap(find.text("Páginas lidas"));
       await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.createGroupContinueButton));
       await tester.pumpAndSettle();

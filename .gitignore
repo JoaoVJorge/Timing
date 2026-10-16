@@ -79,6 +79,8 @@ app.*.map.json
 /android/app/release
 
 # Group activity linking regression tests and isolated SQL test dependencies.
+!/test/presentation/create_group/
+!/test/presentation/create_group/*.dart
 !/test/presentation/group_activity_links/
 !/test/presentation/group_activity_links/*.dart
 /backend/tests/node_modules/

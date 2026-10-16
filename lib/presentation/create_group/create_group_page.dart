@@ -6,7 +6,6 @@ import "package:timing/core/domain/enums/group_theme_type.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
 import "package:timing/presentation/create_group/create_group_controller.dart";
 import "package:timing/presentation/create_group/widgets/friend_tile.dart";
-import "package:timing/presentation/group_activity_links/activity_source_selector.dart";
 import "package:timing/presentation/groups/group_leaderboard_formatters.dart";
 import "package:timing/presentation/groups/widgets/group_member_avatar.dart";
 import "package:timing/shared/extensions/enum_localization_extensions.dart";
@@ -31,7 +30,6 @@ class CreateGroupPage extends StatefulWidget {
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final GlobalKey _groupNameKey = GlobalKey();
   final GlobalKey _themeKey = GlobalKey();
-  final GlobalKey _linksKey = GlobalKey();
   final GlobalKey _friendsKey = GlobalKey();
 
   @override
@@ -50,7 +48,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           showBackButton: true,
           onBack: controller.onTapBack,
           titleStyle: context.textStyles.pageTitle.copyWith(
-            fontSize: 26,
+            fontSize: 22,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -60,20 +58,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _subtitleForStep(context, step),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textStyles.bodyMedium.copyWith(
-                  color: context.colorTokens.textHint,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  height: 1.3,
-                ),
-              ),
-              const Gap(12),
               _StepProgress(currentStep: step),
-              const Gap(14),
+              const Gap(20),
               Expanded(
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
@@ -83,9 +69,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                       controller: controller,
                       groupNameKey: _groupNameKey,
                       themeKey: _themeKey,
-                      linksKey: _linksKey,
-                      onSelectTheme: (theme) =>
-                          _onSelectTheme(controller, theme),
+                      onSelectTheme: controller.onSelectTheme,
                     ),
                     1 => _FriendsStep(
                       controller: controller,
@@ -105,36 +89,6 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           );
         }),
       ),
-    );
-  }
-
-  String _subtitleForStep(BuildContext context, int step) => switch (step) {
-    0 => context.l10n.createGroupSubtitle,
-    1 => context.l10n.createGroupFriendsStepSubtitle,
-    _ => context.l10n.createGroupSummaryStepSubtitle,
-  };
-
-  /// The activities that fit the theme show up below the theme list, which
-  /// is often off screen; bring them into view once a theme is chosen.
-  Future<void> _onSelectTheme(
-    CreateGroupController controller,
-    GroupThemeType theme,
-  ) async {
-    final bool changed = controller.selectedTheme.value != theme;
-    controller.onSelectTheme(theme);
-    if (!changed) {
-      return;
-    }
-    await WidgetsBinding.instance.endOfFrame;
-    final BuildContext? linksContext = _linksKey.currentContext;
-    if (!mounted || linksContext == null || !linksContext.mounted) {
-      return;
-    }
-    await Scrollable.ensureVisible(
-      linksContext,
-      duration: const Duration(milliseconds: 360),
-      curve: Curves.easeInOutCubic,
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
     );
   }
 
@@ -215,65 +169,74 @@ class _BottomAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Obx(() {
     final bool isSummary = controller.isSummaryStep;
+    final bool isLoading = controller.isCreating.value;
     final bool isEnabled = switch (controller.currentStep.value) {
       0 => controller.hasName && controller.hasTheme,
       1 => controller.hasFriends,
       _ => controller.canCreate.value,
     };
 
-    return BounceTap(
-      pressedScale: 0.97,
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: isEnabled ? context.colorTokens.primaryGradient : null,
-          color: isEnabled ? null : context.colorTokens.surfaceInnerLayer,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        alignment: Alignment.center,
-        child: controller.isCreating.value
-            ? SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3.2,
-                  strokeCap: StrokeCap.round,
-                  color: context.colorTokens.primaryForeground,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      isSummary
-                          ? context.l10n.createGroupButton
-                          : context.l10n.createGroupContinueButton,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.textStyles.textPrimaryButton.copyWith(
-                        color: isEnabled
-                            ? context.colorTokens.primaryForeground
-                            : context.colorTokens.textHint,
-                        fontWeight: FontWeight.w800,
+    return Align(
+      child: BounceTap(
+        pressedScale: 0.97,
+        onTap: onTap,
+        // The tap stays live while disabled so it can scroll to the field that
+        // is still missing; only the fill dims, like `CreationSubmitButton`.
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: !isEnabled && !isLoading ? 0.62 : 1,
+          child: Container(
+            // No `alignment` here: it would make the container fill the row
+            // instead of hugging the label. The inner row does the centering.
+            constraints: const BoxConstraints(minWidth: 200, minHeight: 52),
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            decoration: BoxDecoration(
+              gradient: context.colorTokens.primaryGradient,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: isLoading
+                  ? [
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3.2,
+                          strokeCap: StrokeCap.round,
+                          color: context.colorTokens.primaryForeground,
+                        ),
                       ),
-                    ),
-                  ),
-                  if (!isSummary) ...[
-                    const Gap(8),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 20,
-                      color: isEnabled
-                          ? context.colorTokens.primaryForeground
-                          : context.colorTokens.textHint,
-                    ),
-                  ],
-                ],
-              ),
+                    ]
+                  : [
+                      Flexible(
+                        child: Text(
+                          isSummary
+                              ? context.l10n.createGroupButton
+                              : context.l10n.createGroupContinueButton,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: context.textStyles.textPrimaryButton.copyWith(
+                            fontSize: 15,
+                            color: context.colorTokens.primaryForeground,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      if (!isSummary) ...[
+                        const Gap(8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 20,
+                          color: context.colorTokens.primaryForeground,
+                        ),
+                      ],
+                    ],
+            ),
+          ),
+        ),
       ),
     );
   });

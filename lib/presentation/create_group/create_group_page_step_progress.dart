@@ -13,35 +13,49 @@ class _StepProgress extends StatelessWidget {
       context.l10n.createGroupStepSummary,
     ];
 
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: context.colorTokens.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: context.colorTokens.borderUnfocused.withValues(alpha: 0.8),
-        ),
-      ),
-      child: Row(
-        children: [
-          for (int index = 0; index < labels.length; index++)
-            Expanded(
-              child: _StepSegment(
-                number: index + 1,
-                label: labels[index],
-                isCompleted: index < currentStep,
-                isCurrent: index == currentStep,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double stepWidth = constraints.maxWidth / labels.length;
+        return SizedBox(
+          height: 76,
+          child: Stack(
+            children: [
+              for (int index = 0; index < labels.length - 1; index++)
+                Positioned(
+                  top: 17,
+                  left: stepWidth * (index + 0.5) + 26,
+                  width: stepWidth - 52,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    height: 2,
+                    color: index < currentStep
+                        ? context.colorTokens.primary
+                        : context.colorTokens.borderUnfocused,
+                  ),
+                ),
+              Row(
+                children: [
+                  for (int index = 0; index < labels.length; index++)
+                    Expanded(
+                      child: _StepMarker(
+                        number: index + 1,
+                        label: labels[index],
+                        isCompleted: index < currentStep,
+                        isCurrent: index == currentStep,
+                      ),
+                    ),
+                ],
               ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
-class _StepSegment extends StatelessWidget {
-  const _StepSegment({
+class _StepMarker extends StatelessWidget {
+  const _StepMarker({
     required this.number,
     required this.label,
     required this.isCompleted,
@@ -56,65 +70,50 @@ class _StepSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isHighlighted = isCompleted || isCurrent;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOutCubic,
-      height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? context.colorTokens.primaryVeryLight
-            : context.colorTokens.transparent,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 23,
-            height: 23,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isHighlighted
-                  ? context.colorTokens.primary
-                  : context.colorTokens.surfaceInnerLayer,
-              shape: BoxShape.circle,
-            ),
-            child: isCompleted
-                ? Icon(
-                    Icons.check_rounded,
-                    size: 15,
-                    color: context.colorTokens.primaryForeground,
-                  )
-                : Text(
-                    "$number",
-                    style: context.textStyles.bodySmall.copyWith(
-                      color: isCurrent
-                          ? context.colorTokens.primaryForeground
-                          : context.colorTokens.textHint,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isHighlighted
+                ? context.colorTokens.primary
+                : context.colorTokens.surfaceInnerLayer,
+            shape: BoxShape.circle,
+          ),
+          child: isCompleted
+              ? Icon(
+                  Icons.check_rounded,
+                  size: 20,
+                  color: context.colorTokens.primaryForeground,
+                )
+              : Text(
+                  "$number",
+                  style: context.textStyles.bodyMedium.copyWith(
+                    color: isCurrent
+                        ? context.colorTokens.primaryForeground
+                        : context.colorTokens.textHint,
+                    fontWeight: FontWeight.w600,
                   ),
+                ),
+        ),
+        const Gap(8),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: context.textStyles.bodyMedium.copyWith(
+            color: isHighlighted
+                ? context.colorTokens.primary
+                : context.colorTokens.textHint,
+            fontSize: 14,
+            fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w500,
           ),
-          const Gap(5),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textStyles.bodySmall.copyWith(
-                color: isHighlighted
-                    ? context.colorTokens.primary
-                    : context.colorTokens.textHint,
-                fontSize: 11,
-                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

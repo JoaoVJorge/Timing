@@ -17,6 +17,7 @@ class ActivitySourceSelector extends StatelessWidget {
     required this.selectedIds,
     required this.onToggle,
     this.singleSelection = false,
+    this.compact = false,
     this.accent,
   });
 
@@ -24,11 +25,22 @@ class ActivitySourceSelector extends StatelessWidget {
   final Set<String> selectedIds;
   final ValueChanged<String> onToggle;
   final bool singleSelection;
+  final bool compact;
   final Color? accent;
 
   @override
   Widget build(BuildContext context) {
     final Color color = accent ?? context.colorTokens.primary;
+    if (compact) {
+      return _CompactSourceSelector(
+        options: options,
+        selectedIds: selectedIds,
+        singleSelection: singleSelection,
+        accent: color,
+        onToggle: onToggle,
+      );
+    }
+
     return CreationConfigCard(
       accent: color,
       header: CreationSectionHeader(
@@ -97,6 +109,133 @@ class ActivitySourceSelector extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CompactSourceSelector extends StatelessWidget {
+  const _CompactSourceSelector({
+    required this.options,
+    required this.selectedIds,
+    required this.singleSelection,
+    required this.accent,
+    required this.onToggle,
+  });
+
+  final List<GroupActivitySourceOption> options;
+  final Set<String> selectedIds;
+  final bool singleSelection;
+  final Color accent;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    if (options.isEmpty) {
+      return Text(
+        singleSelection
+            ? context.l10n.groupLinksEmptyGoals
+            : context.l10n.groupLinksEmpty,
+        style: context.textStyles.captionSmall,
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          singleSelection
+              ? context.l10n.groupLinksSelectedGoal(selectedIds.length)
+              : context.l10n.groupLinksSelected(selectedIds.length),
+          style: context.textStyles.captionSmall.copyWith(
+            color: accent,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Gap(7),
+        Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            for (final option in options)
+              _CompactSourceChip(
+                key: ValueKey('source_${option.id}'),
+                name: option.name,
+                selected: selectedIds.contains(option.id),
+                singleSelection: singleSelection,
+                accent: accent,
+                onTap: () => onToggle(option.id),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _CompactSourceChip extends StatelessWidget {
+  const _CompactSourceChip({
+    super.key,
+    required this.name,
+    required this.selected,
+    required this.singleSelection,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String name;
+  final bool selected;
+  final bool singleSelection;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    checked: selected,
+    inMutuallyExclusiveGroup: singleSelection,
+    child: BounceTap(
+      behavior: HitTestBehavior.opaque,
+      pressedScale: 0.98,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        constraints: const BoxConstraints(minHeight: 38),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected
+              ? accent.withValues(alpha: 0.1)
+              : context.colorTokens.surfaceInnerLayer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: 0.55)
+                : context.colorTokens.borderUnfocused.withValues(alpha: 0.55),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+              size: 16,
+              color: selected ? accent : context.colorTokens.borderUnfocused,
+            ),
+            const Gap(6),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 210),
+              child: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textStyles.bodySmall.copyWith(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _SourceTile extends StatelessWidget {
