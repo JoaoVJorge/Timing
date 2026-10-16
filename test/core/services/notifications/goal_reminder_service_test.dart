@@ -74,20 +74,17 @@ class _FakeNotifications implements GoalReminderNotifications {
   }
 }
 
-const int _noon = 12 * 60;
+const String _endOfDayBody =
+    "O dia está acabando e essa meta ainda não foi marcada.";
 
-DailyTaskEntity _goal(
-  String id, {
-  int? reminder = _noon,
-  List<String> done = const [],
-}) => DailyTaskEntity(
-  id: id,
-  name: "Meta $id",
-  colorValue: 1,
-  targetDays: 0,
-  completedDates: done,
-  reminderMinutes: reminder,
-);
+DailyTaskEntity _goal(String id, {List<String> done = const []}) =>
+    DailyTaskEntity(
+      id: id,
+      name: "Meta $id",
+      colorValue: 1,
+      targetDays: 0,
+      completedDates: done,
+    );
 
 void main() {
   late _FakeRepository repository;
@@ -120,16 +117,29 @@ void main() {
     await pumpEventQueue();
   }
 
-  List<DateTime> fireTimes() =>
-      notifications.scheduled.values.map((reminder) => reminder.fireAt).toList()
+  List<DateTime> timesWhere(bool Function(GoalReminder) test) =>
+      notifications.scheduled.values
+          .where(test)
+          .map((reminder) => reminder.fireAt)
+          .toList()
         ..sort();
+
+  /// When the midday reminders are due.
+  List<DateTime> fireTimes() =>
+      timesWhere((reminder) => reminder.body != _endOfDayBody);
+
+  /// When the end-of-day last calls are due.
+  List<DateTime> endOfDayTimes() =>
+      timesWhere((reminder) => reminder.body == _endOfDayBody);
+
+  List<DateTime> allTimes() => timesWhere((_) => true);
 
   tearDown(() => service.dispose());
 
   group("with a notification that repeats from any day (Android)", () {
     setUp(() => build(canRepeat: true));
 
-    test("an unchecked goal is reminded today at its time, daily", () async {
+    test("an unchecked goal is reminded today at noon, daily", () async {
       repository.tasks = [_goal("a")];
 
       await configure();
@@ -163,7 +173,7 @@ void main() {
       expect(fireTimes(), [DateTime(2026, 10, 7, 12)]);
     });
 
-    test("a goal left unchecked past its time waits for tomorrow", () async {
+    test("a goal left unchecked past noon waits for tomorrow", () async {
       now = DateTime(2026, 10, 7, 13);
       repository.tasks = [_goal("a")];
 
@@ -215,21 +225,13 @@ void main() {
       expect(fireTimes(), [DateTime(2026, 10, 8, 12)]);
     });
 
-    test("only goals with a reminder time are scheduled", () async {
-      repository.tasks = [_goal("a"), _goal("b", reminder: null)];
-
-      await configure();
-
-      expect(notifications.scheduled.keys, [idOf("a")]);
-    });
-
-    test("removing the reminder or the goal cancels it", () async {
+    test("removing a goal cancels its reminders", () async {
       repository.tasks = [_goal("a"), _goal("b")];
       await configure();
 
-      await save([_goal("a", reminder: null)]);
+      await save([_goal("a")]);
 
-      expect(notifications.scheduled, isEmpty);
+      expect(notifications.scheduled.keys, {idOf("a"), idOf("a#end")});
     });
 
     test("a save that changes nothing about reminders does no work", () async {
@@ -298,6 +300,59 @@ void main() {
       },
     );
 
+    test("an unchecked goal also gets a last call at 9 PM", () async {
+      repository.tasks = [_goal("a")];
+
+      await configure();
+
+      final GoalReminder reminder = notifications.scheduled[idOf("a#end")]!;
+      expect(reminder.fireAt, DateTime(2026, 10, 7, 21));
+      expect(reminder.repeatsDaily, true);
+      expect(reminder.title, "Meta a");
+      expect(reminder.body, _endOfDayBody);
+    });
+
+    test(
+      "checking the goal after noon moves the last call to tomorrow",
+      () async {
+        repository.tasks = [_goal("a")];
+        await configure();
+        now = DateTime(2026, 10, 7, 15);
+
+        await save([
+          _goal("a", done: [today]),
+        ]);
+
+        expect(endOfDayTimes(), [DateTime(2026, 10, 8, 21)]);
+      },
+    );
+
+    test("checking the goal takes a shown last call off the screen", () async {
+      repository.tasks = [_goal("a")];
+      await configure();
+      notifications
+        ..fire(idOf("a"))
+        ..fire(idOf("a#end"));
+      now = DateTime(2026, 10, 7, 22);
+
+      await save([
+        _goal("a", done: [today]),
+      ]);
+
+      expect(notifications.shown, isEmpty);
+    });
+
+    test("a shown last call that still holds is left on screen", () async {
+      repository.tasks = [_goal("a")];
+      await configure();
+      notifications.fire(idOf("a#end"));
+      now = DateTime(2026, 10, 7, 22);
+
+      await service.refresh();
+
+      expect(notifications.shown, {idOf("a#end")});
+    });
+
     test("reminder text follows the app language", () async {
       repository.tasks = [_goal("a")];
       await configure();
@@ -307,6 +362,10 @@ void main() {
       expect(
         notifications.scheduled[idOf("a")]!.body,
         "You haven't checked off this goal today.",
+      );
+      expect(
+        notifications.scheduled[idOf("a#end")]!.body,
+        "The day is almost over and this goal is still unchecked.",
       );
     });
   });
@@ -327,6 +386,17 @@ void main() {
         notifications.scheduled.values.every((r) => !r.repeatsDaily),
         true,
       );
+    });
+
+    test("an unchecked goal gets a last call each day too", () async {
+      repository.tasks = [_goal("a")];
+
+      await configure();
+
+      final List<DateTime> times = endOfDayTimes();
+      expect(times, hasLength(14));
+      expect(times.first, DateTime(2026, 10, 7, 21));
+      expect(times.last, DateTime(2026, 10, 20, 21));
     });
 
     test("checking the goal before its time drops only today's", () async {
@@ -395,22 +465,11 @@ void main() {
       expect(times.last, DateTime(2026, 10, 22, 12));
     });
 
-    test("changing the time moves every pending day", () async {
+    test("removing the goal cancels every pending day", () async {
       repository.tasks = [_goal("a")];
       await configure();
 
-      await save([_goal("a", reminder: 18 * 60 + 30)]);
-
-      final List<DateTime> times = fireTimes();
-      expect(times, hasLength(14));
-      expect(times.first, DateTime(2026, 10, 7, 18, 30));
-    });
-
-    test("removing the reminder cancels every pending day", () async {
-      repository.tasks = [_goal("a")];
-      await configure();
-
-      await save([_goal("a", reminder: null)]);
+      await save([]);
 
       expect(notifications.scheduled, isEmpty);
     });
@@ -420,10 +479,10 @@ void main() {
 
       await configure();
 
-      final List<DateTime> times = fireTimes();
+      final List<DateTime> times = allTimes();
       expect(times, hasLength(60));
       expect(times.first, DateTime(2026, 10, 7, 12));
-      expect(times.last, DateTime(2026, 10, 12, 12));
+      expect(times.last, DateTime(2026, 10, 9, 21));
     });
 
     test("a day that is already waiting is not scheduled again", () async {

@@ -44,11 +44,10 @@ Every statement is idempotent (`create or replace`, `if not exists`,
 
 ## Updating existing installations
 
-If goal sync fails with `PGRST204` mentioning `reminder_minutes`, run
-[`migrations/20261008_daily_goal_reminders.sql`](migrations/20261008_daily_goal_reminders.sql)
-in the affected project's Supabase SQL editor. It adds the nullable reminder
-column and requests a PostgREST schema cache reload. It is safe to repeat,
-including when the column exists but the API cache is stale.
+Goal reminders no longer have a per-goal time, so
+[`migrations/20261015_drop_daily_goal_reminders.sql`](migrations/20261015_drop_daily_goal_reminders.sql)
+drops `daily_goals.reminder_minutes`. Builds up to 0.1.6 still send that column
+and stop syncing goals once it is gone, so run it only after they are retired.
 
 Objects nothing ever used are gone from the schema, and
 [`migrations/20261015_drop_unused_backend_objects.sql`](migrations/20261015_drop_unused_backend_objects.sql)

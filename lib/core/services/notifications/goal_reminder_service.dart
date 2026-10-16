@@ -11,10 +11,11 @@ import "package:timing/core/services/log/app_logger_service.dart";
 import "package:timing/core/services/notifications/goal_reminder_notifications.dart";
 import "package:timing/l10n/app_localizations.dart";
 
-/// Keeps a daily notification for every goal that has a reminder time.
+/// Keeps two daily notifications for every goal: one at midday and a last
+/// call near the end of the day.
 ///
-/// A reminder is due every day at the goal's time, starting from the next day
-/// it still applies. Checking a goal therefore pushes its reminder to tomorrow,
+/// Each is due every day at its time, starting from the next day it still
+/// applies. Checking a goal therefore pushes its reminder to tomorrow,
 /// and unchecking it before the time brings it back to today.
 ///
 /// Where the system can start a repeating notification on a chosen day, each
@@ -52,6 +53,12 @@ class GoalReminderService {
   /// iOS keeps at most 64 pending notifications per app; the rest of the room
   /// is left to anything else the app may schedule.
   static const int _maxSingleDayReminders = 60;
+
+  /// The times of day every goal still unchecked is reminded at.
+  static const List<_Slot> _slots = [
+    _Slot(minutes: 12 * 60, isEndOfDay: false),
+    _Slot(minutes: 21 * 60, isEndOfDay: true),
+  ];
 
   /// Follows every change to the goals saved on this device.
   void start() {
@@ -160,32 +167,33 @@ class GoalReminderService {
     final Set<int> stillTrueOnScreen = <int>{};
 
     for (final DailyTaskEntity task in tasks) {
-      final DateTime? next = task.nextReminderAt(now);
-      if (next == null) {
-        continue;
-      }
-      // Today's reminder has been shown and still holds: the goal is unchecked
-      // and its time has passed.
-      if (next.day != now.day && !task.completedDates.contains(today)) {
-        stillTrueOnScreen.add(_idFor(task, now, repeats: repeats));
-      }
-      for (int day = 0; day < (repeats ? 1 : _singleDayHorizon); day++) {
-        final DateTime fireAt = DateTime(
-          next.year,
-          next.month,
-          next.day + day,
-          next.hour,
-          next.minute,
-        );
-        reminders.add(
-          GoalReminder(
-            id: _idFor(task, fireAt, repeats: repeats),
-            title: task.name,
-            body: l10n.goalReminderNotificationBody,
-            fireAt: fireAt,
-            repeatsDaily: repeats,
-          ),
-        );
+      for (final _Slot slot in _slots) {
+        final DateTime next = task.nextUncheckedAt(now, slot.minutes);
+        // Today's reminder has been shown and still holds: the goal is
+        // unchecked and its time has passed.
+        if (next.day != now.day && !task.completedDates.contains(today)) {
+          stillTrueOnScreen.add(_idFor(task, slot, now, repeats: repeats));
+        }
+        for (int day = 0; day < (repeats ? 1 : _singleDayHorizon); day++) {
+          final DateTime fireAt = DateTime(
+            next.year,
+            next.month,
+            next.day + day,
+            next.hour,
+            next.minute,
+          );
+          reminders.add(
+            GoalReminder(
+              id: _idFor(task, slot, fireAt, repeats: repeats),
+              title: task.name,
+              body: slot.isEndOfDay
+                  ? l10n.goalReminderEndOfDayNotificationBody
+                  : l10n.goalReminderNotificationBody,
+              fireAt: fireAt,
+              repeatsDaily: repeats,
+            ),
+          );
+        }
       }
     }
 
@@ -202,12 +210,27 @@ class GoalReminderService {
     );
   }
 
-  /// A repeating reminder keeps one id for the goal; single-day ones need an
-  /// id per day.
-  int _idFor(DailyTaskEntity task, DateTime day, {required bool repeats}) =>
-      notificationIdFor(
-        repeats ? task.id : "${task.id}@${DailyTaskEntity.dateKey(day)}",
-      );
+  /// A repeating reminder keeps one id per goal and slot; single-day ones
+  /// need an id per day.
+  int _idFor(
+    DailyTaskEntity task,
+    _Slot slot,
+    DateTime day, {
+    required bool repeats,
+  }) {
+    final String key = slot.isEndOfDay ? "${task.id}#end" : task.id;
+    return notificationIdFor(
+      repeats ? key : "$key@${DailyTaskEntity.dateKey(day)}",
+    );
+  }
+}
+
+/// One of the times of day a goal is reminded at.
+class _Slot {
+  const _Slot({required this.minutes, required this.isEndOfDay});
+
+  final int minutes;
+  final bool isEndOfDay;
 }
 
 /// The reminders that should be waiting, and the ones that may rightly be on

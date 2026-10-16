@@ -74,7 +74,6 @@ class DailyTasksDataSource {
         "lastResolvedMissedDate": row["last_resolved_missed_date"],
         "goalType": row["goal_type"],
         "updatedAt": row["updated_at"],
-        "reminderMinutes": row["reminder_minutes"],
       });
 
   Map<String, dynamic> _taskToRow(DailyTaskEntity task, String userId) => {
@@ -87,7 +86,6 @@ class DailyTasksDataSource {
     "sequence_type": task.sequenceType.name,
     "last_resolved_missed_date": task.lastResolvedMissedDate,
     "goal_type": task.goalType.name,
-    "reminder_minutes": task.reminderMinutes,
     "updated_at": (task.updatedAt ?? DateTime.now().toUtc())
         .toUtc()
         .toIso8601String(),

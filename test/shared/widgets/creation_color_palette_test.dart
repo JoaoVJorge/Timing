@@ -158,7 +158,6 @@ void main() {
           updateDailyTaskUseCase: _UnusedUpdateDailyTask(),
           appNavigator: navigator,
           achievementUnlockService: _UnusedAchievements(),
-          ensureNotificationsEnabled: () async => true,
         ),
       );
 
