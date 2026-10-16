@@ -108,27 +108,6 @@ begin
     coalesce(local_date, current_date)
   );
 
-  -- The first selected personal activity defines the group's accent. The
-  -- source was validated by set_group_activity_links above, so its color is
-  -- safe to copy without accepting an arbitrary client-provided value.
-  if cardinality(coalesce(source_ids, '{}'::text[])) > 0 then
-    if group_theme = 'dailyGoals' then
-      update public.groups g
-      set color_value = d.color_value
-      from public.daily_goals d
-      where g.id = new_group_id
-        and d.user_id = current_user_id
-        and d.id = source_ids[1];
-    else
-      update public.groups g
-      set color_value = s.color_value
-      from public.user_subjects s
-      where g.id = new_group_id
-        and s.user_id = current_user_id
-        and s.id = source_ids[1];
-    end if;
-  end if;
-
   return query
   select
     g.id,

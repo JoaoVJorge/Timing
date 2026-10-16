@@ -826,7 +826,10 @@ class GroupsController extends GetxController {
     final group = selectedGroup.value;
     if (group == null) return;
     await showGroupActivityLinks(group);
-    await refreshAfterActivityChange(groupId: group.id);
+    await refreshAfterActivityChange(
+      groupId: group.id,
+      includeGroupMetadata: true,
+    );
   }
 
   Future<void> onTapCreateGroup() async {
@@ -867,7 +870,16 @@ class GroupsController extends GetxController {
 
   /// Something that counts for a ranking changed: recorded time, pages, a
   /// checked goal, or which activities are linked.
-  Future<void> refreshAfterActivityChange({String? groupId}) async {
+  Future<void> refreshAfterActivityChange({
+    String? groupId,
+    bool includeGroupMetadata = false,
+  }) async {
+    // Saving links can initialize the group's color from its first linked
+    // activity. A scores-only refresh cannot carry that metadata change.
+    if (includeGroupMetadata) {
+      await loadGroups(preferredGroupId: groupId);
+      return;
+    }
     if (!await _refreshScoresOnly()) {
       await loadGroups();
     }

@@ -297,6 +297,33 @@ void main() {
         expect(repository.getGroupsCalls, 1);
       },
     );
+
+    test("reloads group metadata after activity links change", () async {
+      final GroupEntity unstyled = _group("group-1", "Grupo");
+      final GroupEntity colored = GroupEntity(
+        id: unstyled.id,
+        name: unstyled.name,
+        theme: unstyled.theme,
+        members: unstyled.members,
+        ownerId: unstyled.ownerId,
+        colorValue: 0xFF2196F3,
+      );
+      final _FakeGroupsRepository repository = _FakeGroupsRepository([
+        unstyled,
+      ]);
+      final GroupsController controller = _controller(repository);
+      await controller.loadGroups();
+      repository.groupsResult = [colored];
+
+      await controller.refreshAfterActivityChange(
+        groupId: unstyled.id,
+        includeGroupMetadata: true,
+      );
+
+      expect(repository.refreshGroupScoresCalls, 0);
+      expect(repository.getGroupsCalls, 2);
+      expect(controller.selectedGroup.value?.colorValue, 0xFF2196F3);
+    });
   });
 
   test("a burst of activity-change events coalesces into one refresh", () {

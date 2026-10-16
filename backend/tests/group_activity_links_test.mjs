@@ -177,8 +177,13 @@ try {
   // A group can start empty and be given activities later.
   const empty = await create('exercises');
   assert.equal(await activeLinks(`group_id='${empty.id}'`),0);
+  assert.equal(empty.color_value,null,'a group without links starts without its own color');
   await record('lower',50);
   assert.equal(await score(empty.id),0,'nothing counts without a link');
+  await link(empty.id,['lower']);
+  assert.equal(await scalar(`select color_value from public.groups where id='${empty.id}'`),2,'the first activity linked later defines the group color');
+  await link(empty.id,['upper']);
+  assert.equal(await scalar(`select color_value from public.groups where id='${empty.id}'`),2,'later link changes preserve the first linked color');
   await user(member);
   const invitation = await scalar(`select id from public.group_invitations where group_id='${group.id}'`);
   await db.exec(`select public.accept_group_invitation('${invitation}');`);

@@ -393,6 +393,7 @@ as $$
 declare
   group_theme text;
   selected_ids text[];
+  first_source text;
   source text;
   change_at timestamptz;
 begin
@@ -411,6 +412,7 @@ begin
   selected_ids := array(
     select distinct chosen from unnest(coalesce(source_ids, '{}'::text[])) chosen
   );
+  first_source := (coalesce(source_ids, '{}'::text[]))[1];
   if cardinality(selected_ids) > 100 then
     raise exception 'invalid sources' using errcode = '23514';
   end if;
@@ -443,6 +445,29 @@ begin
   where not exists (select 1 from public.group_activity_links l
     where l.group_id = target_group_id and l.user_id = auth.uid()
       and l.source_id = chosen and l.ended_at is null);
+
+  -- The first personal activity ever linked gives an unstyled group its
+  -- accent. The null guard preserves that first color across later link
+  -- changes and across links made by other members.
+  if first_source is not null then
+    if group_theme = 'dailyGoals' then
+      update public.groups g
+      set color_value = d.color_value
+      from public.daily_goals d
+      where g.id = target_group_id
+        and g.color_value is null
+        and d.user_id = auth.uid()
+        and d.id = first_source;
+    else
+      update public.groups g
+      set color_value = s.color_value
+      from public.user_subjects s
+      where g.id = target_group_id
+        and g.color_value is null
+        and s.user_id = auth.uid()
+        and s.id = first_source;
+    end if;
+  end if;
 end; $$;
 
 -- The caller's own activities that fit the group's theme, and which of them

@@ -66,6 +66,10 @@ invitation screens, run
 It exposes the request ID to the leader, lists a user's own pending requests,
 and reloads the PostgREST schema cache.
 
+If group colors do not follow the first personal activity linked to them, run
+[`migrations/20261015_group_color_from_first_link.sql`](migrations/20261015_group_color_from_first_link.sql).
+It backfills unstyled groups and makes later first links initialize the color.
+
 Groups no longer own a shared activity: members link their personal
 activities of the group's theme instead. That change runs through most
 sections, so it has no focused script. Apply the whole `supabase-setup.sql`
