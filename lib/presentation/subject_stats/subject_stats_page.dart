@@ -316,6 +316,11 @@ class _StatsGrid extends StatelessWidget {
           : context.l10n.activityTypePermanentLabel,
       label: context.l10n.activityTypeLabel,
     );
+    final _StatItem dailyAverage = _StatItem(
+      icon: Icons.av_timer_rounded,
+      value: _dailyAverageValue(controller.averageDailySeconds),
+      label: _dailyAverageLabel(context),
+    );
     final List<_StatItem> items = controller.isReading
         ? [
             _StatItem(
@@ -330,6 +335,12 @@ class _StatsGrid extends StatelessWidget {
               value: context.l10n.metricPagesValue(subject.currentPages),
               label: _totalPagesReadLabel(context),
             ),
+            dailyAverage,
+            _StatItem(
+              icon: Icons.speed_rounded,
+              value: _averagePerPageValue(controller.averageSecondsPerPage),
+              label: _averagePerPageLabel(context),
+            ),
             activityType,
             goalStart,
           ]
@@ -341,6 +352,7 @@ class _StatsGrid extends StatelessWidget {
               ),
               label: subject.category.spentTimeLabel(context),
             ),
+            dailyAverage,
             goalStart,
             activityType,
             if (subject.hasRest)
@@ -377,6 +389,23 @@ class _StatsGrid extends StatelessWidget {
         Duration(seconds: subject.restSeconds),
         usesSeconds: subject.category == TimeCategoryType.exercises,
       );
+
+  /// A dash while the goal has no start date: with nothing to divide by,
+  /// there is no honest average to show.
+  String _dailyAverageValue(int? seconds) =>
+      seconds == null ? "—" : formatDurationLong(Duration(seconds: seconds));
+
+  /// A dash until the first page is recorded. Under a minute a page is shown
+  /// in seconds, where "0 min" would say nothing.
+  String _averagePerPageValue(int? seconds) {
+    if (seconds == null) {
+      return "—";
+    }
+    final Duration perPage = Duration(seconds: seconds);
+    return seconds < 60
+        ? formatDurationTotalSeconds(perPage)
+        : formatDurationLong(perPage);
+  }
 
   String _goalStartValue(BuildContext context, DateTime? start) => start == null
       ? "—"
@@ -439,5 +468,11 @@ String _totalPagesReadLabel(BuildContext context) =>
     context.l10n.totalPagesReadLabel;
 
 String _goalStartLabel(BuildContext context) => context.l10n.goalStartLabel;
+
+String _dailyAverageLabel(BuildContext context) =>
+    context.l10n.dailyAverageLabel;
+
+String _averagePerPageLabel(BuildContext context) =>
+    context.l10n.averagePerPageLabel;
 
 String _restLabel(BuildContext context) => context.l10n.restLabel;

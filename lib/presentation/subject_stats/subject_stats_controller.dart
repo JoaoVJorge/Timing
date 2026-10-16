@@ -14,6 +14,7 @@ import "package:timing/core/services/achievements/achievement_unlock_service.dar
 import "package:timing/core/services/daily_progress/subject_daily_history_service.dart";
 import "package:timing/core/services/sync/activity_change_bus.dart";
 import "package:timing/core/utils/extensions/context_extensions.dart";
+import "package:timing/core/utils/extensions/date_time_extensions.dart";
 import "package:timing/presentation/subject_stats/widgets/time_adjustment_dialog.dart";
 import "package:timing/shared/widgets/clear_data_confirmation_dialog.dart";
 
@@ -100,6 +101,31 @@ class SubjectStatsController extends GetxController {
   /// back from the backend as UTC, so it is converted before its calendar day
   /// is read.
   DateTime? get goalStartDate => subject.createdAt?.toLocal();
+
+  /// How much time this activity got per day on average, counting every day
+  /// since the goal started (the day it started included), so a big total
+  /// built over months is not read as daily dedication. `null` when there is
+  /// no start date to divide by.
+  int? get averageDailySeconds {
+    final DateTime? start = goalStartDate;
+    if (start == null) {
+      return null;
+    }
+    // A start date in the future (a clock moved back) still counts as one day.
+    final int days =
+        DateTime.now().dateOnly.difference(start.dateOnly).inDays + 1;
+    return days <= 1 ? subject.totalSeconds : subject.totalSeconds ~/ days;
+  }
+
+  /// How long a page takes on average on a reading activity: the reading time
+  /// over the pages it recorded. `null` outside reading, and while no page was
+  /// read yet, since there is nothing to divide by.
+  int? get averageSecondsPerPage {
+    if (!isReading || subject.currentPages <= 0) {
+      return null;
+    }
+    return subject.totalSeconds ~/ subject.currentPages;
+  }
 
   int get days => isMonth.value ? 30 : 7;
 

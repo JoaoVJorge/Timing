@@ -160,7 +160,57 @@ void main() {
     await _pumpStats(tester, _subject(category: TimeCategoryType.exercises));
 
     expect(find.text("Início da meta"), findsOneWidget);
-    expect(find.text("—"), findsOneWidget);
+    expect(find.text("Média diária"), findsOneWidget);
+    // Both the start date and the average that divides by it have nothing to
+    // show.
+    expect(find.text("—"), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("averages the total over the days since the goal started", (
+    tester,
+  ) async {
+    await _pumpStats(
+      tester,
+      // Ten days counting today, over the hour the activity has.
+      _subject(
+        category: TimeCategoryType.studying,
+        createdAt: DateTime.now().subtract(const Duration(days: 9)),
+      ),
+    );
+
+    expect(find.text("Média diária"), findsOneWidget);
+    expect(find.text("6 min"), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("reading adds the time a page takes to its averages", (
+    tester,
+  ) async {
+    await _pumpStats(
+      tester,
+      // Five days counting today, over the hour and the ten pages it has.
+      _subject(
+        category: TimeCategoryType.reading,
+        createdAt: DateTime.now().subtract(const Duration(days: 4)),
+      ),
+    );
+
+    expect(find.text("Total de páginas"), findsOneWidget);
+    expect(find.text("Média diária"), findsOneWidget);
+    expect(find.text("12 min"), findsOneWidget);
+    expect(find.text("Média por página"), findsOneWidget);
+    expect(find.text("6 min"), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets("the time per page is only for reading", (tester) async {
+    await _pumpStats(
+      tester,
+      _subject(category: TimeCategoryType.studying, createdAt: DateTime.now()),
+    );
+
+    expect(find.text("Média por página"), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -178,6 +228,39 @@ void main() {
 
     expect(find.text("25/12/2026"), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  test("an activity started today averages its whole total", () {
+    final SubjectStatsController controller = buildStatsController(
+      subject: _subject(
+        category: TimeCategoryType.studying,
+        createdAt: DateTime.now(),
+      ),
+      history: SubjectDailyHistoryService(localStorageService: _MemStorage()),
+    );
+
+    expect(controller.averageDailySeconds, 3600);
+  });
+
+  test("a book with no page read yet has no time per page", () {
+    final SubjectStatsController controller = buildStatsController(
+      subject: _subject(
+        category: TimeCategoryType.reading,
+        createdAt: DateTime.now(),
+      ).copyWith(currentPages: 0),
+      history: SubjectDailyHistoryService(localStorageService: _MemStorage()),
+    );
+
+    expect(controller.averageSecondsPerPage, isNull);
+  });
+
+  test("there is no average without a goal start date", () {
+    final SubjectStatsController controller = buildStatsController(
+      subject: _subject(category: TimeCategoryType.studying),
+      history: SubjectDailyHistoryService(localStorageService: _MemStorage()),
+    );
+
+    expect(controller.averageDailySeconds, isNull);
   });
 
   test("goalStartDate is expressed in local time", () {
