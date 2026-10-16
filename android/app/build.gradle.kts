@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -19,6 +20,25 @@ if (keystorePropertiesFile.exists()) {
     throw GradleException(
         "Missing android/key.properties. Copy key.properties.example and point it to the Play upload keystore.",
     )
+}
+
+// Without the production environment a release build throws before its first
+// frame and never leaves the launch screen, which is how 0.1.6+7 shipped.
+// Flutter hands the --dart-define values over as base64 "key=value" entries.
+if (isReleaseBuild) {
+    val dartDefines = project.findProperty("dart-defines")?.toString().orEmpty()
+        .split(",")
+        .filter { it.isNotBlank() }
+        .map { String(Base64.getDecoder().decode(it), Charsets.UTF_8) }
+    val missingDefines = listOf("supabaseUrl", "supabasePublishableKey").filter { key ->
+        dartDefines.none { it.startsWith("$key=") && it.length > key.length + 1 }
+    }
+    if (missingDefines.isNotEmpty()) {
+        throw GradleException(
+            "Release build without ${missingDefines.joinToString()}. " +
+                "Build with --dart-define-from-file=lib/env/prod.env.",
+        )
+    }
 }
 
 android {
