@@ -95,8 +95,8 @@ void main() {
     expect(find.text("Tempo estudado"), findsOneWidget);
     expect(find.text("Meta"), findsNothing);
     expect(find.text("Descanso"), findsOneWidget);
-    expect(find.text("Frequência da atividade"), findsOneWidget);
-    expect(find.text("Diária"), findsOneWidget);
+    expect(find.text("Tipo de meta"), findsOneWidget);
+    expect(find.text("Meta por dia"), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -112,8 +112,8 @@ void main() {
     );
 
     expect(find.text("Páginas hoje"), findsNothing);
-    expect(find.text("Frequência da atividade"), findsOneWidget);
-    expect(find.text("Diária"), findsOneWidget);
+    expect(find.text("Tipo de meta"), findsOneWidget);
+    expect(find.text("Meta por dia"), findsOneWidget);
     expect(find.text("Início da meta"), findsOneWidget);
     expect(find.text("05/01/2026"), findsOneWidget);
     expect(find.text("Sessões"), findsNothing);
@@ -135,7 +135,7 @@ void main() {
     expect(find.text("01/03/2026"), findsOneWidget);
     expect(find.text("Sessões"), findsNothing);
     expect(find.text("Descanso"), findsNothing);
-    expect(find.text("Frequência da atividade"), findsOneWidget);
+    expect(find.text("Tipo de meta"), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -148,8 +148,8 @@ void main() {
       ),
     );
 
-    expect(find.text("Frequência da atividade"), findsOneWidget);
-    expect(find.text("Permanente"), findsOneWidget);
+    expect(find.text("Tipo de meta"), findsOneWidget);
+    expect(find.text("Meta total"), findsOneWidget);
     expect(find.text("Páginas hoje"), findsNothing);
     expect(tester.takeException(), isNull);
   });

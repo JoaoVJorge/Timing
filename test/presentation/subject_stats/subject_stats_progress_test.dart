@@ -209,8 +209,8 @@ void main() {
       // The lifetime numbers stay in the overview.
       expect(find.text("Total de páginas"), findsOneWidget);
       expect(find.text("Páginas hoje"), findsNothing);
-      expect(find.text("Frequência da atividade"), findsOneWidget);
-      expect(find.text("Diária"), findsOneWidget);
+      expect(find.text("Tipo de meta"), findsOneWidget);
+      expect(find.text("Meta por dia"), findsOneWidget);
     });
 
     testWidgets("a permanent activity keeps the Total label and its total", (
@@ -232,8 +232,8 @@ void main() {
       expect(find.text("Total"), findsOneWidget);
       expect(find.text("80%"), findsOneWidget);
       expect(find.text("Meta"), findsNothing);
-      expect(find.text("Frequência da atividade"), findsOneWidget);
-      expect(find.text("Permanente"), findsOneWidget);
+      expect(find.text("Tipo de meta"), findsOneWidget);
+      expect(find.text("Meta total"), findsOneWidget);
       expect(find.text("Páginas hoje"), findsNothing);
     });
   });
