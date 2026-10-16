@@ -952,18 +952,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsDisabledSubtitle => 'التنبيهات متوقفة على هذا الجهاز';
 
   @override
-  String get goalReminderLabel => 'تذكير يومي';
-
-  @override
-  String get goalReminderDescription =>
-      'يصلك إشعار في هذا الوقت في الأيام التي لم يُحدَّد فيها الهدف بعد.';
-
-  @override
-  String get goalReminderPermissionDenied =>
-      'اسمح بالإشعارات لتفعيل التذكيرات.';
-
-  @override
   String get goalReminderNotificationBody => 'لم تحدد هذا الهدف اليوم بعد.';
+
+  @override
+  String get goalReminderEndOfDayNotificationBody =>
+      'اليوم يوشك على الانتهاء ولم تحدد هذا الهدف بعد.';
 
   @override
   String get goalReminderChannelName => 'تذكيرات الأهداف';
@@ -1250,7 +1243,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createGroupTitle => 'مجموعة جديدة';
 
   @override
-  String get createGroupSubtitle => 'اختر موضوعًا وقم بدعوة الأصدقاء';
+  String get createGroupSubtitle => 'حدّد الاسم والموضوع.';
 
   @override
   String get groupNameLabel => 'اسم المجموعة';
@@ -2440,6 +2433,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get goalStartLabel => 'بداية الهدف';
 
   @override
+  String get dailyAverageLabel => 'المعدل اليومي';
+
+  @override
+  String get averagePerPageLabel => 'المعدل لكل صفحة';
+
+  @override
   String get restLabel => '??????';
 
   @override
@@ -2950,17 +2949,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createGroupAboutTitle => 'حول المجموعة';
 
   @override
-  String get createGroupAboutDescription => 'كيف تظهر لأصدقائك.';
+  String get createGroupAboutDescription => 'يمكنك تعديل ذلك لاحقًا.';
 
   @override
   String get createGroupDescriptionLabel => 'الوصف';
 
   @override
-  String get createGroupDescriptionHint => 'صف المجموعة وهدفها.';
+  String get createGroupDescriptionHint => 'ما هدف المجموعة؟';
+
+  @override
+  String get createGroupRankingThemeTitle => 'موضوع التصنيف';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'يحدد الموضوع مقياس الترتيب والأنشطة التي يمكن لكل شخص ربطها.';
+      'يحدد الموضوع كيفية تسجيل المجموعة للنقاط.';
+
+  @override
+  String get createGroupActivitiesLaterHint =>
+      'بعد ذلك تختار الأنشطة التي تُحتسب في التصنيف.';
 
   @override
   String get createGroupDaysGoalLabel => 'هدف الأيام';
@@ -3491,8 +3497,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختر أيًّا من أهدافك يُحتسب لهذه المجموعة. يربط كل شخص هدفًا واحدًا فقط.';
 
   @override
-  String get createGroupLinksOptional =>
-      'اختياري: يمكنك ربطها أو تغييرها لاحقًا من قائمة المجموعة.';
+  String get createGroupLinksOptional => 'اختياري. يمكنك فعل ذلك لاحقًا.';
 
   @override
   String get createGroupNoLinksYet => 'لا شيء حتى الآن';

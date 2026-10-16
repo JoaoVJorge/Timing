@@ -853,19 +853,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get periodDescriptionThisMonth => 'este mês';
 
   @override
-  String get groupMetricStudying => 'horas de estudo';
+  String get groupMetricStudying => 'horas focadas';
 
   @override
-  String get groupMetricDailyGoals => 'dias de metas concluídas';
+  String get groupMetricDailyGoals => 'dias concluídos';
 
   @override
-  String get groupMetricExercises => 'horas de exercício';
+  String get groupMetricExercises => 'horas treinadas';
 
   @override
   String get groupMetricReading => 'páginas lidas';
 
   @override
-  String get groupMetricHobbies => 'horas de hobbies';
+  String get groupMetricHobbies => 'horas praticadas';
 
   @override
   String groupLeaderboardDescription(String period, String metric) {
@@ -960,19 +960,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Alertas desligados neste dispositivo';
 
   @override
-  String get goalReminderLabel => 'Lembrete diário';
-
-  @override
-  String get goalReminderDescription =>
-      'Você recebe uma notificação nesse horário nos dias em que a meta ainda não foi marcada.';
-
-  @override
-  String get goalReminderPermissionDenied =>
-      'Permita as notificações para ativar lembretes.';
-
-  @override
   String get goalReminderNotificationBody =>
       'Você ainda não marcou essa meta hoje.';
+
+  @override
+  String get goalReminderEndOfDayNotificationBody =>
+      'O dia está acabando e essa meta ainda não foi marcada.';
 
   @override
   String get goalReminderChannelName => 'Lembretes de metas';
@@ -1260,7 +1253,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createGroupTitle => 'Novo grupo';
 
   @override
-  String get createGroupSubtitle => 'Escolha um tema e convide amigos';
+  String get createGroupSubtitle => 'Defina o nome e o tema.';
 
   @override
   String get groupNameLabel => 'Nome do grupo';
@@ -2462,6 +2455,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get goalStartLabel => 'Início da meta';
 
   @override
+  String get dailyAverageLabel => 'Média diária';
+
+  @override
+  String get averagePerPageLabel => 'Média por página';
+
+  @override
   String get restLabel => 'Descanso';
 
   @override
@@ -2974,19 +2973,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String get createGroupAboutTitle => 'Sobre o grupo';
 
   @override
-  String get createGroupAboutDescription =>
-      'Como ele aparece para seus amigos.';
+  String get createGroupAboutDescription => 'Você poderá editar isso depois.';
 
   @override
   String get createGroupDescriptionLabel => 'Descrição';
 
   @override
-  String get createGroupDescriptionHint =>
-      'Descreva o grupo e qual é o objetivo dele.';
+  String get createGroupDescriptionHint => 'Qual é o objetivo do grupo?';
+
+  @override
+  String get createGroupRankingThemeTitle => 'Tema do ranking';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'O tema define a métrica do ranking e quais atividades cada pessoa pode vincular.';
+      'O tema define como o grupo pontua.';
+
+  @override
+  String get createGroupActivitiesLaterHint =>
+      'Depois você escolhe quais atividades contam para o ranking.';
 
   @override
   String get createGroupDaysGoalLabel => 'Meta de dias';
@@ -3522,7 +3526,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get createGroupLinksOptional =>
-      'Opcional: dá para vincular ou trocar depois, no menu do grupo.';
+      'Opcional. Você pode fazer isso depois.';
 
   @override
   String get createGroupNoLinksYet => 'Nenhuma por enquanto';

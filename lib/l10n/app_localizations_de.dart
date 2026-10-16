@@ -970,19 +970,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf diesem Gerät sind Benachrichtigungen deaktiviert';
 
   @override
-  String get goalReminderLabel => 'Tägliche Erinnerung';
-
-  @override
-  String get goalReminderDescription =>
-      'Du erhältst zu dieser Uhrzeit eine Benachrichtigung, solange das Ziel an dem Tag noch nicht abgehakt ist.';
-
-  @override
-  String get goalReminderPermissionDenied =>
-      'Erlaube Benachrichtigungen, um Erinnerungen zu aktivieren.';
-
-  @override
   String get goalReminderNotificationBody =>
       'Du hast dieses Ziel heute noch nicht abgehakt.';
+
+  @override
+  String get goalReminderEndOfDayNotificationBody =>
+      'Der Tag ist fast vorbei und dieses Ziel ist noch nicht abgehakt.';
 
   @override
   String get goalReminderChannelName => 'Zielerinnerungen';
@@ -1274,8 +1267,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createGroupTitle => 'Neue Gruppe';
 
   @override
-  String get createGroupSubtitle =>
-      'Wählen Sie ein Thema und laden Sie Freunde ein';
+  String get createGroupSubtitle => 'Lege Name und Thema fest.';
 
   @override
   String get groupNameLabel => 'Gruppenname';
@@ -2485,6 +2477,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get goalStartLabel => 'Start des Ziels';
 
   @override
+  String get dailyAverageLabel => 'Tagesdurchschnitt';
+
+  @override
+  String get averagePerPageLabel => 'Durchschnitt pro Seite';
+
+  @override
   String get restLabel => 'Pause';
 
   @override
@@ -3002,19 +3000,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createGroupAboutTitle => 'Über die Gruppe';
 
   @override
-  String get createGroupAboutDescription =>
-      'So wird sie deinen Freunden angezeigt.';
+  String get createGroupAboutDescription => 'Du kannst das später bearbeiten.';
 
   @override
   String get createGroupDescriptionLabel => 'Beschreibung';
 
   @override
-  String get createGroupDescriptionHint =>
-      'Beschreibe die Gruppe und ihr Ziel.';
+  String get createGroupDescriptionHint => 'Was ist das Ziel der Gruppe?';
+
+  @override
+  String get createGroupRankingThemeTitle => 'Ranglistenthema';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'Das Thema legt die Ranglistenmetrik fest und welche Aktivitäten jede Person verknüpfen kann.';
+      'Das Thema bestimmt, wie die Gruppe punktet.';
+
+  @override
+  String get createGroupActivitiesLaterHint =>
+      'Danach wählst du aus, welche Aktivitäten für die Rangliste zählen.';
 
   @override
   String get createGroupDaysGoalLabel => 'Tageziel';
@@ -3552,7 +3555,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get createGroupLinksOptional =>
-      'Optional: Du kannst sie später im Gruppenmenü verknüpfen oder ändern.';
+      'Optional. Das kannst du später erledigen.';
 
   @override
   String get createGroupNoLinksYet => 'Noch keine';

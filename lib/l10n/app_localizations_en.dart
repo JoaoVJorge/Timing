@@ -956,19 +956,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsDisabledSubtitle => 'Alerts are off on this device';
 
   @override
-  String get goalReminderLabel => 'Daily reminder';
-
-  @override
-  String get goalReminderDescription =>
-      'You get a notification at this time on the days the goal is still unchecked.';
-
-  @override
-  String get goalReminderPermissionDenied =>
-      'Allow notifications to turn on reminders.';
-
-  @override
   String get goalReminderNotificationBody =>
       'You haven\'t checked off this goal today.';
+
+  @override
+  String get goalReminderEndOfDayNotificationBody =>
+      'The day is almost over and this goal is still unchecked.';
 
   @override
   String get goalReminderChannelName => 'Goal reminders';
@@ -1255,7 +1248,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createGroupTitle => 'New group';
 
   @override
-  String get createGroupSubtitle => 'Choose a theme and invite friends';
+  String get createGroupSubtitle => 'Set the name and theme.';
 
   @override
   String get groupNameLabel => 'Group name';
@@ -2459,6 +2452,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalStartLabel => 'Goal start';
 
   @override
+  String get dailyAverageLabel => 'Daily average';
+
+  @override
+  String get averagePerPageLabel => 'Average per page';
+
+  @override
   String get restLabel => 'Rest';
 
   @override
@@ -2970,17 +2969,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createGroupAboutTitle => 'About the group';
 
   @override
-  String get createGroupAboutDescription => 'How it appears to your friends.';
+  String get createGroupAboutDescription => 'You can edit this later.';
 
   @override
   String get createGroupDescriptionLabel => 'Description';
 
   @override
-  String get createGroupDescriptionHint => 'Describe the group and its goal.';
+  String get createGroupDescriptionHint => 'What is the group\'s goal?';
+
+  @override
+  String get createGroupRankingThemeTitle => 'Ranking theme';
 
   @override
   String get createGroupThemeMetricDescription =>
-      'The theme sets the ranking metric and which activities each person can link.';
+      'The theme defines how the group scores.';
+
+  @override
+  String get createGroupActivitiesLaterHint =>
+      'Next, you choose which activities count toward the ranking.';
 
   @override
   String get createGroupDaysGoalLabel => 'Days goal';
@@ -3514,8 +3520,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose which of your goals counts for this group. Each person links just one.';
 
   @override
-  String get createGroupLinksOptional =>
-      'Optional: you can link or change them later from the group\'s menu.';
+  String get createGroupLinksOptional => 'Optional. You can do this later.';
 
   @override
   String get createGroupNoLinksYet => 'None yet';

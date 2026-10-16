@@ -1786,29 +1786,17 @@ abstract class AppLocalizations {
   /// **'Alerts are off on this device'**
   String get notificationsDisabledSubtitle;
 
-  /// No description provided for @goalReminderLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily reminder'**
-  String get goalReminderLabel;
-
-  /// No description provided for @goalReminderDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'You get a notification at this time on the days the goal is still unchecked.'**
-  String get goalReminderDescription;
-
-  /// No description provided for @goalReminderPermissionDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow notifications to turn on reminders.'**
-  String get goalReminderPermissionDenied;
-
   /// No description provided for @goalReminderNotificationBody.
   ///
   /// In en, this message translates to:
   /// **'You haven\'t checked off this goal today.'**
   String get goalReminderNotificationBody;
+
+  /// No description provided for @goalReminderEndOfDayNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The day is almost over and this goal is still unchecked.'**
+  String get goalReminderEndOfDayNotificationBody;
 
   /// No description provided for @goalReminderChannelName.
   ///
@@ -2323,7 +2311,7 @@ abstract class AppLocalizations {
   /// No description provided for @createGroupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose a theme and invite friends'**
+  /// **'Set the name and theme.'**
   String get createGroupSubtitle;
 
   /// No description provided for @groupNameLabel.
@@ -4348,6 +4336,18 @@ abstract class AppLocalizations {
   /// **'Goal start'**
   String get goalStartLabel;
 
+  /// No description provided for @dailyAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily average'**
+  String get dailyAverageLabel;
+
+  /// No description provided for @averagePerPageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average per page'**
+  String get averagePerPageLabel;
+
   /// No description provided for @restLabel.
   ///
   /// In en, this message translates to:
@@ -5347,7 +5347,7 @@ abstract class AppLocalizations {
   /// No description provided for @createGroupAboutDescription.
   ///
   /// In en, this message translates to:
-  /// **'How it appears to your friends.'**
+  /// **'You can edit this later.'**
   String get createGroupAboutDescription;
 
   /// No description provided for @createGroupDescriptionLabel.
@@ -5359,14 +5359,26 @@ abstract class AppLocalizations {
   /// No description provided for @createGroupDescriptionHint.
   ///
   /// In en, this message translates to:
-  /// **'Describe the group and its goal.'**
+  /// **'What is the group\'s goal?'**
   String get createGroupDescriptionHint;
+
+  /// No description provided for @createGroupRankingThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking theme'**
+  String get createGroupRankingThemeTitle;
 
   /// No description provided for @createGroupThemeMetricDescription.
   ///
   /// In en, this message translates to:
-  /// **'The theme sets the ranking metric and which activities each person can link.'**
+  /// **'The theme defines how the group scores.'**
   String get createGroupThemeMetricDescription;
+
+  /// No description provided for @createGroupActivitiesLaterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Next, you choose which activities count toward the ranking.'**
+  String get createGroupActivitiesLaterHint;
 
   /// No description provided for @createGroupDaysGoalLabel.
   ///
@@ -6241,7 +6253,7 @@ abstract class AppLocalizations {
   /// No description provided for @createGroupLinksOptional.
   ///
   /// In en, this message translates to:
-  /// **'Optional: you can link or change them later from the group\'s menu.'**
+  /// **'Optional. You can do this later.'**
   String get createGroupLinksOptional;
 
   /// No description provided for @createGroupNoLinksYet.
