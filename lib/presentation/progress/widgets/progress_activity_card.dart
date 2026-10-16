@@ -26,12 +26,12 @@ class ProgressActivityCard extends StatelessWidget {
     final Color color = activity.category.accentColor;
     final double share = activity.share.clamp(0, 1);
     final int percent = (share * 100).round();
-    final String value = activity.isReading
-        ? context.l10n.metricPagesValue(activity.pages)
-        : formatDurationLong(Duration(seconds: activity.seconds));
-    final String shareDescription = activity.isReading
-        ? context.l10n.progressActivityPagesShare(percent)
-        : context.l10n.progressActivityTimeShare(percent);
+    final String value = formatDurationLong(
+      Duration(seconds: activity.seconds),
+    );
+    final String shareDescription = context.l10n.progressActivityTimeShare(
+      percent,
+    );
     final IconData? customIcon = SubjectIcons.byName(activity.iconName);
 
     return Semantics(

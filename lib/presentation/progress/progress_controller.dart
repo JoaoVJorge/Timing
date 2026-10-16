@@ -36,12 +36,10 @@ class ProgressActivitySummary {
   final int seconds;
   final int pages;
 
-  /// Share of all comparable work in the selected period. Timed activities
-  /// are compared with other timed activities and readings with other
-  /// readings, so pages are never treated as if they were minutes.
+  /// Share of all tracked time in the selected period. Every category,
+  /// including reading, is compared in seconds so this ranking answers where
+  /// the user spent the most time.
   final double share;
-
-  bool get isReading => category == TimeCategoryType.reading;
 }
 
 List<ProgressActivitySummary> buildProgressActivitySummaries({
@@ -73,19 +71,13 @@ List<ProgressActivitySummary> buildProgressActivitySummaries({
     totals.pages += entry.pages;
   }
 
-  final int totalSeconds = totalsById.values
-      .where((activity) => activity.category != TimeCategoryType.reading)
-      .fold(0, (total, activity) => total + activity.seconds);
-  final int totalPages = totalsById.values.fold(
+  final int totalSeconds = totalsById.values.fold(
     0,
-    (total, activity) => total + activity.pages,
+    (total, activity) => total + activity.seconds,
   );
   final List<ProgressActivitySummary> result = totalsById.values
-      .where((activity) => activity.seconds > 0 || activity.pages > 0)
+      .where((activity) => activity.seconds > 0)
       .map((activity) {
-        final bool isReading = activity.category == TimeCategoryType.reading;
-        final int comparableTotal = isReading ? totalPages : totalSeconds;
-        final int value = isReading ? activity.pages : activity.seconds;
         return ProgressActivitySummary(
           id: activity.id,
           name: activity.name,
@@ -93,7 +85,7 @@ List<ProgressActivitySummary> buildProgressActivitySummaries({
           category: activity.category,
           seconds: activity.seconds,
           pages: activity.pages,
-          share: comparableTotal == 0 ? 0 : value / comparableTotal,
+          share: totalSeconds == 0 ? 0 : activity.seconds / totalSeconds,
         );
       })
       .toList();

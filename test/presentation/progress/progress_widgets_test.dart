@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:timing/core/domain/entities/activity_entry_entity.dart";
+import "package:timing/core/domain/entities/profile_stats_entity.dart";
 import "package:timing/core/domain/entities/subject_entity.dart";
 import "package:timing/core/domain/enums/time_category_type.dart";
 import "package:timing/presentation/progress/progress_controller.dart";
 import "package:timing/presentation/progress/widgets/progress_achievements_section.dart";
+import "package:timing/presentation/progress/widgets/progress_activity_card.dart";
 import "package:timing/presentation/progress/widgets/progress_evolution_chart.dart";
 import "package:timing/presentation/progress/widgets/progress_hero_card.dart";
 import "package:timing/presentation/progress/widgets/progress_stat_row.dart";
@@ -218,7 +220,29 @@ void main() {
   });
 
   group("activity summaries", () {
-    test("group entries and keep time separate from pages", () {
+    testWidgets("a reading activity displays duration and time share", (
+      tester,
+    ) async {
+      await pumpInScrollView(
+        tester,
+        const ProgressActivityCard(
+          activity: ProgressActivitySummary(
+            id: "book",
+            name: "Livro",
+            category: TimeCategoryType.reading,
+            seconds: 1800,
+            pages: 42,
+            share: 0.25,
+          ),
+        ),
+      );
+
+      expect(find.text("30 min"), findsOneWidget);
+      expect(find.textContaining("42"), findsNothing);
+      expect(find.text("25%"), findsOneWidget);
+    });
+
+    test("groups every category by time and ranks where time was spent", () {
       final DateTime now = DateTime(2026, 9, 25, 12);
       final List<ProgressActivitySummary> result =
           buildProgressActivitySummaries(
@@ -289,9 +313,8 @@ void main() {
             ],
           );
 
-      expect(result, hasLength(4));
-      expect(result.first.name, "Livro");
-      expect(result.first.share, 0.75);
+      expect(result, hasLength(3));
+      expect(result.first.name, "Matemática");
 
       final ProgressActivitySummary math = result.singleWhere(
         (activity) => activity.id == "math",
@@ -300,8 +323,36 @@ void main() {
         (activity) => activity.id == "gym",
       );
       expect(math.seconds, 5400);
-      expect(math.share, 0.75);
-      expect(gym.share, 0.25);
+      expect(math.share, closeTo(5400 / 7800, 0.0001));
+      expect(gym.share, closeTo(1800 / 7800, 0.0001));
+      final ProgressActivitySummary book = result.singleWhere(
+        (activity) => activity.id == "book",
+      );
+      expect(book.seconds, 600);
+      expect(book.pages, 30);
+      expect(book.share, closeTo(600 / 7800, 0.0001));
+      expect(result.where((activity) => activity.id == "other-book"), isEmpty);
+    });
+
+    test("the main reading is the one with the most tracked time", () {
+      final ProfileStatsEntity stats = ProfileStatsEntity.fromSubjects(const [
+        _TestSubject(
+          id: "many-pages",
+          name: "Muitas páginas",
+          category: TimeCategoryType.reading,
+          totalSeconds: 600,
+          currentPages: 100,
+        ),
+        _TestSubject(
+          id: "more-time",
+          name: "Mais tempo",
+          category: TimeCategoryType.reading,
+          totalSeconds: 3600,
+          currentPages: 10,
+        ),
+      ]);
+
+      expect(stats.topReadingSubjects.first.id, "more-time");
     });
 
     test("ignore history whose activity has been deleted", () {
@@ -338,11 +389,11 @@ class _TestSubject extends SubjectEntity {
     required super.id,
     required super.name,
     required super.category,
+    super.totalSeconds = 0,
+    super.currentPages = 0,
   }) : super(
          colorValue: 0,
-         totalSeconds: 0,
          goalSeconds: 0,
-         currentPages: 0,
          goalPages: 0,
          notes: "",
          iconName: "",
